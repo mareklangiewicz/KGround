@@ -1,5 +1,9 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kommand.Adb.Command
+import pl.mareklangiewicz.kommand.Adb.Command.help
+import pl.mareklangiewicz.kommand.Ls.Option
+
 
 // TODO: full documentation in kdoc (all commands, options, etc)
 //  (check in practice to make sure it's optimal for IDE users)
@@ -49,3 +53,37 @@ data class Ls(
 }
 
 fun ls(vararg options: Ls.Option, init: Ls.() -> Unit) = Ls(options.toMutableList()).apply(init)
+
+/** [Android Debug Bridge User Guide](https://developer.android.com/studio/command-line/adb) */
+data class Adb(
+    var command: Command = help,
+    val options: MutableList<Option> = mutableListOf()
+) {
+
+    @Suppress("ClassName")
+    sealed class Command {
+        object help : Command() { override fun toString() = "help" }
+        object devices : Command() { override fun toString() = "devices" }
+        object version : Command() { override fun toString() = "version" }
+    }
+
+    @Suppress("ClassName")
+    sealed class Option {
+
+        /** Listen on all network interfaces, not just localhost */
+        object all : Option() { override fun toString() = "-a" }
+
+        /** Use USB device (error if multiple devices connected) */
+        object usb : Option() { override fun toString() = "-d" }
+
+        /** Use TCP/IP device (error if multiple TCP/IP devices available) */
+        object tcp : Option() { override fun toString() = "-e" }
+    }
+
+    override fun toString() = "adb ${options.joinToString(" ")} $command"
+
+    operator fun Option.unaryMinus() = options.add(this)
+}
+
+fun adb(command: Command, vararg options: Adb.Option, init: Adb.() -> Unit) =
+    Adb(command, options.toMutableList()).apply(init)
