@@ -16,9 +16,8 @@ version = "0.0.1"
 apply<SourceFunPlugin>()
 
 configure<SourceFunExtension> {
-    defs.add(Def("funTask1", "src", "funTempOut", {
-        println(file.absolutePath)
-    }))
+    +Def("funTask1", "src", "funTempOut") { println(file.absolutePath) }
+    +Def("funTask2", "gradle", "funTempOut") { println(file.absolutePath) }
 }
 
 tasks.register<SourceRegexTask>("regexExperiment") {
