@@ -1,4 +1,0 @@
-rootProject.name = 'KommandLine'
-
-
-enableFeaturePreview('GRADLE_METADATA')

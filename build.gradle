@@ -1,4 +1,6 @@
+import pl.mareklangiewicz.Def
 import pl.mareklangiewicz.SourceFunPlugin
+import pl.mareklangiewicz.SourceRegexTask
 
 plugins {
     id 'org.jetbrains.kotlin.multiplatform' version '1.3.72'
@@ -12,6 +14,23 @@ version '0.0.1'
 apply plugin: 'maven-publish'
 
 apply plugin: SourceFunPlugin
+
+sourceFun {
+
+    defs.add(new Def("funTask1", "funTempSrc", "funTempOut", {
+        println(it.file.absolutePath)
+    }))
+}
+
+tasks.register("regexExperiment", SourceRegexTask) {
+    it.source("regexTempSrc")
+    it.outputDir = file("regexTempOut")
+    it.match = ".*"
+    it.replace = "XXX"
+    doLast {
+        println("fjkdslj")
+    }
+}
 
 kotlin {
     jvm()
