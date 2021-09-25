@@ -1,9 +1,10 @@
 plugins {
-    kotlin("multiplatform") version "1.5.30"
+    kotlin("multiplatform") version Vers.kotlin
     `maven-publish`
 }
 repositories {
     mavenCentral()
+    maven(Repos.jitpack)
 }
 group = "com.github.langara.kommandline"
 version = "0.0.02"
@@ -32,37 +33,20 @@ kotlin {
 //        nodejs {}
 //    }
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(kotlin("stdlib-common"))
-            }
-        }
-        commonTest {
+        val commonMain by getting
+        val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
         }
-        jvm().compilations["main"].defaultSourceSet {
+        val jvmMain by getting
+        val jvmTest by getting {
             dependencies {
-                implementation(kotlin("stdlib-jdk8"))
-            }
-        }
-        jvm().compilations["test"].defaultSourceSet {
-            dependencies {
-                implementation(kotlin("test"))
                 implementation(kotlin("test-junit"))
+                implementation(Deps.junit5engine)
+                implementation(Deps.uspek)
             }
         }
-//        js().compilations["main"].defaultSourceSet {
-//            dependencies {
-//                implementation(kotlin("stdlib-js"))
-//            }
-//        }
-//        js().compilations["test"].defaultSourceSet {
-//            dependencies {
-//                implementation(kotlin("test-js"))
-//            }
-//        }
     }
 }
