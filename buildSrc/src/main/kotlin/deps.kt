@@ -1,1 +1,0 @@
-../../../../deps.kt/buildSrc/src/main/java/deps.kt

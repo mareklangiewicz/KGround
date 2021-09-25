@@ -1,6 +1,0 @@
-[submodule "deps.kt"]
-	path = deps.kt
-	url = git@github.com:langara/deps.kt.git
-[submodule "SourceFun"]
-	path = SourceFun
-	url = git@github.com:langara/SourceFun.git

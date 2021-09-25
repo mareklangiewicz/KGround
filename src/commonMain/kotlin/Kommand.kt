@@ -1,8 +1,6 @@
-package pl.mareklangiewicz.kommand
+@file:Suppress("unused", "ClassName")
 
-import pl.mareklangiewicz.kommand.Adb.Command
-import pl.mareklangiewicz.kommand.Adb.Command.help
-import pl.mareklangiewicz.kommand.Ls.Option
+package pl.mareklangiewicz.kommand
 
 
 // TODO: full documentation in kdoc (all commands, options, etc)
@@ -20,7 +18,6 @@ data class Ls(
     val files: MutableList<String> = mutableListOf()
 ) : Kommand {
 
-    @Suppress("ClassName")
     sealed class Option {
         object all : Option() { override fun toString() = "-a" }
         object almostAll : Option() { override fun toString() = "-A" }
@@ -33,11 +30,11 @@ data class Ls(
         object size : Option() { override fun toString() = "-s" }
         data class sort(val type: sortType): Option() { override fun toString() = "--sort=$type" }
         enum class sortType { NONE, SIZE, TIME, VERSION, EXTENSION;
-            override fun toString() = super.toString().toLowerCase()
+            override fun toString() = super.toString().lowercase()
         }
         data class time(val type: timeType): Option() { override fun toString() = "--sort=$type" }
         enum class timeType { ATIME, ACCESS, CTIME, STATUS;
-            override fun toString() = super.toString().toLowerCase()
+            override fun toString() = super.toString().lowercase()
         }
 
         object help : Option() { override fun toString() = "--help" }
@@ -56,18 +53,16 @@ fun ls(vararg options: Ls.Option, init: Ls.() -> Unit) = Ls(options.toMutableLis
 
 /** [Android Debug Bridge User Guide](https://developer.android.com/studio/command-line/adb) */
 data class Adb(
-    var command: Command = help,
+    var command: Command = Command.help,
     val options: MutableList<Option> = mutableListOf()
 ) {
 
-    @Suppress("ClassName")
     sealed class Command {
         object help : Command() { override fun toString() = "help" }
         object devices : Command() { override fun toString() = "devices" }
         object version : Command() { override fun toString() = "version" }
     }
 
-    @Suppress("ClassName")
     sealed class Option {
 
         /** Listen on all network interfaces, not just localhost */
@@ -85,5 +80,5 @@ data class Adb(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
-fun adb(command: Command, vararg options: Adb.Option, init: Adb.() -> Unit) =
+fun adb(command: Adb.Command, vararg options: Adb.Option, init: Adb.() -> Unit) =
     Adb(command, options.toMutableList()).apply(init)
