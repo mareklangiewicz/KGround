@@ -6,7 +6,6 @@ import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.ls
-import pl.mareklangiewicz.kommand.printLine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -24,7 +23,7 @@ class KommandTest {
 
         line.printLine()
 
-        assertEquals("ls -a --author -l --sort=time .. /usr", line.toString())
+        assertEquals("ls -a --author -l --sort=time .. /usr", line.kommandLine())
     }
 
     @Test
@@ -36,6 +35,6 @@ class KommandTest {
 
         line.printLine()
 
-        assertEquals("adb -a -d devices", line.toString())
+        assertEquals("adb -a -d devices", line.kommandLine())
     }
 }

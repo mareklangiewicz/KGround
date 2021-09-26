@@ -6,7 +6,8 @@ repositories {
     mavenCentral()
     maven(Repos.jitpack)
 }
-group = "com.github.langara.kommandline"
+
+group = "pl.mareklangiewicz.kommandline"
 version = "0.0.02"
 
 //apply<SourceFunPlugin>()
