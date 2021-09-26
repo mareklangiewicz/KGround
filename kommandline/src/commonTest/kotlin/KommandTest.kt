@@ -13,22 +13,25 @@ class KommandTest {
     @Test
     fun testLs() {
 
-        val line = ls(all, author) {
+        val kommand = ls {
+            - all
+            - author
             - long
             - sort(TIME)
             + ".."
             + "/usr"
         }
 
-        line.println()
+        kommand.println()
 
-        assertEquals("ls -a --author -l --sort=time .. /usr", line.line())
+        assertEquals("ls -a --author -l --sort=time .. /usr", kommand.line())
     }
 
     @Test
     fun testAdb() {
 
-        val kommand = adb(devices, Option.all) {
+        val kommand = adb(devices) {
+            - Option.all
             - usb
         }
 

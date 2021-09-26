@@ -2,22 +2,31 @@
 
 package pl.mareklangiewicz.kommand
 
+fun ls(init: Ls.() -> Unit) = Ls().apply(init)
+fun adb(command: Adb.Command, init: Adb.() -> Unit) = Adb(command).apply(init)
+
+/** anonymous kommand to use only if no actual Kommand class defined */
+fun kommand(name: String, vararg args: String) = object : Kommand {
+    override val name get() = name
+    override val args get() = args.toList()
+}
 
 // TODO: full documentation in kdoc (all commands, options, etc)
 //  (check in practice to make sure it's optimal for IDE users)
 
-abstract class Kommand {
-    abstract val name: String
-    abstract val args: List<String>
+interface Kommand {
+    val name: String
+    val args: List<String>
     fun line() = (listOf(name) + args).joinToString(" ")
     fun println() = println(line())
 }
+
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
 data class Ls(
     val options: MutableList<Option> = mutableListOf(),
     val files: MutableList<String> = mutableListOf()
-) : Kommand() {
+) : Kommand {
 
     override val name = "ls"
     override val args get() = options.map { it.str } + files
@@ -49,13 +58,11 @@ data class Ls(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
-fun ls(vararg options: Ls.Option, init: Ls.() -> Unit) = Ls(options.toMutableList()).apply(init)
-
 /** [Android Debug Bridge User Guide](https://developer.android.com/studio/command-line/adb) */
 data class Adb(
     var command: Command = Command.help,
     val options: MutableList<Option> = mutableListOf()
-): Kommand() {
+): Kommand {
     override val name = "adb"
     override val args get() = options.map { it.str } + listOf(command.name)
 
@@ -75,6 +82,3 @@ data class Adb(
     }
     operator fun Option.unaryMinus() = options.add(this)
 }
-
-fun adb(command: Adb.Command, vararg options: Adb.Option, init: Adb.() -> Unit) =
-    Adb(command, options.toMutableList()).apply(init)
