@@ -2,8 +2,9 @@
 
 package pl.mareklangiewicz.kommand
 
-fun ls(init: Ls.() -> Unit) = Ls().apply(init)
-fun adb(command: Adb.Command, init: Adb.() -> Unit) = Adb(command).apply(init)
+fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
+fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
+fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
 
 /** anonymous kommand to use only if no actual Kommand class defined */
 fun kommand(name: String, vararg args: String) = object : Kommand {
@@ -28,7 +29,7 @@ data class Ls(
     val files: MutableList<String> = mutableListOf()
 ) : Kommand {
 
-    override val name = "ls"
+    override val name get() = "ls"
     override val args get() = options.map { it.str } + files
 
     sealed class Option(val str: String) {
@@ -61,9 +62,9 @@ data class Ls(
 /** [Android Debug Bridge User Guide](https://developer.android.com/studio/command-line/adb) */
 data class Adb(
     var command: Command = Command.help,
-    val options: MutableList<Option> = mutableListOf()
+    val options: MutableList<Option> = mutableListOf() // these are "global" options - TODO_later other options
 ): Kommand {
-    override val name = "adb"
+    override val name get() = "adb"
     override val args get() = options.map { it.str } + listOf(command.name)
 
         sealed class Command(val name: String) {
@@ -81,4 +82,24 @@ data class Adb(
         object tcp : Option("-e")
     }
     operator fun Option.unaryMinus() = options.add(this)
+}
+
+data class Audacious(
+    val files: MutableList<String> = mutableListOf(),
+    val options: MutableList<Option> = mutableListOf()
+): Kommand {
+    override val name get() = "audacious"
+    override val args get() = options.map { it.str } + files
+
+    sealed class Option(val str: String) {
+        object help : Option("--help")
+        object enqueue : Option("--enqueue")
+        object play : Option("--play")
+        object pause : Option("--pause")
+        object stop : Option("--stop")
+        object rew : Option("--rew")
+        object fwd : Option("--fwd")
+        object version : Option("--version")
+        object verbose : Option("--verbose")
+    }
 }
