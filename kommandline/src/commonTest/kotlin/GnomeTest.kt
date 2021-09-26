@@ -14,8 +14,8 @@ class GnomeTest {
             + "/usr/bin/gnome-shell"
         }
 
-        line.printLine()
+        line.println()
 
-        assertEquals("journalctl -f -o cat /usr/bin/gnome-shell", line.kommandLine())
+        assertEquals("journalctl -f -o cat /usr/bin/gnome-shell", line.line())
     }
 }

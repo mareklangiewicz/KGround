@@ -9,8 +9,8 @@ package pl.mareklangiewicz.kommand
 abstract class Kommand {
     abstract val name: String
     abstract val args: List<String>
-    fun kommandLine() = (listOf(name) + args).joinToString(" ")
-    fun printLine() = println(kommandLine())
+    fun line() = (listOf(name) + args).joinToString(" ")
+    fun println() = println(line())
 }
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */

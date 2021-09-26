@@ -1,5 +1,4 @@
 import pl.mareklangiewicz.kommand.Adb.Command.devices
-import pl.mareklangiewicz.kommand.Adb.Command.help
 import pl.mareklangiewicz.kommand.Adb.Option
 import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Ls.Option.*
@@ -21,20 +20,20 @@ class KommandTest {
             + "/usr"
         }
 
-        line.printLine()
+        line.println()
 
-        assertEquals("ls -a --author -l --sort=time .. /usr", line.kommandLine())
+        assertEquals("ls -a --author -l --sort=time .. /usr", line.line())
     }
 
     @Test
     fun testAdb() {
 
-        val line = adb(devices, Option.all) {
+        val kommand = adb(devices, Option.all) {
             - usb
         }
 
-        line.printLine()
+        kommand.println()
 
-        assertEquals("adb -a -d devices", line.kommandLine())
+        assertEquals("adb -a -d devices", kommand.line())
     }
 }
