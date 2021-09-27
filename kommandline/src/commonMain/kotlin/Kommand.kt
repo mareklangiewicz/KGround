@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
+fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)
 fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
 fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
 
@@ -22,6 +23,24 @@ interface Kommand {
     fun println() = println(line())
 }
 
+@Suppress("unused")
+val Any?.unit get() = Unit
+
+fun List<String>.printlns() = forEach(::println)
+
+data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
+
+/**
+ * Returns the output but ensures the exit value was 0 first
+ * @throws IllegalStateException if exit value is not 0
+ */
+val ExecResult.out: List<String> get() =
+    if (exitValue != 0) throw IllegalStateException("Exit value: $exitValue") else stdOutAndErr
+
+
+expect fun Kommand.exec(dir: String? = null)
+
+expect fun Kommand.shell(dir: String? = null): ExecResult
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
 data class Ls(
@@ -56,6 +75,43 @@ data class Ls(
 
     operator fun String.unaryPlus() = files.add(this)
 
+    operator fun Option.unaryMinus() = options.add(this)
+}
+
+
+data class Vim(
+    val files: MutableList<String> = mutableListOf(),
+    val options: MutableList<Option> = mutableListOf()
+): Kommand {
+    override val name get() = "vim"
+    override val args get() = options.flatMap { it.str } + files
+
+    sealed class Option(val name: String, val arg: String? = null) {
+
+        // important: name and arg has to be separate in Vim.args - for Kommand.exec to work correctly
+        val str get() = arg?.let { listOf(name, it) } ?: listOf(name)
+
+        object gui : Option("-g")
+        object diff : Option("-d")
+        object help : Option("-h")
+        /**
+         * Connect  to  a Vim server and make it edit the files given in the rest of the arguments.
+         * If no server is found a warning is given and the files are edited in the current Vim.
+         */
+        object remote : Option("--remote")
+        /** List the names of all Vim servers that can be found. */
+        object serverlist : Option("--serverlist")
+        /**
+         * Use {server} as the server name.  Used for the current Vim, unless used with a --remote  argument,
+         * then  it's  the name of the server to connect to.
+         */
+        data class servername(val server: String) : Option("--servername", server)
+        /** GTK GUI only: Use the GtkPlug mechanism to run gvim in another window. */
+        data class socketid(val id: String) : Option("--socketid", id)
+        /** During startup write timing messages to the file {fname}. */
+        data class startuptime(val file: String) : Option("--startuptime", file)
+        object version : Option("--version")
+    }
     operator fun Option.unaryMinus() = options.add(this)
 }
 

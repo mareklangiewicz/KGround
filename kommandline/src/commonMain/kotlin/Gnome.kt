@@ -43,7 +43,7 @@ data class GnomeTerm(
     override val args get() = options.map { it.str } + kommand?.let { listOf("--", it.name) + it.args }.orEmpty()
 
     sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = arg?.let { "$name=$arg"} ?: name
+        val str get() = arg?.let { "$name=$arg" } ?: name
         data class title(val title: String) : Option("--title", title)
         object help : Option("--help")
         object verbose : Option("--verbose")

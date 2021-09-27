@@ -1,10 +1,12 @@
+package pl.mareklangiewicz.kommand
+
 import pl.mareklangiewicz.kommand.Adb.Command.devices
 import pl.mareklangiewicz.kommand.Adb.Option
 import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
-import pl.mareklangiewicz.kommand.adb
-import pl.mareklangiewicz.kommand.ls
+import pl.mareklangiewicz.kommand.Vim.Option.gui
+import pl.mareklangiewicz.kommand.Vim.Option.servername
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,5 +40,13 @@ class KommandTest {
         kommand.println()
 
         assertEquals("adb -a -d devices", kommand.line())
+    }
+
+    @Test
+    fun testVim() {
+        val kommand = vim(".") { -gui; -servername("DDDD") }
+        assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
+        assertEquals("vim -g --servername DDDD .", kommand.line())
+        //kommand.exec()
     }
 }
