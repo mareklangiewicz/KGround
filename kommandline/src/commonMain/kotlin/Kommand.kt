@@ -2,10 +2,15 @@
 
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kommand.Bash.Option.command
+
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)
 fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
 fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
+fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
+    Bash(mutableListOf(if (pause) "$script ; echo Finished. Press enter to exit.; read" else script)).apply { -command; init() }
+fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
 
 /** anonymous kommand to use only if no actual Kommand class defined */
 fun kommand(name: String, vararg args: String) = object : Kommand {
@@ -13,7 +18,7 @@ fun kommand(name: String, vararg args: String) = object : Kommand {
     override val args get() = args.toList()
 }
 
-// TODO: full documentation in kdoc (all commands, options, etc)
+// TODO_later: full documentation in kdoc (all commands, options, etc)
 //  (check in practice to make sure it's optimal for IDE users)
 
 interface Kommand {
@@ -123,7 +128,7 @@ data class Adb(
     override val name get() = "adb"
     override val args get() = options.map { it.str } + listOf(command.name)
 
-        sealed class Command(val name: String) {
+    sealed class Command(val name: String) {
         object help : Command("help")
         object devices : Command("devices")
         object version : Command("version")
@@ -158,4 +163,29 @@ data class Audacious(
         object version : Option("--version")
         object verbose : Option("--verbose")
     }
+    operator fun Option.unaryMinus() = options.add(this)
 }
+
+data class Bash(
+    /** a command string (usually just one string with or without spaces) or a file (when no -c option provided) */
+    val nonopts: MutableList<String> = mutableListOf(),
+    val options: MutableList<Option> = mutableListOf(),
+): Kommand {
+    override val name get() = "bash"
+    override val args get() = options.map { it.str } + nonopts
+
+    sealed class Option(val str: String) {
+        /** interpret nonopts as a command to run */
+        object command : Option("-c")
+        object interactive : Option("-i")
+        object login : Option("-l")
+        object restricted : Option("-r")
+        object posix : Option("--posix")
+        object help : Option("--help")
+        object version : Option("--version")
+        object verbose : Option("--verbose")
+    }
+    operator fun Option.unaryMinus() = options.add(this)
+}
+
+// TODO: "export" command - with output parsing for better composability

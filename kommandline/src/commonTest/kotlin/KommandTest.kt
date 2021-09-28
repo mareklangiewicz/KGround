@@ -47,6 +47,16 @@ class KommandTest {
         val kommand = vim(".") { -gui; -servername("DDDD") }
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
         assertEquals("vim -g --servername DDDD .", kommand.line())
-        //kommand.exec()
+//        kommand.exec()
+//        kommand.shell()
+    }
+
+    @Test
+    fun testBash() {
+        val kommand1 = vim(".") { -gui; -servername("DDDD") }
+        val kommand2 = bash(kommand1)
+        assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
+        assertEquals("bash -c vim -g --servername DDDD .", kommand2.line())
+//        kommand2.exec()
     }
 }

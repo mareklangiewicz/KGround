@@ -1,10 +1,9 @@
+package pl.mareklangiewicz.kommand
+
 import pl.mareklangiewicz.kommand.GnomeTerm.Option.title
 import pl.mareklangiewicz.kommand.GnomeTerm.Option.verbose
 import pl.mareklangiewicz.kommand.JournalCtl.Option.cat
 import pl.mareklangiewicz.kommand.JournalCtl.Option.follow
-import pl.mareklangiewicz.kommand.gnometerm
-import pl.mareklangiewicz.kommand.journalctl
-import pl.mareklangiewicz.kommand.kommand
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -35,5 +34,13 @@ class GnomeTest {
         kommand.println()
 
         assertEquals("gnome-terminal --verbose --title=oldeditor -- vim", kommand.line())
+    }
+
+
+    @Test
+    fun testGnomeExt() {
+        val kommand = gnomeext_list()
+        assertEquals("gnome-extensions list", kommand.line())
+//        kommand.shell().out.printlns()
     }
 }

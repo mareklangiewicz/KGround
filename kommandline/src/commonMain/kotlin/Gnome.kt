@@ -6,6 +6,9 @@ package pl.mareklangiewicz.kommand
 fun journalctl(init: JournalCtl.() -> Unit = {}) = JournalCtl().apply(init)
 fun gnometerm(kommand: Kommand? = null, init: GnomeTerm.() -> Unit = {}) = GnomeTerm(kommand).apply(init)
 
+// TODO: better support for all gnome-extensions subcommands
+fun gnomeext_list() = kommand("gnome-extensions", "list")
+
 
 /** [linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 data class JournalCtl(
@@ -51,3 +54,6 @@ data class GnomeTerm(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
+// TODO: commands: gapplication; gnome-extensions; dbus-send
+// for example to be able to clear notifications in optimal ways in comparison to:
+// dbus-send --session --type=method_call --dest=org.gnome.Shell /org/gnome/Shell org.gnome.Shell.Eval string:'Main.panel.statusArea.dateMenu._messageList._sectionList.get_children().forEach(s => s.clear());'

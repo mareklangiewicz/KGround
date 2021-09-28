@@ -26,6 +26,5 @@ actual fun Kommand.exec(dir: String?) = execStart(dir).unit
  * captures all its output (with error output merged in);
  * waits for the subprocess to finish;
  */
-actual fun Kommand.shell(dir: String?) = kommand("bash", "-c", line()).execBlocking(dir)
-// FIXME: create Kommand for bash and use it here too
+actual fun Kommand.shell(dir: String?) = bash(this).execBlocking(dir)
 
