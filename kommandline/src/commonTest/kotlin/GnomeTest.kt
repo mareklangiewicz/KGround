@@ -43,4 +43,19 @@ class GnomeTest {
         assertEquals("gnome-extensions list", kommand.line())
 //        kommand.shell().out.printlns()
     }
+
+    @Test
+    fun testGnomeMagic() {
+        val kommand = kommand("dbus-run-session", "--", "gnome-shell", "--nested", "--wayland")
+        assertEquals("dbus-run-session -- gnome-shell --nested --wayland", kommand.line())
+//        gnometerm(bash(kommand, pause = true)).exec()
+    }
+
+    @Test
+    fun testGLibCompileSchemas() {
+        val kommand = kommand("glib-compile-schemas", "schemas/")
+//        val kommand = kommand("ls", "-lah", "schemas/")
+        assertEquals("glib-compile-schemas schemas/", kommand.line())
+//        gnometerm(bash(kommand, pause = true)).exec("/home/marek/code/kotlin/kokpit667/mygnomeext")
+    }
 }

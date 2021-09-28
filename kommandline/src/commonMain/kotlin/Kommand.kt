@@ -9,7 +9,7 @@ fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableLi
 fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
 fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
-    Bash(mutableListOf(if (pause) "$script ; echo Finished. Press enter to exit.; read" else script)).apply { -command; init() }
+    Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -command; init() }
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
 
 /** anonymous kommand to use only if no actual Kommand class defined */
