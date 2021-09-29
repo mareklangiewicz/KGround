@@ -25,15 +25,13 @@ class GnomeTest {
 
     @Test
     fun testGnomeTerminal() {
-
         val kommand = gnometerm(kommand("vim")) {
             - verbose
             - title("oldeditor")
         }
-
         kommand.println()
-
         assertEquals("gnome-terminal --verbose --title=oldeditor -- vim", kommand.line())
+//        kommand.exec()
     }
 
 
