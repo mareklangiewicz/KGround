@@ -8,7 +8,10 @@ fun gnometerm(kommand: Kommand? = null, init: GnomeTerm.() -> Unit = {}) = Gnome
 
 // TODO: better support for all gnome-extensions subcommands
 fun gnomeext_list() = kommand("gnome-extensions", "list")
+fun gnomeext_prefs(extuuid: String) = kommand("gnome-extensions", "prefs", extuuid)
 
+fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Unit = {}) =
+    NotifySend(summary, body).apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 data class JournalCtl(
@@ -34,6 +37,23 @@ data class JournalCtl(
         object version : Option("--version")
     }
     operator fun String.unaryPlus() = matches.add(this)
+    operator fun Option.unaryMinus() = options.add(this)
+}
+
+data class NotifySend(
+    var summary: String = "",
+    var body: String? = null,
+    val options: MutableList<Option> = mutableListOf(),
+): Kommand {
+    override val name get() = "notify-send"
+    override val args get() = options.map { it.str } + summary plusIfNotNull body
+    sealed class Option(val str: String) {
+        /** Specifies the urgency level (low, normal, critical). */ // TODO_later: enum for level
+        data class urgency(val level: String) : Option("--urgency=$level")
+        object help : Option("--help")
+        object version : Option("--version")
+        // TODO_someday: other options like icon, category, hint..
+    }
     operator fun Option.unaryMinus() = options.add(this)
 }
 

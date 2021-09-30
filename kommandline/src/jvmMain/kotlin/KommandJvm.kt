@@ -27,4 +27,3 @@ actual fun Kommand.exec(dir: String?) = execStart(dir).unit
  * waits for the subprocess to finish;
  */
 actual fun Kommand.shell(dir: String?) = bash(this).execBlocking(dir)
-
