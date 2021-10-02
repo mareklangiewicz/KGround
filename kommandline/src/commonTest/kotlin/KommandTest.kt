@@ -22,6 +22,13 @@ fun Kommand.checkWithUser(expectedKommandLine: String, execInDir: String? = null
 
 
 class KommandTest {
+    @Test fun testQuoteShSpecials() {
+        val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
+        val out = str.quoteBashMetaChars()
+        println(str)
+        println(out)
+        assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
+    }
     @Test fun testLs() = ls { -all; -author; -long; -sort(TIME); +".."; +"/usr" }
         .checkWithUser("ls -a --author -l --sort=time .. /usr")
     @Test fun testAdb() = adb(devices) { -Option.all; -usb }
