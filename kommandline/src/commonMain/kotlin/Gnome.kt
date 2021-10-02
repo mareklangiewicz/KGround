@@ -94,9 +94,10 @@ data class NotifySend(
 data class Zenity(
     var type: DialogType,
     val options: MutableList<Option> = mutableListOf(),
+    val data: MutableList<String> = mutableListOf()
 ): Kommand {
     override val name get() = "zenity"
-    override val args get() = listOf(type.str) + options.map { it.str }
+    override val args get() = listOf(type.str) + options.map { it.str } + data
     enum class DialogType(val str: String) {
         calendar("--calendar"), entry("--entry"), error("--error"), fileselection("--file-selection"), info("--info"),
         list("--list"), notification("--notification"), progress("--progress"), question("--question"),
@@ -143,6 +144,7 @@ data class Zenity(
         object printpartial : Option("--print-partial")
     }
     operator fun Option.unaryMinus() = options.add(this)
+    operator fun String.unaryPlus() = data.add(this)
 }
 
 

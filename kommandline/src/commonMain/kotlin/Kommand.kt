@@ -11,6 +11,7 @@ fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
     Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -command; init() }
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
+    // FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
 
 /** anonymous kommand to use only if no actual Kommand class defined */
 fun kommand(name: String, vararg args: String) = object : Kommand {
@@ -36,6 +37,7 @@ infix fun <T: Any> List<T>.plusIfNotNull(element: T?) = if (element == null) thi
 
 fun List<String>.printlns() = forEach(::println)
 
+// TODO_someday: access to input/output streams wrapped in okio Source/Sink
 expect class ExecProcess(kommand: Kommand, dir: String? = null) {
     fun waitFor(): ExecResult
 }
