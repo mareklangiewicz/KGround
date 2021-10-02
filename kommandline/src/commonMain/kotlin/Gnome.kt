@@ -3,6 +3,9 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kommand.Zenity.DialogType
+import pl.mareklangiewicz.kommand.Zenity.Option.nowrap
+import pl.mareklangiewicz.kommand.Zenity.Option.text
+import pl.mareklangiewicz.kommand.Zenity.Option.title
 
 // FIXME_someday: journalctl is not really gnome related??
 fun journalctl(init: JournalCtl.() -> Unit = {}) = JournalCtl().apply(init)
@@ -16,6 +19,29 @@ fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Un
     NotifySend(summary, body).apply(init)
 
 fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
+
+fun zenityAskIf(question: String, atitle: String? = null): Boolean = zenity(DialogType.question) {
+    -text(question)
+    -nowrap
+    atitle?.let { -title(it) }
+}.shell().exitValue == 0
+
+fun Kommand.execInGnomeTermIfUserConfirms(
+    confirmation: String = "Run \'${line()}\' in gnome terminal?",
+    insideBash: Boolean = true,
+    pauseBeforeExit: Boolean = true,
+    execInDir: String? = null
+) {
+    if (zenityAskIf(confirmation)) {
+        val k = when {
+            insideBash -> bash(this, pauseBeforeExit)
+            pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
+            else -> this
+        }
+        gnometerm(k).exec(execInDir)
+    }
+}
+
 
 /** [linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 data class JournalCtl(
@@ -77,7 +103,7 @@ data class Zenity(
         textinfo("--text-info"), warning("--warning"), scale("--scale")
     }
     sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = arg?.let { "$name=\"$it\"" } ?: name // TODO_someday: some fun similar to plusIfNotNull for such cases
+        val str get() = arg?.let { "$name=$it" } ?: name // TODO_someday: some fun similar to plusIfNotNull for such cases
         object help : Option("--help")
         object version : Option("--version")
         object about : Option("--about")

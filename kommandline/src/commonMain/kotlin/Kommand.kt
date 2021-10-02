@@ -24,9 +24,12 @@ fun kommand(name: String, vararg args: String) = object : Kommand {
 interface Kommand {
     val name: String
     val args: List<String>
-    fun line() = (listOf(name) + args).joinToString(" ")
-    fun println() = println(line())
 }
+
+fun Kommand.line() = (listOf(name) + args.map { it.quoteBashMetaChars() }).joinToString(" ")
+fun Kommand.println() = println(line())
+fun String.quoteBashMetaChars() = replace(Regex("([() \\\\\"\\t\\n])"), "\\\\$1")
+    // FIXME now: better/correct quoting: A character that, when unquoted, separates words. A metacharacter is a space, tab, newline, or one of the following characters: ‘|’, ‘&’, ‘;’, ‘(’, ‘)’, ‘<’, or ‘>’.
 
 val Any?.unit get() = Unit
 

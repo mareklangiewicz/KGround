@@ -5,65 +5,53 @@ import pl.mareklangiewicz.kommand.GnomeTerm.Option.verbose
 import pl.mareklangiewicz.kommand.JournalCtl.Option.cat
 import pl.mareklangiewicz.kommand.JournalCtl.Option.follow
 import pl.mareklangiewicz.kommand.NotifySend.Option.urgency
+import pl.mareklangiewicz.kommand.Zenity.DialogType.entry
+import pl.mareklangiewicz.kommand.Zenity.DialogType.fileselection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+
+// TODO_someday: intellij plugin with @param UI similar to colab notebooks
+private const val USER_ENABLED = true
+//private const val USER_ENABLED = false
+
+private fun Kommand.checkWithUser(expectedKommandLine: String, execInDir: String? = null) {
+    this.println()
+    assertEquals(expectedKommandLine, line())
+    if (USER_ENABLED) execInGnomeTermIfUserConfirms(execInDir = execInDir)
+}
+
 class GnomeTest {
 
-    @Test
-    fun testJournalCtl() {
-
-        val kommand = journalctl {
-            - follow
-            - cat
-            + "/usr/bin/gnome-shell"
-        }
-
-        kommand.println()
-
-        assertEquals("journalctl -f -o cat /usr/bin/gnome-shell", kommand.line())
+    @Test fun testQuoteShSpecials() {
+        val str = "() 1 2  3 \"\\\t\n"
+        val out = str.quoteBashMetaChars()
+        println(str)
+        println(out)
+        assertEquals("\\(\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\\\\t\\\n", out)
     }
+    @Test fun testJournalCtl() = journalctl { -follow; -cat; +"/usr/bin/gnome-shell" }
+        .checkWithUser("journalctl -f -o\\ cat /usr/bin/gnome-shell")
+    @Test fun testGnomeTerminal() = gnometerm(kommand("vim")) { -verbose; -title("strange_terminal_title") }
+        .checkWithUser("gnome-terminal --verbose --title=strange_terminal_title -- vim")
+    @Test fun testGnomeExt() = gnomeext_list()
+        .checkWithUser("gnome-extensions list")
+    @Test fun testGnomeExtPrefs() = gnomeext_prefs("mygnomeext@mareklangiewicz.pl")
+        .checkWithUser("")
+    @Test fun testGnomeMagic() = kommand("dbus-run-session", "--", "gnome-shell", "--nested", "--wayland")
+        .checkWithUser("dbus-run-session -- gnome-shell --nested --wayland")
+    @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
+        .checkWithUser("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext")
+    @Test fun testNotify() = notify("aa", "some-longer-body") { -urgency("critical") }
+        .checkWithUser("notify-send --urgency=critical aa some-longer-body")
 
     @Test
-    fun testGnomeTerminal() {
-        val kommand = gnometerm(kommand("vim")) {
-            - verbose
-            - title("oldeditor")
-        }
-        kommand.println()
-        assertEquals("gnome-terminal --verbose --title=oldeditor -- vim", kommand.line())
-//        kommand.exec()
-    }
-
-
-    @Test
-    fun testGnomeExt() {
-        val kommand = gnomeext_list()
-        assertEquals("gnome-extensions list", kommand.line())
-//        kommand.shell().out.printlns()
-    }
-
-    @Test fun testGnomeExtPrefs() = gnomeext_prefs("mygnomeext@mareklangiewicz.pl").exec()
-
-    @Test
-    fun testGnomeMagic() {
-        val kommand = kommand("dbus-run-session", "--", "gnome-shell", "--nested", "--wayland")
-        assertEquals("dbus-run-session -- gnome-shell --nested --wayland", kommand.line())
-        gnometerm(bash(kommand, pause = true)).exec()
-    }
-
-    @Test
-    fun testGLibCompileSchemas() {
-        val kommand = kommand("glib-compile-schemas", "schemas/")
-//        val kommand = kommand("ls", "-lah", "schemas/")
-        assertEquals("glib-compile-schemas schemas/", kommand.line())
-//        gnometerm(bash(kommand, pause = true)).exec("/home/marek/code/kotlin/kokpit667/mygnomeext")
-    }
-
-    @Test
-    fun testNotify() {
-        val kommand = notify("aa", "some longer body") { -urgency("critical") }
-        assertEquals("notify-send --urgency=critical aa some longer body", kommand.line())
-//        kommand.exec()
+    fun testZenity() {
+        val z1 = zenity(entry)
+        assertEquals("zenity --entry", z1.line())
+        val e = z1.shell()
+        println(e)
+        val e2 = zenity(fileselection).shell()
+        println(e2)
     }
 }
