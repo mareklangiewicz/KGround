@@ -169,6 +169,9 @@ data class Audacious(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
+// TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash
+// https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Quoting
+// TODO_maybe: typesafe DSL for composing bash scripts? (similar to URE)
 data class Bash(
     /** a command string (usually just one string with or without spaces) or a file (when no -c option provided) */
     val nonopts: MutableList<String> = mutableListOf(),

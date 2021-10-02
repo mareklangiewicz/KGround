@@ -11,13 +11,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // TODO_someday: intellij plugin with @param UI similar to colab notebooks
-//const val USER_ENABLED = true
-const val USER_ENABLED = false
+//private const val INTERACTIVE_TESTS_ENABLED = true
+private const val INTERACTIVE_TESTS_ENABLED = false
 
-fun Kommand.checkWithUser(expectedKommandLine: String, execInDir: String? = null) {
+fun ifInteractive(block: () -> Unit) =
+    if (INTERACTIVE_TESTS_ENABLED) block() else println("Interactive tests are disabled.")
+
+fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null) {
     this.println()
-    assertEquals(expectedKommandLine, line())
-    if (USER_ENABLED) execInGnomeTermIfUserConfirms(execInDir = execInDir)
+    if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
+    ifInteractive { execInGnomeTermIfUserConfirms(execInDir = execInDir) }
 }
 
 
