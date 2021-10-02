@@ -29,7 +29,7 @@ fun zenityAskIf(question: String, atitle: String? = null): Boolean = zenity(Dial
 fun Kommand.execInGnomeTermIfUserConfirms(
     confirmation: String = "Run ::${line()}:: in gnome terminal?",
     insideBash: Boolean = true,
-    pauseBeforeExit: Boolean = true,
+    pauseBeforeExit: Boolean = insideBash,
     execInDir: String? = null
 ) {
     if (zenityAskIf(confirmation)) {

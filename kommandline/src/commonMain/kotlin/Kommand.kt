@@ -36,6 +36,10 @@ infix fun <T: Any> List<T>.plusIfNotNull(element: T?) = if (element == null) thi
 
 fun List<String>.printlns() = forEach(::println)
 
+expect class ExecProcess(kommand: Kommand, dir: String? = null) {
+    fun waitFor(): ExecResult
+}
+
 data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
 
 /**
@@ -45,10 +49,24 @@ data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
 val ExecResult.out: List<String> get() =
     if (exitValue != 0) throw IllegalStateException("Exit value: $exitValue") else stdOutAndErr
 
+fun Kommand.execStart(dir: String? = null) = ExecProcess(this, dir)
 
-expect fun Kommand.exec(dir: String? = null)
+fun Kommand.execBlock(dir: String? = null): ExecResult = execStart(dir).waitFor()
 
-expect fun Kommand.shell(dir: String? = null): ExecResult
+
+/**
+ * Execute given command (with optional args) in separate subprocess. Does not wait for it to end.
+ * (the command should not expect any input or give any output or error)
+ */
+fun Kommand.exec(dir: String? = null) = execStart(dir).unit
+
+
+/**
+ * Runs given command in bash shell;
+ * captures all its output (with error output merged in);
+ * waits for the subprocess to finish;
+ */
+fun Kommand.shell(dir: String? = null) = bash(this).execBlock(dir)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
 data class Ls(
