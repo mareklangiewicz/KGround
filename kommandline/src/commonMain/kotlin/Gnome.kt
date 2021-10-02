@@ -27,7 +27,7 @@ fun zenityAskIf(question: String, atitle: String? = null): Boolean = zenity(Dial
 }.shell().exitValue == 0
 
 fun Kommand.execInGnomeTermIfUserConfirms(
-    confirmation: String = "Run \'${line()}\' in gnome terminal?",
+    confirmation: String = "Run ::${line()}:: in gnome terminal?",
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = true,
     execInDir: String? = null
@@ -62,7 +62,7 @@ data class JournalCtl(
          * message of each journal entry with no metadata, not even
          * a timestamp.
          */
-        object cat : Option("-o cat") // FIXME_later: separate -o and type
+        object cat : Option("-ocat") // FIXME_later: separate -o and type
         object help : Option("--help")
         object version : Option("--version")
     }
