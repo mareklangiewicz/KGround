@@ -10,53 +10,31 @@ import pl.mareklangiewicz.kommand.Vim.Option.servername
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// TODO_someday: intellij plugin with @param UI similar to colab notebooks
+//const val USER_ENABLED = true
+const val USER_ENABLED = false
+
+fun Kommand.checkWithUser(expectedKommandLine: String, execInDir: String? = null) {
+    this.println()
+    assertEquals(expectedKommandLine, line())
+    if (USER_ENABLED) execInGnomeTermIfUserConfirms(execInDir = execInDir)
+}
+
+
 class KommandTest {
-
-    @Test
-    fun testLs() {
-
-        val kommand = ls {
-            - all
-            - author
-            - long
-            - sort(TIME)
-            + ".."
-            + "/usr"
-        }
-
-        kommand.println()
-
-        assertEquals("ls -a --author -l --sort=time .. /usr", kommand.line())
-    }
-
-    @Test
-    fun testAdb() {
-
-        val kommand = adb(devices) {
-            - Option.all
-            - usb
-        }
-
-        kommand.println()
-
-        assertEquals("adb -a -d devices", kommand.line())
-    }
-
-    @Test
-    fun testVim() {
+    @Test fun testLs() = ls { -all; -author; -long; -sort(TIME); +".."; +"/usr" }
+        .checkWithUser("ls -a --author -l --sort=time .. /usr")
+    @Test fun testAdb() = adb(devices) { -Option.all; -usb }
+        .checkWithUser("adb -a -d devices")
+    @Test fun testVim() {
         val kommand = vim(".") { -gui; -servername("DDDD") }
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
-        assertEquals("vim -g --servername DDDD .", kommand.line())
-//        kommand.exec()
-//        kommand.shell()
+        kommand.checkWithUser("vim -g --servername DDDD .")
     }
-
-    @Test
-    fun testBash() {
+    @Test fun testBash() {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
-        assertEquals("bash -c vim -g --servername DDDD .", kommand2.line())
-//        kommand2.exec()
+        kommand2.checkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
     }
 }

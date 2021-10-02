@@ -11,16 +11,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-// TODO_someday: intellij plugin with @param UI similar to colab notebooks
-private const val USER_ENABLED = true
-//private const val USER_ENABLED = false
-
-private fun Kommand.checkWithUser(expectedKommandLine: String, execInDir: String? = null) {
-    this.println()
-    assertEquals(expectedKommandLine, line())
-    if (USER_ENABLED) execInGnomeTermIfUserConfirms(execInDir = execInDir)
-}
-
 class GnomeTest {
 
     @Test fun testQuoteShSpecials() {

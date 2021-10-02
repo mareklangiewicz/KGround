@@ -55,3 +55,10 @@ kotlin {
         }
     }
 }
+
+tasks.withType<AbstractTestTask> {
+    testLogging {
+        showStandardStreams = true
+        showStackTraces = true
+    }
+}
