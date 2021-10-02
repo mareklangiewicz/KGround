@@ -24,11 +24,11 @@ private fun Kommand.checkWithUser(expectedKommandLine: String, execInDir: String
 class GnomeTest {
 
     @Test fun testQuoteShSpecials() {
-        val str = "() 1 2  3 \"\\\t\n"
+        val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
         val out = str.quoteBashMetaChars()
         println(str)
         println(out)
-        assertEquals("\\(\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\\\\t\\\n", out)
+        assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
     }
     @Test fun testJournalCtl() = journalctl { -follow; -cat; +"/usr/bin/gnome-shell" }
         .checkWithUser("journalctl -f -o\\ cat /usr/bin/gnome-shell")
