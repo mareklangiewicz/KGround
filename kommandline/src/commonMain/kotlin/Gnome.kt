@@ -2,29 +2,18 @@
 
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.Zenity.DialogType
-import pl.mareklangiewicz.kommand.Zenity.Option.nowrap
-import pl.mareklangiewicz.kommand.Zenity.Option.text
-import pl.mareklangiewicz.kommand.Zenity.Option.title
+import pl.mareklangiewicz.kommand.GnomeExt.Cmd
+import pl.mareklangiewicz.kommand.GnomeExt.Cmd.help
+import pl.mareklangiewicz.kommand.GnomeExt.Cmd.install
 
 // FIXME_someday: journalctl is not really gnome related??
 fun journalctl(init: JournalCtl.() -> Unit = {}) = JournalCtl().apply(init)
 fun gnometerm(kommand: Kommand? = null, init: GnomeTerm.() -> Unit = {}) = GnomeTerm(kommand).apply(init)
 
-// TODO: better support for all gnome-extensions subcommands
-fun gnomeext_list() = kommand("gnome-extensions", "list")
-fun gnomeext_prefs(extuuid: String) = kommand("gnome-extensions", "prefs", extuuid)
+fun gnomeext(cmd: Cmd, init: GnomeExt.() -> Unit = {}) = GnomeExt(cmd).apply(init)
 
 fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Unit = {}) =
     NotifySend(summary, body).apply(init)
-
-fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
-
-fun zenityAskIf(question: String, atitle: String? = null): Boolean = zenity(DialogType.question) {
-    -text(question)
-    -nowrap
-    atitle?.let { -title(it) }
-}.shell().exitValue == 0
 
 fun Kommand.execInGnomeTermIfUserConfirms(
     confirmation: String = "Run ::${line()}:: in gnome terminal?",
@@ -87,67 +76,6 @@ data class NotifySend(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
-/**
- * https://help.gnome.org/users/zenity/stable/index.html.en
- * https://linux.die.net/man/1/zenity
- */
-data class Zenity(
-    var type: DialogType,
-    val options: MutableList<Option> = mutableListOf(),
-    val data: MutableList<String> = mutableListOf()
-): Kommand {
-    override val name get() = "zenity"
-    override val args get() = listOf(type.str) + options.map { it.str } + data
-    enum class DialogType(val str: String) {
-        calendar("--calendar"), entry("--entry"), error("--error"), fileselection("--file-selection"), info("--info"),
-        list("--list"), notification("--notification"), progress("--progress"), question("--question"),
-        textinfo("--text-info"), warning("--warning"), scale("--scale")
-    }
-    sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = arg?.let { "$name=$it" } ?: name // TODO_someday: some fun similar to plusIfNotNull for such cases
-        object help : Option("--help")
-        object version : Option("--version")
-        object about : Option("--about")
-        data class title(val t: String): Option("--title", t)
-        /** icon path or one of keywords: info, warning, question, error */
-        data class icon(val icon: String): Option("--window-icon", icon)
-        data class timeout(val seconds: Int): Option("--timeout", seconds.toString())
-        data class text(val t: String): Option("--text", t)
-        data class day(val d: Int): Option("--day", d.toString())
-        data class month(val m: Int): Option("--month", m.toString())
-        data class year(val y: Int): Option("--year", y.toString())
-        data class dateformat(val format: String): Option("--date-format", format)
-        data class entrytext(val t: String): Option("--entry-text", t)
-        object hidetext : Option("--hide-text")
-        object nowrap : Option("--no-wrap")
-        data class filename(val fn: String): Option("--filename", fn)
-        object multiple : Option("--multiple")
-        object directory : Option("--directory")
-        object save : Option("--save")
-        data class separator(val s: String): Option("--separator", s)
-        object confirmoverwrite : Option("--confirm-overwrite")
-        data class column(val header: String): Option("--column", header)
-        object checklist : Option("--checklist")
-        object radiolist : Option("--radiolist")
-        object editable : Option("--editable")
-        data class printcolumn(val c: String): Option("--print-column", c)
-        data class hidecolumn(val c: Int): Option("--hide-column", c.toString())
-        object listen : Option("--listen")
-        data class percentage(val p: Int): Option("--percentage", p.toString())
-        object autoclose : Option("--auto-close")
-        object autokill : Option("--auto-kill")
-        object pulsate : Option("--pulsate")
-        data class initvalue(val v: Int): Option("--value", v.toString())
-        data class minvalue(val v: Int): Option("--min-value", v.toString())
-        data class maxvalue(val v: Int): Option("--max-value", v.toString())
-        data class step(val v: Int): Option("--step", v.toString())
-        object printpartial : Option("--print-partial")
-    }
-    operator fun Option.unaryMinus() = options.add(this)
-    operator fun String.unaryPlus() = data.add(this)
-}
-
-
 
 data class GnomeTerm(
     val kommand: Kommand? = null,
@@ -161,6 +89,111 @@ data class GnomeTerm(
         data class title(val title: String) : Option("--title", title)
         object help : Option("--help")
         object verbose : Option("--verbose")
+    }
+    operator fun Option.unaryMinus() = options.add(this)
+}
+
+data class GnomeExt(
+    var cmd: Cmd = help(),
+    val options: MutableList<Option> = mutableListOf()
+) : Kommand {
+    override val name get() = "gnome-extensions"
+    override val args get() = cmd.str + options.map { it.str } plusIfNotNull (cmd as? install)?.pack
+
+    sealed class Cmd(val name: String, open val uuid: String? = null) {
+        open val str get() = uuid?.let { listOf(name, it) } ?: listOf(name)
+        /** Displays a short synopsis of the available commands or provides detailed help on a specific command. */
+        data class help(val cmdname: String? = null): Cmd("help") {
+            override val str get() = cmdname?.let { listOf(name, it) } ?: listOf(name)
+        }
+        /** Prints the program version. */
+        object version: Cmd("version")
+
+        /**
+         * Enables the extension identified by UUID.
+         * The command will not detect any errors from the extension itself,
+         * use the info command to confirm that the extension state is ENABLED.
+         * If the extension is already enabled, the command will do nothing.
+         */
+        data class enable(override val uuid: String): Cmd("enable", uuid)
+        /** Disables the extension identified by UUID. If the extension is not enabled, the command will do nothing. */
+        data class disable(override val uuid: String): Cmd("disable", uuid)
+
+        /**
+         * Reset the extension identified by UUID.
+         * The extension will be disabled in GNOME, but may be enabled by other sessions like GNOME Classic.
+         */
+        data class reset(override val uuid: String): Cmd("reset", uuid)
+
+        /** Show details of the extension identified by UUID, including name, description and state. */
+        data class info(override val uuid: String): Cmd("info", uuid)
+        /** Synonym of info. */
+        data class show(override val uuid: String): Cmd("show", uuid)
+        /** Displays a list of installed extensions. */
+        object list: Cmd("list")
+        /** Open the preference dialog of the extension identified by UUID. */
+        data class prefs(override val uuid: String): Cmd("prefs", uuid)
+        /** Creates a new extension from a template. */
+        object create: Cmd("create")
+
+        /**
+         * Creates an extension bundle that is suitable for publishing.
+         * The bundle will always include the required files extension.js and metadata.json, as well as the optional
+         * stylesheet.css and prefs.js if found. Each additional source that should be included must be specified
+         * with --extra-source.
+         * If the extension includes one or more GSettings schemas, they can either be placed in a schemas/ folder to
+         * be picked up automatically, or be specified with --schema.
+         * Similarily, translations are included automatically when they are located in a po/ folder, otherwise the
+         * --podir option can be used to point to the correct directory. If no gettext domain is provided on the
+         * command line, the value of the gettext-domain metadata field is used if it exists, and the extension UUID
+         * if not.
+         * All files are searched in SOURCE-DIRECTORY if specified, or the current directory otherwise.
+         */
+        object pack: Cmd("pack")
+
+        /**
+         * Installs an extension from the bundle PACK.
+         * The command unpacks the extension files and moves them to the expected location in the user’s $HOME, so
+         * that it will be loaded in the next session.
+         * It is mainly intended for testing, not as a replacement for GNOME Software or the extension website. As
+         * extensions have privileged access to the user’s session, it is advised to never load extensions from
+         * untrusted sources without carefully reviewing their content.
+         */
+        data class install(val pack: String): Cmd("install")
+        /** Uninstalls the extension identified by UUID. */
+        data class uninstall(override val uuid: String): Cmd("uninstall", uuid)
+    }
+
+    sealed class Option(val name: String, val arg: String? = null) {
+        val str get() = arg?.let { "$name=$arg" } ?: name
+
+        // common options:
+        /** Do not print error messages */
+        object quiet : Option("--quiet")
+
+        // options for list cmd:
+        object user : Option("--user")
+        object system : Option("--system")
+        object enabled : Option("--enabled")
+        object disabled : Option("--disabled")
+        object prefs : Option("--prefs")
+        object updates : Option("--updates")
+        object details : Option("--details")
+
+        // options for create cmd:
+        data class extname(val n: String) : Option("--name", n)
+        data class extdesc(val d: String) : Option("--description", d)
+        data class extuuid(val u: String) : Option("--uuid", u)
+        data class template(val t: String) : Option("--template", t)
+        object interactive : Option("--interactive")
+
+        // options for pack cmd:
+        data class extrasource(val path: String) : Option("--extra-source", path)
+        data class schema(val s: String) : Option("--schema", s)
+        data class podir(val p: String) : Option("--podir", p)
+        data class gettextdomain(val d: String) : Option("--gettext-domain", d)
+        data class outdir(val d: String) : Option("--out-dir", d)
+        object force : Option("--force") // also for install cmd
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

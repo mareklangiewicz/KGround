@@ -1,5 +1,8 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kommand.GnomeExt.Cmd.list
+import pl.mareklangiewicz.kommand.GnomeExt.Cmd.prefs
+import pl.mareklangiewicz.kommand.GnomeExt.Option.disabled
 import pl.mareklangiewicz.kommand.GnomeTerm.Option.title
 import pl.mareklangiewicz.kommand.GnomeTerm.Option.verbose
 import pl.mareklangiewicz.kommand.JournalCtl.Option.cat
@@ -13,9 +16,11 @@ class GnomeTest {
         .checkWithUser("journalctl -f -ocat /usr/bin/gnome-shell")
     @Test fun testGnomeTerminal() = gnometerm(kommand("vim")) { -verbose; -title("strange terminal title") }
         .checkWithUser("gnome-terminal --verbose --title=strange\\ terminal\\ title -- vim")
-    @Test fun testGnomeExt() = gnomeext_list()
+    @Test fun testGnomeExtList() = gnomeext(list)
         .checkWithUser("gnome-extensions list")
-    @Test fun testGnomeExtPrefs() = gnomeext_prefs("mygnomeext@mareklangiewicz.pl")
+    @Test fun testGnomeExtListDisabled() = gnomeext(list) { -disabled }
+        .checkWithUser("gnome-extensions list --disabled")
+    @Test fun testGnomeExtPrefs() = gnomeext(prefs("mygnomeext@mareklangiewicz.pl"))
         .checkWithUser("gnome-extensions prefs mygnomeext@mareklangiewicz.pl")
     @Test fun testGnomeMagic() = kommand("dbus-run-session", "--", "gnome-shell", "--nested", "--wayland")
         .checkWithUser("dbus-run-session -- gnome-shell --nested --wayland")
