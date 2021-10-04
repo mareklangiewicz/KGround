@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kommand.GnomeApp.Cmd.action
+import pl.mareklangiewicz.kommand.GnomeApp.Cmd.help
 import pl.mareklangiewicz.kommand.GnomeApp.Cmd.launch
 import pl.mareklangiewicz.kommand.GnomeApp.Cmd.listactions
 import pl.mareklangiewicz.kommand.GnomeApp.Cmd.listapps
@@ -16,14 +17,15 @@ class GnomeAppTest {
         .checkWithUser("gapplication list-actions org.gnome.gedit")
 
     @Test fun testGnomeAppListAllAppActions() {
-        gnomeapp(listapps).shell().out.forEach {
+        gnomeapp(listapps).shell().output().forEach {
             println("Application $it:")
-            gnomeapp(listactions(it)).shell().out.forEach {
+            gnomeapp(listactions(it)).shell().output().forEach {
                 println("   action: $it")
             }
         }
     }
 
+    @Test fun testGnomeAppHelp() = gnomeapp(help()).checkWithUser()
     @Test fun testGnomeAppLaunchGEdit() = gnomeapp(launch("org.gnome.gedit")).checkWithUser()
     @Test fun testGnomeAppGEditNewWindow() = gnomeapp(action("org.gnome.gedit", "new-window")).checkWithUser()
     @Test fun testGnomeAppGEditNewDocument() = gnomeapp(action("org.gnome.gedit", "new-document")).checkWithUser()

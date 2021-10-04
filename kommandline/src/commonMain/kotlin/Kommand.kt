@@ -46,10 +46,11 @@ data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
 
 /**
  * Returns the output but ensures the exit value was 0 first
- * @throws IllegalStateException if exit value is not 0
+ * @throws IllegalStateException if exit value is not equal to expectedExitValue
  */
-val ExecResult.out: List<String> get() =
-    if (exitValue != 0) throw IllegalStateException("Exit value: $exitValue") else stdOutAndErr
+fun ExecResult.output(expectedExitValue: Int = 0): List<String> =
+    if (exitValue == expectedExitValue) stdOutAndErr
+    else throw IllegalStateException("Exit value $exitValue != expected $expectedExitValue.")
 
 fun Kommand.execStart(dir: String? = null) = ExecProcess(this, dir)
 
