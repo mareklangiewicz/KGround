@@ -27,7 +27,7 @@ fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String
 class KommandTest {
     @Test fun testQuoteShSpecials() {
         val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
-        val out = str.quoteBashMetaChars()
+        val out = bashQuoteMetaChars(str)
         println(str)
         println(out)
         assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
@@ -46,5 +46,9 @@ class KommandTest {
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
         kommand2.checkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
+    }
+
+    @Test fun testBashGetExports() {
+        bashGetExports().forEach { println(it) }
     }
 }

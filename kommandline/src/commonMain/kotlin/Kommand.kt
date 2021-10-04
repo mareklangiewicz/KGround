@@ -2,16 +2,10 @@
 
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.Bash.Option.command
-
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)
 fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
 fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
-fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
-    Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -command; init() }
-fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
-    // FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
 
 /** anonymous kommand to use only if no actual Kommand class defined */
 fun kommand(name: String, vararg args: String) = object : Kommand {
@@ -27,9 +21,8 @@ interface Kommand {
     val args: List<String>
 }
 
-fun Kommand.line() = (listOf(name) + args.map { it.quoteBashMetaChars() }).joinToString(" ")
+fun Kommand.line() = (listOf(name) + args.map { bashQuoteMetaChars(it) }).joinToString(" ")
 fun Kommand.println() = println(line())
-fun String.quoteBashMetaChars() = replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
 val Any?.unit get() = Unit
 
@@ -190,29 +183,3 @@ data class Audacious(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
-// TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash
-// https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Quoting
-// TODO_maybe: typesafe DSL for composing bash scripts? (similar to URE)
-data class Bash(
-    /** a command string (usually just one string with or without spaces) or a file (when no -c option provided) */
-    val nonopts: MutableList<String> = mutableListOf(),
-    val options: MutableList<Option> = mutableListOf(),
-): Kommand {
-    override val name get() = "bash"
-    override val args get() = options.map { it.str } + nonopts
-
-    sealed class Option(val str: String) {
-        /** interpret nonopts as a command to run */
-        object command : Option("-c")
-        object interactive : Option("-i")
-        object login : Option("-l")
-        object restricted : Option("-r")
-        object posix : Option("--posix")
-        object help : Option("--help")
-        object version : Option("--version")
-        object verbose : Option("--verbose")
-    }
-    operator fun Option.unaryMinus() = options.add(this)
-}
-
-// TODO: "export" command - with output parsing for better composability
