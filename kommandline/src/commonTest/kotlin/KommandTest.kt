@@ -5,22 +5,24 @@ import pl.mareklangiewicz.kommand.Adb.Option
 import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
+import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.gui
 import pl.mareklangiewicz.kommand.Vim.Option.servername
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // TODO_someday: intellij plugin with @param UI similar to colab notebooks
-private const val INTERACTIVE_TESTS_ENABLED = true
+//private const val INTERACTIVE_TESTS_ENABLED = true
 //private const val INTERACTIVE_TESTS_ENABLED = false
+private val INTERACTIVE_TESTS_ENABLED = SYS.isGnome()
 
 fun ifInteractive(block: () -> Unit) =
     if (INTERACTIVE_TESTS_ENABLED) block() else println("Interactive tests are disabled.")
 
-fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null) {
+fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
     this.println()
     if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
-    ifInteractive { execInGnomeTermIfUserConfirms(execInDir = execInDir) }
+    ifInteractive { platform.execInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
 }
 
 
@@ -49,8 +51,8 @@ class KommandTest {
     }
 
     @Test fun testBashGetExports() {
-        bashGetExports().forEach { println(it) }
-        // TODO NOW kommads: idea; ideap; mktemp; which; tests/demos for it; a way to put any kommand output (or anything) to clipboard; and also to open it in idea (scratch? tmp file?)
-        //  test for usecase: automatic save bash exports to temp file and open in ideap..
+        SYS.bashGetExports().forEach { println(it) }
+        // TODO NOW kommands: idea; ideap; mktemp; which; tests/demos for it; a way to put any kommand output (or anything) to clipboard; and also to open it in idea (scratch? tmp file?)
+        //  test for use case: automatic save bash exports to temp file and open in ideap..
     }
 }

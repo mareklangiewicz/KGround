@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.kommand.Ls.Option.all
 import pl.mareklangiewicz.kommand.Ls.Option.humanReadable
 import pl.mareklangiewicz.kommand.Ls.Option.long
+import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Zenity.DialogType.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
 import kotlin.test.Test
@@ -10,7 +11,7 @@ import kotlin.test.Test
 
 class ZenityTest {
     @Test fun testZenityEntryCheck() = zenity(entry) { -text("some question") }.checkWithUser()
-    @Test fun testZenityEntryStart() = ifInteractive { exec(zenity(entry) { -entrytext("suggested text") }) }
+    @Test fun testZenityEntryStart() = ifInteractive { SYS.exec(zenity(entry) { -entrytext("suggested text") }) }
 
     @Test fun testZenityCalendar() = zenity(calendar) { -title("some title"); -text("some text") }
         .checkWithUser("zenity --calendar --title=some\\ title --text=some\\ text")
@@ -44,7 +45,7 @@ class ZenityTest {
         -column("chk")
         -column("labels")
         repeat(10) {
-            + (it % 3 == 0).toString()
+            +(it % 3 == 0).toString()
             +"label $it"
         }
     }.checkWithUser()
@@ -55,19 +56,19 @@ class ZenityTest {
         -column("labels")
         -column("descs")
         repeat(6) {
-            + (it == 1).toString()
+            +(it == 1).toString()
             +"label $it"
             +"desc $it"
         }
     }.checkWithUser()
     @Test fun testZenityListFromLs() { // TODO_someday: nice parsing for ls output columns etc..
-        val lines = shell(ls { -all; -long; -humanReadable }).output()
+        val lines = SYS.shell(ls { -all; -long; -humanReadable }).output()
         zenity(list) {
             -text("ls output")
             -column("ls output")
             for (l in lines) +"line $l"
-                // some prefix like "line" is needed,
-                // so it doesn't confuse line starting with "-" with zenity option
+            // some prefix like "line" is needed,
+            // so it doesn't confuse line starting with "-" with zenity option
         }.checkWithUser()
     }
 

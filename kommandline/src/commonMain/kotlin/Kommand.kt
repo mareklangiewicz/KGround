@@ -24,45 +24,6 @@ interface Kommand {
 fun Kommand.line() = (listOf(name) + args.map { bashQuoteMetaChars(it) }).joinToString(" ")
 fun Kommand.println() = println(line())
 
-val Any?.unit get() = Unit
-
-infix fun <T: Any> List<T>.plusIfNotNull(element: T?) = if (element == null) this else this + element
-
-fun List<String>.printlns() = forEach(::println)
-
-// TODO_someday: access to input/output streams wrapped in okio Source/Sink
-expect class ExecProcess(kommand: Kommand, dir: String? = null) {
-    fun waitFor(): ExecResult
-}
-
-data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
-
-/**
- * Returns the output but ensures the exit value was 0 first
- * @throws IllegalStateException if exit value is not equal to expectedExitValue
- */
-fun ExecResult.output(expectedExitValue: Int = 0): List<String> =
-    if (exitValue == expectedExitValue) stdOutAndErr
-    else throw IllegalStateException("Exit value $exitValue != expected $expectedExitValue.")
-
-fun execStart(kommand: Kommand, dir: String? = null) = ExecProcess(kommand, dir)
-
-fun execBlock(kommand: Kommand, dir: String? = null): ExecResult = execStart(kommand, dir).waitFor()
-
-
-/**
- * Execute given command (with optional args) in separate subprocess. Does not wait for it to end.
- * (the command should not expect any input or give any output or error)
- */
-fun exec(kommand: Kommand, dir: String? = null) = execStart(kommand, dir).unit
-
-
-/**
- * Runs given command in bash shell;
- * captures all its output (with error output merged in);
- * waits for the subprocess to finish;
- */
-fun shell(kommand: Kommand, dir: String? = null) = execBlock(bash(kommand), dir)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
 data class Ls(

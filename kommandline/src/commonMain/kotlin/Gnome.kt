@@ -10,17 +10,18 @@ fun gnometerm(kommand: Kommand? = null, init: GnomeTerm.() -> Unit = {}) = Gnome
 fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Unit = {}) =
     NotifySend(summary, body).apply(init)
 
-fun Kommand.execInGnomeTermIfUserConfirms(
-    confirmation: String = "Run ::${line()}:: in gnome terminal?",
+fun Platform.execInGnomeTermIfUserConfirms(
+    kommand: Kommand,
+    confirmation: String = "Run ::${kommand.line()}:: in gnome terminal?",
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = insideBash,
     execInDir: String? = null
 ) {
     if (zenityAskIf(confirmation)) {
         val k = when {
-            insideBash -> bash(this, pauseBeforeExit)
+            insideBash -> bash(kommand, pauseBeforeExit)
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
-            else -> this
+            else -> kommand
         }
         exec(gnometerm(k), execInDir)
     }

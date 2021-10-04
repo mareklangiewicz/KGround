@@ -1,10 +1,5 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.disable
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.enable
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.list
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.prefs
-import pl.mareklangiewicz.kommand.GnomeExt.Option.disabled
 import pl.mareklangiewicz.kommand.GnomeTerm.Option.title
 import pl.mareklangiewicz.kommand.GnomeTerm.Option.verbose
 import pl.mareklangiewicz.kommand.JournalCtl.Option.cat
