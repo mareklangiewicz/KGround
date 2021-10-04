@@ -6,6 +6,9 @@ fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)
 fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
 fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
+fun mktemp(template: String? = null, init: MkTemp.() -> Unit = {}) = MkTemp(template).apply(init)
+fun Platform.createTempFile(prefix: String = "tmp.", suffix: String = ".tmp") =
+    shell(mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}")).output()[0]
 
 /** anonymous kommand to use only if no actual Kommand class defined */
 fun kommand(name: String, vararg args: String) = object : Kommand {
@@ -72,7 +75,7 @@ data class Vim(
     sealed class Option(val name: String, val arg: String? = null) {
 
         // important: name and arg has to be separate in Vim.args - for Kommand.exec to work correctly
-        val str get() = arg?.let { listOf(name, it) } ?: listOf(name)
+        val str get() = listOf(name) plusIfNotNull arg
 
         object gui : Option("-g")
         object diff : Option("-d")
@@ -144,3 +147,22 @@ data class Audacious(
     operator fun Option.unaryMinus() = options.add(this)
 }
 
+data class MkTemp(
+    var template: String? = null,
+    val options: MutableList<Option> = mutableListOf()
+): Kommand {
+    override val name get() = "mktemp"
+    override val args get() = options.flatMap { it.str } plusIfNotNull template
+
+    sealed class Option(val name: String, val arg: String? = null) {
+        val str get() = listOf(name) plusIfNotNull arg
+        object directory : Option("--directory")
+        object dryrun : Option("--dry-run")
+        object quiet : Option("--quiet")
+        data class suffix(val s: String) : Option("--suffix", s)
+        data class tmpdir(val dir: String) : Option("--tmpdir", dir)
+        object help : Option("--help")
+        object version : Option("--version")
+    }
+    operator fun Option.unaryMinus() = options.add(this)
+}
