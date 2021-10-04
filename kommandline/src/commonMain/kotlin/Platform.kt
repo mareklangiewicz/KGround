@@ -4,10 +4,13 @@ interface Platform {
 
     fun execStart(kommand: Kommand, dir: String? = null): ExecProcess
 
-    fun isJvm(): Boolean = false
-    fun isDesktop(): Boolean = false
-    fun isUbuntu(): Boolean = false
-    fun isGnome(): Boolean = false
+    val isJvm: Boolean get() = false
+    val isDesktop: Boolean get() = false
+    val isUbuntu: Boolean get() = false
+    val isGnome: Boolean get() = false
+
+    val pathToUserHome get (): String? = null
+    val pathToUserTmp get (): String? = null
 
     // TODO_someday: access to input/output streams wrapped in okio Source/Sink
     // (but what about platforms running kommands through ssh or adb?)

@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 // TODO_someday: intellij plugin with @param UI similar to colab notebooks
 //private const val INTERACTIVE_TESTS_ENABLED = true
 //private const val INTERACTIVE_TESTS_ENABLED = false
-private val INTERACTIVE_TESTS_ENABLED = SYS.isGnome()
+private val INTERACTIVE_TESTS_ENABLED = SYS.isGnome
 
 fun ifInteractive(block: () -> Unit) =
     if (INTERACTIVE_TESTS_ENABLED) block() else println("Interactive tests are disabled.")
