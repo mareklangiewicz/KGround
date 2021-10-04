@@ -18,8 +18,8 @@ class JvmPlatform: Platform {
         }
     }
     override fun isJvm() = true
-    override fun isDesktop() = bashGetExports()["XDG_CURRENT_DESKTOP"] != null
-    override fun isUbuntu() = bashGetExports()["XDG_CURRENT_DESKTOP"]?.contains("ubuntu", ignoreCase = true) ?: false
-    override fun isGnome() = bashGetExports()["XDG_CURRENT_DESKTOP"]?.contains("gnome", ignoreCase = true) ?: false
-
+    override fun isDesktop() = xdgdesktop.isEmpty()
+    override fun isUbuntu() = "ubuntu" in xdgdesktop
+    override fun isGnome() = "GNOME" in xdgdesktop
+    private val xdgdesktop by lazy { bashGetExports()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
 }
