@@ -25,7 +25,7 @@ fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String
 
 
 class KommandTest {
-    @Test fun testQuoteShSpecials() {
+    @Test fun testBashQuoteMetaChars() {
         val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
         val out = bashQuoteMetaChars(str)
         println(str)
@@ -50,5 +50,7 @@ class KommandTest {
 
     @Test fun testBashGetExports() {
         bashGetExports().forEach { println(it) }
+        // TODO NOW kommads: idea; ideap; mktemp; which; tests/demos for it; a way to put any kommand output (or anything) to clipboard; and also to open it in idea (scratch? tmp file?)
+        //  test for usecase: automatic save bash exports to temp file and open in ideap..
     }
 }

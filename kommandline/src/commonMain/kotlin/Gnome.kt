@@ -22,7 +22,7 @@ fun Kommand.execInGnomeTermIfUserConfirms(
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
             else -> this
         }
-        gnometerm(k).exec(execInDir)
+        exec(gnometerm(k), execInDir)
     }
 }
 

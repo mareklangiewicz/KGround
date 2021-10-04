@@ -45,16 +45,16 @@ fun ExecResult.output(expectedExitValue: Int = 0): List<String> =
     if (exitValue == expectedExitValue) stdOutAndErr
     else throw IllegalStateException("Exit value $exitValue != expected $expectedExitValue.")
 
-fun Kommand.execStart(dir: String? = null) = ExecProcess(this, dir)
+fun execStart(kommand: Kommand, dir: String? = null) = ExecProcess(kommand, dir)
 
-fun Kommand.execBlock(dir: String? = null): ExecResult = execStart(dir).waitFor()
+fun execBlock(kommand: Kommand, dir: String? = null): ExecResult = execStart(kommand, dir).waitFor()
 
 
 /**
  * Execute given command (with optional args) in separate subprocess. Does not wait for it to end.
  * (the command should not expect any input or give any output or error)
  */
-fun Kommand.exec(dir: String? = null) = execStart(dir).unit
+fun exec(kommand: Kommand, dir: String? = null) = execStart(kommand, dir).unit
 
 
 /**
@@ -62,7 +62,7 @@ fun Kommand.exec(dir: String? = null) = execStart(dir).unit
  * captures all its output (with error output merged in);
  * waits for the subprocess to finish;
  */
-fun Kommand.shell(dir: String? = null) = bash(this).execBlock(dir)
+fun shell(kommand: Kommand, dir: String? = null) = execBlock(bash(kommand), dir)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
 data class Ls(

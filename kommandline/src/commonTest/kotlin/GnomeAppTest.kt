@@ -17,9 +17,9 @@ class GnomeAppTest {
         .checkWithUser("gapplication list-actions org.gnome.gedit")
 
     @Test fun testGnomeAppListAllAppActions() {
-        gnomeapp(listapps).shell().output().forEach {
+        shell(gnomeapp(listapps)).output().forEach {
             println("Application $it:")
-            gnomeapp(listactions(it)).shell().output().forEach {
+            shell(gnomeapp(listactions(it))).output().forEach {
                 println("   action: $it")
             }
         }

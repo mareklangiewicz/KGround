@@ -5,11 +5,11 @@ import pl.mareklangiewicz.kommand.Zenity.Option.*
 
 fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
 
-fun zenityAskIf(question: String, atitle: String? = null): Boolean = zenity(DialogType.question) {
+fun zenityAskIf(question: String, atitle: String? = null): Boolean = shell(zenity(DialogType.question) {
     -text(question)
     -nowrap
     atitle?.let { -title(it) }
-}.shell().exitValue == 0
+}).exitValue == 0
 
 
 /*

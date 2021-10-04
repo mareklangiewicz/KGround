@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class ZenityTest {
     @Test fun testZenityEntryCheck() = zenity(entry) { -text("some question") }.checkWithUser()
-    @Test fun testZenityEntryStart() = ifInteractive { zenity(entry) { -entrytext("suggested text") }.exec() }
+    @Test fun testZenityEntryStart() = ifInteractive { exec(zenity(entry) { -entrytext("suggested text") }) }
 
     @Test fun testZenityCalendar() = zenity(calendar) { -title("some title"); -text("some text") }
         .checkWithUser("zenity --calendar --title=some\\ title --text=some\\ text")
@@ -61,7 +61,7 @@ class ZenityTest {
         }
     }.checkWithUser()
     @Test fun testZenityListFromLs() { // TODO_someday: nice parsing for ls output columns etc..
-        val lines = ls { -all; -long; -humanReadable }.shell().output()
+        val lines = shell(ls { -all; -long; -humanReadable }).output()
         zenity(list) {
             -text("ls output")
             -column("ls output")
