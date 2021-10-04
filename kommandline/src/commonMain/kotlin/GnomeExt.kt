@@ -20,7 +20,7 @@ data class GnomeExt(
 
         /** Displays a short synopsis of the available commands or provides detailed help on a specific command. */
         data class help(val cmdname: String? = null): Cmd("help") {
-            override val str get() = cmdname?.let { listOf(name, it) } ?: listOf(name)
+            override val str get() = listOf(name) plusIfNotNull cmdname
         }
         /** Prints the program version. */
         object version: Cmd("version")
