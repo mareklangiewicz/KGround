@@ -44,6 +44,7 @@ class KommandTest {
         kommand.checkWithUser("vim -g --servername DDDD .")
     }
     @Test fun testMkTemp() = mktemp().checkWithUser()
+    @Test fun testWhich() = which { +"vim" }.checkWithUser()
     @Test fun testCreateTempFile() = println(SYS.createTempFile())
     @Test fun testBash() {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
@@ -54,7 +55,7 @@ class KommandTest {
 
     @Test fun testBashGetExports() {
         SYS.bashGetExports().forEach { println(it) }
-        // TODO NOW kommands: idea; ideap; mktemp; which; tests/demos for it; a way to put any kommand output (or anything) to clipboard; and also to open it in idea (scratch? tmp file?)
+        // TODO NOW kommands: idea; ideap; tests/demos for it; a way to put any kommand output (or anything) to clipboard; and also to open it in idea (scratch? tmp file?)
         //  test for use case: automatic save bash exports to temp file and open in ideap..
     }
 }
