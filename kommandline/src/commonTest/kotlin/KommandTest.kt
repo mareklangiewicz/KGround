@@ -53,9 +53,16 @@ class KommandTest {
         kommand2.checkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
     }
 
-    @Test fun testBashGetExports() {
+    @Test fun testBashGetExports1() {
         SYS.bashGetExports().forEach { println(it) }
         // TODO NOW kommands: idea; ideap; tests/demos for it; a way to put any kommand output (or anything) to clipboard; and also to open it in idea (scratch? tmp file?)
         //  test for use case: automatic save bash exports to temp file and open in ideap..
+    }
+    @Test fun testBashGetExports2() {
+//        val tmpFile = SYS.createTempFile()
+        val tmpFile = "/home/marek/tmp/tmp.notes"
+        println(tmpFile)
+        SYS.bashGetExportsToFile(tmpFile)
+        // TODO NOW: xdg open tmpFile (kmd openf ?)
     }
 }

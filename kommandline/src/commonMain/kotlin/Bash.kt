@@ -19,6 +19,10 @@ fun Platform.bashGetExports(): Map<String, String> = shell(kommand("export")).ou
     }
 }.toMap()
 
+fun Platform.bashGetExportsToFile(outFile: String) =
+    shell(kommand("export"), outFile = outFile).check(expectedOutput = emptyList())
+
+
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash
 // https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Quoting
 // TODO_maybe: typesafe DSL for composing bash scripts? (similar to URE)

@@ -2,7 +2,19 @@ package pl.mareklangiewicz.kommand
 
 interface Platform {
 
-    fun execStart(kommand: Kommand, dir: String? = null): ExecProcess
+    /**
+     * @param dir working directory for started subprocess - null means inherit from current process
+     * @param inFile - redirect std input from given file - null means do not redirect
+     * @param outFile - redirect std output (std err too) to given file - null means do not redirect
+     */
+    fun execStart(
+        kommand: Kommand,
+        dir: String? = null,
+        inFile: String? = null,
+        outFile: String? = null
+    ): ExecProcess
+    // TODO_later: access to input/output/error streams (when not redirected) with Okio source/sink
+    // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
 
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
@@ -22,7 +34,7 @@ interface Platform {
 }
 
 class FakePlatform: Platform {
-    override fun execStart(kommand: Kommand, dir: String?): ExecProcess {
+    override fun execStart(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
         println("execStart($kommand, $dir)")
         return object : ExecProcess {
             override fun waitFor(): ExecResult {
@@ -35,13 +47,22 @@ class FakePlatform: Platform {
 
 expect class SysPlatform(): Platform
 
-fun Platform.execBlock(kommand: Kommand, dir: String? = null): ExecResult = execStart(kommand, dir).waitFor()
+fun Platform.execBlock(
+    kommand: Kommand,
+    dir: String? = null,
+    inFile: String? = null,
+    outFile: String? = null
+): ExecResult = execStart(kommand, dir, inFile, outFile).waitFor()
 
 /**
  * Execute given command (with optional args) in separate subprocess. Does not wait for it to end.
- * (the command should not expect any input or give any output or error)
  */
-fun Platform.exec(kommand: Kommand, dir: String? = null) = execStart(kommand, dir).unit
+fun Platform.exec(
+    kommand: Kommand,
+    dir: String? = null,
+    inFile: String? = null,
+    outFile: String? = null
+) = execStart(kommand, dir, inFile, outFile).unit
 
 
 /**
@@ -49,10 +70,15 @@ fun Platform.exec(kommand: Kommand, dir: String? = null) = execStart(kommand, di
  * captures all its output (with error output merged in);
  * waits for the subprocess to finish;
  */
-fun Platform.shell(kommand: Kommand, dir: String? = null) = execBlock(bash(kommand), dir)
+fun Platform.shell(
+    kommand: Kommand,
+    dir: String? = null,
+    inFile: String? = null,
+    outFile: String? = null
+) = execBlock(bash(kommand), dir, inFile, outFile)
 
 
-fun interface ExecProcess {
+interface ExecProcess {
     fun waitFor(): ExecResult
 }
 
@@ -66,4 +92,8 @@ fun ExecResult.output(expectedExitValue: Int = 0): List<String> =
     if (exitValue == expectedExitValue) stdOutAndErr
     else throw IllegalStateException("Exit value $exitValue != expected $expectedExitValue.")
 
+fun ExecResult.check(expectedExitValue: Int = 0, expectedOutput: List<String>? = null) {
+    check(exitValue == expectedExitValue)
+    expectedOutput?.let { check(stdOutAndErr == it) }
+}
 

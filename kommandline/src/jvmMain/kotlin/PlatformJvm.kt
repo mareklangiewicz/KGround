@@ -5,18 +5,18 @@ import java.io.File
 actual typealias SysPlatform = JvmPlatform
 
 class JvmPlatform: Platform {
-    override fun execStart(kommand: Kommand, dir: String?): ExecProcess {
-        val process: Process = ProcessBuilder()
-            .command(listOf(kommand.name) + kommand.args)
-            .directory(dir?.let(::File))
-            .redirectErrorStream(true)
-            .start()
-        return ExecProcess {
-            val output = process.inputStream.bufferedReader().use { it.readLines() }
-            val exit = process.waitFor()
-            ExecResult(exit, output)
-        }
-    }
+    override fun execStart(
+        kommand: Kommand,
+        dir: String?,
+        inFile: String?,
+        outFile: String?
+    ): ExecProcess = JvmExecProcess(ProcessBuilder().apply {
+        command(listOf(kommand.name) + kommand.args)
+        directory(dir?.let(::File))
+        redirectErrorStream(true)
+        inFile?.let { redirectInput(File(it)) }
+        outFile?.let { redirectOutput(File(it)) }
+    }.start())
 
     override val isJvm get() = true
     override val isDesktop get() = xdgdesktop.isEmpty()
@@ -27,4 +27,12 @@ class JvmPlatform: Platform {
     override val pathToUserTmp: String? get() = if (isUbuntu) "$pathToUserHome/tmp" else null
 
     private val xdgdesktop by lazy { bashGetExports()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
+}
+
+private class JvmExecProcess(private val process: Process): ExecProcess {
+    override fun waitFor(): ExecResult {
+        val output = process.inputStream.bufferedReader().use { it.readLines() }
+        val exit = process.waitFor()
+        return ExecResult(exit, output)
+    }
 }
