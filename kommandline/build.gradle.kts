@@ -56,6 +56,10 @@ kotlin {
     }
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions { jvmTarget = "16" }
+}
+
 tasks.withType<AbstractTestTask> {
     testLogging {
         showStandardStreams = true
