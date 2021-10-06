@@ -10,7 +10,7 @@ fun gnometerm(kommand: Kommand? = null, init: GnomeTerm.() -> Unit = {}) = Gnome
 fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Unit = {}) =
     NotifySend(summary, body).apply(init)
 
-fun Platform.execInGnomeTermIfUserConfirms(
+fun Platform.startInGnomeTermIfUserConfirms(
     kommand: Kommand,
     confirmation: String = "Run ::${kommand.line()}:: in gnome terminal?",
     insideBash: Boolean = true,
@@ -23,7 +23,7 @@ fun Platform.execInGnomeTermIfUserConfirms(
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
             else -> kommand
         }
-        exec(gnometerm(k), execInDir)
+        start(gnometerm(k), execInDir)
     }
 }
 

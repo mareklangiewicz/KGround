@@ -7,7 +7,7 @@ interface Platform {
      * @param inFile - redirect std input from given file - null means do not redirect
      * @param outFile - redirect std output (std err too) to given file - null means do not redirect
      */
-    fun execStart(
+    fun start(
         kommand: Kommand,
         dir: String? = null,
         inFile: String? = null,
@@ -34,11 +34,11 @@ interface Platform {
 }
 
 class FakePlatform: Platform {
-    override fun execStart(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
+    override fun start(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
         println("execStart($kommand, $dir)")
         return object : ExecProcess {
-            override fun waitFor(): ExecResult {
-                println("waitFor()")
+            override fun await(): ExecResult {
+                println("await()")
                 return ExecResult(0, emptyList())
             }
         }
@@ -46,23 +46,6 @@ class FakePlatform: Platform {
 }
 
 expect class SysPlatform(): Platform
-
-fun Platform.execBlock(
-    kommand: Kommand,
-    dir: String? = null,
-    inFile: String? = null,
-    outFile: String? = null
-): ExecResult = execStart(kommand, dir, inFile, outFile).waitFor()
-
-/**
- * Execute given command (with optional args) in separate subprocess. Does not wait for it to end.
- */
-fun Platform.exec(
-    kommand: Kommand,
-    dir: String? = null,
-    inFile: String? = null,
-    outFile: String? = null
-) = execStart(kommand, dir, inFile, outFile).unit
 
 
 /**
@@ -75,11 +58,11 @@ fun Platform.shell(
     dir: String? = null,
     inFile: String? = null,
     outFile: String? = null
-) = execBlock(bash(kommand), dir, inFile, outFile)
+) = start(bash(kommand), dir, inFile, outFile).await()
 
 
 interface ExecProcess {
-    fun waitFor(): ExecResult
+    fun await(): ExecResult
 }
 
 data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)

@@ -5,7 +5,7 @@ import java.io.File
 actual typealias SysPlatform = JvmPlatform
 
 class JvmPlatform: Platform {
-    override fun execStart(
+    override fun start(
         kommand: Kommand,
         dir: String?,
         inFile: String?,
@@ -30,7 +30,7 @@ class JvmPlatform: Platform {
 }
 
 private class JvmExecProcess(private val process: Process): ExecProcess {
-    override fun waitFor(): ExecResult {
+    override fun await(): ExecResult {
         val output = process.inputStream.bufferedReader().use { it.readLines() }
         val exit = process.waitFor()
         return ExecResult(exit, output)

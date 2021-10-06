@@ -25,7 +25,7 @@ fun ifInteractive(block: () -> Unit) =
 fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
     this.println()
     if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
-    ifInteractive { platform.execInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
+    ifInteractive { platform.startInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
 }
 
 fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
@@ -33,8 +33,8 @@ fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String?
     if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
-        exec(this@checkInIdeap, execInDir, outFile = tmpFile)
-        exec(ideap { +tmpFile })
+        start(this@checkInIdeap, execInDir, outFile = tmpFile).await()
+        start(ideap { +tmpFile }).await()
     } }
 }
 
@@ -77,7 +77,7 @@ class KommandTest {
         val tmpFile = "/home/marek/tmp/tmp.notes"
         println(tmpFile)
         SYS.bashGetExportsToFile(tmpFile)
-        SYS.exec(ideap { +tmpFile })
+        SYS.start(ideap { +tmpFile })
     }
     @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(10); -col(3) }.checkWithUser()
     @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.checkWithUser()

@@ -5,5 +5,5 @@ import pl.mareklangiewicz.kommand.Ls.Option.long
 
 println("blaaa")
 
-Platform.SYS.exec(gnometerm(bash(gnomeext(list), pause = true)))
-Platform.SYS.exec(gnometerm(bash(ls { -long; -all }, pause = true)))
+Platform.SYS.start(gnometerm(bash(gnomeext(list), pause = true)))
+Platform.SYS.start(gnometerm(bash(ls { -long; -all }, pause = true)))

@@ -11,7 +11,7 @@ import kotlin.test.Test
 
 class ZenityTest {
     @Test fun testZenityEntryCheck() = zenity(entry) { -text("some question") }.checkWithUser()
-    @Test fun testZenityEntryStart() = ifInteractive { SYS.exec(zenity(entry) { -entrytext("suggested text") }) }
+    @Test fun testZenityEntryStart() = ifInteractive { SYS.start(zenity(entry) { -entrytext("suggested text") }) }
 
     @Test fun testZenityCalendar() = zenity(calendar) { -title("some title"); -text("some text") }
         .checkWithUser("zenity --calendar --title=some\\ title --text=some\\ text")
