@@ -3,6 +3,9 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.kommand.Adb.Command.devices
 import pl.mareklangiewicz.kommand.Adb.Option
 import pl.mareklangiewicz.kommand.Adb.Option.usb
+import pl.mareklangiewicz.kommand.Idea.Cmd.diff
+import pl.mareklangiewicz.kommand.Idea.Option.col
+import pl.mareklangiewicz.kommand.Idea.Option.ln
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
@@ -25,6 +28,16 @@ fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String
     ifInteractive { platform.execInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
 }
 
+fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
+    this.println()
+    if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
+    ifInteractive { platform.run {
+        val tmpFile = "$pathToUserTmp/tmp.notes"
+        exec(this@checkInIdeap, execInDir, outFile = tmpFile)
+        exec(ideap { +tmpFile })
+    } }
+}
+
 
 class KommandTest {
     @Test fun testBashQuoteMetaChars() {
@@ -34,8 +47,9 @@ class KommandTest {
         println(out)
         assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
     }
-    @Test fun testLs() = ls { -all; -author; -long; -sort(TIME); +".."; +"/usr" }
+    @Test fun testLs1() = ls { -all; -author; -long; -sort(TIME); +".."; +"/usr" }
         .checkWithUser("ls -a --author -l --sort=time .. /usr")
+    @Test fun testLs2() = ls { -all; -author; -long; -humanReadable; +"/home/marek" }.checkInIdeap()
     @Test fun testAdb() = adb(devices) { -Option.all; -usb }
         .checkWithUser("adb -a -d devices")
     @Test fun testVim() {
@@ -63,6 +77,8 @@ class KommandTest {
         val tmpFile = "/home/marek/tmp/tmp.notes"
         println(tmpFile)
         SYS.bashGetExportsToFile(tmpFile)
-        // TODO NOW: xdg open tmpFile (kmd openf ?)
+        SYS.exec(ideap { +tmpFile })
     }
+    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(10); -col(3) }.checkWithUser()
+    @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.checkWithUser()
 }
