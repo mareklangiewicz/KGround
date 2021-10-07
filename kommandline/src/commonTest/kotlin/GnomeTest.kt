@@ -15,9 +15,6 @@ class GnomeTest {
     @Test fun testGnomeTerminal() = gnometerm(kommand("vim")) { -verbose; -title("strange terminal title") }
         .checkWithUser("gnome-terminal --verbose --title=strange\\ terminal\\ title -- vim")
 
-    @Test fun testGnomeMagic() = kommand("dbus-run-session", "--", "gnome-shell", "--nested", "--wayland")
-        .checkWithUser("dbus-run-session -- gnome-shell --nested --wayland")
-
     @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
         .checkWithUser("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext")
 
