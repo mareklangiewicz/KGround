@@ -1,13 +1,15 @@
 @file:Suppress("unused", "ClassName")
 
-package pl.mareklangiewicz.kommand.dbus
+package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.Kommand
-import pl.mareklangiewicz.kommand.dbus.GnomeShell.Option
+import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option
 
+/**[gnome-shell ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-shell.1.html) */
 fun gnomeshell(vararg options: Option, init: GnomeShell.() -> Unit = {}) =
     GnomeShell(options.toMutableList()).apply(init)
 
+/**[gnome-shell ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-shell.1.html) */
 data class GnomeShell(
     val options: MutableList<Option> = mutableListOf()
 ) : Kommand {

@@ -4,10 +4,10 @@ package pl.mareklangiewicz.kommand.dbus
 
 import pl.mareklangiewicz.kommand.Kommand
 
-/** https://dbus.freedesktop.org/doc/dbus-run-session.1.html */
+/** [dbus-run-session freedesktop man](https://dbus.freedesktop.org/doc/dbus-run-session.1.html) */
 fun dbusrunsession(program: Kommand? = null, init: DBusRunSession.() -> Unit = {}) = DBusRunSession(program).apply(init)
 
-/** https://dbus.freedesktop.org/doc/dbus-run-session.1.html */
+/** [dbus-run-session freedesktop man](https://dbus.freedesktop.org/doc/dbus-run-session.1.html) */
 data class DBusRunSession(
     var kommand: Kommand? = null,
     val options: MutableList<Option> = mutableListOf()

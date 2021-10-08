@@ -1,11 +1,14 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.gnome
 
-import pl.mareklangiewicz.kommand.GnomeApp.Cmd.action
-import pl.mareklangiewicz.kommand.GnomeApp.Cmd.help
-import pl.mareklangiewicz.kommand.GnomeApp.Cmd.launch
-import pl.mareklangiewicz.kommand.GnomeApp.Cmd.listactions
-import pl.mareklangiewicz.kommand.GnomeApp.Cmd.listapps
+import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.action
+import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.help
+import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.launch
+import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listactions
+import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listapps
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
+import pl.mareklangiewicz.kommand.checkWithUser
+import pl.mareklangiewicz.kommand.output
+import pl.mareklangiewicz.kommand.shell
 import kotlin.test.Test
 
 

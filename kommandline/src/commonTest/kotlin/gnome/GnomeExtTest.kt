@@ -1,10 +1,11 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.gnome
 
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.disable
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.enable
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.list
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.prefs
-import pl.mareklangiewicz.kommand.GnomeExt.Option.disabled
+import pl.mareklangiewicz.kommand.checkWithUser
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.disable
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.enable
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.list
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.prefs
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Option.disabled
 import kotlin.test.Test
 
 

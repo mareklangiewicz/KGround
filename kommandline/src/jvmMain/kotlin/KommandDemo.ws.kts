@@ -1,7 +1,9 @@
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.list
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.list
 import pl.mareklangiewicz.kommand.Ls.Option.all
 import pl.mareklangiewicz.kommand.Ls.Option.long
+import pl.mareklangiewicz.kommand.gnome.gnomeext
+import pl.mareklangiewicz.kommand.gnome.gnometerm
 
 println("blaaa")
 

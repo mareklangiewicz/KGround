@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.gui
 import pl.mareklangiewicz.kommand.Vim.Option.servername
+import pl.mareklangiewicz.kommand.gnome.startInGnomeTermIfUserConfirms
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

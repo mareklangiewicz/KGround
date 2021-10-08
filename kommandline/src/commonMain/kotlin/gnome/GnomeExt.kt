@@ -1,13 +1,17 @@
 @file:Suppress("unused", "ClassName")
 
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.gnome
 
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.help
-import pl.mareklangiewicz.kommand.GnomeExt.Cmd.install
+import pl.mareklangiewicz.kommand.Kommand
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.help
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.install
+import pl.mareklangiewicz.kommand.plusIfNotNull
 
+/** [gnome-extensions ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-extensions.1.html) */
 fun gnomeext(cmd: Cmd, init: GnomeExt.() -> Unit = {}) = GnomeExt(cmd).apply(init)
 
+/** [gnome-extensions ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-extensions.1.html) */
 data class GnomeExt(
     var cmd: Cmd = help(),
     val options: MutableList<Option> = mutableListOf()
