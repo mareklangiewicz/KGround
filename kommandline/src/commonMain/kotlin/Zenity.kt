@@ -5,11 +5,18 @@ import pl.mareklangiewicz.kommand.Zenity.Option.*
 
 fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
 
-fun Platform.zenityAskIf(question: String, atitle: String? = null): Boolean = shell(zenity(DialogType.question) {
+fun Platform.zenityAskIf(question: String, atitle: String? = null): Boolean = start(zenity(DialogType.question) {
     -text(question)
     -nowrap
     atitle?.let { -title(it) }
-}).exitValue == 0
+}).await().exitValue == 0
+
+fun Platform.zenityAskForEntry(question: String, atitle: String? = null, suggested: String? = null): String =
+    start(zenity(DialogType.entry) {
+        -text(question)
+        atitle?.let { -title(it) }
+        suggested?.let { -entrytext(it) }
+    }).await().output().single()
 
 
 /*
