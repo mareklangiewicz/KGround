@@ -11,16 +11,17 @@ fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) =
 
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
-fun Platform.bashGetExports(): Map<String, String> = shell(kommand("export")).output().map {
-    Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(it)!!.run {
-        check(range == it.indices)
+fun Platform.bashGetExports(): Map<String, String> = start(bash("export")).await().unwrap().associate { line ->
+    val match = Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line)!!
+    match.run {
+        check(range == line.indices)
         check(groups.size == 3)
         groups[1]!!.value to groups[2]!!.value
     }
-}.toMap()
+}
 
 fun Platform.bashGetExportsToFile(outFile: String) =
-    shell(kommand("export"), outFile = outFile).check(expectedOutput = emptyList())
+    start(bash("export"), outFile = outFile).await().check(expectedOutput = emptyList())
 
 
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash

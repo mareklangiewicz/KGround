@@ -10,7 +10,7 @@ import pl.mareklangiewicz.kommand.ideap
 import pl.mareklangiewicz.kommand.ifInteractive
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.man
-import pl.mareklangiewicz.kommand.output
+import pl.mareklangiewicz.kommand.unwrap
 import pl.mareklangiewicz.kommand.vim
 import pl.mareklangiewicz.kommand.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenityAskIf
@@ -49,5 +49,5 @@ class Langara {
 private fun idemo(platform: Platform = SYS, block: Platform.() -> Unit) = ifInteractive { platform.block() }
 private fun Platform.askIf(question: String) = zenityAskIf(question)
 private fun Platform.askEntry(question: String, suggested: String? = null) = zenityAskForEntry(question, suggested = suggested)
-private fun Platform.run(kommand: Kommand) = start(kommand).await().output()
+private fun Platform.run(kommand: Kommand) = start(kommand).await().unwrap()
 private fun Platform.runInTerm(kommand: Kommand) = run(gnometerm(kommand))

@@ -16,7 +16,7 @@ fun Platform.zenityAskForEntry(question: String, atitle: String? = null, suggest
         -text(question)
         atitle?.let { -title(it) }
         suggested?.let { -entrytext(it) }
-    }).await().output().single()
+    }).await().unwrap().single()
 
 
 /*
