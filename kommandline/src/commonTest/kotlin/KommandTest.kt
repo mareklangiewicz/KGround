@@ -8,6 +8,7 @@ import pl.mareklangiewicz.kommand.Idea.Option.col
 import pl.mareklangiewicz.kommand.Idea.Option.ln
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
+import pl.mareklangiewicz.kommand.Man.Section.systemcall
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.gui
 import pl.mareklangiewicz.kommand.Vim.Option.servername
@@ -51,6 +52,15 @@ class KommandTest {
     @Test fun testLs1() = ls { -all; -author; -long; -sort(TIME); +".."; +"/usr" }
         .checkWithUser("ls -a --author -l --sort=time .. /usr")
     @Test fun testLs2() = ls { -all; -author; -long; -humanReadable; +"/home/marek" }.checkInIdeap()
+
+    @Test fun testManMan() = man { +"man" }.checkWithUser()
+    @Test fun testManVim() = man { +"vim" }.checkWithUser()
+    @Test fun testManOpenAll() = man { -Man.Option.all; +"open" }.checkWithUser()
+    @Test fun testManOpen2() = man(2) { +"open" }.checkWithUser()
+    @Test fun testManOpenSys() = man(systemcall) { +"open" }.checkWithUser()
+    @Test fun testManApropos() = man { -Man.Option.apropos; +"package" }.checkWithUser()
+    @Test fun testManWhatis() = man { -Man.Option.whatis; +"which" }.checkWithUser()
+
     @Test fun testAdb() = adb(devices) { -Option.all; -usb }
         .checkWithUser("adb -a -d devices")
     @Test fun testVim() {
