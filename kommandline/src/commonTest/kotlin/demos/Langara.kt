@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.ifInteractive
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.man
 import pl.mareklangiewicz.kommand.output
+import pl.mareklangiewicz.kommand.vim
 import pl.mareklangiewicz.kommand.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenityAskIf
 import kotlin.test.Test
@@ -21,7 +22,7 @@ class Langara {
 
     @Test fun demo_htop() = idemo { runInTerm(kommand("htop")) }
 
-    @Test fun demo_ps() = idemo { run(bash("ps -e | grep " + askEntry("find process"))) }
+    @Test fun demo_ps() = idemo { runInTerm(bash("ps -e | grep " + askEntry("find process"), pause = true)) }
 
     @Test fun demo_man() = idemo { runInTerm(man { +askEntry("manual page for") }) }
 
@@ -37,6 +38,11 @@ class Langara {
     @Test fun demo_xclip() = idemo {
         run(bash("xclip -o > $tmpFile")) // FIXME_later: do it with kotlin instead of bash script
         run(ideap { +tmpFile })
+    }
+
+    @Test fun experiment() = idemo {
+        val ideaEnabled = run(bash("ps -e")).any { it.contains("idea.sh") }
+        if (ideaEnabled) run(ideap { +tmpFile }) else run(vim(tmpFile))
     }
 }
 
