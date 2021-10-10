@@ -6,6 +6,7 @@ import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Idea.Cmd.diff
 import pl.mareklangiewicz.kommand.Idea.Option.col
 import pl.mareklangiewicz.kommand.Idea.Option.ln
+import pl.mareklangiewicz.kommand.Idea.Option.wait
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.Man.Section.systemcall
@@ -78,6 +79,6 @@ class KommandTest {
         kommand2.checkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
     }
     @Test fun testBashGetExports() = SYS.bashGetExports().forEach { println(it) }
-    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(10); -col(3) }.checkWithUser()
+    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.checkWithUser()
     @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.checkWithUser()
 }

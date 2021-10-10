@@ -31,10 +31,8 @@ data class Idea(
         object dontReopenProjects : Option("nosplash")
         object disableNonBundledPlugins : Option("disableNonBundledPlugins")
         object wait : Option("--wait")
-            // FIXME: in other place they say it's: "-w" https://www.jetbrains.com/help/idea/2021.3/lightedit-mode.html#lightedit_open_file_modes
-
         data class ln(val l: Int) : Option("--line", l.toString())
-        data class col(val c: Int) : Option("--column", c.toString()) // FIXME: is it still available in eap?? (official idea help webpage versions are confusing)
+        data class col(val c: Int) : Option("--column", c.toString())
 
         // options only for Cmd.format:
         object formathelp : Option("-h")
