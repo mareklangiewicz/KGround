@@ -16,6 +16,9 @@ interface Platform {
     // TODO_later: access to input/output/error streams (when not redirected) with Okio source/sink
     // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
 
+    operator fun Kommand.invoke(dir: String? = null, inFile: String? = null, outFile: String? = null) =
+        start(this, dir, inFile, outFile).await().unwrap()
+
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
     val isUbuntu: Boolean get() = false
@@ -57,7 +60,7 @@ interface ExecProcess {
 data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
 
 /**
- * Returns the output but ensures the exit value was 0 first
+ * Returns the output but ensures the exit value was as expected (0 by default) first
  * @throws IllegalStateException if exit value is not equal to expectedExitValue
  */
 fun ExecResult.unwrap(expectedExitValue: Int = 0): List<String> =
@@ -65,7 +68,7 @@ fun ExecResult.unwrap(expectedExitValue: Int = 0): List<String> =
     else throw IllegalStateException("Exit value $exitValue is not equal to expected $expectedExitValue.")
 
 fun ExecResult.check(expectedExitValue: Int = 0, expectedOutput: List<String>? = null) {
-    check(exitValue == expectedExitValue)
-    expectedOutput?.let { check(stdOutAndErr == it) }
+    val actualOutput = unwrap(expectedExitValue) // makes sure we first check exit value
+    check(expectedOutput == null || expectedOutput == actualOutput)
 }
 

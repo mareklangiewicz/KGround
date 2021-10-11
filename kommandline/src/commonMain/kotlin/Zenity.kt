@@ -12,11 +12,11 @@ fun Platform.zenityAskIf(question: String, atitle: String? = null): Boolean = st
 }).await().exitValue == 0
 
 fun Platform.zenityAskForEntry(question: String, atitle: String? = null, suggested: String? = null): String =
-    start(zenity(DialogType.entry) {
+    zenity(DialogType.entry) {
         -text(question)
         atitle?.let { -title(it) }
         suggested?.let { -entrytext(it) }
-    }).await().unwrap().single()
+    }().single()
 
 
 /*

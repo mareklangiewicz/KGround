@@ -11,7 +11,7 @@ fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) =
 
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
-fun Platform.bashGetExports(): Map<String, String> = start(bash("export")).await().unwrap().associate { line ->
+fun Platform.bashGetExports(): Map<String, String> = bash("export")().associate { line ->
     val match = Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line)!!
     match.run {
         check(range == line.indices)

@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand
 
 fun mktemp(template: String? = null, init: MkTemp.() -> Unit = {}) = MkTemp(template).apply(init)
 fun Platform.createTempFile(prefix: String = "tmp.", suffix: String = ".tmp") =
-    start(mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}")).await().unwrap().single()
+    mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}")().single()
 
 data class MkTemp(
     var template: String? = null,
