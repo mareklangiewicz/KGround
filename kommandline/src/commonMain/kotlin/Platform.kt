@@ -38,7 +38,7 @@ interface Platform {
 
 class FakePlatform: Platform {
     override fun start(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
-        println("execStart($kommand, $dir)")
+        println("start($kommand, $dir)")
         return object : ExecProcess {
             override fun await(): ExecResult {
                 println("await()")
