@@ -1,11 +1,13 @@
 package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.checkWithUser
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.create
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.disable
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.enable
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.list
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.prefs
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Option.disabled
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Option.interactive
 import kotlin.test.Test
 
 
@@ -25,4 +27,7 @@ class GnomeExtTest {
 
     @Test fun testGnomeExtDisable() = gnomeext(disable("mygnomeext@mareklangiewicz.pl"))
         .checkWithUser("gnome-extensions disable mygnomeext@mareklangiewicz.pl")
+
+    @Test fun testGnomeExtCreateInteractive() = gnomeext(create) { -interactive }
+        .checkWithUser("gnome-extensions create --interactive")
 }
