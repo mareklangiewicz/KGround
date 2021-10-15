@@ -6,40 +6,14 @@ import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Idea.Cmd.diff
 import pl.mareklangiewicz.kommand.Idea.Option.col
 import pl.mareklangiewicz.kommand.Idea.Option.ln
-import pl.mareklangiewicz.kommand.Idea.Option.wait
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.Man.Section.systemcall
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.gui
 import pl.mareklangiewicz.kommand.Vim.Option.servername
-import pl.mareklangiewicz.kommand.gnome.startInGnomeTermIfUserConfirms
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-// TODO_someday: intellij plugin with @param UI similar to colab notebooks
-//private const val INTERACTIVE_TESTS_ENABLED = true
-//private const val INTERACTIVE_TESTS_ENABLED = false
-private val INTERACTIVE_TESTS_ENABLED = SYS.isGnome
-
-fun ifInteractive(block: () -> Unit) =
-    if (INTERACTIVE_TESTS_ENABLED) block() else println("Interactive tests are disabled.")
-
-fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
-    this.println()
-    if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
-    ifInteractive { platform.startInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
-}
-
-fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
-    this.println()
-    if (expectedKommandLine != null) assertEquals(expectedKommandLine, line())
-    ifInteractive { platform.run {
-        val tmpFile = "$pathToUserTmp/tmp.notes"
-        start(this@checkInIdeap, execInDir, outFile = tmpFile).await()
-        start(ideap { +tmpFile }).await()
-    } }
-}
 
 
 class KommandTest {
