@@ -44,6 +44,7 @@ class FakePlatform: Platform {
                 println("await()")
                 return ExecResult(0, emptyList())
             }
+            override fun cancel(force: Boolean) = println("cancel($force)")
         }
     }
 }
@@ -55,6 +56,12 @@ expect class SysPlatform(): Platform
 
 interface ExecProcess {
     fun await(): ExecResult
+
+    /**
+     * Tries to cancel (destroy) the process. May not work immediately
+     * @param force - Hint to do it less politely. Some platforms can ignore the hint.
+     */
+    fun cancel(force: Boolean)
 }
 
 data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)

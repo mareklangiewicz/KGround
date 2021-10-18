@@ -35,4 +35,6 @@ private class JvmExecProcess(private val process: Process): ExecProcess {
         val exit = process.waitFor()
         return ExecResult(exit, output)
     }
+
+    override fun cancel(force: Boolean) { if (force) process.destroyForcibly() else process.destroy() }
 }
