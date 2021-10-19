@@ -3,9 +3,9 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.kommand.Adb.Command.devices
 import pl.mareklangiewicz.kommand.Adb.Option
 import pl.mareklangiewicz.kommand.Adb.Option.usb
-import pl.mareklangiewicz.kommand.Idea.Cmd.diff
-import pl.mareklangiewicz.kommand.Idea.Option.col
-import pl.mareklangiewicz.kommand.Idea.Option.ln
+import pl.mareklangiewicz.kommand.Ide.Cmd.diff
+import pl.mareklangiewicz.kommand.Ide.Option.col
+import pl.mareklangiewicz.kommand.Ide.Option.ln
 import pl.mareklangiewicz.kommand.Ls.Option.*
 import pl.mareklangiewicz.kommand.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.Man.Section.systemcall

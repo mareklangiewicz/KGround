@@ -1,19 +1,23 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.Idea.Cmd
+import pl.mareklangiewicz.kommand.Ide.Cmd
+import pl.mareklangiewicz.kommand.Ide.Type
 
 /** https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html */
-fun idea(cmd: Cmd? = null, init: Idea.() -> Unit = {}) = Idea(cmd, eap = false).apply(init)
-fun ideap(cmd: Cmd? = null, init: Idea.() -> Unit = {}) = Idea(cmd, eap = true).apply(init)
+fun idea(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.idea, cmd).apply(init)
+fun ideap(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.ideap, cmd).apply(init)
+fun studio(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.studio, cmd).apply(init)
 
-data class Idea(
+data class Ide(
+    var type: Type,
     var cmd: Cmd? = null,
     val options: MutableList<Option> = mutableListOf(),
     val stuff: MutableList<String> = mutableListOf(),
-    var eap: Boolean = false
 ): Kommand {
-    override val name get() = if (eap) "ideap" else "idea"
+    override val name get() = type.name
     override val args get() = cmd?.str.orEmpty() + options.flatMap { it.str } + stuff
+
+    enum class Type { idea, ideap, studio }
 
     sealed class Cmd(val name: String, val arg: String? = null) {
 
