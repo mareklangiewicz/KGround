@@ -12,11 +12,12 @@ import pl.mareklangiewicz.kommand.zenityAskIf
 fun Platform.startInGnomeTermIfUserConfirms(
     kommand: Kommand,
     confirmation: String = "Run ::${kommand.line()}:: in gnome terminal?",
+    title: String = kommand.name,
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = insideBash,
     execInDir: String? = null
 ) {
-    if (zenityAskIf(confirmation)) {
+    if (zenityAskIf(confirmation, title)) {
         val k = when {
             insideBash -> bash(kommand, pauseBeforeExit)
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
