@@ -1,2 +1,4 @@
 before_install:
   ./jitpack_before_install.sh
+jdk:
+  openjdk17
