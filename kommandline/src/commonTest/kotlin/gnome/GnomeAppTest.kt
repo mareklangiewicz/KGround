@@ -8,6 +8,7 @@ import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listapps
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.checkWithUser
 import pl.mareklangiewicz.kommand.unwrap
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 
@@ -19,6 +20,7 @@ class GnomeAppTest {
     @Test fun testGnomeAppListGEditActions() = gnomeapp(listactions("org.gnome.gedit"))
         .checkWithUser("gapplication list-actions org.gnome.gedit")
 
+    @Ignore // jitpack
     @Test fun testGnomeAppListAllAppActions() = SYS.run {
         gnomeapp(listapps)().forEach {
             println("Application $it:")

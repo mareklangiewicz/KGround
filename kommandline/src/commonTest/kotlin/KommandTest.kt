@@ -12,6 +12,7 @@ import pl.mareklangiewicz.kommand.Man.Section.systemcall
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.gui
 import pl.mareklangiewicz.kommand.Vim.Option.servername
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -45,6 +46,8 @@ class KommandTest {
     }
     @Test fun testMkTemp() = mktemp().checkWithUser()
     @Test fun testWhich() = which { +"vim" }.checkWithUser()
+
+    @Ignore // jitpack
     @Test fun testCreateTempFile() = println(SYS.createTempFile())
     @Test fun testBash() {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
