@@ -1,4 +1,4 @@
 before_install:
-  ./jitpack_before_install.sh
-jdk:
-  openjdk17
+  - sdk install java 17.0.1-open
+  - sdk use java 17.0.1-open
+  - ./jitpack_before_install.sh

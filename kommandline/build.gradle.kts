@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "pl.mareklangiewicz.kommandline"
-version = "0.0.03"
+version = "0.0.04"
 
 //apply<SourceFunPlugin>()
 //
