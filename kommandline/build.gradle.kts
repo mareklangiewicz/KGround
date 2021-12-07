@@ -2,7 +2,7 @@ import pl.mareklangiewicz.deps.*
 
 plugins {
     kotlin("multiplatform") version "1.5.31"
-    `maven-publish`
+    id("maven-publish")
 }
 repositories {
     mavenCentral()
