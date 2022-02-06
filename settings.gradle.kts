@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import okio.Path.Companion.toOkioPath
-import pl.mareklangiewicz.deps.logSomeEventsToFile
+import pl.mareklangiewicz.deps.*
 
 gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
@@ -15,4 +15,5 @@ plugins {
 
 rootProject.name = "KommandLine"
 
+includeAndSubstituteBuild("../USpek", Deps.uspekx, ":uspekx")
 include(":kommandline")

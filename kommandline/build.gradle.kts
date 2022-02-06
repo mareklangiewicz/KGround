@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version Vers.kotlin
+    kotlin("multiplatform")
     id("maven-publish")
 }
 repositories {
@@ -50,7 +50,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation(Deps.junit5engine)
-                implementation(Deps.uspek)
+                implementation(Deps.uspekx)
             }
         }
     }
