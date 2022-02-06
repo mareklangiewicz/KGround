@@ -2,13 +2,10 @@ plugins {
     kotlin("multiplatform")
     id("maven-publish")
 }
-repositories {
-    mavenCentral()
-    maven(Repos.jitpack)
-}
 
-group = "pl.mareklangiewicz.kommandline"
-version = "0.0.05"
+repositories { defaultRepos() }
+
+defaultGroupAndVer(Deps.kommandLine)
 
 //apply<SourceFunPlugin>()
 //

@@ -15,5 +15,6 @@ plugins {
 
 rootProject.name = "KommandLine"
 
-includeAndSubstituteBuild("../USpek", Deps.uspekx, ":uspekx")
 include(":kommandline")
+
+includeAndSubstituteBuild("../USpek", Deps.uspekx, ":uspekx")
