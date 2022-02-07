@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.Adb.Command.devices
+import pl.mareklangiewicz.kommand.Adb.Command.*
 import pl.mareklangiewicz.kommand.Adb.Option
 import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Ide.Cmd.diff
@@ -49,8 +49,9 @@ class KommandTest {
     @Test fun testManApropos() = man { -Man.Option.apropos; +"package" }.checkWithUser()
     @Test fun testManWhatis() = man { -Man.Option.whatis; +"which" }.checkWithUser()
 
-    @Test fun testAdb() = adb(devices) { -Option.all; -usb }
-        .checkWithUser("adb -a -d devices")
+    @Test fun testAdbDevices() = adb(devices) { -Option.all; -usb }.checkWithUser("adb -a -d devices")
+    @Test fun testAdbShell() = adb(shell).checkWithUser("adb shell")
+
     @Test fun testVim() {
         val kommand = vim(".") { -gui; -servername("DDDD") }
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
