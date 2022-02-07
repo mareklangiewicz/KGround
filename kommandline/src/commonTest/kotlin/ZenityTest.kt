@@ -1,12 +1,12 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.core.Ls.Option.all
-import pl.mareklangiewicz.kommand.core.Ls.Option.humanReadable
-import pl.mareklangiewicz.kommand.core.Ls.Option.long
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.all
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.humanReadable
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.long
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Zenity.DialogType.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
-import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.coreutils.*
 import kotlin.test.Test
 
 

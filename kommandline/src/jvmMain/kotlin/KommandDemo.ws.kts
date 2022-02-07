@@ -1,8 +1,8 @@
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.coreutils.*
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.list
-import pl.mareklangiewicz.kommand.core.Ls.Option.all
-import pl.mareklangiewicz.kommand.core.Ls.Option.long
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.all
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.long
 import pl.mareklangiewicz.kommand.gnome.gnomeext
 import pl.mareklangiewicz.kommand.gnome.gnometerm
 

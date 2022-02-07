@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kommand.core
+package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.*
 

@@ -6,14 +6,15 @@ import pl.mareklangiewicz.kommand.Adb.Option.usb
 import pl.mareklangiewicz.kommand.Ide.Cmd.diff
 import pl.mareklangiewicz.kommand.Ide.Option.col
 import pl.mareklangiewicz.kommand.Ide.Option.ln
-import pl.mareklangiewicz.kommand.core.Ls.Option.*
-import pl.mareklangiewicz.kommand.core.Ls.Option.sortType.*
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.Man.Section.systemcall
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.gui
 import pl.mareklangiewicz.kommand.Vim.Option.servername
-import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.core.MkDir.Option.*
+import pl.mareklangiewicz.kommand.coreutils.*
+import pl.mareklangiewicz.kommand.coreutils.MkDir.Option.*
+import pl.mareklangiewicz.kommand.coreutils.Rm.Option.*
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,6 +34,9 @@ class KommandTest {
 
     @Test fun testMkDir1() = mkdir { -parents; +"/tmp/testMkDir1/blaa/blee" }
         .checkWithUser("mkdir --parents /tmp/testMkDir1/blaa/blee")
+
+    @Test fun testRm1() = rm { -dir; +"/tmp/testMkDir1/blaa/blee" }
+        .checkWithUser("rm --dir /tmp/testMkDir1/blaa/blee")
 
     @Test fun testCat1() = cat { +"/etc/fstab" }.checkInIdeap()
     @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.checkInIdeap()
