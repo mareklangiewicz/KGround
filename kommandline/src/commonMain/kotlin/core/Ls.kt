@@ -1,4 +1,6 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.core
+
+import pl.mareklangiewicz.kommand.*
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
