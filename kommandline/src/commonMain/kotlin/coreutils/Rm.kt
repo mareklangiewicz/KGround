@@ -1,6 +1,9 @@
 package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.coreutils.FileTest.*
+
+fun Platform.rmIfExists(file: String) = if (testIfFile(file, exists)) rm { +file }() else listOf("File not found")
 
 fun rm(init: Rm.() -> Unit = {}) = Rm().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/rm.1.html) */
