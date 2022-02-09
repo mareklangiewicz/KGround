@@ -1,18 +1,10 @@
 package pl.mareklangiewicz.kommand.demos
 
-import pl.mareklangiewicz.kommand.Platform
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
-import pl.mareklangiewicz.kommand.bash
-import pl.mareklangiewicz.kommand.bashGetExportsToFile
-import pl.mareklangiewicz.kommand.gnome.gnometerm
-import pl.mareklangiewicz.kommand.ideap
-import pl.mareklangiewicz.kommand.ifInteractive
-import pl.mareklangiewicz.kommand.kommand
-import pl.mareklangiewicz.kommand.man
-import pl.mareklangiewicz.kommand.vim
-import pl.mareklangiewicz.kommand.zenityAskForEntry
-import pl.mareklangiewicz.kommand.zenityAskIf
-import kotlin.test.Test
+import pl.mareklangiewicz.kommand.gnome.*
+import pl.mareklangiewicz.kommand.konfig.*
+import kotlin.test.*
 
 const val tmpFile = "/home/marek/tmp/tmp.notes"
 
@@ -36,6 +28,26 @@ class Langara {
     @Test fun demo_xclip() = idemo {
         bash("xclip -o > $tmpFile")() // FIXME_later: do it with kotlin instead of bash script
         ideap { +tmpFile }()
+    }
+
+    @Test fun demo_set_konfig_examples() = idemo {
+        val k = konfig("/home/marek/tmp/konfig_examples")
+        println("before adding anything:")
+        k.printAll()
+        k["tmpExampleInteger1"] = 111.toString()
+        k["tmpExampleInteger2"] = 222.toString()
+        k["tmpExampleString1"] = "some text 1"
+        k["tmpExampleString2"] = "some text 2"
+        println("after adding 4 keys:")
+        k.printAll()
+        k["tmpExampleInteger2"] = null
+        k["tmpExampleString2"] = null
+        println("after nulling 2 keys:")
+        k.printAll()
+        k["tmpExampleInteger1"] = null
+        k["tmpExampleString1"] = null
+        println("after nulling other 2 keys:")
+        k.printAll()
     }
 
     @Test fun experiment() = idemo {

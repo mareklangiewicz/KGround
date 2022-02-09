@@ -5,17 +5,25 @@ import java.io.File
 actual typealias SysPlatform = JvmPlatform
 
 class JvmPlatform: Platform {
+
+    private val DEBUG = false
+
     override fun start(
         kommand: Kommand,
         dir: String?,
         inFile: String?,
         outFile: String?
     ): ExecProcess = JvmExecProcess(ProcessBuilder().apply {
-        command(listOf(kommand.name) + kommand.args)
+        val cmdlist = listOf(kommand.name) + kommand.args
+        command(cmdlist)
         directory(dir?.let(::File))
         redirectErrorStream(true)
         inFile?.let { redirectInput(File(it)) }
         outFile?.let { redirectOutput(File(it)) }
+        if (DEBUG) {
+            val cmdline = cmdlist.joinToString(" ")
+            println(cmdline)
+        }
     }.start())
 
     override val isJvm get() = true
