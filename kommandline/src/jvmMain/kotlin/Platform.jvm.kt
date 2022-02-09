@@ -6,7 +6,7 @@ actual typealias SysPlatform = JvmPlatform
 
 class JvmPlatform: Platform {
 
-    private val DEBUG = false
+    private val debug = false
 
     override fun start(
         kommand: Kommand,
@@ -15,15 +15,12 @@ class JvmPlatform: Platform {
         outFile: String?
     ): ExecProcess = JvmExecProcess(ProcessBuilder().apply {
         val cmdlist = listOf(kommand.name) + kommand.args
+        if (debug) println(cmdlist.joinToString(" "))
         command(cmdlist)
         directory(dir?.let(::File))
         redirectErrorStream(true)
         inFile?.let { redirectInput(File(it)) }
         outFile?.let { redirectOutput(File(it)) }
-        if (DEBUG) {
-            val cmdline = cmdlist.joinToString(" ")
-            println(cmdline)
-        }
     }.start())
 
     override val isJvm get() = true
