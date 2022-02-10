@@ -23,4 +23,28 @@
     <DebugAllEnabled>false</DebugAllEnabled>
     <method v="2" />
   </configuration>
+  <configuration default="false" name="Langara.print_all_konfig" type="GradleRunConfiguration" factoryName="Gradle">
+    <ExternalSystemSettings>
+      <option name="executionName" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$/kommandline" />
+      <option name="externalSystemIdString" value="GRADLE" />
+      <option name="scriptParameters" value="" />
+      <option name="taskDescriptions">
+        <list />
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value=":kommandline:cleanJvmTest" />
+          <option value=":kommandline:jvmTest" />
+          <option value="--tests" />
+          <option value="&quot;pl.mareklangiewicz.kommand.demos.Langara.print_all_konfig&quot;" />
+        </list>
+      </option>
+      <option name="vmOptions" />
+    </ExternalSystemSettings>
+    <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <method v="2" />
+  </configuration>
 </component>

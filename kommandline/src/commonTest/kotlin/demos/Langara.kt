@@ -10,6 +10,8 @@ const val tmpFile = "/home/marek/tmp/tmp.notes"
 
 class Langara {
 
+    @Test fun demo_repl() = idemo { LangaraREPL() }
+
     @Test fun demo_htop() = idemo { gnometerm(kommand("htop"))() }
 
     @Test fun demo_ps() = idemo { gnometerm(bash("ps -e | grep " + askEntry("find process"), pause = true))() }
