@@ -1,4 +1,6 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.systemd
+
+import pl.mareklangiewicz.kommand.*
 
 /** [journalctl linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 fun journalctl(init: JournalCtl.() -> Unit = {}) = JournalCtl().apply(init)

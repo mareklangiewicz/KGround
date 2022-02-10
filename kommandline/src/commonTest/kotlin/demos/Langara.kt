@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
 import kotlin.test.*
 
-const val tmpFile = "/home/marek/tmp/tmp.notes"
+const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
 
 class Langara {
 
@@ -23,13 +23,13 @@ class Langara {
     }
 
     @Test fun demo_bash_export() = idemo {
-        bashGetExportsToFile(tmpFile)
-        ideap { +tmpFile }()
+        bashGetExportsToFile(tmpNotesFile)
+        ideap { +tmpNotesFile }()
     }
 
     @Test fun demo_xclip() = idemo {
-        bash("xclip -o > $tmpFile")() // FIXME_later: do it with kotlin instead of bash script
-        ideap { +tmpFile }()
+        bash("xclip -o > $tmpNotesFile")() // FIXME_later: do it with kotlin instead of bash script
+        ideap { +tmpNotesFile }()
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
@@ -66,7 +66,7 @@ class Langara {
 
     @Test fun experiment() = idemo {
         val ideaEnabled = bash("ps -e")().any { it.contains("idea.sh") }
-        if (ideaEnabled) ideap { +tmpFile }() else vim(tmpFile)()
+        if (ideaEnabled) ideap { +tmpNotesFile }() else vim(tmpNotesFile)()
     }
 }
 

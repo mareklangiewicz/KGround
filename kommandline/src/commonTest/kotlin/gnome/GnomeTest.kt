@@ -2,13 +2,12 @@ package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.gnome.GnomeTerm.Option.title
 import pl.mareklangiewicz.kommand.gnome.GnomeTerm.Option.verbose
-import pl.mareklangiewicz.kommand.JournalCtl.Option.cat
-import pl.mareklangiewicz.kommand.JournalCtl.Option.follow
 import pl.mareklangiewicz.kommand.NotifySend.Option.urgency
 import pl.mareklangiewicz.kommand.checkWithUser
-import pl.mareklangiewicz.kommand.journalctl
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.notify
+import pl.mareklangiewicz.kommand.systemd.*
+import pl.mareklangiewicz.kommand.systemd.JournalCtl.Option.*
 import kotlin.test.Test
 
 
