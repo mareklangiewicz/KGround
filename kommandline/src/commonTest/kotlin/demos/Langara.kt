@@ -50,6 +50,8 @@ class Langara {
         k.printAll()
     }
 
+    @Test fun print_all_konfig() = SYS.konfig().printAll()
+
     @Test fun enable_interactive_code() = SYS.konfig().run {
         this["interactive_code"] = "true"
         print("interactive_code")
