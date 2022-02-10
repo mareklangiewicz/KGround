@@ -45,5 +45,5 @@ class KonfigImpl(val dir: String, val platform: Platform = Platform.SYS): Konfig
 
 fun Platform.konfig(dir: String = pathToUserHome!! + "/.config/konfig"): Konfig = KonfigImpl(dir, this)
 
-fun Konfig.printAll() = keys.forEach { println("    konfig[\"$it\"] == \"${this[it]}\"") }
-
+fun Konfig.printAll() = keys.forEach(::print)
+fun Konfig.print(key: String) = println("    konfig[\"$key\"] == \"${this[key]}\"")

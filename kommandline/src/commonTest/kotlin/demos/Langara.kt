@@ -50,6 +50,16 @@ class Langara {
         k.printAll()
     }
 
+    @Test fun enable_interactive_code() = SYS.konfig().run {
+        this["interactive_code"] = "true"
+        print("interactive_code")
+    }
+
+    @Test fun disable_interactive_code() = SYS.konfig().run {
+        this["interactive_code"] = "false"
+        print("interactive_code")
+    }
+
     @Test fun experiment() = idemo {
         val ideaEnabled = bash("ps -e")().any { it.contains("idea.sh") }
         if (ideaEnabled) ideap { +tmpFile }() else vim(tmpFile)()

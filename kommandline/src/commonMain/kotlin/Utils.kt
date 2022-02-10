@@ -1,6 +1,8 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInGnomeTermIfUserConfirms
+import pl.mareklangiewicz.kommand.konfig.*
 
 val Any?.unit get() = Unit
 
@@ -9,13 +11,10 @@ infix fun <T: Any> List<T>.prependIfNotNull(element: T?) = if (element == null) 
 
 fun List<String>.printlns() = forEach(::println)
 
-// TODO_someday: intellij plugin with @param UI similar to colab notebooks
-//private const val INTERACTIVE_CHECKS_ENABLED = true
-//private const val INTERACTIVE_CHECKS_ENABLED = false
-private val INTERACTIVE_CHECKS_ENABLED = Platform.SYS.isGnome
+private val interactive = SYS.konfig()["interactive_code"].toBoolean()
 
 fun ifInteractive(block: () -> Unit) =
-    if (INTERACTIVE_CHECKS_ENABLED) block() else println("Interactive tests are disabled.")
+    if (interactive) block() else println("Interactive code is disabled.")
 
 fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = Platform.SYS) {
     this.println()
