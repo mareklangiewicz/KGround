@@ -2,6 +2,7 @@
 
 import okio.Path.Companion.toOkioPath
 import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.evts.*
 
 gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
@@ -17,4 +18,4 @@ rootProject.name = "KommandLine"
 
 include(":kommandline")
 
-includeAndSubstituteBuild("../USpek", Deps.uspekx, ":uspekx")
+//includeAndSubstituteBuild("../USpek", Deps.uspekx, ":uspekx")

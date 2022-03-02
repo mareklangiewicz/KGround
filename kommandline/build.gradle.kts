@@ -1,5 +1,7 @@
+import pl.mareklangiewicz.defaults.*
+
 plugins {
-    kotlin("multiplatform")
+    kotlin("multiplatform") version Vers.kotlin
     id("maven-publish")
 }
 
