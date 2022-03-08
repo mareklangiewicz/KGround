@@ -1,30 +1,13 @@
 import pl.mareklangiewicz.defaults.*
 
 plugins {
-    kotlin("multiplatform") version Vers.kotlin
+    kotlin("multiplatform") version vers.kotlin
     id("maven-publish")
 }
 
 repositories { defaultRepos() }
 
-defaultGroupAndVer(Deps.kommandLine)
-
-//apply<SourceFunPlugin>()
-//
-//configure<SourceFunExtension> {
-//    +Def("funTask1", "src", "funTempOut") { println(file.absolutePath) }
-//    +Def("funTask2", "gradle", "funTempOut") { println(file.absolutePath) }
-//}
-//
-//tasks.register<SourceRegexTask>("regexExperiment") {
-//    source("regexTempSrc")
-//    outputDir = file("regexTempOut")
-//    match = ".*"
-//    replace = "XXX"
-//    doLast {
-//        println("fjkdslj")
-//    }
-//}
+defaultGroupAndVer(deps.kommandLine)
 
 kotlin {
     jvm()
@@ -41,14 +24,14 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(Deps.uspekx)
+                implementation(deps.uspekx)
             }
         }
         val jvmMain by getting
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation(Deps.junit5engine)
+                implementation(deps.junit5engine)
             }
         }
     }
