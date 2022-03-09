@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.*
 import pl.mareklangiewicz.defaults.*
 
 plugins {
@@ -11,10 +12,7 @@ defaultGroupAndVer(deps.kommandLine)
 
 kotlin {
     jvm()
-//    js {
-////        browser {}
-//        nodejs {}
-//    }
+    jsDefault(withNode = true)
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -47,3 +45,29 @@ tasks.withType<AbstractTestTask> {
         showStackTraces = true
     }
 }
+
+// TODO NOW: injecting (like Andro Build Template)
+// region Kotlin Multi Template
+
+fun KotlinMultiplatformExtension.jsDefault(
+    withBrowser: Boolean = true,
+    withNode: Boolean = false,
+    testWithChrome: Boolean = true,
+    testHeadless: Boolean = true,
+) {
+    js(IR) {
+        if (withBrowser) browser {
+            testTask {
+                useKarma {
+                    when (testWithChrome to testHeadless) {
+                        true to true -> useChromeHeadless()
+                        true to false -> useChrome()
+                    }
+                }
+            }
+        }
+        if (withNode) nodejs()
+    }
+}
+
+// endregion Kotlin Multi Template

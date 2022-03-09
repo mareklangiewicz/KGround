@@ -52,17 +52,20 @@ class Langara {
         k.printAll()
     }
 
-    @Test fun print_all_konfig() = SYS.konfig().printAll()
-
+    @Ignore // Ignored by default, so I can always do "gradle build" without switching interactive code
     @Test fun enable_interactive_code() = SYS.konfig().run {
         this["interactive_code"] = "true"
         print("interactive_code")
     }
 
+    @Ignore // Ignored by default, so I can always do "gradle build" without switching interactive code
     @Test fun disable_interactive_code() = SYS.konfig().run {
         this["interactive_code"] = "false"
         print("interactive_code")
     }
+
+    @Ignore // should me moved from common test
+    @Test fun print_all_konfig() = SYS.konfig().printAll()
 
     @Test fun experiment() = idemo {
         val ideaEnabled = bash("ps -e")().any { it.contains("idea.sh") }

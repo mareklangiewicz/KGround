@@ -16,7 +16,9 @@ interface Kommand {
     val args: List<String>
 }
 
-fun Kommand.line() = (listOf(name) + args.map { bashQuoteMetaChars(it) }).joinToString(" ")
+fun Kommand.line() = lineBash()
+fun Kommand.lineBash() = (listOf(name) + args.map { bashQuoteMetaChars(it) }).joinToString(" ")
+fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
 fun Kommand.println() = println(line())
 
 

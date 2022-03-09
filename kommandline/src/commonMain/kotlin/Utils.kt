@@ -11,7 +11,13 @@ infix fun <T: Any> List<T>.prependIfNotNull(element: T?) = if (element == null) 
 
 fun List<String>.printlns() = forEach(::println)
 
-private val interactive = SYS.konfig()["interactive_code"].toBoolean()
+private val interactive by lazy {
+    if (SYS.isJvm) SYS.konfig()["interactive_code"].toBoolean()
+    else {
+        println("Interactive stuff is only available on jvm platform (for now).")
+        false
+    }
+}
 
 fun ifInteractive(block: () -> Unit) =
     if (interactive) block() else println("Interactive code is disabled.")
