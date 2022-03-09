@@ -52,6 +52,7 @@ class Langara {
         k.printAll()
     }
 
+    @Ignore // Ignored by default so I don't enable interactive code accidentally (gradle build etc)
     @Test fun enable_interactive_code() = SYS.konfig().run {
         this["interactive_code"] = "true"
         print("interactive_code")
