@@ -52,15 +52,12 @@ class Langara {
         k.printAll()
     }
 
-    @Ignore // Ignored by default so I don't enable interactive code accidentally (gradle build etc)
-    @Test fun enable_interactive_code() = SYS.konfig().run {
-        this["interactive_code"] = "true"
-        print("interactive_code")
-    }
-
-    @Test fun disable_interactive_code() = SYS.konfig().run {
-        this["interactive_code"] = "false"
-        print("interactive_code")
+    @Test fun interactive_code_switch() = SYS.run {
+        val enabled = askIf("Should interactive code be enabled?")
+        konfig().run {
+            this["interactive_code"] = enabled.toString()
+            print("interactive_code")
+        }
     }
 
     @Test fun print_all_konfig() = SYS.konfig().printAll()
