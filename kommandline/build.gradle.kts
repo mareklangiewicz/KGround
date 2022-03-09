@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.*
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import pl.mareklangiewicz.defaults.*
 
 plugins {
@@ -35,7 +36,7 @@ kotlin {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions { jvmTarget = "16" }
 }
 

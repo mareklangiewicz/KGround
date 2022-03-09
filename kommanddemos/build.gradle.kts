@@ -1,15 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import pl.mareklangiewicz.defaults.*
 
 plugins {
     kotlin("jvm") version vers.kotlin
 }
 
-group = "pl.mareklangiewicz"
-version = "0.0.01"
-
-repositories {
-    mavenCentral()
-}
+repositories { defaultRepos() }
+defaultGroupAndVer(deps.kommandLine)
 
 dependencies {
     implementation(project(":kommandline"))
