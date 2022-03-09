@@ -4,5 +4,6 @@
 /.idea
 /build
 /kommandline/build
+/kommanddemos/build
 /kommandline/src/commonTest/kotlin/demos/LangaraREPL.kt
 my.gradle.log
