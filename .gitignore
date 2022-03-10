@@ -5,5 +5,5 @@
 /build
 /kommandline/build
 /kommanddemos/build
-/kommandline/src/commonTest/kotlin/demos/LangaraREPL.kt
+/kommanddemos/src/test/kotlin/demos/*REPL.kt
 my.gradle.log
