@@ -6,12 +6,23 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.Cmd.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.Option.*
+import pl.mareklangiewicz.kommand.gnupg.Gpg.Option.pinentryMode.*
 
 fun gpgDecrypt(inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg"), cacheSymKey: Boolean = true) =
     gpg(decrypt) { if (!cacheSymKey) -nosymkeycache; -outputfile(outFile); +inFile }
 
 fun gpgEncryptSym(inFile: String, outFile: String = "$inFile.gpg", cacheSymKey: Boolean = true) =
     gpg(symmetric) { if (!cacheSymKey) -nosymkeycache; -outputfile(outFile); +inFile }
+
+@Suppress("DEPRECATION")
+@Deprecated("Be careful with password in command line - see man gpg")
+fun gpgDecryptPass(password: String, inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg")) =
+    gpg(decrypt) { -passphrase(password); -batch; pinentry(LOOPBACK); -outputfile(outFile); +inFile }
+
+@Suppress("DEPRECATION")
+@Deprecated("Be careful with password in command line - see man gpg")
+fun gpgEncryptPass(password: String, inFile: String, outFile: String = "$inFile.gpg") =
+    gpg(symmetric) { -passphrase(password); -batch; pinentry(LOOPBACK); -outputfile(outFile); +inFile }
 
 private fun String.removeRequiredSuffix(suffix: CharSequence) =
     removeSuffix(suffix).also { require(length == it.length - suffix.length) }
@@ -34,6 +45,17 @@ data class Gpg(
         object version : Option("--version")
         object verbose : Option("--verbose")
         object dryrun : Option("--dry-run")
+        /** Use batch mode.  Never ask, do not allow interactive commands. */
+        object batch : Option("--batch")
+        /** Do not use batch mode. */
+        object nobatch : Option("--no-batch")
+        /** Print key listings delimited by colons. Useful in scripts. */
+        object withcolons : Option("--with-colons")
+        /** Set the pinentry mode to mode. */
+        data class pinentry(val mode: pinentryMode = DEFAULT): Option("--pinentry-mode", mode.toString())
+        enum class pinentryMode { DEFAULT, ASK, CANCEL, ERROR, LOOPBACK;
+            override fun toString() = super.toString().lowercase()
+        }
         /** create ascii armored output */
         object armor : Option("--armor")
         object interactive : Option("--interactive")
@@ -51,6 +73,34 @@ data class Gpg(
         /** use userid to sign or decrypt */
         data class localuser(val userid: String): Option("--local-user", userid)
         data class compresslevel(val level: Int): Option("-z", level.toString())
+        data class statusfile(val file: String): Option("--status-file", file)
+        data class statusfd(val filedescriptor: Int): Option("--status-fd", filedescriptor.toString())
+        data class loggerfile(val file: String): Option("--logger-file", file)
+        data class loggerfd(val filedescriptor: Int): Option("--logger-fd", filedescriptor.toString())
+        data class cipheralgo(val algo: String): Option("--cipher-algo", algo)
+        data class digestalgo(val algo: String): Option("--digest-algo", algo)
+        data class compressalgo(val algo: String): Option("--compress-algo", algo)
+
+        /**
+         * Use  string  as the passphrase. This can only be used if only one passphrase is supplied.
+         * Obviously, this is of very questionable  security  on  a  multi-user  system.
+         * Don't use this option if you can avoid it. Note  that  since Version 2.0
+         * this passphrase is only used if the option --batch has also been given.
+         * Since Version 2.1 the --pinentry-mode also needs to be set to loopback.
+         */
+        @Deprecated("dangerous - see man gpg")
+        data class passphrase(val pass: String): Option("--passphrase", pass)
+
+        /** Read the passphrase from file. Only the first line will be read from file. */
+        @Deprecated("dangerous - see man gpg")
+        data class passphrasefile(val file: String): Option("--passphrase-file", file)
+
+        /** Read the passphrase from file descriptor. Only the first line will  be  read  from file descriptor n. */
+        @Deprecated("dangerous - see man gpg")
+        data class passphrasefd(val filedescriptor: Int): Option("--passphrase-fd", filedescriptor.toString())
+
+        /** Specify how many times gpg will request a new passphrase be repeated. */
+        data class passphraserepeat(val repeat: Int = 1): Option("--passphrase-repeat", repeat.toString())
     }
 
     enum class Cmd(val str: String) {

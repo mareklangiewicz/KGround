@@ -22,13 +22,13 @@ private val interactive by lazy {
 fun ifInteractive(block: () -> Unit) =
     if (interactive) block() else println("Interactive code is disabled.")
 
-fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = Platform.SYS) {
+fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
     this.println()
     if (expectedKommandLine != null) check(expectedKommandLine == line())
     ifInteractive { platform.startInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
 }
 
-fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = Platform.SYS) {
+fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String? = null, platform: Platform = SYS) {
     this.println()
     if (expectedKommandLine != null) check(expectedKommandLine == line())
     ifInteractive { platform.run {
