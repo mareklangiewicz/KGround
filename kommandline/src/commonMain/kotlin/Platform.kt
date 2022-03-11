@@ -26,6 +26,7 @@ interface Platform {
 
     val pathToUserHome get (): String? = null
     val pathToUserTmp get (): String? = null
+    val pathToSystemTmp get (): String? = null
 
     // TODO_someday: access to input/output streams wrapped in okio Source/Sink
     // (but what about platforms running kommands through ssh or adb?)

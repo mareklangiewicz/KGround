@@ -30,7 +30,7 @@ class JvmPlatform: Platform {
 
     override val pathToUserHome: String? get() = System.getProperty("user.home")
     override val pathToUserTmp: String? get() = if (isUbuntu) "$pathToUserHome/tmp" else null
-
+    override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
     private val xdgdesktop by lazy { bashGetExports()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
 }
 

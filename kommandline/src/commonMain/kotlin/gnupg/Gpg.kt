@@ -4,6 +4,17 @@ package pl.mareklangiewicz.kommand.gnupg
 
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.*
+import pl.mareklangiewicz.kommand.gnupg.Gpg.Cmd.*
+import pl.mareklangiewicz.kommand.gnupg.Gpg.Option.*
+
+fun gpgDecrypt(inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg"), cacheSymKey: Boolean = true) =
+    gpg(decrypt) { if (!cacheSymKey) -nosymkeycache; -outputfile(outFile); +inFile }
+
+fun gpgEncryptSym(inFile: String, outFile: String = "$inFile.gpg", cacheSymKey: Boolean = true) =
+    gpg(symmetric) { if (!cacheSymKey) -nosymkeycache; -outputfile(outFile); +inFile }
+
+private fun String.removeRequiredSuffix(suffix: CharSequence) =
+    removeSuffix(suffix).also { require(length == it.length - suffix.length) }
 
 fun gpg(cmd: Cmd? = null, init: Gpg.() -> Unit = {}) = Gpg(cmd).apply(init)
 
@@ -30,6 +41,8 @@ data class Gpg(
         object textmode : Option("--textmode")
         /** use strict OpenPGP behavior */
         object openpgp : Option("--openpgp")
+        /** Disable the passphrase cache used for symmetrical en- and decryption. */
+        object nosymkeycache : Option("--no-symkey-cache")
         data class homedir(val dir: String): Option("--homedir", dir)
         data class optionsfile(val file: String): Option("--options", file)
         data class outputfile(val file: String): Option("--output", file)

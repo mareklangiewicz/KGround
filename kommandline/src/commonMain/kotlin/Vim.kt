@@ -1,6 +1,9 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kommand.Vim.Option.*
+
 fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)
+fun gvim(vararg files: String, init: Vim.() -> Unit = {}) = vim(*files) { -gui; init() }
 
 data class Vim(
     val files: MutableList<String> = mutableListOf(),
