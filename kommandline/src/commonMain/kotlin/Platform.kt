@@ -15,6 +15,7 @@ interface Platform {
     ): ExecProcess
     // TODO_later: access to input/output/error streams (when not redirected) with Okio source/sink
     // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
+    // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
     operator fun Kommand.invoke(dir: String? = null, inFile: String? = null, outFile: String? = null) =
         start(this, dir, inFile, outFile).await().unwrap()
@@ -57,6 +58,7 @@ expect class SysPlatform(): Platform
 
 interface ExecProcess {
     fun await(): ExecResult
+    // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
     /**
      * Tries to cancel (destroy) the process. May not work immediately
