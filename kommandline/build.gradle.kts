@@ -5,6 +5,7 @@ import pl.mareklangiewicz.defaults.*
 plugins {
     kotlin("multiplatform") version vers.kotlin
     id("maven-publish")
+    id("signing")
 }
 
 repositories { defaultRepos() }
