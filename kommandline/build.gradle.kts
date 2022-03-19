@@ -9,7 +9,7 @@ plugins {
 
 repositories { defaultRepos() }
 
-defaultGroupAndVer(deps.kommandLine)
+defaultGroupAndVerAndDescription(libs.KommandLine)
 
 kotlin {
     jvm()
@@ -46,6 +46,10 @@ tasks.withType<AbstractTestTask> {
         showStackTraces = true
     }
 }
+
+defaultPublishing(libs.KommandLine)
+
+defaultSigning()
 
 // TODO NOW: injecting (like Andro Build Template)
 // region Kotlin Multi Template

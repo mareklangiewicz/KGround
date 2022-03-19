@@ -6,7 +6,7 @@ plugins {
 }
 
 repositories { defaultRepos() }
-defaultGroupAndVer(deps.kommandLine)
+defaultGroupAndVerAndDescription(libs.KommandLine)
 
 dependencies {
     implementation(project(":kommandline"))
