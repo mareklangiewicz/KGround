@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import pl.mareklangiewicz.defaults.*
 
 plugins {
-    kotlin("jvm") version vers.kotlin
+    kotlin("jvm")
 }
 
 repositories { defaultRepos() }

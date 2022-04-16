@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import pl.mareklangiewicz.defaults.*
 
 plugins {
-    kotlin("multiplatform") version vers.kotlin
+    kotlin("multiplatform")
     id("maven-publish")
     id("signing")
 }
