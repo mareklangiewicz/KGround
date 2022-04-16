@@ -1,10 +1,10 @@
 package pl.mareklangiewicz.kommand.demos
 
+import org.junit.jupiter.api.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
-import kotlin.test.*
 
 const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
 

@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
+import pl.mareklangiewicz.deps.*
 
 plugins {
     kotlin("multiplatform")
@@ -8,52 +9,102 @@ plugins {
     id("signing")
 }
 
-repositories { defaultRepos() }
+defaultBuildTemplateForMppLib(libs.KommandLine) {
+    implementation(kotlin("script-runtime"))
+}
 
-defaultGroupAndVerAndDescription(libs.KommandLine)
+kotlin { js(IR) { nodejs() } }
 
-kotlin {
-    jvm()
-    jsDefault(withNode = true)
+// region [Kotlin Module Build Template]
+
+fun TaskCollection<Task>.defaultKotlinCompileOptions(
+    jvmTargetVer: String = vers.defaultJvm,
+    requiresOptIn: Boolean = true
+) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = jvmTargetVer
+        if (requiresOptIn) freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+    }
+}
+
+// endregion [Kotlin Module Build Template]
+
+// region [MPP Module Build Template]
+
+/** Only for very standard small libs. In most cases it's better to not use this function. */
+fun Project.defaultBuildTemplateForMppLib(
+    details: LibDetails = libs.Unknown,
+    withJvm: Boolean = true,
+    withJs: Boolean = true,
+    withNativeLinux64: Boolean = false,
+    withKotlinxHtml: Boolean = false,
+    withComposeJbDevRepo: Boolean = false,
+    withTestJUnit5: Boolean = true,
+    withTestUSpekX: Boolean = true,
+    addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {}
+) {
+    repositories { defaultRepos(withKotlinxHtml = withKotlinxHtml, withComposeJbDev = withComposeJbDevRepo) }
+    defaultGroupAndVerAndDescription(details)
+    kotlin { allDefault(
+        withJvm,
+        withJs,
+        withNativeLinux64,
+        withKotlinxHtml,
+        withTestJUnit5,
+        withTestUSpekX,
+        addCommonMainDependencies
+    ) }
+    tasks.defaultKotlinCompileOptions()
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    if (plugins.hasPlugin("maven-publish")) {
+        defaultPublishing(details)
+        if (plugins.hasPlugin("signing")) defaultSigning()
+        else println("MPP Module ${name}: signing disabled")
+    }
+    else println("MPP Module ${name}: publishing (and signing) disabled")
+}
+
+/** Only for very standard small libs. In most cases it's better to not use this function. */
+@Suppress("UNUSED_VARIABLE")
+fun KotlinMultiplatformExtension.allDefault(
+    withJvm: Boolean = true,
+    withJs: Boolean = true,
+    withNativeLinux64: Boolean = false,
+    withKotlinxHtml: Boolean = false,
+    withTestJUnit5: Boolean = true,
+    withTestUSpekX: Boolean = true,
+    addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {}
+) {
+    if (withJvm) jvm()
+    if (withJs) jsDefault()
+    if (withNativeLinux64) linuxX64()
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(kotlin("script-runtime"))
+                if (withKotlinxHtml) implementation(deps.kotlinxHtml)
+                addCommonMainDependencies()
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(deps.uspekx)
+                if (withTestUSpekX) implementation(deps.uspekx)
             }
         }
-        val jvmMain by getting
-        val jvmTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit"))
-                implementation(deps.junit5engine)
+        if (withJvm) {
+            val jvmTest by getting {
+                dependencies {
+                    if (withTestJUnit5) implementation(deps.junit5engine)
+                }
             }
+        }
+        if (withNativeLinux64) {
+            val linuxX64Main by getting
+            val linuxX64Test by getting
         }
     }
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions { jvmTarget = "16" }
-}
-
-tasks.withType<AbstractTestTask> {
-    testLogging {
-        showStandardStreams = true
-        showStackTraces = true
-    }
-}
-
-defaultPublishing(libs.KommandLine)
-
-defaultSigning()
-
-// TODO NOW: injecting (like Andro Build Template)
-// region Kotlin Multi Template
 
 fun KotlinMultiplatformExtension.jsDefault(
     withBrowser: Boolean = true,
@@ -76,4 +127,4 @@ fun KotlinMultiplatformExtension.jsDefault(
     }
 }
 
-// endregion Kotlin Multi Template
+// endregion [MPP Module Build Template]

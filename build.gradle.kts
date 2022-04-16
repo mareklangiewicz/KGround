@@ -24,12 +24,14 @@ fun checkTemplates() {
     checkRootBuildTemplate(rootBuild)
     checkKotlinModuleBuildTemplates(libModuleBuild, demosModuleBuild)
     checkMppModuleBuildTemplates(libModuleBuild)
+    checkJvmAppBuildTemplates(demosModuleBuild)
 }
 
 fun injectTemplates() {
     injectRootBuildTemplate(rootBuild)
     injectKotlinModuleBuildTemplate(libModuleBuild, demosModuleBuild)
     injectMppModuleBuildTemplate(libModuleBuild)
+    injectJvmAppBuildTemplate(demosModuleBuild)
 }
 
 // region [Root Build Template]
