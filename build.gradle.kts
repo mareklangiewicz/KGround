@@ -20,18 +20,13 @@ tasks.registerAllThatGroupFun("inject",
     ::injectTemplates,
 )
 
-fun checkTemplates() {
-    checkRootBuildTemplate(rootBuild)
-    checkKotlinModuleBuildTemplates(libModuleBuild, demosModuleBuild)
-    checkMppModuleBuildTemplates(libModuleBuild)
-    checkJvmAppBuildTemplates(demosModuleBuild)
-}
+fun checkTemplates() = checkAllKnownRegionsInProject(rootProjectPath)
 
 fun injectTemplates() {
-    injectRootBuildTemplate(rootBuild)
-    injectKotlinModuleBuildTemplate(libModuleBuild, demosModuleBuild)
-    injectMppModuleBuildTemplate(libModuleBuild)
-    injectJvmAppBuildTemplate(demosModuleBuild)
+    injectKnownRegion(labelRoot, rootBuild)
+    injectKnownRegion(labelKotlinModule, libModuleBuild, demosModuleBuild)
+    injectKnownRegion(labelMppModule, libModuleBuild)
+    injectKnownRegion(labelJvmApp, demosModuleBuild)
 }
 
 // region [Root Build Template]
