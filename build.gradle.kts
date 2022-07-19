@@ -1,10 +1,11 @@
+import okio.FileSystem.Companion.SYSTEM
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
     id("io.github.gradle-nexus.publish-plugin") version vers.nexusPublishGradlePlugin
-    kotlin("multiplatform") version vers.kotlin apply false
+    kotlin("multiplatform") apply false
 }
 
 defaultGroupAndVerAndDescription(libs.KommandLine)
@@ -22,7 +23,7 @@ tasks.registerAllThatGroupFun("inject",
 
 fun checkTemplates() = checkAllKnownRegionsInProject(rootProjectPath)
 
-fun injectTemplates() {
+fun injectTemplates() = SYSTEM.run {
     injectKnownRegion(labelRoot, rootBuild)
     injectKnownRegion(labelKotlinModule, libModuleBuild, demosModuleBuild)
     injectKnownRegion(labelMppModule, libModuleBuild)
