@@ -23,12 +23,7 @@ tasks.registerAllThatGroupFun("inject",
 
 fun checkTemplates() = checkAllKnownRegionsInProject(rootProjectPath)
 
-fun injectTemplates() = SYSTEM.run {
-    injectKnownRegion(labelRoot, rootBuild)
-    injectKnownRegion(labelKotlinModule, libModuleBuild, demosModuleBuild)
-    injectKnownRegion(labelMppModule, libModuleBuild)
-    injectKnownRegion(labelJvmApp, demosModuleBuild)
-}
+fun injectTemplates() = SYSTEM.injectAllKnownRegionsToAllFoundFiles(rootProjectPath)
 
 // region [Root Build Template]
 
