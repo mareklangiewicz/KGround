@@ -12,18 +12,10 @@ defaultGroupAndVerAndDescription(libs.KommandLine)
 
 defaultSonatypeOssStuffFromSystemEnvs()
 
-private val rootBuild = rootProjectPath / "build.gradle.kts"
-private val libModuleBuild = rootProjectPath / "kommandline" / "build.gradle.kts"
-private val demosModuleBuild = rootProjectPath / "kommanddemos" / "build.gradle.kts"
+tasks.registerAllThatGroupFun("inject", ::checkTemplates, ::injectTemplates)
 
-tasks.registerAllThatGroupFun("inject",
-    ::checkTemplates,
-    ::injectTemplates,
-)
-
-fun checkTemplates() = checkAllKnownRegionsInProject(rootProjectPath)
-
-fun injectTemplates() = SYSTEM.injectAllKnownRegionsToAllFoundFiles(rootProjectPath)
+fun checkTemplates() = checkAllKnownRegionsInProject()
+fun injectTemplates() = injectAllKnownRegionsInProject()
 
 // region [Root Build Template]
 
