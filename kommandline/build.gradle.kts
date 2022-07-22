@@ -26,6 +26,7 @@ fun RepositoryHandler.defaultRepos(
     withKotlinx: Boolean = true,
     withKotlinxHtml: Boolean = false,
     withComposeJbDev: Boolean = false,
+    withComposeCompilerAndroidxDev: Boolean = false,
     withKtorEap: Boolean = false,
     withJitpack: Boolean = false,
 ) {
@@ -36,6 +37,7 @@ fun RepositoryHandler.defaultRepos(
     if (withKotlinx) maven(repos.kotlinx)
     if (withKotlinxHtml) maven(repos.kotlinxHtml)
     if (withComposeJbDev) maven(repos.composeJbDev)
+    if (withComposeCompilerAndroidxDev) maven(repos.composeCompilerAndroidxDev)
     if (withKtorEap) maven(repos.ktorEap)
     if (withJitpack) maven(repos.jitpack)
 }
@@ -132,12 +134,29 @@ fun Project.defaultBuildTemplateForMppLib(
     withNativeLinux64: Boolean = false,
     withKotlinxHtml: Boolean = false,
     withComposeJbDevRepo: Boolean = false,
+    withComposeCompilerFix: Boolean = false,
     withTestJUnit4: Boolean = false,
     withTestJUnit5: Boolean = true,
     withTestUSpekX: Boolean = true,
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {}
 ) {
-    repositories { defaultRepos(withKotlinxHtml = withKotlinxHtml, withComposeJbDev = withComposeJbDevRepo) }
+    repositories {
+        defaultRepos(
+            withKotlinxHtml = withKotlinxHtml,
+            withComposeJbDev = withComposeJbDevRepo,
+            withComposeCompilerAndroidxDev = withComposeCompilerFix,
+        )
+    }
+    if (withComposeCompilerFix) {
+        require(withComposeJbDevRepo) { "Compose compiler fix is available only for compose-jb projects." }
+        configurations.all {
+            resolutionStrategy.dependencySubstitution {
+                substitute(module(deps.composeCompilerJbDev)).apply {
+                    using(module(deps.composeCompilerAndroidxDev))
+                }
+            }
+        }
+    }
     defaultGroupAndVerAndDescription(details)
     kotlin { allDefault(
         withJvm,
