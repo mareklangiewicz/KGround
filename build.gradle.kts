@@ -3,10 +3,7 @@ import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.utils.*
 
-plugins {
-    id("io.github.gradle-nexus.publish-plugin") version vers.nexusPublishGradlePlugin
-    kotlin("multiplatform") apply false
-}
+plugins { id("io.github.gradle-nexus.publish-plugin") version vers.nexusPublishGradlePlugin }
 
 defaultGroupAndVerAndDescription(libs.KommandLine)
 
