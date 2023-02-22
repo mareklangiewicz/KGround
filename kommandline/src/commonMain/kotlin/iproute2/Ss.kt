@@ -2,14 +2,17 @@ package pl.mareklangiewicz.kommand
 
 // TODO NOW: add "ss" command correctly. especially with switches: "ss -tulpn" (and parsing output too?)
 
-fun ss(init: Ss.() -> Unit = {}) = Ss().apply(init)
+/** [ss manpage](https://manpages.ubuntu.com/manpages/bionic/en/man8/ss.8.html) */
+fun ss(stateFilter: String? = null, init: Ss.() -> Unit = {}) = Ss(stateFilter).apply(init)
 
 data class Ss(
+    val stateFilter: String? = null,
     val options: MutableList<Option> = mutableListOf(),
     val nonopts: MutableList<String> = mutableListOf()
+        // FIXME_someday: better static types/wrapping for non-options (FILTER := [ state STATE-FILTER ] [ EXPRESSION ])
 ): Kommand {
     override val name get() = "ss"
-    override val args get() = options.map { it.str } + nonopts
+    override val args get() = (options.map { it.str } plusIfNotNull stateFilter?.let { "state $it" }) + nonopts
 
     sealed class Option(val name: String, val arg: String? = null) {
 
