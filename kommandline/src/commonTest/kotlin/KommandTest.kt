@@ -1,24 +1,24 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kommand.Adb.*
 import pl.mareklangiewicz.kommand.Adb.Command.*
-import pl.mareklangiewicz.kommand.Adb.Option
-import pl.mareklangiewicz.kommand.Adb.Option.usb
+import pl.mareklangiewicz.kommand.Adb.Option.*
 import pl.mareklangiewicz.kommand.Ide.Cmd.diff
-import pl.mareklangiewicz.kommand.Ide.Option.col
-import pl.mareklangiewicz.kommand.Ide.Option.ln
-import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
-import pl.mareklangiewicz.kommand.coreutils.Ls.Option.sortType.*
-import pl.mareklangiewicz.kommand.Man.Section.systemcall
+import pl.mareklangiewicz.kommand.Ide.Option.*
+import pl.mareklangiewicz.kommand.Man.Section.*
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
-import pl.mareklangiewicz.kommand.Vim.Option.gui
-import pl.mareklangiewicz.kommand.Vim.Option.servername
+import pl.mareklangiewicz.kommand.Ss.Option.*
+import pl.mareklangiewicz.kommand.Ss.Option.tcp
+import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.coreutils.*
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.all
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.colorType.*
+import pl.mareklangiewicz.kommand.coreutils.Ls.Option.sortType.*
 import pl.mareklangiewicz.kommand.coreutils.MkDir.Option.*
 import pl.mareklangiewicz.kommand.coreutils.Rm.Option.*
-import kotlin.test.Ignore
+import kotlin.test.*
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 
 class KommandTest {
@@ -46,6 +46,9 @@ class KommandTest {
 
     @Test fun testCat1() = cat { +"/etc/fstab" }.checkInIdeap()
     @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.checkInIdeap()
+
+    @Test fun testSs1() = ss { -tcp; -udp; -listening; -processes; -numeric }.checkWithUser() // ss -tulpn
+    @Test fun testSs2() = ss { -tcp; -udp; -listening; -processes; -numeric }.checkInIdeap() // ss -tulpn
 
     @Test fun testManMan() = man { +"man" }.checkWithUser()
     @Test fun testManVim() = man { +"vim" }.checkWithUser()
