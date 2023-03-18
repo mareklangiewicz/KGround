@@ -6,9 +6,12 @@ import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
 
-const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
 
 class Langara {
+
+    companion object {
+        const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
+    }
 
     @Test fun demo_repl() = idemo { LangaraREPL() }
 
