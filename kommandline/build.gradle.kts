@@ -10,7 +10,7 @@ plugins {
     id("signing")
 }
 
-defaultBuildTemplateForMppLib(libs.KommandLine) {
+defaultBuildTemplateForMppLib(libs.KommandLine.copy(version = rootProject.version.toString())) {
     implementation(kotlin("script-runtime"))
 }
 
