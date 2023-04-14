@@ -8,7 +8,7 @@ plugins {
     kotlin("multiplatform") version vers.kotlin apply false
 }
 
-defaultBuildTemplateForRootProject(libs.KommandLine)
+defaultBuildTemplateForRootProject(libs.KommandLine.copy(version = v(0, 0, 8)))
 
 // region [Root Build Template]
 
