@@ -7,6 +7,7 @@ import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
 
 
+@Disabled
 class Langara {
 
     companion object {
