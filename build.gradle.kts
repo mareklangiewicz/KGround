@@ -1,20 +1,29 @@
-import pl.mareklangiewicz.deps.LibDetails
+import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-    id("io.github.gradle-nexus.publish-plugin") version vers.nexusPublishGradlePlugin
-    kotlin("multiplatform") version vers.kotlin apply false
+    plug(plugs.NexusPublish)
+    plug(plugs.KotlinMulti) apply false
+    plug(plugs.KotlinJvm) apply false
 }
 
-defaultBuildTemplateForRootProject(libs.KommandLine.copy(version = v(0, 0, 9)))
+defaultBuildTemplateForRootProject(
+    langaraLibDetails(
+        name = "KommandLine",
+        description = "Kotlin DSL for popular CLI commands.",
+        githubUrl = "https://github.com/langara/KommandLine",
+        version = Ver(0, 0, 10)
+    )
+)
 
 // region [Root Build Template]
 
 fun Project.defaultBuildTemplateForRootProject(ossLibDetails: LibDetails? = null) {
 
     ossLibDetails?.let {
+        rootExtLibDetails = it
         defaultGroupAndVerAndDescription(it)
         defaultSonatypeOssStuffFromSystemEnvs()
     }
