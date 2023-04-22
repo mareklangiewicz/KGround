@@ -6,7 +6,7 @@ import pl.mareklangiewicz.evts.*
 //gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
 pluginManagement {
-//    includeBuild("../DepsKt")
+    includeBuild("../DepsKt")
     repositories {
         gradlePluginPortal()
         google()
@@ -15,7 +15,7 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.33"
+    id("pl.mareklangiewicz.deps.settings") version "0.2.34"
 }
 
 rootProject.name = "KommandLine"
