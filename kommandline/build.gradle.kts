@@ -8,7 +8,9 @@ plugins {
     plugAll(plugs.KotlinMulti, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForMppLib()
+defaultBuildTemplateForMppLib {
+    implementation(Langiewicz.upue.withVer(Ver(0, 0, 11))) // FIXME: remove hardcoded version after DepsKt update
+}
 
 kotlin { js(IR) { nodejs() } }
 

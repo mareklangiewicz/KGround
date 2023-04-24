@@ -1,7 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
 import okio.Path.Companion.toOkioPath
+import pl.mareklangiewicz.deps.Langiewicz
 import pl.mareklangiewicz.evts.*
+import pl.mareklangiewicz.utils.includeAndSubstituteBuild
 
 //gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
@@ -23,4 +25,7 @@ rootProject.name = "KommandLine"
 include(":kommandline")
 include(":kommanddemos")
 
-//includeAndSubstituteBuild("../USpek", Deps.uspekx, ":uspekx")
+
+// FIXME_someday: doesn't really work. And seems like kotlin.mpp.import.enableKgpDependencyResolution=true doesn't help
+//   https://youtrack.jetbrains.com/issue/KT-52172/Multiplatform-Support-composite-builds
+//includeAndSubstituteBuild("../UPue", Langiewicz.upue.mvn, ":upue")
