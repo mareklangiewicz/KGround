@@ -37,7 +37,7 @@ class Langara {
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
-        val k = konfig("/home/marek/tmp/konfig_examples")
+        val k = konfigInDir("/home/marek/tmp/konfig_examples")
         println("before adding anything:")
         k.printAll()
         k["tmpExampleInteger1"] = 111.toString()
@@ -58,13 +58,13 @@ class Langara {
 
     @Test fun interactive_code_switch() = SYS.run {
         val enabled = askIf("Should interactive code be enabled?")
-        konfig().run {
+        konfigInUserHomeConfigDir().run {
             this["interactive_code"] = enabled.toString()
             print("interactive_code")
         }
     }
 
-    @Test fun print_all_konfig() = SYS.konfig().printAll()
+    @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().printAll()
 
     @Test fun experiment() = idemo {
         val ideaEnabled = bash("ps -e")().any { it.contains("idea.sh") }
