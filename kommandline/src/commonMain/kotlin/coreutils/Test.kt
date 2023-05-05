@@ -1,10 +1,21 @@
 package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.coreutils.FileTest.*
 
 fun Platform.testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
 fun Platform.testIfFirstFileNewer(file1: String, file2:String) = testIf(file1, "-nt", file2)
 fun Platform.testIfFirstFileOlder(file1: String, file2:String) = testIf(file1, "-ot", file2)
+
+/** Can be any kind of file (e.g., directory) */
+fun Platform.testIfFileIsThere(file: String) = testIfFile(file, exists)
+fun Platform.testIfFileIsRegular(file: String) = testIfFile(file, regular)
+fun Platform.testIfFileIsDirectory(file: String) = testIfFile(file, directory)
+fun Platform.testIfFileIsSymLink(file: String) = testIfFile(file, symbolicLink)
+fun Platform.testIfFileIsPipe(file: String) = testIfFile(file, namedPipe)
+fun Platform.testIfFileHasGrantedRead(file: String) = testIfFile(file, grantedRead)
+fun Platform.testIfFileHasGrantedWrite(file: String) = testIfFile(file, grantedWrite)
+fun Platform.testIfFileHasGrantedExec(file: String) = testIfFile(file, grantedExec)
 
 enum class FileTest(val code: Char) {
     blockSpecial('b'), charSpecial('c'), directory('d'), exists('e'), regular('f'),
@@ -21,8 +32,8 @@ fun Platform.testIf(vararg tokens: String): Boolean {
     return when (result.exitValue) {
         0 -> true
         1 -> false
-        2 -> throw IllegalStateException("Platform test ended with error (2).\n$result ")
-        else -> throw IllegalStateException("Unexpected platform test exit value (${result.exitValue}).\n$result")
+        2 -> error("Platform test ended with error (2).\n$result ")
+        else -> error("Unexpected platform test exit value (${result.exitValue}).\n$result")
     }
 }
 

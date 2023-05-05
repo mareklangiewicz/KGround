@@ -3,6 +3,12 @@ package pl.mareklangiewicz.kommand
 interface Platform {
 
     /**
+     * TODO_later: experiment with wrapping some remote platform in sth like bash kommands,
+     * so it supports redirect using remote bash operators like < > << >> or sth like that.
+     */
+    val isRedirectSupported: Boolean
+
+    /**
      * @param dir working directory for started subprocess - null means inherit from current process
      * @param inFile - redirect std input from given file - null means do not redirect
      * @param outFile - redirect std output (std err too) to given file - null means do not redirect
@@ -39,6 +45,9 @@ interface Platform {
 }
 
 class FakePlatform: Platform {
+
+    override val isRedirectSupported get() = true // not really, but it's all fake
+
     override fun start(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
         println("start($kommand, $dir)")
         return object : ExecProcess {
@@ -75,7 +84,7 @@ data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
  */
 fun ExecResult.unwrap(expectedExitValue: Int = 0): List<String> =
     if (exitValue == expectedExitValue) stdOutAndErr
-    else throw IllegalStateException("Exit value $exitValue is not equal to expected $expectedExitValue.")
+    else error("Exit value $exitValue is not equal to expected $expectedExitValue.")
 
 fun ExecResult.check(expectedExitValue: Int = 0, expectedOutput: List<String>? = null) {
     val actualOutput = unwrap(expectedExitValue) // makes sure we first check exit value

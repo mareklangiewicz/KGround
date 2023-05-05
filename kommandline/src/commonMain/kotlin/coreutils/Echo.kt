@@ -2,6 +2,11 @@ package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.*
 
+fun Platform.writeFileWithEcho(text: String, outFile: String) {
+    check(isRedirectSupported) { "Can't write to file using echo without redirection." }
+    echo(text)(outFile = outFile)
+}
+
 fun echo(text: String) = echo { +text }
 
 fun echo(init: Echo.() -> Unit = {}) = Echo().apply(init)

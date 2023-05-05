@@ -22,10 +22,10 @@ class GpgTest {
         val inFile = createTempFile("testGED")
         val encFile = "$inFile.enc"
         val decFile = "$inFile.dec"
-        echo("some plain text 667")(outFile = inFile)
+        writeFileWithEcho("some plain text 667", outFile = inFile)
         gpgEncryptPass("correct pass", inFile, encFile)()
         gpgDecryptPass("correct pass", encFile, decFile)()
-        val decrypted = cat { +decFile }().single()
+        val decrypted = readFileWithCat(decFile, singleLine = true)
         assertEquals("some plain text 667", decrypted)
         val err = start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).await()
         assertEquals(2, err.exitValue)

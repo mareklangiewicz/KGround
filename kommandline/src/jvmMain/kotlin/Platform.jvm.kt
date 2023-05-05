@@ -6,6 +6,8 @@ actual typealias SysPlatform = JvmPlatform
 
 class JvmPlatform: Platform {
 
+    override val isRedirectSupported get() = true
+
     private val debug = false
 
     override fun start(

@@ -6,6 +6,9 @@ import pl.mareklangiewicz.kommand.coreutils.MkDir.Option.parents
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 
+// the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
+fun Platform.userEnabled(key: String) = konfigInUserHomeConfigDir()["$key.enabled"]?.trim() == "true"
+
 /** Represents some configuration in the form of a basic mutable map from keys:String to values:String. */
 typealias IKonfig = IMutMap<String, String>
 
@@ -34,19 +37,14 @@ private class KonfigInDirUnsafe(val dir: String, val platform: Platform = Platfo
 
     init { platform.run { mkdir { -parents; +dir }() } }
 
-    override fun get(key: String): String? {
-        val result = platform.start(cat { +"$dir/$key" }).await()
-        return when (result.exitValue) {
-            0 -> result.stdOutAndErr.joinToString("\n")
-            else -> null
-        }
-    }
+    override fun get(key: String): String? = platform.tryToReadFileWithCat("$dir/$key")
 
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
         platform.run {
-            if (item == null) rmIfExists(file)
-            else echo(item)(outFile = file)
+            if (item == null) rmIfFileIsThere(file)
+            else writeFileWithEcho(item, outFile = file)
+                // TODO_someday: Use sth else to make it work on platforms without isRedirectSupported
         }
     }
 
@@ -82,7 +80,10 @@ private class KonfigWithChecks(
 
     override val keys get() = konfig.keys
 
-    private val Char.isSafe get() = isLetterOrDigit() || this == '_'
+    private val Char.isSafe get() = isLetterOrDigit() || this == '_' || this == '.'
+        // It's important to allow dots (especially in keys),
+        // because it will be common to use file extensions as value types
+        // (also dots are pretty safe - shells treat it as normal characters)
 }
 
 fun IKonfig.withChecks(

@@ -1,13 +1,22 @@
 package pl.mareklangiewicz.kommand.demos
 
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.condition.EnabledIf
+import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.Platform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
 
+// unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
+// maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
+fun userEnabledTestClass(context: ExtensionContext) =
+    SYS.userEnabled("tests." + context.requiredTestClass.simpleName)
 
-@Disabled
+@EnabledIf(
+    value = "pl.mareklangiewicz.kommand.demos.LangaraKt#userEnabledTestClass",
+    disabledReason = "tests.Langara not enabled in user konfig"
+)
 class Langara {
 
     companion object {

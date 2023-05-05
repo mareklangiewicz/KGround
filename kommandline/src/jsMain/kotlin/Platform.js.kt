@@ -4,6 +4,8 @@ actual typealias SysPlatform = JsEvalFunPlatform
 
 class JsEvalFunPlatform: Platform {
 
+    override val isRedirectSupported get() = false
+
     private val debug = false
 
     override fun start(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {

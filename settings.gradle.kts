@@ -17,7 +17,7 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.34"
+    id("pl.mareklangiewicz.deps.settings") version "0.2.36"
 }
 
 rootProject.name = "KommandLine"
