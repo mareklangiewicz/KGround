@@ -5,12 +5,12 @@ import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.colorType.*
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.indicatorStyle.*
 
-fun Platform.ls(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
+fun CliPlatform.ls(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
     ls { +dir; -one; -dirsFirst; -color(NEVER); -escape; -indicator(style); if (withHidden) -almostAll }()
 
-fun Platform.lsRegFiles(dir: String, withHidden: Boolean = false) =
+fun CliPlatform.lsRegFiles(dir: String, withHidden: Boolean = false) =
     ls(dir, withHidden, SLASH).filter { !it.endsWith('/') }
-fun Platform.lsSubDirs(dir: String, withHidden: Boolean = false) =
+fun CliPlatform.lsSubDirs(dir: String, withHidden: Boolean = false) =
     ls(dir, withHidden, SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)

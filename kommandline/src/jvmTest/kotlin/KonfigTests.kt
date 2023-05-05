@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import org.junit.jupiter.api.TestFactory
-import pl.mareklangiewicz.kommand.Platform.Companion.SYS
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.coreutils.*
 import pl.mareklangiewicz.kommand.konfig.IKonfig
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
@@ -20,7 +20,7 @@ class KonfigTests {
     }
 }
 
-fun Platform.testTmpKonfig() {
+fun CliPlatform.testTmpKonfig() {
     val konfigNewDir = pathToUserTmp!! + "/tmpKonfigForTests" + Random.nextUInt()
 
     "On konfig in tmp dir" o { // Warning: adding $konfigNewDir to test name would make uspek generate infinite loop!!
@@ -34,7 +34,7 @@ fun Platform.testTmpKonfig() {
     }
 }
 
-fun Platform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
+fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
     "is empty" o { konfig.keys.len eq 0 }
     "dir is created" o { testIfFileIsDirectory(dir) eq true }
     "dir is empty" o { ls(dir, withHidden = true).size eq 0 }

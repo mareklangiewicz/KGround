@@ -11,11 +11,11 @@ fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) =
 
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
-fun Platform.bashGetExports(): Map<String, String> = bash("export")()
+fun CliPlatform.bashGetExports(): Map<String, String> = bash("export")()
     .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
     .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
 
-fun Platform.bashGetExportsToFile(outFile: String) =
+fun CliPlatform.bashGetExportsToFile(outFile: String) =
     start(bash("export"), outFile = outFile).await().check(expectedOutput = emptyList())
 
 

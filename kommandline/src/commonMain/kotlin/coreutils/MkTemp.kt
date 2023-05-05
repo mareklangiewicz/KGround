@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.coreutils
 import pl.mareklangiewicz.kommand.*
 
 fun mktemp(template: String? = null, init: MkTemp.() -> Unit = {}) = MkTemp(template).apply(init)
-fun Platform.createTempFile(prefix: String = "tmp.", suffix: String = ".tmp") =
+fun CliPlatform.createTempFile(prefix: String = "tmp.", suffix: String = ".tmp") =
     mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}")().single()
 
 data class MkTemp(

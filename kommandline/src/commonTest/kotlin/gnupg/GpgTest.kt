@@ -33,7 +33,7 @@ class GpgTest {
     }
 }
 
-private fun ifOnNiceJvmPlatform(block: Platform.() -> Unit) = Platform.SYS.run {
+private fun ifOnNiceJvmPlatform(block: CliPlatform.() -> Unit) = CliPlatform.SYS.run {
     if (isJvm && isUbuntu) block() else println("Disabled on this platform.")
 }
 

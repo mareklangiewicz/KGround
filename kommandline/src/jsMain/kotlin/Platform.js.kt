@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand
 
 actual typealias SysPlatform = JsEvalFunPlatform
 
-class JsEvalFunPlatform: Platform {
+class JsEvalFunPlatform: CliPlatform {
 
     override val isRedirectSupported get() = false
 

@@ -1,6 +1,9 @@
 package pl.mareklangiewicz.kommand
 
-interface Platform {
+@Deprecated("Use CliPlatform")
+typealias Platform = CliPlatform
+
+interface CliPlatform {
 
     /**
      * TODO_later: experiment with wrapping some remote platform in sth like bash kommands,
@@ -44,7 +47,7 @@ interface Platform {
     }
 }
 
-class FakePlatform: Platform {
+class FakePlatform: CliPlatform {
 
     override val isRedirectSupported get() = true // not really, but it's all fake
 
@@ -60,7 +63,7 @@ class FakePlatform: Platform {
     }
 }
 
-expect class SysPlatform(): Platform
+expect class SysPlatform(): CliPlatform
 
 
 

@@ -3,13 +3,13 @@
 package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.Kommand
-import pl.mareklangiewicz.kommand.Platform
+import pl.mareklangiewicz.kommand.CliPlatform
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.line
 import pl.mareklangiewicz.kommand.zenityAskIf
 
 
-fun Platform.startInGnomeTermIfUserConfirms(
+fun CliPlatform.startInGnomeTermIfUserConfirms(
     kommand: Kommand,
     confirmation: String = "Run ::${kommand.line()}:: in gnome terminal?",
     title: String = kommand.name,

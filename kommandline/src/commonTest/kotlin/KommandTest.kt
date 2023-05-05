@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.Adb.Option.*
 import pl.mareklangiewicz.kommand.Ide.Cmd.diff
 import pl.mareklangiewicz.kommand.Ide.Option.*
 import pl.mareklangiewicz.kommand.Man.Section.*
-import pl.mareklangiewicz.kommand.Platform.Companion.SYS
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.Ss.Option.*
 import pl.mareklangiewicz.kommand.Ss.Option.tcp
 import pl.mareklangiewicz.kommand.Vim.Option.*

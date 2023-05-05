@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.*
  * If singleLine is true and the file contains more or less than one line, it throws runtime exception.
  * It should never return just part of the file.
  */
-fun Platform.readFileWithCat(file: String, singleLine: Boolean = false): String = cat { +file }().run {
+fun CliPlatform.readFileWithCat(file: String, singleLine: Boolean = false): String = cat { +file }().run {
     if (singleLine) single() else joinToString("\n")
 }
 
@@ -15,7 +15,7 @@ fun Platform.readFileWithCat(file: String, singleLine: Boolean = false): String 
  * If other RuntimeException happens, it also returns null.
  * It should never return just part of the file.
  */
-fun Platform.tryToReadFileWithCat(file: String, singleLine: Boolean = false): String? =
+fun CliPlatform.tryToReadFileWithCat(file: String, singleLine: Boolean = false): String? =
     try { readFileWithCat(file, singleLine) } catch (e: RuntimeException) { null }
 
 fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)

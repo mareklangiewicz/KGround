@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.all
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.humanReadable
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.long
-import pl.mareklangiewicz.kommand.Platform.Companion.SYS
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.Zenity.DialogType.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
 import pl.mareklangiewicz.kommand.coreutils.*
@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 class ZenityTest {
     @Test fun testZenityEntryCheck() = zenity(entry) { -text("some question") }.checkWithUser()
-    @Test fun testZenityEntryStart() = ifInteractive { SYS.start(zenity(entry) { -entrytext("suggested text") }) }
+    @Test fun testZenityEntryStart() = SYS.start(zenity(entry) { -entrytext("suggested text") })
 
     @Test fun testZenityCalendar() = zenity(calendar) { -title("some title"); -text("some text") }
         .checkWithUser("zenity --calendar --title=some\\ title --text=some\\ text")

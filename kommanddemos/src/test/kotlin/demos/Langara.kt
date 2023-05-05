@@ -4,7 +4,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.Platform.Companion.SYS
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
 
@@ -81,6 +81,7 @@ class Langara {
     }
 }
 
-private fun idemo(platform: Platform = SYS, block: Platform.() -> Unit) = ifInteractive { platform.block() }
+@Deprecated("Use kotlin notebooks")
+private fun idemo(platform: Platform = SYS, block: Platform.() -> Unit) = platform.block()
 private fun Platform.askIf(question: String) = zenityAskIf(question)
 private fun Platform.askEntry(question: String, suggested: String? = null) = zenityAskForEntry(question, suggested = suggested)

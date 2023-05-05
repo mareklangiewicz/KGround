@@ -5,9 +5,8 @@ import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.help
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.launch
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listactions
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listapps
-import pl.mareklangiewicz.kommand.Platform.Companion.SYS
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.checkWithUser
-import pl.mareklangiewicz.kommand.unwrap
 import kotlin.test.Ignore
 import kotlin.test.Test
 
