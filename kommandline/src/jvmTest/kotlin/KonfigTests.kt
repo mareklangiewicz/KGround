@@ -56,6 +56,12 @@ fun Platform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
             "get returns null" o { konfig["somekey1"] eq null }
             "file is removed" o { testIfFileIsThere("$dir/somekey1") eq false }
             "no files in konfig dir" o { ls(dir, withHidden = true).size eq 0 }
+
+            "On touch removed file again" o {
+                touch("$dir/somekey1")
+                "file is there again" o { testIfFileIsThere("$dir/somekey1") eq true }
+                "get returns not null but empty value" o { konfig["somekey1"] eq "" }
+            }
         }
     }
 
