@@ -31,7 +31,7 @@ class JvmPlatform: Platform {
     override val isGnome get() = "GNOME" in xdgdesktop
 
     override val pathToUserHome: String? get() = System.getProperty("user.home")
-    override val pathToUserTmp: String? get() = if (isUbuntu) "$pathToUserHome/tmp" else null
+    override val pathToUserTmp: String? get() = "$pathToUserHome/tmp" // FIXME_maybe: other paths for specific OSes? sometimes null?
     override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
     private val xdgdesktop by lazy { bashGetExports()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
 }
