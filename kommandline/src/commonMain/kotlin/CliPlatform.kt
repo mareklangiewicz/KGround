@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.kommand
 
-@Deprecated("Use CliPlatform")
+@Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
 typealias Platform = CliPlatform
 
 interface CliPlatform {
@@ -15,6 +15,8 @@ interface CliPlatform {
      * @param dir working directory for started subprocess - null means inherit from current process
      * @param inFile - redirect std input from given file - null means do not redirect
      * @param outFile - redirect std output (std err too) to given file - null means do not redirect
+     * TODO NOW: support other redirections (streams/strings with content)
+     *   (might require separate flag like: isRedirectStreamsSupported)
      */
     fun start(
         kommand: Kommand,

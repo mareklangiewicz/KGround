@@ -10,11 +10,11 @@ import pl.mareklangiewicz.kommand.konfig.*
 
 // unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
 // maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
-fun userEnabledTestClass(context: ExtensionContext) =
-    SYS.userEnabled("tests." + context.requiredTestClass.simpleName)
+fun isUserTestClassEnabled(context: ExtensionContext) =
+    SYS.isUserFlagEnabled("tests." + context.requiredTestClass.simpleName)
 
 @EnabledIf(
-    value = "pl.mareklangiewicz.kommand.demos.LangaraKt#userEnabledTestClass",
+    value = "pl.mareklangiewicz.kommand.demos.LangaraKt#isUserTestClassEnabled",
     disabledReason = "tests.Langara not enabled in user konfig"
 )
 class Langara {
@@ -46,7 +46,7 @@ class Langara {
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
-        val k = konfigInDir("/home/marek/tmp/konfig_examples")
+        val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
         println("before adding anything:")
         k.printAll()
         k["tmpExampleInteger1"] = 111.toString()
@@ -65,12 +65,10 @@ class Langara {
         k.printAll()
     }
 
-    @Test fun interactive_code_switch() = SYS.run {
+    @Test fun code_interactive_switch() = SYS.run {
         val enabled = askIf("Should interactive code be enabled?")
-        konfigInUserHomeConfigDir().run {
-            this["interactive_code"] = enabled.toString()
-            print("interactive_code")
-        }
+        setUserFlag("code.interactive", enabled)
+        println("user flag: code.interactive.enabled = $enabled")
     }
 
     @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().printAll()
@@ -81,7 +79,6 @@ class Langara {
     }
 }
 
-@Deprecated("Use kotlin notebooks")
-private fun idemo(platform: Platform = SYS, block: Platform.() -> Unit) = platform.block()
-private fun Platform.askIf(question: String) = zenityAskIf(question)
-private fun Platform.askEntry(question: String, suggested: String? = null) = zenityAskForEntry(question, suggested = suggested)
+private fun idemo(platform: CliPlatform = SYS, block: CliPlatform.() -> Unit) = ifInteractive { platform.block() }
+private fun CliPlatform.askIf(question: String) = zenityAskIf(question)
+private fun CliPlatform.askEntry(question: String, suggested: String? = null) = zenityAskForEntry(question, suggested = suggested)

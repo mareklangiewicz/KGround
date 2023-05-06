@@ -6,8 +6,6 @@ import pl.mareklangiewicz.kommand.coreutils.MkDir.Option.parents
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 
-// the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
-fun CliPlatform.userEnabled(key: String) = konfigInUserHomeConfigDir()["$key.enabled"]?.trim() == "true"
 
 /** Represents some configuration in the form of a basic mutable map from keys:String to values:String. */
 typealias IKonfig = IMutMap<String, String>
