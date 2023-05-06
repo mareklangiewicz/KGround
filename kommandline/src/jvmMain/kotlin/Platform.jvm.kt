@@ -4,7 +4,7 @@ import java.io.File
 
 actual typealias SysPlatform = JvmPlatform
 
-class JvmPlatform: Platform {
+class JvmPlatform: CliPlatform {
 
     override val isRedirectSupported get() = true
 
