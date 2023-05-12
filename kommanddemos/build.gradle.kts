@@ -9,6 +9,7 @@ plugins {
 
 defaultBuildTemplateForJvmApp(appMainPackage = "pl.mareklangiewicz.kommand.demos") {
     implementation(project(":kommandline"))
+    implementation(depsOld.kotlinReflect) // FIXME: add to DepsNew
 }
 
 // region [Kotlin Module Build Template]
