@@ -18,16 +18,16 @@ class SamplesTests {
     }
 }
 
-fun testSamplesObject(obj: Any, maxDepth: Int = 30) {
-    if (maxDepth < 1) {
-        println("maxDepth < 1. Ignoring obj...")
+fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
+    if (depthLimit < 1) {
+        println("depthLimit < 1. Ignoring obj...")
         return
     }
     val props = obj.getNamedPropsValues()
     for ((name, prop) in props) when (prop) {
         is Sample -> "On sample $name" o { testSample(prop) }
         null -> error("prop is null! name: $name")
-        else -> "On $name" o { testSamplesObject(prop, maxDepth - 1) }
+        else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }
 }
 
