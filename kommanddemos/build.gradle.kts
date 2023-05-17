@@ -198,51 +198,6 @@ fun Project.defaultBuildTemplateForJvmLib(
 
 // endregion [Kotlin Module Build Template]
 
-// region [Jvm Lib Build Template]
-
-@Suppress("UNUSED_VARIABLE")
-fun Project.defaultBuildTemplateForJvmLib(
-    details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
-    addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
-    repositories { defaultRepos() }
-    defaultGroupAndVerAndDescription(details)
-
-    kotlin {
-        sourceSets {
-            val main by getting {
-                dependencies {
-                    addMainDependencies()
-                }
-            }
-            val test by getting {
-                dependencies {
-                    if (withTestJUnit4) implementation(JUnit.junit)
-                    if (withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
-                    if (withTestUSpekX) {
-                        implementation(Langiewicz.uspekx)
-                        if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-                        if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
-                    }
-                }
-            }
-        }
-    }
-
-    configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
-    if (plugins.hasPlugin("maven-publish")) {
-        defaultPublishing(details)
-        if (plugins.hasPlugin("signing")) defaultSigning()
-        else println("JVM Module ${name}: signing disabled")
-    } else println("JVM Module ${name}: publishing (and signing) disabled")
-}
-// endregion [Jvm Lib Build Template]
-
 // region [Jvm App Build Template]
 
 @Suppress("UNUSED_VARIABLE")
