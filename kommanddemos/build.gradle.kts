@@ -146,12 +146,10 @@ fun TaskContainer.withSignErrorWorkaround() =
 
 // endregion [Kotlin Module Build Template]
 
-// region [Jvm App Build Template]
+// region [Jvm Lib Build Template]
 
 @Suppress("UNUSED_VARIABLE")
-fun Project.defaultBuildTemplateForJvmApp(
-    appMainPackage: String,
-    appMainClass: String = "MainKt",
+fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
     withTestJUnit4: Boolean = false,
     withTestJUnit5: Boolean = true,
@@ -182,10 +180,31 @@ fun Project.defaultBuildTemplateForJvmApp(
         }
     }
 
-    application { mainClass put "$appMainPackage.$appMainClass" }
-
+    configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions()
     tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    if (plugins.hasPlugin("maven-publish")) {
+        defaultPublishing(details)
+        if (plugins.hasPlugin("signing")) defaultSigning()
+        else println("JVM Module ${name}: signing disabled")
+    } else println("JVM Module ${name}: publishing (and signing) disabled")
+}
+// endregion [Jvm Lib Build Template]
+
+// region [Jvm App Build Template]
+
+@Suppress("UNUSED_VARIABLE")
+fun Project.defaultBuildTemplateForJvmApp(
+    appMainPackage: String,
+    appMainClass: String = "MainKt",
+    details: LibDetails = rootExtLibDetails,
+    withTestJUnit4: Boolean = false,
+    withTestJUnit5: Boolean = true,
+    withTestUSpekX: Boolean = true,
+    addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+) {
+    defaultBuildTemplateForJvmLib(details, withTestJUnit4, withTestJUnit5, withTestUSpekX, addMainDependencies)
+    application { mainClass put "$appMainPackage.$appMainClass" }
 }
 
 // endregion [Jvm App Build Template]
