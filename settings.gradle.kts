@@ -33,7 +33,7 @@ gradleEnterprise {
 rootProject.name = "KommandLine"
 
 include(":kommandline")
-include(":kommanddemos")
+include(":kommandsamples")
 
 
 // FIXME_someday: doesn't really work. And seems like kotlin.mpp.import.enableKgpDependencyResolution=true doesn't help

@@ -4,10 +4,10 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-    plugAll(plugs.KotlinJvm, plugs.JvmApp)
+    plugAll(plugs.KotlinJvm, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForJvmApp(appMainPackage = "pl.mareklangiewicz.kommand.demos") {
+defaultBuildTemplateForJvmLib {
     implementation(project(":kommandline"))
     implementation(depsOld.kotlinReflect) // FIXME: add to DepsNew
 }
@@ -197,21 +197,3 @@ fun Project.defaultBuildTemplateForJvmLib(
 }
 
 // endregion [Kotlin Module Build Template]
-
-// region [Jvm App Build Template]
-
-@Suppress("UNUSED_VARIABLE")
-fun Project.defaultBuildTemplateForJvmApp(
-    appMainPackage: String,
-    appMainClass: String = "MainKt",
-    details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
-    addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
-    defaultBuildTemplateForJvmLib(details, withTestJUnit4, withTestJUnit5, withTestUSpekX, addMainDependencies)
-    application { mainClass put "$appMainPackage.$appMainClass" }
-}
-
-// endregion [Jvm App Build Template]
