@@ -4,6 +4,6 @@
 /.idea
 /build
 /kommandline/build
-/kommanddemos/build
-/kommanddemos/src/test/kotlin/demos/*REPL.kt
+/kommandsamples/build
+/kommandsamples/src/test/kotlin/demos/*REPL.kt
 my.gradle.log
