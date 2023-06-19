@@ -2,11 +2,8 @@
 
 package pl.mareklangiewicz.kommand
 
-/** anonymous kommand to use only if no actual Kommand class defined */
-fun kommand(name: String, vararg args: String) = object : Kommand {
-    override val name get() = name
-    override val args get() = args.toList()
-}
+/** anonymous kommand to use only if no more specific Kommand class defined */
+fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
 
 // TODO_later: full documentation in kdoc (all commands, options, etc)
 //  (check in practice to make sure it's optimal for IDE users)
@@ -15,6 +12,9 @@ interface Kommand {
     val name: String
     val args: List<String>
 }
+
+/** anonymous kommand to use only if no more specific Kommand class defined */
+data class AKommand(override val name: String, override val args: List<String>) : Kommand
 
 fun Kommand.line() = lineBash()
 fun Kommand.lineBash() = (listOf(name) + args.map { bashQuoteMetaChars(it) }).joinToString(" ")
