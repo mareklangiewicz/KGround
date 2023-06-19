@@ -1,6 +1,5 @@
-import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
-import pl.mareklangiewicz.ure.*
+import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
@@ -14,7 +13,7 @@ defaultBuildTemplateForRootProject(
         name = "KommandLine",
         description = "Kotlin DSL for popular CLI commands.",
         githubUrl = "https://github.com/langara/KommandLine",
-        version = Ver(0, 0, 12)
+        version = Ver(0, 0, 13)
     ),
     withSonatypeOssPublishing = true,
 )
