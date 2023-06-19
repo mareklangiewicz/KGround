@@ -2,6 +2,20 @@ package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.*
 
+
+// TODO_someday: move head/tail so separate files and create more specific kommand data classes
+
+fun CliPlatform.readFileHead(path: String, nrLines: Int = 10) =
+    kommand("head", "-n", "$nrLines", path)()
+fun CliPlatform.readFileFirstLine(path: String) =
+    readFileHead(path, 1).single()
+fun CliPlatform.readFileTail(path: String, nrLines: Int = 10) =
+    kommand("tail", "-n", "$nrLines", path)()
+fun CliPlatform.readFileLastLine(path: String) =
+    readFileTail(path, 1).single()
+
+
+
 /**
  * If singleLine is true and the file contains more or less than one line, it throws runtime exception.
  * It should never return just part of the file.
