@@ -4,11 +4,18 @@ actual typealias SysPlatform = JsEvalFunPlatform
 
 class JsEvalFunPlatform: CliPlatform {
 
-    override val isRedirectSupported get() = false
+    override val isRedirectFileSupported get() = false
+    override val isRedirectContentSupported get() = false
 
     private val debug = false
 
-    override fun start(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
+    override fun start(
+        kommand: Kommand,
+        vararg useNamedArgs: Unit,
+        dir: String?,
+        inFile: String?,
+        outFile: String?
+    ): ExecProcess {
         check(dir == null) { "dir unsupported" }
         check(inFile == null) { "inFile unsupported" }
         check(outFile == null) { "outFile unsupported" }
@@ -26,7 +33,7 @@ class JsEvalFunPlatform: CliPlatform {
 private var isEvalEnabled = false
 
 private class JsEvalFunProcess(private val code: String): ExecProcess {
-    override fun await() = ExecResult(
+    override fun await(inContent: String?): ExecResult = ExecResult(
         exitValue = 0,
         stdOutAndErr = when {
             isEvalEnabled -> eval(code).toString()

@@ -6,24 +6,31 @@ actual typealias SysPlatform = JvmPlatform
 
 class JvmPlatform: CliPlatform {
 
-    override val isRedirectSupported get() = true
+    override val isRedirectFileSupported get() = true
+    override val isRedirectContentSupported get() = true
 
     private val debug = false
 
     override fun start(
         kommand: Kommand,
+        vararg useNamedArgs: Unit,
         dir: String?,
         inFile: String?,
         outFile: String?
-    ): ExecProcess = JvmExecProcess(ProcessBuilder().apply {
-        val cmdlist = listOf(kommand.name) + kommand.args
-        if (debug) println(cmdlist.joinToString(" "))
-        command(cmdlist)
-        directory(dir?.let(::File))
-        redirectErrorStream(true)
-        inFile?.let { redirectInput(File(it)) }
-        outFile?.let { redirectOutput(File(it)) }
-    }.start())
+    ): ExecProcess =
+        JvmExecProcess(
+            ProcessBuilder()
+                .apply {
+                    val cmdlist = listOf(kommand.name) + kommand.args
+                    if (debug) println(cmdlist.joinToString(" "))
+                    command(cmdlist)
+                    directory(dir?.let(::File))
+                    redirectErrorStream(true)
+                    inFile?.let { redirectInput(File(it)) }
+                    outFile?.let { redirectOutput(File(it)) }
+                }
+                .start()
+        )
 
     override val isJvm get() = true
     override val isDesktop get() = xdgdesktop.isEmpty()
@@ -37,7 +44,8 @@ class JvmPlatform: CliPlatform {
 }
 
 private class JvmExecProcess(private val process: Process): ExecProcess {
-    override fun await(): ExecResult {
+    override fun await(inContent: String?): ExecResult {
+        if (inContent != null) process.outputStream.bufferedWriter().use { it.write(inContent) }
         val output = process.inputStream.bufferedReader().use { it.readLines() }
         val exit = process.waitFor()
         return ExecResult(exit, output)

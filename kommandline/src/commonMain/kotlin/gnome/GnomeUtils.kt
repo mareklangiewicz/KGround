@@ -23,7 +23,7 @@ fun CliPlatform.startInGnomeTermIfUserConfirms(
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
             else -> kommand
         }
-        start(gnometerm(k), execInDir)
+        start(gnometerm(k), dir = execInDir)
     }
 }
 

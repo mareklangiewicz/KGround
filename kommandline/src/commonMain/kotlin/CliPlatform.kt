@@ -6,20 +6,25 @@ typealias Platform = CliPlatform
 interface CliPlatform {
 
     /**
-     * TODO_later: experiment with wrapping some remote platform in sth like bash kommands,
+     * TODO_later: experiment with wrapping some remote (ssh? adb?) platform in sth like bash kommands,
      * so it supports redirect using remote bash operators like < > << >> or sth like that.
      */
-    val isRedirectSupported: Boolean
+    val isRedirectFileSupported: Boolean
+    val isRedirectContentSupported: Boolean
+        // TODO_maybe: more universal redirection via kotlin flows
+        // (but wrapping java.lang.Redirect etc correctly can be tricky..)
 
     /**
      * @param dir working directory for started subprocess - null means inherit from current process
      * @param inFile - redirect std input from given file - null means do not redirect
      * @param outFile - redirect std output (std err too) to given file - null means do not redirect
-     * TODO NOW: support other redirections (streams/strings with content)
+     * TODO_maybe: support other redirections (streams/strings with content)
      *   (might require separate flag like: isRedirectStreamsSupported)
+     *   (also see comment above at isRedirectContentSupported flag)
      */
     fun start(
         kommand: Kommand,
+        vararg useNamedArgs: Unit,
         dir: String? = null,
         inFile: String? = null,
         outFile: String? = null
@@ -28,8 +33,18 @@ interface CliPlatform {
     // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
-    operator fun Kommand.invoke(dir: String? = null, inFile: String? = null, outFile: String? = null) =
-        start(this, dir, inFile, outFile).await().unwrap()
+    operator fun Kommand.invoke(
+        vararg useNamedArgs: Unit,
+        dir: String? = null,
+        inContent: String? = null,
+        inFile: String? = null,
+        outFile: String? = null,
+    ): List<String> {
+        require(isRedirectContentSupported || inContent == null) { "redirect content not supported here" }
+        require(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+        require(inContent == null || inFile == null) { "Either inContent or inFile or none, but not both" }
+        return start(this, dir = dir, inFile = inFile, outFile = outFile).await(inContent).unwrap()
+    }
 
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
@@ -51,13 +66,20 @@ interface CliPlatform {
 
 class FakePlatform: CliPlatform {
 
-    override val isRedirectSupported get() = true // not really, but it's all fake
+    override val isRedirectFileSupported get() = true // not really, but it's all fake
+    override val isRedirectContentSupported get() = true // not really, but it's all fake
 
-    override fun start(kommand: Kommand, dir: String?, inFile: String?, outFile: String?): ExecProcess {
+    override fun start(
+        kommand: Kommand,
+        vararg useNamedArgs: Unit,
+        dir: String?,
+        inFile: String?,
+        outFile: String?
+    ): ExecProcess {
         println("start($kommand, $dir)")
         return object : ExecProcess {
-            override fun await(): ExecResult {
-                println("await()")
+            override fun await(inContent: String?): ExecResult {
+                println("await(..)")
                 return ExecResult(0, emptyList())
             }
             override fun cancel(force: Boolean) = println("cancel($force)")
@@ -71,7 +93,7 @@ expect class SysPlatform(): CliPlatform
 
 
 interface ExecProcess {
-    fun await(): ExecResult
+    fun await(inContent: String? = null): ExecResult
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
     /**
