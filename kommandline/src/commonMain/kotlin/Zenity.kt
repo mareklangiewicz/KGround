@@ -3,23 +3,26 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.kommand.Zenity.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
 
-fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
+fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boolean =
+    start(zenityAskIf(question, atitle)).await().exitValue == 0
 
-// TODO NOW: simple nonexec wrappers + samples
+fun CliPlatform.zenityAskForEntryExec(question: String, atitle: String? = null, suggested: String? = null): String =
+    zenityAskForEntry(question, atitle, suggested).exec().single()
 
-fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boolean = start(zenity(DialogType.question) {
+fun zenityAskIf(question: String, atitle: String? = null) = zenity(DialogType.question) {
     -text(question)
     -nowrap
     atitle?.let { -title(it) }
-}).await().exitValue == 0
+}
 
-fun CliPlatform.zenityAskForEntryExec(question: String, atitle: String? = null, suggested: String? = null): String =
+fun zenityAskForEntry(question: String, atitle: String? = null, suggested: String? = null) =
     zenity(DialogType.entry) {
         -text(question)
         atitle?.let { -title(it) }
         suggested?.let { -entrytext(it) }
-    }.exec().single()
+    }
 
+fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
 
 /*
 * https://help.gnome.org/users/zenity/stable/index.html.en
