@@ -10,11 +10,10 @@ object GhSamples {
     val version = gh { -Gh.Option.version } s "gh --version"
     val status = gh(Gh.Cmd.status) s "gh status"
     val secretListHelp = gh(secret_list) { -Gh.Option.help } s "gh secret list --help"
-    val secretList = gh(secret_list) s "gh secret list"
-    val secretListForAbcdK =
-        gh(secret_list) { -Gh.Option.repo("langara/AbcdK") } s "gh secret list --repo langara/AbcdK"
+    val secretList = ghSecretList() s "gh secret list"
+    val secretListForAbcdK = ghSecretList("langara/AbcdK") s "gh secret list --repo langara/AbcdK"
 
-    /** I don't provide fake secret as input stream when starting this kommand, so it will ask me interactively */
+    // Not providing fake secret as input stream when starting this kommand will ask for it interactively
     val secretSetFakeSecretInAbcdK =
-        gh(secret_set) { +"FAKE_SECRET"; -repo("langara/AbcdK") } s "gh secret set FAKE_SECRET --repo langara/AbcdK"
+        ghSecretSet("FAKE_SECRET", "langara/AbcdK") s "gh secret set FAKE_SECRET --repo langara/AbcdK"
 }
