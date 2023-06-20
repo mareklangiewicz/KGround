@@ -64,7 +64,7 @@ interface CliPlatform {
     }
 }
 
-class FakePlatform: CliPlatform {
+class FakePlatform(private val log: (Any?) -> Unit = ::println): CliPlatform {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
     override val isRedirectContentSupported get() = true // not really, but it's all fake
@@ -76,20 +76,18 @@ class FakePlatform: CliPlatform {
         inFile: String?,
         outFile: String?
     ): ExecProcess {
-        println("start($kommand, $dir)")
+        log("start($kommand, $dir)")
         return object : ExecProcess {
             override fun await(inContent: String?): ExecResult {
-                println("await(..)")
+                log("await(..)")
                 return ExecResult(0, emptyList())
             }
-            override fun cancel(force: Boolean) = println("cancel($force)")
+            override fun cancel(force: Boolean) = log("cancel($force)")
         }
     }
 }
 
 expect class SysPlatform(): CliPlatform
-
-
 
 
 interface ExecProcess {
