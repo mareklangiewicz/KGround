@@ -4,6 +4,7 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.git.Git.*
 import pl.mareklangiewicz.kommand.git.Git.Command.*
 
+/** @return single line with hash of given revision/commit */
 fun gitHash(revision: String = "HEAD") = git(revparse) { +revision }
 fun gitHelp(commandOrConcept: String? = null) = git(help) { commandOrConcept?.let { +it } }
 fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs: String) = git(status) {
