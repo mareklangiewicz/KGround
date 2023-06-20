@@ -2,12 +2,12 @@ package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.*
 
-fun CliPlatform.rmIfFileIsThere(file: String) =
-    if (testIfFileIsThere(file)) rm { +file }() else listOf("File not found")
+fun CliPlatform.rmIfFileIsThereExec(file: String) =
+    if (testIfFileIsThere(file)) rm { +file }.exec() else listOf("File not found")
 
-fun CliPlatform.rmTreeWithForce(path: String, doubleCheck: CliPlatform.(path: String) -> Boolean): List<String> {
+fun CliPlatform.rmTreeWithForceExec(path: String, doubleCheck: CliPlatform.(path: String) -> Boolean): List<String> {
     check(doubleCheck(path)) { "ERROR: Can not remove whole '$path' tree. Double check failed." }
-    return rm { -Rm.Option.recursive; -Rm.Option.force; +path }()
+    return rm { -Rm.Option.recursive; -Rm.Option.force; +path }.exec()
 }
 
 fun rm(init: Rm.() -> Unit = {}) = Rm().apply(init)

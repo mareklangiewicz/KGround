@@ -5,14 +5,14 @@ import pl.mareklangiewicz.kommand.*
 
 // TODO_someday: move head/tail so separate files and create more specific kommand data classes
 
-fun CliPlatform.readFileHead(path: String, nrLines: Int = 10) =
-    kommand("head", "-n", "$nrLines", path)()
-fun CliPlatform.readFileFirstLine(path: String) =
-    readFileHead(path, 1).single()
-fun CliPlatform.readFileTail(path: String, nrLines: Int = 10) =
-    kommand("tail", "-n", "$nrLines", path)()
-fun CliPlatform.readFileLastLine(path: String) =
-    readFileTail(path, 1).single()
+fun CliPlatform.readFileHeadExec(path: String, nrLines: Int = 10) =
+    kommand("head", "-n", "$nrLines", path).exec()
+fun CliPlatform.readFileFirstLineExec(path: String) =
+    readFileHeadExec(path, 1).single()
+fun CliPlatform.readFileTailExec(path: String, nrLines: Int = 10) =
+    kommand("tail", "-n", "$nrLines", path).exec()
+fun CliPlatform.readFileLastLineExec(path: String) =
+    readFileTailExec(path, 1).single()
 
 
 
@@ -20,7 +20,7 @@ fun CliPlatform.readFileLastLine(path: String) =
  * If singleLine is true and the file contains more or less than one line, it throws runtime exception.
  * It should never return just part of the file.
  */
-fun CliPlatform.readFileWithCat(file: String, singleLine: Boolean = false): String = cat { +file }().run {
+fun CliPlatform.readFileWithCatExec(file: String, singleLine: Boolean = false): String = cat { +file }.exec().run {
     if (singleLine) single() else joinToString("\n")
 }
 
@@ -29,8 +29,8 @@ fun CliPlatform.readFileWithCat(file: String, singleLine: Boolean = false): Stri
  * If other RuntimeException happens, it also returns null.
  * It should never return just part of the file.
  */
-fun CliPlatform.tryToReadFileWithCat(file: String, singleLine: Boolean = false): String? =
-    try { readFileWithCat(file, singleLine) } catch (e: RuntimeException) { null }
+fun CliPlatform.tryToReadFileWithCatExec(file: String, singleLine: Boolean = false): String? =
+    try { readFileWithCatExec(file, singleLine) } catch (e: RuntimeException) { null }
 
 fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/cat.1.html) */

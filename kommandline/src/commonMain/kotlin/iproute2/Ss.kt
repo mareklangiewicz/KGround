@@ -1,4 +1,6 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.iproute2
+
+import pl.mareklangiewicz.kommand.*
 
 // TODO NOW: add "ss" command correctly. especially with switches: "ss -tulpn" (and parsing output too?)
 

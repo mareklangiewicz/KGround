@@ -29,7 +29,7 @@ fun CliPlatform.testTmpKonfig() {
             testGivenNewKonfigInDir(konfig, konfigNewDir)
         }
         finally {
-            rmTreeWithForce(konfigNewDir) { pathToUserTmp!! in it && "tmpKonfigForTests" in it }
+            rmTreeWithForceExec(konfigNewDir) { pathToUserTmp!! in it && "tmpKonfigForTests" in it }
         }
     }
 }
@@ -37,16 +37,16 @@ fun CliPlatform.testTmpKonfig() {
 fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
     "is empty" o { konfig.keys.len eq 0 }
     "dir is created" o { testIfFileIsDirectory(dir) eq true }
-    "dir is empty" o { ls(dir, withHidden = true).size eq 0 }
+    "dir is empty" o { lsExec(dir, withHidden = true).size eq 0 }
 
     "On setting new key and value" o {
         konfig["somekey1"] = "somevalue1"
 
         "get returns stored value" o { konfig["somekey1"] eq "somevalue1" }
         "file is created" o { testIfFileIsRegular("$dir/somekey1") eq true }
-        "no other files there" o { ls(dir, withHidden = true) eq listOf("somekey1") }
+        "no other files there" o { lsExec(dir, withHidden = true) eq listOf("somekey1") }
         "file for somekey1 contains correct content" o {
-            val content = readFileWithCat("$dir/somekey1")
+            val content = readFileWithCatExec("$dir/somekey1")
             content eq "somevalue1"
         }
 
@@ -55,10 +55,10 @@ fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
 
             "get returns null" o { konfig["somekey1"] eq null }
             "file is removed" o { testIfFileIsThere("$dir/somekey1") eq false }
-            "no files in konfig dir" o { ls(dir, withHidden = true).size eq 0 }
+            "no files in konfig dir" o { lsExec(dir, withHidden = true).size eq 0 }
 
             "On touch removed file again" o {
-                touch("$dir/somekey1")
+                touchExec("$dir/somekey1")
                 "file is there again" o { testIfFileIsThere("$dir/somekey1") eq true }
                 "get returns not null but empty value" o { konfig["somekey1"] eq "" }
             }

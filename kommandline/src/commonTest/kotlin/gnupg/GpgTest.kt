@@ -19,17 +19,17 @@ class GpgTest {
 
     @Suppress("DEPRECATION")
     @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmPlatform {
-        val inFile = createTempFile("testGED")
+        val inFile = mktempExec("testGED")
         val encFile = "$inFile.enc"
         val decFile = "$inFile.dec"
-        writeFileWithEcho("some plain text 667", outFile = inFile)
-        gpgEncryptPass("correct pass", inFile, encFile)()
-        gpgDecryptPass("correct pass", encFile, decFile)()
-        val decrypted = readFileWithCat(decFile, singleLine = true)
+        writeFileWithEchoExec("some plain text 667", outFile = inFile)
+        gpgEncryptPass("correct pass", inFile, encFile).exec()
+        gpgDecryptPass("correct pass", encFile, decFile).exec()
+        val decrypted = readFileWithCatExec(decFile, singleLine = true)
         assertEquals("some plain text 667", decrypted)
         val err = start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).await()
         assertEquals(2, err.exitValue)
-        rm { +inFile; +encFile; +decFile }()
+        rm { +inFile; +encFile; +decFile }.exec()
     }
 }
 

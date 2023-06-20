@@ -29,24 +29,24 @@ class Langara {
 
     @Test fun demo_repl() = idemo { LangaraREPL() }
 
-    @Test fun demo_htop() = idemo { gnometerm(kommand("htop"))() }
+    @Test fun demo_htop() = idemo { gnometerm(kommand("htop")).exec() }
 
-    @Test fun demo_ps() = idemo { gnometerm(bash("ps -e | grep " + askEntry("find process"), pause = true))() }
+    @Test fun demo_ps() = idemo { gnometerm(bash("ps -e | grep " + askEntry("find process"), pause = true)).exec() }
 
-    @Test fun demo_man() = idemo { gnometerm(man { +askEntry("manual page for") })() }
+    @Test fun demo_man() = idemo { gnometerm(man { +askEntry("manual page for") }).exec() }
 
     @Test fun demo_ideap() = idemo {
-        ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }()
+        ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.exec()
     }
 
     @Test fun demo_bash_export() = idemo {
-        bashGetExportsToFile(tmpNotesFile)
-        ideap { +tmpNotesFile }()
+        bashGetExportsToFileExec(tmpNotesFile)
+        ideap { +tmpNotesFile }.exec()
     }
 
     @Test fun demo_xclip() = idemo {
-        bash("xclip -o > $tmpNotesFile")() // FIXME_later: do it with kotlin instead of bash script
-        ideap { +tmpNotesFile }()
+        bash("xclip -o > $tmpNotesFile").exec() // FIXME_later: do it with kotlin instead of bash script
+        ideap { +tmpNotesFile }.exec()
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
@@ -78,11 +78,11 @@ class Langara {
     @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().printAll()
 
     @Test fun experiment() = idemo {
-        val ideaEnabled = bash("ps -e")().any { it.contains("idea.sh") }
-        if (ideaEnabled) ideap { +tmpNotesFile }() else vim(tmpNotesFile)()
+        val ideaEnabled = bash("ps -e").exec().any { it.contains("idea.sh") }
+        if (ideaEnabled) ideap { +tmpNotesFile }.exec() else vim(tmpNotesFile).exec()
     }
 }
 
 private fun idemo(platform: CliPlatform = SYS, block: CliPlatform.() -> Unit) = ifInteractive { platform.block() }
-private fun CliPlatform.askIf(question: String) = zenityAskIf(question)
-private fun CliPlatform.askEntry(question: String, suggested: String? = null) = zenityAskForEntry(question, suggested = suggested)
+private fun CliPlatform.askIf(question: String) = zenityAskIfExec(question)
+private fun CliPlatform.askEntry(question: String, suggested: String? = null) = zenityAskForEntryExec(question, suggested = suggested)

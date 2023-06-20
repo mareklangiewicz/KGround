@@ -33,7 +33,8 @@ interface CliPlatform {
     // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
-    operator fun Kommand.invoke(
+    // TODO_someday: move it outside as Kommand extension with CliPlatform context receiver
+    fun Kommand.exec(
         vararg useNamedArgs: Unit,
         dir: String? = null,
         inContent: String? = null,
@@ -64,7 +65,10 @@ interface CliPlatform {
     }
 }
 
-class FakePlatform(private val log: (Any?) -> Unit = ::println): CliPlatform {
+class FakePlatform(
+    private val checkStart: (Kommand, String?, String?, String?) -> Unit = { _, _, _, _ -> },
+    private val checkAwait: (String?) -> Unit = {},
+    private val log: (Any?) -> Unit = ::println): CliPlatform {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
     override val isRedirectContentSupported get() = true // not really, but it's all fake
@@ -77,10 +81,12 @@ class FakePlatform(private val log: (Any?) -> Unit = ::println): CliPlatform {
         outFile: String?
     ): ExecProcess {
         log("start($kommand, $dir)")
+        checkStart(kommand, dir, inFile, outFile)
         return object : ExecProcess {
             override fun await(inContent: String?): ExecResult {
                 log("await(..)")
-                return ExecResult(0, emptyList())
+                checkAwait(inContent)
+                return ExecResult(0, listOf("fake output")) // many kommand wrappers expect single line output
             }
             override fun cancel(force: Boolean) = log("cancel($force)")
         }

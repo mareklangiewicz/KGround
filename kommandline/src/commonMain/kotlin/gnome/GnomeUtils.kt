@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.CliPlatform
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.line
-import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.kommand.zenityAskIfExec
 
 
 fun CliPlatform.startInGnomeTermIfUserConfirms(
@@ -17,7 +17,7 @@ fun CliPlatform.startInGnomeTermIfUserConfirms(
     pauseBeforeExit: Boolean = insideBash,
     execInDir: String? = null
 ) {
-    if (zenityAskIf(confirmation, title)) {
+    if (zenityAskIfExec(confirmation, title)) {
         val k = when {
             insideBash -> bash(kommand, pauseBeforeExit)
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")

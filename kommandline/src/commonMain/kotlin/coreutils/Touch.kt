@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.coreutils
 import pl.mareklangiewicz.kommand.*
 
 /** Update the access and modification times of each file to the current time. Create empty files if necessary. */
-fun CliPlatform.touch(vararg files: String) = touch { this.files.addAll(files) }()
+fun CliPlatform.touchExec(vararg files: String) = touch { this.files.addAll(files) }.exec()
 
 fun touch(init: Touch.() -> Unit = {}) = Touch().apply(init)
 

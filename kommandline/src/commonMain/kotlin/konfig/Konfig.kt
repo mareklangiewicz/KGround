@@ -40,15 +40,15 @@ fun CliPlatform.konfigInDir(
 
 private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = CliPlatform.SYS): IKonfig {
 
-    init { platform.run { mkdir { -parents; +dir }() } }
+    init { platform.run { mkdir { -parents; +dir }.exec() } }
 
-    override fun get(key: String): String? = platform.tryToReadFileWithCat("$dir/$key")
+    override fun get(key: String): String? = platform.tryToReadFileWithCatExec("$dir/$key")
 
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
         platform.run {
-            if (item == null) rmIfFileIsThere(file)
-            else writeFileWithEcho(item, outFile = file)
+            if (item == null) rmIfFileIsThereExec(file)
+            else writeFileWithEchoExec(item, outFile = file)
                 // TODO_someday: Use sth else to make it work on platforms without isRedirectSupported
         }
     }

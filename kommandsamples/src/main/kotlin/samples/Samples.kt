@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.kommand.samples
 
-import pl.mareklangiewicz.kommand.Kommand
+import pl.mareklangiewicz.kommand.*
 
 data class Sample(
     val kommand: Kommand,

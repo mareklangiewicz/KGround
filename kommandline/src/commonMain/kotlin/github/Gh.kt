@@ -13,13 +13,16 @@ import pl.mareklangiewicz.kommand.github.Gh.Option.*
  * @param secretValue if not provided, the gh will try to ask interactively (in terminal)
  * @param repoPath Select another repository using the [HOST/]OWNER/REPO format
  */
-fun CliPlatform.ghSecretSet(secretName: String, secretValue: String? = null, repoPath: String? = null) =
-    gh(secret_set) { + secretName; repoPath?.let { - repo(it) } }(inContent = secretValue)
+fun CliPlatform.ghSecretSetExec(secretName: String, secretValue: String? = null, repoPath: String? = null) =
+    gh(secret_set) { +secretName; repoPath?.let { -repo(it) } }.exec(inContent = secretValue)
 
-fun CliPlatform.ghSecretSetFromFile(secretName: String, filePath: String, repoPath: String? = null) =
-    gh(secret_set) { + secretName; repoPath?.let { - repo(it) } }(inFile = filePath)
+fun CliPlatform.ghSecretSetFromFileExec(secretName: String, filePath: String, repoPath: String? = null) =
+    gh(secret_set) { +secretName; repoPath?.let { -repo(it) } }.exec(inFile = filePath)
 
-fun CliPlatform.ghSecretList(repoPath: String? = null) = gh(secret_list) { repoPath?.let { - repo(it) } }()
+fun CliPlatform.ghSecretListExec(repoPath: String? = null) = gh(secret_list) { repoPath?.let { -repo(it) } }.exec()
+
+
+// TODO NOW: add versions for extensions above without exec and with samples
 
 fun gh(cmd: Cmd? = null, init: Gh.() -> Unit = {}) = Gh(cmd).apply(init)
 

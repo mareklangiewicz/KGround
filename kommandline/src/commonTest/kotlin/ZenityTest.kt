@@ -63,7 +63,7 @@ class ZenityTest {
         }
     }.checkWithUser()
     @Test fun testZenityListFromLs() = SYS.run { // TODO_someday: nice parsing for ls output columns etc..
-        val lines = ls { -all; -long; -humanReadable }()
+        val lines = ls { -all; -long; -humanReadable }.exec()
         zenity(list) {
             -text("ls output")
             -column("ls output")

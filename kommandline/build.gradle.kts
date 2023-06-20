@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib {
-    api(Langiewicz.upue.withVer(Ver(0, 0, 12))) // FIXME: remove hardcoded version after DepsKt update
+    api(Langiewicz.upue)
 }
 
 kotlin { js(IR) { nodejs() } }

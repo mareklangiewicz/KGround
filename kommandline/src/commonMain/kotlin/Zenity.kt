@@ -5,18 +5,20 @@ import pl.mareklangiewicz.kommand.Zenity.Option.*
 
 fun zenity(type: DialogType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
 
-fun CliPlatform.zenityAskIf(question: String, atitle: String? = null): Boolean = start(zenity(DialogType.question) {
+// TODO NOW: simple nonexec wrappers + samples
+
+fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boolean = start(zenity(DialogType.question) {
     -text(question)
     -nowrap
     atitle?.let { -title(it) }
 }).await().exitValue == 0
 
-fun CliPlatform.zenityAskForEntry(question: String, atitle: String? = null, suggested: String? = null): String =
+fun CliPlatform.zenityAskForEntryExec(question: String, atitle: String? = null, suggested: String? = null): String =
     zenity(DialogType.entry) {
         -text(question)
         atitle?.let { -title(it) }
         suggested?.let { -entrytext(it) }
-    }().single()
+    }.exec().single()
 
 
 /*

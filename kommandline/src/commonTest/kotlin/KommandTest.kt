@@ -7,8 +7,9 @@ import pl.mareklangiewicz.kommand.Ide.Cmd.diff
 import pl.mareklangiewicz.kommand.Ide.Option.*
 import pl.mareklangiewicz.kommand.Man.Section.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import pl.mareklangiewicz.kommand.Ss.Option.*
-import pl.mareklangiewicz.kommand.Ss.Option.tcp
+import pl.mareklangiewicz.kommand.iproute2.*
+import pl.mareklangiewicz.kommand.iproute2.Ss.Option.*
+import pl.mareklangiewicz.kommand.iproute2.Ss.Option.tcp
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.coreutils.*
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
@@ -34,7 +35,7 @@ class KommandTest {
         .checkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
     @Test fun testLs2() = ls { -all; -author; -long; -humanReadable; +"/home/marek" }.checkInIdeap()
     @Test fun testLs3() = ls { +"/home/marek" }.checkInIdeap()
-    @Test fun testLsHome() = SYS.ls("/home/marek").printlns()
+    @Test fun testLsHome() = SYS.lsExec("/home/marek").printlns()
     @Test fun testLsHomeSubDirs() = SYS.lsSubDirs("/home/marek").printlns()
     @Test fun testLsHomeSubDirsWithHidden() = SYS.lsSubDirs("/home/marek", withHidden = true).printlns()
     @Test fun testLsHomeRegFiles() = SYS.lsRegFiles("/home/marek").printlns()
@@ -71,14 +72,14 @@ class KommandTest {
     @Test fun testWhich() = which { +"vim" }.checkWithUser()
 
     @Ignore // jitpack
-    @Test fun testCreateTempFile() = println(SYS.createTempFile())
+    @Test fun testCreateTempFile() = println(SYS.mktempExec())
     @Test fun testBash() {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
         kommand2.checkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
     }
-    @Test fun testBashGetExports() = SYS.bashGetExports().forEach { println(it) }
+    @Test fun testBashGetExports() = SYS.bashGetExportsExec().forEach { println(it) }
     @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.checkWithUser()
     @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.checkWithUser()
 }

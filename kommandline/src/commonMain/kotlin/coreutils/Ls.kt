@@ -5,13 +5,15 @@ import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.colorType.*
 import pl.mareklangiewicz.kommand.coreutils.Ls.Option.indicatorStyle.*
 
-fun CliPlatform.ls(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
-    ls { +dir; -one; -dirsFirst; -color(NEVER); -escape; -indicator(style); if (withHidden) -almostAll }()
+fun CliPlatform.lsExec(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
+    ls { +dir; -one; -dirsFirst; -color(NEVER); -escape; -indicator(style); if (withHidden) -almostAll }.exec()
 
 fun CliPlatform.lsRegFiles(dir: String, withHidden: Boolean = false) =
-    ls(dir, withHidden, SLASH).filter { !it.endsWith('/') }
+    lsExec(dir, withHidden, SLASH).filter { !it.endsWith('/') }
 fun CliPlatform.lsSubDirs(dir: String, withHidden: Boolean = false) =
-    ls(dir, withHidden, SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
+    lsExec(dir, withHidden, SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
+
+// TODO NOW: add versions of above without exec + samples
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
