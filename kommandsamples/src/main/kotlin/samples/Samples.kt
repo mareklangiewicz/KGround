@@ -11,6 +11,7 @@ internal infix fun Kommand.s(expectedLine: String) = Sample(this, expectedLine =
 
 
 object Samples {
+    val CoreUtils = pl.mareklangiewicz.kommand.coreutils.CoreUtilsSamples
     val Git = pl.mareklangiewicz.kommand.git.GitSamples
     val GitHub = pl.mareklangiewicz.kommand.github.GhSamples
 }

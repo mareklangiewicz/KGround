@@ -1,8 +1,8 @@
 package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kommand.github.Gh.Cmd.*
-import pl.mareklangiewicz.kommand.github.Gh.Option.*
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.kommand.CliPlatform
 
 object GhSamples {
     val help = gh(Gh.Cmd.help) s "gh help"
@@ -16,4 +16,11 @@ object GhSamples {
     // Not providing fake secret as input stream when starting this kommand will ask for it interactively
     val secretSetFakeSecretInAbcdK =
         ghSecretSet("FAKE_SECRET", "langara/AbcdK") s "gh secret set FAKE_SECRET --repo langara/AbcdK"
+
+    // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
+    val execs = listOf(
+        CliPlatform::ghSecretListExec,
+        CliPlatform::ghSecretSetExec,
+        CliPlatform::ghSecretSetFromFileExec
+    )
 }

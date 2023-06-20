@@ -43,6 +43,6 @@ fun testSample(sample: Sample) = "check kommand.line" o {
 @Suppress("UNCHECKED_CAST")
 private fun <T : Any> T.getNamedPropsValues(): List<Pair<String, Any?>> {
     return (this::class as KClass<T>).declaredMemberProperties
-        .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.visibility == KVisibility.PUBLIC && it.name != "execs" }
         .map { it.getter.isAccessible = true; it.name to it(this) }
 }
