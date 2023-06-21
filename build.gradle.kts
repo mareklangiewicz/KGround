@@ -13,7 +13,7 @@ defaultBuildTemplateForRootProject(
         name = "KommandLine",
         description = "Kotlin DSL for popular CLI commands.",
         githubUrl = "https://github.com/langara/KommandLine",
-        version = Ver(0, 0, 14)
+        version = Ver(0, 0, 15)
     ),
     withSonatypeOssPublishing = true,
 )
