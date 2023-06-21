@@ -18,6 +18,8 @@ fun ls(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
     ls { +dir; -one; -dirsFirst; -color(NEVER); -escape; -indicator(style); if (withHidden) -almostAll }
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
+
+
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
 data class Ls(
     val options: MutableList<Option> = mutableListOf(),

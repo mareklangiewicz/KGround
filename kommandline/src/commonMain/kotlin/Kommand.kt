@@ -5,6 +5,10 @@ package pl.mareklangiewicz.kommand
 /** anonymous kommand to use only if no more specific Kommand class defined */
 fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
 
+fun String.toKommand() = split(" ").run {
+    kommand(first(), *drop(1).toTypedArray())
+}
+
 // TODO_later: full documentation in kdoc (all commands, options, etc)
 //  (check in practice to make sure it's optimal for IDE users)
 
