@@ -3,9 +3,9 @@ package pl.mareklangiewicz.kommand.coreutils
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
 import pl.mareklangiewicz.kommand.coreutils.LsOpt.ColorType.*
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.indicatorStyle.*
+import pl.mareklangiewicz.kommand.coreutils.LsOpt.IndicatorStyle.*
 
-fun CliPlatform.lsExec(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
+fun CliPlatform.lsExec(dir: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     ls(dir, withHidden, style).exec()
 
 fun CliPlatform.lsRegFilesExec(dir: String, withHidden: Boolean = false) =
@@ -14,8 +14,8 @@ fun CliPlatform.lsRegFilesExec(dir: String, withHidden: Boolean = false) =
 fun CliPlatform.lsSubDirsExec(dir: String, withHidden: Boolean = false) =
     lsExec(dir, withHidden, SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
 
-fun ls(dir: String, withHidden: Boolean = false, style: indicatorStyle = NONE) =
-    ls { +dir; -One; -DirsFirst; -Color(NEVER); -Escape; -indicator(style); if (withHidden) -AlmostAll }
+fun ls(dir: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
+    ls { +dir; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 
@@ -82,50 +82,50 @@ interface LsOpt: KOpt {
 
     object NoGroup : KOptS("G"), LsOpt
 
-    object long : KOptS("l"), LsOpt
-    object longWithoutOwner : KOptS("g"), LsOpt
-    object longWithoutGroup : KOptS("o"), LsOpt
+    object Long : KOptS("l"), LsOpt
+    object LongWithoutOwner : KOptS("g"), LsOpt
+    object LongWithoutGroup : KOptS("o"), LsOpt
 
-    object humanReadable : KOptS("h"), LsOpt
-    object humanReadableSI : KOptL("si"), LsOpt
+    object HumanReadable : KOptS("h"), LsOpt
+    object HumanReadableSI : KOptL("si"), LsOpt
 
-    object dereference : KOptL("dereference"), LsOpt
-    object dereferenceCommandLine : KOptL("dereference-command-line"), LsOpt
-    object dereferenceCommandLineSymlinkToDir : KOptL("dereference-command-line-symlink-to-dir"), LsOpt
+    object Dereference : KOptL("dereference"), LsOpt
+    object DereferenceCommandLine : KOptL("dereference-command-line"), LsOpt
+    object DereferenceCommandLineSymlinkToDir : KOptL("dereference-command-line-symlink-to-dir"), LsOpt
 
-    data class hide(val pattern: String): KOptL("hide", pattern), LsOpt
+    data class Hide(val pattern: String): KOptL("hide", pattern), LsOpt
     /** print ? instead of nongraphic characters */
-    object hideControlChars : KOptL("hide-control-chars"), LsOpt
+    object HideControlChars : KOptL("hide-control-chars"), LsOpt
     /** show nongraphic characters as-is (the default, unless program is 'ls' and output is a terminal) */
-    object showControlChars : KOptL("show-control-chars"), LsOpt
+    object ShowControlChars : KOptL("show-control-chars"), LsOpt
 
-    data class hyperlink(val type: hyperlinkType): KOptL("hyperlink", "$type"), LsOpt
-    enum class hyperlinkType { ALWAYS, AUTO, NEVER;
+    data class Hyperlink(val type: HyperlinkType): KOptL("hyperlink", "$type"), LsOpt
+    enum class HyperlinkType { ALWAYS, AUTO, NEVER;
         override fun toString() = super.toString().lowercase()
     }
 
-    data class indicator(val style: indicatorStyle): KOptL("indicator-style", "$style"), LsOpt
-    enum class indicatorStyle { NONE, SLASH, FILETYPE, CLASSIFY;
+    data class Indicator(val style: IndicatorStyle): KOptL("indicator-style", "$style"), LsOpt
+    enum class IndicatorStyle { NONE, SLASH, FILETYPE, CLASSIFY;
         override fun toString() = if (this == FILETYPE) "file-type" else super.toString().lowercase()
     }
-    object indicatorSlash : KOptS("p"), LsOpt
+    object IndicatorSlash : KOptS("p"), LsOpt
 
-    object inode : KOptL("inode"), LsOpt
+    object INode : KOptL("inode"), LsOpt
 
-    data class ignore(val pattern: String): KOptL("ignore", pattern), LsOpt
+    data class Ignore(val pattern: String): KOptL("ignore", pattern), LsOpt
 
-    object kibibytes : KOptL("kibibytes"), LsOpt
+    object Kibibytes : KOptL("kibibytes"), LsOpt
 
-    object commas : KOptS("m"), LsOpt
+    object Commas : KOptS("m"), LsOpt
 
-    object numericUidGid : KOptL("numeric-uid-gid"), LsOpt
+    object NumericUidGid : KOptL("numeric-uid-gid"), LsOpt
 
-    object literal : KOptL("literal"), LsOpt
+    object Literal : KOptL("literal"), LsOpt
 
-    object quoteName : KOptL("quote-name"), LsOpt
+    object QuoteName : KOptL("quote-name"), LsOpt
 
-    data class quoting(val style: quotingStyle): KOptL("quoting-style", "$style"), LsOpt
-    enum class quotingStyle { LITERAL, LOCALE, SHELL, SHELLALWAYS, SHELLESCAPE, SHELLESCAPEALWAYS, C, ESCAPE;
+    data class Quoting(val style: QuotingStyle): KOptL("quoting-style", "$style"), LsOpt
+    enum class QuotingStyle { LITERAL, LOCALE, SHELL, SHELLALWAYS, SHELLESCAPE, SHELLESCAPEALWAYS, C, ESCAPE;
         override fun toString() = when (this) {
             SHELLALWAYS -> "shell-always"
             SHELLESCAPE -> "shell-escape"
@@ -134,26 +134,26 @@ interface LsOpt: KOpt {
         }
     }
 
-    object reverse : KOptS("r"), LsOpt
+    object Reverse : KOptS("r"), LsOpt
 
-    object recursive : KOptS("R"), LsOpt
+    object Recursive : KOptS("R"), LsOpt
 
-    object size : KOptS("s"), LsOpt
+    object Size : KOptS("s"), LsOpt
 
-    data class sort(val type: sortType): KOptL("sort", "$type"), LsOpt
-    enum class sortType { NONE, SIZE, TIME, VERSION, EXTENSION;
+    data class Sort(val type: SortType): KOptL("sort", "$type"), LsOpt
+    enum class SortType { NONE, SIZE, TIME, VERSION, EXTENSION;
         override fun toString() = super.toString().lowercase()
     }
     /** largest first */
-    object sortBySize : KOptS("S"), LsOpt
-    object sortByTime : KOptS("t"), LsOpt
+    object SortBySize : KOptS("S"), LsOpt
+    object SortByTime : KOptS("t"), LsOpt
     /** do not sort */
-    object sortByNothing : KOptS("U"), LsOpt
+    object SortByNothing : KOptS("U"), LsOpt
     /** FIXME_later: what does it mean: natural sort of (version) numbers within text */
-    object sortByNatural : KOptS("v"), LsOpt
-    object sortByExtension : KOptS("X"), LsOpt
+    object SortByNatural : KOptS("v"), LsOpt
+    object SortByExtension : KOptS("X"), LsOpt
 
-    data class time(val type: timeType): KOptL("time", "$type"), LsOpt
+    data class Time(val type: TimeType): KOptL("time", "$type"), LsOpt
 
     /**
      * There are duplicates:
@@ -161,21 +161,21 @@ interface LsOpt: KOpt {
      * last change time: CTIME, STATUS
      * creation time: BIRTH, CREATION
      */
-    enum class timeType { ATIME, ACCESS, USE, CTIME, STATUS, BIRTH, CREATION;
+    enum class TimeType { ATIME, ACCESS, USE, CTIME, STATUS, BIRTH, CREATION;
         override fun toString() = super.toString().lowercase()
     }
-    object timeOfAccess : KOptS("u"), LsOpt
-    object timeOfChange : KOptS("c"), LsOpt
-    object timeOfBirth : KOptL("time", "birth"), LsOpt
+    object TimeOfAccess : KOptS("u"), LsOpt
+    object TimeOfChange : KOptS("c"), LsOpt
+    object TimeOfBirth : KOptL("time", "birth"), LsOpt
 
-    data class timeStyle(val style: String): KOptL("time-style", style), LsOpt
+    data class TimeStyle(val style: String): KOptL("time-style", style), LsOpt
 
-    data class tabSize(val size: Int): KOptL("tabsize", "$size"), LsOpt
+    data class TabSize(val size: Int): KOptL("tabsize", "$size"), LsOpt
 
-    data class width(val columns: Int): KOptL("width", "$columns"), LsOpt
+    data class Width(val columns: Int): KOptL("width", "$columns"), LsOpt
 
-    object printContext : KOptL("context"), LsOpt
+    object PrintContext : KOptL("context"), LsOpt
 
-    object help : KOptL("help"), LsOpt
-    object version : KOptL("version"), LsOpt
+    object Help : KOptL("help"), LsOpt
+    object Version : KOptL("version"), LsOpt
 }

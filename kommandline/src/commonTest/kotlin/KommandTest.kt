@@ -31,9 +31,9 @@ class KommandTest {
         println(out)
         assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
     }
-    @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -long; -sort(TIME); +".."; +"/usr" }
+    @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -Long; -sort(TIME); +".."; +"/usr" }
         .checkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
-    @Test fun testLs2() = ls { -All; -Author; -long; -humanReadable; +"/home/marek" }.checkInIdeap()
+    @Test fun testLs2() = ls { -All; -Author; -Long; -humanReadable; +"/home/marek" }.checkInIdeap()
     @Test fun testLs3() = ls { +"/home/marek" }.checkInIdeap()
     @Test fun testLsHome() = SYS.lsExec("/home/marek").printlns()
     @Test fun testLsHomeSubDirs() = SYS.lsSubDirsExec("/home/marek").printlns()
