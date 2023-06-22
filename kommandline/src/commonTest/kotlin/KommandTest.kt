@@ -15,10 +15,11 @@ import pl.mareklangiewicz.kommand.coreutils.*
 import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
 import pl.mareklangiewicz.kommand.coreutils.LsOpt.All
 import pl.mareklangiewicz.kommand.coreutils.LsOpt.ColorType.*
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.sortType.*
+import pl.mareklangiewicz.kommand.coreutils.LsOpt.SortType.*
 import pl.mareklangiewicz.kommand.coreutils.MkDir.Option.*
 import pl.mareklangiewicz.kommand.coreutils.Rm.Option.*
 import kotlin.test.*
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 
@@ -31,9 +32,9 @@ class KommandTest {
         println(out)
         assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
     }
-    @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -Long; -sort(TIME); +".."; +"/usr" }
+    @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -Long; -Sort(TIME); +".."; +"/usr" }
         .checkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
-    @Test fun testLs2() = ls { -All; -Author; -Long; -humanReadable; +"/home/marek" }.checkInIdeap()
+    @Test fun testLs2() = ls { -All; -Author; -Long; -HumanReadable; +"/home/marek" }.checkInIdeap()
     @Test fun testLs3() = ls { +"/home/marek" }.checkInIdeap()
     @Test fun testLsHome() = SYS.lsExec("/home/marek").printlns()
     @Test fun testLsHomeSubDirs() = SYS.lsSubDirsExec("/home/marek").printlns()
