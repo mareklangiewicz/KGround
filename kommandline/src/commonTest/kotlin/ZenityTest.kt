@@ -1,8 +1,6 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.coreutils.Ls.Option.all
-import pl.mareklangiewicz.kommand.coreutils.Ls.Option.humanReadable
-import pl.mareklangiewicz.kommand.coreutils.Ls.Option.long
+import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.Zenity.DialogType.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
@@ -63,7 +61,7 @@ class ZenityTest {
         }
     }.checkWithUser()
     @Test fun testZenityListFromLs() = SYS.run { // TODO_someday: nice parsing for ls output columns etc..
-        val lines = ls { -all; -long; -humanReadable }.exec()
+        val lines = ls { -All; -long; -humanReadable }.exec()
         zenity(list) {
             -text("ls output")
             -column("ls output")

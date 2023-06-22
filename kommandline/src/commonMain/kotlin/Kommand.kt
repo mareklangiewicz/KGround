@@ -25,4 +25,31 @@ fun Kommand.lineBash() = (listOf(name) + args.map { bashQuoteMetaChars(it) }).jo
 fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
 fun Kommand.println() = println(line())
 
+/** Kommand option */
+interface KOpt {
+    val name: String
+    val value: String? get() = null
+    val prefix: String get() = "--"
+    val separator: String get() = "="
 
+    /**
+     * Usually just one arg like: "--sort=size"
+     * These args are meant to be just added to particular Kommand.args.
+     * No separate property for option "name" here,
+     * so usually first arg (or prefix of single arg) is actual option name.
+     */
+    val args: List<String> get() = when {
+        value == null -> listOf("$prefix$name")
+        separator == " " -> listOf("$prefix$name", value!!)
+        else -> listOf("$prefix$name$separator$value")
+    }
+}
+
+/** Long form of an option */
+open class KOptL(override val name: String, override val value: String? = null) : KOpt
+
+/** Short form of an option */
+open class KOptS(override val name: String, override val value: String? = null) : KOpt {
+    override val prefix: String get() = "-"
+    override val separator: String get() = " "
+}

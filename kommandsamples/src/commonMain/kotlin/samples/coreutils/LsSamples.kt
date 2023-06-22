@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand.coreutils
 
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.coreutils.Ls.Option.*
+import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
 
 private val lsCommon = "-1 --group-directories-first --color=never --escape"
 
