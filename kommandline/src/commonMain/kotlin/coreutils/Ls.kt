@@ -82,7 +82,7 @@ interface LsOpt: KOpt {
 
     object NoGroup : KOptS("G"), LsOpt
 
-    object Long : KOptS("l"), LsOpt
+    object LongFormat : KOptS("l"), LsOpt // option name is not just Long to avoid clash with Long data type
     object LongWithoutOwner : KOptS("g"), LsOpt
     object LongWithoutGroup : KOptS("o"), LsOpt
 
