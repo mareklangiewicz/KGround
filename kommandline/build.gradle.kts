@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib {
-    api(Langiewicz.upue)
+    api(Langiewicz.upue.withVer(Ver(0, 0, 14))) // FIXME: hardcoded ver
 }
 
 kotlin { js(IR) { nodejs() } }
