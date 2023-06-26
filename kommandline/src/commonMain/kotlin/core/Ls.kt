@@ -1,9 +1,9 @@
-package pl.mareklangiewicz.kommand.coreutils
+package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.ColorType.*
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.IndicatorStyle.*
+import pl.mareklangiewicz.kommand.core.LsOpt.*
+import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
+import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
 fun CliPlatform.lsExec(dir: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     ls(dir, withHidden, style).exec()

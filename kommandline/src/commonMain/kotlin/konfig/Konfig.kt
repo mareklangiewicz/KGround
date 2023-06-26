@@ -1,8 +1,8 @@
 package pl.mareklangiewicz.kommand.konfig
 
 import pl.mareklangiewicz.kommand.CliPlatform
-import pl.mareklangiewicz.kommand.coreutils.*
-import pl.mareklangiewicz.kommand.coreutils.MkDir.Option.parents
+import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.core.MkDir.Option.parents
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 

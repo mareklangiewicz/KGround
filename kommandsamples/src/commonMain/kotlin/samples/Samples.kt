@@ -13,8 +13,8 @@ internal infix fun Kommand.s(expectedLine: String) = Sample(this, expectedLine =
 
 
 object Samples {
-    val CoreUtils = pl.mareklangiewicz.kommand.coreutils.CoreUtilsSamples
-    val DebianUtils = pl.mareklangiewicz.kommand.debianutils.DebianUtilsSamples
+    val Core = pl.mareklangiewicz.kommand.core.CoreSamples
+    val Debian = pl.mareklangiewicz.kommand.debian.DebianSamples
     val Git = pl.mareklangiewicz.kommand.git.GitSamples
     val GitHub = pl.mareklangiewicz.kommand.github.GhSamples
 }

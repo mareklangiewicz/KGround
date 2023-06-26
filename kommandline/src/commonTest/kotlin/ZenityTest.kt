@@ -1,10 +1,10 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
+import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.Zenity.DialogType.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
-import pl.mareklangiewicz.kommand.coreutils.*
+import pl.mareklangiewicz.kommand.core.*
 import kotlin.test.Test
 
 

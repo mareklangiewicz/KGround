@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand.gnupg
 
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.coreutils.*
+import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.Cmd.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.Option.*
 import kotlin.test.*

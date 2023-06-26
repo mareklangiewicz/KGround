@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kommand.debianutils
+package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.kommand.*
 

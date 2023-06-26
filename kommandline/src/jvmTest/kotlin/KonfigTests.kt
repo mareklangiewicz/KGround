@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import org.junit.jupiter.api.TestFactory
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import pl.mareklangiewicz.kommand.coreutils.*
+import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.konfig.IKonfig
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.upue.asEncodedIfAbc16

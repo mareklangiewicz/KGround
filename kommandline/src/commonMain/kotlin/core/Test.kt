@@ -1,7 +1,7 @@
-package pl.mareklangiewicz.kommand.coreutils
+package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.coreutils.FileTest.*
+import pl.mareklangiewicz.kommand.core.FileTest.*
 
 fun CliPlatform.testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
 fun CliPlatform.testIfFirstFileNewer(file1: String, file2:String) = testIf(file1, "-nt", file2)

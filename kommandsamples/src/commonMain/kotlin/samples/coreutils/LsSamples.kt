@@ -1,8 +1,8 @@
-package pl.mareklangiewicz.kommand.coreutils
+package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.coreutils.LsOpt.*
+import pl.mareklangiewicz.kommand.core.LsOpt.*
 
 private val lsCommon = "-1 --group-directories-first --color=never --escape"
 
