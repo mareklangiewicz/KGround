@@ -28,9 +28,9 @@ fun Kommand.println() = println(line())
 /** Kommand option */
 interface KOpt {
     val name: String
-    val value: String? get() = null
-    val prefix: String get() = "--"
-    val separator: String get() = "="
+    val value: String?
+    val prefix: String
+    val separator: String
 
     /**
      * Usually just one arg like: "--sort=size"
@@ -46,10 +46,17 @@ interface KOpt {
 }
 
 /** Long form of an option */
-open class KOptL(override val name: String, override val value: String? = null) : KOpt
+open class KOptL(
+    override val name: String,
+    override val value: String? = null,
+    override val prefix: String = "--",
+    override val separator: String = "=",
+) : KOpt
 
 /** Short form of an option */
-open class KOptS(override val name: String, override val value: String? = null) : KOpt {
-    override val prefix: String get() = "-"
-    override val separator: String get() = " "
-}
+open class KOptS(
+    override val name: String,
+    override val value: String? = null,
+    override val prefix: String = "-",
+    override val separator: String = " ",
+) : KOpt
