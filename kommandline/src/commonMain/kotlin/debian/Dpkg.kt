@@ -4,7 +4,7 @@ package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.kommand.*
 
-fun CliPlatform.whichOneDpkgExec(command: String) =
+fun CliPlatform.dpkgSearchOneCommandExec(command: String) =
     whichOneExec(command)?.let { dpkg(DpkgAct.Search(it)).exec() }
 
 /** There has to be exactly one action in each invocation */

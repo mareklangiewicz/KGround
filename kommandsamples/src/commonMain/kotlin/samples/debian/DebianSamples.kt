@@ -33,5 +33,6 @@ object DpkgSamples {
 
     // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
     val execs: List<KFunction<*>> = listOf(
+        CliPlatform::dpkgSearchOneCommandExec,
     )
 }
