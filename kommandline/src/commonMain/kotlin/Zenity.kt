@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kommand.Zenity.*
@@ -5,6 +7,9 @@ import pl.mareklangiewicz.kommand.Zenity.Option.*
 
 fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boolean =
     start(zenityAskIf(question, atitle)).await().exitValue == 0
+
+fun CliPlatform.zenityAskForPasswordExec(question: String = "Enter password", atitle: String? = null): String =
+    zenityAskForPassword(question, atitle).exec().single()
 
 fun CliPlatform.zenityAskForEntryExec(question: String, atitle: String? = null, suggested: String? = null): String =
     zenityAskForEntry(question, atitle, suggested).exec().single()
@@ -14,6 +19,13 @@ fun zenityAskIf(question: String, atitle: String? = null) = zenity(DialogType.qu
     -nowrap
     atitle?.let { -title(it) }
 }
+
+fun zenityAskForPassword(question: String = "Enter password", atitle: String? = null) =
+    zenity(DialogType.entry) {
+        -hidetext
+        -text(question)
+        atitle?.let { -title(it) }
+    }
 
 fun zenityAskForEntry(question: String, atitle: String? = null, suggested: String? = null) =
     zenity(DialogType.entry) {

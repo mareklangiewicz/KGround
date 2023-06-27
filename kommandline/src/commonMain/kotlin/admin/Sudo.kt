@@ -4,6 +4,12 @@ package pl.mareklangiewicz.kommand.admin
 
 import pl.mareklangiewicz.kommand.*
 
+fun CliPlatform.sudoExec(k: Kommand, asUser: String? = null, inPass: String? = null, vararg options: SudoOpt) =
+    sudo(k, *options) {
+        asUser?.let { -SudoOpt.User(it) }
+        inPass?.let { -SudoOpt.Stdin; -SudoOpt.Prompt("") }
+    }.exec(inContent = inPass)
+
 fun sudoEdit(file: String, asUser: String? = null) = sudo {
     -SudoOpt.Edit; asUser?.let { -SudoOpt.User(it) }; +file
 }

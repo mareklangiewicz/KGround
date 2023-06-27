@@ -107,6 +107,13 @@ interface ExecProcess {
     fun cancel(force: Boolean)
 }
 
+/**
+ * Represents the result of execution an external process.
+ * @param exitValue The exit value of the process.
+ * @param stdOutAndErr The standard output and error of the process, combined in a single list of strings.
+ * It's better to always have std out and err merged, so it's always clear after which output there was an error.
+ * Also, KommandLine is generally wrapping commands in functions, so it's more composable to have just one output.
+ */
 data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
 
 /**
@@ -115,7 +122,12 @@ data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
  */
 fun ExecResult.unwrap(expectedExitValue: Int = 0): List<String> =
     if (exitValue == expectedExitValue) stdOutAndErr
-    else error("Exit value $exitValue is not equal to expected $expectedExitValue.")
+    else {
+        println(stdOutAndErr)
+        val message = "Exit value $exitValue is not equal to expected $expectedExitValue."
+        println(message)
+        error(message)
+    }
 
 fun ExecResult.check(expectedExitValue: Int = 0, expectedOutput: List<String>? = null) {
     val actualOutput = unwrap(expectedExitValue) // makes sure we first check exit value
