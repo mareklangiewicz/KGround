@@ -6,6 +6,9 @@ import pl.mareklangiewicz.kommand.Bash.Option.command
 
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
     Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -command; init() }
+
+fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
+
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
     // FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
 

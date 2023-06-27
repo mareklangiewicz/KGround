@@ -11,7 +11,7 @@ data class Adb(
     override val args get() = options.map { it.str } + command.str
 
     sealed class Command(val name: String, val arg: String? = null) {
-        open val str get() = listOf(name) plusIfNotNull arg
+        open val str get() = listOf(name) plusIfNN arg
         object help : Command("help")
         object devices : Command("devices") // TODO: -l
         object version : Command("version")

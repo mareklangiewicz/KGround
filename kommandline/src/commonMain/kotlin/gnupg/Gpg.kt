@@ -37,10 +37,10 @@ data class Gpg(
 ) : Kommand {
 
     override val name get() = "gpg"
-    override val args get() = (options.flatMap { it.str } plusIfNotNull cmd?.str) + cmdargs
+    override val args get() = options.flatMap { it.str }.plusIfNN(cmd?.str) + cmdargs
 
     sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = listOf(name) plusIfNotNull arg
+        val str get() = listOf(name) plusIfNN arg
         object help : Option("--help")
         object version : Option("--version")
         object verbose : Option("--verbose")

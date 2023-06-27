@@ -15,7 +15,7 @@ data class Vim(
     sealed class Option(val name: String, val arg: String? = null) {
 
         // important: name and arg has to be separate in Vim.args - for Kommand.exec to work correctly
-        val str get() = listOf(name) plusIfNotNull arg
+        val str get() = listOf(name) plusIfNN arg
 
         object gui : Option("-g")
         object diff : Option("-d")

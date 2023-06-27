@@ -12,10 +12,10 @@ data class MkTemp(
     val options: MutableList<Option> = mutableListOf()
 ): Kommand {
     override val name get() = "mktemp"
-    override val args get() = options.flatMap { it.str } plusIfNotNull template
+    override val args get() = options.flatMap { it.str } plusIfNN template
 
     sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = listOf(name) plusIfNotNull arg
+        val str get() = listOf(name) plusIfNN arg
         object directory : Option("--directory")
         object dryrun : Option("--dry-run")
         object quiet : Option("--quiet")

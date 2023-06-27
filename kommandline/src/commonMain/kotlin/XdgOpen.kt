@@ -7,7 +7,7 @@ data class XdgOpen(
     val options: MutableList<Option> = mutableListOf()
 ): Kommand {
     override val name get() = "xdg-open"
-    override val args get() = options.map { it.str } plusIfNotNull file
+    override val args get() = options.map { it.str } plusIfNN file
 
     sealed class Option(val str: String) {
         object help : Option("--help")

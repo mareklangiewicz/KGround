@@ -21,7 +21,7 @@ data class Ide(
 
     sealed class Cmd(val name: String, val arg: String? = null) {
 
-        open val str get() = listOf(name) plusIfNotNull arg
+        open val str get() = listOf(name) plusIfNN arg
 
         object diff : Cmd("diff")
         object merge : Cmd("merge")
@@ -30,7 +30,7 @@ data class Ide(
     }
 
     sealed class Option(val name: String, val arg: String? = null) {
-        open val str get() = listOf(name) plusIfNotNull arg
+        open val str get() = listOf(name) plusIfNN arg
         object nosplash : Option("nosplash")
         object dontReopenProjects : Option("nosplash")
         object disableNonBundledPlugins : Option("disableNonBundledPlugins")

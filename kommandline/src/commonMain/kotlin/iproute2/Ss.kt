@@ -14,7 +14,7 @@ data class Ss(
         // FIXME_someday: better static types/wrapping for non-options (FILTER := [ state STATE-FILTER ] [ EXPRESSION ])
 ): Kommand {
     override val name get() = "ss"
-    override val args get() = (options.map { it.str } plusIfNotNull stateFilter?.let { "state $it" }) + nonopts
+    override val args get() = (options.map { it.str } plusIfNN stateFilter?.let { "state $it" }) + nonopts
 
     sealed class Option(val name: String, val arg: String? = null) {
 

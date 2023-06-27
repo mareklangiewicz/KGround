@@ -11,7 +11,7 @@ data class Man(
     val nonopts: MutableList<String> = mutableListOf()
 ): Kommand {
     override val name get() = "man"
-    override val args get() = (options.map { it.str } plusIfNotNull section?.number?.toString()) + nonopts
+    override val args get() = options.map { it.str }.plusIfNN(section?.number?.toString()) + nonopts
 
     enum class Section(val number: Int) {
         execorshell(1), systemcall(2), librarycall(3), specialfile(4), fileformat(5),

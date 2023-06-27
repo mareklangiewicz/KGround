@@ -5,7 +5,7 @@ package pl.mareklangiewicz.kommand.gnome
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.help
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd
-import pl.mareklangiewicz.kommand.plusIfNotNull
+import pl.mareklangiewicz.kommand.plusIfNN
 
 /** [gapplication ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gapplication.1.html) */
 fun gnomeapp(cmd: Cmd, init: GnomeApp.() -> Unit = {}) = GnomeApp(cmd).apply(init)
@@ -20,11 +20,11 @@ data class GnomeApp(
 
     sealed class Cmd(val name: String, open val appid: String? = null, open val actid: String? = null) {
 
-        open val str get() = listOf(name) plusIfNotNull appid plusIfNotNull actid
+        open val str get() = listOf(name) plusIfNN appid plusIfNN actid
 
         /** Displays a short synopsis of the available commands or provides detailed help on a specific command. */
         data class help(val cmdname: String? = null) : Cmd("help") {
-            override val str get() = listOf(name) plusIfNotNull cmdname
+            override val str get() = listOf(name) plusIfNN cmdname
         }
 
         /** Prints the GLib version whence gapplication came. */

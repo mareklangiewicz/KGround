@@ -23,7 +23,7 @@ data class Git(
     val options: MutableList<Option> = mutableListOf() // global options
 ): Kommand {
     override val name get() = "git"
-    override val args get() = options.flatMap { it.str } + (stuff prependIfNotNull command?.str)
+    override val args get() = options.flatMap { it.str } + stuff.prependIfNN(command?.str)
 
     sealed class Command(val str: String) {
         object add : Command("add")
@@ -70,7 +70,7 @@ data class Git(
     }
 
     sealed class Option(val name: String, open val arg: String? = null) {
-        open val str get() = listOf(name) plusIfNotNull arg
+        open val str get() = listOf(name) plusIfNN arg
         object help : Option("--help")
         object version : Option("--version")
         object paginate : Option("--paginate")

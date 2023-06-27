@@ -11,7 +11,7 @@ data class NotifySend(
     val options: MutableList<Option> = mutableListOf(),
 ): Kommand {
     override val name get() = "notify-send"
-    override val args get() = options.map { it.str } + summary plusIfNotNull body
+    override val args get() = options.map { it.str } + summary plusIfNN body
     sealed class Option(val str: String) {
         /** Specifies the urgency level (low, normal, critical). */ // TODO_later: enum for level
         data class urgency(val level: String) : Option("--urgency=$level")

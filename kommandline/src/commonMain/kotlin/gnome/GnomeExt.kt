@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.help
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.install
-import pl.mareklangiewicz.kommand.plusIfNotNull
+import pl.mareklangiewicz.kommand.plusIfNN
 
 /** [gnome-extensions ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-extensions.1.html) */
 fun gnomeext(cmd: Cmd, init: GnomeExt.() -> Unit = {}) = GnomeExt(cmd).apply(init)
@@ -17,14 +17,14 @@ data class GnomeExt(
     val options: MutableList<Option> = mutableListOf()
 ) : Kommand {
     override val name get() = "gnome-extensions"
-    override val args get() = cmd.str + options.map { it.str } plusIfNotNull (cmd as? install)?.pack
+    override val args get() = cmd.str + options.map { it.str } plusIfNN (cmd as? install)?.pack
 
     sealed class Cmd(val name: String, open val uuid: String? = null) {
-        open val str get() = listOf(name) plusIfNotNull uuid
+        open val str get() = listOf(name) plusIfNN uuid
 
         /** Displays a short synopsis of the available commands or provides detailed help on a specific command. */
         data class help(val cmdname: String? = null): Cmd("help") {
-            override val str get() = listOf(name) plusIfNotNull cmdname
+            override val str get() = listOf(name) plusIfNN cmdname
         }
         /** Prints the program version. */
         object version: Cmd("version")
