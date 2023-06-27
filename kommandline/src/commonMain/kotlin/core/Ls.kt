@@ -5,17 +5,27 @@ import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
-fun CliPlatform.lsExec(dir: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
-    ls(dir, withHidden, style).exec()
+fun CliPlatform.lsExec(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
+    ls(*paths, withHidden = withHidden, style = style).exec()
 
 fun CliPlatform.lsRegFilesExec(dir: String, withHidden: Boolean = false) =
-    lsExec(dir, withHidden, SLASH).filter { !it.endsWith('/') }
+    lsExec(dir, withHidden = withHidden, style = SLASH).filter { !it.endsWith('/') }
 
 fun CliPlatform.lsSubDirsExec(dir: String, withHidden: Boolean = false) =
-    lsExec(dir, withHidden, SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
+    lsExec(dir, withHidden = withHidden, style = SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
 
-fun ls(dir: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
-    ls { +dir; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
+fun ls(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
+    lsPredictable(*paths, withHidden = withHidden, style = style)
+
+/** lsPredictable is better to get a more predictable output format, especially for parsing. */
+fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
+    ls { for (p in paths) +p; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
+
+/**
+ * lsDefault is ls without any options; uses default settings on given CliPlatform.
+ * lsPredictable is better to get a more predictable output format, especially for parsing.
+ */
+fun lsDefault(vararg files: String) = ls { for (f in files) +f }
 
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 
