@@ -12,6 +12,9 @@ object FindSamples {
             "find /home/marek/code/kotlin/KommandLine -type f -name *Samples.kt"
     val findBigFiles = find(".", FileSize(NumArg.MoreThan(100), 'M')) s
             "find . -size +100M"
+    // WARNING: Dangerous sample! If executed, it can automatically delete a lot of files!! (but it's just tmp dir)
+    val findAndDeleteAllBigFiles = find("/home/marek/tmp", FileSize(NumArg.MoreThan(100), 'M'), ActPrint, ActDelete) s
+            "find /home/marek/tmp -size +100M -print -delete"
     val findBuildDirs = findDirBaseName("/home/marek/code/kotlin", "build", whenFoundPrune = true) s
             "find /home/marek/code/kotlin -type d -name build -print -prune"
     val findNodeModulesDirs = findDirBaseName("/home/marek/code/kotlin", "node_modules", whenFoundPrune = true) s
