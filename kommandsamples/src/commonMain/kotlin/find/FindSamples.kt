@@ -1,0 +1,16 @@
+package pl.mareklangiewicz.kommand.find
+
+import pl.mareklangiewicz.kommand.samples.*
+import kotlin.reflect.*
+
+
+object FindSamples {
+    val findAbcIgnoreCase = find(".", FindExpr.BaseName("*abc*", ignoreCase = true)) s "find . -iname *abc*"
+    val findSomeSamples = findRegularBaseName("/home/marek/code/kotlin/KommandLine", "*Samples.kt") s "find /home/marek/code/kotlin/KommandLine -type f -name *Samples.kt"
+    val findBuildDirs = findDirBaseName("/home/marek/code/kotlin", "build", whenFoundPrune = true) s "find /home/marek/code/kotlin -type d -name build -print -prune"
+    val findNodeModulesDirs = findDirBaseName("/home/marek/code/kotlin", "node_modules", whenFoundPrune = true) s "find /home/marek/code/kotlin -type d -name node_modules -print -prune"
+
+    // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
+    val execs: List<KFunction<*>> = listOf(
+    )
+}
