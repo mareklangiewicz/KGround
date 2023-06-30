@@ -19,7 +19,7 @@ data class Dpkg(
     val opts: MutableList<DpkgOpt> = mutableListOf(),
 ) : Kommand {
     override val name get() = "dpkg"
-    override val args get() = opts.flatMap { it.args }
+    override val args get() = opts.flatMap { it.toArgs() }
     operator fun DpkgOpt.unaryMinus() = opts.add(this)
 }
 
@@ -43,7 +43,7 @@ interface DpkgAct : DpkgOpt {
      * Configure a package which has been unpacked but not yet configured.
      * @param pkgName Single package, or null if Pending option enabled.
      */
-    data class Configure(val pkgName: String? = null) : KOptL("configure", separator = " "), DpkgAct
+    data class Configure(val pkgName: String? = null) : KOptL("configure", pkgName, nameSeparator = " "), DpkgAct
 
     /**
      * Remove an installed package.

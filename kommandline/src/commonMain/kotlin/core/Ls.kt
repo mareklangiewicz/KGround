@@ -36,7 +36,7 @@ data class Ls(
     val files: MutableList<String> = mutableListOf()
 ) : Kommand {
     override val name get() = "ls"
-    override val args get() = opts.flatMap { it.args } + files
+    override val args get() = opts.flatMap { it.toArgs() } + files
     operator fun String.unaryPlus() = files.add(this)
     operator fun LsOpt.unaryMinus() = opts.add(this)
 }

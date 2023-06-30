@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.find
 
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 import pl.mareklangiewicz.kommand.samples.*
 import kotlin.reflect.*
@@ -22,5 +23,6 @@ object FindSamples {
 
     // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
     val execs: List<KFunction<*>> = listOf(
+        CliPlatform::findExec
     )
 }

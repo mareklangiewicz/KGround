@@ -17,8 +17,7 @@ fun sudoEdit(file: String, asUser: String? = null) = sudo {
 fun Kommand.withSudo(vararg options: SudoOpt, init: Sudo.() -> Unit = {}): Sudo = sudo(this, *options, init = init)
 
 fun sudo(k: Kommand, vararg options: SudoOpt, init: Sudo.() -> Unit = {}) = sudo {
-    for (o in options) -o
-    init(); +"--"; +k.name; for (a in k.args) +a
+    opts.addAll(options); init(); +"--"; stuff.addAll(k.toArgs())
 }
 
 fun sudo(init: Sudo.() -> Unit = {}) = Sudo().apply(init)
@@ -31,7 +30,7 @@ data class Sudo(
     val stuff: MutableList<String> = mutableListOf(),
 ) : Kommand {
     override val name get() = "sudo"
-    override val args get() = opts.flatMap { it.args } + stuff
+    override val args get() = opts.flatMap { it.toArgs() } + stuff
     operator fun SudoOpt.unaryMinus() = opts.add(this)
     operator fun String.unaryPlus() = stuff.add(this)
 }

@@ -21,9 +21,8 @@ class JvmPlatform: CliPlatform {
         JvmExecProcess(
             ProcessBuilder()
                 .apply {
-                    val cmdlist = listOf(kommand.name) + kommand.args
-                    if (debug) println(cmdlist.joinToString(" "))
-                    command(cmdlist)
+                    if (debug) println(kommand.line())
+                    command(kommand.toArgs())
                     directory(dir?.let(::File))
                     redirectErrorStream(true)
                     inFile?.let { redirectInput(File(it)) }

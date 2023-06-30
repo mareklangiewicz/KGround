@@ -20,7 +20,7 @@ data class Which(
     val commands: MutableList<String> = mutableListOf()
 ) : Kommand {
     override val name get() = "which"
-    override val args get() = opts.flatMap { it.args } + commands
+    override val args get() = opts.flatMap { it.toArgs() } + commands
     operator fun String.unaryPlus() = commands.add(this)
     operator fun WhichOpt.unaryMinus() = opts.add(this)
 }

@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "UNUSED_PARAMETER")
 
 package pl.mareklangiewicz.kommand.find
 
@@ -11,6 +11,20 @@ import pl.mareklangiewicz.kommand.find.FindExpr.*
 
 // In all shortcut fun here, the first mandatory parameter will always be path.
 // It's better to be explicit and just use ".", when needed, instead of relaying on implicit default behavior.
+
+/**
+ * The Exec suffix here means just that it will automatically call .exec() on created kommand.
+ * The find kommand will NOT use any ActExecIn action, but just default ActPrint + optionally ActPrune or ActQuit
+ */
+fun CliPlatform.findExec(
+    vararg useNamedArgs: Unit,
+    path: String,
+    fileType: String = "f",
+    baseNamePattern: String = "*",
+    ignoreCase: Boolean = false,
+    whenFoundPrune: Boolean = false,
+    whenFoundFirstQuit: Boolean = false,
+) = findTypeBaseName(path, fileType, baseNamePattern, ignoreCase, whenFoundPrune, whenFoundFirstQuit).exec()
 
 fun findWholeName(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, WholeName(pattern, ignoreCase))
@@ -64,7 +78,7 @@ data class Find(
     val expr: MutableList<FindExpr> = mutableListOf(),
 ) : Kommand {
     override val name get() = "find"
-    override val args get() = opts.flatMap { it.args } + paths + expr.flatMap { it.args }
+    override val args get() = opts.flatMap { it.toArgs() } + paths + expr.flatMap { it.toArgs() }
     operator fun FindOpt.unaryMinus() = opts.add(this)
     operator fun String.unaryPlus() = paths.add(this)
 }
@@ -343,34 +357,57 @@ interface FindExpr: KOpt {
         val kommand: Kommand,
         val inContainingDir: Boolean = true,
         val askUserFirst: Boolean = false,
-    ): FindExpr {
-        override val name = (if (askUserFirst)"ok" else "exec") + "dir".iff(inContainingDir)
-        override val value get() = error("No one value for ActExecIn. The args list is based on provided kommand")
-        override val prefix = "-"
-        override val separator = " " // not really used, because the rest is always in separate args
-        override val args: List<String>
-            get() {
-                check(!kommand.args.any { it.startsWith(";") }) {
-                    "Find can't correctly execute any kommand with any argument starting with the ';'"
-                }
-                return listOf("$prefix$name") + kommand.name + kommand.args + ";"
+    ): KOptS(name = (if (askUserFirst)"ok" else "exec") + "dir".iff(inContainingDir)), FindExpr {
+        override fun toArgs(): List<String> {
+            val kta = kommand.toArgs()
+            check(!kta.any { it.startsWith(";") }) {
+                "Find can't correctly execute any kommand with any argument starting with the ';'"
             }
+            return listOf("-$name") + kta + ";"
+        }
     }
 
-    // TODO_someday_maybe: The "-exec command {} +", and the "-execdir command {} +" variant.
-
-
     object ActPrint: KOptS("print"), FindExpr
+
+    /**
+     * It's best to find the format in console: "man find" -> "/-printf format", but there are also online docs:
+     * [online docs](https://www.gnu.org/software/findutils/manual/html_mono/find.html#Print-File-Information)
+     */
+    data class ActPrintF(val format: String): KOptS("printf", format), FindExpr
+    // TODO_someday:
+    //  One ActPrint with flags deciding which version of -(f)print(0/f) to use and optional format and/or file
+    //  Also ActLs for -(f)ls
 
     object ActPrune: KOptS("prune"), FindExpr
 
     object ActQuit: KOptS("quit"), FindExpr
 
-    // TODO NOW CONTINUE -fls -fprint...
-
 // endregion Find Expression Category: ACTIONS
 
+// region Find Expression Category: OPERATORS
+
+    data class OpParent(val children: List<FindExpr>): FindExpr {
+        constructor(vararg ex: FindExpr): this(ex.toList())
+        override fun toArgs(): List<String> = listOf("(") + children.flatMap { it.toArgs() } + ")"
+    }
+
+    object OpAnd: KOptS("a"), FindExpr
+    object OpOr: KOptS("o"), FindExpr
+    object OpNot: FindExpr { override fun toArgs() = listOf("!") }
+    object OpComma: FindExpr { override fun toArgs() = listOf(",") }
+
+    // FIXME_someday: rethink all grouping expressions and precedence,
+    // so I don't need so many OpParent to make it always correct.
+    // It would be better for FindExpr to always represent ONE expression, and not arbitrary list.
+    // (then make Find hold ONE FindExpr expr instead of list)
+    // (also make OpXXX stuff more private and expose only koltliny operator funs)
+    operator fun FindExpr.not() = OpParent(OpNot, OpParent(this))
+    infix fun FindExpr.and(other: FindExpr) = OpParent(OpParent(this), OpAnd, OpParent(other))
+    infix fun FindExpr.or(other: FindExpr) = OpParent(OpParent(this), OpOr, OpParent(other))
+// endregion Find Expression Category: OPERATORS
+
 }
+
 
 interface FindOpt: KOpt {
 
@@ -388,7 +425,7 @@ interface FindOpt: KOpt {
         init { check(dopts.all { it.all { it.isLetter() } }) }
     }
 
-    data class Optimisation(val level: Int): KOptS("O", level.toString(), separator = ""), FindOpt {
+    data class Optimisation(val level: Int): KOptS("O", level.toString(), nameSeparator = ""), FindOpt {
         init { check(level in 0..3) }
     }
 }
