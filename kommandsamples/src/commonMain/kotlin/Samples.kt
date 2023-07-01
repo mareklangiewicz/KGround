@@ -6,10 +6,10 @@ import pl.mareklangiewicz.kommand.*
 
 data class Sample(
     val kommand: Kommand,
-    val expectedLine: String? = null,
+    val expectedLineRaw: String? = null,
 ) : Kommand by kommand
 
-internal infix fun Kommand.s(expectedLine: String) = Sample(this, expectedLine = expectedLine)
+internal infix fun Kommand.s(expectedLineRaw: String) = Sample(this, expectedLineRaw = expectedLineRaw)
 
 
 object Samples {

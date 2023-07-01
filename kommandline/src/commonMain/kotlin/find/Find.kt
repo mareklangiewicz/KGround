@@ -14,7 +14,8 @@ import pl.mareklangiewicz.kommand.find.FindExpr.*
 
 /**
  * The Exec suffix here means just that it will automatically call .exec() on created kommand.
- * The find kommand will NOT use any ActExecIn action, but just default ActPrint + optionally ActPrune or ActQuit
+ * The find kommand will NOT use any ActExecIn action, but ActPrint or ActPrintF, then optionally ActPrune or ActQuit
+ * @param whenFoundPrintF null means using ActPrint, non-null means ActPrintF(whenFoundPrintF!!)
  */
 fun CliPlatform.findExec(
     vararg useNamedArgs: Unit,
@@ -22,9 +23,12 @@ fun CliPlatform.findExec(
     fileType: String = "f",
     baseNamePattern: String = "*",
     ignoreCase: Boolean = false,
+    whenFoundPrintF: String? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
-) = findTypeBaseName(path, fileType, baseNamePattern, ignoreCase, whenFoundPrune, whenFoundFirstQuit).exec()
+) = findTypeBaseName(
+    path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit
+).exec()
 
 fun findWholeName(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, WholeName(pattern, ignoreCase))
@@ -39,23 +43,31 @@ fun findDirBaseName(
     path: String,
     pattern: String,
     ignoreCase: Boolean = false,
+    whenFoundPrintF: String? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
-) = findTypeBaseName(path, "d", pattern, ignoreCase, whenFoundPrune, whenFoundFirstQuit)
+) = findTypeBaseName(path, "d", pattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
 
 fun findTypeBaseName(
     path: String,
     fileType: String,
     pattern: String,
     ignoreCase: Boolean = false,
+    whenFoundPrintF: String? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) =
     find(path, FileType(fileType), BaseName(pattern, ignoreCase)) {
-        check(!whenFoundFirstQuit || !whenFoundPrune)
-        !whenFoundPrune && !whenFoundFirstQuit && return@find // it will print anyway as default action
-        expr.add(ActPrint)
-        expr.add(if (whenFoundFirstQuit) ActQuit else ActPrune)
+        when {
+            whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
+            whenFoundPrintF != null -> expr.add(ActPrintF(whenFoundPrintF))
+            whenFoundFirstQuit || whenFoundPrune -> expr.add(ActPrint)
+            // or else find will perform default printing
+        }
+        when {
+            whenFoundFirstQuit -> expr.add(ActQuit)
+            whenFoundPrune -> expr.add(ActPrune)
+        }
     }
 
 fun find(path: String, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
@@ -127,10 +139,10 @@ interface FindExpr: KOpt {
     /**
      * Process each directory's contents before the directory itself.
      * The "-delete" action also implies "-depth"
-     * I use the "-depth" form because it's recommended (man find) and POSIX compliant,
-     * even though "-d" should also do the same and also is supported on some BSD systems.
+     * I use the "-depth" form by default because it's recommended on my system (man find) and POSIX compliant,
+     * but "-d" should also do the same and additionally is supported on FreeBSD, NetBSD, Mac OS X and OpenBSD.
      */
-    object DepthFirst: KOptS("depth"), FindExpr
+    data class DepthFirst(val posix: Boolean = true): KOptS("d" + "epth".iff(posix)), FindExpr
 
     data class DepthMax(val levels: Int): KOptS("maxdepth", levels.toString()), FindExpr
     data class DepthMin(val levels: Int): KOptS("mindepth", levels.toString()), FindExpr

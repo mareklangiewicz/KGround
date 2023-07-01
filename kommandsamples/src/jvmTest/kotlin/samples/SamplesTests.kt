@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand.samples
 
 import org.junit.jupiter.api.TestFactory
-import pl.mareklangiewicz.kommand.line
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.uspek.eq
 import pl.mareklangiewicz.uspek.o
 import pl.mareklangiewicz.uspek.uspekTestFactory
@@ -31,11 +31,11 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     }
 }
 
-fun testSample(sample: Sample) = "check kommand.line" o {
-    val line = sample.kommand.line()
-    if (sample.expectedLine == null) println("Expected line not provided.")
-    else line eq sample.expectedLine
-    println("Actual kommand.line is: $line")
+fun testSample(sample: Sample) = "check kommand.lineRaw" o {
+    val lineRaw = sample.kommand.lineRaw()
+    if (sample.expectedLineRaw == null) println("Expected line not provided.")
+    else lineRaw eq sample.expectedLineRaw
+    println("Actual kommand.lineRaw is: $lineRaw")
 }
 
 // Copied and pasted from Kokpit (for now)

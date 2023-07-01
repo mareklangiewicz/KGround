@@ -44,6 +44,7 @@ interface Kommand: WithName, WithArgs, ToArgs {
 data class SomeKommand(override val name: String, override val args: List<String>) : Kommand
 
 fun Kommand.line() = lineBash()
+fun Kommand.lineRaw(separator: String = " ") = toArgs().joinToString(separator)
 fun Kommand.lineBash() = toArgs().joinToString(" ") { bashQuoteMetaChars(it) }
 fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
 fun Kommand.println() = println(line())

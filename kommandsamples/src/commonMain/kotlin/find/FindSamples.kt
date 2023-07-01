@@ -21,6 +21,9 @@ object FindSamples {
             "find /home/marek/code/kotlin/KommandLine -type f -name *Samples.kt"
     val findBigFiles = find(".", FileSize(NumArg.MoreThan(100), 'M')) s
             "find . -size +100M"
+    val findAndPrint0AbcFilesAndTheirSizes =
+        findTypeBaseName(".", "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
+            "find . -type f -name *abc* -printf %p\\0%s\\0"
     val findSymLinksToKtsFiles = find(depsKtPath, SymLinkTo("*.kts")) s
             "find /home/marek/code/kotlin/DepsKt -lname *.kts"
     // WARNING: Dangerous sample! If executed, it can automatically delete a lot of files!! (but it's just tmp dir)
