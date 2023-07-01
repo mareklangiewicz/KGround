@@ -36,6 +36,32 @@ object FindSamples {
 
     // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
     val execs: List<KFunction<*>> = listOf(
-        CliPlatform::findExec
+        CliPlatform::findExec,
+        CliPlatform::findDetailsTableExec,
     )
 }
+
+private val details = listOf(
+    "access time" to "%A+",
+    "status change time" to "%C+",
+    "last modification time" to "%T+",
+    "birth time" to "%B+",
+    "depth" to "%d",
+    "size" to "%s",
+    "dir name" to "%h",
+    "base name" to "%f",
+    "full name" to "%p",
+    "group name" to "%g",
+    "user name" to "%u",
+    "octal permissions" to "%m",
+    "symbolic permissions" to "%M",
+)
+private val detailsHeadersRow = listOf(details.map { it.first })
+private val detailsPrintFormat = details.joinToString("\\0", postfix = "\\0") { it.second }
+
+fun CliPlatform.findDetailsTableExec(path: String = "."): List<List<String>> = detailsHeadersRow +
+        findExec(path = path, whenFoundPrintF = detailsPrintFormat)
+            .single()
+            .split(Char(0))
+            .windowed(details.size, details.size)
+
