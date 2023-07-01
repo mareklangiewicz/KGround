@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.find
 
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
+import pl.mareklangiewicz.kommand.find.FindOpt.*
 import pl.mareklangiewicz.kommand.samples.*
 import kotlin.reflect.*
 
@@ -12,6 +13,10 @@ private val depsKtPath = "/home/marek/code/kotlin/DepsKt"
 object FindSamples {
     val findAbcIgnoreCase = find(".", BaseName("*abc*", ignoreCase = true)) s
             "find . -iname *abc*"
+    val findAbcWithFollowSymLinksAndOptimisation2 = find(".", BaseName("*abc*")) {
+        -SymLinkFollowAlways
+        -Optimisation(2)
+    } s "find -L -O2 . -name *abc*"
     val findSomeSamples = findRegularBaseName("/home/marek/code/kotlin/KommandLine", "*Samples.kt") s
             "find /home/marek/code/kotlin/KommandLine -type f -name *Samples.kt"
     val findBigFiles = find(".", FileSize(NumArg.MoreThan(100), 'M')) s
