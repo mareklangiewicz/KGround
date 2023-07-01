@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package pl.mareklangiewicz.kommand.find
 
 import pl.mareklangiewicz.kommand.*

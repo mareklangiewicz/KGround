@@ -60,7 +60,7 @@ interface KOptTypical: KOpt, WithName, WithArgs {
         args.isEmpty() -> listOf("$namePrefix$name")
         nameSeparator == " " -> listOf("$namePrefix$name") + joinArgs()
         nameSeparator.any { it.isWhitespace() } -> error("nameSeparator has to be one space or cannot contain any space")
-        argsSeparator == " " -> error("argsSeparator can not be space when nameSeparator isn't")
+        argsSeparator == " " && args.size > 1 -> error("argsSeparator can not be space when nameSeparator isn't")
         else -> listOf("$namePrefix$name$nameSeparator" + joinArgs().single())
     }
 

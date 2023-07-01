@@ -126,10 +126,11 @@ interface FindExpr: KOpt {
 
     /**
      * Process each directory's contents before the directory itself.
-     * The "-delete" action also implies "-d"
-     * I use the "-d" form because it's more portable, but it works the same as "-depth"
+     * The "-delete" action also implies "-depth"
+     * I use the "-depth" form because it's recommended (man find) and POSIX compliant,
+     * even though "-d" should also do the same and also is supported on some BSD systems.
      */
-    object DepthFirst: KOptS("d"), FindExpr
+    object DepthFirst: KOptS("depth"), FindExpr
 
     data class DepthMax(val levels: Int): KOptS("maxdepth", levels.toString()), FindExpr
     data class DepthMin(val levels: Int): KOptS("mindepth", levels.toString()), FindExpr
