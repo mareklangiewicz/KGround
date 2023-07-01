@@ -12,7 +12,7 @@ object LsSamples {
     val lsDefault = ls() s "ls"
     val lsDir = ls("blabla") s "ls $lsCommon --indicator-style=none blabla"
     val lsWithHidden = ls(".", withHidden = true) s "ls $lsCommon --indicator-style=none -A ."
-    val lsWithSlashes = ls(".", style = IndicatorStyle.SLASH) s "ls $lsCommon --indicator-style=slash ."
+    val lsParentWithSlashes = ls("..", style = IndicatorStyle.SLASH) s "ls $lsCommon --indicator-style=slash .."
 
     // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
     val execs = listOf(
