@@ -16,9 +16,55 @@ import pl.mareklangiewicz.kommand.find.FindExpr.*
  * TODO_someday: actual types/structures representing print format.
  */
 typealias FindPrintFormat = String
+typealias FindColumnName = String
+typealias FindDetailsDef = Collection<Pair<FindColumnName, FindPrintFormat>>
+
 
 // In all shortcut fun here, the first mandatory parameter will always be path.
 // It's better to be explicit and just use ".", when needed, instead of relaying on implicit default behavior.
+
+fun CliPlatform.findDetailsTableExec(
+    vararg useNamedArgs: Unit,
+    path: String,
+    details: FindDetailsDef,
+    baseNamePattern: String = "*",
+    ignoreCase: Boolean = false,
+): List<List<String>> {
+    val detailsHeadersRow = listOf(details.map { it.first })
+    val detailsPrintFormat = details.joinToString("\\0", postfix = "\\0") { it.second }
+    return detailsHeadersRow +
+            findExec(
+                path = path,
+                baseNamePattern = baseNamePattern,
+                ignoreCase = ignoreCase,
+                whenFoundPrintF = detailsPrintFormat
+            )
+                .single()
+                .split(Char(0))
+                .windowed(details.size, details.size)
+}
+
+// TODO: decide on some good typical details - headers names and formats
+//  (need clear unambiguous data useful for postprocessing in dataframes, for charts, etc)
+private val typicalDetails: FindDetailsDef = listOf(
+    "access time" to "%A+",
+    "status change time" to "%C+",
+    "last modification time" to "%T+",
+    "birth time" to "%B+",
+    "depth" to "%d",
+    "size" to "%s",
+    "dir name" to "%h",
+    "base name" to "%f",
+    "full name" to "%p",
+    "group name" to "%g",
+    "user name" to "%u",
+    "octal permissions" to "%m",
+    "symbolic permissions" to "%M",
+)
+
+fun CliPlatform.findTypicalDetailsTableExec(path: String) =
+    findDetailsTableExec(path = path, details = typicalDetails)
+
 
 /**
  * The Exec suffix here means just that it will automatically call .exec() on created kommand.

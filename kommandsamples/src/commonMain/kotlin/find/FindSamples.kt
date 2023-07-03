@@ -18,62 +18,27 @@ object FindSamples {
         -Optimisation(2)
     } s "find -L -O2 . -name *abc*"
     val findSomeSamples = findRegularBaseName("/home/marek/code/kotlin/KommandLine", "*Samples.kt") s
-            "find /home/marek/code/kotlin/KommandLine -type f -name *Samples.kt"
+            "find /home/marek/code/kotlin/KommandLine -name *Samples.kt -type f"
     val findBigFiles = find(".", FileSize(NumArg.MoreThan(100), 'M')) s
             "find . -size +100M"
     val findAndPrint0AbcFilesAndTheirSizes =
         findTypeBaseName(".", "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
-            "find . -type f -name *abc* -printf %p\\0%s\\0"
+            "find . -name *abc* -type f -printf %p\\0%s\\0"
     val findSymLinksToKtsFiles = find(depsKtPath, SymLinkTo("*.kts")) s
             "find /home/marek/code/kotlin/DepsKt -lname *.kts"
     // WARNING: Dangerous sample! If executed, it can automatically delete a lot of files!! (but it's just tmp dir)
     val findAndDeleteAllBigFiles = find("/home/marek/tmp", FileSize(NumArg.MoreThan(100), 'M'), ActPrint, ActDelete) s
             "find /home/marek/tmp -size +100M -print -delete"
     val findBuildDirs = findDirBaseName("/home/marek/code/kotlin", "build", whenFoundPrune = true) s
-            "find /home/marek/code/kotlin -type d -name build -print -prune"
+            "find /home/marek/code/kotlin -name build -type d -print -prune"
     val findNodeModulesDirs = findDirBaseName("/home/marek/code/kotlin", "node_modules", whenFoundPrune = true) s
-            "find /home/marek/code/kotlin -type d -name node_modules -print -prune"
+            "find /home/marek/code/kotlin -name node_modules -type d -print -prune"
 
     // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
     val execs: List<KFunction<*>> = listOf(
         CliPlatform::findExec,
         CliPlatform::findDetailsTableExec,
+        CliPlatform::findTypicalDetailsTableExec,
     )
 }
 
-typealias FindColumnName = String
-typealias FindDetailsDef = Collection<Pair<FindColumnName, FindPrintFormat>>
-
-fun CliPlatform.findDetailsTableExec(
-    details: FindDetailsDef,
-    path: String = ".",
-): List<List<String>> {
-    val detailsHeadersRow = listOf(details.map { it.first })
-    val detailsPrintFormat = details.joinToString("\\0", postfix = "\\0") { it.second }
-    return detailsHeadersRow +
-            findExec(path = path, whenFoundPrintF = detailsPrintFormat)
-                .single()
-                .split(Char(0))
-                .windowed(details.size, details.size)
-}
-
-// TODO: decide on some good typical details - headers names and formats
-//  (need clear unambiguous data useful for postprocessing in dataframes, for charts, etc)
-private val typicalDetails: FindDetailsDef = listOf(
-    "access time" to "%A+",
-    "status change time" to "%C+",
-    "last modification time" to "%T+",
-    "birth time" to "%B+",
-    "depth" to "%d",
-    "size" to "%s",
-    "dir name" to "%h",
-    "base name" to "%f",
-    "full name" to "%p",
-    "group name" to "%g",
-    "user name" to "%u",
-    "octal permissions" to "%m",
-    "symbolic permissions" to "%M",
-)
-
-fun CliPlatform.findTypicalDetailsTableExec(path: String = ".") =
-    findDetailsTableExec(typicalDetails, path)
