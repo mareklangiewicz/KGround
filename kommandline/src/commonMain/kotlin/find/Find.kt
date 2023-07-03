@@ -9,6 +9,14 @@ package pl.mareklangiewicz.kommand.find
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 
+
+/**
+ * It's best to find the format in console: "man find" -> "/-printf format", but there are also online docs:
+ * [online docs](https://www.gnu.org/software/findutils/manual/html_mono/find.html#Print-File-Information)
+ * TODO_someday: actual types/structures representing print format.
+ */
+typealias FindPrintFormat = String
+
 // In all shortcut fun here, the first mandatory parameter will always be path.
 // It's better to be explicit and just use ".", when needed, instead of relaying on implicit default behavior.
 
@@ -23,7 +31,7 @@ fun CliPlatform.findExec(
     fileType: String = "f",
     baseNamePattern: String = "*",
     ignoreCase: Boolean = false,
-    whenFoundPrintF: String? = null,
+    whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeBaseName(
@@ -43,7 +51,7 @@ fun findDirBaseName(
     path: String,
     pattern: String,
     ignoreCase: Boolean = false,
-    whenFoundPrintF: String? = null,
+    whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeBaseName(path, "d", pattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
@@ -53,11 +61,12 @@ fun findTypeBaseName(
     fileType: String,
     pattern: String,
     ignoreCase: Boolean = false,
-    whenFoundPrintF: String? = null,
+    whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) =
-    find(path, FileType(fileType), BaseName(pattern, ignoreCase)) {
+    find(path, BaseName(pattern, ignoreCase), FileType(fileType)) {
+        // BaseName is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
         when {
             whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
             whenFoundPrintF != null -> expr.add(ActPrintF(whenFoundPrintF))
@@ -147,7 +156,10 @@ interface FindExpr: KOpt {
     data class DepthMax(val levels: Int): KOptS("maxdepth", levels.toString()), FindExpr
     data class DepthMin(val levels: Int): KOptS("mindepth", levels.toString()), FindExpr
 
-    data class Paths0From(val file: String): KOptS("files0-from"), FindExpr
+    /**
+     * @param file default "-" is stdin
+     */
+    data class Paths0From(val file: String = "-"): KOptS("files0-from"), FindExpr
 
     /**
      * Normally, find will emit an error message when it fails to stat a file.
@@ -313,6 +325,8 @@ interface FindExpr: KOpt {
 
     /**
      * Matches files of a specified type.
+     * Note: it always calls system stat(2), which can be a bit expensive,
+     * so usually it's faster to filter by name first ([BaseName]/[WholeName]).
      *
      * @param type one of:
      * - b - block (buffered) special
@@ -382,11 +396,7 @@ interface FindExpr: KOpt {
 
     object ActPrint: KOptS("print"), FindExpr
 
-    /**
-     * It's best to find the format in console: "man find" -> "/-printf format", but there are also online docs:
-     * [online docs](https://www.gnu.org/software/findutils/manual/html_mono/find.html#Print-File-Information)
-     */
-    data class ActPrintF(val format: String): KOptS("printf", format), FindExpr
+    data class ActPrintF(val format: FindPrintFormat): KOptS("printf", format), FindExpr
     // TODO_someday:
     //  One ActPrint with flags deciding which version of -(f)print(0/f) to use and optional format and/or file
     //  Also ActLs for -(f)ls

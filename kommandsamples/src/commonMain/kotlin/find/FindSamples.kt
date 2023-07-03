@@ -41,7 +41,25 @@ object FindSamples {
     )
 }
 
-private val details = listOf(
+typealias FindColumnName = String
+typealias FindDetailsDef = Collection<Pair<FindColumnName, FindPrintFormat>>
+
+fun CliPlatform.findDetailsTableExec(
+    details: FindDetailsDef,
+    path: String = ".",
+): List<List<String>> {
+    val detailsHeadersRow = listOf(details.map { it.first })
+    val detailsPrintFormat = details.joinToString("\\0", postfix = "\\0") { it.second }
+    return detailsHeadersRow +
+            findExec(path = path, whenFoundPrintF = detailsPrintFormat)
+                .single()
+                .split(Char(0))
+                .windowed(details.size, details.size)
+}
+
+// TODO: decide on some good typical details - headers names and formats
+//  (need clear unambiguous data useful for postprocessing in dataframes, for charts, etc)
+private val typicalDetails: FindDetailsDef = listOf(
     "access time" to "%A+",
     "status change time" to "%C+",
     "last modification time" to "%T+",
@@ -56,12 +74,6 @@ private val details = listOf(
     "octal permissions" to "%m",
     "symbolic permissions" to "%M",
 )
-private val detailsHeadersRow = listOf(details.map { it.first })
-private val detailsPrintFormat = details.joinToString("\\0", postfix = "\\0") { it.second }
 
-fun CliPlatform.findDetailsTableExec(path: String = "."): List<List<String>> = detailsHeadersRow +
-        findExec(path = path, whenFoundPrintF = detailsPrintFormat)
-            .single()
-            .split(Char(0))
-            .windowed(details.size, details.size)
-
+fun CliPlatform.findTypicalDetailsTableExec(path: String = ".") =
+    findDetailsTableExec(typicalDetails, path)
