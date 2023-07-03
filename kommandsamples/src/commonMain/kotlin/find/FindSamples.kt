@@ -27,8 +27,8 @@ object FindSamples {
     val findSymLinksToKtsFilesInDepsKt = find(depsKtPath, SymLinkTo("*.kts")) s
             "find $depsKtPath -lname *.kts"
     val findDepthMax2FilesInDepsKtAndRunFileOnEach =
-        find(depsKtPath, DepthMax(2), ActExecIn(kommand("file", "{}"))) s
-                "find $depsKtPath -maxdepth 1 -execdir file {} ;"
+        find(depsKtPath, DepthMax(2), ActExec(kommand("file", "{}"))) s
+                "find $depsKtPath -maxdepth 2 -execdir file {} ;"
     // WARNING: Dangerous sample! If executed, it can automatically delete a lot of files!! (but it's just tmp dir)
     val findAndDeleteAllBigFiles =
         find(myTmpPath, FileSize(NumArg.MoreThan(100), 'M'), ActPrint, ActDelete) s

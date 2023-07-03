@@ -68,7 +68,7 @@ fun CliPlatform.findTypicalDetailsTableExec(path: String) =
 
 /**
  * The Exec suffix here means just that it will automatically call .exec() on created kommand.
- * The find kommand will NOT use any ActExecIn action, but ActPrint or ActPrintF, then optionally ActPrune or ActQuit
+ * The find kommand will NOT use any ActExec action, but ActPrint or ActPrintF, then optionally ActPrune or ActQuit
  * @param whenFoundPrintF null means using ActPrint, non-null means ActPrintF(whenFoundPrintF!!)
  */
 fun CliPlatform.findExec(
@@ -426,7 +426,7 @@ interface FindExpr: KOpt {
      * * true: The kommand is executed in dir containing matched file. (safer, especially regarding race conditions)
      * * false: The kommand is executed in the starting directory. (unavoidable security problems - see "man find")
      */
-    data class ActExecIn(
+    data class ActExec(
         val kommand: Kommand,
         val inContainingDir: Boolean = true,
         val askUserFirst: Boolean = false,
