@@ -74,17 +74,17 @@ fun CliPlatform.findMyKotlinCodeExec(
     withModifTime24h: NumArg? = null,
 ) = find(
     kotlinCodePath,
-    findExprWithPrunedDirs(
+    fexprWithPrunedDirs(
         withPruneBuildDirsNamed,
         withWholeName?.let { WholeName(withWholeName) } ?: AlwaysTrue,
         withBaseName?.let { BaseName(it) } ?: AlwaysTrue,
         FileType("f"),
         withModifTime24h?.let { ModifTime24h(it) } ?: AlwaysTrue,
-        findActExecGrepPrintIfMatched(withGrepRE),
+        fexprActExecGrepPrintIfMatched(withGrepRE),
     )
 ).exec()
 
-private fun findActExecGrepPrintIfMatched(grepRE: String?) =
+private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
     if (grepRE == null) ActPrint
     else OpParent(
         ActExec(grepQuietly(grepRE, "{}")), ActPrint
@@ -95,7 +95,7 @@ private fun findActExecGrepPrintIfMatched(grepRE: String?) =
   * A lot of OpParent here, but it's necessary until I have better operators wrappers
   * (see fixme_comment above Find.kt:operator fun FindExpr.not)
  */
-private fun findExprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr) =  OpParent(
+private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr) =  OpParent(
     prunedDirsNamed?.let {
         OpParent(
             BaseName(it), FileType("d"),
@@ -109,6 +109,6 @@ private fun findExprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindEx
 private fun grepQuietly(regexp: String, vararg files: String) =
     kommand("grep", "-q", regexp, *files)
 
-private fun grepPrintingDetails(regexp: String, vararg files: String) =
+private fun grepWithDetails(regexp: String, vararg files: String) =
     kommand("grep", "-H", "-n", "-T", "-e", regexp, *files)
 
