@@ -55,6 +55,50 @@ object FindSamples {
         CliPlatform::findExec,
         CliPlatform::findDetailsTableExec,
         CliPlatform::findTypicalDetailsTableExec,
+        CliPlatform::findMyKotlinCodeExec,
     )
 }
+
+/**
+ * Note: null means do not use given test/filter/limit at all.
+ * @param withModifTime24h
+ *   Exactly(0) will return files modified within last 24h,
+ *   LessThan(7) for files modified in last few days.
+ */
+fun CliPlatform.findMyKotlinCodeExec(
+    kotlinCodePath: String = myKotlinPath,
+    withGrepRE: String? = null,
+    withBaseName: String? = "*.kt",
+    withWholeName: String? = "*/src/*/kotlin/*",
+    withPruneBuildDirsNamed: String? = "build",
+    withModifTime24h: NumArg? = null,
+) = find(
+    kotlinCodePath,
+    findExprWithPrunedDirs(
+        withPruneBuildDirsNamed,
+        withWholeName?.let { WholeName(withWholeName) } ?: AlwaysTrue,
+        withBaseName?.let { BaseName(it) } ?: AlwaysTrue,
+        FileType("f"),
+        withModifTime24h?.let { ModifTime24h(it) } ?: AlwaysTrue,
+        withGrepRE?.let { ActExec(grep(it, "{}")) } ?: ActPrint
+    )
+).exec()
+
+/**
+ * @param prunedDirsNamed null means do not prune anything at all
+  * A lot of OpParent here, but it's necessary until I have better operators wrappers
+  * (see fixme_comment above Find.kt:operator fun FindExpr.not)
+ */
+private fun findExprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr) =  OpParent(
+    prunedDirsNamed?.let {
+        OpParent(
+            BaseName(it), FileType("d"),
+            ActPrune, AlwaysFalse
+        )
+    } ?: AlwaysFalse,
+    OpOr, OpParent(*expr),
+)
+
+// TODO_later: full grep kommand wrapper class+funs.
+private fun grep(regexp: String, vararg files: String) = kommand("grep", "-e", regexp, *files)
 
