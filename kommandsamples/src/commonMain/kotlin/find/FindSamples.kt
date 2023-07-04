@@ -80,9 +80,15 @@ fun CliPlatform.findMyKotlinCodeExec(
         withBaseName?.let { BaseName(it) } ?: AlwaysTrue,
         FileType("f"),
         withModifTime24h?.let { ModifTime24h(it) } ?: AlwaysTrue,
-        withGrepRE?.let { ActExec(grep(it, "{}")) } ?: ActPrint
+        findActExecGrepPrintIfMatched(withGrepRE),
     )
 ).exec()
+
+private fun findActExecGrepPrintIfMatched(grepRE: String?) =
+    if (grepRE == null) ActPrint
+    else OpParent(
+        ActExec(grepQuietly(grepRE, "{}")), ActPrint
+    )
 
 /**
  * @param prunedDirsNamed null means do not prune anything at all
@@ -100,5 +106,9 @@ private fun findExprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindEx
 )
 
 // TODO_later: full grep kommand wrapper class+funs.
-private fun grep(regexp: String, vararg files: String) = kommand("grep", "-e", regexp, *files)
+private fun grepQuietly(regexp: String, vararg files: String) =
+    kommand("grep", "-q", regexp, *files)
+
+private fun grepPrintingDetails(regexp: String, vararg files: String) =
+    kommand("grep", "-H", "-n", "-T", "-e", regexp, *files)
 
