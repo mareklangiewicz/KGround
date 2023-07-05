@@ -49,13 +49,13 @@ object FindSamples {
     val findInKotlinDirNodeModulesDirs =
         findDirBaseName(myKotlinPath, "node_modules", whenFoundPrune = true) s
                 "find $myKotlinPath -name node_modules -type d -print -prune"
+    val findMyLastWeekKotlinCode = findMyKotlinCode(withModifTime24h = NumArg.LessThan(8)) s null
 
     // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
     val execs: List<KFunction<*>> = listOf(
         CliPlatform::findExec,
         CliPlatform::findDetailsTableExec,
         CliPlatform::findTypicalDetailsTableExec,
-        CliPlatform::findMyKotlinCodeExec,
     )
 }
 
@@ -65,7 +65,7 @@ object FindSamples {
  *   Exactly(0) will return files modified within last 24h,
  *   LessThan(7) for files modified in last few days.
  */
-fun CliPlatform.findMyKotlinCodeExec(
+fun findMyKotlinCode(
     kotlinCodePath: String = myKotlinPath,
     withGrepRE: String? = null,
     withBaseName: String? = "*.kt",
@@ -82,7 +82,7 @@ fun CliPlatform.findMyKotlinCodeExec(
         withModifTime24h?.let { ModifTime24h(it) } ?: AlwaysTrue,
         fexprActExecGrepPrintIfMatched(withGrepRE),
     )
-).exec()
+)
 
 private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
     if (grepRE == null) ActPrint

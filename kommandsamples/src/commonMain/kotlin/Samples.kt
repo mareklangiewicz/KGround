@@ -9,7 +9,7 @@ data class Sample(
     val expectedLineRaw: String? = null,
 ) : Kommand by kommand
 
-internal infix fun Kommand.s(expectedLineRaw: String) = Sample(this, expectedLineRaw = expectedLineRaw)
+internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
 
 
 object Samples {
