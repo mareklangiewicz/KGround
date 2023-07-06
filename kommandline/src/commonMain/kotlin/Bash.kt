@@ -2,10 +2,8 @@
 
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kommand.Bash.Option.command
-
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
-    Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -command; init() }
+    Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -BashOpt.command; init() }
 
 fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
 
@@ -27,23 +25,28 @@ fun CliPlatform.bashGetExportsToFileExec(outFile: String) =
 // https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Quoting
 // TODO_maybe: typesafe DSL for composing bash scripts? (similar to URE)
 data class Bash(
-    /** a command string (usually just one string with or without spaces) or a file (when no -c option provided) */
+    /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
     val nonopts: MutableList<String> = mutableListOf(),
-    val options: MutableList<Option> = mutableListOf(),
+    val opts: MutableList<BashOpt> = mutableListOf(),
 ): Kommand {
     override val name get() = "bash"
-    override val args get() = options.map { it.str } + nonopts
+    override val args get() = opts.flatMap { it.toArgs() } + nonopts
 
-    sealed class Option(val str: String) {
-        /** interpret nonopts as a command to run */
-        object command : Option("-c")
-        object interactive : Option("-i")
-        object login : Option("-l")
-        object restricted : Option("-r")
-        object posix : Option("--posix")
-        object help : Option("--help")
-        object version : Option("--version")
-        object verbose : Option("--verbose")
-    }
-    operator fun Option.unaryMinus() = options.add(this)
+operator fun BashOpt.unaryMinus() = opts.add(this)
+
 }
+interface BashOpt: KOpt {
+    /**
+     * interpret first from nonopts as a command_string to run
+     * If more nonopts present, they are used to override env variables $0 $1 $2...
+     */
+    object command : KOptS("c"), BashOpt
+    object interactive : KOptS("i"), BashOpt
+    object login : KOptS("l"), BashOpt
+    object restricted : KOptS("r"), BashOpt
+    object posix : KOptL("posix"), BashOpt
+    object help : KOptL("help"), BashOpt
+    object version : KOptL("version"), BashOpt
+    object verbose : KOptL("verbose"), BashOpt
+}
+
