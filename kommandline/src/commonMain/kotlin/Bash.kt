@@ -3,7 +3,7 @@
 package pl.mareklangiewicz.kommand
 
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
-    Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -BashOpt.command; init() }
+    Bash(mutableListOf(if (pause) "$script ; echo END.ENTER; read" else script)).apply { -BashOpt.Command; init() }
 
 fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
 
@@ -24,29 +24,34 @@ fun CliPlatform.bashGetExportsToFileExec(outFile: String) =
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash
 // https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Quoting
 // TODO_maybe: typesafe DSL for composing bash scripts? (similar to URE)
+// TODO NOW: mark all lowlevel stuff as delicate api; default api should always fail fast, for example:
+//  - always check weird filenames (like with \n)
+//  - bash -c more than one nonopt (is confusing and should be opt in)
+//  - ssh host command separatearg (instead of ssh host "command arg") is delicate
+    //    because it always concatenate separatearg with just space and send to remote shell as one script
+//  - generally all direct manipulation of Kommand classes should be marked as @DelicateKommandApi!
 data class Bash(
     /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
-    val nonopts: MutableList<String> = mutableListOf(),
-    val opts: MutableList<BashOpt> = mutableListOf(),
-): Kommand {
+    override val nonopts: MutableList<String> = mutableListOf(),
+    override val opts: MutableList<BashOpt> = mutableListOf(),
+): KommandTypical<BashOpt> {
     override val name get() = "bash"
-    override val args get() = opts.flatMap { it.toArgs() } + nonopts
-
-operator fun BashOpt.unaryMinus() = opts.add(this)
-
 }
-interface BashOpt: KOpt {
+interface BashOpt: KOptTypical {
     /**
      * interpret first from nonopts as a command_string to run
      * If more nonopts present, they are used to override env variables $0 $1 $2...
      */
-    object command : KOptS("c"), BashOpt
-    object interactive : KOptS("i"), BashOpt
-    object login : KOptS("l"), BashOpt
-    object restricted : KOptS("r"), BashOpt
-    object posix : KOptL("posix"), BashOpt
-    object help : KOptL("help"), BashOpt
-    object version : KOptL("version"), BashOpt
-    object verbose : KOptL("verbose"), BashOpt
+    object Command : BashOptS("c")
+    object Interactive : BashOptS("i")
+    object Login : BashOptS("l")
+    object Restricted : BashOptS("r")
+    object Posix : BashOptL("posix")
+    object Help : BashOptL("help")
+    object Version : BashOptL("version")
+    object Verbose : BashOptL("verbose")
+
+    open class BashOptS(override val name: String): KOptS(name), BashOpt
+    open class BashOptL(override val name: String): KOptL(name), BashOpt
 }
 

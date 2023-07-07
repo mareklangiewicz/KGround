@@ -31,9 +31,10 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     }
 }
 
+@OptIn(DelicateKommandApi::class)
 fun testSample(sample: Sample) = "check kommand.lineRaw" o {
     val lineRaw = sample.kommand.lineRaw()
-    if (sample.expectedLineRaw == null) println("Expected line not provided.")
+    if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
     else lineRaw eq sample.expectedLineRaw
     println("Actual kommand.lineRaw is: $lineRaw")
 }

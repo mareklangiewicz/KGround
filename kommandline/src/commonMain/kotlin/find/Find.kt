@@ -102,6 +102,7 @@ fun findDirBaseName(
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeBaseName(path, "d", pattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
 
+@OptIn(DelicateKommandApi::class)
 fun findTypeBaseName(
     path: String,
     fileType: String,
@@ -125,12 +126,14 @@ fun findTypeBaseName(
         }
     }
 
+@DelicateKommandApi
 fun find(path: String, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
     +path
     for (e in ex) expr.add(e)
     init()
 }
 
+@DelicateKommandApi
 fun find(init: Find.() -> Unit = {}) = Find().apply(init)
 
 
@@ -139,13 +142,14 @@ fun find(init: Find.() -> Unit = {}) = Find().apply(init)
  * [gnu projects findutils](https://savannah.gnu.org/projects/findutils/)
  * [online findutils docs](https://www.gnu.org/software/findutils/manual/html_mono/find.html)
  */
+@DelicateKommandApi
 data class Find(
     val opts: MutableList<FindOpt> = mutableListOf(),
     val paths: MutableList<String> = mutableListOf(),
     val expr: MutableList<FindExpr> = mutableListOf(),
 ) : Kommand {
     override val name get() = "find"
-    override val args get() = opts.flatMap { it.toArgs() } + paths + expr.flatMap { it.toArgs() }
+    override val args get() = opts.toArgsFlat() + paths + expr.toArgsFlat()
     operator fun FindOpt.unaryMinus() = opts.add(this)
     operator fun String.unaryPlus() = paths.add(this)
 }

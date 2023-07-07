@@ -3,8 +3,10 @@
 package pl.mareklangiewicz.kommand
 
 /** anonymous kommand to use only if no more specific Kommand class defined */
-fun kommand(name: String, vararg args: String): Kommand = SomeKommand(name, args.toList())
+@DelicateKommandApi
+fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
 
+@DelicateKommandApi
 fun String.toKommand() = split(" ").run {
     kommand(first(), *drop(1).toTypedArray())
 }
@@ -36,18 +38,26 @@ interface WithArgs { val args: List<String> }
  */
 interface ToArgs { fun toArgs(): List<String> }
 
+fun Iterable<ToArgs>.toArgsFlat() = flatMap {  it.toArgs() }
+
 interface Kommand: WithName, WithArgs, ToArgs {
     override fun toArgs() = listOf(name) + args
 }
 
-/** anonymous kommand to use only if no more specific Kommand class defined */
-data class SomeKommand(override val name: String, override val args: List<String>) : Kommand
+
+/** Anonymous/Arbitrary Kommand implementation to use only if no more specific Kommand class defined */
+@DelicateKommandApi
+data class AKommand(override val name: String, override val args: List<String>) : Kommand
 
 fun Kommand.line() = lineBash()
-fun Kommand.lineRaw(separator: String = " ") = toArgs().joinToString(separator)
+
 fun Kommand.lineBash() = toArgs().joinToString(" ") { bashQuoteMetaChars(it) }
-fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
+
 fun Kommand.println() = println(line())
+@DelicateKommandApi
+fun Kommand.lineRaw(separator: String = " ") = toArgs().joinToString(separator)
+@DelicateKommandApi
+fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
 
 /** Kommand option */
 interface KOpt: ToArgs
@@ -108,3 +118,21 @@ open class KOptS(
 
 private fun listOfNN(vararg elements: String?) = buildList { addAll(elements.filterNotNull()) }
 
+interface KommandTypical<KOptT: KOptTypical>: Kommand {
+    val opts: MutableList<KOptT>
+    val nonopts: MutableList<String>
+    override val args get() = opts.toArgsFlat() + nonopts
+    operator fun KOptT.unaryMinus() = opts.add(this)
+    operator fun String.unaryPlus() = nonopts.add(this)
+}
+
+/** Anonymus/Arbitrary implementation of KommandTypical to use only if no more specific Kommand class defined */
+@DelicateKommandApi
+data class AKommandTypical(
+    override val name: String,
+    override val opts: MutableList<KOptTypical> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+    ): KommandTypical<KOptTypical>
+@DelicateKommandApi
+fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =
+    AKommandTypical(name, opts.toMutableList()).apply(init)
