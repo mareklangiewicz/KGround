@@ -17,10 +17,10 @@ class JsEvalFunPlatform: CliPlatform {
         outFile: String?,
         envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess {
-        check(dir == null) { "dir unsupported" }
-        check(inFile == null) { "inFile unsupported" }
-        check(outFile == null) { "outFile unsupported" }
-        check(envModify == null) { "envModify unsupported" }
+        require(dir == null) { "dir unsupported" }
+        require(inFile == null) { "inFile unsupported" }
+        require(outFile == null) { "outFile unsupported" }
+        require(envModify == null) { "envModify unsupported" }
         val code = kommand.lineFun()
         if (debug) println(code)
         return JsEvalFunProcess(code)
