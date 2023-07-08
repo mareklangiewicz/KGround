@@ -11,7 +11,7 @@ package pl.mareklangiewicz.kommand
 @Retention(value = AnnotationRetention.BINARY)
 @RequiresOptIn(
     level = RequiresOptIn.Level.WARNING,
-    message = "This is a delicate API and its use requires care."
+    message = "This is a delicate KommandLine API and its use requires care."
 )
 public annotation class DelicateKommandApi
 

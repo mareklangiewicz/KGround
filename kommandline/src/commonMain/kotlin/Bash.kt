@@ -30,6 +30,7 @@ fun CliPlatform.bashGetExportsToFileExec(outFile: String) =
 //  - ssh host command separatearg (instead of ssh host "command arg") is delicate
     //    because it always concatenate separatearg with just space and send to remote shell as one script
 //  - generally all direct manipulation of Kommand classes should be marked as @DelicateKommandApi!
+@DelicateKommandApi
 data class Bash(
     /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
     override val nonopts: MutableList<String> = mutableListOf(),

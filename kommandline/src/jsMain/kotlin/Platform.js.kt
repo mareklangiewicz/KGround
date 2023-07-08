@@ -14,11 +14,13 @@ class JsEvalFunPlatform: CliPlatform {
         vararg useNamedArgs: Unit,
         dir: String?,
         inFile: String?,
-        outFile: String?
+        outFile: String?,
+        envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess {
         check(dir == null) { "dir unsupported" }
         check(inFile == null) { "inFile unsupported" }
         check(outFile == null) { "outFile unsupported" }
+        check(envModify == null) { "envModify unsupported" }
         val code = kommand.lineFun()
         if (debug) println(code)
         return JsEvalFunProcess(code)

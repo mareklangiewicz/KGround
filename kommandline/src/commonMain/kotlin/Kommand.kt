@@ -62,6 +62,7 @@ fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", p
 /** Kommand option */
 interface KOpt: ToArgs
 
+@DelicateKommandApi
 interface KOptTypical: KOpt, WithName, WithArgs {
     val namePrefix: String
     val nameSeparator: String
@@ -83,6 +84,7 @@ interface KOptTypical: KOpt, WithName, WithArgs {
 }
 
 /** Long form of an option */
+@DelicateKommandApi
 open class KOptL(
     override val name: String,
     override val args: List<String>,
@@ -100,6 +102,7 @@ open class KOptL(
 }
 
 /** Short form of an option */
+@DelicateKommandApi
 open class KOptS(
     override val name: String,
     override val args: List<String>,
@@ -118,6 +121,7 @@ open class KOptS(
 
 private fun listOfNN(vararg elements: String?) = buildList { addAll(elements.filterNotNull()) }
 
+@DelicateKommandApi
 interface KommandTypical<KOptT: KOptTypical>: Kommand {
     val opts: MutableList<KOptT>
     val nonopts: MutableList<String>

@@ -21,13 +21,16 @@ interface CliPlatform {
      * TODO_maybe: support other redirections (streams/strings with content)
      *   (might require separate flag like: isRedirectStreamsSupported)
      *   (also see comment above at isRedirectContentSupported flag)
+     * @param envModify Allows to modify default inherited environment variables for child process.
+     *   Can throw exepction if it's unsupported on particular platform.
      */
     fun start(
         kommand: Kommand,
         vararg useNamedArgs: Unit,
         dir: String? = null,
         inFile: String? = null,
-        outFile: String? = null
+        outFile: String? = null,
+        envModify: (MutableMap<String, String>.() -> Unit)? = null,
     ): ExecProcess
     // TODO_later: access to input/output/error streams (when not redirected) with Okio source/sink
     // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
@@ -78,7 +81,8 @@ class FakePlatform(
         vararg useNamedArgs: Unit,
         dir: String?,
         inFile: String?,
-        outFile: String?
+        outFile: String?,
+        envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess {
         log("start($kommand, $dir)")
         checkStart(kommand, dir, inFile, outFile)

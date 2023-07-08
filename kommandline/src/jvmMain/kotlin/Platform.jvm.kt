@@ -16,7 +16,8 @@ class JvmPlatform: CliPlatform {
         vararg useNamedArgs: Unit,
         dir: String?,
         inFile: String?,
-        outFile: String?
+        outFile: String?,
+        envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess =
         JvmExecProcess(
             ProcessBuilder()
@@ -27,6 +28,7 @@ class JvmPlatform: CliPlatform {
                     redirectErrorStream(true)
                     inFile?.let { redirectInput(File(it)) }
                     outFile?.let { redirectOutput(File(it)) }
+                    envModify?.let { environment().it() }
                 }
                 .start()
         )
