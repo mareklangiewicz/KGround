@@ -7,7 +7,6 @@ actual typealias SysPlatform = JvmPlatform
 class JvmPlatform: CliPlatform {
 
     override val isRedirectFileSupported get() = true
-    override val isRedirectContentSupported get() = true
 
     private val debug = false
 
@@ -17,6 +16,7 @@ class JvmPlatform: CliPlatform {
         dir: String?,
         inFile: String?,
         outFile: String?,
+        //outFileAppend: Boolean, // TODO_someday_maybe
         envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess =
         JvmExecProcess(
@@ -45,12 +45,18 @@ class JvmPlatform: CliPlatform {
 }
 
 private class JvmExecProcess(private val process: Process): ExecProcess {
-    override fun await(inContent: String?): ExecResult {
-        if (inContent != null) process.outputStream.bufferedWriter().use { it.write(inContent) }
-        val output = process.inputStream.bufferedReader().use { it.readLines() }
-        val exit = process.waitFor()
-        return ExecResult(exit, output)
-    }
+
+    // TODO_someday: suspending version based on Process.onExit(): CompletableFuture
+    // but: It looks like default onExit implementation just calls blocking: waitFor in a loop anyway in special thread.
+    // so it's "thread expensive" anyway.. check what "onExit" implementation is actually used in my cases..
+    // maybe they're planning to change onExit in the future to make it really nonblocking (NIO?)??
+    override fun waitForExit() = process.waitFor()
 
     override fun cancel(force: Boolean) { if (force) process.destroyForcibly() else process.destroy() }
+
+    override fun useInputLines(input: Sequence<String>) = process.outputWriter().use {writer ->
+        input.forEach {  writer.write(it); writer.newLine() }
+    }
+
+    override fun useOutputLines(block: (output: Sequence<String>) -> Unit) = process.inputReader().useLines(block)
 }

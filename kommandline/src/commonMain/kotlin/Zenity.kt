@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.Zenity.*
 import pl.mareklangiewicz.kommand.Zenity.Option.*
 
 fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boolean =
-    start(zenityAskIf(question, atitle)).await().exitValue == 0
+    start(zenityAskIf(question, atitle)).waitForExit() == 0
 
 fun CliPlatform.zenityAskForPasswordExec(question: String = "Enter password", atitle: String? = null): String =
     zenityAskForPassword(question, atitle).exec().single()

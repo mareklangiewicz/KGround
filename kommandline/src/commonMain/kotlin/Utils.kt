@@ -39,8 +39,8 @@ fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String?
     if (expectedKommandLine != null) check(expectedKommandLine == line())
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
-        start(this@checkInIdeap, dir = execInDir, outFile = tmpFile).await()
-        start(ideap { +tmpFile }).await()
+        start(this@checkInIdeap, dir = execInDir, outFile = tmpFile).waitForExit()
+        start(ideap { +tmpFile }).waitForExit()
     } }
 }
 

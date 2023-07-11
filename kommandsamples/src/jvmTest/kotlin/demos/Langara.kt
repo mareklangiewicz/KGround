@@ -78,8 +78,8 @@ class Langara {
     @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().printAll()
 
     @Test fun experiment() = idemo {
-        val ideaEnabled = bash("ps -e").exec().any { it.contains("idea.sh") }
-        if (ideaEnabled) ideap { +tmpNotesFile }.exec() else vim(tmpNotesFile).exec()
+        val ideaEnabled = bash("ps aux").exec().any { it.lowercase().contains("idea") }
+        if (ideaEnabled) ideap { +tmpNotesFile }.exec() else gvim(tmpNotesFile).exec()
     }
 }
 

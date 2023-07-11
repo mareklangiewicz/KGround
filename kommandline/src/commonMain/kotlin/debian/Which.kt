@@ -4,7 +4,7 @@ import pl.mareklangiewicz.kommand.*
 
 fun CliPlatform.isKommandAvailable(kommand: Kommand) = isCommandAvailable(kommand.name)
 
-fun CliPlatform.isCommandAvailable(command: String) = start(which(command)).await().exitValue == 0
+fun CliPlatform.isCommandAvailable(command: String) = start(which(command)).waitForExit() == 0
 
 fun CliPlatform.whichOneExec(command: String) = which(command).exec().firstOrNull()
 

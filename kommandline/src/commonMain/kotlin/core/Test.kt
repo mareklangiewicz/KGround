@@ -28,7 +28,7 @@ enum class FileTest(val code: Char) {
 fun CliPlatform.testIfFile(file: String, ftest: FileTest) = testIf("-${ftest.code}", file)
 
 fun CliPlatform.testIf(vararg tokens: String): Boolean {
-    val result = start(test(*tokens)).await()
+    val result = start(test(*tokens)).waitForResult()
     return when (result.exitValue) {
         0 -> true
         1 -> false

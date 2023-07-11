@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.upue.*
+
 @Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
 typealias Platform = CliPlatform
 
@@ -10,9 +12,6 @@ interface CliPlatform {
      * so it supports redirect using remote bash operators like < > << >> or sth like that.
      */
     val isRedirectFileSupported: Boolean
-    val isRedirectContentSupported: Boolean
-        // TODO_maybe: more universal redirection via kotlin flows
-        // (but wrapping java.lang.Redirect etc correctly can be tricky..)
 
     /**
      * @param dir working directory for started subprocess - null means inherit from current process
@@ -32,8 +31,8 @@ interface CliPlatform {
         outFile: String? = null,
         envModify: (MutableMap<String, String>.() -> Unit)? = null,
     ): ExecProcess
-    // TODO_later: access to input/output/error streams (when not redirected) with Okio source/sink
-    // TODO_later: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
+    // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
+    // TODO_maybe: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
     // TODO_someday: move it outside as Kommand extension with CliPlatform context receiver
@@ -41,14 +40,11 @@ interface CliPlatform {
         vararg useNamedArgs: Unit,
         dir: String? = null,
         inContent: String? = null,
+        inLines: Sequence<String>? = inContent?.lineSequence(),
         inFile: String? = null,
         outFile: String? = null,
-    ): List<String> {
-        require(isRedirectContentSupported || inContent == null) { "redirect content not supported here" }
-        require(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
-        require(inContent == null || inFile == null) { "Either inContent or inFile or none, but not both" }
-        return start(this, dir = dir, inFile = inFile, outFile = outFile).await(inContent).unwrap()
-    }
+    ): List<String> =
+        exec(this, dir = dir, inContent = inContent, inLines = inLines, inFile = inFile, outFile = outFile)
 
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
@@ -68,13 +64,27 @@ interface CliPlatform {
     }
 }
 
+fun CliPlatform.exec(
+    kommand: Kommand,
+    vararg useNamedArgs: Unit,
+    dir: String? = null,
+    inContent: String? = null,
+    inLines: Sequence<String>? = inContent?.lineSequence(),
+    inFile: String? = null,
+    outFile: String? = null,
+): List<String> {
+    require(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+    require(inLines == null || inFile == null) { "Either inLines or inFile or none, but not both" }
+    return start(kommand, dir = dir, inFile = inFile, outFile = outFile)
+        .waitForResult(inLines = inLines)
+        .unwrap()
+}
+
 class FakePlatform(
     private val checkStart: (Kommand, String?, String?, String?) -> Unit = { _, _, _, _ -> },
-    private val checkAwait: (String?) -> Unit = {},
     private val log: (Any?) -> Unit = ::println): CliPlatform {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
-    override val isRedirectContentSupported get() = true // not really, but it's all fake
 
     override fun start(
         kommand: Kommand,
@@ -86,30 +96,58 @@ class FakePlatform(
     ): ExecProcess {
         log("start($kommand, $dir)")
         checkStart(kommand, dir, inFile, outFile)
-        return object : ExecProcess {
-            override fun await(inContent: String?): ExecResult {
-                log("await(..)")
-                checkAwait(inContent)
-                return ExecResult(0, listOf("fake output")) // many kommand wrappers expect single line output
-            }
-            override fun cancel(force: Boolean) = log("cancel($force)")
-        }
+        return FakeProcess(log)
     }
+}
+
+class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
+    override fun waitForExit() = 0
+    override fun cancel(force: Boolean) = log("cancel($force)")
+    override fun useInputLines(input: Sequence<String>) = input.forEach { log("input line: $it") }
+    override fun useOutputLines(block: (output: Sequence<String>) -> Unit) = block(emptySequence())
 }
 
 expect class SysPlatform(): CliPlatform
 
 
 interface ExecProcess {
-    fun await(inContent: String? = null): ExecResult
-    // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
+
+    fun waitForExit(): Int
 
     /**
      * Tries to cancel (destroy) the process. May not work immediately
      * @param force - Hint to do it less politely. Some platforms can ignore the hint.
      */
     fun cancel(force: Boolean)
+
+    /**
+     * Can be used only once. It always finally close input stream.
+     * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
+     */
+    fun useInputLines(input: Sequence<String>)
+
+    /** Can be used only once. It always finally close output stream. */
+    fun useOutputLines(block: (output: Sequence<String>) -> Unit)
 }
+
+// TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
+/**
+ * Not only waits for process to exit, but collects all output in a list.
+ * Then returns both exit code and all output in ExecResult.
+ */
+fun ExecProcess.waitForResult(
+    inContent: String? = null,
+    inLines: Sequence<String>? = inContent?.lineSequence(),
+): ExecResult {
+    inLines?.let(::useInputLines)
+    val output = buildList<String> { useOutputLines { addAll(it) } }
+    val exit = waitForExit()
+    return ExecResult(exit, output)
+}
+
+fun ExecProcess.pushEachOutuptLine(pushee: Pushee<String>) = useOutputLines { it.forEach { pushee(it)} }
+
+fun ExecProcess.pullEachInputLine(pullee: Pullee<String>) = useInputLines(pullee.iterator().asSequence())
 
 /**
  * Represents the result of execution an external process.
