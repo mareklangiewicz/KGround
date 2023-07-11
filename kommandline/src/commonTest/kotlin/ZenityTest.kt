@@ -60,15 +60,17 @@ class ZenityTest {
             +"desc $it"
         }
     }.checkWithUser()
-    @Test fun testZenityListFromLs() = SYS.run { // TODO_someday: nice parsing for ls output columns etc..
-        val lines = ls { -All; -LongFormat; -HumanReadable }.exec()
-        zenity(list) {
-            -text("ls output")
-            -column("ls output")
-            for (l in lines) +"line $l"
-            // some prefix like "line" is needed,
-            // so it doesn't confuse line starting with "-" with zenity option
-        }.checkWithUser()
+    @Test fun testZenityListFromLs() = ifInteractive{
+        SYS.run { // TODO_someday: nice parsing for ls output columns etc..
+            val lines = ls { -All; -LongFormat; -HumanReadable }.exec()
+            zenity(list) {
+                -text("ls output")
+                -column("ls output")
+                for (l in lines) +"line $l"
+                // some prefix like "line" is needed,
+                // so it doesn't confuse line starting with "-" with zenity option
+            }.checkWithUser()
+        }
     }
 
     // TODO_someday bash (& nobash) pipes (both typesafe!). Best if I can compose in kotlin (without bash) sth like:
