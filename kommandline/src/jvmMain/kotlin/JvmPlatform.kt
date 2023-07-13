@@ -1,11 +1,11 @@
 package pl.mareklangiewicz.kommand
 
-import java.io.File
+import java.io.*
 import java.lang.ProcessBuilder.*
 
 actual typealias SysPlatform = JvmPlatform
 
-class JvmPlatform: CliPlatform {
+class JvmPlatform : CliPlatform {
 
     override val isRedirectFileSupported get() = true
 
@@ -30,12 +30,12 @@ class JvmPlatform: CliPlatform {
                     command(kommand.toArgs())
                     directory(dir?.let(::File))
                     inFile?.let(::File)?.let(::redirectInput)
-                    outFile ?: check(!outFileAppend) {"No output file to append to"}
+                    outFile ?: check(!outFileAppend) { "No output file to append to" }
                     outFile?.let(::File)?.let {
                         redirectOutput(if (outFileAppend) Redirect.appendTo(it) else Redirect.to(it))
                     }
                     redirectErrorStream(errToOut)
-                    errFile ?: check(!errFileAppend) {"No error file to append to"}
+                    errFile ?: check(!errFileAppend) { "No error file to append to" }
                     errFile?.let(::File)?.let {
                         redirectError(if (errFileAppend) Redirect.appendTo(it) else Redirect.to(it))
                     }
@@ -55,7 +55,7 @@ class JvmPlatform: CliPlatform {
     private val xdgdesktop by lazy { bashGetExportsExec()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
 }
 
-private class JvmExecProcess(private val process: Process): ExecProcess {
+private class JvmExecProcess(private val process: Process) : ExecProcess {
 
     private val stdin = process.outputWriter()
     private val stdout = process.inputReader()
@@ -70,7 +70,7 @@ private class JvmExecProcess(private val process: Process): ExecProcess {
     override fun cancel(force: Boolean) { if (force) process.destroyForcibly() else process.destroy() }
 
     override fun useInLines(input: Sequence<String>) = stdin.use { writer ->
-        input.forEach {  writer.write(it); writer.newLine() }
+        input.forEach { writer.write(it); writer.newLine() }
     }
 
     override fun useOutLines(block: (output: Sequence<String>) -> Unit) = stdout.useLines(block)

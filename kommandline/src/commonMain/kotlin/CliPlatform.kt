@@ -142,6 +142,22 @@ interface ExecProcess {
     fun useErrLines(block: (error: Sequence<String>) -> Unit)
 }
 
+fun ExecProcess.useOutLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit) {
+    try { useOutLines(block) }
+    catch (e: Exception) {
+        if (e.message == "Stream closed") block(emptySequence())
+        else throw e
+    }
+}
+
+fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> Unit) {
+    try { useErrLines(block) }
+    catch (e: Exception) {
+        if (e.message == "Stream closed") block(emptySequence())
+        else throw e
+    }
+}
+
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 /**
  * Not only waits for process to exit, but collects all output in a list.
@@ -152,8 +168,8 @@ fun ExecProcess.waitForResult(
     inLines: Sequence<String>? = inContent?.lineSequence(),
 ): ExecResult {
     inLines?.let(::useInLines)
-    val out = buildList<String> { useOutLines { addAll(it) } }
-    val err = buildList<String> { useErrLines { addAll(it) } }
+    val out = buildList<String> { useOutLinesOrEmptyIfClosed { addAll(it) } }
+    val err = buildList<String> { useErrLinesOrEmptyIfClosed { addAll(it) } }
     // FIXME: is there any chance it's correct to collect err SEQUENCIALLY AFTER collecting whole out?
     //    What happens when we are still collecting output, but subprocess send a LOT of error,
     //    so stderr pipe buffer is full?? Probably subprocess is blocked on writing to err,

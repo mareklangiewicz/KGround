@@ -3,14 +3,35 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInGnomeTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
+import kotlin.time.*
 
 val Any?.unit get() = Unit
 
 infix fun <T: Any> List<T>.plusIfNN(element: T?) = if (element == null) this else this + element
 infix fun <T: Any> List<T>.prependIfNN(element: T?) = if (element == null) this else listOf(element) + this
 
-fun List<String>.printlns() = forEach(::println)
+fun Iterator<String>.loglns(logln: (String) -> Unit = ::println) = forEach(logln)
 
+@OptIn(ExperimentalTime::class)
+fun Iterator<String>.loglnsWithMillis(
+    mark: TimeMark = TimeSource.Monotonic.markNow(),
+    logln: (String) -> Unit = ::println,
+) = loglns { logln("${mark.elapsedNow().inWholeMilliseconds} $it") }
+
+fun Iterable<String>.loglns(logln: (String) -> Unit = ::println) = iterator().loglns(logln)
+fun Sequence<String>.loglns(logln: (String) -> Unit = ::println) = iterator().loglns(logln)
+
+@OptIn(ExperimentalTime::class)
+fun Iterable<String>.loglnsWithMillis(
+    mark: TimeMark = TimeSource.Monotonic.markNow(),
+    logln: (String) -> Unit = ::println,
+) = iterator().loglnsWithMillis(mark, logln)
+
+@OptIn(ExperimentalTime::class)
+fun Sequence<String>.loglnsWithMillis(
+    mark: TimeMark = TimeSource.Monotonic.markNow(),
+    logln: (String) -> Unit = ::println,
+) = iterator().loglnsWithMillis(mark, logln)
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
 fun CliPlatform.isUserFlagEnabled(key: String) = konfigInUserHomeConfigDir()["$key.enabled"]?.trim().toBoolean()
