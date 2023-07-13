@@ -29,6 +29,10 @@ interface CliPlatform {
         dir: String? = null,
         inFile: String? = null,
         outFile: String? = null,
+        outFileAppend: Boolean = false,
+        errToOut: Boolean = false,
+        errFile: String? = null,
+        errFileAppend: Boolean = false,
         envModify: (MutableMap<String, String>.() -> Unit)? = null,
     ): ExecProcess
     // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
@@ -81,7 +85,8 @@ fun CliPlatform.exec(
 }
 
 class FakePlatform(
-    private val checkStart: (Kommand, String?, String?, String?) -> Unit = { _, _, _, _ -> },
+    private val checkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
+        {_, _, _, _, _, _, _, _ -> },
     private val log: (Any?) -> Unit = ::println): CliPlatform {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
@@ -92,10 +97,14 @@ class FakePlatform(
         dir: String?,
         inFile: String?,
         outFile: String?,
-        envModify: (MutableMap<String, String>.() -> Unit)?,
+        outFileAppend: Boolean,
+        errToOut: Boolean,
+        errFile: String?,
+        errFileAppend: Boolean,
+        envModify: (MutableMap<String, String>.() -> Unit)?
     ): ExecProcess {
-        log("start($kommand, $dir)")
-        checkStart(kommand, dir, inFile, outFile)
+        log("start($kommand, $dir, ...)")
+        checkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
         return FakeProcess(log)
     }
 }
@@ -103,8 +112,9 @@ class FakePlatform(
 class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
     override fun waitForExit() = 0
     override fun cancel(force: Boolean) = log("cancel($force)")
-    override fun useInputLines(input: Sequence<String>) = input.forEach { log("input line: $it") }
-    override fun useOutputLines(block: (output: Sequence<String>) -> Unit) = block(emptySequence())
+    override fun useInLines(input: Sequence<String>) = input.forEach { log("input line: $it") }
+    override fun useOutLines(block: (output: Sequence<String>) -> Unit) = block(emptySequence())
+    override fun useErrLines(block: (error: Sequence<String>) -> Unit) = block(emptySequence())
 }
 
 expect class SysPlatform(): CliPlatform
@@ -124,10 +134,12 @@ interface ExecProcess {
      * Can be used only once. It always finally close input stream.
      * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
      */
-    fun useInputLines(input: Sequence<String>)
+    fun useInLines(input: Sequence<String>)
 
     /** Can be used only once. It always finally close output stream. */
-    fun useOutputLines(block: (output: Sequence<String>) -> Unit)
+    fun useOutLines(block: (output: Sequence<String>) -> Unit)
+    /** Can be used only once. It always finally close error stream. */
+    fun useErrLines(block: (error: Sequence<String>) -> Unit)
 }
 
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
@@ -139,40 +151,51 @@ fun ExecProcess.waitForResult(
     inContent: String? = null,
     inLines: Sequence<String>? = inContent?.lineSequence(),
 ): ExecResult {
-    inLines?.let(::useInputLines)
-    val output = buildList<String> { useOutputLines { addAll(it) } }
+    inLines?.let(::useInLines)
+    val out = buildList<String> { useOutLines { addAll(it) } }
+    val err = buildList<String> { useErrLines { addAll(it) } }
+    // FIXME: is there any chance it's correct to collect err SEQUENCIALLY AFTER collecting whole out?
+    //    What happens when we are still collecting output, but subprocess send a LOT of error,
+    //    so stderr pipe buffer is full?? Probably subprocess is blocked on writing to err,
+    //    and we are here blocked still collecting still open output stream??
+    //    if that's the case: it would be much better to make subprocess crash and we throw sth,
+    //    instead os such deadlock..
     val exit = waitForExit()
-    return ExecResult(exit, output)
+    return ExecResult(exit, out, err)
 }
 
-fun ExecProcess.pushEachOutuptLine(pushee: Pushee<String>) = useOutputLines { it.forEach { pushee(it)} }
+fun ExecProcess.pushEachOutLine(pushee: Pushee<String>) = useOutLines { it.forEach { pushee(it)} }
 
-fun ExecProcess.pullEachInputLine(pullee: Pullee<String>) = useInputLines(pullee.iterator().asSequence())
-
-/**
- * Represents the result of execution an external process.
- * @param exitValue The exit value of the process.
- * @param stdOutAndErr The standard output and error of the process, combined in a single list of strings.
- * It's better to always have std out and err merged, so it's always clear after which output there was an error.
- * Also, KommandLine is generally wrapping commands in functions, so it's more composable to have just one output.
- */
-data class ExecResult(val exitValue: Int, val stdOutAndErr: List<String>)
+fun ExecProcess.pullEachInLine(pullee: Pullee<String>) = useInLines(pullee.iterator().asSequence())
 
 /**
- * Returns the output but ensures the exit value was as expected (0 by default) first
- * @throws IllegalStateException if exit value is not equal to expectedExitValue
+ * Represents full result of execution an external process.
+ * @param exit The exit value of the process.
+ * @param out The standard output of the process.
+ * @param err The standard error of the process.
  */
-fun ExecResult.unwrap(expectedExitValue: Int = 0): List<String> =
-    if (exitValue == expectedExitValue) stdOutAndErr
-    else {
-        println(stdOutAndErr)
-        val message = "Exit value $exitValue is not equal to expected $expectedExitValue."
-        println(message)
-        error(message)
-    }
+data class ExecResult(val exit: Int, val out: List<String>, val err: List<String>)
 
-fun ExecResult.check(expectedExitValue: Int = 0, expectedOutput: List<String>? = null) {
-    val actualOutput = unwrap(expectedExitValue) // makes sure we first check exit value
-    check(expectedOutput == null || expectedOutput == actualOutput)
+/**
+ * Returns the output but ensures the exit value was as expected (0 by default) first.
+ * Also by default ensures collected error stream was empty.
+ * @throws IllegalStateException if not expected result encounted.
+ */
+fun ExecResult.unwrap(
+    expectedExit: Int? = 0,
+    expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() }
+): List<String> {
+    expectedExit == null || exit == expectedExit || error("Exit value $exit is not equal to expected $expectedExit")
+    expectedErr == null || expectedErr(err) || error("Error stream is not equal to expected error stream.")
+    return out
+}
+
+fun ExecResult.check(
+    expectedExit: Int? = 0,
+    expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty()},
+    expectedOut: ((List<String>) -> Boolean)?,
+) {
+    unwrap(expectedExit, expectedErr)
+    expectedOut == null || expectedOut(out) || error("Error stream is not equal to expected error stream.")
 }
 

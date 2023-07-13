@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import java.io.File
+import java.lang.ProcessBuilder.*
 
 actual typealias SysPlatform = JvmPlatform
 
@@ -16,7 +17,10 @@ class JvmPlatform: CliPlatform {
         dir: String?,
         inFile: String?,
         outFile: String?,
-        //outFileAppend: Boolean, // TODO_someday_maybe
+        outFileAppend: Boolean,
+        errToOut: Boolean,
+        errFile: String?,
+        errFileAppend: Boolean,
         envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess =
         JvmExecProcess(
@@ -25,9 +29,16 @@ class JvmPlatform: CliPlatform {
                     if (debug) println(kommand.line())
                     command(kommand.toArgs())
                     directory(dir?.let(::File))
-                    redirectErrorStream(true)
-                    inFile?.let { redirectInput(File(it)) }
-                    outFile?.let { redirectOutput(File(it)) }
+                    inFile?.let(::File)?.let(::redirectInput)
+                    outFile ?: check(!outFileAppend) {"No output file to append to"}
+                    outFile?.let(::File)?.let {
+                        redirectOutput(if (outFileAppend) Redirect.appendTo(it) else Redirect.to(it))
+                    }
+                    redirectErrorStream(errToOut)
+                    errFile ?: check(!errFileAppend) {"No error file to append to"}
+                    errFile?.let(::File)?.let {
+                        redirectError(if (errFileAppend) Redirect.appendTo(it) else Redirect.to(it))
+                    }
                     envModify?.let { environment().it() }
                 }
                 .start()
@@ -46,6 +57,10 @@ class JvmPlatform: CliPlatform {
 
 private class JvmExecProcess(private val process: Process): ExecProcess {
 
+    private val stdin = process.outputWriter()
+    private val stdout = process.inputReader()
+    private val stderr = process.errorReader()
+
     // TODO_someday: suspending version based on Process.onExit(): CompletableFuture
     // but: It looks like default onExit implementation just calls blocking: waitFor in a loop anyway in special thread.
     // so it's "thread expensive" anyway.. check what "onExit" implementation is actually used in my cases..
@@ -54,9 +69,10 @@ private class JvmExecProcess(private val process: Process): ExecProcess {
 
     override fun cancel(force: Boolean) { if (force) process.destroyForcibly() else process.destroy() }
 
-    override fun useInputLines(input: Sequence<String>) = process.outputWriter().use {writer ->
+    override fun useInLines(input: Sequence<String>) = stdin.use { writer ->
         input.forEach {  writer.write(it); writer.newLine() }
     }
 
-    override fun useOutputLines(block: (output: Sequence<String>) -> Unit) = process.inputReader().useLines(block)
+    override fun useOutLines(block: (output: Sequence<String>) -> Unit) = stdout.useLines(block)
+    override fun useErrLines(block: (error: Sequence<String>) -> Unit) = stderr.useLines(block)
 }

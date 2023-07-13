@@ -29,11 +29,11 @@ fun CliPlatform.testIfFile(file: String, ftest: FileTest) = testIf("-${ftest.cod
 
 fun CliPlatform.testIf(vararg tokens: String): Boolean {
     val result = start(test(*tokens)).waitForResult()
-    return when (result.exitValue) {
+    return when (result.exit) {
         0 -> true
         1 -> false
-        2 -> error("Platform test ended with error (2).\n$result ")
-        else -> error("Unexpected platform test exit value (${result.exitValue}).\n$result")
+        2 -> error("Platform test ended with error (2).\n$result")
+        else -> error("Unexpected platform test exit value (${result.exit}).\n$result")
     }
 }
 
