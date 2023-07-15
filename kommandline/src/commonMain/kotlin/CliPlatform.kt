@@ -47,8 +47,34 @@ interface CliPlatform {
         inLines: Sequence<String>? = inContent?.lineSequence(),
         inFile: String? = null,
         outFile: String? = null,
-    ): List<String> =
-        exec(this, dir = dir, inContent = inContent, inLines = inLines, inFile = inFile, outFile = outFile)
+    ): List<String> = exec(this,
+        dir = dir,
+        inContent = inContent,
+        inLines = inLines,
+        inFile = inFile,
+        outFile = outFile,
+    )
+
+    /**
+     * WARNING: Current impl first wait for process to read whole input (blocking) and then starts to consume output.
+     * If it deadlocks, that is why.. FIXME: Use coroutines and Flow instead of Sequence?? (+add thread safety by default)
+     */
+    @DelicateKommandApi
+    fun Kommand.execonsume(
+        vararg useNamedArgs: Unit,
+        dir: String? = null,
+        inContent: String? = null,
+        inLines: Sequence<String>? = inContent?.lineSequence(),
+        inFile: String? = null,
+        outLinesConsumer: (outLines: Sequence<String>) -> Unit,
+    ) = execonsume(
+        this,
+        dir = dir,
+        inContent = inContent,
+        inLines = inLines,
+        inFile = inFile,
+        outLinesConsumer = outLinesConsumer
+    )
 
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
@@ -82,6 +108,31 @@ fun CliPlatform.exec(
     return start(kommand, dir = dir, inFile = inFile, outFile = outFile)
         .waitForResult(inLines = inLines)
         .unwrap()
+}
+
+/**
+ * WARNING: Current impl first wait for process to read whole input (blocking) and then starts to consume output.
+ * If it deadlocks, that is why.. FIXME: Use coroutines and Flow instead of Sequence?? (+add thread safety by default)
+ */
+@DelicateKommandApi
+fun CliPlatform.execonsume(
+    kommand: Kommand,
+    vararg useNamedArgs: Unit,
+    dir: String? = null,
+    inContent: String? = null,
+    inLines: Sequence<String>? = inContent?.lineSequence(),
+    inFile: String? = null,
+    outLinesConsumer: (outLines: Sequence<String>) -> Unit,
+) {
+    require(isRedirectFileSupported || (inFile == null)) { "redirect file not supported here" }
+    require(inLines == null || inFile == null) { "Either inLines or inFile or none, but not both" }
+    start(kommand, dir = dir, inFile = inFile)
+        .apply {
+            inLines?.let(::useInLines)
+            useOutLines { outLinesConsumer(it) }
+        }
+        .waitForResult(inLines = inLines)
+        .check { it.isEmpty() }
 }
 
 class FakePlatform(
