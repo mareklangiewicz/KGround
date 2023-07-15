@@ -53,7 +53,11 @@ fun Kommand.line() = lineBash()
 
 fun Kommand.lineBash() = toArgs().joinToString(" ") { bashQuoteMetaChars(it) }
 
-fun Kommand.println() = println(line())
+fun Kommand.logln(logln: (String) -> Unit = ::println) = logln(line())
+
+@Deprecated("Use logln")
+fun Kommand.println() = logln()
+
 @DelicateKommandApi
 fun Kommand.lineRaw(separator: String = " ") = toArgs().joinToString(separator)
 @DelicateKommandApi

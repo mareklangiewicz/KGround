@@ -50,13 +50,17 @@ private val interactive by lazy {
 fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("Interactive code is disabled.")
 
 fun Kommand.checkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
-    this.println()
+    this.logln()
     if (expectedKommandLine != null) check(expectedKommandLine == line())
     ifInteractive { platform.startInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
 }
 
-fun Kommand.checkInIdeap(expectedKommandLine: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
-    this.println()
+fun Kommand.checkInIdeap(
+    expectedKommandLine: String? = null,
+    execInDir: String? = null,
+    platform: CliPlatform = SYS
+) {
+    this.logln()
     if (expectedKommandLine != null) check(expectedKommandLine == line())
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
