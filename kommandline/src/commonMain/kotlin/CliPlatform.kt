@@ -131,7 +131,7 @@ fun CliPlatform.execonsume(
             inLines?.let(::useInLines)
             useOutLines { outLinesConsumer(it) }
         }
-        .waitForResult(inLines = inLines)
+        .waitForResult() // inLines already consumed (outLines too BTW)
         .check { it.isEmpty() }
 }
 
