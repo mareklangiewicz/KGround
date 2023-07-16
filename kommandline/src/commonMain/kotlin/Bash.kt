@@ -43,14 +43,14 @@ interface BashOpt: KOptTypical {
      * interpret first from nonopts as a command_string to run
      * If more nonopts present, they are used to override env variables $0 $1 $2...
      */
-    object Command : BashOptS("c")
-    object Interactive : BashOptS("i")
-    object Login : BashOptS("l")
-    object Restricted : BashOptS("r")
-    object Posix : BashOptL("posix")
-    object Help : BashOptL("help")
-    object Version : BashOptL("version")
-    object Verbose : BashOptL("verbose")
+    data object Command : BashOptS("c")
+    data object Interactive : BashOptS("i")
+    data object Login : BashOptS("l")
+    data object Restricted : BashOptS("r")
+    data object Posix : BashOptL("posix")
+    data object Help : BashOptL("help")
+    data object Version : BashOptL("version")
+    data object Verbose : BashOptL("verbose")
 
     open class BashOptS(override val name: String): KOptS(name), BashOpt
     open class BashOptL(override val name: String): KOptL(name), BashOpt

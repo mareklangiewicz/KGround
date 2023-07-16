@@ -144,3 +144,6 @@ data class AKommandTypical(
 @DelicateKommandApi
 fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =
     AKommandTypical(name, opts.toMutableList()).apply(init)
+
+// TODO NOW: update implementations to use (where appropriate): KOptTypical, KommandTypical, DelicateKommandApi,
+// TODO NOW: update implementations to data classes and objects starting with big letter (normal kotlin convention)
