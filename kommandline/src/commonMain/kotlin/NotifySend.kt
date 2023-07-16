@@ -15,8 +15,8 @@ data class NotifySend(
     sealed class Option(val str: String) {
         /** Specifies the urgency level (low, normal, critical). */ // TODO_later: enum for level
         data class urgency(val level: String) : Option("--urgency=$level")
-        object help : Option("--help")
-        object version : Option("--version")
+        data object help : Option("--help")
+        data object version : Option("--version")
         // TODO_someday: other options like icon, category, hint..
     }
     operator fun Option.unaryMinus() = options.add(this)

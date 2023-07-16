@@ -17,12 +17,12 @@ data class Touch(
     override val args get() = options.map { it.str } + files
 
     sealed class Option(val str: String) {
-        object timeOfAccessOnly : Option("-a")
-        object timeOfChangeOnly : Option("-m")
-        object disableCreation : Option("-c")
+        data object timeOfAccessOnly : Option("-a")
+        data object timeOfChangeOnly : Option("-m")
+        data object disableCreation : Option("-c")
         data class date(val date: String): Option("--date=$date")
-        object help : Option("--help")
-        object version : Option("--version")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
 
     operator fun String.unaryPlus() = files.add(this)

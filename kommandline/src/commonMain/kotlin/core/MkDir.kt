@@ -13,11 +13,11 @@ data class MkDir(
     override val args get() = options.map { it.str } + dirs
 
     sealed class Option(val str: String) {
-        object parents : Option("--parents")
+        data object parents : Option("--parents")
         data class mode(val mode: String): Option("--mode=$mode")
-        object verbose : Option("--verbose")
-        object help : Option("--help")
-        object version : Option("--version")
+        data object verbose : Option("--verbose")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
 
     operator fun String.unaryPlus() = dirs.add(this)

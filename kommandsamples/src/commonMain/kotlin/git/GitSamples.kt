@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand.git
 
 import pl.mareklangiewicz.kommand.samples.*
 
-object GitSamples {
+data object GitSamples {
     val hash = gitHash() s "git rev-parse HEAD"
     val help = gitHelp() s "git help"
     val helpLog = gitHelp("log") s "git help log"

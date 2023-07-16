@@ -17,16 +17,16 @@ data class Vim(
         // important: name and arg has to be separate in Vim.args - for Kommand.exec to work correctly
         val str get() = listOf(name) plusIfNN arg
 
-        object gui : Option("-g")
-        object diff : Option("-d")
-        object help : Option("-h")
+        data object gui : Option("-g")
+        data object diff : Option("-d")
+        data object help : Option("-h")
         /**
          * Connect  to  a Vim server and make it edit the files given in the rest of the arguments.
          * If no server is found a warning is given and the files are edited in the current Vim.
          */
-        object remote : Option("--remote")
+        data object remote : Option("--remote")
         /** List the names of all Vim servers that can be found. */
-        object serverlist : Option("--serverlist")
+        data object serverlist : Option("--serverlist")
         /**
          * Use {server} as the server name.  Used for the current Vim, unless used with a --remote  argument,
          * then  it's  the name of the server to connect to.
@@ -36,7 +36,7 @@ data class Vim(
         data class socketid(val id: String) : Option("--socketid", id)
         /** During startup write timing messages to the file {fname}. */
         data class startuptime(val file: String) : Option("--startuptime", file)
-        object version : Option("--version")
+        data object version : Option("--version")
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

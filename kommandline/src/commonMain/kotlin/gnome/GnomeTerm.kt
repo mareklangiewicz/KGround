@@ -18,8 +18,8 @@ data class GnomeTerm(
     sealed class Option(val name: String, val arg: String? = null) {
         val str get() = arg?.let { "$name=$arg" } ?: name
         data class title(val title: String) : Option("--title", title)
-        object help : Option("--help")
-        object verbose : Option("--verbose")
+        data object help : Option("--help")
+        data object verbose : Option("--verbose")
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

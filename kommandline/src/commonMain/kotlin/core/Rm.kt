@@ -21,14 +21,14 @@ data class Rm(
     override val args get() = options.map { it.str } + files
 
     sealed class Option(val str: String) {
-        object force : Option("--force")
-        object interactive : Option("--interactive")
-        object onefs : Option("--one-file-system")
-        object recursive : Option("--recursive")
-        object dir : Option("--dir")
-        object verbose : Option("--verbose")
-        object help : Option("--help")
-        object version : Option("--version")
+        data object force : Option("--force")
+        data object interactive : Option("--interactive")
+        data object onefs : Option("--one-file-system")
+        data object recursive : Option("--recursive")
+        data object dir : Option("--dir")
+        data object verbose : Option("--verbose")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
 
     operator fun String.unaryPlus() = files.add(this)

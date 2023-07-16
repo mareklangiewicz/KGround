@@ -4,7 +4,7 @@ import pl.mareklangiewicz.kommand.github.Gh.Cmd.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.CliPlatform
 
-object GhSamples {
+data object GhSamples {
     val help = gh(Gh.Cmd.help) s "gh help"
     val helpOption = gh { -Gh.Option.help } s "gh --help"
     val version = gh { -Gh.Option.version } s "gh --version"

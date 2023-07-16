@@ -12,7 +12,7 @@ data class Sample(
 internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
 
 
-object Samples {
+data object Samples {
     val Core = pl.mareklangiewicz.kommand.core.CoreSamples
     val Find = pl.mareklangiewicz.kommand.find.FindSamples
     val Admin = pl.mareklangiewicz.kommand.admin.AdminSamples

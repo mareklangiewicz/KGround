@@ -1,5 +1,5 @@
 package pl.mareklangiewicz.kommand.core
 
-object CoreSamples {
+data object CoreSamples {
     val Ls = LsSamples
 }

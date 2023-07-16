@@ -27,7 +27,7 @@ data class GnomeExt(
             override val str get() = listOf(name) plusIfNN cmdname
         }
         /** Prints the program version. */
-        object version: Cmd("version")
+        data object version: Cmd("version")
 
         /**
          * Enables the extension identified by UUID.
@@ -50,11 +50,11 @@ data class GnomeExt(
         /** Synonym of info. */
         data class show(override val uuid: String): Cmd("show", uuid)
         /** Displays a list of installed extensions. */
-        object list: Cmd("list")
+        data object list: Cmd("list")
         /** Open the preference dialog of the extension identified by UUID. */
         data class prefs(override val uuid: String): Cmd("prefs", uuid)
         /** Creates a new extension from a template. */
-        object create: Cmd("create")
+        data object create: Cmd("create")
 
         /**
          * Creates an extension bundle that is suitable for publishing.
@@ -69,7 +69,7 @@ data class GnomeExt(
          * if not.
          * All files are searched in SOURCE-DIRECTORY if specified, or the current directory otherwise.
          */
-        object pack: Cmd("pack")
+        data object pack: Cmd("pack")
 
         /**
          * Installs an extension from the bundle PACK.
@@ -89,23 +89,23 @@ data class GnomeExt(
 
         // common options:
         /** Do not print error messages */
-        object quiet : Option("--quiet")
+        data object quiet : Option("--quiet")
 
         // options for list cmd:
-        object user : Option("--user")
-        object system : Option("--system")
-        object enabled : Option("--enabled")
-        object disabled : Option("--disabled")
-        object prefs : Option("--prefs")
-        object updates : Option("--updates")
-        object details : Option("--details")
+        data object user : Option("--user")
+        data object system : Option("--system")
+        data object enabled : Option("--enabled")
+        data object disabled : Option("--disabled")
+        data object prefs : Option("--prefs")
+        data object updates : Option("--updates")
+        data object details : Option("--details")
 
         // options for create cmd:
         data class extname(val n: String) : Option("--name", n)
         data class extdesc(val d: String) : Option("--description", d)
         data class extuuid(val u: String) : Option("--uuid", u)
         data class template(val t: String) : Option("--template", t)
-        object interactive : Option("--interactive")
+        data object interactive : Option("--interactive")
 
         // options for pack cmd:
         data class extrasource(val path: String) : Option("--extra-source", path)
@@ -113,7 +113,7 @@ data class GnomeExt(
         data class podir(val p: String) : Option("--podir", p)
         data class gettextdomain(val d: String) : Option("--gettext-domain", d)
         data class outdir(val d: String) : Option("--out-dir", d)
-        object force : Option("--force") // also for install cmd
+        data object force : Option("--force") // also for install cmd
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

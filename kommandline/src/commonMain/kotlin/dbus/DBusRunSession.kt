@@ -20,8 +20,8 @@ data class DBusRunSession(
 
         data class configfile(val filename: String) : Option("--config-file", filename)
         data class dbusdaemon(val binary: String) : Option("--dbus-daemon", binary)
-        object help : Option("--help")
-        object version : Option("--version")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
 
     operator fun Option.unaryMinus() = options.add(this)

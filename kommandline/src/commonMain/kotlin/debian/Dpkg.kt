@@ -24,8 +24,8 @@ data class Dpkg(
 }
 
 interface DpkgAct : DpkgOpt {
-    object Help : KOptL("help"), DpkgAct
-    object Version : KOptL("version"), DpkgAct
+    data object Help : KOptL("help"), DpkgAct
+    data object Version : KOptL("version"), DpkgAct
 
     /**
      * Install the package.
@@ -63,7 +63,7 @@ interface DpkgAct : DpkgOpt {
      */
     data class Verify(val pkgName: String? = null) : KOptS("V", pkgName), DpkgAct
 
-    object PrintArch : KOptL("print-architecture"), DpkgAct
+    data object PrintArch : KOptL("print-architecture"), DpkgAct
     data class ListPackages(val pkgNamePattern: String) : KOptS("l", pkgNamePattern), DpkgAct
     data class ListFiles(val pkgName: String) : KOptS("L", pkgName), DpkgAct
     data class Status(val pkgName: String) : KOptS("l", pkgName), DpkgAct
@@ -72,12 +72,12 @@ interface DpkgAct : DpkgOpt {
 }
 
 interface DpkgOpt: KOpt {
-    object Recursive : KOptS("R"), DpkgOpt
-    object Pending : KOptL("pending"), DpkgOpt
-    object DryRun : KOptL("dry-run"), DpkgOpt
-    object RefuseDowngrade : KOptL("refuse-downgrade"), DpkgOpt
-    object SkipSameVersion : KOptL("skip-same-version"), DpkgOpt
+    data object Recursive : KOptS("R"), DpkgOpt
+    data object Pending : KOptL("pending"), DpkgOpt
+    data object DryRun : KOptL("dry-run"), DpkgOpt
+    data object RefuseDowngrade : KOptL("refuse-downgrade"), DpkgOpt
+    data object SkipSameVersion : KOptL("skip-same-version"), DpkgOpt
     /** Use a machine-readable output format. */
-    object Robot : KOptL("robot"), DpkgOpt
-    object NoPager : KOptL("no-pager"), DpkgOpt
+    data object Robot : KOptL("robot"), DpkgOpt
+    data object NoPager : KOptL("no-pager"), DpkgOpt
 }

@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.core.LsOpt.*
 
 private val lsCommon = "-1 --group-directories-first --color=never --escape"
 
-object LsSamples {
+data object LsSamples {
     val lsHelp = ls { -Help } s "ls --help"
     val lsVersion = ls { -Version } s "ls --version"
     val lsDefault = ls() s "ls"

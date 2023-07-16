@@ -53,8 +53,8 @@ data class Gh(
 
     sealed class Option(val name: String, val arg: String? = null) {
         val str get() = listOf(name) plusIfNN arg
-        object help : Option("--help")
-        object version : Option("--version")
+        data object help : Option("--help")
+        data object version : Option("--version")
         /** @param repoPath [HOST/]OWNER/REPO */
         data class repo(val repoPath: String): Option("--repo", repoPath)
     }

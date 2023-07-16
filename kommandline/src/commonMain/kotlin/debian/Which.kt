@@ -27,5 +27,5 @@ data class Which(
 
 interface WhichOpt: KOpt {
     /** print all matching pathnames of each argument */
-    object All : KOptS("a"), WhichOpt
+    data object All : KOptS("a"), WhichOpt
 }

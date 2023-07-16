@@ -164,14 +164,14 @@ interface FindExpr: KOpt {
      * Measure times (for -amin, -atime, -cmin, -ctime, -mmin, and -mtime) from
      * the beginning of today rather than from 24 hours ago.
      */
-    object DayStart: KOptS("daystart"), FindExpr
+    data object DayStart: KOptS("daystart"), FindExpr
 
     /**
      * Deprecated; use the -L option instead.  Dereference symbolic links.  Implies -noleaf.
      * The -follow option affects only those tests which appear after it on the command line.
      */
     @Deprecated("Use SymLinkFollowAlways")
-    object Follow: KOptS("follow"), FindExpr
+    data object Follow: KOptS("follow"), FindExpr
 
     /**
      * Changes the regular expression syntax understood by "-regex" and "-iregex" tests
@@ -192,8 +192,8 @@ interface FindExpr: KOpt {
 
 // region Find Expression Category: GLOBAL OPTIONS
 
-    object Help : KOptL("help"), FindExpr
-    object Version : KOptL("version"), FindExpr
+    data object Help : KOptL("help"), FindExpr
+    data object Version : KOptL("version"), FindExpr
 
     /**
      * Process each directory's contents before the directory itself.
@@ -227,10 +227,10 @@ interface FindExpr: KOpt {
      * that do not follow the Unix directory link convention,
      * such as CD-ROM or MS-DOS filesystems or AFS volume mount points.
      */
-    object NoLeaf: KOptS("noleaf"), FindExpr
+    data object NoLeaf: KOptS("noleaf"), FindExpr
 
     /** Don't descend directories on other filesystems. */
-    object XDev: KOptS("mount"), FindExpr
+    data object XDev: KOptS("mount"), FindExpr
     // I use "-mount" instead of "-xdev" because it's more portable (it does the same thing)
 
 // endregion Find Expression Category: GLOBAL OPTIONS
@@ -290,16 +290,16 @@ interface FindExpr: KOpt {
 
 
     /** The file is empty and is either a regular file or a directory. */
-    object IsEmpty: KOptS("empty"), FindExpr
+    data object IsEmpty: KOptS("empty"), FindExpr
 
     /**
      * Matches files which are executable and directories which are searchable
      * (in a file name resolution sense) by the current user.
      */
-    object IsExecutable: KOptS("executable"), FindExpr
+    data object IsExecutable: KOptS("executable"), FindExpr
 
-    object AlwaysFalse: KOptS("false"), FindExpr
-    object AlwaysTrue: KOptS("true"), FindExpr
+    data object AlwaysFalse: KOptS("false"), FindExpr
+    data object AlwaysTrue: KOptS("true"), FindExpr
 
     data class OnFileSystemType(val type: String): KOptS("fstype", type), FindExpr
 
@@ -345,10 +345,10 @@ interface FindExpr: KOpt {
         KOptS("i".iff(ignoreCase) + "regex", regex), FindExpr
 
     /** No group corresponds to file's numeric group ID. */
-    object NoGroup: KOptS("nogroup"), FindExpr
+    data object NoGroup: KOptS("nogroup"), FindExpr
 
     /** No user corresponds to file's numeric user ID. */
-    object NoUser: KOptS("nouser"), FindExpr
+    data object NoUser: KOptS("nouser"), FindExpr
 
 
     data class PermAllOf(val mode: String): KOptS("perm", "-$mode"), FindExpr
@@ -356,7 +356,7 @@ interface FindExpr: KOpt {
     data class PermExactly(val mode: String): KOptS("perm", mode), FindExpr
 
     /** Matches files which are readable by the current user. */
-    object Readable: KOptS("readable"), FindExpr
+    data object Readable: KOptS("readable"), FindExpr
 
     /** The file refers to the same inode as name. */
     data class SameFileAs(val referenceFile: String): KOptS("samefile", referenceFile), FindExpr
@@ -418,7 +418,7 @@ interface FindExpr: KOpt {
      * it will not output an error diagnostic, not change the exit code to nonzero,
      * and the return code of the ActDelete will be true.
      */
-    object ActDelete: KOptS("delete"), FindExpr
+    data object ActDelete: KOptS("delete"), FindExpr
 
     /**
      * Execute kommand; true if 0 status is returned. Special arg ";" is used after all kommand args,
@@ -444,16 +444,16 @@ interface FindExpr: KOpt {
         }
     }
 
-    object ActPrint: KOptS("print"), FindExpr
+    data object ActPrint: KOptS("print"), FindExpr
 
     data class ActPrintF(val format: FindPrintFormat): KOptS("printf", format), FindExpr
     // TODO_someday:
     //  One ActPrint with flags deciding which version of -(f)print(0/f) to use and optional format and/or file
     //  Also ActLs for -(f)ls
 
-    object ActPrune: KOptS("prune"), FindExpr
+    data object ActPrune: KOptS("prune"), FindExpr
 
-    object ActQuit: KOptS("quit"), FindExpr
+    data object ActQuit: KOptS("quit"), FindExpr
 
 // endregion Find Expression Category: ACTIONS
 
@@ -464,10 +464,10 @@ interface FindExpr: KOpt {
         override fun toArgs(): List<String> = listOf("(") + children.flatMap { it.toArgs() } + ")"
     }
 
-    object OpAnd: KOptS("a"), FindExpr
-    object OpOr: KOptS("o"), FindExpr
-    object OpNot: FindExpr { override fun toArgs() = listOf("!") }
-    object OpComma: FindExpr { override fun toArgs() = listOf(",") }
+    data object OpAnd: KOptS("a"), FindExpr
+    data object OpOr: KOptS("o"), FindExpr
+    data object OpNot: FindExpr { override fun toArgs() = listOf("!") }
+    data object OpComma: FindExpr { override fun toArgs() = listOf(",") }
 
     // FIXME_someday: rethink all grouping expressions and precedence,
     // so I don't need so many OpParent to make it always correct.
@@ -487,11 +487,11 @@ interface FindOpt: KOpt {
     // Note: Help and Version are inside FindExpr (formally these are expressions for find)
 
     /** Never follow symbolic links.  This is the default behavior. */
-    object SymLinkFollowNever : KOptS("P"), FindOpt
+    data object SymLinkFollowNever : KOptS("P"), FindOpt
     /** Follow symbolic links. */
-    object SymLinkFollowAlways : KOptS("L"), FindOpt
+    data object SymLinkFollowAlways : KOptS("L"), FindOpt
     /** Do not follow symbolic links, except while processing the command line arguments. */
-    object SymLinkFollowCmdArg : KOptS("H"), FindOpt
+    data object SymLinkFollowCmdArg : KOptS("H"), FindOpt
 
     data class Debug(val dopts: List<String>): KOptS("D", dopts.joinToString(",")), FindOpt {
         constructor(vararg o: String): this(o.toList())

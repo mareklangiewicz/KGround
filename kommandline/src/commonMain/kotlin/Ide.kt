@@ -23,31 +23,31 @@ data class Ide(
 
         open val str get() = listOf(name) plusIfNN arg
 
-        object diff : Cmd("diff")
-        object merge : Cmd("merge")
-        object format : Cmd("format")
-        object inspect : Cmd("inspect")
+        data object diff : Cmd("diff")
+        data object merge : Cmd("merge")
+        data object format : Cmd("format")
+        data object inspect : Cmd("inspect")
     }
 
     sealed class Option(val name: String, val arg: String? = null) {
         open val str get() = listOf(name) plusIfNN arg
-        object nosplash : Option("nosplash")
-        object dontReopenProjects : Option("nosplash")
-        object disableNonBundledPlugins : Option("disableNonBundledPlugins")
-        object wait : Option("--wait")
+        data object nosplash : Option("nosplash")
+        data object dontReopenProjects : Option("nosplash")
+        data object disableNonBundledPlugins : Option("disableNonBundledPlugins")
+        data object wait : Option("--wait")
         data class ln(val l: Int) : Option("--line", l.toString())
         data class col(val c: Int) : Option("--column", c.toString())
 
         // options only for Cmd.format:
-        object formathelp : Option("-h")
-        object formatmask : Option("-m")
-        object formatrecursive : Option("-r")
-        object formatsettings : Option("-s")
+        data object formathelp : Option("-h")
+        data object formatmask : Option("-m")
+        data object formatrecursive : Option("-r")
+        data object formatsettings : Option("-s")
 
         // options only for Cmd.inspect:
-        object inspectchanges : Option("-changes")
-        object inspectsubdir : Option("-d")
-        object inspectformat : Option("-format")
+        data object inspectchanges : Option("-changes")
+        data object inspectsubdir : Option("-d")
+        data object inspectformat : Option("-format")
         data class inspectverbosity(val v: Int) : Option("-v", v.toString())
 
     }

@@ -19,19 +19,19 @@ data class GnomeShell(
     sealed class Option(val name: String, val arg: String? = null) {
         val str get() = if (arg == null) name else "$name=$arg"
 
-        object nested : Option("--nested")
-        object wayland : Option("--wayland")
-        object replace : Option("--replace")
-        object smdisable : Option("--sm-disable")
+        data object nested : Option("--nested")
+        data object wayland : Option("--wayland")
+        data object replace : Option("--replace")
+        data object smdisable : Option("--sm-disable")
         data class smclientid(val id: String) : Option("--sm-client-id", id)
         data class smsavefile(val file: String) : Option("--sm-save-file", file)
         data class screen(val s: String) : Option("--screen", s)
         data class display(val d: String) : Option("--display", d)
-        object sync : Option("--sync")
-        object version : Option("--version")
-        object help : Option("--help")
+        data object sync : Option("--sync")
+        data object version : Option("--version")
+        data object help : Option("--help")
         data class mode(val m: String) : Option("--mode", m)
-        object listmodes : Option("--listmodes")
+        data object listmodes : Option("--listmodes")
         data class clutterdisplay(val d: String) : Option("--clutter-display", d)
     }
 

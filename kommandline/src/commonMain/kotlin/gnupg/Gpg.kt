@@ -41,30 +41,30 @@ data class Gpg(
 
     sealed class Option(val name: String, val arg: String? = null) {
         val str get() = listOf(name) plusIfNN arg
-        object help : Option("--help")
-        object version : Option("--version")
-        object verbose : Option("--verbose")
-        object dryrun : Option("--dry-run")
+        data object help : Option("--help")
+        data object version : Option("--version")
+        data object verbose : Option("--verbose")
+        data object dryrun : Option("--dry-run")
         /** Use batch mode.  Never ask, do not allow interactive commands. */
-        object batch : Option("--batch")
+        data object batch : Option("--batch")
         /** Do not use batch mode. */
-        object nobatch : Option("--no-batch")
+        data object nobatch : Option("--no-batch")
         /** Print key listings delimited by colons. Useful in scripts. */
-        object withcolons : Option("--with-colons")
+        data object withcolons : Option("--with-colons")
         /** Set the pinentry mode to mode. */
         data class pinentry(val mode: pinentryMode = DEFAULT): Option("--pinentry-mode", mode.toString())
         enum class pinentryMode { DEFAULT, ASK, CANCEL, ERROR, LOOPBACK;
             override fun toString() = super.toString().lowercase()
         }
         /** create ascii armored output */
-        object armor : Option("--armor")
-        object interactive : Option("--interactive")
+        data object armor : Option("--armor")
+        data object interactive : Option("--interactive")
         /** use canonical text mode */
-        object textmode : Option("--textmode")
+        data object textmode : Option("--textmode")
         /** use strict OpenPGP behavior */
-        object openpgp : Option("--openpgp")
+        data object openpgp : Option("--openpgp")
         /** Disable the passphrase cache used for symmetrical en- and decryption. */
-        object nosymkeycache : Option("--no-symkey-cache")
+        data object nosymkeycache : Option("--no-symkey-cache")
         data class homedir(val dir: String): Option("--homedir", dir)
         data class optionsfile(val file: String): Option("--options", file)
         data class outputfile(val file: String): Option("--output", file)

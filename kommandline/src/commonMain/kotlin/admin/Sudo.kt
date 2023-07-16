@@ -36,27 +36,27 @@ data class Sudo(
 }
 
 interface SudoOpt: KOpt {
-    object Help : KOptL("help"), SudoOpt // there is also short -h but it does NOT always mean help
-    object Version : KOptL("version"), SudoOpt
-    object SetHome : KOptL("set-home"), SudoOpt
+    data object Help : KOptL("help"), SudoOpt // there is also short -h but it does NOT always mean help
+    data object Version : KOptL("version"), SudoOpt
+    data object SetHome : KOptL("set-home"), SudoOpt
     data class Host(val host: String) : KOptL("host", host), SudoOpt
-    object Login : KOptL("login"), SudoOpt
+    data object Login : KOptL("login"), SudoOpt
     data class Prompt(val prompt: String) : KOptL("prompt", prompt), SudoOpt
     data class ChRoot(val dir: String) : KOptL("chroot", dir), SudoOpt
     data class Role(val role: String) : KOptL("role", role), SudoOpt
-    object AskPass : KOptL("askpass"), SudoOpt
-    object Edit : KOptL("edit"), SudoOpt
-    object List : KOptL("list"), SudoOpt
-    object NonInteractive : KOptL("non-interactive"), SudoOpt
-    object Stdin : KOptL("stdin"), SudoOpt
-    object Shell : KOptL("shell"), SudoOpt
+    data object AskPass : KOptL("askpass"), SudoOpt
+    data object Edit : KOptL("edit"), SudoOpt
+    data object List : KOptL("list"), SudoOpt
+    data object NonInteractive : KOptL("non-interactive"), SudoOpt
+    data object Stdin : KOptL("stdin"), SudoOpt
+    data object Shell : KOptL("shell"), SudoOpt
     data class Type(val type: String) : KOptL("type", type), SudoOpt
     data class User(val user: String) : KOptL("user", user), SudoOpt
     data class OtherUser(val user: String) : KOptL("other-user", user), SudoOpt
     data class Timeout(val timeout: String) : KOptL("command-timeout", timeout), SudoOpt
     /** Update the user's cached credentials, authenticating the user if necessary. */
-    object Validate : KOptL("validate"), SudoOpt
-    object NoUpdate : KOptL("no-update"), SudoOpt
-    object RemoveTimestamp : KOptL("remove-timestamp"), SudoOpt
-    object ResetTimestamp : KOptL("reset-timestamp"), SudoOpt
+    data object Validate : KOptL("validate"), SudoOpt
+    data object NoUpdate : KOptL("no-update"), SudoOpt
+    data object RemoveTimestamp : KOptL("remove-timestamp"), SudoOpt
+    data object ResetTimestamp : KOptL("reset-timestamp"), SudoOpt
 }

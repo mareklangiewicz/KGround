@@ -10,15 +10,15 @@ data class Audacious(
     override val args get() = options.map { it.str } + files
 
     sealed class Option(val str: String) {
-        object help : Option("--help")
-        object enqueue : Option("--enqueue")
-        object play : Option("--play")
-        object pause : Option("--pause")
-        object stop : Option("--stop")
-        object rew : Option("--rew")
-        object fwd : Option("--fwd")
-        object version : Option("--version")
-        object verbose : Option("--verbose")
+        data object help : Option("--help")
+        data object enqueue : Option("--enqueue")
+        data object play : Option("--play")
+        data object pause : Option("--pause")
+        data object stop : Option("--stop")
+        data object rew : Option("--rew")
+        data object fwd : Option("--fwd")
+        data object version : Option("--version")
+        data object verbose : Option("--verbose")
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

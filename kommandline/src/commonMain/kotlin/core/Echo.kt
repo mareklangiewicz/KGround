@@ -20,10 +20,10 @@ data class Echo(
     override val args get() = options.map { it.str } + text
 
     sealed class Option(val str: String) {
-        object noTrailingNewLine : Option("-n")
-        object enableBackslashEscapes : Option("-e")
-        object help : Option("--help")
-        object version : Option("--version")
+        data object noTrailingNewLine : Option("-n")
+        data object enableBackslashEscapes : Option("-e")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
 
     operator fun String.unaryPlus() = text.add(this)

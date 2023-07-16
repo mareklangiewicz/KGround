@@ -43,12 +43,12 @@ data class Cat(
     override val args get() = options.map { it.str } + files
 
     sealed class Option(val str: String) {
-        object showEnds : Option("--show-ends")
-        object showNonPrinting : Option("--show-nonprinting")
-        object showTabs : Option("--show-tabs")
-        object squeezeBlank : Option("--squeeze-blank")
-        object help : Option("--help")
-        object version : Option("--version")
+        data object showEnds : Option("--show-ends")
+        data object showNonPrinting : Option("--show-nonprinting")
+        data object showTabs : Option("--show-tabs")
+        data object squeezeBlank : Option("--squeeze-blank")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
 
     operator fun String.unaryPlus() = files.add(this)

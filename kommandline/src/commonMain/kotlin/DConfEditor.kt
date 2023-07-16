@@ -14,10 +14,10 @@ data class DConfEditor(
     override val name get() = "dconf-editor"
     override val args get() = options.map { it.str } + nonopts
     sealed class Option(val str: String) {
-        object help : Option("--help")
-        object version : Option("--version")
-        object relocatableschemas : Option("--list-relocatable-schemas")
-        object skipwarning : Option("--I-understand-that-changing-options-can-break-applications")
+        data object help : Option("--help")
+        data object version : Option("--version")
+        data object relocatableschemas : Option("--list-relocatable-schemas")
+        data object skipwarning : Option("--I-understand-that-changing-options-can-break-applications")
     }
     operator fun Option.unaryMinus() = options.add(this)
     operator fun String.unaryPlus() = nonopts.add(this)

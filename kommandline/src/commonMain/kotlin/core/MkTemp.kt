@@ -16,13 +16,13 @@ data class MkTemp(
 
     sealed class Option(val name: String, val arg: String? = null) {
         val str get() = listOf(name) plusIfNN arg
-        object directory : Option("--directory")
-        object dryrun : Option("--dry-run")
-        object quiet : Option("--quiet")
+        data object directory : Option("--directory")
+        data object dryrun : Option("--dry-run")
+        data object quiet : Option("--quiet")
         data class suffix(val s: String) : Option("--suffix", s)
         data class tmpdir(val dir: String) : Option("--tmpdir", dir)
-        object help : Option("--help")
-        object version : Option("--version")
+        data object help : Option("--help")
+        data object version : Option("--version")
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

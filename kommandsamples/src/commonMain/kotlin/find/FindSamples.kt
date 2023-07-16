@@ -14,7 +14,7 @@ private val myKotlinPath = "$myHomePath/code/kotlin"
 private val myDepsKtPath = "$myKotlinPath/DepsKt"
 private val myKommandLinePath = "$myKotlinPath/KommandLine"
 
-object FindSamples {
+data object FindSamples {
     val findAbcIgnoreCase =
         find(".", BaseName("*abc*", ignoreCase = true)) s "find . -iname *abc*"
     val findAbcWithFollowSymLinksAndOptimisation2 =

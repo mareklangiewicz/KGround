@@ -9,11 +9,11 @@ import pl.mareklangiewicz.kommand.samples.*
 import kotlin.reflect.*
 
 
-object AdminSamples {
+data object AdminSamples {
     val Sudo = SudoSamples
 }
 
-object SudoSamples {
+data object SudoSamples {
     val sudoVersion = sudo { -SudoOpt.Version } s "sudo --version"
     val sudoLsRoot = sudo(lsDefault("/root/")) s "sudo -- ls /root/"
     val sudoEditHosts = sudoEdit("/etc/hosts") s "sudo --edit /etc/hosts"
