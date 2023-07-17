@@ -8,7 +8,7 @@ class JsEvalFunPlatform: CliPlatform {
 
     private val debug = false
 
-    @OptIn(DelicateKommandApi::class)
+    @DelicateKommandApi
     override fun start(
         kommand: Kommand,
         vararg useNamedArgs: Unit,
@@ -39,34 +39,44 @@ class JsEvalFunPlatform: CliPlatform {
 
 private var isEvalEnabled = false
 
+@DelicateKommandApi
 private class JsEvalFunProcess(code: String): ExecProcess {
 
-    var exit: Int
-    var out: Sequence<String>
-    var err: Sequence<String>
+    private var exit: Int
+    private var out: Iterator<String>?
+    private var err: Iterator<String>?
+
+    var logln: (line: String) -> Unit = { console.log(it) }
 
     init {
         check(isEvalEnabled) { "eval is disabled"}
         try {
             exit = 0
-            out = eval(code).toString().lineSequence()
-            err = emptySequence()
+            out = eval(code).toString().lines().iterator()
+            err = null
         }
         catch (e: Exception) {
             exit = e::class.hashCode().mod(120) + 4 // positive number dependent on exception class
-            out = emptySequence()
-            err = e.toString().lineSequence()
+            out = null
+            err = e.toString().lines().iterator()
         }
     }
 
-    override fun waitForExit() = exit
+    override fun waitForExit(thenCloseAll: Boolean): Int = exit
+        .also { if (thenCloseAll) { stdinClose(); stdoutClose(); stderrClose() } }
 
     override fun cancel(force: Boolean) = error("cancel unsupported")
 
-    override fun useInLines(input: Sequence<String>):Unit = error("JsEvalFunProcess:useInputLines unsupported")
+    override fun stdinWriteLine(line: String, thenFlush: Boolean) = logln(line)
 
-    override fun useOutLines(block: (output: Sequence<String>) -> Unit) = block(out)
+    override fun stdinClose() { logln = {} }
 
-    override fun useErrLines(block: (error: Sequence<String>) -> Unit) = block(err)
+    override fun stdoutReadLine(): String? = out?.takeIf { it.hasNext() }?.next()
+
+    override fun stdoutClose() { out = null }
+
+    override fun stderrReadLine(): String? = err?.takeIf { it.hasNext() }?.next()
+
+    override fun stderrClose() { err = null }
 }
 

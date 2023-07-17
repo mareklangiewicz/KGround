@@ -55,6 +55,7 @@ class JvmPlatform : CliPlatform {
     private val xdgdesktop by lazy { bashGetExportsExec()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
 }
 
+@DelicateKommandApi
 private class JvmExecProcess(private val process: Process) : ExecProcess {
 
     private val stdin = process.outputWriter()
@@ -65,14 +66,21 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
     // but: It looks like default onExit implementation just calls blocking: waitFor in a loop anyway in special thread.
     // so it's "thread expensive" anyway.. check what "onExit" implementation is actually used in my cases..
     // maybe they're planning to change onExit in the future to make it really nonblocking (NIO?)??
-    override fun waitForExit() = process.waitFor()
+    override fun waitForExit(thenCloseAll: Boolean) = process.waitFor()
+        .also { if (thenCloseAll) { stdinClose(); stdoutClose(); stderrClose() } }
 
     override fun cancel(force: Boolean) { if (force) process.destroyForcibly() else process.destroy() }
 
-    override fun useInLines(input: Sequence<String>) = stdin.use { writer ->
-        input.forEach { writer.write(it); writer.newLine() }
-    }
+    override fun stdinWriteLine(line: String, thenFlush: Boolean) =
+        stdin.run { write(line); newLine(); if (thenFlush) flush() }
 
-    override fun useOutLines(block: (output: Sequence<String>) -> Unit) = stdout.useLines(block)
-    override fun useErrLines(block: (error: Sequence<String>) -> Unit) = stderr.useLines(block)
+    override fun stdinClose() = stdin.close()
+
+    override fun stdoutReadLine(): String? = stdout.readLine()
+
+    override fun stdoutClose() = stdout.close()
+
+    override fun stderrReadLine(): String? = stderr.readLine()
+
+    override fun stderrClose() = stderr.close()
 }

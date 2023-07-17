@@ -1,7 +1,5 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.upue.*
-
 @Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
 typealias Platform = CliPlatform
 
@@ -55,27 +53,6 @@ interface CliPlatform {
         outFile = outFile,
     )
 
-    /**
-     * WARNING: Current impl first wait for process to read whole input (blocking) and then starts to consume output.
-     * If it deadlocks, that is why.. FIXME: Use coroutines and Flow instead of Sequence?? (+add thread safety by default)
-     */
-    @DelicateKommandApi
-    fun Kommand.execonsume(
-        vararg useNamedArgs: Unit,
-        dir: String? = null,
-        inContent: String? = null,
-        inLines: Sequence<String>? = inContent?.lineSequence(),
-        inFile: String? = null,
-        outLinesConsumer: (outLines: Sequence<String>) -> Unit,
-    ) = execonsume(
-        this,
-        dir = dir,
-        inContent = inContent,
-        inLines = inLines,
-        inFile = inFile,
-        outLinesConsumer = outLinesConsumer
-    )
-
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
     val isUbuntu: Boolean get() = false
@@ -110,31 +87,6 @@ fun CliPlatform.exec(
         .unwrap()
 }
 
-/**
- * WARNING: Current impl first wait for process to read whole input (blocking) and then starts to consume output.
- * If it deadlocks, that is why.. FIXME: Use coroutines and Flow instead of Sequence?? (+add thread safety by default)
- */
-@DelicateKommandApi
-fun CliPlatform.execonsume(
-    kommand: Kommand,
-    vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inContent: String? = null,
-    inLines: Sequence<String>? = inContent?.lineSequence(),
-    inFile: String? = null,
-    outLinesConsumer: (outLines: Sequence<String>) -> Unit,
-) {
-    require(isRedirectFileSupported || (inFile == null)) { "redirect file not supported here" }
-    require(inLines == null || inFile == null) { "Either inLines or inFile or none, but not both" }
-    start(kommand, dir = dir, inFile = inFile)
-        .apply {
-            inLines?.let(::useInLines)
-            useOutLines { outLinesConsumer(it) }
-        }
-        .waitForResult() // inLines already consumed (outLines too BTW)
-        .check { it.isEmpty() }
-}
-
 class FakePlatform(
     private val checkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
         {_, _, _, _, _, _, _, _ -> },
@@ -142,6 +94,7 @@ class FakePlatform(
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
 
+    @DelicateKommandApi
     override fun start(
         kommand: Kommand,
         vararg useNamedArgs: Unit,
@@ -160,20 +113,31 @@ class FakePlatform(
     }
 }
 
+@DelicateKommandApi
 class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
-    override fun waitForExit() = 0
+    override fun waitForExit(thenCloseAll: Boolean) = 0
     override fun cancel(force: Boolean) = log("cancel($force)")
-    override fun useInLines(input: Sequence<String>) = input.forEach { log("input line: $it") }
-    override fun useOutLines(block: (output: Sequence<String>) -> Unit) = block(emptySequence())
-    override fun useErrLines(block: (error: Sequence<String>) -> Unit) = block(emptySequence())
+    override fun stdinWriteLine(line: String, thenFlush: Boolean): Unit = log("input line: $line")
+    override fun stdinClose() = Unit
+    override fun stdoutReadLine() = null
+    override fun stdoutClose() = Unit
+    override fun stderrReadLine() = null
+    override fun stderrClose() = Unit
 }
 
 expect class SysPlatform(): CliPlatform
 
 
+/**
+ * Careful with threads. Especially delicate are std streams.
+ * Each should have separate dedicated thread to avoid strange deadlocks with external process.
+ * For example see:
+ * https://wiki.sei.cmu.edu/confluence/display/java/FIO07-J.+Do+not+let+external+processes+block+on+IO+buffers
+ */
+@DelicateKommandApi
 interface ExecProcess {
 
-    fun waitForExit(): Int
+    fun waitForExit(thenCloseAll: Boolean = true): Int
 
     /**
      * Tries to cancel (destroy) the process. May not work immediately
@@ -181,28 +145,60 @@ interface ExecProcess {
      */
     fun cancel(force: Boolean)
 
-    /**
-     * Can be used only once. It always finally close input stream.
-     * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
-     */
-    fun useInLines(input: Sequence<String>)
+    /** System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them! */
+    fun stdinWriteLine(line: String, thenFlush: Boolean = true)
 
-    /** Can be used only once. It always finally close output stream. */
-    fun useOutLines(block: (output: Sequence<String>) -> Unit)
-    /** Can be used only once. It always finally close error stream. */
-    fun useErrLines(block: (error: Sequence<String>) -> Unit)
+    /** Indepotent. Flushes buffer before closing. */
+    fun stdinClose()
+
+    /** @return null means end of stream */
+    fun stdoutReadLine(): String?
+
+    /** Indepotent. */
+    fun stdoutClose()
+
+    /** @return null means end of stream */
+    fun stderrReadLine(): String?
+
+    /** Indepotent. */
+    fun stderrClose()
 }
 
-fun ExecProcess.useOutLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit) {
-    try { useOutLines(block) }
-    catch (e: Exception) {
-        if (e.message == "Stream closed") block(emptySequence())
-        else throw e
-    }
-}
+/**
+ * Normally it's better to use ExecFlows. Can be used only once. It always finally closes input stream.
+ * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
+ */
+@DelicateKommandApi
+fun ExecProcess.useInLines(input: Sequence<String>, flushAfterEachLine: Boolean = true) =
+    try { input.forEach { stdinWriteLine(it, flushAfterEachLine) } }
+    finally { stdinClose() }
 
-fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> Unit) {
-    try { useErrLines(block) }
+/** Normally it's better to use ExecFlows. Can be used only once. It always finally closes output stream. */
+@DelicateKommandApi
+fun ExecProcess.useOutLines(block: (output: Sequence<String>) -> Unit) =
+    useSomeLines(block, ::stdoutReadLine, ::stdoutClose)
+
+/** Normally it's better to use ExecFlows. Can be used only once. It always finally closes error stream. */
+@DelicateKommandApi
+fun ExecProcess.useErrLines(block: (output: Sequence<String>) -> Unit) =
+    useSomeLines(block, ::stderrReadLine, ::stderrClose)
+
+@DelicateKommandApi
+private fun useSomeLines(block: (output: Sequence<String>) -> Unit, readLine: () -> String?, close: () -> Unit) =
+    try { block(generateSequence(readLine)) }
+    finally { close() }
+
+@DelicateKommandApi
+fun ExecProcess.useOutLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit) =
+    useSomeLinesOrEmptyIfClosed(block, ::useOutLines)
+
+@DelicateKommandApi
+fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> Unit) =
+    useSomeLinesOrEmptyIfClosed(block, ::useErrLines)
+
+@DelicateKommandApi
+private fun useSomeLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit, useLines: ((Sequence<String>) -> Unit) -> Unit) {
+    try { useLines(block) }
     catch (e: Exception) {
         if (e.message == "Stream closed") block(emptySequence())
         else throw e
@@ -214,6 +210,7 @@ fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> U
  * Not only waits for process to exit, but collects all output in a list.
  * Then returns both exit code and all output in ExecResult.
  */
+@DelicateKommandApi
 fun ExecProcess.waitForResult(
     inContent: String? = null,
     inLines: Sequence<String>? = inContent?.lineSequence(),
@@ -230,10 +227,6 @@ fun ExecProcess.waitForResult(
     val exit = waitForExit()
     return ExecResult(exit, out, err)
 }
-
-fun ExecProcess.pushEachOutLine(pushee: Pushee<String>) = useOutLines { it.forEach { pushee(it)} }
-
-fun ExecProcess.pullEachInLine(pullee: Pullee<String>) = useInLines(pullee.iterator().asSequence())
 
 /**
  * Represents full result of execution an external process.
