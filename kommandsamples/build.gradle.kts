@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib {
-    implementation(project(":kommandline"))
+    api(project(":kommandline"))
     implementation(depsOld.kotlinReflect) // FIXME: add to DepsNew
 }
 

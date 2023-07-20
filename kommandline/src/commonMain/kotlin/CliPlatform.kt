@@ -1,5 +1,8 @@
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
 @Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
 typealias Platform = CliPlatform
 
@@ -115,71 +118,99 @@ class FakePlatform(
 
 @DelicateKommandApi
 class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
-    override fun waitForExit(thenCloseAll: Boolean) = 0
-    override fun cancel(force: Boolean) = log("cancel($force)")
+    override fun waitForExit(finallyClose: Boolean) = 0
+    override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
+    override fun kill(forcibly: Boolean) = log("cancel($forcibly)")
+    override fun close() = Unit
     override fun stdinWriteLine(line: String, thenFlush: Boolean): Unit = log("input line: $line")
     override fun stdinClose() = Unit
     override fun stdoutReadLine() = null
     override fun stdoutClose() = Unit
     override fun stderrReadLine() = null
     override fun stderrClose() = Unit
+    override val stdin: FlowCollector<String> = FlowCollector { stdinWriteLine(it) }
+    override val stdout: Flow<String> = stdFakeFlow(::stdoutReadLine, ::stdoutClose)
+    override val stderr: Flow<String> = stdFakeFlow(::stderrReadLine, ::stderrClose)
 }
+
+private fun stdFakeFlow(readLine: () -> String?, close: () -> Unit): Flow<String> =
+    flow { while (true) emit(readLine() ?: break) }.onCompletion { close() }
 
 expect class SysPlatform(): CliPlatform
 
 
 /**
- * Careful with threads. Especially delicate are std streams.
+ * Methods marked DelicateKommandApi are NOT thread safe! Use other ones.
+ * Impl notes: Careful with threads. Especially delicate are std streams.
  * Each should have separate dedicated thread to avoid strange deadlocks with external process.
  * For example see:
  * https://wiki.sei.cmu.edu/confluence/display/java/FIO07-J.+Do+not+let+external+processes+block+on+IO+buffers
  */
-@DelicateKommandApi
-interface ExecProcess {
-
-    fun waitForExit(thenCloseAll: Boolean = true): Int
+@OptIn(ExperimentalStdlibApi::class)
+interface ExecProcess : AutoCloseable {
 
     /**
-     * Tries to cancel (destroy) the process. May not work immediately
-     * @param force - Hint to do it less politely. Some platforms can ignore the hint.
+     * Tries to kill/destroy/cancel the process. Might not work immediately!
+     * @param forcibly - Hint to do it less politely. Some platforms can ignore the hint.
      */
-    fun cancel(force: Boolean)
+    fun kill(forcibly: Boolean = false)
+
+    suspend fun awaitExit(finallyClose: Boolean = true): Int
+
+    val stdin: FlowCollector<String>
+
+    val stdout: Flow<String>
+
+    val stderr: Flow<String>
+
+    @DelicateKommandApi
+    fun waitForExit(finallyClose: Boolean = true): Int
 
     /** System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them! */
+    @DelicateKommandApi
     fun stdinWriteLine(line: String, thenFlush: Boolean = true)
 
     /** Indepotent. Flushes buffer before closing. */
+    @DelicateKommandApi
     fun stdinClose()
 
     /** @return null means end of stream */
+    @DelicateKommandApi
     fun stdoutReadLine(): String?
 
     /** Indepotent. */
+    @DelicateKommandApi
     fun stdoutClose()
 
     /** @return null means end of stream */
+    @DelicateKommandApi
     fun stderrReadLine(): String?
 
     /** Indepotent. */
+    @DelicateKommandApi
     fun stderrClose()
 }
 
+
 /**
- * Normally it's better to use ExecFlows. Can be used only once. It always finally closes input stream.
+ * Can be used only once. It always finally closes input stream.
  * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
  */
 @DelicateKommandApi
+@Deprecated("Use stdin FlowCollector.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useInLines(input: Sequence<String>, flushAfterEachLine: Boolean = true) =
     try { input.forEach { stdinWriteLine(it, flushAfterEachLine) } }
     finally { stdinClose() }
 
-/** Normally it's better to use ExecFlows. Can be used only once. It always finally closes output stream. */
+/** Can be used only once. It always finally closes output stream. */
 @DelicateKommandApi
+@Deprecated("Use stout Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useOutLines(block: (output: Sequence<String>) -> Unit) =
     useSomeLines(block, ::stdoutReadLine, ::stdoutClose)
 
-/** Normally it's better to use ExecFlows. Can be used only once. It always finally closes error stream. */
+/** Can be used only once. It always finally closes error stream. */
 @DelicateKommandApi
+@Deprecated("Use sterr Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useErrLines(block: (output: Sequence<String>) -> Unit) =
     useSomeLines(block, ::stderrReadLine, ::stderrClose)
 
@@ -189,10 +220,12 @@ private fun useSomeLines(block: (output: Sequence<String>) -> Unit, readLine: ()
     finally { close() }
 
 @DelicateKommandApi
+@Deprecated("Use stout Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useOutLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit) =
     useSomeLinesOrEmptyIfClosed(block, ::useOutLines)
 
 @DelicateKommandApi
+@Deprecated("Use sterr Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> Unit) =
     useSomeLinesOrEmptyIfClosed(block, ::useErrLines)
 
@@ -207,10 +240,32 @@ private fun useSomeLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Uni
 
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 /**
- * Not only waits for process to exit, but collects all output in a list.
+ * Not only awaits for process to exit, but collects all output in lists.
  * Then returns both exit code and all output in ExecResult.
  */
+suspend fun ExecProcess.awaitResult(
+    inContent: String? = null,
+    inLinesFlow: Flow<String>? = inContent?.lineSequence()?.asFlow()
+): ExecResult = coroutineScope {
+    val inJob = inLinesFlow?.onEach(stdin::emit)?.launchIn(this)
+    val outDeferred = async { stdout.toList() }
+    val errDeferred = async { stderr.toList() }
+    inJob?.join()
+    val out = outDeferred.await()
+    val err = errDeferred.await()
+    val exit = awaitExit()
+    ExecResult(exit, out, err)
+}
+
+// TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
+/**
+ * Not only waits for process to exit, but collects all output in lists.
+ * Then returns both exit code and all output in ExecResult.
+ * Warning: it sequencially tries to consume input first, then output, then err stream.
+ * It's much better to use suspend ExecProcess.awaitResult which uses async flows.
+ */
 @DelicateKommandApi
+@Deprecated("Use suspending awaitResult.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.waitForResult(
     inContent: String? = null,
     inLines: Sequence<String>? = inContent?.lineSequence(),

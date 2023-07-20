@@ -9,8 +9,8 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib {
-    implementation(Langiewicz.upue)
-    implementation(KotlinX.coroutines_core)
+    api(Langiewicz.upue)
+    api(KotlinX.coroutines_core)
 }
 
 kotlin { js(IR) { nodejs() } }

@@ -1,7 +1,11 @@
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.future.*
 import java.io.*
 import java.lang.ProcessBuilder.*
+import kotlin.coroutines.*
 
 actual typealias SysPlatform = JvmPlatform
 
@@ -55,32 +59,75 @@ class JvmPlatform : CliPlatform {
     private val xdgdesktop by lazy { bashGetExportsExec()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
 }
 
-@DelicateKommandApi
+@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 private class JvmExecProcess(private val process: Process) : ExecProcess {
 
-    private val stdin = process.outputWriter()
-    private val stdout = process.inputReader()
-    private val stderr = process.errorReader()
+    // TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
+    private val processSTC = newSingleThreadContext("JvmExecProcess.processSTC")
+    private val stdinSTC = newSingleThreadContext("JvmExecProcess.stdinSTC")
+    private val stdoutSTC = newSingleThreadContext("JvmExecProcess.stdoutSTC")
+    private val stderrSTC = newSingleThreadContext("JvmExecProcess.stderrSTC")
 
-    // TODO_someday: suspending version based on Process.onExit(): CompletableFuture
-    // but: It looks like default onExit implementation just calls blocking: waitFor in a loop anyway in special thread.
-    // so it's "thread expensive" anyway.. check what "onExit" implementation is actually used in my cases..
-    // maybe they're planning to change onExit in the future to make it really nonblocking (NIO?)??
-    override fun waitForExit(thenCloseAll: Boolean) = process.waitFor()
-        .also { if (thenCloseAll) { stdinClose(); stdoutClose(); stderrClose() } }
+    private val stdinWriter = process.outputWriter()
+    private val stdoutReader = process.inputReader()
+    private val stderrReader = process.errorReader()
 
-    override fun cancel(force: Boolean) { if (force) process.destroyForcibly() else process.destroy() }
+    @DelicateKommandApi
+    override fun waitForExit(finallyClose: Boolean) =
+        try { process.waitFor() }
+        finally { if (finallyClose) close() }
 
+    override suspend fun awaitExit(finallyClose: Boolean): Int = withContext(processSTC) {
+        try { process.onExit().await().exitValue() }
+        finally { if (finallyClose) close() }
+    }
+
+    override fun kill(forcibly: Boolean) = processSTC.dispatch(EmptyCoroutineContext) {
+        if (forcibly) process.destroyForcibly() else process.destroy()
+    }
+
+    @OptIn(DelicateKommandApi::class)
+    override fun close() {
+        stdinSTC.dispatch(EmptyCoroutineContext) { stdinClose() }
+        stdoutSTC.dispatch(EmptyCoroutineContext) { stdoutClose() }
+        stderrSTC.dispatch(EmptyCoroutineContext) { stderrClose() }
+        // TODO_someday: analyze CAREFULLY if it would be safe here
+        // to somehow schedule closing stdxxxSTC dispatchers (release threads) AFTER not used anymore
+        // with process.onExit with additional delay or sth??
+    }
+
+    @DelicateKommandApi
     override fun stdinWriteLine(line: String, thenFlush: Boolean) =
-        stdin.run { write(line); newLine(); if (thenFlush) flush() }
+        stdinWriter.run { write(line); newLine(); if (thenFlush) flush() }
 
-    override fun stdinClose() = stdin.close()
+    @DelicateKommandApi
+    override fun stdinClose() = stdinWriter.close()
 
-    override fun stdoutReadLine(): String? = stdout.readLine()
+    @DelicateKommandApi
+    override fun stdoutReadLine(): String? = stdoutReader.readLine()
 
-    override fun stdoutClose() = stdout.close()
+    @DelicateKommandApi
+    override fun stdoutClose() = stdoutReader.close()
 
-    override fun stderrReadLine(): String? = stderr.readLine()
+    @DelicateKommandApi
+    override fun stderrReadLine(): String? = stderrReader.readLine()
 
-    override fun stderrClose() = stderr.close()
+    @DelicateKommandApi
+    override fun stderrClose() = stderrReader.close()
+
+    @OptIn(DelicateKommandApi::class)
+    override val stdin: FlowCollector<String> = FlowCollector {
+        withContext(stdinSTC) { stdinWriteLine(it) }
+    }
+
+    @OptIn(DelicateKommandApi::class)
+    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose, stdoutSTC)
+
+    @OptIn(DelicateKommandApi::class)
+    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose, stderrSTC)
 }
+
+private fun stdFlow(readLine: () -> String?, close: () -> Unit, dispatcher: CoroutineDispatcher): Flow<String> =
+    flow { while (true) emit(readLine() ?: break) }
+        .onCompletion { close() }
+        .flowOn(dispatcher)

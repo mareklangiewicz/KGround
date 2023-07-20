@@ -1,5 +1,8 @@
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
 actual typealias SysPlatform = JsEvalFunPlatform
 
 class JsEvalFunPlatform: CliPlatform {
@@ -39,7 +42,6 @@ class JsEvalFunPlatform: CliPlatform {
 
 private var isEvalEnabled = false
 
-@DelicateKommandApi
 private class JsEvalFunProcess(code: String): ExecProcess {
 
     private var exit: Int
@@ -62,21 +64,51 @@ private class JsEvalFunProcess(code: String): ExecProcess {
         }
     }
 
-    override fun waitForExit(thenCloseAll: Boolean): Int = exit
-        .also { if (thenCloseAll) { stdinClose(); stdoutClose(); stderrClose() } }
+    @DelicateKommandApi
+    override fun waitForExit(finallyClose: Boolean): Int =
+        try { exit }
+        finally { if (finallyClose) close() }
 
-    override fun cancel(force: Boolean) = error("cancel unsupported")
+    @OptIn(DelicateKommandApi::class)
+    override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
 
+    override fun kill(forcibly: Boolean) = error("cancel unsupported")
+
+    @OptIn(DelicateKommandApi::class)
+    override fun close() {
+        stdinClose()
+        stdoutClose()
+        stderrClose()
+    }
+
+    @DelicateKommandApi
     override fun stdinWriteLine(line: String, thenFlush: Boolean) = logln(line)
 
+    @DelicateKommandApi
     override fun stdinClose() { logln = {} }
 
+    @DelicateKommandApi
     override fun stdoutReadLine(): String? = out?.takeIf { it.hasNext() }?.next()
 
+    @DelicateKommandApi
     override fun stdoutClose() { out = null }
 
+    @DelicateKommandApi
     override fun stderrReadLine(): String? = err?.takeIf { it.hasNext() }?.next()
 
+    @DelicateKommandApi
     override fun stderrClose() { err = null }
+
+    @OptIn(DelicateKommandApi::class)
+    override val stdin: FlowCollector<String> = FlowCollector {
+        stdinWriteLine(it)
+    }
+    @OptIn(DelicateKommandApi::class)
+    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose)
+
+    @OptIn(DelicateKommandApi::class)
+    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose)
 }
 
+private fun stdFlow(readLine: () -> String?, close: () -> Unit): Flow<String> =
+    flow { while (true) emit(readLine() ?: break) }.onCompletion { close() }
