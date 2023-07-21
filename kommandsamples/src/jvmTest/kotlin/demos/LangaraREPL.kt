@@ -9,6 +9,6 @@ import pl.mareklangiewicz.kommand.core.*
 @Deprecated("Use notebooks + samples")
 fun CliPlatform.LangaraREPL() {
 
-    lsRegFilesExec("/home/marek").loglns()
+    lsRegFilesExec("/home/marek").forEachLogLn()
 
 }

@@ -36,10 +36,10 @@ class KommandTest {
         .checkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
     @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.checkInIdeap()
     @Test fun testLs3() = ls { +"/home/marek" }.checkInIdeap()
-    @Test fun testLsHome() = SYS.lsExec("/home/marek").loglns()
-    @Test fun testLsHomeSubDirs() = SYS.lsSubDirsExec("/home/marek").loglns()
-    @Test fun testLsHomeSubDirsWithHidden() = SYS.lsSubDirsExec("/home/marek", withHidden = true).loglns()
-    @Test fun testLsHomeRegFiles() = SYS.lsRegFilesExec("/home/marek").loglns()
+    @Test fun testLsHome() = SYS.lsExec("/home/marek").forEachLogLn()
+    @Test fun testLsHomeSubDirs() = SYS.lsSubDirsExec("/home/marek").forEachLogLn()
+    @Test fun testLsHomeSubDirsWithHidden() = SYS.lsSubDirsExec("/home/marek", withHidden = true).forEachLogLn()
+    @Test fun testLsHomeRegFiles() = SYS.lsRegFilesExec("/home/marek").forEachLogLn()
 
     @Test fun testMkDir1() = mkdir { -parents; +"/tmp/testMkDir1/blaa/blee" }
         .checkWithUser("mkdir --parents /tmp/testMkDir1/blaa/blee")

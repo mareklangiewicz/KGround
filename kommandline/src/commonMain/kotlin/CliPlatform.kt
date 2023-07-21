@@ -191,6 +191,9 @@ interface ExecProcess : AutoCloseable {
     fun stderrClose()
 }
 
+/** Catches exception thrown by BufferedReader.java:ensureOpen */
+fun Flow<String>.catchStreamClosed() =
+    catch { it::class.simpleName == "IOException" && it.message == "Stream closed" || throw it }
 
 /**
  * Can be used only once. It always finally closes input stream.
@@ -248,8 +251,8 @@ suspend fun ExecProcess.awaitResult(
     inLinesFlow: Flow<String>? = inContent?.lineSequence()?.asFlow()
 ): ExecResult = coroutineScope {
     val inJob = inLinesFlow?.onEach(stdin::emit)?.launchIn(this)
-    val outDeferred = async { stdout.toList() }
-    val errDeferred = async { stderr.toList() }
+    val outDeferred = async { stdout.catchStreamClosed().toList() }
+    val errDeferred = async { stderr.catchStreamClosed().toList() }
     inJob?.join()
     val out = outDeferred.await()
     val err = errDeferred.await()
