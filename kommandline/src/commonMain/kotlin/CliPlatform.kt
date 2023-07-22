@@ -141,7 +141,7 @@ expect class SysPlatform(): CliPlatform
 /**
  * Methods marked DelicateKommandApi are NOT thread safe! Use other ones.
  * Impl notes: Careful with threads. Especially delicate are std streams.
- * Each should have separate dedicated thread to avoid strange deadlocks with external process.
+ * Each should use separate thread to avoid strange deadlocks with external process.
  * For example see:
  * https://wiki.sei.cmu.edu/confluence/display/java/FIO07-J.+Do+not+let+external+processes+block+on+IO+buffers
  */
@@ -161,6 +161,8 @@ interface ExecProcess : AutoCloseable {
     val stdout: Flow<String>
 
     val stderr: Flow<String>
+
+    // TODO_maybe: move all delicate methods below to separate interface: (Delicate/Unsafe/LowLevel)ExecProcess
 
     @DelicateKommandApi
     fun waitForExit(finallyClose: Boolean = true): Int
