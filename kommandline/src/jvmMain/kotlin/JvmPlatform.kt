@@ -60,16 +60,23 @@ class JvmPlatform : CliPlatform {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-private fun safeDispatcher(name: String): CoroutineDispatcher =
-    newSingleThreadContext(name)
+private fun seqentialContext(name: String): CoroutineContext =
+    // TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
+    // UPDATE: I convinced myself it is safe. There is always happens-before guarantee and only one thread at a time is used.
+//    newSingleThreadContext(name)
+    Dispatchers.IO.limitedParallelism(1) + CoroutineName(name)
+
+private fun CoroutineContext.tryDispatch(block: () -> Unit) =
+    (this[ContinuationInterceptor] as? CoroutineDispatcher)
+        ?.dispatch(this, block)
+        ?: error("No dispatcher in coroutine ${this[CoroutineName]?.name}")
 
 private class JvmExecProcess(private val process: Process) : ExecProcess {
 
-    // TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
-    private val processDispatcher = safeDispatcher("JvmExecProcess.processDispatcher")
-    private val stdinDispatcher = safeDispatcher("JvmExecProcess.stdinDispatcher")
-    private val stdoutDispatcher = safeDispatcher("JvmExecProcess.stdoutDispatcher")
-    private val stderrDispatcher = safeDispatcher("JvmExecProcess.stderrDispatcher")
+    private val processContext = seqentialContext("JvmExecProcess.processDispatcher")
+    private val stdinContext = seqentialContext("JvmExecProcess.stdinDispatcher")
+    private val stdoutContext = seqentialContext("JvmExecProcess.stdoutDispatcher")
+    private val stderrContext = seqentialContext("JvmExecProcess.stderrDispatcher")
 
     private val stdinWriter = process.outputWriter()
     private val stdoutReader = process.inputReader()
@@ -80,23 +87,20 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
         try { process.waitFor() }
         finally { if (finallyClose) close() }
 
-    override suspend fun awaitExit(finallyClose: Boolean): Int = withContext(processDispatcher) {
+    override suspend fun awaitExit(finallyClose: Boolean): Int = withContext(processContext) {
         try { process.onExit().await().exitValue() }
         finally { if (finallyClose) close() }
     }
 
-    override fun kill(forcibly: Boolean) = processDispatcher.dispatch(EmptyCoroutineContext) {
+    override fun kill(forcibly: Boolean) = processContext.tryDispatch {
         if (forcibly) process.destroyForcibly() else process.destroy()
     }
 
     @OptIn(DelicateKommandApi::class)
     override fun close() {
-        stdinDispatcher.dispatch(EmptyCoroutineContext) { stdinClose() }
-        stdoutDispatcher.dispatch(EmptyCoroutineContext) { stdoutClose() }
-        stderrDispatcher.dispatch(EmptyCoroutineContext) { stderrClose() }
-        // TODO_someday: analyze CAREFULLY if it would be safe here
-        // to somehow schedule closing stdxxxDispatchers (release threads) AFTER not used anymore
-        // with process.onExit with additional delay or sth??
+        stdinContext.tryDispatch { stdinClose() }
+        stdoutContext.tryDispatch { stdoutClose() }
+        stderrContext.tryDispatch { stderrClose() }
     }
 
     @DelicateKommandApi
@@ -120,17 +124,17 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
 
     @OptIn(DelicateKommandApi::class)
     override val stdin: FlowCollector<String> = FlowCollector {
-        withContext(stdinDispatcher) { stdinWriteLine(it) }
+        withContext(stdinContext) { stdinWriteLine(it) }
     }
 
     @OptIn(DelicateKommandApi::class)
-    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose, stdoutDispatcher)
+    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose, stdoutContext)
 
     @OptIn(DelicateKommandApi::class)
-    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose, stderrDispatcher)
+    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose, stderrContext)
 }
 
-private fun stdFlow(readLine: () -> String?, close: () -> Unit, dispatcher: CoroutineDispatcher): Flow<String> =
+private fun stdFlow(readLine: () -> String?, close: () -> Unit, context: CoroutineContext): Flow<String> =
     flow { while (true) emit(readLine() ?: break) }
         .onCompletion { close() }
-        .flowOn(dispatcher)
+        .flowOn(context)
