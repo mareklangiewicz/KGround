@@ -60,13 +60,16 @@ class JvmPlatform : CliPlatform {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+private fun safeDispatcher(name: String): CoroutineDispatcher =
+    newSingleThreadContext(name)
+
 private class JvmExecProcess(private val process: Process) : ExecProcess {
 
     // TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
-    private val processSTC = newSingleThreadContext("JvmExecProcess.processSTC")
-    private val stdinSTC = newSingleThreadContext("JvmExecProcess.stdinSTC")
-    private val stdoutSTC = newSingleThreadContext("JvmExecProcess.stdoutSTC")
-    private val stderrSTC = newSingleThreadContext("JvmExecProcess.stderrSTC")
+    private val processDispatcher = safeDispatcher("JvmExecProcess.processDispatcher")
+    private val stdinDispatcher = safeDispatcher("JvmExecProcess.stdinDispatcher")
+    private val stdoutDispatcher = safeDispatcher("JvmExecProcess.stdoutDispatcher")
+    private val stderrDispatcher = safeDispatcher("JvmExecProcess.stderrDispatcher")
 
     private val stdinWriter = process.outputWriter()
     private val stdoutReader = process.inputReader()
@@ -77,22 +80,22 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
         try { process.waitFor() }
         finally { if (finallyClose) close() }
 
-    override suspend fun awaitExit(finallyClose: Boolean): Int = withContext(processSTC) {
+    override suspend fun awaitExit(finallyClose: Boolean): Int = withContext(processDispatcher) {
         try { process.onExit().await().exitValue() }
         finally { if (finallyClose) close() }
     }
 
-    override fun kill(forcibly: Boolean) = processSTC.dispatch(EmptyCoroutineContext) {
+    override fun kill(forcibly: Boolean) = processDispatcher.dispatch(EmptyCoroutineContext) {
         if (forcibly) process.destroyForcibly() else process.destroy()
     }
 
     @OptIn(DelicateKommandApi::class)
     override fun close() {
-        stdinSTC.dispatch(EmptyCoroutineContext) { stdinClose() }
-        stdoutSTC.dispatch(EmptyCoroutineContext) { stdoutClose() }
-        stderrSTC.dispatch(EmptyCoroutineContext) { stderrClose() }
+        stdinDispatcher.dispatch(EmptyCoroutineContext) { stdinClose() }
+        stdoutDispatcher.dispatch(EmptyCoroutineContext) { stdoutClose() }
+        stderrDispatcher.dispatch(EmptyCoroutineContext) { stderrClose() }
         // TODO_someday: analyze CAREFULLY if it would be safe here
-        // to somehow schedule closing stdxxxSTC dispatchers (release threads) AFTER not used anymore
+        // to somehow schedule closing stdxxxDispatchers (release threads) AFTER not used anymore
         // with process.onExit with additional delay or sth??
     }
 
@@ -117,14 +120,14 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
 
     @OptIn(DelicateKommandApi::class)
     override val stdin: FlowCollector<String> = FlowCollector {
-        withContext(stdinSTC) { stdinWriteLine(it) }
+        withContext(stdinDispatcher) { stdinWriteLine(it) }
     }
 
     @OptIn(DelicateKommandApi::class)
-    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose, stdoutSTC)
+    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose, stdoutDispatcher)
 
     @OptIn(DelicateKommandApi::class)
-    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose, stderrSTC)
+    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose, stderrDispatcher)
 }
 
 private fun stdFlow(readLine: () -> String?, close: () -> Unit, dispatcher: CoroutineDispatcher): Flow<String> =

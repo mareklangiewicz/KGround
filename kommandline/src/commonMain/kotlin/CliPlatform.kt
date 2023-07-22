@@ -37,7 +37,6 @@ interface CliPlatform {
         envModify: (MutableMap<String, String>.() -> Unit)? = null,
     ): ExecProcess
     // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
-    // TODO_maybe: support for outFile appending (java:ProcessBuilder.Redirect.appendTo)
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
     // TODO_someday: move it outside as Kommand extension with CliPlatform context receiver
