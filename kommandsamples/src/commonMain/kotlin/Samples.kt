@@ -9,7 +9,15 @@ data class Sample(
     val expectedLineRaw: String? = null,
 ) : Kommand by kommand
 
+data class TypedSample<K: Kommand, In, Out, Err>(
+    val typedKommand: TypedKommand<K, In, Out, Err>,
+    val expectedLineRaw: String? = null,
+)
+
 internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
+
+internal infix fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.ts(expectedLineRaw: String?) =
+    TypedSample(this, expectedLineRaw = expectedLineRaw)
 
 
 data object Samples {

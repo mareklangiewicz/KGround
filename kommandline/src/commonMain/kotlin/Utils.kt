@@ -12,48 +12,48 @@ infix fun <T: Any> List<T>.plusIfNN(element: T?) = if (element == null) this els
 infix fun <T: Any> List<T>.prependIfNN(element: T?) = if (element == null) this else listOf(element) + this
 
 
-fun Iterator<String>.forEachLogLn(logln: (String) -> Unit = ::println) = forEach(logln)
+fun Iterator<*>.logEach(logln: (Any?) -> Unit = ::println) = forEach(logln)
 
 @OptIn(ExperimentalTime::class)
-fun Iterator<String>.forEachLogLnWithMillis(
+fun Iterator<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
-) = forEachLogLn { logln(it.withMillis(mark)) }
+) = logEach { logln(it.toStringWithMillis(mark)) }
 
-fun Iterable<String>.forEachLogLn(logln: (String) -> Unit = ::println) = iterator().forEachLogLn(logln)
-fun Sequence<String>.forEachLogLn(logln: (String) -> Unit = ::println) = iterator().forEachLogLn(logln)
+fun Iterable<*>.logEach(logln: (Any?) -> Unit = ::println) = iterator().logEach(logln)
+fun Sequence<*>.logEach(logln: (Any?) -> Unit = ::println) = iterator().logEach(logln)
 
 @OptIn(ExperimentalTime::class)
-fun Iterable<String>.forEachLogLnWithMillis(
+fun Iterable<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
-) = iterator().forEachLogLnWithMillis(mark, logln)
+) = iterator().logEachWithMillis(mark, logln)
 
 @OptIn(ExperimentalTime::class)
-fun Sequence<String>.forEachLogLnWithMillis(
+fun Sequence<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
-) = iterator().forEachLogLnWithMillis(mark, logln)
+) = iterator().logEachWithMillis(mark, logln)
 
 
 
-suspend fun Flow<String>.onEachLogLn(logln: (String) -> Unit = ::println) = onEach(logln)
+suspend fun Flow<*>.onEachLog(logln: (Any?) -> Unit = ::println) = onEach(logln)
 
-suspend fun Flow<String>.forEachLogLn(logln: (String) -> Unit = ::println) = onEachLogLn(logln).collect()
+suspend fun Flow<*>.logEach(logln: (Any?) -> Unit = ::println) = onEachLog(logln).collect()
 
-private fun String.withMillis(from: TimeMark, separator: String = " ") =
+private fun Any?.toStringWithMillis(from: TimeMark, separator: String = " ") =
     "${from.elapsedNow().inWholeMilliseconds}$separator$this"
 
 @OptIn(ExperimentalTime::class)
-suspend fun Flow<String>.onEachLogLnWithMillis(
+suspend fun Flow<*>.onEachLogWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
-) = onEachLogLn { logln(it.withMillis(mark)) }
+) = onEachLog { logln(it.toStringWithMillis(mark)) }
 
-suspend fun Flow<String>.forEachLogLnWithMillis(
+suspend fun Flow<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println
-) = onEachLogLnWithMillis(mark, logln).collect()
+) = onEachLogWithMillis(mark, logln).collect()
 
 
 

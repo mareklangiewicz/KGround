@@ -6,6 +6,7 @@ package pl.mareklangiewicz.kommand.find
 // https://www.gnu.org/software/findutils/
 // https://savannah.gnu.org/projects/findutils/
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 
@@ -23,25 +24,31 @@ typealias FindDetailsDef = Collection<Pair<FindColumnName, FindPrintFormat>>
 // In all shortcut fun here, the first mandatory parameter will always be path.
 // It's better to be explicit and just use ".", when needed, instead of relaying on implicit default behavior.
 
-fun CliPlatform.findDetailsTableExec(
-    vararg useNamedArgs: Unit,
+@OptIn(DelicateKommandApi::class)
+fun findDetailsTable(
     path: String,
+    vararg useNamedArgs: Unit,
     details: FindDetailsDef,
     baseNamePattern: String = "*",
     ignoreCase: Boolean = false,
-): List<List<String>> {
-    val detailsHeadersRow = listOf(details.map { it.first })
-    val detailsPrintFormat = details.joinToString("\\0", postfix = "\\0") { it.second }
-    return detailsHeadersRow +
-            findExec(
-                path = path,
-                baseNamePattern = baseNamePattern,
-                ignoreCase = ignoreCase,
-                whenFoundPrintF = detailsPrintFormat
-            )
-                .single()
-                .split(Char(0))
-                .windowed(details.size, details.size)
+) = find(
+    path = path,
+    baseNamePattern = baseNamePattern,
+    ignoreCase = ignoreCase,
+    whenFoundPrintF = details.detailsPrintFormat()
+).typed {
+    map { details.detailsParseLine(it) }
+}
+
+private fun FindDetailsDef.detailsPrintFormat(): FindPrintFormat =
+    joinToString("\\0\\0", postfix = "\\0\\n") { it.second }
+
+private fun FindDetailsDef.detailsParseLine(line: String): List<String> {
+    check(line.endsWith("\u0000")) { "Looks like there was some file with forbidden character (line break)" }
+    // Not actually forbidden in unix but it's weird and dangerous to have multiline file names, so better fail fast.
+    val list = line.removeSuffix("\u0000").split("\u0000\u0000")
+    check(list.size == size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
+    return list
 }
 
 // TODO: decide on some good typical details - headers names and formats
@@ -62,18 +69,18 @@ private val typicalDetails: FindDetailsDef = listOf(
     "symbolic permissions" to "%M",
 )
 
-fun CliPlatform.findTypicalDetailsTableExec(path: String) =
-    findDetailsTableExec(path = path, details = typicalDetails)
+fun findTypicalDetailsTable(path: String) =
+    findDetailsTable(path, details = typicalDetails)
 
 
 /**
- * The Exec suffix here means just that it will automatically call .exec() on created kommand.
- * The find kommand will NOT use any ActExec action, but ActPrint or ActPrintF, then optionally ActPrune or ActQuit
+ * Most typical find invocation with default param values.
+ * @param useNamedArgs requires named args if nondefault used; avoids name clash with base / low level find fun.
  * @param whenFoundPrintF null means using ActPrint, non-null means ActPrintF(whenFoundPrintF!!)
  */
-fun CliPlatform.findExec(
-    vararg useNamedArgs: Unit,
+fun find(
     path: String,
+    vararg useNamedArgs: Unit,
     fileType: String = "f",
     baseNamePattern: String = "*",
     ignoreCase: Boolean = false,
@@ -82,7 +89,7 @@ fun CliPlatform.findExec(
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeBaseName(
     path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit
-).exec()
+)
 
 fun findWholeName(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, WholeName(pattern, ignoreCase))

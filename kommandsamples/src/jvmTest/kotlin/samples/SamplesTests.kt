@@ -19,24 +19,36 @@ class SamplesTests {
 }
 
 fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
-    if (depthLimit < 1) {
-        println("depthLimit < 1. Ignoring obj...")
-        return
-    }
+    val objSimpleName = obj::class.simpleName ?: error("Unexpected samples obj without name")
+    if (depthLimit < 1) { println("depthLimit < 1. Ignoring obj $objSimpleName"); return }
+    check(objSimpleName.endsWith("Samples") == true) { "Unexpected obj name in samples: $objSimpleName" }
+    check(obj::class.objectInstance != null) { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
+    check(obj::class.isData) { "Unexpected obj in samples which is NOT data object: $objSimpleName" }
     val props = obj.getNamedPropsValues()
-    for ((name, prop) in props) when (prop) {
-        is Sample -> "On sample $name" o { testSample(prop) }
-        null -> error("prop is null! name: $name")
+    for ((name, prop) in props) when {
+        name == "execs" -> println("Ignoring execs prop in $objSimpleName")
+            // TODO_someday_maybe: remove whole execs stuff in favor of TypedKommands/TypedSamples
+        prop is Sample -> "On sample $name" o { testSample(prop) }
+        prop is TypedSample<*, *, *, *> -> "On typed sample $name" o { testTypedSample(prop) }
+        prop == null -> error("prop is null! name: $name")
         else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }
 }
 
 @OptIn(DelicateKommandApi::class)
-fun testSample(sample: Sample) = "check kommand.lineRaw" o {
+fun testSample(sample: Sample) = "check kommand lineRaw" o {
     val lineRaw = sample.kommand.lineRaw()
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
     else lineRaw eq sample.expectedLineRaw
-    println("Actual kommand.lineRaw is: $lineRaw")
+    println("Actual kommand lineRaw is: $lineRaw")
+}
+
+@OptIn(DelicateKommandApi::class)
+fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand lineRaw" o {
+    val lineRaw = sample.typedKommand.kommand.lineRaw()
+    if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
+    else lineRaw eq sample.expectedLineRaw
+    println("Actual typed kommand lineRaw is: $lineRaw")
 }
 
 // Copied and pasted from Kokpit (for now)
@@ -44,6 +56,6 @@ fun testSample(sample: Sample) = "check kommand.lineRaw" o {
 @Suppress("UNCHECKED_CAST")
 private fun <T : Any> T.getNamedPropsValues(): List<Pair<String, Any?>> {
     return (this::class as KClass<T>).declaredMemberProperties
-        .filter { it.visibility == KVisibility.PUBLIC && it.name != "execs" }
+        .filter { it.visibility == KVisibility.PUBLIC }
         .map { it.getter.isAccessible = true; it.name to it(this) }
 }
