@@ -7,7 +7,7 @@ class GhTest {
     @Test fun testGhHelp() = ghHelp().checkWithUser("gh help")
     @Test fun testGhVersion() = ghVersion().checkWithUser("gh version")
     @Test fun testGhStatus() = ghStatus().checkWithUser("gh status")
-    @Test fun testGhSecretListHelp() = ghSecretList { -GhOpt.Help }.checkWithUser("gh secret list --help")
+    @Test fun testGhSecretListHelp() = ghSecretList { -Help }.checkWithUser("gh secret list --help")
     @Test fun testGhSecretList() = ghSecretList().checkWithUser("gh secret list")
     @Test fun testGhSecretListForAbcdK() = ghSecretList("langara/AbcdK")
         .checkWithUser("gh secret list --repo langara/AbcdK")

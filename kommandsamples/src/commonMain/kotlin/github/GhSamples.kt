@@ -2,7 +2,6 @@ package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.CliPlatform
-import pl.mareklangiewicz.kommand.github.GhCmd.*
 
 data object GhSamples {
     val help =
@@ -10,7 +9,7 @@ data object GhSamples {
                 "gh help"
 
     val helpHelp =
-        ghHelp { -GhOpt.Help } s
+        ghHelp { -Help } s
                 "gh help --help"
 
     val helpSecret =
@@ -26,7 +25,7 @@ data object GhSamples {
                 "gh version"
 
     val versionHelp =
-        ghVersion { -GhOpt.Help } s
+        ghVersion { -Help } s
                 "gh version --help"
 
     val status =
@@ -34,7 +33,7 @@ data object GhSamples {
                 "gh status"
 
     val statusOrgExclude =
-        ghStatus { -GhOpt.Org("orgbla"); -GhOpt.Exclude("langara/bla", "langara/ble") } s
+        ghStatus { -Org("orgbla"); -Exclude("langara/bla", "langara/ble") } s
                 "gh status --org orgbla --exclude langara/bla,langara/ble"
 
     val secretList =
@@ -42,7 +41,7 @@ data object GhSamples {
                 "gh secret list"
 
     val secretListHelp =
-        ghSecretList { -GhOpt.Help } s
+        ghSecretList { -Help } s
                 "gh secret list --help"
 
     val secretListForAbcdK =

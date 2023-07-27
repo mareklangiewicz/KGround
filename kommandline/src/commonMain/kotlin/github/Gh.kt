@@ -3,8 +3,6 @@
 package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.github.GhCmd.*
-import pl.mareklangiewicz.kommand.github.GhOpt.*
 
 /**
  * Secret values are locally encrypted before being sent to GitHub.
@@ -27,7 +25,7 @@ fun CliPlatform.ghSecretListExec(repoPath: String? = null) = ghSecretList(repoPa
  * @param repoPath Select another repository using the [HOST/]OWNER/REPO format
  */
 fun ghSecretSet(secretName: String, repoPath: String? = null) =
-    gh(SecretSet()) { +secretName; repoPath?.let { -Repo(it) } }
+    gh(GhCmd.SecretSet()) { +secretName; repoPath?.let { -Repo(it) } }
 
 fun ghSecretList(repoPath: String? = null, init: GhCmd.SecretList.() -> Unit = {}) =
     gh(GhCmd.SecretList()) { repoPath?.let { -Repo(it) }; init() }
@@ -66,33 +64,39 @@ abstract class GhCmd<KOptT: KOpt>: Kommand {
     operator fun String.unaryPlus() = nonopts.add(this)
     operator fun KOptT.unaryMinus() = opts.add(this)
 
-    class Help: GhCmd<GhOpt.Help>()
-    class Version: GhCmd<GhOpt.Help>()
-    class Status: GhCmd<Status.Opt>() { interface Opt: KOpt }
-    class SecretList: GhCmd<SecretList.Opt>() { interface Opt: KOpt }
-    class SecretSet(val secretName: String? = null): GhCmd<SecretSet.Opt>() { interface Opt: KOpt }
+    class Help: GhCmd<GhCommonOpt>()
+    class Version: GhCmd<GhCommonOpt>()
+    class Status: GhCmd<GhStatusOpt>()
+    class SecretList: GhCmd<GhSecretListOpt>()
+    class SecretSet(val secretName: String? = null): GhCmd<GhSecretSetOpt>()
 }
 
-open class GhOpt(name: String, arg: String? = null): KOptL(name, arg, nameSeparator = " ") {
+interface GhStatusOpt: KOpt
+interface GhSecretOpt: KOpt, GhSecretListOpt, GhSecretSetOpt
+interface GhSecretListOpt: KOpt
+interface GhSecretSetOpt: KOpt
+interface GhCommonOpt: KOpt, GhStatusOpt, GhSecretOpt
 
+/** @param path [HOST/]OWNER/REPO */
+data class Repo(val path: String): GhOpt("repo", path), GhSecretOpt
+
+data object Help: GhOpt("help"), GhCommonOpt
+
+/**
+ * It's impossible to use anyway because we always have mandatory GhCmd in Gh class.
+ * But let's leave it anyway to signal that actual gh command accepts such (unnecessary) option.
+ */
+@Deprecated("Use version command instead of option.", ReplaceWith("ghVersion"))
+data object Version: GhOpt("version")
+
+/** @param repos list of repos to exclude in owner/name format */
+data class Exclude(val repos: List<String>): GhOpt("exclude", repos.joinToString(",")), GhStatusOpt {
+    constructor(vararg repo: String): this(repo.toList())
+}
+
+
+data class Org(val organization: String): GhOpt("org", organization), GhStatusOpt
+
+abstract class GhOpt(name: String, arg: String? = null): KOptL(name, arg, nameSeparator = " ") {
     // TODO_later: can I also set name automatially using ::class.simpleName?
-
-    /** @param repos list of repos to exclude in owner/name format */
-    data class Exclude(val repos: List<String>): GhOpt("exclude", repos.joinToString(",")), Status.Opt {
-        constructor(vararg repo: String): this(repo.toList())
-    }
-
-    data class Org(val organization: String): GhOpt("org", organization), Status.Opt
-
-    /** @param path [HOST/]OWNER/REPO */
-    data class Repo(val path: String): GhOpt("repo", path), SecretList.Opt, SecretSet.Opt
-
-    data object Help: GhOpt("help"), SecretList.Opt, Status.Opt
-
-    /**
-     * It's impossible to use anyway because we always have mandatory GhCmd in Gh class.
-     * But let's leave it anyway to signal that actual gh command accepts such (unnecessary) option.
-     */
-    @Deprecated("Use version command instead of option.", ReplaceWith("ghVersion"))
-    data object Version: GhOpt("version")
 }
