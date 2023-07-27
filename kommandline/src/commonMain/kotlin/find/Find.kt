@@ -72,6 +72,9 @@ private val typicalDetails: FindDetailsDef = listOf(
 fun findTypicalDetailsTable(path: String) =
     findDetailsTable(path, details = typicalDetails)
 
+fun findTypicalDetailsTableToList(path: String) =
+    findDetailsTable(path, details = typicalDetails).reduced { stdout.toList() }
+
 
 /**
  * Most typical find invocation with default param values.

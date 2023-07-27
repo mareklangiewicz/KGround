@@ -3,9 +3,8 @@
 package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.github.Gh.Cmd
-import pl.mareklangiewicz.kommand.github.Gh.Cmd.*
-import pl.mareklangiewicz.kommand.github.Gh.Option.*
+import pl.mareklangiewicz.kommand.github.GhCmd.*
+import pl.mareklangiewicz.kommand.github.GhOpt.*
 
 /**
  * Secret values are locally encrypted before being sent to GitHub.
@@ -28,37 +27,72 @@ fun CliPlatform.ghSecretListExec(repoPath: String? = null) = ghSecretList(repoPa
  * @param repoPath Select another repository using the [HOST/]OWNER/REPO format
  */
 fun ghSecretSet(secretName: String, repoPath: String? = null) =
-    gh(secret_set) { +secretName; repoPath?.let { -repo(it) } }
+    gh(SecretSet()) { +secretName; repoPath?.let { -Repo(it) } }
 
-fun ghSecretList(repoPath: String? = null) = gh(secret_list) { repoPath?.let { -repo(it) } }
+fun ghSecretList(repoPath: String? = null, init: GhCmd.SecretList.() -> Unit = {}) =
+    gh(GhCmd.SecretList()) { repoPath?.let { -Repo(it) }; init() }
 
-fun gh(cmd: Cmd? = null, init: Gh.() -> Unit = {}) = Gh(cmd).apply(init)
+fun ghHelp(init: GhCmd.Help.() -> Unit = {}) =
+    gh(GhCmd.Help(), init)
+
+fun ghVersion(init: GhCmd.Version.() -> Unit = {}) =
+    gh(GhCmd.Version(), init)
+
+fun ghStatus(init: GhCmd.Status.() -> Unit = {}) =
+    gh(GhCmd.Status(), init)
+
+fun <GhOptT: KOpt, GhCmdT: GhCmd<GhOptT>> gh(cmd: GhCmdT, init: GhCmdT.() -> Unit = {}) =
+    Gh(cmd.apply(init))
 
 /** [gh manual](https://cli.github.com/manual/index) */
 data class Gh(
-    val cmd: Cmd? = null,
-    val cmdargs: MutableList<String> = mutableListOf(),
-    val options: MutableList<Option> = mutableListOf(),
+    val cmd: GhCmd<*>
 ) : Kommand {
-
     override val name get() = "gh"
-    override val args get() = cmd?.str?.split(' ').orEmpty() + cmdargs + options.flatMap { it.str }
+    override val args get() = cmd.toArgs()
+}
 
-    enum class Cmd(val str: String) {
-        help("help"),
-        status("status"),
-        secret_list("secret list"),
-        secret_set("secret set"),
+abstract class GhCmd<KOptT: KOpt>: Kommand {
+
+    val cmdNameWords get() = this::class.simpleName!!
+        .split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
+
+    val nonopts: MutableList<String> = mutableListOf()
+    val opts: MutableList<KOptT> = mutableListOf()
+
+    override val name get() = cmdNameWords.first()
+    override val args get() = cmdNameWords.drop(1) + nonopts + opts.toArgsFlat()
+
+    operator fun String.unaryPlus() = nonopts.add(this)
+    operator fun KOptT.unaryMinus() = opts.add(this)
+
+    class Help: GhCmd<GhOpt.Help>()
+    class Version: GhCmd<GhOpt.Help>()
+    class Status: GhCmd<Status.Opt>() { interface Opt: KOpt }
+    class SecretList: GhCmd<SecretList.Opt>() { interface Opt: KOpt }
+    class SecretSet(val secretName: String? = null): GhCmd<SecretSet.Opt>() { interface Opt: KOpt }
+}
+
+open class GhOpt(name: String, arg: String? = null): KOptL(name, arg, nameSeparator = " ") {
+
+    // TODO_later: can I also set name automatially using ::class.simpleName?
+
+    /** @param repos list of repos to exclude in owner/name format */
+    data class Exclude(val repos: List<String>): GhOpt("exclude", repos.joinToString(",")), Status.Opt {
+        constructor(vararg repo: String): this(repo.toList())
     }
 
-    sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = listOf(name) plusIfNN arg
-        data object help : Option("--help")
-        data object version : Option("--version")
-        /** @param repoPath [HOST/]OWNER/REPO */
-        data class repo(val repoPath: String): Option("--repo", repoPath)
-    }
+    data class Org(val organization: String): GhOpt("org", organization), Status.Opt
 
-    operator fun String.unaryPlus() = cmdargs.add(this)
-    operator fun Option.unaryMinus() = options.add(this)
+    /** @param path [HOST/]OWNER/REPO */
+    data class Repo(val path: String): GhOpt("repo", path), SecretList.Opt, SecretSet.Opt
+
+    data object Help: GhOpt("help"), SecretList.Opt, Status.Opt
+
+    /**
+     * It's impossible to use anyway because we always have mandatory GhCmd in Gh class.
+     * But let's leave it anyway to signal that actual gh command accepts such (unnecessary) option.
+     */
+    @Deprecated("Use version command instead of option.", ReplaceWith("ghVersion"))
+    data object Version: GhOpt("version")
 }
