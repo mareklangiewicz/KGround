@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.*
  * If platform level redirections are really needed, then just use lower level api.
  * But first, consider if you can just locally save/load flows to/from files using Okio.
  * (Overall goal is to gradually move AWAY from CLI craziness and more towards safe/composable kotlin programming.)
- * Note2: The "Out" type can be some "suspend fun"! (Nice solution to reduce output flow to some single value)
  */
 data class TypedKommand<K: Kommand, In, Out, Err>(
     val kommand: K,
@@ -67,3 +66,17 @@ fun <K: Kommand, In, Out, Err> CliPlatform.start(
 )
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
+
+data class ReducedKommand<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
+    val typedKommand: TK,
+    val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+)
+
+fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reduced(
+    reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+) = ReducedKommand(this, reduce)
+
+suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> CliPlatform.exec(
+    kommand: ReducedKommand<K, In, Out, Err, TK, ReducedOut>,
+    dir: String? = null,
+): ReducedOut = kommand.reduce(start(kommand.typedKommand, dir))
