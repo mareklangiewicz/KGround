@@ -39,8 +39,9 @@ fun ghVersion(init: GhCmd.Version.() -> Unit = {}) =
 fun ghStatus(init: GhCmd.Status.() -> Unit = {}) =
     gh(GhCmd.Status(), init)
 
-fun <GhOptT: KOpt, GhCmdT: GhCmd<GhOptT>> gh(cmd: GhCmdT, init: GhCmdT.() -> Unit = {}) =
+fun <GhOptT: KOptGh, GhCmdT: GhCmd<GhOptT>> gh(cmd: GhCmdT, init: GhCmdT.() -> Unit = {}) =
     Gh(cmd.apply(init))
+
 
 /** [gh manual](https://cli.github.com/manual/index) */
 data class Gh(
@@ -50,37 +51,46 @@ data class Gh(
     override val args get() = cmd.toArgs()
 }
 
-abstract class GhCmd<KOptT: KOpt>: Kommand {
+
+abstract class GhCmd<KOptGhT: KOptGh>: Kommand {
 
     val cmdNameWords get() = this::class.simpleName!!
         .split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
 
     val nonopts: MutableList<String> = mutableListOf()
-    val opts: MutableList<KOptT> = mutableListOf()
+    val opts: MutableList<KOptGhT> = mutableListOf()
 
     override val name get() = cmdNameWords.first()
     override val args get() = cmdNameWords.drop(1) + nonopts + opts.toArgsFlat()
 
     operator fun String.unaryPlus() = nonopts.add(this)
-    operator fun KOptT.unaryMinus() = opts.add(this)
+    operator fun KOptGhT.unaryMinus() = opts.add(this)
 
-    class Help: GhCmd<GhCommonOpt>()
-    class Version: GhCmd<GhCommonOpt>()
-    class Status: GhCmd<GhStatusOpt>()
-    class SecretList: GhCmd<GhSecretListOpt>()
-    class SecretSet(val secretName: String? = null): GhCmd<GhSecretSetOpt>()
+    class Help: GhCmd<KOptGhCommon>()
+    class Version: GhCmd<KOptGhCommon>()
+    class Status: GhCmd<KOptGhStatus>()
+    class SecretList: GhCmd<KOptGhSecretList>()
+    class SecretSet(val secretName: String? = null): GhCmd<KOptGhSecretSet>()
 }
 
-interface GhStatusOpt: KOpt
-interface GhSecretOpt: KOpt, GhSecretListOpt, GhSecretSetOpt
-interface GhSecretListOpt: KOpt
-interface GhSecretSetOpt: KOpt
-interface GhCommonOpt: KOpt, GhStatusOpt, GhSecretOpt
 
-/** @param path [HOST/]OWNER/REPO */
-data class Repo(val path: String): GhOpt("repo", path), GhSecretOpt
+abstract class GhOpt(val arg: String? = null): KOptGh {
+    override fun toArgs(): List<String> = listOf("--" + this::class.simpleName!!.lowercase()) plusIfNN arg
+}
 
-data object Help: GhOpt("help"), GhCommonOpt
+
+// Reversed hierarhy of options to mark which GhCmd accepts which options.
+// KOptGh prefix chosen to be clearly distinct from normal implementation tree prefixes: Gh, GhCmd, GhOpt
+
+interface KOptGh: KOpt
+interface KOptGhStatus: KOptGh
+interface KOptGhSecretList: KOptGh
+interface KOptGhSecretSet: KOptGh
+interface KOptGhSecret: KOptGh, KOptGhSecretList, KOptGhSecretSet
+interface KOptGhCommon: KOptGh, KOptGhStatus, KOptGhSecret
+
+
+data object Help: GhOpt(), KOptGhCommon
 
 /**
  * It's impossible to use anyway because we always have mandatory GhCmd in Gh class.
@@ -89,14 +99,12 @@ data object Help: GhOpt("help"), GhCommonOpt
 @Deprecated("Use version command instead of option.", ReplaceWith("ghVersion"))
 data object Version: GhOpt("version")
 
+/** @param path [HOST/]OWNER/REPO */
+data class Repo(val path: String): GhOpt(path), KOptGhSecret
+
 /** @param repos list of repos to exclude in owner/name format */
-data class Exclude(val repos: List<String>): GhOpt("exclude", repos.joinToString(",")), GhStatusOpt {
+data class Exclude(val repos: List<String>): GhOpt(repos.joinToString(",")), KOptGhStatus {
     constructor(vararg repo: String): this(repo.toList())
 }
 
-
-data class Org(val organization: String): GhOpt("org", organization), GhStatusOpt
-
-abstract class GhOpt(name: String, arg: String? = null): KOptL(name, arg, nameSeparator = " ") {
-    // TODO_later: can I also set name automatially using ::class.simpleName?
-}
+data class Org(val organization: String): GhOpt(organization), KOptGhStatus
