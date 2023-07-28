@@ -128,24 +128,12 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
     override fun stderrClose() = stderrReader.close()
 
     @OptIn(DelicateKommandApi::class)
-    override suspend fun stdin(
-        lineS: Flow<String>,
-        lineEnd: String,
-        flushAfterEachLine: Boolean,
-        finallyStdinClose: Boolean,
-    ) = withContext(stdinContext) {
-        try { lineS.collect { stdinWriteLine(it, lineEnd, flushAfterEachLine) } }
-        finally { if (finallyStdinClose) stdinClose() }
-    }
+    override val stdin = defaultStdinCollector(stdinContext, ::stdinWriteLine, ::stdinClose)
 
     @OptIn(DelicateKommandApi::class)
-    override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose, stdoutContext)
+    override val stdout: Flow<String> = defaultStdOutOrErrFlow(stdoutContext, ::stdoutReadLine, ::stdoutClose)
 
     @OptIn(DelicateKommandApi::class)
-    override val stderr: Flow<String> = stdFlow(::stderrReadLine, ::stderrClose, stderrContext)
+    override val stderr: Flow<String> = defaultStdOutOrErrFlow(stderrContext, ::stderrReadLine, ::stderrClose)
 }
 
-private fun stdFlow(readLine: () -> String?, close: () -> Unit, context: CoroutineContext): Flow<String> =
-    flow { while (true) emit(readLine() ?: break) }
-        .onCompletion { close() }
-        .flowOn(context)

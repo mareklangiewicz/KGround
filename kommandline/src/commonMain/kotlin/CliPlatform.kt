@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlin.coroutines.*
 
 @Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
 typealias Platform = CliPlatform
@@ -129,24 +130,49 @@ class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
     override fun stdoutClose() = Unit
     override fun stderrReadLine() = null
     override fun stderrClose() = Unit
-    override suspend fun stdin(
-        lineS: Flow<String>,
-        lineEnd: String,
-        flushAfterEachLine: Boolean,
-        finallyStdinClose: Boolean
-    ) {
-        try { lineS.collect { stdinWriteLine(it, lineEnd, flushAfterEachLine) } }
-        finally { if (finallyStdinClose) stdinClose() }
-    }
-    override val stdout: Flow<String> = stdFakeFlow(::stdoutReadLine, ::stdoutClose)
-    override val stderr: Flow<String> = stdFakeFlow(::stderrReadLine, ::stderrClose)
+    override val stdin = defaultStdinCollector(Dispatchers.Default, ::stdinWriteLine, ::stdinClose)
+    override val stdout: Flow<String> = defaultStdOutOrErrFlow(Dispatchers.Default, ::stdoutReadLine, ::stdoutClose)
+    override val stderr: Flow<String> = defaultStdOutOrErrFlow(Dispatchers.Default, ::stderrReadLine, ::stderrClose)
 }
 
-private fun stdFakeFlow(readLine: () -> String?, close: () -> Unit): Flow<String> =
-    flow { while (true) emit(readLine() ?: break) }.onCompletion { close() }
+internal fun defaultStdinCollector(
+    stdinContext: CoroutineContext,
+    writeLine: (line: String, lineEnd: String, thenFlush: Boolean) -> Unit,
+    close: () -> Unit
+) = StdinCollector { lineS, lineEnd, flushAfterEachLine, finallyStdinClose ->
+    withContext(stdinContext) {
+        try { lineS.collect { writeLine(it, lineEnd, flushAfterEachLine) } }
+        finally { if (finallyStdinClose) close() }
+    }
+}
+
+internal fun defaultStdOutOrErrFlow(
+    flowOnContext: CoroutineContext,
+    readLine: () -> String?,
+    close: () -> Unit
+) = flow { while (true) emit(readLine() ?: break) }
+    .onCompletion { close() }
+    .flowOn(flowOnContext)
 
 expect class SysPlatform(): CliPlatform
 
+
+fun interface StdinCollector {
+    suspend fun collect(
+        lineS: Flow<String>,
+        lineEnd: String,
+        flushAfterEachLine: Boolean,
+        finallyStdinClose: Boolean,
+    )
+}
+
+suspend fun StdinCollector.collect(
+    lineS: Flow<String>,
+    vararg useNamedArgs: Unit,
+    lineEnd: String = CliPlatform.SYS.lineEnd,
+    flushAfterEachLine: Boolean = true,
+    finallyStdinClose: Boolean = true,
+) = collect(lineS, lineEnd, flushAfterEachLine, finallyStdinClose)
 
 /**
  * Methods marked DelicateKommandApi are NOT thread safe! Use other ones.
@@ -166,12 +192,7 @@ interface ExecProcess : AutoCloseable {
 
     suspend fun awaitExit(finallyClose: Boolean = true): Int
 
-    suspend fun stdin(
-        lineS: Flow<String>,
-        lineEnd: String = CliPlatform.SYS.lineEnd,
-        flushAfterEachLine: Boolean = true,
-        finallyStdinClose: Boolean = true,
-    )
+    val stdin: StdinCollector
 
     val stdout: Flow<String>
 
@@ -266,7 +287,7 @@ suspend fun ExecProcess.awaitResult(
     inContent: String? = null,
     inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow()
 ): ExecResult = coroutineScope {
-    val inJob = inLineS?.let { launch { stdin(it) } }
+    val inJob = inLineS?.let { launch { stdin.collect(it) } }
     val outDeferred = async { stdout.catchStreamClosed().toList() }
     val errDeferred = async { stderr.catchStreamClosed().toList() }
     inJob?.join()

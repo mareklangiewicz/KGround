@@ -12,7 +12,7 @@ fun ghSecretSet(
     repoPath: String? = null
 ) =
     ghSecretSet(secretName, repoPath = repoPath).reduced {
-        stdin(flowOf(secretValue), "", true, true)
+        stdin.collect(flowOf(secretValue), lineEnd = "", finallyStdinClose = true)
         stdout.onEachLogWithMillis().toList()
     }
 

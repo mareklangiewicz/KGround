@@ -3,9 +3,6 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.flow.*
 
 
-typealias StdInT =
-        suspend (lineS: Flow<String>, lineEnd: String, flushAfterEachLine: Boolean, finallyStdinClose: Boolean) -> Unit
-
 /**
  * Separate from Kommand, because I want Kommand to be simple and serializable!
  * TODO_someday_maybe: Use kotlinx-serialization for all Kommands (but not TypedKommands)
@@ -17,21 +14,21 @@ typealias StdInT =
  */
 data class TypedKommand<K: Kommand, In, Out, Err>(
     val kommand: K,
-    val stdinRetype: StdInT.() -> In,
+    val stdinRetype: StdinCollector.() -> In,
     val stderrRetype: Flow<String>.() -> Err,
     val stderrToOut: Boolean,
     val stdoutRetype: Flow<String>.() -> Out,
 )
 
 fun <K: Kommand, In, Out, Err> K.typed(
-    stdinRetype: StdInT.() -> In,
+    stdinRetype: StdinCollector.() -> In,
     stderrRetype: Flow<String>.() -> Err,
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
 ) = TypedKommand(this, stdinRetype, stderrRetype, stderrToOut, stdoutRetype)
 
 fun <K: Kommand, In, Out> K.typed(
-    stdinRetype: StdInT.() -> In,
+    stdinRetype: StdinCollector.() -> In,
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
 ): TypedKommand<K, In, Out, Flow<Nothing>> =
@@ -40,18 +37,18 @@ fun <K: Kommand, In, Out> K.typed(
 fun <K: Kommand, Out> K.typed(
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
-): TypedKommand<K, StdInT, Out, Flow<Nothing>> =
+): TypedKommand<K, StdinCollector, Out, Flow<Nothing>> =
     typed({ this }, stderrToOut, stdoutRetype)
 
 class TypedExecProcess<In, Out, Err>(
     private val eprocess: ExecProcess,
-    stdinRetype: StdInT.() -> In,
+    stdinRetype: StdinCollector.() -> In,
     stderrRetype: Flow<String>.() -> Err,
     stdoutRetype: Flow<String>.() -> Out,
 ) {
     fun kill(forcibly: Boolean = false) = eprocess.kill(forcibly)
     suspend fun awaitExit(finallyClose: Boolean = true) = eprocess.awaitExit(finallyClose)
-    val stdin: In = eprocess::stdin.stdinRetype()
+    val stdin: In = eprocess.stdin.stdinRetype()
     val stdout: Out = eprocess.stdout.stdoutRetype()
     val stderr: Err = eprocess.stderr.stderrRetype()
 }
@@ -81,8 +78,8 @@ fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK
 ) = ReducedKommand(this, reduce)
 
 fun <K: Kommand, ReducedOut> K.reduced(
-    reduce: suspend TypedExecProcess<StdInT, Flow<String>, Flow<Nothing>>.() -> ReducedOut,
-): ReducedKommand<K, StdInT, Flow<String>, Flow<Nothing>, TypedKommand<K, StdInT, Flow<String>, Flow<Nothing>>, ReducedOut> =
+    reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<Nothing>>.() -> ReducedOut,
+): ReducedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>, TypedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>>, ReducedOut> =
     typed { this }.reduced(reduce)
 
 suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> CliPlatform.exec(
