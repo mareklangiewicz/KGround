@@ -59,4 +59,8 @@ data object GhSamples {
     val secretSetConcreteFakeSecret67InAbcdK =
         ghSecretSet(secretName = "FAKE_SECRET_67", secretValue = "concretevalue67", repoPath = "langara/AbcdK") rs
                 "gh secret set FAKE_SECRET_67 --repo langara/AbcdK"
+
+    val secretDeleteFakeSecretInAbcdK =
+        ghSecretDelete(secretName = "FAKE_SECRET", repoPath = "langara/AbcdK") s
+                "gh secret delete FAKE_SECRET --repo langara/AbcdK"
 }

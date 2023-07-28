@@ -29,6 +29,13 @@ fun ghSecretSet(
 ) =
     gh(GhCmd.SecretSet()) { +secretName; repoPath?.let { -Repo(it) } }
 
+fun ghSecretDelete(
+    secretName: String,
+    vararg useNamedArgs: Unit,
+    repoPath: String? = null
+) =
+    gh(GhCmd.SecretDelete()) { +secretName; repoPath?.let { -Repo(it) } }
+
 fun ghSecretList(repoPath: String? = null, init: GhCmd.SecretList.() -> Unit = {}) =
     gh(GhCmd.SecretList()) { repoPath?.let { -Repo(it) }; init() }
 
@@ -73,6 +80,7 @@ abstract class GhCmd<KOptGhT: KOptGh>: Kommand {
     class Status: GhCmd<KOptGhStatus>()
     class SecretList: GhCmd<KOptGhSecretList>()
     class SecretSet(val secretName: String? = null): GhCmd<KOptGhSecretSet>()
+    class SecretDelete(val secretName: String? = null): GhCmd<KOptGhSecretDelete>()
 }
 
 
@@ -88,7 +96,8 @@ interface KOptGh: KOpt
 interface KOptGhStatus: KOptGh
 interface KOptGhSecretList: KOptGh
 interface KOptGhSecretSet: KOptGh
-interface KOptGhSecret: KOptGh, KOptGhSecretList, KOptGhSecretSet
+interface KOptGhSecretDelete: KOptGh
+interface KOptGhSecret: KOptGh, KOptGhSecretList, KOptGhSecretSet, KOptGhSecretDelete
 interface KOptGhCommon: KOptGh, KOptGhStatus, KOptGhSecret
 
 
@@ -104,9 +113,19 @@ data object Version: GhOpt("version")
 /** @param path [HOST/]OWNER/REPO */
 data class Repo(val path: String): GhOpt(path), KOptGhSecret
 
+/** @param ghApp {actions|codespaces|dependabot} */
+data class App(val ghApp: String): GhOpt(ghApp), KOptGhSecret
+
+data class Env(val ghEnv: String): GhOpt(ghEnv), KOptGhSecret
+
+data class Org(val ghOrg: String): GhOpt(ghOrg), KOptGhSecret, KOptGhStatus
+
+data object User: GhOpt(), KOptGhSecret
+
+/** @param vis {all|private|selected} */
+data class Visibility(val vis: String): GhOpt(vis), KOptGhSecretSet
+
 /** @param repos list of repos to exclude in owner/name format */
 data class Exclude(val repos: List<String>): GhOpt(repos.joinToString(",")), KOptGhStatus {
     constructor(vararg repo: String): this(repo.toList())
 }
-
-data class Org(val organization: String): GhOpt(organization), KOptGhStatus
