@@ -48,6 +48,8 @@ class JvmPlatform : CliPlatform {
                 .start()
         )
 
+    override val lineEnd: String = System.lineSeparator() ?: "\n"
+
     override val isJvm get() = true
     override val isDesktop get() = xdgdesktop.isEmpty()
     override val isUbuntu get() = "ubuntu" in xdgdesktop
@@ -104,8 +106,11 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
     }
 
     @DelicateKommandApi
-    override fun stdinWriteLine(line: String, thenFlush: Boolean) =
-        stdinWriter.run { write(line); newLine(); if (thenFlush) flush() }
+    override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) = stdinWriter.run {
+        write(line)
+        if (lineEnd.isNotEmpty()) write(lineEnd)
+        if (thenFlush) flush()
+    }
 
     @DelicateKommandApi
     override fun stdinClose() = stdinWriter.close()

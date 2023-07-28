@@ -82,7 +82,7 @@ private class JsEvalFunProcess(code: String): ExecProcess {
     }
 
     @DelicateKommandApi
-    override fun stdinWriteLine(line: String, thenFlush: Boolean) = logln(line)
+    override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) = logln(line)
 
     @DelicateKommandApi
     override fun stdinClose() { logln = {} }

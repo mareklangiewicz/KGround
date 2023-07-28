@@ -55,6 +55,8 @@ interface CliPlatform {
         outFile = outFile,
     )
 
+    val lineEnd: String get() = "\n"
+
     val isJvm: Boolean get() = false
     val isDesktop: Boolean get() = false
     val isUbuntu: Boolean get() = false
@@ -121,7 +123,7 @@ class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
     override fun kill(forcibly: Boolean) = log("cancel($forcibly)")
     override fun close() = Unit
-    override fun stdinWriteLine(line: String, thenFlush: Boolean): Unit = log("input line: $line")
+    override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean): Unit = log("input line: $line")
     override fun stdinClose() = Unit
     override fun stdoutReadLine() = null
     override fun stdoutClose() = Unit
@@ -169,7 +171,7 @@ interface ExecProcess : AutoCloseable {
 
     /** System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them! */
     @DelicateKommandApi
-    fun stdinWriteLine(line: String, thenFlush: Boolean = true)
+    fun stdinWriteLine(line: String, lineEnd: String = CliPlatform.SYS.lineEnd, thenFlush: Boolean = true)
 
     /** Indepotent. Flushes buffer before closing. */
     @DelicateKommandApi
@@ -203,7 +205,7 @@ fun Flow<String>.catchStreamClosed() =
 @DelicateKommandApi
 @Deprecated("Use stdin FlowCollector.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useInLines(input: Sequence<String>, flushAfterEachLine: Boolean = true) =
-    try { input.forEach { stdinWriteLine(it, flushAfterEachLine) } }
+    try { input.forEach { stdinWriteLine(it, thenFlush = flushAfterEachLine) } }
     finally { stdinClose() }
 
 /** Can be used only once. It always finally closes output stream. */
