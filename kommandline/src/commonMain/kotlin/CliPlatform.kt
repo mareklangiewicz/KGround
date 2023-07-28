@@ -129,7 +129,15 @@ class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
     override fun stdoutClose() = Unit
     override fun stderrReadLine() = null
     override fun stderrClose() = Unit
-    override val stdin: FlowCollector<String> = FlowCollector { stdinWriteLine(it) }
+    override suspend fun stdin(
+        lineS: Flow<String>,
+        lineEnd: String,
+        flushAfterEachLine: Boolean,
+        finallyStdinClose: Boolean
+    ) {
+        try { lineS.collect { stdinWriteLine(it, lineEnd, flushAfterEachLine) } }
+        finally { if (finallyStdinClose) stdinClose() }
+    }
     override val stdout: Flow<String> = stdFakeFlow(::stdoutReadLine, ::stdoutClose)
     override val stderr: Flow<String> = stdFakeFlow(::stderrReadLine, ::stderrClose)
 }
@@ -158,7 +166,12 @@ interface ExecProcess : AutoCloseable {
 
     suspend fun awaitExit(finallyClose: Boolean = true): Int
 
-    val stdin: FlowCollector<String>
+    suspend fun stdin(
+        lineS: Flow<String>,
+        lineEnd: String = CliPlatform.SYS.lineEnd,
+        flushAfterEachLine: Boolean = true,
+        finallyStdinClose: Boolean = true,
+    )
 
     val stdout: Flow<String>
 
@@ -203,7 +216,7 @@ fun Flow<String>.catchStreamClosed() =
  * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
  */
 @DelicateKommandApi
-@Deprecated("Use stdin FlowCollector.") // do not remove it - it's here as kinda "educational" example
+@Deprecated("Use stdin.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useInLines(input: Sequence<String>, flushAfterEachLine: Boolean = true) =
     try { input.forEach { stdinWriteLine(it, thenFlush = flushAfterEachLine) } }
     finally { stdinClose() }
@@ -251,9 +264,9 @@ private fun useSomeLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Uni
  */
 suspend fun ExecProcess.awaitResult(
     inContent: String? = null,
-    inLinesFlow: Flow<String>? = inContent?.lineSequence()?.asFlow()
+    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow()
 ): ExecResult = coroutineScope {
-    val inJob = inLinesFlow?.onEach(stdin::emit)?.launchIn(this)
+    val inJob = inLineS?.let { launch { stdin(it) } }
     val outDeferred = async { stdout.catchStreamClosed().toList() }
     val errDeferred = async { stderr.catchStreamClosed().toList() }
     inJob?.join()

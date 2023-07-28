@@ -4,7 +4,6 @@ package pl.mareklangiewicz.kommand.github
 
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 
 fun ghSecretSet(
     vararg useNamedArgs: Unit,
@@ -13,34 +12,9 @@ fun ghSecretSet(
     repoPath: String? = null
 ) =
     ghSecretSet(secretName, repoPath = repoPath).reduced {
-        stdin.emit(secretValue)
-        // FIXME NOW: looks like this hangs (demo1 notebook). And old xxxExec version was working with inContent!
-        //    Probably stdin have to be closed!
+        stdin(flowOf(secretValue), "", true, true)
         stdout.onEachLogWithMillis().toList()
     }
-
-// FIXME NOW: remove this version after debuging. It works! (when closing stdin after pushing secretValue)
-// TODO NOW: change stdin type so it closes stdin after collecting whole given flow. (do I close stdout and stderr???)
-// TODO NOW: option to send different separators (possibly none) to stdin (make sure secretValue is not appended with some \n)
-suspend fun ghSecretSetTempByHand(
-    vararg useNamedArgs: Unit,
-    secretName: String,
-    secretValue: String,
-    repoPath: String? = null
-) {
-    val k = ghSecretSet(secretName, repoPath = repoPath)
-    println("aaa1")
-    val ep = SYS.start(k)
-    println("aaa2")
-    ep.stdin.emit(secretValue)
-    println("aaa3")
-    ep.stdinClose() // TODO NOW THIS fixes the issue!!! (check, by commenting out)
-    println("aaa4")
-    ep.stdout.onEachLogWithMillis().toList()
-    println("aaa5")
-    ep.awaitExit()
-    println("aaa6")
-}
 
 /**
  * Secret values are locally encrypted before being sent to GitHub.

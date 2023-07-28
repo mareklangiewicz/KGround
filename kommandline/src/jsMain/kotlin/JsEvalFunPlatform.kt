@@ -100,9 +100,15 @@ private class JsEvalFunProcess(code: String): ExecProcess {
     override fun stderrClose() { err = null }
 
     @OptIn(DelicateKommandApi::class)
-    override val stdin: FlowCollector<String> = FlowCollector {
-        stdinWriteLine(it)
-    }
+    override suspend fun stdin(
+        lineS: Flow<String>,
+        lineEnd: String,
+        flushAfterEachLine: Boolean,
+        finallyStdinClose: Boolean,
+    ) =
+        try { lineS.collect { stdinWriteLine(it, lineEnd, flushAfterEachLine) } }
+        finally { if (finallyStdinClose) stdinClose() }
+
     @OptIn(DelicateKommandApi::class)
     override val stdout: Flow<String> = stdFlow(::stdoutReadLine, ::stdoutClose)
 
