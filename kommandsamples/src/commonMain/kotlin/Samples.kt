@@ -14,10 +14,19 @@ data class TypedSample<K: Kommand, In, Out, Err>(
     val expectedLineRaw: String? = null,
 )
 
+data class ReducedSample<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
+    val reducedKommand: ReducedKommand<K, In, Out, Err, TK, ReducedOut>,
+    val expectedLineRaw: String? = null,
+)
+
 internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
 
 internal infix fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.ts(expectedLineRaw: String?) =
     TypedSample(this, expectedLineRaw = expectedLineRaw)
+
+internal infix fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>
+        ReducedKommand<K, In, Out, Err, TK, ReducedOut>.rs(expectedLineRaw: String?) =
+    ReducedSample(this, expectedLineRaw = expectedLineRaw)
 
 
 data object Samples {

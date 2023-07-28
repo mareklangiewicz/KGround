@@ -1,7 +1,6 @@
 package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.kommand.CliPlatform
 
 data object GhSamples {
     val help =
@@ -50,13 +49,14 @@ data object GhSamples {
 
     /** Not providing fake secret as input stream when starting this kommand will ask for it interactively */
     val secretSetFakeSecretInAbcdK =
-        ghSecretSet("FAKE_SECRET", "langara/AbcdK") s
+        ghSecretSet("FAKE_SECRET", repoPath = "langara/AbcdK") s
                 "gh secret set FAKE_SECRET --repo langara/AbcdK"
 
-    @Deprecated("FIXME")
-    val execs = listOf(
-        CliPlatform::ghSecretListExec,
-        CliPlatform::ghSecretSetExec,
-        CliPlatform::ghSecretSetFromFileExec
-    )
+    val secretSetConcreteFakeSecret66InAbcdK =
+        ghSecretSet(secretName = "FAKE_SECRET_66", secretValue = "concretevalue66", repoPath = "langara/AbcdK") rs
+                "gh secret set FAKE_SECRET_66 --repo langara/AbcdK"
+
+    val secretSetConcreteFakeSecret67InAbcdK =
+        ghSecretSet(secretName = "FAKE_SECRET_67", secretValue = "concretevalue67", repoPath = "langara/AbcdK") rs
+                "gh secret set FAKE_SECRET_67 --repo langara/AbcdK"
 }

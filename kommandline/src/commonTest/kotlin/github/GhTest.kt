@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.kommand.github
 
-import pl.mareklangiewicz.kommand.checkWithUser
+import pl.mareklangiewicz.kommand.*
 import kotlin.test.Test
 
 class GhTest {
@@ -13,6 +13,6 @@ class GhTest {
         .checkWithUser("gh secret list --repo langara/AbcdK")
 
     // I don't provide fake secret as input stream when starting this kommand, so it will ask me interactively
-    @Test fun testGhSecretSetFakeForAbcdK() = ghSecretSet("FAKE_SECRET", "langara/AbcdK")
+    @Test fun testGhSecretSetFakeForAbcdK() = ghSecretSet("FAKE_SECRET", repoPath = "langara/AbcdK")
         .checkWithUser("gh secret set FAKE_SECRET --repo langara/AbcdK")
 }

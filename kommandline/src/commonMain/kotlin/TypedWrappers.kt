@@ -76,6 +76,11 @@ fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK
     reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ) = ReducedKommand(this, reduce)
 
+fun <K: Kommand, ReducedOut> K.reduced(
+    reduce: suspend TypedExecProcess<FlowCollector<String>, Flow<String>, Flow<Nothing>>.() -> ReducedOut,
+): ReducedKommand<K, FlowCollector<String>, Flow<String>, Flow<Nothing>, TypedKommand<K, FlowCollector<String>, Flow<String>, Flow<Nothing>>, ReducedOut> =
+    typed(stdinRetype = { this }) { this }.reduced(reduce)
+
 suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> CliPlatform.exec(
     kommand: ReducedKommand<K, In, Out, Err, TK, ReducedOut>,
     dir: String? = null,
