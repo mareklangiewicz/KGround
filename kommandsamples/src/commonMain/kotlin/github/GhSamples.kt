@@ -71,4 +71,16 @@ data object GhSamples {
     val repoViewKotlinXCoroutinesDevelopWeb =
         ghRepoView("Kotlin/kotlinx.coroutines", branch = "develop", web = true) s
                 "gh repo view Kotlin/kotlinx.coroutines --branch develop --web"
+
+    val repoList=
+        ghRepoList() s
+                "gh repo list"
+
+    val repoListRomanElizarov=
+        ghRepoList("elizarov") s
+                "gh repo list elizarov"
+
+    val repoListLangaraKotlinNotForksLimitBig=
+        ghRepoList("langara", limit = 900, onlyLanguage = "kotlin", onlyNotForks = true) s
+                "gh repo list langara --limit 900 --language kotlin --source"
 }

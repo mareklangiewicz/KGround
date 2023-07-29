@@ -11,6 +11,9 @@ val Any?.unit get() = Unit
 infix fun <T: Any> List<T>.plusIfNN(element: T?) = if (element == null) this else this + element
 infix fun <T: Any> List<T>.prependIfNN(element: T?) = if (element == null) this else listOf(element) + this
 
+fun Any.classSimpleWords() = this::class.simpleName!!
+    .split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
+
 
 fun Iterator<*>.logEach(logln: (Any?) -> Unit = ::println) = forEach(logln)
 
