@@ -39,6 +39,21 @@ fun ghSecretDelete(
 fun ghSecretList(repoPath: String? = null, init: GhCmd.SecretList.() -> Unit = {}) =
     gh(GhCmd.SecretList()) { repoPath?.let { -Repo(it) }; init() }
 
+/**
+ * Display the description and the README of a GitHub repository.
+ * With no argument, the repository for the current directory is displayed.
+ * @param repoPath Select another repository using the [HOST/]OWNER/REPO format.
+ * @param branch Non-null means: View a specific branch of the repository.
+ * @param web True means open repo in browser instead of printing info to stdout.
+ */
+fun ghRepoView(
+    repoPath: String? = null,
+    branch: String? = null,
+    web: Boolean = false,
+    init: GhCmd.RepoView.() -> Unit = {}
+) =
+    gh(GhCmd.RepoView()) { repoPath?.let { +it }; branch?.let { -Branch(it) }; if (web) -Web; init() }
+
 fun ghHelp(init: GhCmd.Help.() -> Unit = {}) =
     gh(GhCmd.Help(), init)
 
@@ -79,8 +94,9 @@ abstract class GhCmd<KOptGhT: KOptGh>: Kommand {
     class Version: GhCmd<KOptGhCommon>()
     class Status: GhCmd<KOptGhStatus>()
     class SecretList: GhCmd<KOptGhSecretList>()
-    class SecretSet(val secretName: String? = null): GhCmd<KOptGhSecretSet>()
-    class SecretDelete(val secretName: String? = null): GhCmd<KOptGhSecretDelete>()
+    class SecretSet: GhCmd<KOptGhSecretSet>()
+    class SecretDelete: GhCmd<KOptGhSecretDelete>()
+    class RepoView: GhCmd<KOptGhRepoView>()
 }
 
 
@@ -94,6 +110,7 @@ abstract class GhOpt(val arg: String? = null): KOptGh {
 
 interface KOptGh: KOpt
 interface KOptGhStatus: KOptGh
+interface KOptGhRepoView: KOptGh
 interface KOptGhSecretList: KOptGh
 interface KOptGhSecretSet: KOptGh
 interface KOptGhSecretDelete: KOptGh
@@ -129,3 +146,7 @@ data class Visibility(val vis: String): GhOpt(vis), KOptGhSecretSet
 data class Exclude(val repos: List<String>): GhOpt(repos.joinToString(",")), KOptGhStatus {
     constructor(vararg repo: String): this(repo.toList())
 }
+
+data object Web: GhOpt(), KOptGhRepoView
+
+data class Branch(val name: String): GhOpt(name), KOptGhRepoView

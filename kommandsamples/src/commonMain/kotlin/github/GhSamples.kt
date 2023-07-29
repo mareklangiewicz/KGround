@@ -63,4 +63,12 @@ data object GhSamples {
     val secretDeleteFakeSecretInAbcdK =
         ghSecretDelete(secretName = "FAKE_SECRET", repoPath = "langara/AbcdK") s
                 "gh secret delete FAKE_SECRET --repo langara/AbcdK"
+
+    val repoViewAbcdKWeb =
+        ghRepoView("langara/AbcdK", web = true) s
+                "gh repo view langara/AbcdK --web"
+
+    val repoViewKotlinXCoroutinesDevelopWeb =
+        ghRepoView("Kotlin/kotlinx.coroutines", branch = "develop", web = true) s
+                "gh repo view Kotlin/kotlinx.coroutines --branch develop --web"
 }
