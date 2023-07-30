@@ -6,9 +6,13 @@ import pl.mareklangiewicz.utils.*
 
 
 plugins {
-    plugAll(plugs.KotlinJvm, plugs.MavenPublish)
-    id("io.ktor.plugin") version "2.3.0" // FIXME: add to DepsKt
-    id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-388" // FIXME: add to DepsKt
+    plugAll(plugs.KotlinJvm, plugs.MavenPublish, plugs.Signing)
+
+    // FIXME: add to DepsKt; https://plugins.gradle.org/plugin/io.ktor.plugin
+    id("io.ktor.plugin") version "2.3.2"
+
+    // FIXME: add to DepsKt; https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jupyter.api
+    id("org.jetbrains.kotlin.jupyter.api") version "0.12.0-33"
 }
 
 defaultBuildTemplateForJvmLib(

@@ -204,3 +204,6 @@ data class Limit(val max: Int): GhOpt(max.toString()), KOptGhRepoList
 
 data class Topic(val name: String): GhOpt(name), KOptGhRepoList
 
+// TODO NOW: support this
+data class Json(val fields: String): GhOpt(fields), KOptGhRepoList // TODO NOW: add to other commands too!!
+data class Template(val template: String): GhOpt(template), KOptGhRepoList // TODO NOW: add to other commands too!!
