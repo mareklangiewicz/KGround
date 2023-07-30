@@ -17,8 +17,8 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.42" // https://plugins.gradle.org/search?term=mareklangiewicz
-    id("com.gradle.enterprise") version "3.13.4" // https://docs.gradle.com/enterprise/gradle-plugin/
+    id("pl.mareklangiewicz.deps.settings") version "0.2.45" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("com.gradle.enterprise") version "3.14.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
 gradleEnterprise {
@@ -34,6 +34,7 @@ rootProject.name = "KommandLine"
 
 include(":kommandline")
 include(":kommandsamples")
+include(":kommandjupyter")
 
 
 // FIXME_someday: doesn't really work. And seems like kotlin.mpp.import.enableKgpDependencyResolution=true doesn't help

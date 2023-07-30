@@ -6,4 +6,5 @@
 /kommandline/build
 /kommandsamples/build
 /kommandsamples/src/test/kotlin/demos/*REPL.kt
+/kommandjupyter/build
 my.gradle.log
