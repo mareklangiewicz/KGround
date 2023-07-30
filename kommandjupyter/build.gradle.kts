@@ -6,7 +6,7 @@ import pl.mareklangiewicz.utils.*
 
 
 plugins {
-    plugAll(plugs.KotlinJvm, plugs.MavenPublish, plugs.Signing)
+    plugAll(plugs.KotlinMulti, plugs.MavenPublish, plugs.Signing)
 
     // FIXME: add to DepsKt; https://plugins.gradle.org/plugin/io.ktor.plugin
     id("io.ktor.plugin") version "2.3.2"
@@ -15,7 +15,8 @@ plugins {
     id("org.jetbrains.kotlin.jupyter.api") version "0.12.0-33"
 }
 
-defaultBuildTemplateForJvmLib(
+defaultBuildTemplateForMppLib(
+    withJs = false,
     withTestJUnit5 = false,
     withTestUSpekX = false,
 ) {
@@ -216,3 +217,121 @@ fun Project.defaultBuildTemplateForJvmLib(
 }
 
 // endregion [Kotlin Module Build Template]
+
+// region [MPP Module Build Template]
+
+/** Only for very standard small libs. In most cases it's better to not use this function. */
+fun Project.defaultBuildTemplateForMppLib(
+    details: LibDetails = rootExtLibDetails,
+    withJvm: Boolean = true,
+    withJs: Boolean = true,
+    withNativeLinux64: Boolean = false,
+    withKotlinxHtml: Boolean = false,
+    withComposeJbDevRepo: Boolean = false,
+    withComposeCompilerAndroidxDevRepo: Boolean = false,
+    withTestJUnit4: Boolean = false,
+    withTestJUnit5: Boolean = true,
+    withTestUSpekX: Boolean = true,
+    addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+) {
+    repositories {
+        defaultRepos(
+            withKotlinxHtml = withKotlinxHtml,
+            withComposeJbDev = withComposeJbDevRepo,
+            withComposeCompilerAndroidxDev = withComposeCompilerAndroidxDevRepo,
+        )
+    }
+    defaultGroupAndVerAndDescription(details)
+    kotlin {
+        allDefault(
+            withJvm,
+            withJs,
+            withNativeLinux64,
+            withKotlinxHtml,
+            withTestJUnit4,
+            withTestJUnit5,
+            withTestUSpekX,
+            addCommonMainDependencies
+        )
+    }
+    configurations.checkVerSync()
+    tasks.defaultKotlinCompileOptions()
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    if (plugins.hasPlugin("maven-publish")) {
+        defaultPublishing(details)
+        if (plugins.hasPlugin("signing")) defaultSigning()
+        else println("MPP Module ${name}: signing disabled")
+    } else println("MPP Module ${name}: publishing (and signing) disabled")
+}
+
+/** Only for very standard small libs. In most cases it's better to not use this function. */
+@Suppress("UNUSED_VARIABLE")
+fun KotlinMultiplatformExtension.allDefault(
+    withJvm: Boolean = true,
+    withJs: Boolean = true,
+    withNativeLinux64: Boolean = false,
+    withKotlinxHtml: Boolean = false,
+    withTestJUnit4: Boolean = false,
+    withTestJUnit5: Boolean = true,
+    withTestUSpekX: Boolean = true,
+    addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+) {
+    if (withJvm) jvm()
+    if (withJs) jsDefault()
+    if (withNativeLinux64) linuxX64()
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                if (withKotlinxHtml) implementation(KotlinX.html)
+                addCommonMainDependencies()
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                if (withTestUSpekX) implementation(Langiewicz.uspekx)
+            }
+        }
+        if (withJvm) {
+            val jvmTest by getting {
+                dependencies {
+                    if (withTestJUnit4) implementation(JUnit.junit)
+                    if (withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+                    if (withTestUSpekX) {
+                        implementation(Langiewicz.uspekx)
+                        if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+                        if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+                    }
+                }
+            }
+        }
+        if (withNativeLinux64) {
+            val linuxX64Main by getting
+            val linuxX64Test by getting
+        }
+    }
+}
+
+
+fun KotlinMultiplatformExtension.jsDefault(
+    withBrowser: Boolean = true,
+    withNode: Boolean = false,
+    testWithChrome: Boolean = true,
+    testHeadless: Boolean = true,
+) {
+    js(IR) {
+        if (withBrowser) browser {
+            testTask {
+                useKarma {
+                    when (testWithChrome to testHeadless) {
+                        true to true -> useChromeHeadless()
+                        true to false -> useChrome()
+                    }
+                }
+            }
+        }
+        if (withNode) nodejs()
+    }
+}
+
+// endregion [MPP Module Build Template]
