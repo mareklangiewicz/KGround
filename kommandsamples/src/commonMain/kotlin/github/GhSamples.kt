@@ -80,7 +80,19 @@ data object GhSamples {
         ghRepoList("elizarov") s
                 "gh repo list elizarov"
 
-    val repoListLangaraKotlinNotForksLimitBig=
-        ghRepoList("langara", limit = 900, onlyLanguage = "kotlin", onlyNotForks = true) s
-                "gh repo list langara --limit 900 --language kotlin --source"
+    val repoListAvailableJsonFields=
+        ghRepoList { -Json() } s
+                "gh repo list --json"
+
+    val repoListNamesLangaraKotlinNotForksLimitBig=
+        ghRepoList(
+            "langara",
+            limit = 900,
+            onlyLanguage = "kotlin",
+            onlyNotForks = true
+        ) {
+            -Json("name")
+            -Jq(".[].name")
+        } s
+                "gh repo list langara --limit 900 --language kotlin --source --json name --jq .[].name"
 }

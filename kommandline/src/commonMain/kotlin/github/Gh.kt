@@ -154,6 +154,7 @@ interface KOptGh: KOpt
 interface KOptGhStatus: KOptGh
 interface KOptGhRepoView: KOptGh
 interface KOptGhRepoList: KOptGh
+interface KOptGhRepo: KOptGh, KOptGhRepoList, KOptGhRepoView
 interface KOptGhSecretList: KOptGh
 interface KOptGhSecretSet: KOptGh
 interface KOptGhSecretDelete: KOptGh
@@ -204,6 +205,7 @@ data class Limit(val max: Int): GhOpt(max.toString()), KOptGhRepoList
 
 data class Topic(val name: String): GhOpt(name), KOptGhRepoList
 
-// TODO NOW: support this
-data class Json(val fields: String): GhOpt(fields), KOptGhRepoList // TODO NOW: add to other commands too!!
-data class Template(val template: String): GhOpt(template), KOptGhRepoList // TODO NOW: add to other commands too!!
+// null means just list available json fields, no actual data
+data class Json(val fields: String? = null): GhOpt(fields), KOptGhRepo
+data class Jq(val expression: String): GhOpt(expression), KOptGhRepo
+data class Template(val template: String): GhOpt(template), KOptGhRepo
