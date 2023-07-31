@@ -6,13 +6,13 @@ import pl.mareklangiewicz.utils.*
 
 
 plugins {
-    plugAll(plugs.KotlinMulti, plugs.MavenPublish, plugs.Signing)
-
-    // FIXME: add to DepsKt; https://plugins.gradle.org/plugin/io.ktor.plugin
-    id("io.ktor.plugin") version "2.3.2"
-
-    // FIXME: add to DepsKt; https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jupyter.api
-    id("org.jetbrains.kotlin.jupyter.api") version "0.12.0-33"
+    plugAll(
+        plugs.KotlinMulti,
+        plugs.MavenPublish,
+        plugs.Signing,
+        plugs.Ktor,
+        plugs.KotlinJupyter,
+    )
 }
 
 defaultBuildTemplateForMppLib(
@@ -22,6 +22,12 @@ defaultBuildTemplateForMppLib(
 ) {
     api(project(":kommandline"))
     api(project(":kommandsamples"))
+}
+
+kotlin {
+    jvm {
+        withJava() // https://youtrack.jetbrains.com/issue/KT-45038
+    }
 }
 
 application {

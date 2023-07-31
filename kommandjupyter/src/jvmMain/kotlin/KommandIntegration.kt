@@ -12,6 +12,8 @@ internal class KommandIntegration: JupyterIntegration() {
 //        render<BlaBla> { HTML("<p><b>bla1: </b>${it.bla1}</p><p><b>bla2: </b>${it.bla2}</p>") }
         import("kotlinx.coroutines.*")
         import("kotlinx.coroutines.flow.*")
+        // FIXME_later: refactor packages, so only high-level functions are imported automatically, and delicate api are NOT.
+        //   maybe high-level fun stuff up to pl.mareklangiewicz.kommand package??
         import("pl.mareklangiewicz.kommand.*")
         import("pl.mareklangiewicz.kommand.core.*")
         import("pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS")
