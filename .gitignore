@@ -7,4 +7,5 @@
 /kommandsamples/build
 /kommandsamples/src/test/kotlin/demos/*REPL.kt
 /kommandjupyter/build
+/kommandjupyter/src/jvmMain/kotlin/KommandPlayground.kt
 my.gradle.log
