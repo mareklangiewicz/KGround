@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand.github
 
+import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.samples.*
 
 data object GhSamples {
@@ -84,15 +86,25 @@ data object GhSamples {
         ghRepoList { -Json() } s
                 "gh repo list --json"
 
-    val repoListNamesLangaraKotlinNotForksLimitBig=
+    val repoListNamesLangaraKotlinPublicNotForksLimitBig=
         ghRepoList(
             "langara",
             limit = 900,
             onlyLanguage = "kotlin",
-            onlyNotForks = true
-        ) {
-            -Json("name")
-            -Jq(".[].name")
-        } s
-                "gh repo list langara --limit 900 --language kotlin --source --json name --jq .[].name"
+            onlyNotForks = true,
+            onlyPublic = true,
+        ).outputFields("name", "url") s
+                "gh repo list langara --limit 900 --language kotlin --source --visibility public --json name,url --jq .[]|.name,.url"
+
+    val repoListNLKPNFLBAsMarkdownLinks =
+        repoListNamesLangaraKotlinPublicNotForksLimitBig
+            .kommand
+            .reduced {
+                stdout
+                    .toList()
+                    .windowed(2, 2) { (name, url) -> "[$name]($url)" }
+                    .sorted()
+                    .joinToString("\n") { "- $it" }
+            } rs
+                repoListNamesLangaraKotlinPublicNotForksLimitBig.expectedLineRaw
 }

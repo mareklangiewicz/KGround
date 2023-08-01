@@ -31,7 +31,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("pl.mareklangiewicz.kommand.KommandJupyterMainKt")
+    mainClass.set("pl.mareklangiewicz.kommand.playground.KommandPlaygroundKt")
 }
 
 tasks.processJupyterApiResources {

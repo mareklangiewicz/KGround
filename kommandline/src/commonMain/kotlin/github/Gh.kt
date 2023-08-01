@@ -78,7 +78,7 @@ data class Visibility(val vis: String): GhOpt(vis), KOptGhSecretSet, KOptGhRepoL
 
 /** @param repos list of repos to exclude in owner/name format */
 data class Exclude(val repos: List<String>): GhOpt(repos.joinToString(",")), KOptGhStatus {
-    constructor(vararg repo: String): this(repo.toList())
+    constructor(vararg repos: String): this(repos.toList())
 }
 
 data object Web: GhOpt(), KOptGhRepoView
@@ -96,7 +96,15 @@ data class Limit(val max: Int): GhOpt(max.toString()), KOptGhRepoList
 
 data class Topic(val name: String): GhOpt(name), KOptGhRepoList
 
-// null means just list available json fields, no actual data
-data class Json(val fields: String? = null): GhOpt(fields), KOptGhRepo
+/**
+ * [gh help formatting](https://cli.github.com/manual/gh_help_formatting)
+ * @param fields JSON fields separated by comma. null just prints available fields, no actual data */
+data class Json(val fields: String? = null): GhOpt(fields), KOptGhRepo {
+    constructor(vararg fields: String) : this(fields.joinToString(",").takeIf { it.isNotEmpty() })
+}
+
+/** [jq lang manual](https://jqlang.github.io/jq/manual/v1.6/) */
 data class Jq(val expression: String): GhOpt(expression), KOptGhRepo
+
+/** [go templates](https://pkg.go.dev/text/template) */
 data class Template(val template: String): GhOpt(template), KOptGhRepo

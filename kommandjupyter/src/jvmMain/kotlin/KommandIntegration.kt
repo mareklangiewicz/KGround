@@ -31,10 +31,7 @@ fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }
 
 
 /**
- * Kinda like .exec, but less strict/explicit, because here in notebook we are in more local "experimental" context.
- *
- * WARNING: Current impl first wait for process to read whole input (blocking) and then starts to consume output.
- * If it deadlocks, that is why.. See CliPlatform.execonsume - same problem
+ * Kinda like .exec, but less strict/explicit, because in notebooks we are in more local "experimental" context.
  */
 @OptIn(DelicateKommandApi::class, DelicateCoroutinesApi::class)
 fun Kommand.x(
@@ -73,3 +70,19 @@ fun Kommand.x(
         .awaitResult() // inLinesFlow already used
         .unwrap(expectedExit, expectedErr)
 }
+
+fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(
+    platform: CliPlatform = SYS,
+    dir: String? = null,
+) = platform.start(this, dir)
+
+
+suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.x(
+    platform: CliPlatform = SYS,
+    dir: String? = null,
+): ReducedOut = platform.exec(this, dir = dir)
+
+fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.xblocking(
+    platform: CliPlatform = SYS,
+    dir: String? = null,
+): ReducedOut = runBlocking { x(platform, dir) }

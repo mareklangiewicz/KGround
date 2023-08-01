@@ -45,3 +45,12 @@ fun ghRepoList(
         init()
     }
 
+/**
+ * For each repo, each output field is returned in separate line.
+ * If no fields are provided, just output available fields. No actual data.
+ */
+fun GhRepoList.outputFields(vararg fields: String) = apply {
+    -Json(*fields)
+    fields.isEmpty() && return@apply
+    -Jq(fields.joinToString(",", prefix = ".[]|") { ".$it" })
+}
