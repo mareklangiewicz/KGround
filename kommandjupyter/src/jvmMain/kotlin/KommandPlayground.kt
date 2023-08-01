@@ -1,8 +1,6 @@
 package pl.mareklangiewicz.kommand.playground
 
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.core.*
 
 
