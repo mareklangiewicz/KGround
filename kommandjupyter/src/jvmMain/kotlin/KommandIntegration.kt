@@ -24,17 +24,16 @@ internal class KommandIntegration: JupyterIntegration() {
 
 
 @OptIn(ExperimentalTime::class)
-fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }
+suspend fun Flow<*>.logm() = logEachWithMillis()
 
-
-// I don't want too many shortcut names inside kommand itself, but here it's fine
+fun Flow<*>.logb() = logEachWithMillisBlocking()
 
 
 /**
  * Kinda like .exec, but less strict/explicit, because in notebooks we are in more local "experimental" context.
+ * I don't want too many shortcut names inside kommandline itself, but here it's fine.
  */
-@OptIn(DelicateKommandApi::class, DelicateCoroutinesApi::class)
-fun Kommand.x(
+suspend fun Kommand.x(
     platform: CliPlatform = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
@@ -49,7 +48,7 @@ fun Kommand.x(
     expectedExit: Int? = 0,
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
     outLinesCollector: FlowCollector<String>? = null,
-): List<String> = runBlocking {
+): List<String> = coroutineScope {
     require(platform.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
     require(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
     require(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
@@ -60,14 +59,16 @@ fun Kommand.x(
         outFileAppend = outFileAppend,
         errToOut = errToOut,
         errFile = errFile,
-        errFileAppend = errFileAppend
+        errFileAppend = errFileAppend,
     )
     val inJob = inLineS?.let { launch { eprocess.stdin.collect(it) }}
+    // Note, Have to start pushing to stdin before collecting stdout,
+    // because many commands wait for stdin before outputting data.
     val outJob = outLinesCollector?.let { eprocess.stdout.onEach(it::emit).launchIn(this) }
     inJob?.join()
     outJob?.join()
     eprocess
-        .awaitResult() // inLinesFlow already used
+        .awaitResult() // inLineS already used
         .unwrap(expectedExit, expectedErr)
 }
 
@@ -82,7 +83,51 @@ suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, Reduce
     dir: String? = null,
 ): ReducedOut = platform.exec(this, dir = dir)
 
-fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.xblocking(
+
+
+
+
+
+/**
+ * Blocking flavor of fun Kommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
+ * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
+ */
+fun Kommand.xb(
+    platform: CliPlatform = SYS,
+    dir: String? = null,
+    vararg useNamedArgs: Unit,
+    inContent: String? = null,
+    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+    inFile: String? = null,
+    outFile: String? = null,
+    outFileAppend: Boolean = false,
+    errToOut: Boolean = false,
+    errFile: String? = null,
+    errFileAppend: Boolean = false,
+    expectedExit: Int? = 0,
+    expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
+    outLinesCollector: FlowCollector<String>? = null,
+): List<String> = runBlocking { x(
+    platform,
+    dir,
+    inContent = inContent,
+    inLineS = inLineS,
+    inFile = inFile,
+    outFile = outFile,
+    outFileAppend = outFileAppend,
+    errToOut = errToOut,
+    errFile = errFile,
+    errFileAppend = errFileAppend,
+    expectedExit = expectedExit,
+    expectedErr = expectedErr,
+    outLinesCollector = outLinesCollector,
+) }
+
+/**
+ * Blocking flavor of fun ReducedKommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
+ * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
+ */
+fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.xb(
     platform: CliPlatform = SYS,
     dir: String? = null,
 ): ReducedOut = runBlocking { x(platform, dir) }

@@ -6,7 +6,7 @@ fun CliPlatform.isKommandAvailable(kommand: Kommand) = isCommandAvailable(komman
 
 fun CliPlatform.isCommandAvailable(command: String) = start(which(command)).waitForExit() == 0
 
-fun CliPlatform.whichOneExec(command: String) = which(command).exec().firstOrNull()
+fun CliPlatform.whichOneExec(command: String) = which(command).execb(this).firstOrNull()
 
 fun which(vararg commands: String, all: Boolean = false) =
     which { if (all) -WhichOpt.All; for (c in commands) +c }

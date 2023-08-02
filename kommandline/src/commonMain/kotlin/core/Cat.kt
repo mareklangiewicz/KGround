@@ -6,11 +6,11 @@ import pl.mareklangiewicz.kommand.*
 // TODO_someday: move head/tail so separate files and create more specific kommand data classes
 
 fun CliPlatform.readFileHeadExec(path: String, nrLines: Int = 10) =
-    kommand("head", "-n", "$nrLines", path).exec()
+    kommand("head", "-n", "$nrLines", path).execb(this)
 fun CliPlatform.readFileFirstLineExec(path: String) =
     readFileHeadExec(path, 1).single()
 fun CliPlatform.readFileTailExec(path: String, nrLines: Int = 10) =
-    kommand("tail", "-n", "$nrLines", path).exec()
+    kommand("tail", "-n", "$nrLines", path).execb(this)
 fun CliPlatform.readFileLastLineExec(path: String) =
     readFileTailExec(path, 1).single()
 
@@ -20,7 +20,7 @@ fun CliPlatform.readFileLastLineExec(path: String) =
  * If singleLine is true and the file contains more or less than one line, it throws runtime exception.
  * It should never return just part of the file.
  */
-fun CliPlatform.readFileWithCatExec(file: String, singleLine: Boolean = false): String = cat { +file }.exec().run {
+fun CliPlatform.readFileWithCatExec(file: String, singleLine: Boolean = false): String = cat { +file }.execb(this).run {
     if (singleLine) single() else joinToString("\n")
 }
 

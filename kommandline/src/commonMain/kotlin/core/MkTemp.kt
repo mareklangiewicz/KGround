@@ -5,7 +5,7 @@ import pl.mareklangiewicz.kommand.*
 fun mktemp(template: String? = null, init: MkTemp.() -> Unit = {}) = MkTemp(template).apply(init)
 
 fun CliPlatform.mktempExec(prefix: String = "tmp.", suffix: String = ".tmp") =
-    mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}").exec().single()
+    mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}").execb(this).single()
 
 data class MkTemp(
     var template: String? = null,

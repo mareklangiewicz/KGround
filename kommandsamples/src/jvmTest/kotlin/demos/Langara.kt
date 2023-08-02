@@ -29,24 +29,24 @@ class Langara {
 
     @Test fun demo_repl() = idemo { LangaraREPL() }
 
-    @Test fun demo_htop() = idemo { gnometerm(kommand("htop")).exec() }
+    @Test fun demo_htop() = idemo { gnometerm(kommand("htop")).execb(this) }
 
-    @Test fun demo_ps() = idemo { gnometerm(bash("ps -e | grep " + askEntry("find process"), pause = true)).exec() }
+    @Test fun demo_ps() = idemo { gnometerm(bash("ps -e | grep " + askEntry("find process"), pause = true)).execb(this) }
 
-    @Test fun demo_man() = idemo { gnometerm(man { +askEntry("manual page for") }).exec() }
+    @Test fun demo_man() = idemo { gnometerm(man { +askEntry("manual page for") }).execb(this) }
 
     @Test fun demo_ideap() = idemo {
-        ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.exec()
+        ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.execb(this)
     }
 
     @Test fun demo_bash_export() = idemo {
         bashGetExportsToFileExec(tmpNotesFile)
-        ideap { +tmpNotesFile }.exec()
+        ideap { +tmpNotesFile }.execb(this)
     }
 
     @Test fun demo_xclip() = idemo {
-        bash("xclip -o > $tmpNotesFile").exec() // FIXME_later: do it with kotlin instead of bash script
-        ideap { +tmpNotesFile }.exec()
+        bash("xclip -o > $tmpNotesFile").execb(this) // FIXME_later: do it with kotlin instead of bash script
+        ideap { +tmpNotesFile }.execb(this)
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
@@ -78,8 +78,8 @@ class Langara {
     @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().loglns()
 
     @Test fun experiment() = idemo {
-        val ideaEnabled = bash("ps aux").exec().any { it.lowercase().contains("idea") }
-        if (ideaEnabled) ideap { +tmpNotesFile }.exec() else gvim(tmpNotesFile).exec()
+        val ideaEnabled = bash("ps aux").execb(this).any { it.lowercase().contains("idea") }
+        if (ideaEnabled) ideap { +tmpNotesFile }.execb(this) else gvim(tmpNotesFile).execb(this)
     }
 }
 

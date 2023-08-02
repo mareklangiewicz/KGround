@@ -1,12 +1,12 @@
 package pl.mareklangiewicz.kommand.gnome
 
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.action
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.help
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.launch
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listactions
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.listapps
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import pl.mareklangiewicz.kommand.checkWithUser
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -21,9 +21,9 @@ class GnomeAppTest {
 
     @Ignore // jitpack
     @Test fun testGnomeAppListAllAppActions() = SYS.run {
-        gnomeapp(listapps).exec().forEach {
+        gnomeapp(listapps).execb(this).forEach {
             println("Application $it:")
-            gnomeapp(listactions(it)).exec().forEach {
+            gnomeapp(listactions(it)).execb(this).forEach {
                 println("   action: $it")
             }
         }

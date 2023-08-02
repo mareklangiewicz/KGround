@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
 fun CliPlatform.lsExec(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
-    ls(*paths, withHidden = withHidden, style = style).exec()
+    ls(*paths, withHidden = withHidden, style = style).execb(this)
 
 fun CliPlatform.lsRegFilesExec(dir: String, withHidden: Boolean = false) =
     lsExec(dir, withHidden = withHidden, style = SLASH).filter { !it.endsWith('/') }

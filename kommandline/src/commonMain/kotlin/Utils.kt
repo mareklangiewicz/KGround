@@ -1,10 +1,61 @@
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInGnomeTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import kotlin.time.*
+
+
+
+suspend fun CliPlatform.exec(
+    kommand: Kommand,
+    vararg useNamedArgs: Unit,
+    dir: String? = null,
+    inContent: String? = null,
+    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+    inFile: String? = null,
+    outFile: String? = null,
+): List<String> = coroutineScope {
+    require(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+    require(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
+    start(kommand, dir = dir, inFile = inFile, outFile = outFile)
+        .awaitResult(inLineS = inLineS)
+        .unwrap()
+}
+
+
+// TODO_someday: CliPlatform as context receiver
+suspend fun Kommand.exec(
+    platform: CliPlatform,
+    vararg useNamedArgs: Unit,
+    dir: String? = null,
+    inContent: String? = null,
+    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+    inFile: String? = null,
+    outFile: String? = null,
+): List<String> = platform.exec(this,
+    dir = dir,
+    inContent = inContent,
+    inLineS = inLineS,
+    inFile = inFile,
+    outFile = outFile,
+)
+
+// temporary hack
+expect fun Kommand.execb(
+    platform: CliPlatform,
+    vararg useNamedArgs: Unit,
+    dir: String? = null,
+    inContent: String? = null,
+    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+    inFile: String? = null,
+    outFile: String? = null,
+): List<String>
+
+
+
 
 val Any?.unit get() = Unit
 
@@ -53,6 +104,7 @@ suspend fun Flow<*>.onEachLogWithMillis(
     logln: (String) -> Unit = ::println,
 ) = onEachLog { logln(it.toStringWithMillis(mark)) }
 
+@OptIn(ExperimentalTime::class)
 suspend fun Flow<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println

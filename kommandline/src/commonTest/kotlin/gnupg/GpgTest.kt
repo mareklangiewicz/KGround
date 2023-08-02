@@ -23,13 +23,13 @@ class GpgTest {
         val encFile = "$inFile.enc"
         val decFile = "$inFile.dec"
         writeFileWithEchoExec("some plain text 667", outFile = inFile)
-        gpgEncryptPass("correct pass", inFile, encFile).exec()
-        gpgDecryptPass("correct pass", encFile, decFile).exec()
+        gpgEncryptPass("correct pass", inFile, encFile).execb(this)
+        gpgDecryptPass("correct pass", encFile, decFile).execb(this)
         val decrypted = readFileWithCatExec(decFile, singleLine = true)
         assertEquals("some plain text 667", decrypted)
         val errCode = start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
         assertEquals(2, errCode)
-        rm { +inFile; +encFile; +decFile }.exec()
+        rm { +inFile; +encFile; +decFile }.execb(this)
     }
 }
 

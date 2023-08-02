@@ -40,22 +40,6 @@ interface CliPlatform {
     // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
-    // TODO_someday: move it outside as Kommand extension with CliPlatform context receiver
-    fun Kommand.exec(
-        vararg useNamedArgs: Unit,
-        dir: String? = null,
-        inContent: String? = null,
-        inLines: Sequence<String>? = inContent?.lineSequence(),
-        inFile: String? = null,
-        outFile: String? = null,
-    ): List<String> = exec(this,
-        dir = dir,
-        inContent = inContent,
-        inLines = inLines,
-        inFile = inFile,
-        outFile = outFile,
-    )
-
     val lineEnd: String get() = "\n"
 
     val isJvm: Boolean get() = false
@@ -74,22 +58,6 @@ interface CliPlatform {
         val SYS = SysPlatform()
         val FAKE = FakePlatform()
     }
-}
-
-fun CliPlatform.exec(
-    kommand: Kommand,
-    vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inContent: String? = null,
-    inLines: Sequence<String>? = inContent?.lineSequence(),
-    inFile: String? = null,
-    outFile: String? = null,
-): List<String> {
-    require(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
-    require(inLines == null || inFile == null) { "Either inLines or inFile or none, but not both" }
-    return start(kommand, dir = dir, inFile = inFile, outFile = outFile)
-        .waitForResult(inLines = inLines)
-        .unwrap()
 }
 
 class FakePlatform(
@@ -288,6 +256,8 @@ suspend fun ExecProcess.awaitResult(
     inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow()
 ): ExecResult = coroutineScope {
     val inJob = inLineS?.let { launch { stdin.collect(it) } }
+    // Note: Have to start pushing to stdin before collecting stdout,
+    // because many commands wait for stdin before outputting data.
     val outDeferred = async { stdout.catchStreamClosed().toList() }
     val errDeferred = async { stderr.catchStreamClosed().toList() }
     inJob?.join()

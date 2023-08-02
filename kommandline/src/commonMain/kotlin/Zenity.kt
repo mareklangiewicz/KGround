@@ -9,10 +9,10 @@ fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boole
     start(zenityAskIf(question, atitle)).waitForExit() == 0
 
 fun CliPlatform.zenityAskForPasswordExec(question: String = "Enter password", atitle: String? = null): String =
-    zenityAskForPassword(question, atitle).exec().single()
+    zenityAskForPassword(question, atitle).execb(this).single()
 
 fun CliPlatform.zenityAskForEntryExec(question: String, atitle: String? = null, suggested: String? = null): String =
-    zenityAskForEntry(question, atitle, suggested).exec().single()
+    zenityAskForEntry(question, atitle, suggested).execb(this).single()
 
 fun zenityAskIf(question: String, atitle: String? = null) = zenity(DialogType.question) {
     -text(question)

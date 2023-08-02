@@ -8,7 +8,7 @@ fun CliPlatform.sudoExec(k: Kommand, asUser: String? = null, inPass: String? = n
     sudo(k, *options) {
         asUser?.let { -SudoOpt.User(it) }
         inPass?.let { -SudoOpt.Stdin; -SudoOpt.Prompt("") }
-    }.exec(inContent = inPass)
+    }.execb(this, inContent = inPass)
 
 fun sudoEdit(file: String, asUser: String? = null) = sudo {
     -SudoOpt.Edit; asUser?.let { -SudoOpt.User(it) }; +file
