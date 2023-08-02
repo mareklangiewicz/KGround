@@ -40,7 +40,7 @@ fun CliPlatform.konfigInDir(
 
 private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = CliPlatform.SYS): IKonfig {
 
-    init { platform.run { mkdir { -parents; +dir }.execb(this) } }
+    init { mkdir { -parents; +dir }.execb(platform) }
 
     override fun get(key: String): String? = platform.tryToReadFileWithCatExec("$dir/$key")
 

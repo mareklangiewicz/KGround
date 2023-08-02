@@ -42,7 +42,14 @@ actual fun Kommand.execb(
     inLineS: Flow<String>?,
     inFile: String?,
     outFile: String?,
-) = execBlocking(platform)
+) = execBlocking(
+    platform,
+    dir = dir,
+    inContent = inContent,
+    inLineS = inLineS,
+    inFile = inFile,
+    outFile = outFile
+)
 
 
 fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }
