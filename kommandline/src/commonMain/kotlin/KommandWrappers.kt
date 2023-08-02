@@ -32,13 +32,18 @@ fun <K: Kommand, In, Out> K.typed(
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
 ): TypedKommand<K, In, Out, Flow<Nothing>> =
-    typed(stdinRetype, { map { error("Unexpected error: $it") } }, stderrToOut, stdoutRetype)
+    typed(stdinRetype, defaultOutRetypeAnyLineToUnexpectedError, stderrToOut, stdoutRetype)
+
+// these default retype algorithms/vals are defined here mostly for me to be able to compare when debugging/testing
+internal val defaultInRetypeToItSelf: StdinCollector.() -> StdinCollector = { this }
+internal val defaultOutRetypeToItSelf: Flow<String>.() -> Flow<String> = { this }
+internal val defaultOutRetypeAnyLineToUnexpectedError: Flow<String>.() -> Flow<Nothing> = { map { error("Unexpected: $it") } }
 
 fun <K: Kommand, Out> K.typed(
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
 ): TypedKommand<K, StdinCollector, Out, Flow<Nothing>> =
-    typed({ this }, stderrToOut, stdoutRetype)
+    typed(defaultInRetypeToItSelf, stderrToOut, stdoutRetype)
 
 class TypedExecProcess<In, Out, Err>(
     private val eprocess: ExecProcess,
@@ -80,5 +85,5 @@ fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK
 fun <K: Kommand, ReducedOut> K.reduced(
     reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<Nothing>>.() -> ReducedOut,
 ): ReducedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>, TypedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>>, ReducedOut> =
-    typed { this }.reduced(reduce)
+    typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(reduce)
 

@@ -52,6 +52,20 @@ expect fun Kommand.execb(
 ): List<String>
 
 
+// I'm leaving it here as deprecated, so user can always see when trying to do TypedKommand.exec,
+// that it's better to wrap it in ReducedKommand (or just use .start and handle TypedExecProcess by hand)
+@Deprecated("Use TypedKommand.reduced(...).exec(...)")
+suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, CollectedOut> TK
+    .exec(platform: CliPlatform, dir: String? = null, collectOut: suspend Out.() -> CollectedOut): CollectedOut {
+    require(stderrRetype == defaultOutRetypeAnyLineToUnexpectedError) {
+        "TypedKommand.exec doesn't work with customized stderr collection."
+    }
+    val tprocess = platform.start(this, dir)
+    val collectedOut = tprocess.stdout.collectOut()
+    val exit = tprocess.awaitExit()
+    check(exit == 0) { "Unexpected exit value: $exit" }
+    return collectedOut
+}
 
 @Deprecated("Use ReducedKommand.exec(CliPlatform, ...)")
 suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> CliPlatform.exec(
