@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlin.time.*
 
+@Deprecated("Use suspend fun Kommand.exec(...)")
 fun CliPlatform.execBlocking(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
@@ -17,6 +18,7 @@ fun CliPlatform.execBlocking(
 }
 
 // TODO_someday: CliPlatform as context receiver
+@Deprecated("Use suspend fun Kommand.exec(...)")
 fun Kommand.execBlocking(
     platform: CliPlatform,
     vararg useNamedArgs: Unit,
@@ -34,6 +36,7 @@ fun Kommand.execBlocking(
 )
 
 // temporary hack
+@Deprecated("Use suspend fun Kommand.exec(...)")
 actual fun Kommand.execb(
     platform: CliPlatform,
     vararg useNamedArgs: Unit,

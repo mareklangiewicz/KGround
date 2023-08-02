@@ -82,7 +82,3 @@ fun <K: Kommand, ReducedOut> K.reduced(
 ): ReducedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>, TypedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>>, ReducedOut> =
     typed { this }.reduced(reduce)
 
-suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> CliPlatform.exec(
-    kommand: ReducedKommand<K, In, Out, Err, TK, ReducedOut>,
-    dir: String? = null,
-): ReducedOut = kommand.reduce(start(kommand.typedKommand, dir))
