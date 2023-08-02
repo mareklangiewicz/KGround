@@ -86,25 +86,21 @@ data object GhSamples {
         ghRepoList { -Json() } s
                 "gh repo list --json"
 
-    val repoListNamesLangaraKotlinPublicNotForksLimitBig=
-        ghRepoList(
-            "langara",
-            limit = 900,
-            onlyLanguage = "kotlin",
-            onlyNotForks = true,
-            onlyPublic = true,
-        ).outputFields("name", "url") s
-                "gh repo list langara --limit 900 --language kotlin --source --visibility public --json name,url --jq .[]|.name,.url"
+    val langaraPublicRepoListNamesAndUrls =
+        ghLangaraPublicRepoList().outputFields("name", "url") s
+                "gh repo list langara --limit 1000 --language kotlin --source --visibility public --json name,url --jq .[]|.name,.url"
 
-    val repoListNLKPNFLBAsMarkdownLinks =
-        repoListNamesLangaraKotlinPublicNotForksLimitBig
-            .kommand
-            .reduced {
-                stdout
-                    .toList()
-                    .windowed(2, 2) { (name, url) -> "[$name]($url)" }
-                    .sorted()
-                    .joinToString("\n") { "- $it" }
-            } rs
-                repoListNamesLangaraKotlinPublicNotForksLimitBig.expectedLineRaw
+
+    val langaraPublicRepoMarkdownList =
+        ghLangaraPublicRepoList().reducedToMarkdownList() rs
+                langaraPublicRepoListNamesAndUrls.expectedLineRaw
+
 }
+
+fun ghLangaraPublicRepoList(limit: Int = 1000, language: String? = "kotlin") = ghRepoList(
+    "langara",
+    limit = limit,
+    onlyLanguage = language,
+    onlyNotForks = true,
+    onlyPublic = true,
+)

@@ -1,5 +1,8 @@
 package pl.mareklangiewicz.kommand.github
 
+import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.kommand.*
+
 /**
  * Display the description and the README of a GitHub repository.
  * With no argument, the repository for the current directory is displayed.
@@ -54,3 +57,17 @@ fun GhRepoList.outputFields(vararg fields: String) = apply {
     fields.isEmpty() && return@apply
     -Jq(fields.joinToString(",", prefix = ".[]|") { ".$it" })
 }
+
+/**
+ * @param listItemPrefix defines the type of Markdown list.
+ * Note: the "1. " Will give the numbered list with actual numbers when rendered (but not when just printed to console).
+ */
+fun GhRepoList.reducedToMarkdownList(listItemPrefix: String = "- ", sorted: Boolean = true) =
+    outputFields("name", "url").reduced {
+        stdout
+            .toList()
+            .windowed(2, 2) { (name, url) -> "[$name]($url)" }
+            .let { if (sorted) it.sorted() else it }
+            .joinToString("\n") { "$listItemPrefix$it" }
+    }
+

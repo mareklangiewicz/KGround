@@ -24,4 +24,15 @@ suspend fun playground() {
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")
     }
+    showLangaraRepoMarkdownListInIdeaP()
+}
+
+
+
+suspend fun showLangaraRepoMarkdownListInIdeaP() {
+    val reposMdContent = GhSamples.langaraPublicRepoMarkdownList.reducedKommand.x()
+    println(reposMdContent)
+    val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
+    echo(reposMdContent).x(outFile = tmpReposFileMd)
+    ideap { +tmpReposFileMd }.x()
 }
