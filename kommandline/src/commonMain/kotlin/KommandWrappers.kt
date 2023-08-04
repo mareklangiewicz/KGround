@@ -87,3 +87,24 @@ fun <K: Kommand, ReducedOut> K.reduced(
 ): ReducedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>, TypedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>>, ReducedOut> =
     typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(reduce)
 
+/**
+ * Another wrapper to use reduced kommands in an even simpler way - as normal suspending functions.
+ * And to hide complicated generic types from the user side (maybe it also helps IDE performance).
+ * Not sure if it's needed, or maybe I should simplify/hide types in ReducedKommand itself.
+ */
+@ExperimentalKommandApi
+class FunctionKommand<FunctionOut>(
+    private val reducedKommand: ReducedKommand<*, *, *, *, *, FunctionOut>,
+    private val dir: String? = null,
+    private val platform: CliPlatform = CliPlatform.SYS,
+): (suspend () -> FunctionOut) {
+    override suspend fun invoke(): FunctionOut = reducedKommand.exec(platform, dir)
+}
+
+@ExperimentalKommandApi
+fun <FunctionOut> ReducedKommand<*, *, *, *, *, FunctionOut>.toFun(
+    dir: String? = null,
+    platform: CliPlatform = CliPlatform.SYS,
+) = FunctionKommand(this, dir, platform)
+
+
