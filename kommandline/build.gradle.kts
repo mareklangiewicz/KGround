@@ -10,7 +10,7 @@ plugins {
 
 defaultBuildTemplateForMppLib {
     api(Langiewicz.upue)
-    api(KotlinX.coroutines_core)
+    api(KotlinX.coroutines_core.withVer("1.7.2")) // FIXME NOW: issue with 1.7.3
 }
 
 kotlin { js(IR) { nodejs() } }

@@ -42,21 +42,21 @@ fun Sequence<*>.logEachWithMillis(
 
 
 
-suspend fun Flow<*>.onEachLog(logln: (Any?) -> Unit = ::println) = onEach(logln)
+suspend fun <T> Flow<T>.onEachLog(logln: (T) -> Unit = ::println) = onEach(logln)
 
-suspend fun Flow<*>.logEach(logln: (Any?) -> Unit = ::println) = onEachLog(logln).collect()
+suspend fun <T> Flow<T>.logEach(logln: (T) -> Unit = ::println) = onEachLog(logln).collect()
 
 private fun Any?.toStringWithMillis(from: TimeMark, separator: String = " ") =
     "${from.elapsedNow().inWholeMilliseconds}$separator$this"
 
 @OptIn(ExperimentalTime::class)
-suspend fun Flow<*>.onEachLogWithMillis(
+suspend fun <T> Flow<T>.onEachLogWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
 ) = onEachLog { logln(it.toStringWithMillis(mark)) }
 
 @OptIn(ExperimentalTime::class)
-suspend fun Flow<*>.logEachWithMillis(
+suspend fun <T> Flow<T>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println
 ) = onEachLogWithMillis(mark, logln).collect()

@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 
 
@@ -24,7 +25,17 @@ suspend fun playground() {
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")
     }
-    showLangaraRepoMarkdownListInIdeaP()
+    prepareMyExcludeFolderInKotlinMultiProject()
+//    showLangaraRepoMarkdownListInIdeaP()
+}
+
+suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
+    val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).x()
+    writeToFileAndOpenInIdeaP(out)
+
+    // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
+    ideap("/home/marek/code/kotlin/kotlin.iml").x()
+    ideap("/home/marek/code/kotlin/.idea/kotlin.iml").x()
 }
 
 
@@ -33,6 +44,11 @@ suspend fun showLangaraRepoMarkdownListInIdeaP() {
     val reposMdContent = GhSamples.langaraPublicRepoMarkdownList.reducedKommand.x()
     println(reposMdContent)
     val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
-    echo(reposMdContent).x(outFile = tmpReposFileMd)
-    ideap { +tmpReposFileMd }.x()
+    writeToFileAndOpenInIdeaP(reposMdContent, tmpReposFileMd)
+}
+
+@DelicateKommandApi
+suspend fun writeToFileAndOpenInIdeaP(content: String, filePath: String = SYS.pathToUserTmp + "/tmp.notes") {
+    echo(content).x(outFile = filePath)
+    ideap(filePath).x()
 }

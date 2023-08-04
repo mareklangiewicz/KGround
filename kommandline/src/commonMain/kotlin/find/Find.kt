@@ -90,30 +90,30 @@ fun find(
     whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
-) = findTypeBaseName(
+) = findTypeNameBase(
     path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit
 )
 
-fun findWholeName(path: String, pattern: String, ignoreCase: Boolean = false) =
-    find(path, WholeName(pattern, ignoreCase))
+fun findNameFull(path: String, pattern: String, ignoreCase: Boolean = false) =
+    find(path, NameFull(pattern, ignoreCase))
 
-fun findBaseName(path: String, pattern: String, ignoreCase: Boolean = false) =
-    find(path, BaseName(pattern, ignoreCase))
+fun findNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
+    find(path, NameBase(pattern, ignoreCase))
 
-fun findRegularBaseName(path: String, pattern: String, ignoreCase: Boolean = false) =
-    findTypeBaseName(path, "f", pattern, ignoreCase)
+fun findRegularNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
+    findTypeNameBase(path, "f", pattern, ignoreCase)
 
-fun findDirBaseName(
+fun findDirNameBase(
     path: String,
     pattern: String,
     ignoreCase: Boolean = false,
     whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
-) = findTypeBaseName(path, "d", pattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
+) = findTypeNameBase(path, "d", pattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
 
 @OptIn(DelicateKommandApi::class)
-fun findTypeBaseName(
+fun findTypeNameBase(
     path: String,
     fileType: String,
     pattern: String,
@@ -122,8 +122,42 @@ fun findTypeBaseName(
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) =
-    find(path, BaseName(pattern, ignoreCase), FileType(fileType)) {
-        // BaseName is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
+    find(path, NameBase(pattern, ignoreCase), FileType(fileType)) {
+        // NameBase is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
+        when {
+            whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
+            whenFoundPrintF != null -> expr.add(ActPrintF(whenFoundPrintF))
+            whenFoundFirstQuit || whenFoundPrune -> expr.add(ActPrint)
+            // or else find will perform default printing
+        }
+        when {
+            whenFoundFirstQuit -> expr.add(ActQuit)
+            whenFoundPrune -> expr.add(ActPrune)
+        }
+    }
+
+@OptIn(DelicateKommandApi::class)
+fun findDirRegex(
+    path: String,
+    regexName: String,
+    ignoreCase: Boolean = false,
+    whenFoundPrintF: FindPrintFormat? = null,
+    whenFoundPrune: Boolean = false,
+    whenFoundFirstQuit: Boolean = false,
+) = findTypeRegex(path, "d", regexName, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
+
+@OptIn(DelicateKommandApi::class)
+fun findTypeRegex(
+    path: String,
+    fileType: String,
+    regexName: String,
+    ignoreCase: Boolean = false,
+    whenFoundPrintF: FindPrintFormat? = null,
+    whenFoundPrune: Boolean = false,
+    whenFoundFirstQuit: Boolean = false,
+) =
+    find(path, NameRegex(regexName, ignoreCase), FileType(fileType)) {
+        // NameRegex is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
         when {
             whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
             whenFoundPrintF != null -> expr.add(ActPrintF(whenFoundPrintF))
@@ -186,9 +220,9 @@ interface FindExpr: KOpt {
     /**
      * Changes the regular expression syntax understood by "-regex" and "-iregex" tests
      * which occur later on the command line.
-     * To see which regular expression types are known, use RegExType("help").
+     * To see which regular expression types are known, use RegexType("help").
      */
-    data class RegExType(val type: String): KOptS("regextype"), FindExpr
+    data class RegexType(val type: String): KOptS("regextype"), FindExpr
 
     /**
      * Turn warning messages on or off.  These warnings apply only to the command line usage,
@@ -335,7 +369,7 @@ interface FindExpr: KOpt {
         KOptS("i".iff(ignoreCase) + "lname", pattern), FindExpr
 
     /** Base of file name (leading directories removed) matches the given shell pattern */
-    data class BaseName(val pattern: String, val ignoreCase: Boolean = false):
+    data class NameBase(val pattern: String, val ignoreCase: Boolean = false):
         KOptS("i".iff(ignoreCase) + "name", pattern), FindExpr
 
     /**
@@ -343,15 +377,18 @@ interface FindExpr: KOpt {
      * Note that the pattern match test applies to the whole file name,
      * starting from one of the start points named on the command line.
      */
-    data class WholeName(val pattern: String, val ignoreCase: Boolean = false):
+    data class NameFull(val pattern: String, val ignoreCase: Boolean = false):
         KOptS("i".iff(ignoreCase) + "path", pattern), FindExpr
         // I use the "-path" notation which is more portable than "-wholename", but does the same thing.
 
     /**
      * The file name matches a regular expression pattern.
      * This is a match on the whole path, not a search.
+     * The "NameRegex" means it's regex matched against (full) name.
+     * (And also to be different from stdlib "Regex" class)
+     * It does NOT mean a name OF some regex.
      */
-    data class WholeNameRegEx(val regex: String, val ignoreCase: Boolean = false):
+    data class NameRegex(val regex: String, val ignoreCase: Boolean = false):
         KOptS("i".iff(ignoreCase) + "regex", regex), FindExpr
 
     /** No group corresponds to file's numeric group ID. */
@@ -386,7 +423,7 @@ interface FindExpr: KOpt {
     /**
      * Matches files of a specified type.
      * Note: it always calls system stat(2), which can be a bit expensive,
-     * so usually it's faster to filter by name first ([BaseName]/[WholeName]).
+     * so usually it's faster to filter by name first ([NameRegex]/[NameBase]/[NameFull]).
      *
      * @param type one of:
      * - b - block (buffered) special

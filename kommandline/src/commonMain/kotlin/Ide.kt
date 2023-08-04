@@ -8,6 +8,10 @@ fun idea(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.idea, cmd).appl
 fun ideap(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.ideap, cmd).apply(init)
 fun studio(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.studio, cmd).apply(init)
 
+fun idea(file: String, init: Ide.() -> Unit = {}) = idea { +file; init() }
+fun ideap(file: String, init: Ide.() -> Unit = {}) = ideap { +file; init() }
+fun studio(file: String, init: Ide.() -> Unit = {}) = studio { +file; init() }
+
 data class Ide(
     var type: Type,
     var cmd: Cmd? = null,
