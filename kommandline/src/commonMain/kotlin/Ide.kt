@@ -6,10 +6,12 @@ import pl.mareklangiewicz.kommand.Ide.Type
 /** https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html */
 fun idea(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.idea, cmd).apply(init)
 fun ideap(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.ideap, cmd).apply(init)
+fun ideaslim(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.ideaslim, cmd).apply(init)
 fun studio(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.studio, cmd).apply(init)
 
 fun idea(file: String, init: Ide.() -> Unit = {}) = idea { +file; init() }
 fun ideap(file: String, init: Ide.() -> Unit = {}) = ideap { +file; init() }
+fun ideaslim(file: String, init: Ide.() -> Unit = {}) = ideaslim { +file; init() }
 fun studio(file: String, init: Ide.() -> Unit = {}) = studio { +file; init() }
 
 data class Ide(
@@ -21,7 +23,7 @@ data class Ide(
     override val name get() = type.name
     override val args get() = cmd?.str.orEmpty() + options.flatMap { it.str } + stuff
 
-    enum class Type { idea, ideap, studio }
+    enum class Type { idea, ideap, ideaslim, studio }
 
     sealed class Cmd(val name: String, val arg: String? = null) {
 
