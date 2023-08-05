@@ -81,7 +81,7 @@ fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(
 suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.x(
     platform: CliPlatform = SYS,
     dir: String? = null,
-): ReducedOut = platform.exec(this, dir = dir)
+): ReducedOut = exec(platform, dir = dir)
 
 
 
