@@ -29,6 +29,13 @@ internal infix fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>,
     ReducedSample(this, expectedLineRaw = expectedLineRaw)
 
 
+@ExperimentalKommandApi
+fun <FunctionOut> ReducedSample<*, *, *, *, *, FunctionOut>.asFunction(
+    dir: String? = null,
+    platform: CliPlatform = CliPlatform.SYS,
+) = reducedKommand.asFunction(dir, platform)
+
+
 data object Samples {
     val Core = pl.mareklangiewicz.kommand.core.CoreSamples
     val Find = pl.mareklangiewicz.kommand.find.FindSamples

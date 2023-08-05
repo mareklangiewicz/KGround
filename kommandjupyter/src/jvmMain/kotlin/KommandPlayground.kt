@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKommandApi::class)
+
 package pl.mareklangiewicz.kommand.playground
 
 import kotlinx.coroutines.*
@@ -6,6 +8,7 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
+import pl.mareklangiewicz.kommand.samples.*
 
 
 /**
@@ -29,6 +32,7 @@ suspend fun playground() {
 //    showLangaraRepoMarkdownListInIdeaP()
 }
 
+@OptIn(DelicateKommandApi::class)
 suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
     val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).x()
     writeToFileAndOpenInIdeaP(out)
@@ -40,8 +44,10 @@ suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
 
 
 
+@OptIn(DelicateKommandApi::class, ExperimentalKommandApi::class)
 suspend fun showLangaraRepoMarkdownListInIdeaP() {
-    val reposMdContent = GhSamples.langaraPublicRepoMarkdownList.reducedKommand.x()
+    val getReposMd = GhSamples.langaraPublicRepoMarkdownList.asFunction()
+    val reposMdContent = getReposMd()
     println(reposMdContent)
     val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
     writeToFileAndOpenInIdeaP(reposMdContent, tmpReposFileMd)

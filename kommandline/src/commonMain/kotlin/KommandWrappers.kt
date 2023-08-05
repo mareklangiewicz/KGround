@@ -102,7 +102,7 @@ class FunctionKommand<FunctionOut>(
 }
 
 @ExperimentalKommandApi
-fun <FunctionOut> ReducedKommand<*, *, *, *, *, FunctionOut>.toFun(
+fun <FunctionOut> ReducedKommand<*, *, *, *, *, FunctionOut>.asFunction(
     dir: String? = null,
     platform: CliPlatform = CliPlatform.SYS,
 ) = FunctionKommand(this, dir, platform)
