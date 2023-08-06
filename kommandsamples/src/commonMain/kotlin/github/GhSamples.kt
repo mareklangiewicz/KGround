@@ -1,3 +1,5 @@
+@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate")
+
 package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kommand.samples.*
