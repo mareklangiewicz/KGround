@@ -84,31 +84,33 @@ data object FindSamples {
 
 }
 
-private val boringCodeDirRegexes = listOf("build", "node_modules", "\\.gradle")
-// order is important build before node_modules, because usually node_modules are inside build,
-// so no need to search for it it as it will be marked as boring anyway (whole build pruned) in such case
-
 /** Usually to exclude from some indexing. */
-fun findBoringCodeDirs(path: String) = findDirRegex(path,
-    regexName = boringCodeDirRegexes.joinToString("\\|", prefix = ".*/\\(", postfix = "\\)"),
+@OptIn(DelicateKommandApi::class)
+fun findBoringCodeDirs(
+    path: String,
+    boringCodeDirRegexes: List<String> = listOf("build", "node_modules", "\\.gradle")
+        // order is important build before node_modules, because usually node_modules are inside build,
+        // so no need to search for it it as it will be marked as boring anyway (whole build pruned) in such case
+) = findDirRegex(path,
+    nameRegex = boringCodeDirRegexes.joinToString("\\|", prefix = ".*/\\(", postfix = "\\)"),
     whenFoundPrune = true,
 )
 
+@OptIn(DelicateKommandApi::class)
 fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
-    path: String,
+    path: String = myKotlinPath,
     indent: String = "      ",
     urlPrefix: String = "file://\$MODULE_DIR\$",
     withOnEachLog: Boolean = false,
 ) =
     findBoringCodeDirs(path).reduced {
         stdout
-            .map {
-                check(it.startsWith(myKotlinPath))
-                it.removePrefix(myKotlinPath)
-            }
+            .map { it.removePrefixOrError(path) }
             .map { "$indent<excludeFolder url=\"$urlPrefix$it\" />" }
             .let { if (withOnEachLog) it.onEachLog() else it }
-            .toList().sorted().joinToString("\n")
+            .toList()
+            .sorted()
+            .joinToString("\n")
     }
 
 /**

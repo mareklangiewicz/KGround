@@ -17,6 +17,11 @@ fun Any.classSimpleWords() = this::class.simpleName!!
     .split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
 
 
+fun String.removePrefixOrError(prefix: CharSequence): String {
+    require(startsWith(prefix)) { "Incorrect prefix: $prefix" }
+    return removePrefix(prefix)
+}
+
 fun Iterator<*>.logEach(logln: (Any?) -> Unit = ::println) = forEach(logln)
 
 @OptIn(ExperimentalTime::class)

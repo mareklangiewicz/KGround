@@ -139,24 +139,24 @@ fun findTypeNameBase(
 @OptIn(DelicateKommandApi::class)
 fun findDirRegex(
     path: String,
-    regexName: String,
+    nameRegex: String,
     ignoreCase: Boolean = false,
     whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
-) = findTypeRegex(path, "d", regexName, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
+) = findTypeRegex(path, "d", nameRegex, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
 
 @OptIn(DelicateKommandApi::class)
 fun findTypeRegex(
     path: String,
     fileType: String,
-    regexName: String,
+    nameRegex: String,
     ignoreCase: Boolean = false,
     whenFoundPrintF: FindPrintFormat? = null,
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) =
-    find(path, NameRegex(regexName, ignoreCase), FileType(fileType)) {
+    find(path, NameRegex(nameRegex, ignoreCase), FileType(fileType)) {
         // NameRegex is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
         when {
             whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
