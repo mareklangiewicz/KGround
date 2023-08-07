@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.*
  * But first, consider if you can just locally save/load flows to/from files using Okio.
  * (Overall goal is to gradually move AWAY from CLI craziness and more towards safe/composable kotlin programming.)
  */
-data class TypedKommand<K: Kommand, In, Out, Err>(
+data class TypedKommand<out K: Kommand, In, Out, Err>(
     val kommand: K,
     val stdinRetype: StdinCollector.() -> In,
     val stderrRetype: Flow<String>.() -> Err,
