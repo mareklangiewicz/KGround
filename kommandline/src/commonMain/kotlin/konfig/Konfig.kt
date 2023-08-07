@@ -72,14 +72,14 @@ private class KonfigWithChecks(
     }
 
     override fun get(key: String): String? {
-        if (checkForDangerousKeys) check(key.all { it.isSafe })
+        if (checkForDangerousKeys) chk(key.all { it.isSafe })
         return konfig[key]
     }
 
     override fun set(key: String, item: String?) {
         if (isReadOnly) error("This konfig is read only.")
-        if (checkForDangerousKeys) check(key.all { it.isSafe })
-        if (checkForDangerousValues && item != null) check(item.all { it.isSafe })
+        if (checkForDangerousKeys) chk(key.all { it.isSafe })
+        if (checkForDangerousValues && item != null) chk(item.all { it.isSafe })
         konfig[key] = item
     }
 

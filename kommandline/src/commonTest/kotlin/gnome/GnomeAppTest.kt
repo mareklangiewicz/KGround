@@ -14,10 +14,10 @@ import kotlin.test.Test
 class GnomeAppTest {
 
     @Test fun testGnomeAppListApps() = gnomeapp(listapps)
-        .checkWithUser("gapplication list-apps")
+        .chkWithUser("gapplication list-apps")
 
     @Test fun testGnomeAppListGEditActions() = gnomeapp(listactions("org.gnome.gedit"))
-        .checkWithUser("gapplication list-actions org.gnome.gedit")
+        .chkWithUser("gapplication list-actions org.gnome.gedit")
 
     @Ignore // jitpack
     @Test fun testGnomeAppListAllAppActions() = SYS.run {
@@ -29,8 +29,8 @@ class GnomeAppTest {
         }
     }
 
-    @Test fun testGnomeAppHelp() = gnomeapp(help()).checkWithUser()
-    @Test fun testGnomeAppLaunchGEdit() = gnomeapp(launch("org.gnome.gedit")).checkWithUser()
-    @Test fun testGnomeAppGEditNewWindow() = gnomeapp(action("org.gnome.gedit", "new-window")).checkWithUser()
-    @Test fun testGnomeAppGEditNewDocument() = gnomeapp(action("org.gnome.gedit", "new-document")).checkWithUser()
+    @Test fun testGnomeAppHelp() = gnomeapp(help()).chkWithUser()
+    @Test fun testGnomeAppLaunchGEdit() = gnomeapp(launch("org.gnome.gedit")).chkWithUser()
+    @Test fun testGnomeAppGEditNewWindow() = gnomeapp(action("org.gnome.gedit", "new-window")).chkWithUser()
+    @Test fun testGnomeAppGEditNewDocument() = gnomeapp(action("org.gnome.gedit", "new-document")).chkWithUser()
 }

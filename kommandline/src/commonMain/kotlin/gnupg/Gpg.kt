@@ -25,7 +25,7 @@ fun gpgEncryptPass(password: String, inFile: String, outFile: String = "$inFile.
     gpg(symmetric) { -passphrase(password); -batch; pinentry(LOOPBACK); -outputfile(outFile); +inFile }
 
 private fun String.removeRequiredSuffix(suffix: CharSequence) =
-    removeSuffix(suffix).also { require(length == it.length - suffix.length) }
+    removeSuffix(suffix).also { req(length == it.length - suffix.length) }
 
 fun gpg(cmd: Cmd? = null, init: Gpg.() -> Unit = {}) = Gpg(cmd).apply(init)
 

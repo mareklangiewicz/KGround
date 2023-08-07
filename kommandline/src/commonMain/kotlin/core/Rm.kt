@@ -5,8 +5,8 @@ import pl.mareklangiewicz.kommand.*
 fun CliPlatform.rmIfFileIsThereExec(file: String) =
     if (testIfFileIsThere(file)) rm { +file }.execb(this) else listOf("File not found")
 
-fun CliPlatform.rmTreeWithForceExec(path: String, doubleCheck: CliPlatform.(path: String) -> Boolean): List<String> {
-    check(doubleCheck(path)) { "ERROR: Can not remove whole '$path' tree. Double check failed." }
+fun CliPlatform.rmTreeWithForceExec(path: String, doubleChk: CliPlatform.(path: String) -> Boolean): List<String> {
+    chk(doubleChk(path)) { "ERROR: Can not remove whole '$path' tree. Double chk failed." }
     return rm { -Rm.Option.recursive; -Rm.Option.force; +path }.execb(this)
 }
 

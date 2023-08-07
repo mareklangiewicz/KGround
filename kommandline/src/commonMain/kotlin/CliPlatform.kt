@@ -61,7 +61,7 @@ interface CliPlatform {
 }
 
 class FakePlatform(
-    private val checkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
+    private val chkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
         {_, _, _, _, _, _, _, _ -> },
     private val log: (Any?) -> Unit = ::println): CliPlatform {
 
@@ -81,7 +81,7 @@ class FakePlatform(
         envModify: (MutableMap<String, String>.() -> Unit)?
     ): ExecProcess {
         log("start($kommand, $dir, ...)")
-        checkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
+        chkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
         return FakeProcess(log)
     }
 }
@@ -310,17 +310,17 @@ fun ExecResult.unwrap(
     expectedExit: Int? = 0,
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() }
 ): List<String> {
-    expectedExit == null || exit == expectedExit || error("Exit value $exit is not equal to expected $expectedExit")
-    expectedErr == null || expectedErr(err) || error("Error stream is not equal to expected error stream.")
+    expectedExit == null || exit == expectedExit || bad { "Exit value $exit is not equal to expected $expectedExit" }
+    expectedErr == null || expectedErr(err) || bad { "Error stream is not equal to expected error stream." }
     return out
 }
 
-fun ExecResult.check(
+fun ExecResult.chk(
     expectedExit: Int? = 0,
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty()},
     expectedOut: ((List<String>) -> Boolean)?,
 ) {
     unwrap(expectedExit, expectedErr)
-    expectedOut == null || expectedOut(out) || error("Error stream is not equal to expected error stream.")
+    expectedOut == null || expectedOut(out) || bad { "Error stream is not equal to expected error stream." }
 }
 

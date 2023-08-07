@@ -14,8 +14,8 @@ suspend fun CliPlatform.exec(
     inFile: String? = null,
     outFile: String? = null,
 ): List<String> = coroutineScope {
-    require(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
-    require(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
+    req(isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+    req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
     start(kommand, dir = dir, inFile = inFile, outFile = outFile)
         .awaitResult(inLineS = inLineS)
         .unwrap()
@@ -57,13 +57,13 @@ expect fun Kommand.execb(
 @Deprecated("Use TypedKommand.reduced(...).exec(...)")
 suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, CollectedOut> TK
     .exec(platform: CliPlatform, dir: String? = null, collectOut: suspend Out.() -> CollectedOut): CollectedOut {
-    require(stderrRetype == defaultOutRetypeAnyLineToUnexpectedError) {
+    req(stderrRetype == defaultOutRetypeAnyLineToUnexpectedError) {
         "TypedKommand.exec doesn't work with customized stderr collection."
     }
     val tprocess = platform.start(this, dir)
     val collectedOut = tprocess.stdout.collectOut()
     val exit = tprocess.awaitExit()
-    check(exit == 0) { "Unexpected exit value: $exit" }
+    chk(exit == 0) { "Unexpected exit value: $exit" }
     return collectedOut
 }
 

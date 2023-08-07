@@ -44,10 +44,10 @@ private fun FindDetailsDef.detailsPrintFormat(): FindPrintFormat =
     joinToString("\\0\\0", postfix = "\\0\\n") { it.second }
 
 private fun FindDetailsDef.detailsParseLine(line: String): List<String> {
-    check(line.endsWith("\u0000")) { "Looks like there was some file with forbidden character (line break)" }
+    chk(line.endsWith("\u0000")) { "Looks like there was some file with forbidden character (line break)" }
     // Not actually forbidden in unix but it's weird and dangerous to have multiline file names, so better fail fast.
     val list = line.removeSuffix("\u0000").split("\u0000\u0000")
-    check(list.size == size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
+    chk(list.size == size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
     return list
 }
 
@@ -282,7 +282,7 @@ interface FindExpr: KOpt {
 // region Find Expression Category: TESTS
 
     sealed class NumArg(val n: Int) {
-        init { check(n >= 0) }
+        init { chk(n >= 0) }
         abstract val arg: String
         override fun toString() = arg
         class Exactly(n: Int): NumArg(n) { override val arg get() = "$n" }
@@ -484,7 +484,7 @@ interface FindExpr: KOpt {
     ): KOptS(name = (if (askUserFirst)"ok" else "exec") + "dir".iff(inContainingDir)), FindExpr {
         override fun toArgs(): List<String> {
             val kta = kommand.toArgs()
-            check(!kta.any { it.startsWith(";") }) {
+            chk(!kta.any { it.startsWith(";") }) {
                 "Find can't correctly execute any kommand with any argument starting with the ';'"
             }
             return listOf("-$name") + kta + ";"
@@ -542,10 +542,10 @@ interface FindOpt: KOpt {
 
     data class Debug(val dopts: List<String>): KOptS("D", dopts.joinToString(",")), FindOpt {
         constructor(vararg o: String): this(o.toList())
-        init { check(dopts.all { it.all { it.isLetter() } }) }
+        init { chk(dopts.all { it.all { it.isLetter() } }) }
     }
 
     data class Optimisation(val level: Int): KOptS("O", level.toString(), nameSeparator = ""), FindOpt {
-        init { check(level in 0..3) }
+        init { chk(level in 0..3) }
     }
 }

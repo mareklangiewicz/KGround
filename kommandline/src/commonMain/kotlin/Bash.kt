@@ -18,7 +18,7 @@ fun CliPlatform.bashGetExportsExec(): Map<String, String> = bash("export")
     .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
 
 fun CliPlatform.bashGetExportsToFileExec(outFile: String) =
-    start(bash("export"), outFile = outFile).waitForResult().check { it.isEmpty() }
+    start(bash("export"), outFile = outFile).waitForResult().chk { it.isEmpty() }
 
 
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash

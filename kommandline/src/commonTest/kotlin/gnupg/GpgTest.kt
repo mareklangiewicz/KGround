@@ -9,13 +9,13 @@ import kotlin.test.Test
 
 class GpgTest {
     @Test fun testGpgHelp() = gpg { -help }
-        .checkWithUser("gpg --help")
+        .chkWithUser("gpg --help")
 
     @Test fun testGpgListKeys() = gpg(listkeys)
-        .checkWithUser("gpg --list-keys")
+        .chkWithUser("gpg --list-keys")
 
     @Test fun testGpgListKeysVerbose() = gpg(listkeys) { -verbose }
-        .checkWithUser("gpg --verbose --list-keys")
+        .chkWithUser("gpg --verbose --list-keys")
 
     @Suppress("DEPRECATION")
     @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmPlatform {

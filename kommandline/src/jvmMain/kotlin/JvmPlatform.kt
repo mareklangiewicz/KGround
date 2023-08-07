@@ -34,12 +34,12 @@ class JvmPlatform : CliPlatform {
                     command(kommand.toArgs())
                     directory(dir?.let(::File))
                     inFile?.let(::File)?.let(::redirectInput)
-                    outFile ?: check(!outFileAppend) { "No output file to append to" }
+                    outFile ?: chk(!outFileAppend) { "No output file to append to" }
                     outFile?.let(::File)?.let {
                         redirectOutput(if (outFileAppend) Redirect.appendTo(it) else Redirect.to(it))
                     }
                     redirectErrorStream(errToOut)
-                    errFile ?: check(!errFileAppend) { "No error file to append to" }
+                    errFile ?: chk(!errFileAppend) { "No error file to append to" }
                     errFile?.let(::File)?.let {
                         redirectError(if (errFileAppend) Redirect.appendTo(it) else Redirect.to(it))
                     }

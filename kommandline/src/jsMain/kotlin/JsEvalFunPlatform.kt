@@ -24,11 +24,11 @@ class JsEvalFunPlatform: CliPlatform {
         errFileAppend: Boolean,
         envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess {
-        require(dir == null) { "dir unsupported" }
-        require(inFile == null) { "inFile unsupported" }
-        require(outFile == null) { "outFile unsupported" }
-        require(errFile == null) { "errFile unsupported" }
-        require(envModify == null) { "envModify unsupported" }
+        req(dir == null) { "dir unsupported" }
+        req(inFile == null) { "inFile unsupported" }
+        req(outFile == null) { "outFile unsupported" }
+        req(errFile == null) { "errFile unsupported" }
+        req(envModify == null) { "envModify unsupported" }
         val code = kommand.lineFun()
         if (debug) println(code)
         return JsEvalFunProcess(code)
@@ -51,7 +51,7 @@ private class JsEvalFunProcess(code: String): ExecProcess {
     var logln: (line: String) -> Unit = { console.log(it) }
 
     init {
-        check(isEvalEnabled) { "eval is disabled"}
+        chk(isEvalEnabled) { "eval is disabled"}
         try {
             exit = 0
             out = eval(code).toString().lines().iterator()

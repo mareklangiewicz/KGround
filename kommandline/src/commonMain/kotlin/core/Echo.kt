@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.core
 import pl.mareklangiewicz.kommand.*
 
 fun CliPlatform.writeFileWithEchoExec(text: String, outFile: String) {
-    check(isRedirectFileSupported) { "Can't write to file using echo without redirection." }
+    chk(isRedirectFileSupported) { "Can't write to file using echo without redirection." }
     echo(text).execb(this, outFile = outFile)
 }
 

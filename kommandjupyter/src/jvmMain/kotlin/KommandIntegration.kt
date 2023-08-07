@@ -49,9 +49,9 @@ suspend fun Kommand.x(
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
     outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = coroutineScope {
-    require(platform.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
-    require(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
-    require(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
+    req(platform.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+    req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
+    req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
     val eprocess = platform.start(this@x,
         dir = dir,
         inFile = inFile,

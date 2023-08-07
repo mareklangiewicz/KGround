@@ -33,44 +33,44 @@ class KommandTest {
         assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
     }
     @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -LongFormat; -Sort(TIME); +".."; +"/usr" }
-        .checkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
-    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.checkInIdeap()
-    @Test fun testLs3() = ls { +"/home/marek" }.checkInIdeap()
+        .chkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
+    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkInIdeap()
+    @Test fun testLs3() = ls { +"/home/marek" }.chkInIdeap()
     @Test fun testLsHome() = SYS.lsExec("/home/marek").logEach()
     @Test fun testLsHomeSubDirs() = SYS.lsSubDirsExec("/home/marek").logEach()
     @Test fun testLsHomeSubDirsWithHidden() = SYS.lsSubDirsExec("/home/marek", withHidden = true).logEach()
     @Test fun testLsHomeRegFiles() = SYS.lsRegFilesExec("/home/marek").logEach()
 
     @Test fun testMkDir1() = mkdir { -parents; +"/tmp/testMkDir1/blaa/blee" }
-        .checkWithUser("mkdir --parents /tmp/testMkDir1/blaa/blee")
+        .chkWithUser("mkdir --parents /tmp/testMkDir1/blaa/blee")
 
     @Test fun testRm1() = rm { -dir; +"/tmp/testMkDir1/blaa/blee" }
-        .checkWithUser("rm --dir /tmp/testMkDir1/blaa/blee")
+        .chkWithUser("rm --dir /tmp/testMkDir1/blaa/blee")
 
-    @Test fun testCat1() = cat { +"/etc/fstab" }.checkInIdeap()
-    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.checkInIdeap()
+    @Test fun testCat1() = cat { +"/etc/fstab" }.chkInIdeap()
+    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInIdeap()
 
-    @Test fun testSs1() = ss { -tcp; -udp; -listening; -processes; -numeric }.checkWithUser() // ss -tulpn
-    @Test fun testSs2() = ss { -tcp; -udp; -listening; -processes; -numeric }.checkInIdeap() // ss -tulpn
+    @Test fun testSs1() = ss { -tcp; -udp; -listening; -processes; -numeric }.chkWithUser() // ss -tulpn
+    @Test fun testSs2() = ss { -tcp; -udp; -listening; -processes; -numeric }.chkInIdeap() // ss -tulpn
 
-    @Test fun testManMan() = man { +"man" }.checkWithUser()
-    @Test fun testManVim() = man { +"vim" }.checkWithUser()
-    @Test fun testManOpenAll() = man { -Man.Option.all; +"open" }.checkWithUser()
-    @Test fun testManOpen2() = man(2) { +"open" }.checkWithUser()
-    @Test fun testManOpenSys() = man(systemcall) { +"open" }.checkWithUser()
-    @Test fun testManApropos() = man { -Man.Option.apropos; +"package" }.checkWithUser()
-    @Test fun testManWhatis() = man { -Man.Option.whatis; +"which" }.checkWithUser()
+    @Test fun testManMan() = man { +"man" }.chkWithUser()
+    @Test fun testManVim() = man { +"vim" }.chkWithUser()
+    @Test fun testManOpenAll() = man { -Man.Option.all; +"open" }.chkWithUser()
+    @Test fun testManOpen2() = man(2) { +"open" }.chkWithUser()
+    @Test fun testManOpenSys() = man(systemcall) { +"open" }.chkWithUser()
+    @Test fun testManApropos() = man { -Man.Option.apropos; +"package" }.chkWithUser()
+    @Test fun testManWhatis() = man { -Man.Option.whatis; +"which" }.chkWithUser()
 
-    @Test fun testAdbDevices() = adb(devices) { -Option.all; -usb }.checkWithUser("adb -a -d devices")
-    @Test fun testAdbShell() = adb(shell).checkWithUser("adb shell")
+    @Test fun testAdbDevices() = adb(devices) { -Option.all; -usb }.chkWithUser("adb -a -d devices")
+    @Test fun testAdbShell() = adb(shell).chkWithUser("adb shell")
 
     @Test fun testVim() {
         val kommand = vim(".") { -gui; -servername("DDDD") }
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
-        kommand.checkWithUser("vim -g --servername DDDD .")
+        kommand.chkWithUser("vim -g --servername DDDD .")
     }
-    @Test fun testMkTemp() = mktemp().checkWithUser()
-    @Test fun testWhich() = which { +"vim" }.checkWithUser()
+    @Test fun testMkTemp() = mktemp().chkWithUser()
+    @Test fun testWhich() = which { +"vim" }.chkWithUser()
 
     @Ignore // jitpack
     @Test fun testCreateTempFile() = println(SYS.mktempExec())
@@ -78,9 +78,9 @@ class KommandTest {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
-        kommand2.checkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
+        kommand2.chkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
     }
     @Test fun testBashGetExports() = SYS.bashGetExportsExec().forEach { println(it) }
-    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.checkWithUser()
-    @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.checkWithUser()
+    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.chkWithUser()
+    @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
 }
