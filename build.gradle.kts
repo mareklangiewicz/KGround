@@ -10,12 +10,12 @@ plugins {
 
 defaultBuildTemplateForRootProject(
     langaraLibDetails(
-        name = "KommandLine",
-        description = "Kotlin DSL for popular CLI commands.",
-        githubUrl = "https://github.com/langara/KommandLine",
-        version = Ver(0, 0, 27)
-        // https://repo1.maven.org/maven2/pl/mareklangiewicz/kommandline/
-        // https://github.com/langara/KommandLine/releases
+        name = "KGround",
+        description = "Kotlin Common Ground.",
+        githubUrl = "https://github.com/langara/KGround",
+        version = Ver(0, 0, 1)
+        // https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
+        // https://github.com/langara/KGround/releases
     ),
     withSonatypeOssPublishing = true,
 )
