@@ -19,25 +19,6 @@ defaultBuildTemplateForMppLib(
 
 kotlin { js(IR) { nodejs() } }
 
-// FIXME NOW:
-kotlin {
-    sourceSets {
-        val jvmMain by getting {
-            kotlin.srcDirs(
-                "../../DepsKt/src/main/kotlin/ure",
-                "../../DepsKt/src/main/kotlin/io",
-                "../../DepsKt/src/main/kotlin/maintenance",
-            )
-            resources.srcDirs(
-                "../../DepsKt/src/main/resources",
-            )
-            dependencies {
-                implementation(Io.GitHub.TypeSafeGitHub.github_workflows_kt) // needed for included sources: Deps:MyProjects
-            }
-        }
-    }
-}
-
 
 // region [Kotlin Module Build Template]
 
