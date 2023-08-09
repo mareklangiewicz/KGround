@@ -8,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.47" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("pl.mareklangiewicz.deps.settings") version "0.2.48" // https://plugins.gradle.org/search?term=mareklangiewicz
     id("com.gradle.enterprise") version "3.14.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
@@ -25,6 +25,7 @@ rootProject.name = "KGround"
 
 include(":kground")
 include(":kgroundx")
-include(":kgroundio")
-include(":kgroundiox")
+include(":kground-io")
+include(":kgroundx-io")
+include(":kgroundx-jupyter") // TODO NOW
 

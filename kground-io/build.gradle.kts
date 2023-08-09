@@ -12,6 +12,7 @@ defaultBuildTemplateForMppLib(
     // TODO_later: withNativeLinux64 = true,
 ) {
     api(project(":kground"))
+    api(Langiewicz.kommandline)
     api(Com.SquareUp.Okio.okio)
 }
 

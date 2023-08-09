@@ -5,6 +5,7 @@
 /build
 /kground/build
 /kgroundx/build
-/kgroundio/build
-/kgroundiox/build
+/kground-io/build
+/kgroundx-io/build
+/kgroundx-jupyter/build
 my.gradle.log
