@@ -13,6 +13,7 @@ defaultBuildTemplateForMppLib(
 ) {
     api(project(":kgroundx"))
     api(project(":kground-io"))
+    api(Langiewicz.kommandline)
     api(Langiewicz.kommandsamples)
 }
 
