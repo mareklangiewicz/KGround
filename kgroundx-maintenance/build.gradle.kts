@@ -12,6 +12,7 @@ defaultBuildTemplateForMppLib(
     withJs = false,
 ) {
     api(project(":kgroundx-io"))
+    implementation(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
 }
 
 
