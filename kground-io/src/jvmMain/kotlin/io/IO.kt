@@ -7,6 +7,9 @@ import okio.Path.Companion.toPath
 import kotlin.math.*
 import kotlin.random.*
 
+// FIXME NOW: this file is moved from DepsKt as is temporarily.
+//   analyze this code and move stuff to more common code and/or other KGround modules
+
 @Throws(IOException::class)
 fun FileSystem.findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Path> {
     require(maxDepth >= 0)

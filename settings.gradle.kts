@@ -27,5 +27,6 @@ include(":kground")
 include(":kgroundx")
 include(":kground-io")
 include(":kgroundx-io")
+include(":kgroundx-maintenance") // TODO NOW
 include(":kgroundx-jupyter") // TODO NOW
 

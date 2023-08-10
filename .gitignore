@@ -8,4 +8,6 @@
 /kground-io/build
 /kgroundx-io/build
 /kgroundx-jupyter/build
+/kgroundx-maintenance/build
+/kgroundx-maintenance/src/jvmMain/kotlin/maintenance/MyIgnoredStuff.kt
 my.gradle.log

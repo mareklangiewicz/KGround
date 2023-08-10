@@ -5,6 +5,9 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
 
+
+// FIXME NOW: Update this file to correctly manage resources in kgroundx-maintenance instead of DepsKt
+
 internal val MyDepsKtRootPath = "/home/marek/code/kotlin/DepsKt".toPath()
 
 private val resourcesRelPath = "src/main/resources".toPath()

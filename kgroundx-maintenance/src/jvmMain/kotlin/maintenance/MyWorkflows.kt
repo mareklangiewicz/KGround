@@ -61,6 +61,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
 }
 
 
+// FIXME NOW: stop using MaintenanceTests
 // FIXME: something less hacky/hardcoded/repetative
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
     val everyMondayAt8am = Cron(minute = "0", hour = "8", dayWeek = "1")
