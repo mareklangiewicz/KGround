@@ -11,6 +11,9 @@ import kotlin.random.*
 //   analyze this code and move stuff to more common code and/or other KGround modules
 
 @Throws(IOException::class)
+@Deprecated("Okio has listRecursively. Use that or maybe implement new listRecursively with additional params.")
+// TODO_later: analyze Okio listRecursively more, before possibly implementing any own version
+// (traversal order, infinite loops with symlinks, etc.).
 fun FileSystem.findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Path> {
     require(maxDepth >= 0)
     val md = metadata(path)

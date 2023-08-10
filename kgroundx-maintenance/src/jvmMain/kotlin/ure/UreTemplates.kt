@@ -37,10 +37,13 @@ val RegionInfo.pathInRes get() = path / "build.gradle.kts.tmpl"
 // pathInRes has to have different suffix from "build.gradle.kts" otherwise gradle sometimes tries to run it…
 // (even just .kts extension sometimes confuses at least IDE)
 
-fun RegionInfo.pathInSrc(depsKtRootPath: Path = MyDepsKtRootPath) =
+// FIXME NOW: this file is totally broken after changing MyDepsKtRootPath to MyKGroundPath
+//    also separate it from Ure and move Ure common code to better place (later to separate lib)
+
+fun RegionInfo.pathInSrc(depsKtRootPath: Path = MyKGroundRootPath) =
     depsKtRootPath / path / "build.gradle.kts"
 
-fun RegionInfo.syncedPathsArrInSrc(depsKtRootPath: Path = MyDepsKtRootPath) =
+fun RegionInfo.syncedPathsArrInSrc(depsKtRootPath: Path = MyKGroundRootPath) =
     syncedPaths.map { depsKtRootPath / it / "build.gradle.kts" }.toTypedArray()
 
 private fun info(label: String, dir: String, vararg syncedDirs: String) =
@@ -70,7 +73,7 @@ private fun knownRegion(regionLabel: String): String {
 
 private fun knownRegionFullTemplatePath(
     regionLabel: String,
-    depsKtRootPath: Path = MyDepsKtRootPath,
+    depsKtRootPath: Path = MyKGroundRootPath,
 ) = SYSTEM.canonicalize(regionsInfos[regionLabel].pathInSrc(depsKtRootPath))
 
 fun checkAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::println) = try {
@@ -90,12 +93,12 @@ fun injectAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::pr
 
 // This actually is self-check for deps.kt, so it should be in some unit test for deps.kt
 // But let's run it every time when checking client regions just to be sure the "source of truth" is consistent.
-fun checkAllKnownRegionsSynced(depsKtRootPath: Path = MyDepsKtRootPath, verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
+fun checkAllKnownRegionsSynced(depsKtRootPath: Path = MyKGroundRootPath, verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
         SYSTEM.checkKnownRegion(it.label, it.pathInSrc(depsKtRootPath), *it.syncedPathsArrInSrc(depsKtRootPath), verbose = verbose, log = log)
     }
 
-fun injectAllKnownRegionsToSync(depsKtRootPath: Path = MyDepsKtRootPath, log: (Any?) -> Unit = ::println) =
+fun injectAllKnownRegionsToSync(depsKtRootPath: Path = MyKGroundRootPath, log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
         SYSTEM.injectKnownRegion(it.label, *it.syncedPathsArrInSrc(depsKtRootPath), addIfNotFound = false, log = log)
     }

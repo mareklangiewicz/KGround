@@ -6,36 +6,42 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
 
 
-// FIXME NOW: Update this file to correctly manage resources in kgroundx-maintenance instead of DepsKt
+internal val MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
 
-internal val MyDepsKtRootPath = "/home/marek/code/kotlin/DepsKt".toPath()
-
-private val resourcesRelPath = "src/main/resources".toPath()
-private val resourcesAbsPath = MyDepsKtRootPath / resourcesRelPath
+private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".toPath()
+private val resourcesAbsPath = MyKGroundRootPath / resourcesRelPath
 
 private val Path.isTmplSymlink
     get() = name.endsWith(".tmpl") && SYSTEM.metadata(this).symlinkTarget != null
 
 fun updateDepsKtResourcesSymLinks(log: (Any?) -> Unit = ::println) = SYSTEM.run {
+
+    // remove all tmpl symlinks (but throw if other unexpected file found)
     listRecursively(resourcesAbsPath).forEach {
         if (metadata(it).isDirectory) return@forEach
         check(it.isTmplSymlink) { "Unexpected file in resources: $it" }
         delete(it)
     }
+    // remove all dirs (but throw if non directory still found)
     list(resourcesAbsPath).forEach {
         check(metadata(it).isDirectory) { "Some non directory left in resources: $it" }
         deleteRecursively(it)
     }
-    val buildFiles = findAllFiles(MyDepsKtRootPath)
+
+    // prepare the list of buildfiles (*.gradle.kts)
+    val buildFiles = findAllFiles(MyKGroundRootPath, maxDepth = 10)
         .filter { it.segments.any { it.startsWith("template-") } }
         .filterExt("gradle.kts")
         .toList()
-    val gradlewFiles = gradlewRelPaths.map { MyDepsKtRootPath / it }
-    val files = buildFiles + gradlewFiles
-    files.forEach { srcAbs ->
-        val srcRel = srcAbs.asRelativeTo(MyDepsKtRootPath)
+
+    // prepare the list of gradlew files
+    val gradlewFiles = gradlewRelPaths.map { MyKGroundRootPath / it }
+
+    // generate .tmpl symlinks in resources (relative to MyKGroundRootPath)
+    (buildFiles + gradlewFiles).forEach { srcAbs ->
+        val srcRel = srcAbs.asRelativeTo(MyKGroundRootPath)
         val linkRel = resourcesRelPath / srcRel.withName { "$it.tmpl" }
-        val linkAbs = MyDepsKtRootPath / linkRel
+        val linkAbs = MyKGroundRootPath / linkRel
         val targetDots = linkRel.parent!!.segments.joinToString("/") { ".." }
         val target = targetDots.toPath() / srcRel
         log("symlink $linkAbs -> $target")
