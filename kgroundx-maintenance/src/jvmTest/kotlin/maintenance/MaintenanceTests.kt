@@ -9,13 +9,12 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.uspek.*
 
-// TODO_later: move the whole maintenance stuff to separate cli app, but inside deps.kt repo (but separate gradle and all)
-
 class MaintenanceTests {
 
     // DepsKt$ ./gradlew cleanTest (if needed - especially after "successful" or "disabled" run)
     // DepsKt$ UPDATE_GENERATED_DEPS=true ./gradlew test --tests MaintenanceTests.updateGeneratedDeps
-    @EnabledIfEnvironmentVariable(named = "UPDATE_GENERATED_DEPS", matches = "true")
+//    @EnabledIfEnvironmentVariable(named = "UPDATE_GENERATED_DEPS", matches = "true")
+    @Disabled // FIXME NOW
     @Test
     fun updateGeneratedDeps() = downloadAndInjectFileToSpecialRegion(
         inFileUrl = "https://raw.githubusercontent.com/langara/refreshDeps/main/plugins/dependencies/src/test/resources/objects-for-deps.txt",
@@ -25,8 +24,8 @@ class MaintenanceTests {
 
     // TODO: I have to run it from command line, due to issue (todo track it):
     // https://youtrack.jetbrains.com/issue/IDEA-320303
-    // DepsKt$ ./gradlew cleanTest
-    // DepsKt$ ./gradlew test --tests MaintenanceTests.maintenanceTestFactory
+    // KGround$ ./gradlew cleanTest
+    // KGround$ ./gradlew test --tests MaintenanceTests.maintenanceTestFactory
     @TestFactory
     fun maintenanceTestFactory() = uspekTestFactory {
 //        "check all known regions synced" o { checkAllKnownRegionsSynced() }
@@ -38,7 +37,7 @@ class MaintenanceTests {
 //        "DANGEROUS inject default workflows to all my projects" o { runBlocking { injectMyDWorkflowsToMyProjects(onlyPublic = true) } }
 //        "DANGEROUS inject default workflows to Some Proj" o { injectDWorkflowsToKotlinProject("KommandLine") }
 //
-//        "DANGEROUS updateDepsKtResourcesSymLinks" o { updateDepsKtResourcesSymLinks() }
+//        "DANGEROUS updateKGroundResourcesSymLinks" o { updateKGroundResourcesSymLinks() }
 //        "DANGEROUS updateGradlewFilesInMyProjects" o { runBlocking { updateGradlewFilesInMyProjects(onlyPublic = false) } }
 //
 //        "DANGEROUS someIgnoredStuff" o { someIgnoredStuff() }

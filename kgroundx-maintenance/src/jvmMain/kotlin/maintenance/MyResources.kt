@@ -14,7 +14,7 @@ private val resourcesAbsPath = MyKGroundRootPath / resourcesRelPath
 private val Path.isTmplSymlink
     get() = name.endsWith(".tmpl") && SYSTEM.metadata(this).symlinkTarget != null
 
-fun updateDepsKtResourcesSymLinks(log: (Any?) -> Unit = ::println) = SYSTEM.run {
+fun updateKGroundResourcesSymLinks(log: (Any?) -> Unit = ::println) = SYSTEM.run {
 
     // remove all tmpl symlinks (but throw if other unexpected file found)
     listRecursively(resourcesAbsPath).forEach {
