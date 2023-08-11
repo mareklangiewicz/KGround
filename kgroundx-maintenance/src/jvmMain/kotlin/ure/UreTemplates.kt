@@ -10,6 +10,7 @@ import pl.mareklangiewicz.maintenance.*
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
+// FIXME NOW: I should not need to hardcode all these labels. Dynamically collect all special regions instead.
 const val labelRoot = "Root Build Template"
 const val labelKotlinModule = "Kotlin Module Build Template"
 const val labelMppModule = "MPP Module Build Template"
@@ -21,8 +22,8 @@ const val labelAndroCommon = "Andro Common Build Template"
 const val labelAndroLib = "Andro Lib Build Template"
 const val labelAndroApp = "Andro App Build Template"
 
+// paths to templates dirs with build files, relative to MyKGroundRootPath
 private const val pathMppRoot = "template-mpp"
-private const val pathDepsKtRoot = ""
 private const val pathMppLib = "template-mpp/template-mpp-lib"
 private const val pathMppApp = "template-mpp/template-mpp-app"
 private const val pathJvmLib = "template-mpp/template-jvm-lib"
@@ -31,27 +32,25 @@ private const val pathAndroRoot = "template-andro"
 private const val pathAndroLib = "template-andro/template-andro-lib"
 private const val pathAndroApp = "template-andro/template-andro-app"
 
-data class RegionInfo(val label: String, val path: Path, val syncedPaths: List<Path>)
+private data class RegionInfo(val label: String, val path: Path, val syncedPaths: List<Path>)
 
-val RegionInfo.pathInRes get() = path / "build.gradle.kts.tmpl"
+private val RegionInfo.pathInRes get() = path / "build.gradle.kts.tmpl" // TODO_maybe: special regions in settings.gradle.kts??
 // pathInRes has to have different suffix from "build.gradle.kts" otherwise gradle sometimes tries to run it…
 // (even just .kts extension sometimes confuses at least IDE)
 
-// FIXME NOW: this file is totally broken after changing MyDepsKtRootPath to MyKGroundPath
-//    also separate it from Ure and move Ure common code to better place (later to separate lib)
+// FIXME NOW separate it from Ure and move Ure common code to better places (later to separate lib)
 
-fun RegionInfo.pathInSrc(depsKtRootPath: Path = MyKGroundRootPath) =
-    depsKtRootPath / path / "build.gradle.kts"
+private val RegionInfo.pathInSrc get() = MyKGroundRootPath / path / "build.gradle.kts"
 
-fun RegionInfo.syncedPathsArrInSrc(depsKtRootPath: Path = MyKGroundRootPath) =
-    syncedPaths.map { depsKtRootPath / it / "build.gradle.kts" }.toTypedArray()
+private val RegionInfo.syncedPathsArrInSrc
+    get() = syncedPaths.map { MyKGroundRootPath / it / "build.gradle.kts" }.toTypedArray()
 
 private fun info(label: String, dir: String, vararg syncedDirs: String) =
     RegionInfo(label, dir.toPath(), syncedDirs.toList().map { it.toPath() })
 
 private val regionsInfos = listOf(
-    info(labelRoot, pathMppRoot, pathAndroRoot, pathDepsKtRoot),
-    info(labelKotlinModule, pathMppLib, pathMppApp, pathJvmLib, pathJvmApp, pathAndroLib, pathAndroApp, pathDepsKtRoot),
+    info(labelRoot, pathMppRoot, pathAndroRoot),
+    info(labelKotlinModule, pathMppLib, pathMppApp, pathJvmLib, pathJvmApp, pathAndroLib, pathAndroApp),
     info(labelMppModule, pathMppLib, pathMppApp),
     info(labelMppApp, pathMppApp),
     info(labelJvmApp, pathJvmApp),
@@ -62,7 +61,7 @@ private val regionsInfos = listOf(
     info(labelAndroApp, pathAndroApp),
 )
 
-operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: error("Unknown region label: $label")
+private operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: error("Unknown region label: $label")
 
 private fun knownRegion(regionLabel: String): String {
     val inputResPath = regionsInfos[regionLabel].pathInRes
@@ -71,13 +70,10 @@ private fun knownRegion(regionLabel: String): String {
     return mr["region"]
 }
 
-private fun knownRegionFullTemplatePath(
-    regionLabel: String,
-    depsKtRootPath: Path = MyKGroundRootPath,
-) = SYSTEM.canonicalize(regionsInfos[regionLabel].pathInSrc(depsKtRootPath))
+private fun knownRegionFullTemplatePath(regionLabel: String) =
+    SYSTEM.canonicalize(regionsInfos[regionLabel].pathInSrc)
 
 fun checkAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::println) = try {
-    checkAllKnownRegionsSynced(log = log) // to be sure source of truth is clean
     log("BEGIN: Check all known regions in project:")
     SYSTEM.checkAllKnownRegionsInAllFoundFiles(projectPath, verbose = true, log = log)
     log("END: Check all known regions in project.")
@@ -91,16 +87,15 @@ fun injectAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::pr
     log("END: Inject all known regions in project.")
 }
 
-// This actually is self-check for deps.kt, so it should be in some unit test for deps.kt
-// But let's run it every time when checking client regions just to be sure the "source of truth" is consistent.
-fun checkAllKnownRegionsSynced(depsKtRootPath: Path = MyKGroundRootPath, verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
+// This actually is self-check for templates in KGround, so it should be in some integration test.
+fun checkAllKnownRegionsSynced(verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
-        SYSTEM.checkKnownRegion(it.label, it.pathInSrc(depsKtRootPath), *it.syncedPathsArrInSrc(depsKtRootPath), verbose = verbose, log = log)
+        SYSTEM.checkKnownRegion(it.label, it.pathInSrc, *it.syncedPathsArrInSrc, verbose = verbose, log = log)
     }
 
-fun injectAllKnownRegionsToSync(depsKtRootPath: Path = MyKGroundRootPath, log: (Any?) -> Unit = ::println) =
+fun injectAllKnownRegionsToSync(log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
-        SYSTEM.injectKnownRegion(it.label, *it.syncedPathsArrInSrc(depsKtRootPath), addIfNotFound = false, log = log)
+        SYSTEM.injectKnownRegion(it.label, *it.syncedPathsArrInSrc, addIfNotFound = false, log = log)
     }
 
 fun FileSystem.checkAllKnownRegionsInAllFoundFiles(
@@ -149,14 +144,6 @@ fun FileSystem.injectKnownRegionToAllFoundFiles(
     injectKnownRegion(regionLabel, *outputPaths, addIfNotFound = addIfNotFound, log = log)
 }
 
-// by "special" we mean region with label wrapped in squared brackets
-// the promise is: all special regions with some label should contain exactly the same content (synced)
-private fun ureWithSpecialRegion(regionLabel: String) = ure {
-    1 of ureWhateva().withName("before")
-    1 of ureRegion(ureWhateva(), ir("\\[$regionLabel\\]")).withName("region")
-    1 of ureWhateva(reluctant = false).withName("after")
-}
-
 fun FileSystem.checkKnownRegion(
     regionLabel: String,
     vararg outputPaths: Path,
@@ -165,10 +152,10 @@ fun FileSystem.checkKnownRegion(
     log: (Any?) -> Unit = ::println,
 ) = outputPaths.forEach { path ->
     val hint = "Try sth like: ideap diff ${knownRegionFullTemplatePath(regionLabel)} ${canonicalize(path)}"
-    checkRegion(regionLabel, knownRegion(regionLabel), path, failIfNotFound, verbose, hint.takeIf { verbose }, log = log)
+    checkCustomRegion(regionLabel, knownRegion(regionLabel), path, failIfNotFound, verbose, hint.takeIf { verbose }, log = log)
 }
 
-private fun FileSystem.checkRegion(
+private fun FileSystem.checkCustomRegion(
     regionLabel: String,
     regionExpected: String,
     outputPath: Path,
@@ -265,8 +252,3 @@ fun downloadAndInjectFileToSpecialRegion(
     val region = "$markBefore\n$regionContent\n$markAfter"
     SYSTEM.injectCustomRegion(outFileRegionLabel, region, outFilePath)
 }
-
-
-
-// TODO_someday: scan imports and add imports from template-android/lib/build.gradle.kts if needed
-

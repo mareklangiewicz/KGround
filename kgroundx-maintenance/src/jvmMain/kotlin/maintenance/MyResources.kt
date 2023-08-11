@@ -6,7 +6,7 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
 
 
-internal val MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
+var MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
 
 private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".toPath()
 private val resourcesAbsPath = MyKGroundRootPath / resourcesRelPath

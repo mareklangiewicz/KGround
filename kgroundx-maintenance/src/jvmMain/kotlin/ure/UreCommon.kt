@@ -120,11 +120,22 @@ fun ureLineWithEndingComment(comment: Ure) =
     ureLineWithContent(ureWhateva(inLine = true) then comment.commentedOut(inLine = true, traditional = false))
 
 
+// TODO_someday: support named regions without the exact name repeated at the end
+//   (as an optional flag, but leave unchanged requirement by default!)
 fun ureRegion(content: Ure, regionName: Ure? = null) = ure {
     1 of ureCommentLine(ureKeywordAndOptArg("region", regionName), traditional = false)
     1 of content
     1 of ureCommentLine(ureKeywordAndOptArg("endregion", regionName), traditional = false)
 }
+
+// by "special" we mean region with label wrapped in squared brackets
+// the promise is: all special regions with some label should contain exactly the same content (synced)
+fun ureWithSpecialRegion(regionLabel: String) = ure {
+    1 of ureWhateva().withName("before")
+    1 of ureRegion(ureWhateva(), ir("\\[$regionLabel\\]")).withName("region")
+    1 of ureWhateva(reluctant = false).withName("after")
+}
+
 
 fun ureKeywordAndOptArg(keyword: String, arg: Ure? = null, separator: Ure = chSpaceInLine.timesMin(1)) =
     ureKeywordAndOptArg(ir(keyword).withWordBoundaries(), arg, separator)
