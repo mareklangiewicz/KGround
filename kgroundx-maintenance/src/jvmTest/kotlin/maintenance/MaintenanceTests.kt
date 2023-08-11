@@ -28,7 +28,7 @@ class MaintenanceTests {
     // KGround$ ./gradlew test --tests MaintenanceTests.maintenanceTestFactory
     @TestFactory
     fun maintenanceTestFactory() = uspekTestFactory {
-//        "check all known regions synced" o { checkAllKnownRegionsSynced() }
+//        "check all known regions synced" o { checkAllKnownRegionsSynced(verbose = true) }
 //        "check all known regions in my kotlin projects" o { runBlocking { checkAllKnownRegionsInMyProjects() } }
 //        "check my dworkflows in my projects" o { runBlocking { checkMyDWorkflowsInMyProjects(onlyPublic = true) } }
 //
