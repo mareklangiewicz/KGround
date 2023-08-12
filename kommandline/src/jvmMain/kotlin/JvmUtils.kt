@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.kground.*
 import kotlin.time.*
 
 @Deprecated("Use suspend fun Kommand.exec(...)")

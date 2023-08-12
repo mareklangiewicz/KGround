@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
 
 fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)

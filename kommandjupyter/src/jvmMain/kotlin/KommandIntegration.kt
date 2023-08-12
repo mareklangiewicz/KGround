@@ -6,6 +6,7 @@ import kotlin.time.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
+import pl.mareklangiewicz.kground.*
 
 internal class KommandIntegration: JupyterIntegration() {
     override fun Builder.onLoaded() {

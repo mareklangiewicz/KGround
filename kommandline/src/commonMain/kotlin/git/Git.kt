@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.git
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.git.Git.*
 import pl.mareklangiewicz.kommand.git.Git.Command.*

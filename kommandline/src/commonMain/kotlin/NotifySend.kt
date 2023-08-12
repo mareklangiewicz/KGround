@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
+
 /** [notify-send ubuntu manpage](https://manpages.ubuntu.com/manpages/impish/man1/notify-send.1.html) */
 fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Unit = {}) =
     NotifySend(summary, body).apply(init)

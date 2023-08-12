@@ -2,10 +2,10 @@
 
 package pl.mareklangiewicz.kommand.gnome
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.help
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd
-import pl.mareklangiewicz.kommand.plusIfNN
 
 /** [gapplication ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gapplication.1.html) */
 fun gnomeapp(cmd: Cmd, init: GnomeApp.() -> Unit = {}) = GnomeApp(cmd).apply(init)

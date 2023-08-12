@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
+
 fun which(all: Boolean = false, init: Which.() -> Unit = {}) = Which(all).apply(init)
 
 data class Which(

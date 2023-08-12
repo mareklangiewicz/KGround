@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 
 fun CliPlatform.writeFileWithEchoExec(text: String, outFile: String) {

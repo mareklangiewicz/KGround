@@ -9,8 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib {
-    api(Langiewicz.upue)
-    api(KotlinX.coroutines_core.withVer("1.7.2")) // FIXME NOW: issue with 1.7.3
+    api("pl.mareklangiewicz:kground:0.0.06") // FIXME https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
 }
 
 kotlin { js(IR) { nodejs() } }

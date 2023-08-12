@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.kground.*
 import kotlin.coroutines.*
 
 @Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))

@@ -3,6 +3,8 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
+import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kommand.chk
 import java.io.*
 import java.lang.ProcessBuilder.*
 import kotlin.coroutines.*

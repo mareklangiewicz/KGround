@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Man.Section
 
 fun man(section: Section? = null, init: Man.() -> Unit = {}) = Man(section).apply(init)

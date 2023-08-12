@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Ide.Cmd
 import pl.mareklangiewicz.kommand.Ide.Type
 

@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.gnupg
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.*
 import pl.mareklangiewicz.kommand.gnupg.Gpg.Cmd.*

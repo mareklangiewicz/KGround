@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
+
 fun adb(command: Adb.Command, init: Adb.() -> Unit = {}) = Adb(command).apply(init)
 
 /** [Android Debug Bridge User Guide](https://developer.android.com/studio/command-line/adb) */

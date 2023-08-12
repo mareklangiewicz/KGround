@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.github
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 
 fun ghSecretList(repoPath: String? = null, init: GhSecretList.() -> Unit = {}) =
