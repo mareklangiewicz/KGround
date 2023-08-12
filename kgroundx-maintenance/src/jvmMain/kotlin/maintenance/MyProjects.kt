@@ -56,15 +56,15 @@ suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false, log: 
             SYSTEM.injectAllKnownRegionsToAllFoundFiles(it, log = log)
         }
 
-internal val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
+val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
 
 @Suppress("IdentifierGrammar")
-internal suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
+suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
     ghLangaraRepoList(onlyPublic = onlyPublic)
         .outputFields("name")
         .reduced { stdout }
         .exec(SYS)
 
-internal suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
+suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
     fetchMyProjectsNameS(onlyPublic).toList().let { if (sorted) it.sorted() else it }
 
