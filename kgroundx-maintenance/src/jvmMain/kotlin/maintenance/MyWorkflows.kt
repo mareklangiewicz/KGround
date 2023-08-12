@@ -79,11 +79,10 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
             uses(action = CheckoutV3())
             usesJdk()
             uses(
-                name = "MaintenanceTests.updateGeneratedDeps",
+                name = "updateGeneratedDeps",
                 action = GradleBuildActionV2(
-                    arguments = "test --tests MaintenanceTests.updateGeneratedDeps",
+                    arguments = "updateGeneratedDeps",
                 ),
-                env = linkedMapOf("UPDATE_GENERATED_DEPS" to "true"),
             )
             uses(
                 name = "Commit",

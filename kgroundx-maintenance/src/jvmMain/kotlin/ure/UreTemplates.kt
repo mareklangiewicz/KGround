@@ -6,6 +6,7 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.maintenance.*
 import kotlin.math.absoluteValue
 import kotlin.random.Random
@@ -214,15 +215,14 @@ fun FileSystem.injectCustomRegion(
     }
 }
 
-
 fun downloadTmpFile(
     url: String,
     name: String = "tmp${Random.nextLong().absoluteValue}.txt",
-    dir: Path = "build".toPath(),
-): Path = CliPlatform.SYS.run {
+    dir: Path = (SYS.pathToUserTmp ?: SYS.pathToSystemTmp ?: "/tmp").toPath()
+): Path {
     val path = dir / name
-    download(url, path)
-    path
+    SYS.download(url, path)
+    return path
 }
 
 private fun CliPlatform.download(url: String, to: Path) {
@@ -251,4 +251,5 @@ fun downloadAndInjectFileToSpecialRegion(
     val markAfter = "// endregion [$outFileRegionLabel]\n"
     val region = "$markBefore\n$regionContent\n$markAfter"
     SYSTEM.injectCustomRegion(outFileRegionLabel, region, outFilePath)
+    SYSTEM.delete(inFilePath)
 }

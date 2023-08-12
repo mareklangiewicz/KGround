@@ -11,17 +11,6 @@ import pl.mareklangiewicz.uspek.*
 
 class MaintenanceTests {
 
-    // DepsKt$ ./gradlew cleanTest (if needed - especially after "successful" or "disabled" run)
-    // DepsKt$ UPDATE_GENERATED_DEPS=true ./gradlew test --tests MaintenanceTests.updateGeneratedDeps
-//    @EnabledIfEnvironmentVariable(named = "UPDATE_GENERATED_DEPS", matches = "true")
-    @Disabled // FIXME NOW
-    @Test
-    fun updateGeneratedDeps() = downloadAndInjectFileToSpecialRegion(
-        inFileUrl = "https://raw.githubusercontent.com/langara/refreshDeps/main/plugins/dependencies/src/test/resources/objects-for-deps.txt",
-        outFilePath = "src/main/kotlin/deps/DepsNew.kt".toPath(),
-        outFileRegionLabel = "Deps Generated"
-    )
-
     // TODO: I have to run it from command line, due to issue (todo track it):
     // https://youtrack.jetbrains.com/issue/IDEA-320303
     // KGround$ ./gradlew cleanTest
