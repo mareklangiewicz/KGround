@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.demos
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 

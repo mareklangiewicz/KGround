@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand.samples
 
 import org.junit.jupiter.api.TestFactory
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.uspek.eq
 import pl.mareklangiewicz.uspek.o
