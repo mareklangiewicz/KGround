@@ -67,6 +67,11 @@ interface DpkgAct : DpkgOpt {
     data class ListPackages(val pkgNamePattern: String) : KOptS("l", pkgNamePattern), DpkgAct
     data class ListFiles(val pkgName: String) : KOptS("L", pkgName), DpkgAct
     data class Status(val pkgName: String) : KOptS("l", pkgName), DpkgAct
+
+    /**
+     * Display details about package-name, as found in /var/lib/dpkg/available.
+     * Users of APT-based frontends should use apt show package-name instead.
+     */
     data class Details(val pkgName: String) : KOptS("p", pkgName), DpkgAct
     data class Search(val fileSearchPattern: String) : KOptS("S", fileSearchPattern), DpkgAct
 }

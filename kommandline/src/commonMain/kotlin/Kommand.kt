@@ -11,7 +11,7 @@ fun String.toKommand() = split(" ").run {
     kommand(first(), *drop(1).toTypedArray())
 }
 
-// TODO_someday_maybe: full documentation in kdoc (all commands, options, etc)
+// TODO_someday_maybe: full documentation in kdoc (all commands, options, etc.)
 //  (check in practice to make sure it's optimal for IDE users)
 
 interface WithName { val name: String }
@@ -33,7 +33,7 @@ interface WithArgs { val args: List<String> }
  * and ToArgs.toArgs() is always generating kind of target "internal representation"
  * (full "internal representation" to be used by platform or some parent structure/kommand)
  * Also toArgs() should perform some checking for forbidden/inconsistent chars/data, and fail fast in case of problems.
- * (Structures like Kommand and KOpt, etc are mutable, because they are used as convenient builders,
+ * (Structures like Kommand and KOpt, etc. are mutable, because they are used as convenient builders,
  * so they can contain incorrect/inconsistent data during building)
  */
 interface ToArgs { fun toArgs(): List<String> }
@@ -102,7 +102,7 @@ open class KOptL(
         namePrefix: String = "--",
         nameSeparator: String = "=",
         argsSeparator: String = ",",
-    ): this(name, listOfNN(arg), namePrefix, nameSeparator, argsSeparator)
+    ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Short form of an option */
@@ -120,10 +120,8 @@ open class KOptS(
         namePrefix: String = "-",
         nameSeparator: String = " ",
         argsSeparator: String = " ",
-    ): this(name, listOfNN(arg), namePrefix, nameSeparator, argsSeparator)
+    ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
-
-private fun listOfNN(vararg elements: String?) = buildList { addAll(elements.filterNotNull()) }
 
 @DelicateKommandApi
 interface KommandTypical<KOptT: KOptTypical>: Kommand {
