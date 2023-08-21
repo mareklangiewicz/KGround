@@ -1,41 +1,75 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.Man.Section
+@OptIn(DelicateKommandApi::class)
+fun man(section: ManSection? = null, init: Man.() -> Unit = {}) = man(section?.number, init)
 
-fun man(section: Section? = null, init: Man.() -> Unit = {}) = Man(section).apply(init)
-fun man(number: Int, init: Man.() -> Unit = {}) = man(enumValues<Section>().single { it.number == number }, init)
+@OptIn(DelicateKommandApi::class)
+fun man(sectionNumber: Int?, init: Man.() -> Unit = {}) =
+    Man().apply { sectionNumber?.let { +it.toString() }; init() }
 
+@DelicateKommandApi
 data class Man(
-    var section: Section? = null,
-    val options: MutableList<Option> = mutableListOf(),
-    val nonopts: MutableList<String> = mutableListOf()
-): Kommand {
+    override val opts: MutableList<ManOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+): KommandTypical<ManOpt> {
     override val name get() = "man"
-    override val args get() = options.map { it.str }.plusIfNN(section?.number?.toString()) + nonopts
+}
 
-    enum class Section(val number: Int) {
-        execorshell(1), systemcall(2), librarycall(3), specialfile(4), fileformat(5),
-        game(6), miscellaneous(7), systemadmin(8), kernelroutine(9)
-    }
+enum class ManSection(val number: Int) {
+    /** Executable programs or shell commands */
+    Command(1),
+    /** System calls (functions provided by the kernel) */
+    SysCall(2),
+    /** Library calls (functions within program libraries) */
+    LibCall(3),
+    /** Special files (usually found in /dev) */
+    SpecFile(4),
+    /** File formats and conventions, e.g. /etc/passwd */
+    FileFormat(5),
+    /** Games */
+    Game(6),
+    /** Miscellaneous (including macro packages and conventions), e.g. man(7), groff(7), man-pages(7) */
+    Misc(7),
+    /** System administration commands (usually only for root) */
+    SysAdmin(8),
+    /** Kernel routines [Non standard] */
+    KernelRoutine(9),
+}
 
-    sealed class Option(val str: String) {
-        data object all : Option("--all")
-        data object update : Option("--update")
-        data object debug : Option("--debug")
-        data object default : Option("--default")
-        data object warnings : Option("--warnings")
-        data object whatis : Option("--whatis")
-        data object apropos : Option("--apropos")
-        data object globalapropos : Option("--global-apropos")
-        data object where : Option("--where")
-        data object regex : Option("--regex")
-        data object wildcard : Option("--wildcard")
-        data object namesonly : Option("--names-only")
-        data object help : Option("--help")
-        data object usage : Option("--usage")
-        data object version : Option("--version")
-    }
-    operator fun Option.unaryMinus() = options.add(this)
-    operator fun String.unaryPlus() = nonopts.add(this)
+@DelicateKommandApi
+interface ManOpt: KOptTypical {
+
+    data object All : KOptS("a"), ManOpt
+
+    data object Update : KOptS("u"), ManOpt
+
+    data object Debug : KOptS("d"), ManOpt
+
+    data object Default : KOptS("D"), ManOpt
+
+    data class Warnings(val warnings: String) : KOptL("warnings", warnings), ManOpt
+
+    data object WhatIs : KOptS("f"), ManOpt
+
+    /**
+     * @property global when true makes it search text in all man pages (and likely take some time),
+     * instead of searching in short pages descriptions (like the "apropos" cli command).
+     */
+    data class Apropos(val global: Boolean = false) : KOptS(if (global) "K" else "k"), ManOpt
+
+    data class Where(val catFile: Boolean = false) : KOptS(if (catFile) "W" else "w"), ManOpt
+
+    data class Locale(val locale: String) : KOptS("L", locale), ManOpt
+
+    data object Regex : KOptL("--regex"), ManOpt
+
+    data object Wildcard : KOptL("--wildcard"), ManOpt
+
+    data object NamesOnly : KOptL("--names-only"), ManOpt
+
+    data object Help : KOptL("--help"), ManOpt
+
+    data object Usage : KOptL("--usage"), ManOpt
+
+    data object Version : KOptL("--version"), ManOpt
 }

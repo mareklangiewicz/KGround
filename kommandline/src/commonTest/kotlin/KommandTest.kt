@@ -6,7 +6,6 @@ import pl.mareklangiewicz.kommand.Adb.Command.*
 import pl.mareklangiewicz.kommand.Adb.Option.*
 import pl.mareklangiewicz.kommand.Ide.Cmd.diff
 import pl.mareklangiewicz.kommand.Ide.Option.*
-import pl.mareklangiewicz.kommand.Man.Section.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.kommand.iproute2.Ss.Option.*
@@ -24,6 +23,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 
+@OptIn(DelicateKommandApi::class)
 @Ignore // stuff specific to my laptop fails on CI
 class KommandTest {
     @Test fun testBashQuoteMetaChars() {
@@ -56,11 +56,11 @@ class KommandTest {
 
     @Test fun testManMan() = man { +"man" }.chkWithUser()
     @Test fun testManVim() = man { +"vim" }.chkWithUser()
-    @Test fun testManOpenAll() = man { -Man.Option.all; +"open" }.chkWithUser()
+    @Test fun testManOpenAll() = man { -ManOpt.All; +"open" }.chkWithUser()
     @Test fun testManOpen2() = man(2) { +"open" }.chkWithUser()
-    @Test fun testManOpenSys() = man(systemcall) { +"open" }.chkWithUser()
-    @Test fun testManApropos() = man { -Man.Option.apropos; +"package" }.chkWithUser()
-    @Test fun testManWhatis() = man { -Man.Option.whatis; +"which" }.chkWithUser()
+    @Test fun testManOpenSys() = man(ManSection.SysCall) { +"open" }.chkWithUser()
+    @Test fun testManApropos() = man { -ManOpt.Apropos(); +"package" }.chkWithUser()
+    @Test fun testManWhatIs() = man { -ManOpt.WhatIs; +"which" }.chkWithUser()
 
     @Test fun testAdbDevices() = adb(devices) { -Option.all; -usb }.chkWithUser("adb -a -d devices")
     @Test fun testAdbShell() = adb(shell).chkWithUser("adb shell")
