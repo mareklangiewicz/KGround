@@ -9,6 +9,7 @@ import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.kommand.ssh.*
 
 
 /**
@@ -28,6 +29,7 @@ suspend fun playground() {
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")
     }
+//    SshSamples.sshPimInTermGnome.x()
 //    prepareMyExcludeFolderInKotlinMultiProject()
 //    showLangaraRepoMarkdownListInIdeaP()
 }

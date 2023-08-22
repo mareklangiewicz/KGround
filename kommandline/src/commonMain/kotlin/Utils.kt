@@ -1,14 +1,9 @@
 package pl.mareklangiewicz.kommand
 
-import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import pl.mareklangiewicz.kommand.gnome.startInGnomeTermIfUserConfirms
+import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
-import kotlin.contracts.*
-import kotlin.time.*
-
-
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -30,7 +25,7 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 fun Kommand.chkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
     this.logln()
     if (expectedKommandLine != null) chk(expectedKommandLine == line())
-    ifInteractive { platform.startInGnomeTermIfUserConfirms(kommand = this, execInDir = execInDir) }
+    ifInteractive { platform.startInTermIfUserConfirms(kommand = this, execInDir = execInDir) }
 }
 
 fun Kommand.chkInIdeap(

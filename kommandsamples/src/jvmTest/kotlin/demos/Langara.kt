@@ -17,6 +17,7 @@ import pl.mareklangiewicz.kommand.konfig.*
 fun isUserTestClassEnabled(context: ExtensionContext) =
     SYS.isUserFlagEnabled("tests." + context.requiredTestClass.simpleName)
 
+@OptIn(DelicateKommandApi::class)
 @EnabledIf(
     value = "pl.mareklangiewicz.kommand.demos.LangaraKt#isUserTestClassEnabled",
     disabledReason = "tests.Langara not enabled in user konfig"
@@ -29,11 +30,13 @@ class Langara {
 
     @Test fun demo_repl() = idemo { LangaraREPL() }
 
-    @Test fun demo_htop() = idemo { gnometerm(kommand("htop")).execb(this) }
+    @Test fun demo_htop() = idemo { termGnome(kommand("htop")).execb(this) }
 
-    @Test fun demo_ps() = idemo { gnometerm(bash("ps -e | grep " + askEntry("find process"), pause = true)).execb(this) }
+    @Test fun demo_btop() = idemo { termGnome(kommand("btop")).execb(this) }
 
-    @Test fun demo_man() = idemo { gnometerm(man { +askEntry("manual page for") }).execb(this) }
+    @Test fun demo_ps() = idemo { termGnome(bash("ps -e | grep " + askEntry("find process"), pause = true)).execb(this) }
+
+    @Test fun demo_man() = idemo { termGnome(man { +askEntry("manual page for") }).execb(this) }
 
     @Test fun demo_ideap() = idemo {
         ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.execb(this)

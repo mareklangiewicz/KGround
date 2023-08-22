@@ -13,6 +13,9 @@ fun ssh(destination: String, command: String? = null, vararg options: SshOpt) =
 fun ssh(destination: String, command: String? = null, init: Ssh.() -> Unit = {}) =
     Ssh().apply { +destination; command?.let { +it }; init() }
 
+@OptIn(DelicateKommandApi::class)
+fun sshVersion() = Ssh().apply { -SshOpt.Version }
+
 /**
  * [openssh homepage](https://www.openssh.com/)
  * [openssh manuals](https://www.openssh.com/manual.html)

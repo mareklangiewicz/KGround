@@ -2,20 +2,18 @@
 
 package pl.mareklangiewicz.kommand.gnome
 
-import pl.mareklangiewicz.kommand.Kommand
-import pl.mareklangiewicz.kommand.CliPlatform
-import pl.mareklangiewicz.kommand.bash
-import pl.mareklangiewicz.kommand.line
-import pl.mareklangiewicz.kommand.zenityAskIfExec
+import pl.mareklangiewicz.kommand.*
 
 
-fun CliPlatform.startInGnomeTermIfUserConfirms(
+@OptIn(DelicateKommandApi::class)
+fun CliPlatform.startInTermIfUserConfirms(
     kommand: Kommand,
-    confirmation: String = "Run ::${kommand.line()}:: in gnome terminal?",
+    confirmation: String = "Run ::${kommand.line()}:: in terminal?",
     title: String = kommand.name,
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = insideBash,
-    execInDir: String? = null
+    execInDir: String? = null,
+    termKommand: (innerKommand: Kommand) -> Kommand = { termGnome(it) }
 ) {
     if (zenityAskIfExec(confirmation, title)) {
         val k = when {
@@ -23,7 +21,7 @@ fun CliPlatform.startInGnomeTermIfUserConfirms(
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
             else -> kommand
         }
-        start(gnometerm(k), dir = execInDir)
+        start(termKommand(k), dir = execInDir)
     }
 }
 
