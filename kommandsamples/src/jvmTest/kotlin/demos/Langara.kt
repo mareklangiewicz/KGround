@@ -30,13 +30,13 @@ class Langara {
 
     @Test fun demo_repl() = idemo { LangaraREPL() }
 
-    @Test fun demo_htop() = idemo { termGnome(kommand("htop")).execb(this) }
+    @Test fun demo_htop() = idemo { termKitty(kommand("htop")).execb(this) }
 
-    @Test fun demo_btop() = idemo { termGnome(kommand("btop")).execb(this) }
+    @Test fun demo_btop() = idemo { termKitty(kommand("btop")).execb(this) }
 
-    @Test fun demo_ps() = idemo { termGnome(bash("ps -e | grep " + askEntry("find process"), pause = true)).execb(this) }
+    @Test fun demo_ps() = idemo { termKitty(bash("ps -e | grep " + askEntry("find process"), pause = true)).execb(this) }
 
-    @Test fun demo_man() = idemo { termGnome(man { +askEntry("manual page for") }).execb(this) }
+    @Test fun demo_man() = idemo { termKitty(man { +askEntry("manual page for") }).execb(this) }
 
     @Test fun demo_ideap() = idemo {
         ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.execb(this)

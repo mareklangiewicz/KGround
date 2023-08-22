@@ -1,4 +1,4 @@
-@file:Suppress("ClassName", "MemberVisibilityCanBePrivate")
+@file:Suppress("ClassName")
 
 package pl.mareklangiewicz.kommand.term
 
