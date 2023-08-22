@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.ssh
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
 
@@ -19,14 +20,14 @@ data object SshSamples {
 
     val sshPimInTermKitty =
         termKitty(ssh("pim")) s
-                "kitty -1 -- ssh pim"
+                "kitty -1 --detach -- ssh pim"
 
     val sshPimLsInTermKitty =
         termKitty(ssh("pim", "ls"), hold = true) s
-                "kitty -1 --hold -- ssh pim ls"
+                "kitty -1 --detach --hold -- ssh pim ls"
 
     val sshPimLsLAH =
-        ssh("pim", "ls -lah") s
-                "ssh pim ls"
+        ssh("pim", ls { -LsOpt.LongFormat; -LsOpt.All; -LsOpt.HumanReadable }) s
+                "ssh pim ls -l -a -h"
 }
 

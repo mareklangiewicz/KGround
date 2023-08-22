@@ -6,6 +6,10 @@ import pl.mareklangiewicz.kommand.*
 
 
 @DelicateKommandApi
+fun ssh(destination: String, kommand: Kommand, vararg options: SshOpt) =
+    ssh(destination, kommand.line()) { opts.addAll(options) }
+
+@DelicateKommandApi
 fun ssh(destination: String, command: String? = null, vararg options: SshOpt) =
     ssh(destination, command) { opts.addAll(options) }
 
