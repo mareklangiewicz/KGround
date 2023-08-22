@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.term
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
 
 /**
  * [kitty homepage](https://sw.kovidgoyal.net/kitty/)
@@ -10,7 +11,15 @@ import pl.mareklangiewicz.kommand.*
  * [kitty man page ubuntu outdated?](https://manpages.ubuntu.com/manpages/focal/man1/kitty.1.html)
  */
 @OptIn(DelicateKommandApi::class)
-fun termKitty(kommand: Kommand? = null, init: TermKitty.() -> Unit = {}) =
+fun termKitty(
+    kommand: Kommand? = null,
+    one: Boolean = true,
+    detach: Boolean = true,
+    hold: Boolean = false
+) = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold  }
+
+@DelicateKommandApi
+fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
     TermKitty().apply {
         kommand?.let { +"--"; nonopts.addAll(kommand.toArgs()) }
             // I added the "--" separator even though docs don't say anything about it, but it works,

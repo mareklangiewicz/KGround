@@ -39,6 +39,7 @@ fun <FunctionOut> ReducedSample<*, *, *, *, *, FunctionOut>.asFunction(
 data object Samples {
     val Core = pl.mareklangiewicz.kommand.core.CoreSamples
     val Find = pl.mareklangiewicz.kommand.find.FindSamples
+    val Ssh = pl.mareklangiewicz.kommand.ssh.SshSamples
     val Admin = pl.mareklangiewicz.kommand.admin.AdminSamples
     val Debian = pl.mareklangiewicz.kommand.debian.DebianSamples
     val Git = pl.mareklangiewicz.kommand.git.GitSamples
