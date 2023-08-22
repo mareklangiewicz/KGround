@@ -1,6 +1,6 @@
 @file:Suppress("ClassName", "MemberVisibilityCanBePrivate")
 
-package pl.mareklangiewicz.kommand.gnome
+package pl.mareklangiewicz.kommand.term
 
 import pl.mareklangiewicz.kommand.*
 

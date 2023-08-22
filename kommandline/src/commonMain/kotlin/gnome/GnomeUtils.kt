@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.term.*
 
 
 @OptIn(DelicateKommandApi::class)

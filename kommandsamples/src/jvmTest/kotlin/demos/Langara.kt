@@ -5,8 +5,8 @@ import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.kommand.konfig.*
+import pl.mareklangiewicz.kommand.term.*
 
 
 // TODO NOW: move all this kind of stuff to samples
