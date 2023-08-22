@@ -7,13 +7,6 @@ on:
   push:
     tags:
     - 'v*.*.*'
-env:
-  MYKOTLIBS_signing_keyId: '${{ secrets.MYKOTLIBS_signing_keyId }}'
-  MYKOTLIBS_signing_password: '${{ secrets.MYKOTLIBS_signing_password }}'
-  MYKOTLIBS_signing_key: '${{ secrets.MYKOTLIBS_signing_key }}'
-  MYKOTLIBS_ossrhUsername: '${{ secrets.MYKOTLIBS_ossrhUsername }}'
-  MYKOTLIBS_ossrhPassword: '${{ secrets.MYKOTLIBS_ossrhPassword }}'
-  MYKOTLIBS_sonatypeStagingProfileId: '${{ secrets.MYKOTLIBS_sonatypeStagingProfileId }}'
 jobs:
   release:
     runs-on: 'ubuntu-latest'
@@ -36,3 +29,10 @@ jobs:
       uses: 'gradle/gradle-build-action@v2'
       with:
         arguments: 'publishToSonatype closeAndReleaseSonatypeStagingRepository'
+      env:
+        MYKOTLIBS_signing_keyId: '${{ secrets.MYKOTLIBS_signing_keyId }}'
+        MYKOTLIBS_signing_password: '${{ secrets.MYKOTLIBS_signing_password }}'
+        MYKOTLIBS_signing_key: '${{ secrets.MYKOTLIBS_signing_key }}'
+        MYKOTLIBS_ossrhUsername: '${{ secrets.MYKOTLIBS_ossrhUsername }}'
+        MYKOTLIBS_ossrhPassword: '${{ secrets.MYKOTLIBS_ossrhPassword }}'
+        MYKOTLIBS_sonatypeStagingProfileId: '${{ secrets.MYKOTLIBS_sonatypeStagingProfileId }}'
