@@ -312,14 +312,14 @@ fun KotlinMultiplatformExtension.jsDefault(
 ) {
     js(IR) {
         if (withBrowser) browser {
-            testTask {
+            testTask(Action {
                 useKarma {
                     when (testWithChrome to testHeadless) {
                         true to true -> useChromeHeadless()
                         true to false -> useChrome()
                     }
                 }
-            }
+            })
         }
         if (withNode) nodejs()
     }

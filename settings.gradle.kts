@@ -8,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.50" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("pl.mareklangiewicz.deps.settings") version "0.2.52" // https://plugins.gradle.org/search?term=mareklangiewicz
     id("com.gradle.enterprise") version "3.14.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
@@ -27,6 +27,6 @@ include(":kground")
 include(":kgroundx")
 include(":kground-io")
 include(":kgroundx-io")
-include(":kgroundx-maintenance") // TODO NOW
-include(":kgroundx-jupyter") // TODO NOW
+include(":kgroundx-maintenance")
+include(":kgroundx-jupyter")
 
