@@ -4,6 +4,7 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.NotifySend.Option.urgency
 import pl.mareklangiewicz.kommand.systemd.*
 import pl.mareklangiewicz.kommand.systemd.JournalCtl.Option.*
+import pl.mareklangiewicz.kommand.term.*
 import kotlin.test.Test
 
 
