@@ -23,8 +23,8 @@ class MaintenanceTests {
 //
 //        "DANGEROUS inject all known regions to sync" o { injectAllKnownRegionsToSync() }
 //        "DANGEROUS inject all known regions to all my projects" o { runBlocking { injectAllKnownRegionsToMyProjects() } }
-//        "DANGEROUS inject default workflows to all my projects" o { runBlocking { injectMyDWorkflowsToMyProjects(onlyPublic = true) } }
-//        "DANGEROUS inject default workflows to Some Proj" o { injectDWorkflowsToKotlinProject("KommandLine") }
+//        "DANGEROUS inject dworkflows to all my projects" o { runBlocking { injectMyDWorkflowsToMyProjects(onlyPublic = true) } }
+//        "DANGEROUS inject dworkflows to Some Proj" o { injectDWorkflowsToKotlinProject("KommandLine") }
 //
 //        "DANGEROUS updateKGroundResourcesSymLinks" o { updateKGroundResourcesSymLinks() }
 //        "DANGEROUS updateGradlewFilesInMyProjects" o { runBlocking { updateGradlewFilesInMyProjects(onlyPublic = false) } }

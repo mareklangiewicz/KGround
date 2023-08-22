@@ -8,8 +8,8 @@ import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.maintenance.*
-import kotlin.math.absoluteValue
-import kotlin.random.Random
+import kotlin.math.*
+import kotlin.random.*
 
 // FIXME NOW: I should not need to hardcode all these labels. Dynamically collect all special regions instead.
 const val labelRoot = "Root Build Template"
@@ -221,6 +221,7 @@ fun downloadTmpFile(
     dir: Path = (SYS.pathToUserTmp ?: SYS.pathToSystemTmp ?: "/tmp").toPath()
 ): Path {
     val path = dir / name
+    SYSTEM.createDirectories(dir)
     SYS.download(url, path)
     return path
 }

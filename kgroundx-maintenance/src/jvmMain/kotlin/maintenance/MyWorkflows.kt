@@ -18,7 +18,7 @@ import pl.mareklangiewicz.io.*
 
 private val myFork = expr { "${github.repository_owner} == 'langara'" }
 
-private val myEnv = listOf(
+private val mySecretsEnv = listOf(
     "signing_keyId", "signing_password", "signing_key",
     "ossrhUsername", "ossrhPassword", "sonatypeStagingProfileId"
 )
@@ -68,7 +68,6 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
     val workflow = workflow(
         name = "Update Generated Deps",
         on = listOf(Schedule(listOf(everyMondayAt8am)), WorkflowDispatch()),
-        env = myEnv,
         targetFileName = "update-generated-deps.yml",
     ) {
         job(
@@ -177,12 +176,12 @@ private fun defaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.U
             Push(branches = listOf("master", "main")),
             PullRequest(),
         ),
-        env = myEnv,
     ) {
         runners.forEach { runnerType ->
             job(
                 id = "build-for-${runnerType::class.simpleName}",
                 runsOn = runnerType,
+                env = mySecretsEnv,
             ) {
                 uses(action = CheckoutV3())
                 usesJdk()
@@ -195,10 +194,10 @@ private fun defaultReleaseWorkflow() =
     workflow(
         name = "drelease",
         on = listOf(Push(tags = listOf("v*.*.*"))),
-        env = myEnv,
     ) {
         job(
             id = "release",
+            env = mySecretsEnv,
             runsOn = RunnerType.UbuntuLatest,
         ) {
             uses(action = CheckoutV3())
