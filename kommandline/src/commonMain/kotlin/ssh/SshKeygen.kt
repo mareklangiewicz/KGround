@@ -24,8 +24,6 @@ class SshKeygen(
     override val name get() = "ssh-keygen"
 }
 
-// TODO NOW: -f -N -p -c -m
-
 @DelicateKommandApi
 interface SshKeygenOpt: KOptTypical {
 
@@ -65,7 +63,14 @@ interface SshKeygenOpt: KOptTypical {
      * Specifies the hash algorithm used when displaying key fingerprints.
      * Valid options are: “md5” and “sha256”. The default is “sha256”.
      */
-    data class FingerprintHash(val algo: String = "sha256"): KOptS("E", keyType), SshKeygenOpt
+    data class FingerprintHash(val algo: String = "sha256"): KOptS("E", algo), SshKeygenOpt
+
+    /**
+     * Show fingerprint of specified public key file.
+     * For RSA and DSA keys ssh-keygen tries to find the matching public key file and prints its fingerprint.
+     * If combined with -v, a visual ASCII art representation of the key is supplied with the fingerprint.
+     */
+    data object FingerprintShow: KOptS("l"), SshKeygenOpt
 
     /**
      * This option will read a private or public OpenSSH key file and print to stdout a public key
@@ -85,13 +90,36 @@ interface SshKeygenOpt: KOptTypical {
      */
     data object ImportKey: KOptS("i"), SshKeygenOpt
 
+    /** This option will read a private OpenSSH format file and print an OpenSSH public key to stdout. */
+    data object PrintPublicKey: KOptS("y"), SshKeygenOpt
+
     /**
-     * @property host format: 'hostname|[hostname]:port'
+     * @property host format: 'hostname|hostname:port'
      * Search for the specified hostname (with optional port number) in a known_hosts file,
      * listing any occurrences found. This option is useful to find hashed host names or addresses
      * and may also be used in conjunction with the -H option to print found keys in a hashed format.
      */
-    data class FindKnownHost(val host: String): KOptS("F", keyType), SshKeygenOpt
+    data class KnownHostFind(val host: String): KOptS("F", host), SshKeygenOpt
+
+    /**
+     * @property host format: 'hostname|hostname:port'
+     * Removes all keys belonging to the specified hostname (with optional port number) from a known_hosts file.
+     * This option is useful to delete hashed hosts (see the -H option above).
+     */
+    data class KnownHostRemove(val host: String): KOptS("R", host), SshKeygenOpt
+
+    /**
+     * Specify a key format for key generation, the -i (import),
+     * -e (export) conversion options, and the -p change passphrase operation.
+     * The latter may be used to convert between OpenSSH private key and PEM private key formats.
+     * The supported key formats are: “RFC4716” (RFC 4716/SSH2 public or private key),
+     * “PKCS8” (PKCS8 public or private key) or “PEM” (PEM public key).
+     * By default OpenSSH will write newly-generated private keys in its own format,
+     * but when converting public keys for export the default format is “RFC4716”.
+     * Setting a format of “PEM” when generating or updating a supported private key type
+     * will cause the key to be stored in the legacy PEM private key format.
+     */
+    data class KeyFormat(val format: String = "RFC4716"): KOptS("m", format), SshKeygenOpt
 
     /** Specifies the filename of the key file. */
     data class KeyFile(val file: String): KOptS("f", file), SshKeygenOpt
@@ -105,6 +133,26 @@ interface SshKeygenOpt: KOptTypical {
      * [man page fragment](https://man.openbsd.org/ssh-keygen#t)
      */
     data class KeyType(val keyType: String = "rsa"): KOptS("t", keyType), SshKeygenOpt
+
+
+    /** Provides the new passphrase. */
+    data class PassPhraseNew(val newPhrase: String): KOptS("N", newPhrase), SshKeygenOpt
+
+    /** Provides the (old) passphrase. */
+    data class PassPhraseOld(val oldPhrase: String): KOptS("P", oldPhrase), SshKeygenOpt
+
+    /**
+     * Requests changing the passphrase of a private key file instead of creating a new private key.
+     * The program will prompt for the file containing the private key, for the old passphrase,
+     * and twice for the new passphrase.
+     */
+    data object PassPhraseChange: KOptS("p"), SshKeygenOpt
+
+    /**
+     * Specify a key/value option. These are specific to the operation that ssh-keygen has been requested to perform.
+     * @see [man page fragment](https://man.openbsd.org/ssh-keygen#O)
+     */
+    data class Option(val option: String): KOptS("O", option), SshKeygenOpt
 
     /**
      * Verbose mode. Causes ssh-keygen to print debugging messages about its progress.
