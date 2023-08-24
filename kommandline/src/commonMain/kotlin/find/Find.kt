@@ -49,7 +49,7 @@ private fun FindDetailsDef.detailsParseLine(line: String): List<String> {
     chk(line.endsWith("\u0000")) { "Looks like there was some file with forbidden character (line break)" }
     // Not actually forbidden in unix but it's weird and dangerous to have multiline file names, so better fail fast.
     val list = line.removeSuffix("\u0000").split("\u0000\u0000")
-    chk(list.size == size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
+    chkeq(list.size, size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
     return list
 }
 

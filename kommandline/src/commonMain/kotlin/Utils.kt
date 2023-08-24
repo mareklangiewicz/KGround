@@ -5,6 +5,7 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.term.*
+import kotlin.contracts.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -28,13 +29,18 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 @OptIn(DelicateKommandApi::class)
 fun Kommand.chkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
     this.logln()
-    if (expectedKommandLine != null) chk(expectedKommandLine == line())
+    if (expectedKommandLine != null) chkeq(line(), expectedKommandLine)
     ifInteractive { platform.startInTermIfUserConfirms(
         kommand = this,
         execInDir = execInDir,
         termKommand = { termKitty(it) },
     ) }
 }
+
+// TODO_NOW: move to kground
+@OptIn(ExperimentalContracts::class)
+inline fun chkeq(exp: Any?, act: Any?, lazyMessage: () -> String = { "bad act: $act != $exp" }) =
+    chk(exp == act, lazyMessage)
 
 @OptIn(DelicateKommandApi::class)
 fun Kommand.chkInIdeap(
@@ -43,7 +49,7 @@ fun Kommand.chkInIdeap(
     platform: CliPlatform = SYS
 ) {
     this.logln()
-    if (expectedKommandLine != null) chk(expectedKommandLine == line())
+    if (expectedKommandLine != null) chkeq(line(), expectedKommandLine)
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
         start(this@chkInIdeap, dir = execInDir, outFile = tmpFile).waitForExit()

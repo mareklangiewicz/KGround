@@ -1,9 +1,10 @@
+@file:OptIn(DelicateKommandApi::class)
+
 package pl.mareklangiewicz.kommand.konfig
 
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.core.MkDir.Option.parents
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 
@@ -41,7 +42,7 @@ fun CliPlatform.konfigInDir(
 
 private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = CliPlatform.SYS): IKonfig {
 
-    init { mkdir { -parents; +dir }.execb(platform) }
+    init { mkdir(dir, withParents = true).execb(platform) }
 
     override fun get(key: String): String? = platform.tryToReadFileWithCatExec("$dir/$key")
 

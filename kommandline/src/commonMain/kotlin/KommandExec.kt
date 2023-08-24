@@ -65,7 +65,7 @@ suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, Collec
     val tprocess = platform.start(this, dir)
     val collectedOut = tprocess.stdout.collectOut()
     val exit = tprocess.awaitExit()
-    chk(exit == 0) { "Unexpected exit value: $exit" }
+    chkeq(exit, 0) { "Unexpected exit value: $exit" }
     return collectedOut
 }
 

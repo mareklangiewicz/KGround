@@ -22,7 +22,7 @@ class SamplesTests {
 fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     val objSimpleName = obj::class.simpleName ?: error("Unexpected samples obj without name")
     if (depthLimit < 1) { println("depthLimit < 1. Ignoring obj $objSimpleName"); return }
-    chk(objSimpleName.endsWith("Samples") == true) { "Unexpected obj name in samples: $objSimpleName" }
+    chkeq(objSimpleName.endsWith("Samples"), true) { "Unexpected obj name in samples: $objSimpleName" }
     chk(obj::class.objectInstance != null) { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
     chk(obj::class.isData) { "Unexpected obj in samples which is NOT data object: $objSimpleName" }
     val props = obj.getNamedPropsValues()

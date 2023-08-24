@@ -16,7 +16,6 @@ import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.All
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
-import pl.mareklangiewicz.kommand.core.MkDir.Option.*
 import pl.mareklangiewicz.kommand.core.Rm.Option.*
 import kotlin.test.*
 import kotlin.test.Ignore
@@ -42,8 +41,8 @@ class KommandTest {
     @Test fun testLsHomeSubDirsWithHidden() = SYS.lsSubDirsExec("/home/marek", withHidden = true).logEach()
     @Test fun testLsHomeRegFiles() = SYS.lsRegFilesExec("/home/marek").logEach()
 
-    @Test fun testMkDir1() = mkdir { -parents; +"/tmp/testMkDir1/blaa/blee" }
-        .chkWithUser("mkdir --parents /tmp/testMkDir1/blaa/blee")
+    @Test fun testMkDir1() = mkdir("/tmp/testMkDir1/blaa/blee", withParents = true)
+        .chkWithUser("mkdir -p /tmp/testMkDir1/blaa/blee")
 
     @Test fun testRm1() = rm { -dir; +"/tmp/testMkDir1/blaa/blee" }
         .chkWithUser("rm --dir /tmp/testMkDir1/blaa/blee")
