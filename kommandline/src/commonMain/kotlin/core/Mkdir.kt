@@ -9,7 +9,10 @@ fun mkdir(dir: String, withParents: Boolean = false) = mkdir { if (withParents) 
 @DelicateKommandApi
 fun mkdir(init: Mkdir.() -> Unit = {}) = Mkdir().apply(init)
 
-/** [linux man](https://man7.org/linux/man-pages/man1/mkdir.1.html) */
+/**
+ * [linux man](https://man7.org/linux/man-pages/man1/mkdir.1.html)
+ * [gnu coreutils mkdir manual](https://www.gnu.org/software/coreutils/manual/html_node/mkdir-invocation.html#mkdir-invocation)
+ */
 @DelicateKommandApi
 class Mkdir(
     override val opts: MutableList<MkdirOpt> = mutableListOf(),
