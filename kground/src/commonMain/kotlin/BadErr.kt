@@ -32,29 +32,29 @@ inline fun req(value: Boolean, lazyMessage: () -> String = { "this arg is bad" }
 inline fun <T: Any> T?.chkNN(lazyMessage: () -> String = { "this null is bad" }): T = this ?: bad(lazyMessage)
 inline fun <T: Any> T?.reqNN(lazyMessage: () -> String = { "this null arg is bad" }): T = this ?: badArg(lazyMessage)
 
-open class BadEqStateErr(val exp: Any?, val act: Any?, message: String? = null, cause: Throwable? = null): BadStateErr(message, cause)
+open class NotEqStateErr(val exp: Any?, val act: Any?, message: String? = null): BadStateErr(message)
 
-open class BadEqArgErr(val exp: Any?, val act: Any?, message: String? = null, cause: Throwable? = null): BadArgErr(message, cause)
+open class NotEqArgErr(val exp: Any?, val act: Any?, message: String? = null): BadArgErr(message)
 
 inline fun Any?.chkEq(exp: Any?, lazyMessage: () -> String = { "bad $this != $exp" }) = apply {
-    this == exp || throw BadEqStateErr(exp, this, lazyMessage())
+    this == exp || throw NotEqStateErr(exp, this, lazyMessage())
 }
 
 inline fun Any?.reqEq(exp: Any?, lazyMessage: () -> String = { "bad arg $this != $exp" }) = apply {
-    this == exp || throw BadEqArgErr(exp, this, lazyMessage())
+    this == exp || throw NotEqArgErr(exp, this, lazyMessage())
 }
 
 @OptIn(ExperimentalContracts::class)
 inline fun Any?.chkEqNull(lazyMessage: () -> String = { "this non-null is bad" }): Nothing? {
     contract { returns() implies (this@chkEqNull == null) }
-    this == null || throw BadEqStateErr(null, this, lazyMessage())
+    this == null || throw NotEqStateErr(null, this, lazyMessage())
     return null
 }
 
 @OptIn(ExperimentalContracts::class)
 inline fun Any?.reqEqNull(lazyMessage: () -> String = { "this non-null arg is bad" }): Nothing? {
     contract { returns() implies (this@reqEqNull == null) }
-    this == null || throw BadEqArgErr(null, this, lazyMessage())
+    this == null || throw NotEqArgErr(null, this, lazyMessage())
     return null
 }
 
