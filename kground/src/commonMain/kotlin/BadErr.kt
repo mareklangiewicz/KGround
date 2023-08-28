@@ -36,11 +36,25 @@ open class BadEqStateErr(val exp: Any?, val act: Any?, message: String? = null, 
 
 open class BadEqArgErr(val exp: Any?, val act: Any?, message: String? = null, cause: Throwable? = null): BadArgErr(message, cause)
 
-inline fun Any?.chkEq(exp: Any?, lazyMessage: () -> String = { "bad $this != $exp" }) {
+inline fun Any?.chkEq(exp: Any?, lazyMessage: () -> String = { "bad $this != $exp" }) = apply {
     this == exp || throw BadEqStateErr(exp, this, lazyMessage())
 }
 
-inline fun Any?.reqEq(exp: Any?, lazyMessage: () -> String = { "bad arg $this != $exp" }) {
+inline fun Any?.reqEq(exp: Any?, lazyMessage: () -> String = { "bad arg $this != $exp" }) = apply {
     this == exp || throw BadEqArgErr(exp, this, lazyMessage())
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun Any?.chkEqNull(lazyMessage: () -> String = { "this non-null is bad" }): Nothing? {
+    contract { returns() implies (this@chkEqNull == null) }
+    this == null || throw BadEqStateErr(null, this, lazyMessage())
+    return null
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun Any?.reqEqNull(lazyMessage: () -> String = { "this non-null arg is bad" }): Nothing? {
+    contract { returns() implies (this@reqEqNull == null) }
+    this == null || throw BadEqArgErr(null, this, lazyMessage())
+    return null
 }
 
