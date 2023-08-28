@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.chk
 import java.io.*
 import java.lang.ProcessBuilder.*
 import kotlin.coroutines.*
@@ -64,7 +63,7 @@ class JvmPlatform : CliPlatform {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-private fun seqentialContext(name: String): CoroutineContext =
+private fun sequentialContext(name: String): CoroutineContext =
     // TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
     // UPDATE: I convinced myself it is safe. There is always happens-before guarantee and only one thread at a time is used.
 //    newSingleThreadContext(name)
@@ -77,10 +76,10 @@ private fun CoroutineContext.tryDispatch(block: () -> Unit) =
 
 private class JvmExecProcess(private val process: Process) : ExecProcess {
 
-    private val processContext = seqentialContext("JvmExecProcess.processDispatcher")
-    private val stdinContext = seqentialContext("JvmExecProcess.stdinDispatcher")
-    private val stdoutContext = seqentialContext("JvmExecProcess.stdoutDispatcher")
-    private val stderrContext = seqentialContext("JvmExecProcess.stderrDispatcher")
+    private val processContext = sequentialContext("JvmExecProcess.processDispatcher")
+    private val stdinContext = sequentialContext("JvmExecProcess.stdinDispatcher")
+    private val stdoutContext = sequentialContext("JvmExecProcess.stdoutDispatcher")
+    private val stderrContext = sequentialContext("JvmExecProcess.stderrDispatcher")
 
     private val stdinWriter = process.outputWriter()
     private val stdoutReader = process.inputReader()

@@ -9,7 +9,6 @@ package pl.mareklangiewicz.kommand.find
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.chk
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 
 
@@ -49,7 +48,7 @@ private fun FindDetailsDef.detailsParseLine(line: String): List<String> {
     chk(line.endsWith("\u0000")) { "Looks like there was some file with forbidden character (line break)" }
     // Not actually forbidden in unix but it's weird and dangerous to have multiline file names, so better fail fast.
     val list = line.removeSuffix("\u0000").split("\u0000\u0000")
-    chkeq(list.size, size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
+    list.size.chkEq(size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
     return list
 }
 

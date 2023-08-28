@@ -152,6 +152,9 @@ suspend fun StdinCollector.collect(
  */
 @OptIn(ExperimentalStdlibApi::class)
 interface ExecProcess : AutoCloseable {
+    // TODO_later: make ExecProcess implement CoroutineScope. It's natural to be scope and useful for .reduced {...}
+    //   (on JVM use processContext), be careful not to cancel scope too early (when reduced is still collecting),
+    //   so make sure I correctly guarantee cooperative cancelation (rethink finallyClose flags etc.).
 
     /**
      * Tries to kill/destroy/cancel the process. Might not work immediately!
@@ -167,7 +170,8 @@ interface ExecProcess : AutoCloseable {
 
     val stderr: Flow<String>
 
-    // TODO_maybe: move all delicate methods below to separate interface: (Delicate/Unsafe/LowLevel)ExecProcess
+    // TODO_later: move all delicate methods below to separate interface: (Delicate/Unsafe/LowLevel)ExecProcess
+    // maybe access it here as property: val unsafe: UnsafeExecProcess ??
 
     @DelicateKommandApi
     fun waitForExit(finallyClose: Boolean = true): Int

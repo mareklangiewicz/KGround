@@ -1,7 +1,8 @@
+@file:Suppress("unused")
+
 package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.flow.*
-
 
 /**
  * Separate from Kommand, because I want Kommand to be simple and serializable!
@@ -27,23 +28,20 @@ fun <K: Kommand, In, Out, Err> K.typed(
     stdoutRetype: Flow<String>.() -> Out,
 ) = TypedKommand(this, stdinRetype, stderrRetype, stderrToOut, stdoutRetype)
 
-fun <K: Kommand, In, Out> K.typed(
-    stdinRetype: StdinCollector.() -> In,
-    stderrToOut: Boolean = false,
-    stdoutRetype: Flow<String>.() -> Out,
-): TypedKommand<K, In, Out, Flow<Nothing>> =
-    typed(stdinRetype, defaultOutRetypeAnyLineToUnexpectedError, stderrToOut, stdoutRetype)
-
 // these default retype algorithms/vals are defined here mostly for me to be able to compare when debugging/testing
 internal val defaultInRetypeToItSelf: StdinCollector.() -> StdinCollector = { this }
 internal val defaultOutRetypeToItSelf: Flow<String>.() -> Flow<String> = { this }
-internal val defaultOutRetypeAnyLineToUnexpectedError: Flow<String>.() -> Flow<Nothing> = { map { error("Unexpected: $it") } }
 
 fun <K: Kommand, Out> K.typed(
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
-): TypedKommand<K, StdinCollector, Out, Flow<Nothing>> =
-    typed(defaultInRetypeToItSelf, stderrToOut, stdoutRetype)
+): TypedKommand<K, StdinCollector, Out, Flow<String>> =
+    typed(
+        stdinRetype = defaultInRetypeToItSelf,
+        stderrRetype = defaultOutRetypeToItSelf,
+        stderrToOut = stderrToOut,
+        stdoutRetype = stdoutRetype
+    )
 
 class TypedExecProcess<In, Out, Err>(
     private val eprocess: ExecProcess,
@@ -58,8 +56,12 @@ class TypedExecProcess<In, Out, Err>(
     val stderr: Err = eprocess.stderr.stderrRetype()
 }
 
+// Mostly for IDE to suggest it when typing "await.."
+suspend fun TypedExecProcess<*, *, *>.awaitAndChkExit(expExit: Int = 0, finallyClose: Boolean = true) =
+    awaitExit(finallyClose).chkExit(expExit)
+
 /**
- * @param dir working directory for started subprocess - null means inherit from current process
+ * @param dir working directory for started subprocess - null means inherit from the current process
  */
 fun <K: Kommand, In, Out, Err> CliPlatform.start(
     kommand: TypedKommand<K, In, Out, Err>,
@@ -83,8 +85,8 @@ fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK
 ) = ReducedKommand(this, reduce)
 
 fun <K: Kommand, ReducedOut> K.reduced(
-    reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<Nothing>>.() -> ReducedOut,
-): ReducedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>, TypedKommand<K, StdinCollector, Flow<String>, Flow<Nothing>>, ReducedOut> =
+    reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
+): ReducedKommand<K, StdinCollector, Flow<String>, Flow<String>, TypedKommand<K, StdinCollector, Flow<String>, Flow<String>>, ReducedOut> =
     typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(reduce)
 
 /**

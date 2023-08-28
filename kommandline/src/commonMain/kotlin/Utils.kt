@@ -29,7 +29,7 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 @OptIn(DelicateKommandApi::class)
 fun Kommand.chkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
     this.logln()
-    if (expectedKommandLine != null) chkeq(line(), expectedKommandLine)
+    if (expectedKommandLine != null) line().chkEq(expectedKommandLine)
     ifInteractive { platform.startInTermIfUserConfirms(
         kommand = this,
         execInDir = execInDir,
@@ -37,10 +37,11 @@ fun Kommand.chkWithUser(expectedKommandLine: String? = null, execInDir: String? 
     ) }
 }
 
-// TODO_NOW: move to kground
-@OptIn(ExperimentalContracts::class)
-inline fun chkeq(exp: Any?, act: Any?, lazyMessage: () -> String = { "bad act: $act != $exp" }) =
-    chk(exp == act, lazyMessage)
+class BadExitStateErr(exp: Int, act: Int, message: String? = null): BadEqStateErr(exp, act, message)
+
+inline fun Int.chkExit(exp: Int = 0, lazyMessage: () -> String = { "bad exit $this != $exp" }) {
+    this == exp || throw BadExitStateErr(exp, this, lazyMessage())
+}
 
 @OptIn(DelicateKommandApi::class)
 fun Kommand.chkInIdeap(
@@ -49,7 +50,7 @@ fun Kommand.chkInIdeap(
     platform: CliPlatform = SYS
 ) {
     this.logln()
-    if (expectedKommandLine != null) chkeq(line(), expectedKommandLine)
+    if (expectedKommandLine != null) line().chkEq(expectedKommandLine)
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
         start(this@chkInIdeap, dir = execInDir, outFile = tmpFile).waitForExit()

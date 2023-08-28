@@ -55,5 +55,10 @@ actual fun Kommand.execb(
     outFile = outFile
 )
 
+// also temporary hack
+@Deprecated("Use suspend fun ReducedKommand.exec(...)")
+actual fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> ReducedKommand<K, In, Out, Err, TK, ReducedOut>
+        .execb(platform: CliPlatform, dir: String?): ReducedOut = runBlocking { exec(platform, dir) }
+
 
 fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }

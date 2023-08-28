@@ -4,7 +4,8 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.MkdirOpt.*
 
 @OptIn(DelicateKommandApi::class)
-fun mkdir(dir: String, withParents: Boolean = false) = mkdir { if (withParents) -Parents; +dir }
+fun mkdir(dir: String, withParents: Boolean = false) =
+    mkdir { if (withParents) -Parents; +dir }.reduced { awaitAndChkExit() }
 
 @DelicateKommandApi
 fun mkdir(init: Mkdir.() -> Unit = {}) = Mkdir().apply(init)

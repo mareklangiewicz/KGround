@@ -3,7 +3,6 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.chk
 
 
 @Deprecated("Use Kommand.exec(CliPlatform, ...)")
@@ -53,19 +52,24 @@ expect fun Kommand.execb(
     outFile: String? = null,
 ): List<String>
 
+// also temporary hack
+expect fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> ReducedKommand<K, In, Out, Err, TK, ReducedOut>
+        .execb(platform: CliPlatform, dir: String? = null): ReducedOut
+
 
 // I'm leaving it here as deprecated, so user can always see when trying to do TypedKommand.exec,
 // that it's better to wrap it in ReducedKommand (or just use .start and handle TypedExecProcess by hand)
 @Deprecated("Use TypedKommand.reduced(...).exec(...)")
-suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, CollectedOut> TK
+suspend fun <K: Kommand, In, Out, TK: TypedKommand<K, In, Out, Flow<String>>, CollectedOut> TK
     .exec(platform: CliPlatform, dir: String? = null, collectOut: suspend Out.() -> CollectedOut): CollectedOut {
-    req(stderrRetype == defaultOutRetypeAnyLineToUnexpectedError) {
+    req(stderrRetype == defaultOutRetypeToItSelf) {
         "TypedKommand.exec doesn't work with customized stderr collection."
     }
     val tprocess = platform.start(this, dir)
     val collectedOut = tprocess.stdout.collectOut()
-    val exit = tprocess.awaitExit()
-    chkeq(exit, 0) { "Unexpected exit value: $exit" }
+    val collectedErr = tprocess.stderr.toList()
+    tprocess.awaitAndChkExit()
+    collectedErr.chkEq(emptyList<String>()) { "Non-empty error stream collected." }
     return collectedOut
 }
 

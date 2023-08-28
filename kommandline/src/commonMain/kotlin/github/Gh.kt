@@ -12,7 +12,7 @@ fun ghStatus(init: GhStatus.() -> Unit = {}) = GhStatus().apply(init)
 /** [gh manual](https://cli.github.com/manual/index) */
 abstract class GhKommand<KOptGhT: KOptGh>: Kommand {
 
-    val ghKommandNameWords get() = classSimpleWords().also { chkeq(it.first(), "gh") }
+    val ghKommandNameWords get() = classSimpleWords().also { it.first().chkEq("gh") }
 
     val nonopts: MutableList<String> = mutableListOf()
     val opts: MutableList<KOptGhT> = mutableListOf()
