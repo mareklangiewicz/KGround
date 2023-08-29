@@ -3,5 +3,9 @@
 /local.properties
 /.idea
 /build
+/template-mpp-lib/build
+/template-mpp-app/build
+/template-jvm-lib/build
+/template-jvm-cli/build
 /captures
 my.gradle.log
