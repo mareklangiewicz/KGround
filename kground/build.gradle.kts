@@ -15,10 +15,7 @@ defaultBuildTemplateForMppLib(
     api(Langiewicz.tuplek)
     api(Langiewicz.upue)
     api(KotlinX.datetime)
-    api(KotlinX.coroutines_core.withVer("1.7.2"))
-    // TODO: track and update when fixed https://github.com/Kotlin/kotlinx.coroutines/issues/3841
-    //   Similar issue (but different because for IDE): https://youtrack.jetbrains.com/issue/KT-60168/
-    //   Probably it was broken in 1.7.3: https://github.com/Kotlin/kotlinx.coroutines/blob/master/CHANGES.md
+    api(KotlinX.coroutines_core)
 }
 
 kotlin { js(IR) { nodejs() } }
