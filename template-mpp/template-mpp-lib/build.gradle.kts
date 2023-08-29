@@ -15,11 +15,10 @@ repositories { maven(repos.composeJbDev) }
 
 defaultBuildTemplateForComposeMppLib(
     withJs = true,
+    // TODO: jsBrowserDevelopmentRun fails, but jsBrowserProductionRun works. Check again when kotlin 1.9.10 is released.
+    // https://youtrack.jetbrains.com/issue/KT-60852/Kotlin-JSIR-IllegalArgumentException-Cross-module-dependency-resolution-failed-when-updating-to-Kotlin-1.9.0
     withNativeLinux64 = false,
     withKotlinxHtml = true,
-    // withComposeCompilerVer = VersNew.ComposeCompiler, // UPDATE: Issue is closed but still JS target doesn't work for me :(
-    // FIXME: stop using custom andro cimpiler when compose multiplatform supports kotlin 1.9.0
-    // https://github.com/JetBrains/compose-multiplatform/issues/3323
 ) {
 // workaround for crazy gradle bugs like this one or simillar:
 // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency

@@ -16,24 +16,13 @@ repositories { maven(repos.composeJbDev) }
 defaultBuildTemplateForComposeMppApp(
     appMainPackage = "pl.mareklangiewicz.hello",
     withJs = true,
+    // TODO: jsBrowserDevelopmentRun fails, but jsBrowserProductionRun works. Check again when kotlin 1.9.10 is released.
+    // https://youtrack.jetbrains.com/issue/KT-60852/Kotlin-JSIR-IllegalArgumentException-Cross-module-dependency-resolution-failed-when-updating-to-Kotlin-1.9.0
     withNativeLinux64 = false,
     withKotlinxHtml = true,
-    // withComposeCompilerVer = VersNew.ComposeCompiler, // UPDATE: Issue is closed but still JS target doesn't work for me :(
-    // FIXME: stop using custom andro cimpiler when compose multiplatform supports kotlin 1.9.0
-    // https://github.com/JetBrains/compose-multiplatform/issues/3323
 ) {
     implementation(project(":template-mpp-lib"))
 }
-
-
-// // Fixes webpack-cli incompatibility by pinning the newest version.
-// // https://youtrack.jetbrains.com/issue/KT-52776/KJS-Gradle-Webpack-version-update-despite-yarnlock-breaks-KotlinJS-build
-// // also see: https://github.com/renovatebot/renovate/issues/13573#issuecomment-1013864638
-// // and: https://www.npmjs.com/package/webpack
-// rootProject.extensions.configure<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension> {
-//     versions.webpack.version = "5.74.0"
-//     versions.webpackCli.version = "4.10.0"
-// }
 
 // region [Kotlin Module Build Template]
 
