@@ -8,14 +8,16 @@ import pl.mareklangiewicz.utils.rootProjectPath
 pluginManagement {
     repositories {
         mavenLocal()
+        mavenCentral()
+        google()
         gradlePluginPortal()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
-//    includeBuild("..") // DepsKt
+//    includeBuild("../../DepsKt")
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.55" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("pl.mareklangiewicz.deps.settings") version "0.2.56" // https://plugins.gradle.org/search?term=mareklangiewicz
     id("com.gradle.enterprise") version "3.14.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
