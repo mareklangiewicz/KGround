@@ -13,7 +13,7 @@ class ZenityTest {
     @Test fun testZenityEntryStart() = ifInteractive { SYS.start(zenity(entry) { -entrytext("suggested text") }) }
 
     @Test fun testZenityCalendar() = zenity(calendar) { -title("some title"); -text("some text") }
-        .chkWithUser("zenity --calendar --title=some\\ title --text=some\\ text")
+        .chkWithUser("zenity --calendar --title=some title --text=some text")
 
     @Test fun testZenityCalendarFormat() = zenity(calendar) { -dateformat("%y-%m-%d") }.chkWithUser()
     @Test fun testZenityInfo() = zenity(info) { -text("Some info (timeout 5s)"); -timeout(5) }.chkWithUser()

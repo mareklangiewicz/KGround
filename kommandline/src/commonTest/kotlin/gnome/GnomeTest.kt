@@ -15,11 +15,11 @@ class GnomeTest {
 
     @Test fun testTermGnome() =
         termGnome(kommand("vim")) { -TermGnomeOpt.Verbose; -TermGnomeOpt.Title("strange terminal title") }
-        .chkWithUser("gnome-terminal -v --title=strange\\ terminal\\ title -- vim")
+        .chkWithUser("gnome-terminal -v --title=strange terminal title -- vim")
 
     @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
         .chkWithUser("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext")
 
     @Test fun testNotify() = notify("aa", "some longer body") { -urgency("critical") }
-        .chkWithUser("notify-send --urgency=critical aa some\\ longer\\ body")
+        .chkWithUser("notify-send --urgency=critical aa some longer body")
 }

@@ -78,7 +78,7 @@ class KommandTest {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
-        kommand2.chkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
+        kommand2.chkWithUser("bash -c vim -g --servername DDDD .")
     }
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
