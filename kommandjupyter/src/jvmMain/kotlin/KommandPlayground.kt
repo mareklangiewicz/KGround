@@ -49,10 +49,9 @@ suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
 
 
 
-@OptIn(DelicateKommandApi::class, ExperimentalKommandApi::class)
+@OptIn(DelicateKommandApi::class)
 suspend fun showLangaraRepoMarkdownListInIdeaP() {
-    val getReposMd = GhSamples.langaraPublicRepoMarkdownList.asFunction()
-    val reposMdContent = getReposMd()
+    val reposMdContent = GhSamples.langaraPublicRepoMarkdownList.reducedKommand.x()
     println(reposMdContent)
     val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
     writeToFileAndOpenInIdeaP(reposMdContent, tmpReposFileMd)
