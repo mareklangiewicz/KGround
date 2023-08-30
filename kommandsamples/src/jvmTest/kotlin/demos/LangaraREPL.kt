@@ -9,7 +9,5 @@ import pl.mareklangiewicz.kommand.core.*
 /** Changes in this fun should NOT be pushed to GIT. */
 @Deprecated("Use notebooks + samples")
 fun CliPlatform.LangaraREPL() {
-
-    lsRegFilesExec("/home/marek").logEach()
-
+    lsRegFiles("/home/marek").execb(this).logEach()
 }

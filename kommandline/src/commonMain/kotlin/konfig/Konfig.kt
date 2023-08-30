@@ -55,7 +55,7 @@ private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = Cli
         }
     }
 
-    override val keys get() = platform.lsRegFilesExec(dir).asCol()
+    override val keys get() = lsRegFiles(dir).execb(platform).asCol()
 }
 
 private class KonfigWithChecks(

@@ -1,8 +1,8 @@
 package pl.mareklangiewicz.kommand.core
 
-import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
+import pl.mareklangiewicz.kommand.samples.*
 
 private val lsCommon = "-1 --group-directories-first --color=never --escape"
 
@@ -13,11 +13,11 @@ data object LsSamples {
     val lsDir = ls("blabla") s "ls $lsCommon --indicator-style=none blabla"
     val lsWithHidden = ls(".", withHidden = true) s "ls $lsCommon --indicator-style=none -A ."
     val lsParentWithSlashes = ls("..", style = IndicatorStyle.SLASH) s "ls $lsCommon --indicator-style=slash .."
-
-    // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
-    val execs = listOf(
-        CliPlatform::lsExec,
-        CliPlatform::lsRegFilesExec,
-        CliPlatform::lsSubDirsExec,
-    )
+    val lsParentSubDirs =
+        lsSubDirs("..") rs
+                "ls $lsCommon --indicator-style=slash .."
+    val lsParentRegFiles =
+        lsRegFiles("..") rs
+                "ls $lsCommon --indicator-style=slash .."
+                // same kommand line as above because difference is only in postprocessing: the "reduce" lambda
 }

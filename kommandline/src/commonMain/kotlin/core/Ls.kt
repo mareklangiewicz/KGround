@@ -1,23 +1,32 @@
 package pl.mareklangiewicz.kommand.core
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
-fun CliPlatform.lsExec(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
-    ls(*paths, withHidden = withHidden, style = style).execb(this)
+@OptIn(DelicateKommandApi::class)
+fun lsRegFiles(dir: String, withHidden: Boolean = false) =
+    ls(dir, withHidden = withHidden, style = SLASH).reduced {
+        val files = stdout.toList().filter { !it.endsWith('/') }
+        awaitAndChkExit()
+        files
+    }
 
-fun CliPlatform.lsRegFilesExec(dir: String, withHidden: Boolean = false) =
-    lsExec(dir, withHidden = withHidden, style = SLASH).filter { !it.endsWith('/') }
-
-fun CliPlatform.lsSubDirsExec(dir: String, withHidden: Boolean = false) =
-    lsExec(dir, withHidden = withHidden, style = SLASH).filter { it.endsWith('/') }.map { it.dropLast(1) }
+@OptIn(DelicateKommandApi::class)
+fun lsSubDirs(dir: String, withHidden: Boolean = false) =
+    ls(dir, withHidden = withHidden, style = SLASH).reduced {
+        val dirs = stdout.toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
+        awaitAndChkExit()
+        dirs
+    }
 
 fun ls(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     lsPredictable(*paths, withHidden = withHidden, style = style)
 
 /** lsPredictable is better to get a more predictable output format, especially for parsing. */
+@OptIn(DelicateKommandApi::class)
 fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     ls { for (p in paths) +p; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
 
@@ -25,23 +34,24 @@ fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: Indi
  * lsDefault is ls without any options; uses default settings on given CliPlatform.
  * lsPredictable is better to get a more predictable output format, especially for parsing.
  */
-fun lsDefault(vararg files: String) = ls { for (f in files) +f }
+@OptIn(DelicateKommandApi::class)
+fun lsDefault(vararg paths: String) = ls { for (path in paths) +path }
 
+@DelicateKommandApi
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
+@OptIn(DelicateKommandApi::class)
 data class Ls(
-    val opts: MutableList<LsOpt> = mutableListOf(),
-    val files: MutableList<String> = mutableListOf()
-) : Kommand {
+    override val opts: MutableList<LsOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<LsOpt> {
     override val name get() = "ls"
-    override val args get() = opts.flatMap { it.toArgs() } + files
-    operator fun String.unaryPlus() = files.add(this)
-    operator fun LsOpt.unaryMinus() = opts.add(this)
 }
 
-interface LsOpt: KOpt {
+@DelicateKommandApi
+interface LsOpt: KOptTypical {
 
     /** List one file per line.  You can avoid '\n' by adding options: hideControlChars or escape */
     data object One: KOptS("1"), LsOpt
