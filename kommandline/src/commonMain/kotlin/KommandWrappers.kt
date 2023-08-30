@@ -81,13 +81,24 @@ data class ReducedKommand<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out,
 )
 
 fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reduced(
+    alsoAwaitAndChkExit: Boolean = true,
     reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
-) = ReducedKommand(this, reduce)
+) = ReducedKommand(this) {
+    val out = reduce()
+    if (alsoAwaitAndChkExit) awaitAndChkExit()
+    out
+}
 
 fun <K: Kommand, ReducedOut> K.reduced(
+    alsoAwaitAndChkExit: Boolean = true,
     reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
 ): ReducedKommand<K, StdinCollector, Flow<String>, Flow<String>, TypedKommand<K, StdinCollector, Flow<String>, Flow<String>>, ReducedOut> =
-    typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(reduce)
+    typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit, reduce)
+
+fun <K: Kommand> K.reduced(
+    expectedExit: Int = 0,
+): ReducedKommand<K, StdinCollector, Flow<String>, Flow<String>, TypedKommand<K, StdinCollector, Flow<String>, Flow<String>>, Unit> =
+    typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit = false) { awaitAndChkExit(expectedExit) }
 
 /**
  * Another wrapper to use reduced kommands in an even simpler way - as normal suspending functions.
