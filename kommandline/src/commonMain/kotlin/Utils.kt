@@ -5,7 +5,6 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.term.*
-import kotlin.contracts.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -27,14 +26,22 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 // FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
 // Maybe move to kommandsamples or somewhere else??
 @OptIn(DelicateKommandApi::class)
-fun Kommand.chkWithUser(expectedKommandLine: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
-    this.logln()
-    if (expectedKommandLine != null) line().chkEq(expectedKommandLine)
+fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
+    this.logLineRaw()
+    if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
     ifInteractive { platform.startInTermIfUserConfirms(
         kommand = this,
         execInDir = execInDir,
         termKommand = { termKitty(it) },
     ) }
+}
+
+@OptIn(DelicateKommandApi::class)
+fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, platform: CliPlatform = SYS) {
+    val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
+    println(lineRaw)
+    lineRaw.chkEq(expectedLineRaw)
+    execb(platform, execInDir)
 }
 
 class BadExitStateErr(exp: Int, act: Int, message: String? = null): BadEqStateErr(exp, act, message)
@@ -45,12 +52,12 @@ inline fun Int.chkExit(exp: Int = 0, lazyMessage: () -> String = { "bad exit $th
 
 @OptIn(DelicateKommandApi::class)
 fun Kommand.chkInIdeap(
-    expectedKommandLine: String? = null,
+    expectedLineRaw: String? = null,
     execInDir: String? = null,
     platform: CliPlatform = SYS
 ) {
-    this.logln()
-    if (expectedKommandLine != null) line().chkEq(expectedKommandLine)
+    this.logLineRaw()
+    if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
         start(this@chkInIdeap, dir = execInDir, outFile = tmpFile).waitForExit()

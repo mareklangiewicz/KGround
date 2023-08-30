@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlin.time.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
-import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
 import pl.mareklangiewicz.kground.*
 
@@ -79,10 +78,8 @@ fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(
 ) = platform.start(this, dir)
 
 
-suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.x(
-    platform: CliPlatform = SYS,
-    dir: String? = null,
-): ReducedOut = exec(platform, dir = dir)
+suspend fun <ReducedOut> ReducedKommand<ReducedOut>.x(platform: CliPlatform = SYS, dir: String? = null): ReducedOut =
+    exec(platform, dir = dir)
 
 
 
@@ -128,7 +125,5 @@ fun Kommand.xb(
  * Blocking flavor of fun ReducedKommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut, RK: ReducedKommand<K, In, Out, Err, TK, ReducedOut>> RK.xb(
-    platform: CliPlatform = SYS,
-    dir: String? = null,
-): ReducedOut = runBlocking { x(platform, dir) }
+fun <ReducedOut> ReducedKommand<ReducedOut>.xb(platform: CliPlatform = SYS, dir: String? = null): ReducedOut =
+    runBlocking { x(platform, dir) }

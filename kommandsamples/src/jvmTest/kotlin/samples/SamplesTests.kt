@@ -31,7 +31,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
             // TODO_someday_maybe: remove whole execs stuff in favor of TypedKommands/TypedSamples
         prop is Sample -> "On sample $name" o { testSample(prop) }
         prop is TypedSample<*, *, *, *> -> "On typed sample $name" o { testTypedSample(prop) }
-        prop is ReducedSample<*, *, *, *, *, *> -> "On reduced sample $name" o { testReducedSample(prop) }
+        prop is ReducedSample<*> -> "On reduced sample $name" o { testReducedSample(prop) }
         prop == null -> error("prop is null! name: $name")
         else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }
@@ -54,8 +54,8 @@ fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand line
 }
 
 @OptIn(DelicateKommandApi::class)
-fun testReducedSample(sample: ReducedSample<*, *, *, *, *, *>) = "check reduced kommand lineRaw" o {
-    val lineRaw = sample.reducedKommand.typedKommand.kommand.lineRaw()
+fun testReducedSample(sample: ReducedSample<*>) = "check reduced kommand lineRaw" o {
+    val lineRaw = sample.reducedKommand.lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
     else lineRaw eq sample.expectedLineRaw
     println("Actual reduced kommand lineRaw is: $lineRaw")

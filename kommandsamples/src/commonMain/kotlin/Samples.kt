@@ -14,8 +14,8 @@ data class TypedSample<K: Kommand, In, Out, Err>(
     val expectedLineRaw: String? = null,
 )
 
-data class ReducedSample<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
-    val reducedKommand: ReducedKommand<K, In, Out, Err, TK, ReducedOut>,
+data class ReducedSample<ReducedOut>(
+    val reducedKommand: ReducedKommand<ReducedOut>,
     val expectedLineRaw: String? = null,
 )
 
@@ -24,16 +24,8 @@ internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLi
 internal infix fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.ts(expectedLineRaw: String?) =
     TypedSample(this, expectedLineRaw = expectedLineRaw)
 
-internal infix fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>
-        ReducedKommand<K, In, Out, Err, TK, ReducedOut>.rs(expectedLineRaw: String?) =
+internal infix fun <ReducedOut> ReducedKommand<ReducedOut>.rs(expectedLineRaw: String?) =
     ReducedSample(this, expectedLineRaw = expectedLineRaw)
-
-
-@ExperimentalKommandApi
-fun <FunctionOut> ReducedSample<*, *, *, *, *, FunctionOut>.asFunction(
-    dir: String? = null,
-    platform: CliPlatform = CliPlatform.SYS,
-) = reducedKommand.asFunction(dir, platform)
 
 
 data object Samples {

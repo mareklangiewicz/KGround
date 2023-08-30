@@ -16,5 +16,5 @@ actual fun Kommand.execb(
 
 // also temporary hack
 @Deprecated("Use suspend fun ReducedKommand.exec(...)")
-actual fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> ReducedKommand<K, In, Out, Err, TK, ReducedOut>
-        .execb(platform: CliPlatform, dir: String?): ReducedOut = TODO("Remove this functionality")
+actual fun <ReducedOut> ReducedKommand<ReducedOut>.execb(platform: CliPlatform, dir: String?): ReducedOut =
+    TODO("Remove this functionality")

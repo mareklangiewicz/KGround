@@ -75,15 +75,27 @@ fun <K: Kommand, In, Out, Err> CliPlatform.start(
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
 
-data class ReducedKommand<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
+interface ReducedKommand<ReducedOut> {
+    suspend fun exec(platform: CliPlatform, dir: String? = null): ReducedOut
+}
+
+/** Mostly for tests to try to compare wrapped kommand line to expected line. */
+@DelicateKommandApi
+fun ReducedKommand<*>.lineRawOrNull() = (this as? ReducedKommandImpl<*, *, *, *, *, *>)
+    ?.typedKommand?.kommand?.lineRaw()
+
+internal class ReducedKommandImpl<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
     val typedKommand: TK,
     val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
-)
+): ReducedKommand<ReducedOut> {
+    override suspend fun exec(platform: CliPlatform, dir: String?): ReducedOut =
+        reduce(platform.start(typedKommand, dir))
+}
 
 fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reduced(
     alsoAwaitAndChkExit: Boolean = true,
     reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
-) = ReducedKommand(this) {
+): ReducedKommand<ReducedOut> = ReducedKommandImpl(this) {
     val out = reduce()
     if (alsoAwaitAndChkExit) awaitAndChkExit()
     out
@@ -92,32 +104,10 @@ fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK
 fun <K: Kommand, ReducedOut> K.reduced(
     alsoAwaitAndChkExit: Boolean = true,
     reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
-): ReducedKommand<K, StdinCollector, Flow<String>, Flow<String>, TypedKommand<K, StdinCollector, Flow<String>, Flow<String>>, ReducedOut> =
-    typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit, reduce)
+): ReducedKommand<ReducedOut> = typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit, reduce)
 
-fun <K: Kommand> K.reduced(
-    expectedExit: Int = 0,
-): ReducedKommand<K, StdinCollector, Flow<String>, Flow<String>, TypedKommand<K, StdinCollector, Flow<String>, Flow<String>>, Unit> =
+fun <K: Kommand> K.reduced(expectedExit: Int = 0): ReducedKommand<Unit> =
     typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit = false) { awaitAndChkExit(expectedExit) }
 
-/**
- * Another wrapper to use reduced kommands in an even simpler way - as normal suspending functions.
- * And to hide complicated generic types from the user side (maybe it also helps IDE performance).
- * Not sure if it's needed, or maybe I should simplify/hide types in ReducedKommand itself.
- */
-@ExperimentalKommandApi
-class FunctionKommand<FunctionOut>(
-    private val reducedKommand: ReducedKommand<*, *, *, *, *, FunctionOut>,
-    private val dir: String? = null,
-    private val platform: CliPlatform = CliPlatform.SYS,
-): (suspend () -> FunctionOut) {
-    override suspend fun invoke(): FunctionOut = reducedKommand.exec(platform, dir)
-}
-
-@ExperimentalKommandApi
-fun <FunctionOut> ReducedKommand<*, *, *, *, *, FunctionOut>.asFunction(
-    dir: String? = null,
-    platform: CliPlatform = CliPlatform.SYS,
-) = FunctionKommand(this, dir, platform)
 
 

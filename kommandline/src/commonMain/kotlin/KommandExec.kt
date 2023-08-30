@@ -53,8 +53,7 @@ expect fun Kommand.execb(
 ): List<String>
 
 // also temporary hack
-expect fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> ReducedKommand<K, In, Out, Err, TK, ReducedOut>
-        .execb(platform: CliPlatform, dir: String? = null): ReducedOut
+expect fun <ReducedOut> ReducedKommand<ReducedOut>.execb(platform: CliPlatform, dir: String? = null): ReducedOut
 
 
 // I'm leaving it here as deprecated, so user can always see when trying to do TypedKommand.exec,
@@ -74,11 +73,7 @@ suspend fun <K: Kommand, In, Out, TK: TypedKommand<K, In, Out, Flow<String>>, Co
 }
 
 @Deprecated("Use ReducedKommand.exec(CliPlatform, ...)")
-suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> CliPlatform.exec(
-    kommand: ReducedKommand<K, In, Out, Err, TK, ReducedOut>,
-    dir: String? = null,
-): ReducedOut = kommand.exec(this, dir)
+suspend fun <ReducedOut> CliPlatform.exec(kommand: ReducedKommand<ReducedOut>, dir: String? = null): ReducedOut =
+    kommand.exec(this, dir)
 
-suspend fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> ReducedKommand<K, In, Out, Err, TK, ReducedOut>
-        .exec(platform: CliPlatform, dir: String? = null): ReducedOut = reduce(platform.start(typedKommand, dir))
 

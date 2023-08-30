@@ -42,7 +42,7 @@ class KommandTest {
     @Test fun testLsHomeRegFiles() = lsRegFiles("/home/marek").execb(SYS).logEach()
 
     @Test fun testMkDir1() = mkdir("/tmp/testMkDir1/blaa/blee", withParents = true)
-        .typedKommand.kommand.chkWithUser("mkdir -p /tmp/testMkDir1/blaa/blee")
+        .chkLineRawAndExec("mkdir -p /tmp/testMkDir1/blaa/blee")
 
     @Test fun testRm1() = rm { -dir; +"/tmp/testMkDir1/blaa/blee" }
         .chkWithUser("rm --dir /tmp/testMkDir1/blaa/blee")

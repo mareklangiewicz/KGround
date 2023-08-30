@@ -3,7 +3,6 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
-import kotlin.time.*
 
 @Deprecated("Use suspend fun Kommand.exec(...)")
 fun CliPlatform.execBlocking(
@@ -57,8 +56,8 @@ actual fun Kommand.execb(
 
 // also temporary hack
 @Deprecated("Use suspend fun ReducedKommand.exec(...)")
-actual fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> ReducedKommand<K, In, Out, Err, TK, ReducedOut>
-        .execb(platform: CliPlatform, dir: String?): ReducedOut = runBlocking { exec(platform, dir) }
+actual fun <ReducedOut> ReducedKommand<ReducedOut>.execb(platform: CliPlatform, dir: String?): ReducedOut =
+    runBlocking { exec(platform, dir) }
 
 
 fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }
