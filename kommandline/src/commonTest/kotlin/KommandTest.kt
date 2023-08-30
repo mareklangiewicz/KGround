@@ -80,7 +80,11 @@ class KommandTest {
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
         kommand2.chkWithUser("bash -c vim\\ -g\\ --servername\\ DDDD\\ .")
     }
-    @Test fun testBashGetExports() = SYS.bashGetExportsExec().forEach { println(it) }
+    @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
+        .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
     @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.chkWithUser()
     @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
 }
+
+// FIXME: use impl from new kground
+private fun <K, V> Map<K, V>.logEachEntry(logln: (Map.Entry<K, V>) -> Unit = ::println) = iterator().forEach(logln)

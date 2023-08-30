@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import java.io.*
 import java.lang.ProcessBuilder.*
 import kotlin.coroutines.*
@@ -52,14 +53,18 @@ class JvmPlatform : CliPlatform {
     override val lineEnd: String = System.lineSeparator() ?: "\n"
 
     override val isJvm get() = true
-    override val isDesktop get() = xdgdesktop.isEmpty()
+    override val isDesktop get() = xdgdesktop.isNotEmpty()
     override val isUbuntu get() = "ubuntu" in xdgdesktop
     override val isGnome get() = "GNOME" in xdgdesktop
 
     override val pathToUserHome: String? get() = System.getProperty("user.home")
     override val pathToUserTmp: String? get() = "$pathToUserHome/tmp" // FIXME_maybe: other paths for specific OSes? sometimes null?
     override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
-    private val xdgdesktop by lazy { bashGetExportsExec()["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty() }
+
+    @OptIn(DelicateKommandApi::class)
+    private val xdgdesktop by lazy {
+        bashGetExportsMap().execb(SYS)["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)

@@ -43,7 +43,7 @@ class Langara {
     }
 
     @Test fun demo_bash_export() = idemo {
-        bashGetExportsToFileExec(tmpNotesFile)
+        bashGetExportsToFile(tmpNotesFile).execb(SYS)
         ideap { +tmpNotesFile }.execb(this)
     }
 
