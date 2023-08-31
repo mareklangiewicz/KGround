@@ -14,7 +14,7 @@ fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}) =
 
 /** [gnome-terminal ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-terminal.1.html) */
 @DelicateKommandApi
-class TermGnome(
+data class TermGnome(
     override val opts: MutableList<TermGnomeOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<TermGnomeOpt> {

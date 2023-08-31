@@ -31,3 +31,12 @@ data object SshSamples {
                 "ssh pim ls -l -a -h"
 }
 
+// TODO NOW: Continue, it's first experiment based on:
+// https://www.codejam.info/2021/11/standalone-userland-ssh-server.html
+@OptIn(DelicateKommandApi::class)
+suspend fun runSshdStandalone(dir: String = "/tmp/sshd-sdandalone") {
+    mkdir(dir, withParents = true).exec(CliPlatform.SYS)
+    TODO()
+
+}
+

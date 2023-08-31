@@ -15,7 +15,7 @@ fun mkdir(init: Mkdir.() -> Unit = {}) = Mkdir().apply(init)
  * [gnu coreutils mkdir manual](https://www.gnu.org/software/coreutils/manual/html_node/mkdir-invocation.html#mkdir-invocation)
  */
 @DelicateKommandApi
-class Mkdir(
+data class Mkdir(
     override val opts: MutableList<MkdirOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<MkdirOpt> {

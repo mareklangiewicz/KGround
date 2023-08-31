@@ -27,7 +27,7 @@ fun sshVersion() = Ssh().apply { -SshOpt.Version }
  * [linux man ssh](https://man7.org/linux/man-pages/man1/ssh.1.html)
  */
 @DelicateKommandApi
-class Ssh(
+data class Ssh(
     override val opts: MutableList<SshOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ): KommandTypical<SshOpt> {

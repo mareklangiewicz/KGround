@@ -17,7 +17,7 @@ fun sshKeygen(init: SshKeygen.() -> Unit = {}) = SshKeygen().apply(init)
  * [openssh manuals](https://www.openssh.com/manual.html)
  */
 @DelicateKommandApi
-class SshKeygen(
+data class SshKeygen(
     override val opts: MutableList<SshKeygenOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ): KommandTypical<SshKeygenOpt> {

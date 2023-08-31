@@ -16,6 +16,7 @@ fun lsSubDirs(dir: String, withHidden: Boolean = false) =
         stdout.toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
     }
 
+@OptIn(DelicateKommandApi::class)
 fun ls(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     lsPredictable(*paths, withHidden = withHidden, style = style)
 

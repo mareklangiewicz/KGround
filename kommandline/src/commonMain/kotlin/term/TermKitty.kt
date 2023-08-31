@@ -34,7 +34,7 @@ fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
  * [kitty man page ubuntu outdated?](https://manpages.ubuntu.com/manpages/focal/man1/kitty.1.html)
  */
 @DelicateKommandApi
-class TermKitty(
+data class TermKitty(
     override val opts: MutableList<TermKittyOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<TermKittyOpt> {

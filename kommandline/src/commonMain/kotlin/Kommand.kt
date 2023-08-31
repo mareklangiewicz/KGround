@@ -139,6 +139,7 @@ data class AKommandTypical(
     override val opts: MutableList<KOptTypical> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
     ): KommandTypical<KOptTypical>
+
 @DelicateKommandApi
 fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =
     AKommandTypical(name, opts.toMutableList()).apply(init)
