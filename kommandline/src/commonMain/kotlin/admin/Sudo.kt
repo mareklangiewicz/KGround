@@ -3,21 +3,22 @@
 package pl.mareklangiewicz.kommand.admin
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.admin.SudoOpt.*
 
 fun CliPlatform.sudoExec(k: Kommand, asUser: String? = null, inPass: String? = null, vararg options: SudoOpt) =
     sudo(k, *options) {
-        asUser?.let { -SudoOpt.User(it) }
-        inPass?.let { -SudoOpt.Stdin; -SudoOpt.Prompt("") }
+        asUser?.let { -User(it) }
+        inPass?.let { -Stdin; -Prompt("") }
     }.execb(this, inContent = inPass)
 
 fun sudoEdit(file: String, asUser: String? = null) = sudo {
-    -SudoOpt.Edit; asUser?.let { -SudoOpt.User(it) }; +file
+    -Edit; asUser?.let { -User(it) }; +file
 }
 
 fun Kommand.withSudo(vararg options: SudoOpt, init: Sudo.() -> Unit = {}): Sudo = sudo(this, *options, init = init)
 
 fun sudo(k: Kommand, vararg options: SudoOpt, init: Sudo.() -> Unit = {}) = sudo {
-    opts.addAll(options); init(); +"--"; stuff.addAll(k.toArgs())
+    opts.addAll(options); init(); -EOOpt; stuff.addAll(k.toArgs())
 }
 
 fun sudo(init: Sudo.() -> Unit = {}) = Sudo().apply(init)
@@ -59,4 +60,5 @@ interface SudoOpt: KOpt {
     data object NoUpdate : KOptL("no-update"), SudoOpt
     data object RemoveTimestamp : KOptL("remove-timestamp"), SudoOpt
     data object ResetTimestamp : KOptL("reset-timestamp"), SudoOpt
+    data object EOOpt : KOptL(""), SudoOpt
 }

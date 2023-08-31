@@ -3,13 +3,14 @@
 package pl.mareklangiewicz.kommand.term
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.term.TermGnomeOpt.*
 
 /** [gnome-terminal ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-terminal.1.html) */
 @OptIn(DelicateKommandApi::class)
 fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}) =
     TermGnome().apply {
-        kommand?.let { +"--"; nonopts.addAll(kommand.toArgs()) }
         init()
+        kommand?.let { -EOOpt; nonopts.addAll(kommand.toArgs()) }
     }
 
 /** [gnome-terminal ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-terminal.1.html) */
@@ -26,4 +27,5 @@ interface TermGnomeOpt: KOptTypical {
     data class Title(val title: String) : KOptL("title", title), TermGnomeOpt
     data object Help : KOptS("h"), TermGnomeOpt
     data object Verbose : KOptS("v"), TermGnomeOpt
+    data object EOOpt : KOptL(""), TermGnomeOpt
 }

@@ -18,9 +18,7 @@ fun mkdir(init: Mkdir.() -> Unit = {}) = Mkdir().apply(init)
 data class Mkdir(
     override val opts: MutableList<MkdirOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<MkdirOpt> {
-    override val name get() = "mkdir"
-}
+) : KommandTypical<MkdirOpt> { override val name get() = "mkdir" }
 
 @DelicateKommandApi
 interface MkdirOpt: KOptTypical {

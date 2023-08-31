@@ -21,11 +21,11 @@ fun termKitty(
 @DelicateKommandApi
 fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
     TermKitty().apply {
-        kommand?.let { +"--"; nonopts.addAll(kommand.toArgs()) }
-            // I added the "--" separator even though docs don't say anything about it, but it works,
+        init()
+        kommand?.let { -EOOpt; nonopts.addAll(kommand.toArgs()) }
+            // I added the "--" (EOOpt) separator even though docs don't say anything about it, but it works,
             // and it clearly separates options from command (and it's options) to run,
             // and it's consistent with other kommands like termGnome.
-        init()
     }
 
 /**
@@ -73,4 +73,5 @@ interface TermKittyOpt: KOptTypical {
 
     data object Help : KOptS("h"), TermKittyOpt
     data object Version : KOptS("v"), TermKittyOpt
+    data object EOOpt : KOptL(""), TermKittyOpt
 }
