@@ -3,7 +3,6 @@ package pl.mareklangiewicz.kground
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
-import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -44,24 +43,22 @@ fun String.removeReqSuffix(suffix: CharSequence): String {
 }
 
 
-fun Iterator<*>.logEach(logln: (Any?) -> Unit = ::println) = forEach(logln)
+inline fun <T> Iterator<T>.logEach(logln: (T) -> Unit = ::println) = forEach(logln)
 
-@OptIn(ExperimentalTime::class)
 fun Iterator<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
 ) = logEach { logln(it.toStringWithMillis(mark)) }
 
-fun Iterable<*>.logEach(logln: (Any?) -> Unit = ::println) = iterator().logEach(logln)
-fun Sequence<*>.logEach(logln: (Any?) -> Unit = ::println) = iterator().logEach(logln)
+inline fun <T> Iterable<T>.logEach(logln: (T) -> Unit = ::println) = iterator().logEach(logln)
+inline fun <T> Sequence<T>.logEach(logln: (T) -> Unit = ::println) = iterator().logEach(logln)
+inline fun <K, V> Map<K, V>.logEachEntry(logln: (Map.Entry<K, V>) -> Unit = ::println) = iterator().logEach(logln)
 
-@OptIn(ExperimentalTime::class)
 fun Iterable<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
 ) = iterator().logEachWithMillis(mark, logln)
 
-@OptIn(ExperimentalTime::class)
 fun Sequence<*>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
@@ -69,20 +66,18 @@ fun Sequence<*>.logEachWithMillis(
 
 
 
-suspend fun <T> Flow<T>.onEachLog(logln: (T) -> Unit = ::println) = onEach(logln)
+fun <T> Flow<T>.onEachLog(logln: (T) -> Unit = ::println) = onEach(logln)
 
 suspend fun <T> Flow<T>.logEach(logln: (T) -> Unit = ::println) = onEachLog(logln).collect()
 
 private fun Any?.toStringWithMillis(from: TimeMark, separator: String = " ") =
     "${from.elapsedNow().inWholeMilliseconds}$separator$this"
 
-@OptIn(ExperimentalTime::class)
 suspend fun <T> Flow<T>.onEachLogWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println,
 ) = onEachLog { logln(it.toStringWithMillis(mark)) }
 
-@OptIn(ExperimentalTime::class)
 suspend fun <T> Flow<T>.logEachWithMillis(
     mark: TimeMark = TimeSource.Monotonic.markNow(),
     logln: (String) -> Unit = ::println
