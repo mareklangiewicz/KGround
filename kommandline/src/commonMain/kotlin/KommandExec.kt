@@ -68,7 +68,7 @@ suspend fun <K: Kommand, In, Out, TK: TypedKommand<K, In, Out, Flow<String>>, Co
     val collectedOut = tprocess.stdout.collectOut()
     val collectedErr = tprocess.stderr.toList()
     tprocess.awaitAndChkExit()
-    collectedErr.chkEq(emptyList<String>()) { "Non-empty error stream collected." }
+    collectedErr.chkStdErr()
     return collectedOut
 }
 

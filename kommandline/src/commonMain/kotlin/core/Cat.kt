@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.core
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 
 
@@ -20,38 +21,67 @@ fun CliPlatform.readFileLastLineExec(path: String) =
  * If singleLine is true and the file contains more or less than one line, it throws runtime exception.
  * It should never return just part of the file.
  */
+// FIXME NOW: remove all ...Exec versions
 fun CliPlatform.readFileWithCatExec(file: String, singleLine: Boolean = false): String = cat { +file }.execb(this).run {
     if (singleLine) single() else joinToString("\n")
 }
 
-/**
- * If singleLine is true and the file contains more, or less, it returns null.
- * If other RuntimeException happens, it also returns null.
- * It should never return just part of the file.
- */
-fun CliPlatform.tryToReadFileWithCatExec(file: String, singleLine: Boolean = false): String? =
-    try { readFileWithCatExec(file, singleLine) } catch (e: RuntimeException) { null }
+// it will stay here for users that try read... (will it actually suggest deprecated fun? TODO_later check)
+@Deprecated("Use catReadTextFile", ReplaceWith("catReadTextFile(path)"))
+fun readTextFileWithCat(path: String) = catReadTextFile(path)
 
+@OptIn(DelicateKommandApi::class)
+fun catReadTextFile(path: String) =
+    cat { +path }.reduced { stdout.toList() }
+
+@DelicateKommandApi
 fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)
-/** [linux man](https://man7.org/linux/man-pages/man1/cat.1.html) */
+/**
+ * [gnu coreutils cat](https://www.gnu.org/software/coreutils/manual/html_node/cat-invocation.html)
+ * [linux man](https://man7.org/linux/man-pages/man1/cat.1.html)
+ */
+@DelicateKommandApi
 data class Cat(
-    val options: MutableList<Option> = mutableListOf(),
-    val files: MutableList<String> = mutableListOf()
-) : Kommand {
+    override val opts: MutableList<CatOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<CatOpt> { override val name get() = "cat" }
 
-    override val name get() = "cat"
-    override val args get() = options.map { it.str } + files
+@DelicateKommandApi
+interface CatOpt: KOptTypical {
 
-    sealed class Option(val str: String) {
-        data object showEnds : Option("--show-ends")
-        data object showNonPrinting : Option("--show-nonprinting")
-        data object showTabs : Option("--show-tabs")
-        data object squeezeBlank : Option("--squeeze-blank")
-        data object help : Option("--help")
-        data object version : Option("--version")
-    }
+    /** Number all output lines, starting with 1. This option is ignored if -b is in effect. */
+    data object NumberAll : KOptS("n"), CatOpt
 
-    operator fun String.unaryPlus() = files.add(this)
+    /** Number all nonempty output lines, starting with 1. */
+    data object NumberNonBlank : KOptS("b"), CatOpt
 
-    operator fun Option.unaryMinus() = options.add(this)
+    /** Suppress repeated adjacent blank lines; output just one empty line instead of several. */
+    data object SqueezeBlank : KOptS("s"), CatOpt
+
+    /** Display a ‘$’ after the end of each line. The \r\n combination is shown as ‘^M$’. */
+    data object ShowLineEnds : KOptS("E"), CatOpt
+
+    /** Display TAB characters as ‘^I’. */
+    data object ShowTabs : KOptS("T"), CatOpt
+
+    /**
+     * Display control characters except for LFD and TAB using ‘^’ notation
+     * and precede characters that have the high bit set with ‘M-’.
+     */
+    data object ShowNonPrinting : KOptS("v"), CatOpt
+
+    /** Equivalent to -vET. */
+    data object ShowAll : KOptS("A"), CatOpt
+
+    /** Equivalent to -vE. */
+    data object ShowNonPrintingAndLineEnds : KOptS("e"), CatOpt
+
+    /** Equivalent to -vT. */
+    data object ShowNonPrintingAndTabs : KOptS("t"), CatOpt
+
+    data object Help : KOptL("help"), CatOpt
+
+    data object Version : KOptL("--version"), CatOpt
+
+    data object EOOpt : KOptL(""), CatOpt
 }

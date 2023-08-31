@@ -3,7 +3,6 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.chk
 
 actual typealias SysPlatform = JsEvalFunPlatform
 

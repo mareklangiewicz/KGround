@@ -46,7 +46,7 @@ suspend fun Kommand.x(
     errFile: String? = null,
     errFileAppend: Boolean = false,
     expectedExit: Int? = 0,
-    expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
+    expectedErr: ((List<String>) -> Boolean)? = null,
     outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = coroutineScope {
     req(platform.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }

@@ -308,24 +308,29 @@ data class ExecResult(val exit: Int, val out: List<String>, val err: List<String
 
 /**
  * Returns the output but ensures the exit value was as expected (0 by default) first.
- * Also by default ensures collected error stream was empty.
- * @throws IllegalStateException if not expected result encounted.
+ * Also can ensure collected error is as expected (for example expectedErr = { it.isEmpty }),
+ * but by default expectedErr is null, so stderr is ignored.
+ * @throws BadStateErr if sth unexpected found. Either [BadExitStateErr] or [BadStdErrStateErr].
+ * Note: Many times it's better to accept non-empty error stream, and just log it somewhere or sth.
+ *   It's because many commands put non-fatal messages in stderr stream,
+ *   and only the exit value actually defines if whole command succeded or not.
  */
 fun ExecResult.unwrap(
     expectedExit: Int? = 0,
-    expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() }
+    expectedErr: ((List<String>) -> Boolean)? = null,
 ): List<String> {
-    expectedExit == null || exit == expectedExit || bad { "Exit value $exit is not equal to expected $expectedExit" }
-    expectedErr == null || expectedErr(err) || bad { "Error stream is not equal to expected error stream." }
+    expectedExit == null || exit.chkExit()
+    expectedErr == null || err.chkStdErr(expectedErr)
     return out
 }
 
+/** Similar to [unwrap] but also checks stdout, and doesn't return anything. */
 fun ExecResult.chk(
     expectedExit: Int? = 0,
-    expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty()},
+    expectedErr: ((List<String>) -> Boolean)? = null,
     expectedOut: ((List<String>) -> Boolean)?,
 ) {
     unwrap(expectedExit, expectedErr)
-    expectedOut == null || expectedOut(out) || bad { "Error stream is not equal to expected error stream." }
+    expectedOut == null || out.chkStdOut(expectedOut)
 }
 
