@@ -111,5 +111,6 @@ fun IKonfig.withChecks(
 @Deprecated("TODO: implement")
 fun CliPlatform.konfigInFile(file: String): IKonfig = TODO()
 
-fun IKonfig.loglns(logln: (String) -> Unit = ::println) = keys.forEach { logkeyval(it, logln) }
-fun IKonfig.logkeyval(key: String, logln: (String) -> Unit = ::println) = logln("    konfig[\"$key\"] == \"${this[key]}\"")
+fun IKonfig.logEachKeyVal(logln: (String) -> Unit = ::println) = keys.forEach { logKeyVal(it, logln) }
+
+fun IKonfig.logKeyVal(key: String, logln: (String) -> Unit = ::println) = logln("konfig[\"$key\"] == \"${this[key]}\"")

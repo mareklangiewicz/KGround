@@ -85,6 +85,3 @@ class KommandTest {
     @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.chkWithUser()
     @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
 }
-
-// FIXME: use impl from new kground
-private fun <K, V> Map<K, V>.logEachEntry(logln: (Map.Entry<K, V>) -> Unit = ::println) = iterator().forEach(logln)

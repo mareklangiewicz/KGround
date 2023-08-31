@@ -55,21 +55,21 @@ class Langara {
     @Test fun demo_set_konfig_examples() = idemo {
         val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
         println("before adding anything:")
-        k.loglns()
+        k.logEachKeyVal()
         k["tmpExampleInteger1"] = 111.toString()
         k["tmpExampleInteger2"] = 222.toString()
         k["tmpExampleString1"] = "some text 1"
         k["tmpExampleString2"] = "some text 2"
         println("after adding 4 keys:")
-        k.loglns()
+        k.logEachKeyVal()
         k["tmpExampleInteger2"] = null
         k["tmpExampleString2"] = null
         println("after nulling 2 keys:")
-        k.loglns()
+        k.logEachKeyVal()
         k["tmpExampleInteger1"] = null
         k["tmpExampleString1"] = null
         println("after nulling other 2 keys:")
-        k.loglns()
+        k.logEachKeyVal()
     }
 
     @Test fun code_interactive_switch() = SYS.run {
@@ -78,7 +78,7 @@ class Langara {
         println("user flag: code.interactive.enabled = $enabled")
     }
 
-    @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().loglns()
+    @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().logEachKeyVal()
 
     @Test fun experiment() = idemo {
         val ideaEnabled = bash("ps aux").execb(this).any { it.lowercase().contains("idea") }
