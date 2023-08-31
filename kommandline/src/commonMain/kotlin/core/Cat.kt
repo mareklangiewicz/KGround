@@ -15,16 +15,7 @@ fun CliPlatform.readFileTailExec(path: String, nrLines: Int = 10) =
 fun CliPlatform.readFileLastLineExec(path: String) =
     readFileTailExec(path, 1).single()
 
-
-
-/**
- * If singleLine is true and the file contains more or less than one line, it throws runtime exception.
- * It should never return just part of the file.
- */
 // FIXME NOW: remove all ...Exec versions
-fun CliPlatform.readFileWithCatExec(file: String, singleLine: Boolean = false): String = cat { +file }.execb(this).run {
-    if (singleLine) single() else joinToString("\n")
-}
 
 // it will stay here for users that try read... (will it actually suggest deprecated fun? TODO_later check)
 @Deprecated("Use catReadTextFile", ReplaceWith("catReadTextFile(path)"))

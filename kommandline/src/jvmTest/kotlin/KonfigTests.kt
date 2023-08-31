@@ -46,7 +46,7 @@ fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
         "file is created" o { testIfFileIsRegular("$dir/somekey1") eq true }
         "no other files there" o { ls(dir, withHidden = true).execb(this) eq listOf("somekey1") }
         "file for somekey1 contains correct content" o {
-            val content = readFileWithCatExec("$dir/somekey1")
+            val content = catReadTextFile("$dir/somekey1").execb(this).joinToString("\n")
             content eq "somevalue1"
         }
 
