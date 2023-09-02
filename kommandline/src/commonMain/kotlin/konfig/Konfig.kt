@@ -45,7 +45,7 @@ private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = Cli
     init { mkdir(dir, withParents = true).execb(platform) }
 
     override fun get(key: String): String? =
-        try { catReadFileText("$dir/$key").execb(platform).joinToString("\n") } catch (e: RuntimeException) { null }
+        try { readFileWithCat("$dir/$key").execb(platform).joinToString("\n") } catch (e: RuntimeException) { null }
 
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"

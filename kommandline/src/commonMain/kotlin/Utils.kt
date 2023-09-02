@@ -53,14 +53,16 @@ class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadS
 // TODO_someday: figure out nicer approach not to loose full error messages (maybe when we have context receivers in kotlin).
 // But it's nice to have it mostly on caller side. To just throw collected stderr/out on kommand execution side,
 // without logging or any additional complexity there..
-fun withLoggingBadStreams(linesLimit: Int? = null, code: () -> Unit) {
+inline fun withLoggingBadStreams(linesLimit: Int? = null, code: () -> Unit) {
     try { code() }
     catch (e: BadExitStateErr) { e.stderr?.logSome(linesLimit); throw e }
     catch (e: BadStdErrStateErr) { e.stderr.logSome(linesLimit); throw e }
     catch (e: BadStdOutStateErr) { e.stdout.logSome(linesLimit); throw e }
 }
 
-private fun List<String>.logSome(linesLimit: Int? = null,logln: (String) -> Unit = ::println) =
+// FIXME_someday: this should be private, but kotlin forbids when used in inline fun.
+//   (and [withLoggingBadStreams] HAS to be inline to be usable in suspendale world)
+inline fun List<String>.logSome(linesLimit: Int? = null,logln: (String) -> Unit = ::println) =
     repeat(min(size, linesLimit ?: size)) { logln(this[it]) }
 
 /** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */

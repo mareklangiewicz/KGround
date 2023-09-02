@@ -25,7 +25,7 @@ fun main() {
     }
 }
 
-suspend fun playground() {
+suspend fun playground() = withLoggingBadStreams {
     println("Let's play with kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")

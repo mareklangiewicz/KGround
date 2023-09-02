@@ -25,7 +25,7 @@ class GpgTest {
         writeFileWithEchoExec("some plain text 667", outFile = inFile)
         gpgEncryptPass("correct pass", inFile, encFile).execb(this)
         gpgDecryptPass("correct pass", encFile, decFile).execb(this)
-        val decrypted = catReadFileText(decFile).execb(this).single()
+        val decrypted = readFileWithCat(decFile).execb(this).single()
         assertEquals("some plain text 667", decrypted)
         val errCode = start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
         assertEquals(2, errCode)
