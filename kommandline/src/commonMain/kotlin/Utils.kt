@@ -5,6 +5,7 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.term.*
+import kotlin.math.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -48,6 +49,19 @@ fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: Stri
 class BadExitStateErr(exp: Int, act: Int, val stderr: List<String>? = null, message: String? = null): NotEqStateErr(exp, act, message)
 class BadStdErrStateErr(val stderr: List<String>, message: String? = null): BadStateErr(message)
 class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadStateErr(message)
+
+// TODO_someday: figure out nicer approach not to loose full error messages (maybe when we have context receivers in kotlin).
+// But it's nice to have it mostly on caller side. To just throw collected stderr/out on kommand execution side,
+// without logging or any additional complexity there..
+fun withLoggingBadStreams(linesLimit: Int? = null, code: () -> Unit) {
+    try { code() }
+    catch (e: BadExitStateErr) { e.stderr?.logSome(linesLimit); throw e }
+    catch (e: BadStdErrStateErr) { e.stderr.logSome(linesLimit); throw e }
+    catch (e: BadStdOutStateErr) { e.stdout.logSome(linesLimit); throw e }
+}
+
+private fun List<String>.logSome(linesLimit: Int? = null,logln: (String) -> Unit = ::println) =
+    repeat(min(size, linesLimit ?: size)) { logln(this[it]) }
 
 /** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */
 inline fun Int.chkExit(
