@@ -17,10 +17,6 @@ fun CliPlatform.readFileLastLineExec(path: String) =
 
 // FIXME NOW: remove all ...Exec versions
 
-// it will stay here for users that try read... (will it actually suggest deprecated fun? TODO_later check)
-@Deprecated("Use catReadTextFile", ReplaceWith("catReadTextFile(path)"))
-fun readTextFileWithCat(path: String) = catReadTextFile(path)
-
 @OptIn(DelicateKommandApi::class)
 fun catReadFileText(path: String) = cat { +path }.reducedOut { toList() }
 
