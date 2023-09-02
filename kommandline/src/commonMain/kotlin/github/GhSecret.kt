@@ -15,9 +15,9 @@ fun ghSecretSet(
     secretValue: String,
     repoPath: String? = null
 ) =
-    ghSecretSet(secretName, repoPath = repoPath).reduced {
+    ghSecretSet(secretName, repoPath = repoPath).reducedManually {
         stdin.collect(flowOf(secretValue), lineEnd = "", finallyStdinClose = true)
-        stdout.onEachLogWithMillis().toList()
+        awaitAndChkExit(firstCollectErr = true)
     }
 
 /**

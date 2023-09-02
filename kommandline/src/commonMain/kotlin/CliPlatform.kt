@@ -152,7 +152,7 @@ suspend fun StdinCollector.collect(
  */
 @OptIn(ExperimentalStdlibApi::class)
 interface ExecProcess : AutoCloseable {
-    // TODO_later: make ExecProcess implement CoroutineScope. It's natural to be scope and useful for .reduced {...}
+    // TODO_later: make ExecProcess implement CoroutineScope. It's natural to be scope and useful for .reducedXxx {...}
     //   (on JVM use processContext), be careful not to cancel scope too early (when reduced is still collecting),
     //   so make sure I correctly guarantee cooperative cancelation (rethink finallyClose flags etc.).
 
@@ -319,8 +319,8 @@ fun ExecResult.unwrap(
     expectedExit: Int? = 0,
     expectedErr: ((List<String>) -> Boolean)? = null,
 ): List<String> {
-    expectedExit == null || exit.chkExit()
-    expectedErr == null || err.chkStdErr(expectedErr)
+    expectedExit?.let { exit.chkExit(it, stderr = err) }
+    expectedErr?.let { err.chkStdErr(it) }
     return out
 }
 
@@ -331,6 +331,6 @@ fun ExecResult.chk(
     expectedOut: ((List<String>) -> Boolean)?,
 ) {
     unwrap(expectedExit, expectedErr)
-    expectedOut == null || out.chkStdOut(expectedOut)
+    expectedOut?.let { out.chkStdOut(it) }
 }
 

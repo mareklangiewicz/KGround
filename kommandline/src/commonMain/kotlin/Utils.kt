@@ -44,25 +44,28 @@ fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: Stri
     execb(platform, execInDir)
 }
 
-class BadExitStateErr(exp: Int, act: Int, message: String? = null): NotEqStateErr(exp, act, message)
+/** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */
+class BadExitStateErr(exp: Int, act: Int, val stderr: List<String>? = null, message: String? = null): NotEqStateErr(exp, act, message)
 class BadStdErrStateErr(val stderr: List<String>, message: String? = null): BadStateErr(message)
 class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadStateErr(message)
 
+/** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */
 inline fun Int.chkExit(
     exp: Int = 0,
+    stderr: List<String>? = null,
     lazyMessage: () -> String = { "bad exit $this != $exp" }
-) = this == exp || throw BadExitStateErr(exp, this, lazyMessage())
+) { this == exp || throw BadExitStateErr(exp, this, stderr, lazyMessage()) }
 
 
 inline fun List<String>.chkStdErr(
     test: List<String>.() -> Boolean = { isEmpty() },
     lazyMessage: () -> String = { "bad stderr" }
-) = test(this) || throw BadStdErrStateErr(this, lazyMessage())
+) { test(this) || throw BadStdErrStateErr(this, lazyMessage()) }
 
 inline fun List<String>.chkStdOut(
     test: List<String>.() -> Boolean = { isEmpty() },
     lazyMessage: () -> String = { "bad stdout" }
-) = test(this) || throw BadStdOutStateErr(this, lazyMessage())
+) { test(this) || throw BadStdOutStateErr(this, lazyMessage()) }
 
 @OptIn(DelicateKommandApi::class)
 fun Kommand.chkInIdeap(

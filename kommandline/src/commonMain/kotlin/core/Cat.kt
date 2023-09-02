@@ -22,8 +22,14 @@ fun CliPlatform.readFileLastLineExec(path: String) =
 fun readTextFileWithCat(path: String) = catReadTextFile(path)
 
 @OptIn(DelicateKommandApi::class)
-fun catReadTextFile(path: String) =
-    cat { +path }.reduced { stdout.toList() }
+fun catReadFileText(path: String) = cat { +path }.reducedOut { toList() }
+
+/** Another name for [catReadFileText]; important for autocomplete. */
+fun readFileTextWithCat(path: String) = catReadFileText(path)
+// In case of reading/writing files we should have both naming schemes:
+// starting with command name, like: catRead...
+// stating with read/write, like readFile..WithCat
+// TODO: make sure I follow this rule in other cases too (reading/writing with: echo, dd, ..)
 
 @DelicateKommandApi
 fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)

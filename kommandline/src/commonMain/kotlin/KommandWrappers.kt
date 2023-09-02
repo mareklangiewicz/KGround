@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 /**
@@ -56,9 +57,24 @@ class TypedExecProcess<In, Out, Err>(
     val stderr: Err = eprocess.stderr.stderrRetype()
 }
 
-// Mostly for IDE to suggest it when typing "await.."
-suspend fun TypedExecProcess<*, *, *>.awaitAndChkExit(expExit: Int = 0, finallyClose: Boolean = true) =
-    awaitExit(finallyClose).chkExit(expExit)
+suspend fun TypedExecProcess<*, *, Flow<String>>.awaitAndChkExit(
+    expExit: Int = 0,
+    firstCollectErr: Boolean,
+    finallyClose: Boolean = true
+) {
+    val collectedErr: List<String>? = if (firstCollectErr) stderr.toList() else null
+    awaitExit(finallyClose).chkExit(expExit, collectedErr)
+}
+
+/**
+ * If unexpected exit, then it will normally throw [BadExitStateErr], but with stderr set to null (meaning: unknown).
+ * Usually it's better to capture stderr in some way, so think twice before choosing this extension function.
+ */
+@DelicateKommandApi
+suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
+    expExit: Int = 0,
+    finallyClose: Boolean = true
+) = awaitExit(finallyClose).chkExit(expExit)
 
 /**
  * @param dir working directory for started subprocess - null means inherit from the current process
@@ -92,22 +108,43 @@ internal class ReducedKommandImpl<K: Kommand, In, Out, Err, TK: TypedKommand<K, 
         reduce(platform.start(typedKommand, dir))
 }
 
-fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reduced(
-    alsoAwaitAndChkExit: Boolean = true,
-    reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+/**
+ * Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit.
+ */
+fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reducedManually(
+    reduceManually: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+): ReducedKommand<ReducedOut> = ReducedKommandImpl(this, reduceManually)
+
+fun <K: Kommand, ReducedOut> K.reducedManually(
+    reduceManually: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
+): ReducedKommand<ReducedOut> = typed(stdoutRetype = defaultOutRetypeToItSelf)
+    .reducedManually(reduceManually)
+
+/**
+ * Note: reduceOut means: user is responsible only for reducing stdout;
+ * stderr and exit will be handled in the default way.
+ */
+fun <K: Kommand, Out, TK: TypedKommand<K, StdinCollector, Out, Flow<String>>, ReducedOut> TK.reducedOut(
+    reduceOut: suspend Out.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this) {
-    val out = reduce()
-    if (alsoAwaitAndChkExit) awaitAndChkExit()
-    out
+    coroutineScope {
+        val deferredErr = async { stderr.toList() }
+        val reducedOut = stdout.reduceOut()
+        val collectedErr = deferredErr.await()
+        awaitExit().chkExit(stderr = collectedErr)
+        reducedOut
+    }
 }
 
-fun <K: Kommand, ReducedOut> K.reduced(
-    alsoAwaitAndChkExit: Boolean = true,
-    reduce: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
-): ReducedKommand<ReducedOut> = typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit, reduce)
+fun <K: Kommand, ReducedOut> K.reducedOut(
+    reduceOut: suspend Flow<String>.() -> ReducedOut,
+): ReducedKommand<ReducedOut> = this
+    .typed(stdoutRetype = defaultOutRetypeToItSelf)
+    .reducedOut(reduceOut)
 
-fun <K: Kommand> K.reduced(expectedExit: Int = 0): ReducedKommand<Unit> =
-    typed(stdoutRetype = defaultOutRetypeToItSelf).reduced(alsoAwaitAndChkExit = false) { awaitAndChkExit(expectedExit) }
+fun <K: Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = this
+    .typed(stdoutRetype = defaultOutRetypeToItSelf)
+    .reducedOut {}
 
 
 

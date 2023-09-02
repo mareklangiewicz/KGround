@@ -74,7 +74,7 @@ fun findTypicalDetailsTable(path: String) =
     findDetailsTable(path, details = typicalDetails)
 
 fun findTypicalDetailsTableToList(path: String) =
-    findDetailsTable(path, details = typicalDetails).reduced { stdout.toList() }
+    findDetailsTable(path, details = typicalDetails).reducedOut { toList() }
 
 
 /**

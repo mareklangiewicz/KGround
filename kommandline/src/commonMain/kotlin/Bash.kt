@@ -23,15 +23,15 @@ fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\
 
 @OptIn(DelicateKommandApi::class)
 fun bashGetExportsMap() =
-    bash("export").reduced {
-        stdout.toList()
-            .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
-            .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
+    bash("export").reducedOut { this
+        .toList()
+        .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
+        .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
     }
 
 @OptIn(DelicateKommandApi::class)
 fun bashGetExportsToFile(outFile: String) =
-    bash("export > $outFile").reduced()
+    bash("export > $outFile").reducedOutToUnit()
 
 
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash

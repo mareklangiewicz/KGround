@@ -8,12 +8,12 @@ import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
 @OptIn(DelicateKommandApi::class)
 fun lsRegFiles(dir: String, withHidden: Boolean = false) =
-    ls(dir, withHidden = withHidden, style = SLASH).reduced { stdout.toList().filter { !it.endsWith('/') } }
+    ls(dir, withHidden = withHidden, style = SLASH).reducedOut { toList().filter { !it.endsWith('/') } }
 
 @OptIn(DelicateKommandApi::class)
 fun lsSubDirs(dir: String, withHidden: Boolean = false) =
-    ls(dir, withHidden = withHidden, style = SLASH).reduced {
-        stdout.toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
+    ls(dir, withHidden = withHidden, style = SLASH).reducedOut {
+        toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
     }
 
 @OptIn(DelicateKommandApi::class)

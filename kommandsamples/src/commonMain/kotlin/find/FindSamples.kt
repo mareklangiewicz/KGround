@@ -104,14 +104,13 @@ fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
     urlPrefix: String = "file://\$MODULE_DIR\$",
     withOnEachLog: Boolean = false,
 ) =
-    findBoringCodeDirs(path).reduced {
-        stdout
-            .map { it.removeReqPrefix(path) }
-            .map { "$indent<excludeFolder url=\"$urlPrefix$it\" />" }
-            .let { if (withOnEachLog) it.onEachLog() else it }
-            .toList()
-            .sorted()
-            .joinToString("\n")
+    findBoringCodeDirs(path).reducedOut { this
+        .map { it.removeReqPrefix(path) }
+        .map { "$indent<excludeFolder url=\"$urlPrefix$it\" />" }
+        .let { if (withOnEachLog) it.onEachLog() else it }
+        .toList()
+        .sorted()
+        .joinToString("\n")
     }
 
 /**
