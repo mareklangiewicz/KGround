@@ -1,28 +1,7 @@
 package pl.mareklangiewicz.kommand.core
 
-import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 
-
-// TODO_someday: move head/tail so separate files and create more specific kommand data classes
-
-@OptIn(DelicateKommandApi::class)
-fun readFileHead(path: String, lines: Int = 10) = kommandTypical("head", KOptS("n", "$lines")) { +path }
-
-@OptIn(DelicateKommandApi::class)
-fun readFileTail(path: String, lines: Int = 10) = kommandTypical("tail", KOptS("n", "$lines")) { +path }
-
-@OptIn(DelicateKommandApi::class)
-fun readFileFirstLine(path: String) = readFileHead(path, 1).reducedOut { single() }
-
-@OptIn(DelicateKommandApi::class)
-fun readFileLastLine(path: String) = readFileTail(path, 1).reducedOut { single() }
-
-
-@OptIn(DelicateKommandApi::class)
-fun readFileWithCat(path: String) = cat { +path }.reducedOut { toList() }
-// In case of essentially just reading/writing files we should use naming scheme starting with readFile/writeFile
-// TODO: make sure I follow this rule in other cases too (reading/writing with: echo, dd, ..)
 
 @DelicateKommandApi
 fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)

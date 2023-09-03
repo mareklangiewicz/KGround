@@ -22,7 +22,7 @@ class GpgTest {
         val inFile = mktempExec("testGED")
         val encFile = "$inFile.enc"
         val decFile = "$inFile.dec"
-        writeFileWithEchoExec("some plain text 667", outFile = inFile)
+        writeFileWithDD(inLines = listOf("some plain text 667"), outFile = inFile).execb(this)
         gpgEncryptPass("correct pass", inFile, encFile).execb(this)
         gpgDecryptPass("correct pass", encFile, decFile).execb(this)
         val decrypted = readFileWithCat(decFile).execb(this).single()

@@ -51,8 +51,7 @@ private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = Cli
         val file = "$dir/$key"
         platform.run {
             if (item == null) rmIfFileIsThereExec(file)
-            else writeFileWithEchoExec(item, outFile = file)
-                // TODO_someday: Use sth else to make it work on platforms without isRedirectSupported
+            else writeFileWithDD(inLines = listOf(item), outFile = file).execb(CliPlatform.SYS)
         }
     }
 

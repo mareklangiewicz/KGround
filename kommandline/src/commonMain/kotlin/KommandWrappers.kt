@@ -91,14 +91,15 @@ fun <K: Kommand, In, Out, Err> CliPlatform.start(
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
 
+// TODO_someday: (When we have context receivers in MPP and it's time for bigger refactor):
+//   this ReducedKommand interface is in fact more general contract - sth like "Skript",
+//   that should also represent executing more kommands on some platform, not just one.
+//   Rethink if I need both fun interface Skript, and just empty interface ReducedKommand : Skript,
+//   or maybe Skript is even enough and ReducedKommand maybe deleted.
+//   Then ReducedKommandMap, etc. would also be just a specific form of Skript.
 interface ReducedKommand<ReducedOut> {
     suspend fun exec(platform: CliPlatform, dir: String? = null): ReducedOut
 }
-
-/** Mostly for tests to try to compare wrapped kommand line to expected line. */
-@DelicateKommandApi
-fun ReducedKommand<*>.lineRawOrNull() = (this as? ReducedKommandImpl<*, *, *, *, *, *>)
-    ?.typedKommand?.kommand?.lineRaw()
 
 internal class ReducedKommandImpl<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
     val typedKommand: TK,
@@ -108,13 +109,34 @@ internal class ReducedKommandImpl<K: Kommand, In, Out, Err, TK: TypedKommand<K, 
         reduce(platform.start(typedKommand, dir))
 }
 
-/**
- * Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit.
- */
+internal class ReducedKommandMap<InnerOut, MappedOut>(
+    val reducedKommand: ReducedKommand<InnerOut>,
+    val reduceMap: suspend InnerOut.() -> MappedOut,
+): ReducedKommand<MappedOut> {
+    override suspend fun exec(platform: CliPlatform, dir: String?): MappedOut =
+        reducedKommand.exec(platform, dir).reduceMap()
+}
+
+fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
+    reduceMap: suspend InnerOut.() -> MappedOut,
+): ReducedKommand<MappedOut> = ReducedKommandMap(this, reduceMap)
+
+
+/** Mostly for tests to try to compare wrapped kommand line to expected line. */
+@DelicateKommandApi
+fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
+    is ReducedKommandImpl<*, *, *, *, *, *> -> typedKommand.kommand.lineRaw()
+    is ReducedKommandMap<*, *>  -> reducedKommand.lineRawOrNull()
+    else -> null
+}
+
+
+/** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
 fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reducedManually(
     reduceManually: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this, reduceManually)
 
+/** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
 fun <K: Kommand, ReducedOut> K.reducedManually(
     reduceManually: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = typed(stdoutRetype = defaultOutRetypeToItSelf)
@@ -122,9 +144,9 @@ fun <K: Kommand, ReducedOut> K.reducedManually(
 
 /**
  * Note: reduceOut means: user is responsible only for reducing stdout;
- * stderr and exit will be handled in the default way.
+ * stderr and exit will be handled in the default way; stdin will not be used at all.
  */
-fun <K: Kommand, Out, TK: TypedKommand<K, StdinCollector, Out, Flow<String>>, ReducedOut> TK.reducedOut(
+fun <K: Kommand, In, Out, TK: TypedKommand<K, In, Out, Flow<String>>, ReducedOut> TK.reducedOut(
     reduceOut: suspend Out.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this) {
     coroutineScope {
@@ -142,9 +164,16 @@ fun <K: Kommand, ReducedOut> K.reducedOut(
     .typed(stdoutRetype = defaultOutRetypeToItSelf)
     .reducedOut(reduceOut)
 
-fun <K: Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = this
-    .typed(stdoutRetype = defaultOutRetypeToItSelf)
-    .reducedOut {}
 
+// These four below look unnecessary, but I like how they explicitly suggest common correct thing to do in the IDE.
+
+fun <K: Kommand> K.reducedOutToList(): ReducedKommand<List<String>> = reducedOut { toList() }
+fun <K: Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = reducedOut {}
+
+fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToList(): ReducedKommand<List<OutItem>> =
+    reducedOut { toList() }
+
+fun <In, Out> TypedKommand<*, In, Out, Flow<String>>.reducedOutToUnit(): ReducedKommand<Unit> =
+    reducedOut {}
 
 
