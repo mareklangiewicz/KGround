@@ -2,14 +2,25 @@
 
 package pl.mareklangiewicz.kommand.admin
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.admin.SudoOpt.*
 
-fun CliPlatform.sudoExec(k: Kommand, asUser: String? = null, inPass: String? = null, vararg options: SudoOpt) =
-    sudo(k, *options) {
-        asUser?.let { -User(it) }
-        inPass?.let { -Stdin; -Prompt("") }
-    }.execb(this, inContent = inPass)
+@OptIn(DelicateKommandApi::class)
+fun sudo(
+    k: Kommand,
+    asUser: String? = null,
+    inPass: String? = null,
+    vararg options: SudoOpt
+) = sudo(k, *options) {
+    asUser?.let { -User(it) }
+    inPass?.let { -Stdin; -Prompt("") }
+}.reducedManually {
+    inPass?.let { stdin.collect(flowOf(it)) }
+    val out = stdout.toList()
+    awaitAndChkExit(firstCollectErr = true)
+    out
+}
 
 @DelicateKommandApi
 fun sudoEdit(file: String, asUser: String? = null) = sudo {
