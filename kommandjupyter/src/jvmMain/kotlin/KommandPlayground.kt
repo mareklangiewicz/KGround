@@ -9,8 +9,6 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
-import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.kommand.ssh.*
 
 
 /**
@@ -25,7 +23,7 @@ fun main() {
     }
 }
 
-suspend fun playground() = withLoggingBadStreams {
+suspend fun playground() = withPrintingBadStreams {
     println("Let's play with kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")
@@ -35,6 +33,8 @@ suspend fun playground() = withLoggingBadStreams {
 //    SshSamples.sshPimLsLAH.x(errToOut = true).logEach()
 //    prepareMyExcludeFolderInKotlinMultiProject()
 //    showLangaraRepoMarkdownListInIdeaP()
+//    readFileHead("/home/marek/non-existent-file-46578563").x() // should print BadExitStateErr.stderr
+//    readFileHead("/home/marek/.vimrc").x().logEach()
 }
 
 @OptIn(DelicateKommandApi::class)
