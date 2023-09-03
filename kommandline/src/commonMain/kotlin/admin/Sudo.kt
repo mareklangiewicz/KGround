@@ -8,15 +8,15 @@ import pl.mareklangiewicz.kommand.admin.SudoOpt.*
 
 /**
  * Tested only for simple non-interactive commands, that don't expect any input and just print some output.
- * Password (if provided) is given to sudo via stdin, and it's then flow is finished, so no input for inner kommand.
+ * Password (if provided) is given to sudo via stdin, and then stdin is closed, so no input for inner kommand.
  */
 @DelicateKommandApi
 fun sudo(
     k: Kommand,
+    vararg useNamedArgs: Unit,
     asUser: String? = null,
     inPass: String? = null,
-    vararg options: SudoOpt
-) = sudo(k, *options) {
+) = sudo(k) {
     asUser?.let { -User(it) }
     inPass?.let { -Stdin; -Prompt("") }
 }.reducedManually {
