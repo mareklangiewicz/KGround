@@ -13,6 +13,7 @@ val myHomePath = "/home/marek"
 val myTmpPath = "$myHomePath/tmp"
 val myKotlinPath = "$myHomePath/code/kotlin"
 val myDepsKtPath = "$myKotlinPath/DepsKt"
+val myKGroundPath = "$myKotlinPath/KGround"
 val myKommandLinePath = "$myKotlinPath/KommandLine"
 
 @OptIn(DelicateKommandApi::class)
@@ -38,9 +39,9 @@ data object FindSamples {
         findTypeNameBase(".", "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
                 "find . -name *abc* -type f -printf %p\\0%s\\0"
 
-    val findSymLinksToKtsFilesInDepsKt =
-        find(myDepsKtPath, SymLinkTo("*.kts")) s
-            "find $myDepsKtPath -lname *.kts"
+    val findSymLinksToKtsFilesInKGround =
+        find(myKGroundPath, SymLinkTo("*.kts")) s
+            "find $myKGroundPath -lname *.kts"
 
     val findDepthMax2FilesInDepsKtAndRunFileOnEach =
         find(myDepsKtPath, DepthMax(2), ActExec(kommand("file", "{}"))) s

@@ -11,32 +11,33 @@ fun CliPlatform.sudoExec(k: Kommand, asUser: String? = null, inPass: String? = n
         inPass?.let { -Stdin; -Prompt("") }
     }.execb(this, inContent = inPass)
 
+@DelicateKommandApi
 fun sudoEdit(file: String, asUser: String? = null) = sudo {
     -Edit; asUser?.let { -User(it) }; +file
 }
 
+@DelicateKommandApi
 fun Kommand.withSudo(vararg options: SudoOpt, init: Sudo.() -> Unit = {}): Sudo = sudo(this, *options, init = init)
 
+@DelicateKommandApi
 fun sudo(k: Kommand, vararg options: SudoOpt, init: Sudo.() -> Unit = {}) = sudo {
-    opts.addAll(options); init(); -EOOpt; stuff.addAll(k.toArgs())
+    opts.addAll(options); init(); -EOOpt; nonopts.addAll(k.toArgs())
 }
 
+@DelicateKommandApi
 fun sudo(init: Sudo.() -> Unit = {}) = Sudo().apply(init)
 
 /**
  * [home page](https://www.sudo.ws/)
  * [linux man](https://www.sudo.ws/docs/man/sudo.man/) */
+@DelicateKommandApi
 data class Sudo(
-    val opts: MutableList<SudoOpt> = mutableListOf(),
-    val stuff: MutableList<String> = mutableListOf(),
-) : Kommand {
-    override val name get() = "sudo"
-    override val args get() = opts.flatMap { it.toArgs() } + stuff
-    operator fun SudoOpt.unaryMinus() = opts.add(this)
-    operator fun String.unaryPlus() = stuff.add(this)
-}
+    override val opts: MutableList<SudoOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<SudoOpt> { override val name get() = "sudo" }
 
-interface SudoOpt: KOpt {
+@DelicateKommandApi
+interface SudoOpt: KOptTypical {
     data object Help : KOptL("help"), SudoOpt // there is also short -h but it does NOT always mean help
     data object Version : KOptL("version"), SudoOpt
     data object SetHome : KOptL("set-home"), SudoOpt
