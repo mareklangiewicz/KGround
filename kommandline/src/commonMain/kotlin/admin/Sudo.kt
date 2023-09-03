@@ -6,7 +6,11 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.admin.SudoOpt.*
 
-@OptIn(DelicateKommandApi::class)
+/**
+ * Tested only for simple non-interactive commands, that don't expect any input and just print some output.
+ * Password (if provided) is given to sudo via stdin, and it's then flow is finished, so no input for inner kommand.
+ */
+@DelicateKommandApi
 fun sudo(
     k: Kommand,
     asUser: String? = null,

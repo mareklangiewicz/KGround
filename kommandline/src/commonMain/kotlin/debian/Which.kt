@@ -25,7 +25,8 @@ data class Which(
     operator fun WhichOpt.unaryMinus() = opts.add(this)
 }
 
-interface WhichOpt: KOpt {
-    /** print all matching pathnames of each argument */
+@DelicateKommandApi
+interface WhichOpt: KOptTypical {
+    /** print all matching path names of each argument */
     data object All : KOptS("a"), WhichOpt
 }

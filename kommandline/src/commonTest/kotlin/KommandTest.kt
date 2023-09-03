@@ -17,6 +17,7 @@ import pl.mareklangiewicz.kommand.core.LsOpt.All
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
 import pl.mareklangiewicz.kommand.core.Rm.Option.*
+import pl.mareklangiewicz.kommand.debian.*
 import kotlin.test.*
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -70,7 +71,7 @@ class KommandTest {
         kommand.chkWithUser("vim -g --servername DDDD .")
     }
     @Test fun testMkTemp() = mktemp().chkWithUser()
-    @Test fun testWhich() = which { +"vim" }.chkWithUser()
+    @Test fun testWhich() = which("vim", "ls", all = true).chkWithUser()
 
     @Ignore // jitpack
     @Test fun testCreateTempFile() = println(SYS.mktempExec())
