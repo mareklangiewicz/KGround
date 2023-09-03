@@ -101,8 +101,8 @@ interface ReducedKommand<ReducedOut> {
     suspend fun exec(platform: CliPlatform, dir: String? = null): ReducedOut
 }
 
-internal class ReducedKommandImpl<K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut>(
-    val typedKommand: TK,
+internal class ReducedKommandImpl<K: Kommand, In, Out, Err, ReducedOut>(
+    val typedKommand: TypedKommand<K, In, Out, Err>,
     val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> {
     override suspend fun exec(platform: CliPlatform, dir: String?): ReducedOut =
@@ -125,14 +125,14 @@ fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
 /** Mostly for tests to try to compare wrapped kommand line to expected line. */
 @DelicateKommandApi
 fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
-    is ReducedKommandImpl<*, *, *, *, *, *> -> typedKommand.kommand.lineRaw()
+    is ReducedKommandImpl<*, *, *, *, *> -> typedKommand.kommand.lineRaw()
     is ReducedKommandMap<*, *>  -> reducedKommand.lineRawOrNull()
     else -> null
 }
 
 
 /** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
-fun <K: Kommand, In, Out, Err, TK: TypedKommand<K, In, Out, Err>, ReducedOut> TK.reducedManually(
+fun <K: Kommand, In, Out, Err, ReducedOut> TypedKommand<K, In, Out, Err>.reducedManually(
     reduceManually: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this, reduceManually)
 
@@ -146,7 +146,7 @@ fun <K: Kommand, ReducedOut> K.reducedManually(
  * Note: reduceOut means: user is responsible only for reducing stdout;
  * stderr and exit will be handled in the default way; stdin will not be used at all.
  */
-fun <K: Kommand, In, Out, TK: TypedKommand<K, In, Out, Flow<String>>, ReducedOut> TK.reducedOut(
+fun <K: Kommand, In, Out, ReducedOut> TypedKommand<K, In, Out, Flow<String>>.reducedOut(
     reduceOut: suspend Out.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this) {
     coroutineScope {
