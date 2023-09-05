@@ -3,11 +3,14 @@
 package pl.mareklangiewicz.kommand.playground
 
 import kotlinx.coroutines.*
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
+import pl.mareklangiewicz.kommand.gnome.*
+import pl.mareklangiewicz.upue.*
 
 
 /**
@@ -27,6 +30,7 @@ suspend fun playground() = withPrintingBadStreams {
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")
     }
+    SYS.startInTermIfUserConfirms(EchoSamples.echoTwoParagraphsWithEscapes.kommand)
 //    SshSamples.sshPimInTermGnome.x()
 //    SshSamples.sshPimLsInTermKitty.x()
 //    SshSamples.sshPimLsLAH.x(errToOut = true).logEach()

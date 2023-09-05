@@ -1,30 +1,44 @@
 package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.core.EchoOpt.*
 
-fun echo(text: String) = echo { +text }
+/**
+ * @param withNewLine adds trailing newline at the end of [line].
+ *   Note: normally it doesn't matter because in KommandLine stdout is read line-wise anyway.
+ *   But it matters when we redirect output to file, for example with: [CliPlatform.start] start(..., outFile=...),
+ *   or when we inject echo kommand line into some bash script with pipes, etc.
+ */
 
+@OptIn(DelicateKommandApi::class)
+fun echo(
+    line: String,
+    vararg useNamedArgs: Unit,
+    withEscapes: Boolean = false,
+    withNewLine: Boolean = true,
+) = echo {
+    if (withEscapes) -Escapes(enable = true)
+    if (!withNewLine) -NoNewLine
+    +line
+}
+
+@DelicateKommandApi
 fun echo(init: Echo.() -> Unit = {}) = Echo().apply(init)
+
 /**
  * [gnu coreutils echo manual](https://www.gnu.org/software/coreutils/manual/html_node/echo-invocation.html)
  * [linux man](https://man7.org/linux/man-pages/man1/echo.1.html)
  */
+@DelicateKommandApi
 data class Echo(
-    val options: MutableList<Option> = mutableListOf(),
-    val text: MutableList<String> = mutableListOf()
-) : Kommand {
+    override val opts: MutableList<EchoOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf()
+) : KommandTypical<EchoOpt> { override val name get() = "echo" }
 
-    override val name get() = "echo"
-    override val args get() = options.map { it.str } + text
-
-    sealed class Option(val str: String) {
-        data object noTrailingNewLine : Option("-n")
-        data object enableBackslashEscapes : Option("-e")
-        data object help : Option("--help")
-        data object version : Option("--version")
-    }
-
-    operator fun String.unaryPlus() = text.add(this)
-
-    operator fun Option.unaryMinus() = options.add(this)
+@DelicateKommandApi
+interface EchoOpt: KOptTypical {
+    data object NoNewLine : KOptS("n"), EchoOpt
+    data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt
+    data object Help : KOptL("help"), EchoOpt
+    data object Version : KOptL("version"), EchoOpt
 }
