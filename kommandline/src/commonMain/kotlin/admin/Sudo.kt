@@ -10,6 +10,15 @@ import pl.mareklangiewicz.kommand.admin.SudoOpt.*
  * Tested only for simple non-interactive commands, that don't expect any input and just print some output.
  * Password (if provided) is given to sudo via stdin, and then stdin is closed, so no input for inner kommand.
  */
+// This is just a simple sequential implementation, for simple kommands.
+// TODO_someday_maybe:
+// Implementation for long-running kommands that read input and write to stdout and stderr concurrently over time.
+// But carefully because with outer sudo kommand, it can get complicated.
+// Would need to be sure how exactly sudo passes data through.
+// For example, when first sudo itself is collecting password from stdin.
+// So I guess the correct concurrent implementation would be complicated and require a lot of testing.
+// See fun TypedKommand<...>.reducedOut for more typical concurrent implementation
+// (but without sudo related complications).
 @DelicateKommandApi
 fun sudo(
     k: Kommand,
