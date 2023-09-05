@@ -1,29 +1,36 @@
 package pl.mareklangiewicz.kommand.core
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 
-fun mktemp(template: String? = null, init: MkTemp.() -> Unit = {}) = MkTemp(template).apply(init)
+@OptIn(DelicateKommandApi::class)
+fun mktemp(
+    vararg useNamedArgs: Unit,
+    path: String = ".",
+    prefix: String = "tmp.",
+    suffix: String = ".tmp",
+) = mktemp("$path/${prefix}XXXXXX${suffix}").reducedOut { single() }
 
-fun CliPlatform.mktempExec(prefix: String = "tmp.", suffix: String = ".tmp") =
-    mktemp("$pathToUserTmp/${prefix}XXXXXX${suffix}").execb(this).single()
+@DelicateKommandApi
+fun mktemp(template: String, init: MkTemp.() -> Unit = {}) = mktemp { +template; init() }
 
+@DelicateKommandApi
+fun mktemp(init: MkTemp.() -> Unit) = MkTemp().apply(init)
+
+@DelicateKommandApi
 data class MkTemp(
-    var template: String? = null,
-    val options: MutableList<Option> = mutableListOf()
-): Kommand {
-    override val name get() = "mktemp"
-    override val args get() = options.flatMap { it.str } plusIfNN template
+    override val opts: MutableList<MkTempOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+): KommandTypical<MkTempOpt> { override val name get() = "mktemp" }
 
-    sealed class Option(val name: String, val arg: String? = null) {
-        val str get() = listOf(name) plusIfNN arg
-        data object directory : Option("--directory")
-        data object dryrun : Option("--dry-run")
-        data object quiet : Option("--quiet")
-        data class suffix(val s: String) : Option("--suffix", s)
-        data class tmpdir(val dir: String) : Option("--tmpdir", dir)
-        data object help : Option("--help")
-        data object version : Option("--version")
-    }
-    operator fun Option.unaryMinus() = options.add(this)
+@DelicateKommandApi
+interface MkTempOpt: KOptTypical {
+    data object Directory : KOptS("d"), MkTempOpt
+    data object DryRun : KOptS("u"), MkTempOpt
+    data object Quiet : KOptS("q"), MkTempOpt
+    data class Suffix(val suffix: String) : KOptL("suffix", suffix), MkTempOpt
+    data class TmpDir(val dir: String? = null) : KOptS("p", dir), MkTempOpt
+    data object Help : KOptL("help"), MkTempOpt
+    data object Version : KOptL("version"), MkTempOpt
 }

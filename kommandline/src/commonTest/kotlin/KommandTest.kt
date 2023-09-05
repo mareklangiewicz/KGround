@@ -70,11 +70,10 @@ class KommandTest {
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
         kommand.chkWithUser("vim -g --servername DDDD .")
     }
-    @Test fun testMkTemp() = mktemp().chkWithUser()
     @Test fun testWhich() = which("vim", "ls", all = true).chkWithUser()
 
-    @Ignore // jitpack
-    @Test fun testCreateTempFile() = println(SYS.mktempExec())
+    @Ignore
+    @Test fun testMkTemp() = println(mktemp().execb(SYS))
     @Test fun testBash() {
         val kommand1 = vim(".") { -gui; -servername("DDDD") }
         val kommand2 = bash(kommand1)

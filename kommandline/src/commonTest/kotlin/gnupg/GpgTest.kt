@@ -19,7 +19,7 @@ class GpgTest {
 
     @Suppress("DEPRECATION")
     @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmPlatform {
-        val inFile = mktempExec("testGED")
+        val inFile = mktemp(prefix = "testGED").execb(this)
         val encFile = "$inFile.enc"
         val decFile = "$inFile.dec"
         writeFileWithDD(inLines = listOf("some plain text 667"), outFile = inFile).execb(this)
