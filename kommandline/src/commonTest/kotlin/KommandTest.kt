@@ -16,7 +16,6 @@ import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.All
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
-import pl.mareklangiewicz.kommand.core.Rm.Option.*
 import pl.mareklangiewicz.kommand.debian.*
 import kotlin.test.*
 import kotlin.test.Ignore
@@ -45,8 +44,13 @@ class KommandTest {
     @Test fun testMkDir1() = mkdir("/tmp/testMkDir1/blaa/blee", withParents = true)
         .chkLineRawAndExec("mkdir -p /tmp/testMkDir1/blaa/blee")
 
-    @Test fun testRm1() = rm { -dir; +"/tmp/testMkDir1/blaa/blee" }
-        .chkWithUser("rm --dir /tmp/testMkDir1/blaa/blee")
+    @Test fun testRm1() = rm { -RmOpt.Dir; +"/tmp/testMkDir1/blaa/blee" }
+        .chkWithUser("rm -d /tmp/testMkDir1/blaa/blee")
+
+    @Test fun testRm2() = rmTreeWithForce("/tmp/testMkDir1") {
+        // double check if we are removing what we think we are:
+        ls(it).execb(this) == listOf("blaa")
+    }.execb(SYS).logEach()
 
     @Test fun testCat1() = cat { +"/etc/fstab" }.chkInIdeap()
     @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInIdeap()

@@ -53,7 +53,7 @@ expect fun Kommand.execb(
 ): List<String>
 
 // also temporary hack
-expect fun <ReducedOut> ReducedKommand<ReducedOut>.execb(platform: CliPlatform, dir: String? = null): ReducedOut
+expect fun <ReducedOut> ReducedScript<ReducedOut>.execb(platform: CliPlatform, dir: String? = null): ReducedOut
 
 @Deprecated("Use ReducedKommand.exec(CliPlatform, ...)")
 suspend fun <ReducedOut> CliPlatform.exec(kommand: ReducedKommand<ReducedOut>, dir: String? = null): ReducedOut =

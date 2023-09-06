@@ -50,7 +50,7 @@ private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = Cli
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
         platform.run {
-            if (item == null) rmIfFileIsThereExec(file)
+            if (item == null) rmIfFileIsThere(file).execb(CliPlatform.SYS)
             else writeFileWithDD(inLines = listOf(item), outFile = file).execb(CliPlatform.SYS)
         }
     }

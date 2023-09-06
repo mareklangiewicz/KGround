@@ -20,6 +20,7 @@ class KonfigTests {
     }
 }
 
+@OptIn(DelicateKommandApi::class)
 fun CliPlatform.testTmpKonfig() {
     val konfigNewDir = pathToUserTmp!! + "/tmpKonfigForTests" + Random.nextUInt()
 
@@ -29,7 +30,7 @@ fun CliPlatform.testTmpKonfig() {
             testGivenNewKonfigInDir(konfig, konfigNewDir)
         }
         finally {
-            rmTreeWithForceExec(konfigNewDir) { pathToUserTmp!! in it && "tmpKonfigForTests" in it }
+            rmTreeWithForce(konfigNewDir) { pathToUserTmp!! in it && "tmpKonfigForTests" in it }.execb(this)
         }
     }
 }
