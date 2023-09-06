@@ -7,6 +7,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.debian.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.gnome.*
@@ -31,6 +32,7 @@ suspend fun playground() = withPrintingBadStreams {
         println("out line: $it")
     }
     SYS.startInTermIfUserConfirms(EchoSamples.echoTwoParagraphsWithEscapes.kommand)
+//    searchCommandScript("pip").x()?.logEach()
 //    SshSamples.sshPimInTermGnome.x()
 //    SshSamples.sshPimLsInTermKitty.x()
 //    SshSamples.sshPimLsLAH.x(errToOut = true).logEach()

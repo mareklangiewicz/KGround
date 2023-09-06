@@ -4,8 +4,11 @@ package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.kommand.*
 
-fun CliPlatform.dpkgSearchOneCommandExec(command: String) =
-    whichOneExec(command)?.let { dpkg(DpkgAct.Search(it)).execb(this) }
+fun searchCommandScript(command: String) =
+    ReducedScript { platform, dir ->
+        val first = whichFirstOrNull(command).exec(platform, dir) ?: return@ReducedScript null
+        dpkg(DpkgAct.Search(first)).exec(platform)
+    }
 
 /** There has to be exactly one action in each invocation */
 fun dpkg(act: DpkgAct, init: Dpkg.() -> Unit = {}) = dpkg { init(); -act }

@@ -92,14 +92,22 @@ fun <K: Kommand, In, Out, Err> CliPlatform.start(
 
 
 // TODO_someday: (When we have context receivers in MPP and it's time for bigger refactor):
-//   this ReducedKommand interface is in fact more general contract - sth like "Skript",
+//   <Update> I introduced ReducedScript as a coy experiment already... will see </Update>
+//   this ReducedKommand interface is in fact more general contract - sth like "ReducedScript",
 //   that should also represent executing more kommands on some platform, not just one.
-//   Rethink if I need both fun interface Skript, and just empty interface ReducedKommand : Skript,
-//   or maybe Skript is even enough and ReducedKommand maybe deleted.
-//   Then ReducedKommandMap, etc. would also be just a specific form of Skript.
-interface ReducedKommand<ReducedOut> {
-    suspend fun exec(platform: CliPlatform, dir: String? = null): ReducedOut
+//   Rethink if I need both fun interface ReducedScript, and just empty interface ReducedKommand : ReducedScript,
+//   or maybe ReducedScript is even enough and ReducedKommand could be deleted.
+//   Then ReducedKommandMap, etc. would also be just a specific form of ReducedScript.
+
+fun interface ReducedScript<ReducedOut> {
+    // TODO_maybe: dir should probably be inside CliPlatform as val currentDir.
+    //   and maybe sth like CliPlatform.withCurrentDir(dir, code:...) (or rather with context receivers)
+    suspend fun exec(platform: CliPlatform, dir: String?): ReducedOut
 }
+
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(platform: CliPlatform) = exec(platform, null)
+
+interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
 internal class ReducedKommandImpl<K: Kommand, In, Out, Err, ReducedOut>(
     val typedKommand: TypedKommand<K, In, Out, Err>,

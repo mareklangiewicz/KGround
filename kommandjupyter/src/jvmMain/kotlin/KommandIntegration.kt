@@ -78,7 +78,7 @@ fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(
 ) = platform.start(this, dir)
 
 
-suspend fun <ReducedOut> ReducedKommand<ReducedOut>.x(platform: CliPlatform = SYS, dir: String? = null): ReducedOut =
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(platform: CliPlatform = SYS, dir: String? = null): ReducedOut =
     exec(platform, dir = dir)
 
 

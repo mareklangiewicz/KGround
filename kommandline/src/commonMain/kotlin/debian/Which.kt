@@ -1,29 +1,29 @@
 package pl.mareklangiewicz.kommand.debian
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.*
 
-fun CliPlatform.isKommandAvailable(kommand: Kommand) = isCommandAvailable(kommand.name)
+fun isKommandAvailable(kommand: Kommand) = isCommandAvailable(kommand.name)
 
-fun CliPlatform.isCommandAvailable(command: String) = start(which(command)).waitForExit() == 0
+fun isCommandAvailable(command: String) = whichFirstOrNull(command).reducedMap { this != null }
 
-fun CliPlatform.whichOneExec(command: String) = which(command).execb(this).firstOrNull()
+@OptIn(DelicateKommandApi::class)
+fun whichFirstOrNull(command: String) = which(command).reducedOut { firstOrNull() }
 
+@OptIn(DelicateKommandApi::class)
 fun which(vararg commands: String, all: Boolean = false) =
     which { if (all) -WhichOpt.All; for (c in commands) +c }
 
-fun which(init: Which.() -> Unit = {}) = Which().apply(init)
+@DelicateKommandApi
+fun which(init: Which.() -> Unit) = Which().apply(init)
 
 
 /** [linux man](https://linux.die.net/man/1/which) */
+@DelicateKommandApi
 data class Which(
-    val opts: MutableList<WhichOpt> = mutableListOf(),
-    val commands: MutableList<String> = mutableListOf()
-) : Kommand {
-    override val name get() = "which"
-    override val args get() = opts.flatMap { it.toArgs() } + commands
-    operator fun String.unaryPlus() = commands.add(this)
-    operator fun WhichOpt.unaryMinus() = opts.add(this)
-}
+    override val opts: MutableList<WhichOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf()
+) : KommandTypical<WhichOpt> { override val name get() = "which" }
 
 @DelicateKommandApi
 interface WhichOpt: KOptTypical {

@@ -15,13 +15,9 @@ data object WhichSamples {
     val whichDpkg = which("dpkg") s "which dpkg"
     val whichDpkgAndApt = which("dpkg", "apt") s "which dpkg apt"
     val whichAllDpkgAndApt = which("dpkg", "apt", all = true) s "which -a dpkg apt"
-
-    // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
-    val execs: List<KFunction<*>> = listOf(
-        CliPlatform::isCommandAvailable,
-        CliPlatform::isKommandAvailable,
-        CliPlatform::whichOneExec,
-    )
+    val whichDpkgFirstReduced = whichFirstOrNull("dpkg") rs "which dpkg"
+    val isDpkgCommandAvailable = isCommandAvailable("dpkg") rs "which dpkg"
+    val isDpkgKommandAvailable = isKommandAvailable(dpkg()) rs "which dpkg"
 }
 
 data object DpkgSamples {
@@ -31,8 +27,8 @@ data object DpkgSamples {
     val dpkgVerifyDebianUtils = dpkg(Verify("debianutils")) s "dpkg -V debianutils"
     val dpkgListPackagesDebian = dpkg(ListPackages("*debian*")) s "dpkg -l *debian*"
 
-    // TODO_someday: browser+executor UI for execs/wrappers; then add a similar list to other samples
-    val execs: List<KFunction<*>> = listOf(
-        CliPlatform::dpkgSearchOneCommandExec,
+    // TODO_someday: browser+executor UI for scripts; then add a similar list to other samples
+    val scripts: List<KFunction<ReducedScript<*>>> = listOf(
+        ::searchCommandScript
     )
 }
