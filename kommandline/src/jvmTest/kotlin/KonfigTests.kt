@@ -59,7 +59,7 @@ fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
             "no files in konfig dir" o { ls(dir, withHidden = true).execb(this).size eq 0 }
 
             "On touch removed file again" o {
-                touchExec("$dir/somekey1")
+                touch("$dir/somekey1").execb(this)
                 "file is there again" o { testIfFileExists("$dir/somekey1").execb(this) eq true }
                 "get returns not null but empty value" o { konfig["somekey1"] eq "" }
             }

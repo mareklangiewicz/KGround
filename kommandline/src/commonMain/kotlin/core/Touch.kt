@@ -3,11 +3,14 @@ package pl.mareklangiewicz.kommand.core
 import pl.mareklangiewicz.kommand.*
 
 /** Update the access and modification times of each file to the current time. Create empty files if necessary. */
-fun CliPlatform.touchExec(vararg files: String) = touch { this.files.addAll(files) }.execb(this)
+@OptIn(DelicateKommandApi::class)
+fun touch(vararg files: String) = touch { this.files.addAll(files) }.reducedOutToUnit()
 
-fun touch(init: Touch.() -> Unit = {}) = Touch().apply(init)
+@DelicateKommandApi
+fun touch(init: Touch.() -> Unit) = Touch().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/touch.1.html) */
+@DelicateKommandApi
 data class Touch(
     val options: MutableList<Option> = mutableListOf(),
     val files: MutableList<String> = mutableListOf()
