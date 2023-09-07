@@ -65,13 +65,13 @@ fun testIf(file: String, testIfFile: TestIfFile) = testIf("-${testIfFile.code}",
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 @DelicateKommandApi
 fun testIf(vararg tokens: String) = testIf { this.tokens.addAll(tokens) }
-    .reducedManually {
-        // not collecting streams, because they should be empty anyway, and test needs to be fast.
-        when (val exit = awaitExit()) {
+    // not collecting streams, because they should be empty anyway, and test needs to be fast.
+    .reducedExit {
+        when (it) {
             0 -> true
             1 -> false
             2 -> bad { "Platform test ended with error (2)." }
-            else -> bad { "Unexpected platform test exit value ($exit)." }
+            else -> bad { "Unexpected platform test exit value ($it)." }
         }
     }
 

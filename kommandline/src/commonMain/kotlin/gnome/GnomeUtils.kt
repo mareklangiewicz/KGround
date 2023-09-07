@@ -16,7 +16,7 @@ fun CliPlatform.startInTermIfUserConfirms(
     execInDir: String? = null,
     termKommand: (innerKommand: Kommand) -> Kommand = { termGnome(it) }
 ) {
-    if (zenityAskIfExec(confirmation, title)) {
+    if (zenityAskIf(confirmation, title).execb(this)) {
         val k = when {
             insideBash -> bash(kommand, pauseBeforeExit)
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")

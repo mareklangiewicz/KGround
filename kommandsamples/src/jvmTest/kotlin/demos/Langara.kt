@@ -87,5 +87,6 @@ class Langara {
 }
 
 private fun idemo(platform: CliPlatform = SYS, block: CliPlatform.() -> Unit) = ifInteractive { platform.block() }
-private fun CliPlatform.askIf(question: String) = zenityAskIfExec(question)
-private fun CliPlatform.askEntry(question: String, suggested: String? = null) = zenityAskForEntryExec(question, suggested = suggested)
+private fun CliPlatform.askIf(question: String) = zenityAskIf(question).execb(this)
+private fun CliPlatform.askEntry(question: String, suggested: String? = null) =
+    zenityAskForEntry(question, suggested = suggested).execb(this)

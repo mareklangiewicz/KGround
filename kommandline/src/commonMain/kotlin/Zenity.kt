@@ -2,23 +2,15 @@
 
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kommand.ZenityOpt.*
-
-fun CliPlatform.zenityAskIfExec(question: String, title: String? = null): Boolean =
-    start(zenityAskIf(question, title)).waitForExit() == 0
-
-fun CliPlatform.zenityAskForPasswordExec(question: String = "Enter password", title: String? = null): String =
-    zenityAskForPassword(question, title).execb(this).single()
-
-fun CliPlatform.zenityAskForEntryExec(question: String, title: String? = null, suggested: String? = null): String =
-    zenityAskForEntry(question, title, suggested).execb(this).single()
 
 @OptIn(DelicateKommandApi::class)
 fun zenityAskIf(question: String, title: String? = null) = zenity(Type.Question) {
     -Text(question)
     -NoWrap
     title?.let { -Title(it) }
-}
+}.reducedExit { it == 0 }
 
 @OptIn(DelicateKommandApi::class)
 fun zenityAskForPassword(question: String = "Enter password", title: String? = null) =
@@ -26,7 +18,7 @@ fun zenityAskForPassword(question: String = "Enter password", title: String? = n
         -HideText
         -Text(question)
         title?.let { -Title(it) }
-    }
+    }.reducedOut { single() }
 
 @OptIn(DelicateKommandApi::class)
 fun zenityAskForEntry(question: String, title: String? = null, suggested: String? = null) =
@@ -34,7 +26,7 @@ fun zenityAskForEntry(question: String, title: String? = null, suggested: String
         -Text(question)
         title?.let { -Title(it) }
         suggested?.let { -EntryText(it) }
-    }
+    }.reducedOut { single() }
 
 @DelicateKommandApi
 fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; init() }

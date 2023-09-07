@@ -173,6 +173,12 @@ fun <K: Kommand, ReducedOut> K.reducedOut(
     .typed(stdoutRetype = defaultOutRetypeToItSelf)
     .reducedOut(reduceOut)
 
+fun <K: Kommand, ReducedExit> K.reducedExit(
+    reduceExit: suspend (Int) -> ReducedExit,
+): ReducedKommand<ReducedExit> = this
+    .typed(stdoutRetype = defaultOutRetypeToItSelf)
+    .reducedManually { reduceExit(awaitExit()) }
+
 
 // These four below look unnecessary, but I like how they explicitly suggest common correct thing to do in the IDE.
 
