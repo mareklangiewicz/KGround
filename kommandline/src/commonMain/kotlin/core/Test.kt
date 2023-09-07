@@ -1,49 +1,84 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.core.FileTest.*
+import pl.mareklangiewicz.kommand.core.TestFile.*
 
-fun CliPlatform.testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
-fun CliPlatform.testIfFirstFileNewer(file1: String, file2:String) = testIf(file1, "-nt", file2)
-fun CliPlatform.testIfFirstFileOlder(file1: String, file2:String) = testIf(file1, "-ot", file2)
+@OptIn(DelicateKommandApi::class)
+fun testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
+
+@OptIn(DelicateKommandApi::class)
+fun testIfFirstFileNewer(file1: String, file2:String) = testIf(file1, "-nt", file2)
+
+@OptIn(DelicateKommandApi::class)
+fun testIfFirstFileOlder(file1: String, file2:String) = testIf(file1, "-ot", file2)
 
 /** Can be any kind of file (e.g., directory) */
-fun CliPlatform.testIfFileIsThere(file: String) = testIfFile(file, exists)
-fun CliPlatform.testIfFileIsRegular(file: String) = testIfFile(file, regular)
-fun CliPlatform.testIfFileIsDirectory(file: String) = testIfFile(file, directory)
-fun CliPlatform.testIfFileIsSymLink(file: String) = testIfFile(file, symbolicLink)
-fun CliPlatform.testIfFileIsPipe(file: String) = testIfFile(file, namedPipe)
-fun CliPlatform.testIfFileHasGrantedRead(file: String) = testIfFile(file, grantedRead)
-fun CliPlatform.testIfFileHasGrantedWrite(file: String) = testIfFile(file, grantedWrite)
-fun CliPlatform.testIfFileHasGrantedExec(file: String) = testIfFile(file, grantedExec)
+fun testIfFileExists(file: String) = testIf(file, FileExists)
 
-enum class FileTest(val code: Char) {
-    blockSpecial('b'), charSpecial('c'), directory('d'), exists('e'), regular('f'),
-    setGroupID('g'), ownedByEffectiveGroupID('G'), symbolicLink('h'), sticky('k'), modified('N'),
-    ownedByEffectiveUserID('O'), namedPipe('p'), grantedRead('r'), notEmpty('s'), socket('S'),
-    fdOpenOnTerminal('t'), setUserID('u'), grantedWrite('w'), grantedExec('x')
+fun testIfFileIsRegular(file: String) = testIf(file, FileIsRegular)
 
+fun testIfFileIsDirectory(file: String) = testIf(file, FileIsDirectory)
+
+fun testIfFileIsSymLink(file: String) = testIf(file, FileIsSymLink)
+
+fun testIfFileIsPipe(file: String) = testIf(file, FileIsNamedPipe)
+
+fun testIfFileHasGrantedRead(file: String) = testIf(file, FileHasGrantedRead)
+
+fun testIfFileHasGrantedWrite(file: String) = testIf(file, FileHasGrantedWrite)
+
+fun testIfFileHasGrantedExec(file: String) = testIf(file, FileHasGrantedExec)
+
+
+enum class TestFile(val code: Char) {
+    FileIsBlockSpecial('b'),
+    FileIsCharSpecial('c'),
+    FileIsDirectory('d'),
+    /** Can be any kind of file (e.g., directory) */
+    FileExists('e'),
+    FileIsRegular('f'),
+    FileIsSetGroupID('g'),
+    FileIsOwnedByEffectiveGroupID('G'),
+    FileIsSymLink('h'),
+    FileIsSticky('k'),
+    /** has been modified since it was last read */
+    FileIsModified('N'),
+    FileIsOwnedByEffectiveUserID('O'),
+    FileIsNamedPipe('p'),
+    FileHasGrantedRead('r'),
+    FileIsNotEmpty('s'),
+    FileIsSocket('S'),
+    FileDescriptorIsOpenedOnTerminal('t'),
+    FileHasSetUserID('u'),
+    FileHasGrantedWrite('w'),
+    FileHasGrantedExec('x')
 }
 
-fun CliPlatform.testIfFile(file: String, ftest: FileTest) = testIf("-${ftest.code}", file)
+@OptIn(DelicateKommandApi::class)
+fun testIf(file: String, testFile: TestFile) = testIf("-${testFile.code}", file)
+
 
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
-fun CliPlatform.testIf(vararg tokens: String): Boolean {
-    val result = start(test(*tokens)).waitForResult()
-    return when (result.exit) {
-        0 -> true
-        1 -> false
-        2 -> error("Platform test ended with error (2).\n$result")
-        else -> error("Unexpected platform test exit value (${result.exit}).\n$result")
+@DelicateKommandApi
+fun testIf(vararg tokens: String) = test { this.tokens.addAll(tokens) }
+    .reducedManually {
+        // not collecting streams, because they should be empty anyway, and test needs to be fast.
+        when (val exit = awaitExit()) {
+            0 -> true
+            1 -> false
+            2 -> bad { "Platform test ended with error (2)." }
+            else -> bad { "Unexpected platform test exit value ($exit)." }
+        }
     }
-}
 
-fun test(vararg tokens: String) = test { tokens.forEach { +it } }
+@DelicateKommandApi
 fun test(init: Test.() -> Unit = {}) = Test().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/test.1.html) */
+@DelicateKommandApi
 data class Test(val tokens: MutableList<String> = mutableListOf()) : Kommand {
-    // no --help and --verbose options by design. (not always supported anyway - can lead to difficult bugs)
+    // no --help and --version options by design. (not always supported anyway - can lead to difficult bugs)
     override val name get() = "test"
     override val args get() = tokens
     operator fun String.unaryPlus() = tokens.add(this)

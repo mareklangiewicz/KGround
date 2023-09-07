@@ -5,9 +5,9 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.RmOpt.*
 
 @OptIn(DelicateKommandApi::class)
-fun rmIfFileIsThere(file: String) = ReducedScript { platform, dir ->
-    val isThere = platform.testIfFileIsThere(file) // FIXME tests should also use reduced stuff
-    if (isThere) rm(file).exec(platform, dir = dir)
+fun rmIfFileExists(file: String) = ReducedScript { platform, dir ->
+    val exists = testIfFileExists(file).exec(platform, dir)
+    if (exists) rm(file).exec(platform, dir = dir)
     else listOf("File not found")
 }
 

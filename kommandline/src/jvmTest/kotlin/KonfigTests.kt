@@ -37,14 +37,14 @@ fun CliPlatform.testTmpKonfig() {
 
 fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
     "is empty" o { konfig.keys.len eq 0 }
-    "dir is created" o { testIfFileIsDirectory(dir) eq true }
+    "dir is created" o { testIfFileIsDirectory(dir).execb(this) eq true }
     "dir is empty" o { ls(dir, withHidden = true).execb(this).size eq 0 }
 
     "On setting new key and value" o {
         konfig["somekey1"] = "somevalue1"
 
         "get returns stored value" o { konfig["somekey1"] eq "somevalue1" }
-        "file is created" o { testIfFileIsRegular("$dir/somekey1") eq true }
+        "file is created" o { testIfFileIsRegular("$dir/somekey1").execb(this) eq true }
         "no other files there" o { ls(dir, withHidden = true).execb(this) eq listOf("somekey1") }
         "file for somekey1 contains correct content" o {
             val content = readFileWithCat("$dir/somekey1").execb(this).joinToString("\n")
@@ -55,12 +55,12 @@ fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
             konfig["somekey1"] = null
 
             "get returns null" o { konfig["somekey1"] eq null }
-            "file is removed" o { testIfFileIsThere("$dir/somekey1") eq false }
+            "file is removed" o { testIfFileExists("$dir/somekey1").execb(this) eq false }
             "no files in konfig dir" o { ls(dir, withHidden = true).execb(this).size eq 0 }
 
             "On touch removed file again" o {
                 touchExec("$dir/somekey1")
-                "file is there again" o { testIfFileIsThere("$dir/somekey1") eq true }
+                "file is there again" o { testIfFileExists("$dir/somekey1").execb(this) eq true }
                 "get returns not null but empty value" o { konfig["somekey1"] eq "" }
             }
         }

@@ -103,6 +103,7 @@ fun interface ReducedScript<ReducedOut> {
     // TODO_maybe: dir should probably be inside CliPlatform as val currentDir.
     //   and maybe sth like CliPlatform.withCurrentDir(dir, code:...) (or rather with context receivers)
     suspend fun exec(platform: CliPlatform, dir: String?): ReducedOut
+    // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
 
 suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(platform: CliPlatform) = exec(platform, null)
