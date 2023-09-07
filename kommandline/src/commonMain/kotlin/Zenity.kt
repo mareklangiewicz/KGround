@@ -3,99 +3,107 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kommand.ZenityOpt.*
-import pl.mareklangiewicz.kommand.ZenityType.*
 
-fun CliPlatform.zenityAskIfExec(question: String, atitle: String? = null): Boolean =
-    start(zenityAskIf(question, atitle)).waitForExit() == 0
+fun CliPlatform.zenityAskIfExec(question: String, title: String? = null): Boolean =
+    start(zenityAskIf(question, title)).waitForExit() == 0
 
-fun CliPlatform.zenityAskForPasswordExec(question: String = "Enter password", atitle: String? = null): String =
-    zenityAskForPassword(question, atitle).execb(this).single()
+fun CliPlatform.zenityAskForPasswordExec(question: String = "Enter password", title: String? = null): String =
+    zenityAskForPassword(question, title).execb(this).single()
 
-fun CliPlatform.zenityAskForEntryExec(question: String, atitle: String? = null, suggested: String? = null): String =
-    zenityAskForEntry(question, atitle, suggested).execb(this).single()
+fun CliPlatform.zenityAskForEntryExec(question: String, title: String? = null, suggested: String? = null): String =
+    zenityAskForEntry(question, title, suggested).execb(this).single()
 
-fun zenityAskIf(question: String, atitle: String? = null) = zenity(ZenityType.question) {
-    -text(question)
-    -nowrap
-    atitle?.let { -title(it) }
+@OptIn(DelicateKommandApi::class)
+fun zenityAskIf(question: String, title: String? = null) = zenity(Type.Question) {
+    -Text(question)
+    -NoWrap
+    title?.let { -Title(it) }
 }
 
-fun zenityAskForPassword(question: String = "Enter password", atitle: String? = null) =
-    zenity(entry) {
-        -hidetext
-        -text(question)
-        atitle?.let { -title(it) }
+@OptIn(DelicateKommandApi::class)
+fun zenityAskForPassword(question: String = "Enter password", title: String? = null) =
+    zenity(Type.Entry) {
+        -HideText
+        -Text(question)
+        title?.let { -Title(it) }
     }
 
-fun zenityAskForEntry(question: String, atitle: String? = null, suggested: String? = null) =
-    zenity(entry) {
-        -text(question)
-        atitle?.let { -title(it) }
-        suggested?.let { -entrytext(it) }
+@OptIn(DelicateKommandApi::class)
+fun zenityAskForEntry(question: String, title: String? = null, suggested: String? = null) =
+    zenity(Type.Entry) {
+        -Text(question)
+        title?.let { -Title(it) }
+        suggested?.let { -EntryText(it) }
     }
 
-fun zenity(type: ZenityType, init: Zenity.() -> Unit = {}) = Zenity(type).apply(init)
+@DelicateKommandApi
+fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; init() }
 
 /*
 * https://help.gnome.org/users/zenity/stable/index.html.en
 * https://linux.die.net/man/1/zenity
 */
+@OptIn(DelicateKommandApi::class)
 data class Zenity(
-    var type: ZenityType,
-    val opts: MutableList<ZenityOpt> = mutableListOf(),
-    val nonopts: MutableList<String> = mutableListOf()
-): Kommand {
-    override val name get() = "zenity"
-    override val args get() = listOf(type.str) + opts.map { it.str } + nonopts
-    operator fun ZenityOpt.unaryMinus() = opts.add(this)
-    operator fun String.unaryPlus() = nonopts.add(this)
-}
+    override val opts: MutableList<ZenityOpt> = mutableListOf(),
+    override val nonopts: MutableList<String> = mutableListOf(),
+): KommandTypical<ZenityOpt> { override val name get() = "zenity" }
 
-enum class ZenityType(val str: String) {
-    calendar("--calendar"), entry("--entry"), error("--error"), fileselection("--file-selection"), info("--info"),
-    list("--list"), notification("--notification"), progress("--progress"), question("--question"),
-    textinfo("--text-info"), warning("--warning"), scale("--scale")
-}
+@DelicateKommandApi
+interface ZenityOpt : KOptTypical {
 
-sealed class ZenityOpt(val name: String, val arg: String? = null) {
-    val str get() = arg?.let { "$name=$it" } ?: name // TODO_someday: some fun similar to plusIfNotNull for such cases
-    data object help : ZenityOpt("--help")
-    data object version : ZenityOpt("--version")
-    data object about : ZenityOpt("--about")
-    data class title(val t: String): ZenityOpt("--title", t)
+    sealed class Type(name: String): ZenityOpt, KOptL(name) {
+        data object Calendar : Type("calendar")
+        data object Entry : Type("entry")
+        data object Error : Type("error")
+        data object FileSelection : Type("file-selection")
+        data object Info : Type("info")
+        data object List : Type("list")
+        data object Notification : Type("notification")
+        data object Progress : Type("progress")
+        data object Question : Type("question")
+        data object TextInfo : Type("text-info")
+        data object Warning : Type("warning")
+        data object Scale : Type("scale")
+    }
+
+    data object Help : ZenityOpt, KOptL("help")
+    data object Version : ZenityOpt, KOptL("version")
+    data object About : ZenityOpt, KOptL("about")
+    data class Title(val t: String): ZenityOpt, KOptL("title", t)
     /** icon path or one of keywords: info, warning, question, error */
-    data class icon(val icon: String): ZenityOpt("--window-icon", icon)
-    data class timeout(val seconds: Int): ZenityOpt("--timeout", seconds.toString())
-    data class text(val t: String): ZenityOpt("--text", t)
-    data class day(val d: Int): ZenityOpt("--day", d.toString())
-    data class month(val m: Int): ZenityOpt("--month", m.toString())
-    data class year(val y: Int): ZenityOpt("--year", y.toString())
-    data class dateformat(val format: String): ZenityOpt("--date-format", format)
-    data class entrytext(val t: String): ZenityOpt("--entry-text", t)
-    data object hidetext : ZenityOpt("--hide-text")
-    data object nowrap : ZenityOpt("--no-wrap")
-    data class filename(val fn: String): ZenityOpt("--filename", fn)
-    data object multiple : ZenityOpt("--multiple")
-    data object directory : ZenityOpt("--directory")
-    data object save : ZenityOpt("--save")
-    data class separator(val s: String): ZenityOpt("--separator", s)
-    data object confirmoverwrite : ZenityOpt("--confirm-overwrite")
-    data class column(val header: String): ZenityOpt("--column", header)
-    data object checklist : ZenityOpt("--checklist")
-    data object radiolist : ZenityOpt("--radiolist")
-    data object editable : ZenityOpt("--editable")
-    data class printcolumn(val c: String): ZenityOpt("--print-column", c)
-    data class hidecolumn(val c: Int): ZenityOpt("--hide-column", c.toString())
-    data object listen : ZenityOpt("--listen")
-    data class percentage(val p: Int): ZenityOpt("--percentage", p.toString())
-    data object autoclose : ZenityOpt("--auto-close")
-    data object autokill : ZenityOpt("--auto-kill")
-    data object pulsate : ZenityOpt("--pulsate")
-    data class initvalue(val v: Int): ZenityOpt("--value", v.toString())
-    data class minvalue(val v: Int): ZenityOpt("--min-value", v.toString())
-    data class maxvalue(val v: Int): ZenityOpt("--max-value", v.toString())
-    data class step(val v: Int): ZenityOpt("--step", v.toString())
-    data object printpartial : ZenityOpt("--print-partial")
+    data class Icon(val icon: String): ZenityOpt, KOptL("window-icon", icon)
+    data class Timeout(val seconds: Int): ZenityOpt, KOptL("timeout", seconds.toString())
+    data class Text(val t: String): ZenityOpt, KOptL("text", t)
+    data class Day(val d: Int): ZenityOpt, KOptL("day", d.toString())
+    data class Month(val m: Int): ZenityOpt, KOptL("month", m.toString())
+    data class Year(val y: Int): ZenityOpt, KOptL("year", y.toString())
+    data class DateFormat(val format: String): ZenityOpt, KOptL("date-format", format)
+    data class EntryText(val t: String): ZenityOpt, KOptL("entry-text", t)
+    data object HideText : ZenityOpt, KOptL("hide-text")
+    data object NoWrap : ZenityOpt, KOptL("no-wrap")
+    data class FileName(val fn: String): ZenityOpt, KOptL("filename", fn)
+    data object Multiple : ZenityOpt, KOptL("multiple")
+    data object Directory : ZenityOpt, KOptL("directory")
+    data object Save : ZenityOpt, KOptL("save")
+    data class Separator(val s: String): ZenityOpt, KOptL("separator", s)
+    data object ConfirmOverwrite : ZenityOpt, KOptL("confirm-overwrite")
+    data class Column(val header: String): ZenityOpt, KOptL("column", header)
+    data object CheckList : ZenityOpt, KOptL("checklist")
+    data object RadioList : ZenityOpt, KOptL("radiolist")
+    data object Editable : ZenityOpt, KOptL("editable")
+    data class PrintColumn(val c: String): ZenityOpt, KOptL("print-column", c)
+    data class HideColumn(val c: Int): ZenityOpt, KOptL("hide-column", c.toString())
+    data object Listen : ZenityOpt, KOptL("listen")
+    data class Percentage(val p: Int): ZenityOpt, KOptL("percentage", p.toString())
+    data object AutoClose : ZenityOpt, KOptL("auto-close")
+    data object AutoKill : ZenityOpt, KOptL("auto-kill")
+    data object Pulsate : ZenityOpt, KOptL("pulsate")
+    data class InitValue(val v: Int): ZenityOpt, KOptL("value", v.toString())
+    data class MinValue(val v: Int): ZenityOpt, KOptL("min-value", v.toString())
+    data class MaxValue(val v: Int): ZenityOpt, KOptL("max-value", v.toString())
+    data class Step(val v: Int): ZenityOpt, KOptL("step", v.toString())
+    data object PrintPartial : ZenityOpt, KOptL("print-partial")
 }
 
 
