@@ -2,7 +2,10 @@ package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.core.TestFile.*
+import pl.mareklangiewicz.kommand.core.TestIfFile.*
+
+// names here are all like testIf/TestIf instead of just test/Test,
+// mostly to be different from normal test annotations/classes/functions
 
 @OptIn(DelicateKommandApi::class)
 fun testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
@@ -22,7 +25,7 @@ fun testIfFileIsDirectory(file: String) = testIf(file, FileIsDirectory)
 
 fun testIfFileIsSymLink(file: String) = testIf(file, FileIsSymLink)
 
-fun testIfFileIsPipe(file: String) = testIf(file, FileIsNamedPipe)
+fun testIfFileIsNamedPipe(file: String) = testIf(file, FileIsNamedPipe)
 
 fun testIfFileHasGrantedRead(file: String) = testIf(file, FileHasGrantedRead)
 
@@ -31,7 +34,7 @@ fun testIfFileHasGrantedWrite(file: String) = testIf(file, FileHasGrantedWrite)
 fun testIfFileHasGrantedExec(file: String) = testIf(file, FileHasGrantedExec)
 
 
-enum class TestFile(val code: Char) {
+enum class TestIfFile(val code: Char) {
     FileIsBlockSpecial('b'),
     FileIsCharSpecial('c'),
     FileIsDirectory('d'),
@@ -56,12 +59,12 @@ enum class TestFile(val code: Char) {
 }
 
 @OptIn(DelicateKommandApi::class)
-fun testIf(file: String, testFile: TestFile) = testIf("-${testFile.code}", file)
+fun testIf(file: String, testIfFile: TestIfFile) = testIf("-${testIfFile.code}", file)
 
 
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 @DelicateKommandApi
-fun testIf(vararg tokens: String) = test { this.tokens.addAll(tokens) }
+fun testIf(vararg tokens: String) = testIf { this.tokens.addAll(tokens) }
     .reducedManually {
         // not collecting streams, because they should be empty anyway, and test needs to be fast.
         when (val exit = awaitExit()) {
@@ -73,11 +76,11 @@ fun testIf(vararg tokens: String) = test { this.tokens.addAll(tokens) }
     }
 
 @DelicateKommandApi
-fun test(init: Test.() -> Unit = {}) = Test().apply(init)
+fun testIf(init: TestIf.() -> Unit) = TestIf().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/test.1.html) */
 @DelicateKommandApi
-data class Test(val tokens: MutableList<String> = mutableListOf()) : Kommand {
+data class TestIf(val tokens: MutableList<String> = mutableListOf()) : Kommand {
     // no --help and --version options by design. (not always supported anyway - can lead to difficult bugs)
     override val name get() = "test"
     override val args get() = tokens
