@@ -32,8 +32,8 @@ data class Dpkg(
 
 @DelicateKommandApi
 interface DpkgAct : DpkgOpt {
-    data object Help : KOptL("help"), DpkgAct
-    data object Version : KOptL("version"), DpkgAct
+    data object Help : KOptLN(), DpkgAct
+    data object Version : KOptLN(), DpkgAct
 
     /**
      * Install the package.
@@ -45,13 +45,13 @@ interface DpkgAct : DpkgOpt {
      * Unpack the package, but don't configure it.
      * @param debFileOrDir Single .deb file, or directory when the Recursive option enabled.
      */
-    data class Unpack(val debFileOrDir: String) : KOptL("unpack", debFileOrDir), DpkgAct
+    data class Unpack(val debFileOrDir: String) : KOptLN(debFileOrDir), DpkgAct
 
     /**
      * Configure a package which has been unpacked but not yet configured.
      * @param pkgName Single package, or null if Pending option enabled.
      */
-    data class Configure(val pkgName: String? = null) : KOptL("configure", pkgName, nameSeparator = " "), DpkgAct
+    data class Configure(val pkgName: String? = null) : KOptLN(pkgName, nameSeparator = " "), DpkgAct
 
     /**
      * Remove an installed package.
@@ -71,7 +71,7 @@ interface DpkgAct : DpkgOpt {
      */
     data class Verify(val pkgName: String? = null) : KOptS("V", pkgName), DpkgAct
 
-    data object PrintArch : KOptL("print-architecture"), DpkgAct
+    data object PrintArchitecture : KOptLN(), DpkgAct
     data class ListPackages(val pkgNamePattern: String) : KOptS("l", pkgNamePattern), DpkgAct
     data class ListFiles(val pkgName: String) : KOptS("L", pkgName), DpkgAct
     data class Status(val pkgName: String) : KOptS("l", pkgName), DpkgAct
@@ -87,11 +87,11 @@ interface DpkgAct : DpkgOpt {
 @DelicateKommandApi
 interface DpkgOpt: KOpt {
     data object Recursive : KOptS("R"), DpkgOpt
-    data object Pending : KOptL("pending"), DpkgOpt
-    data object DryRun : KOptL("dry-run"), DpkgOpt
-    data object RefuseDowngrade : KOptL("refuse-downgrade"), DpkgOpt
-    data object SkipSameVersion : KOptL("skip-same-version"), DpkgOpt
+    data object Pending : KOptLN(), DpkgOpt
+    data object DryRun : KOptLN(), DpkgOpt
+    data object RefuseDowngrade : KOptLN(), DpkgOpt
+    data object SkipSameVersion : KOptLN(), DpkgOpt
     /** Use a machine-readable output format. */
-    data object Robot : KOptL("robot"), DpkgOpt
-    data object NoPager : KOptL("no-pager"), DpkgOpt
+    data object Robot : KOptLN(), DpkgOpt
+    data object NoPager : KOptLN(), DpkgOpt
 }

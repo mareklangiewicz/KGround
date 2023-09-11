@@ -2,6 +2,8 @@
 
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.kground.*
+
 /** anonymous kommand to use only if no more specific Kommand class defined */
 @DelicateKommandApi
 fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
@@ -87,6 +89,28 @@ interface KOptTypical: KOpt, WithName, WithArgs {
     }
 }
 
+// Below there are three KOptTypical subclasses: KOptS, KOptL, KOptLN. These are kinda cryptic, not self explenatory,
+//   but it this case I optimize more for brevity on call side, because they are used is so many places;
+//   so they unfortunatelly have to be memorized by user.
+
+/** Short form of an option */
+@DelicateKommandApi
+open class KOptS(
+    override val name: String,
+    override val args: List<String>,
+    override val namePrefix: String = "-",
+    override val nameSeparator: String = " ",
+    override val argsSeparator: String = " ",
+) : KOptTypical {
+    constructor(
+        name: String,
+        arg: String? = null,
+        namePrefix: String = "-",
+        nameSeparator: String = " ",
+        argsSeparator: String = " ",
+    ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+}
+
 /** Long form of an option */
 @DelicateKommandApi
 open class KOptL(
@@ -105,22 +129,21 @@ open class KOptL(
     ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
-/** Short form of an option */
+/** Special form of an option, with automatically derrived name as class name lowercase words separated by one hyphen */
 @DelicateKommandApi
-open class KOptS(
-    override val name: String,
+open class KOptLN(
     override val args: List<String>,
-    override val namePrefix: String = "-",
-    override val nameSeparator: String = " ",
-    override val argsSeparator: String = " ",
+    override val namePrefix: String = "--",
+    override val nameSeparator: String = "=",
+    override val argsSeparator: String = ",",
 ) : KOptTypical {
     constructor(
-        name: String,
         arg: String? = null,
-        namePrefix: String = "-",
-        nameSeparator: String = " ",
-        argsSeparator: String = " ",
-    ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+        namePrefix: String = "--",
+        nameSeparator: String = "=",
+        argsSeparator: String = ",",
+    ): this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+    override val name: String get() = classSimpleWords().joinToString("-")
 }
 
 @DelicateKommandApi
