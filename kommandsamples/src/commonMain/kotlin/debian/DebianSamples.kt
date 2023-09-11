@@ -11,6 +11,7 @@ data object DebianSamples {
     val Dpkg = DpkgSamples
 }
 
+@OptIn(DelicateKommandApi::class)
 data object WhichSamples {
     val whichDpkg = which("dpkg") s "which dpkg"
     val whichDpkgAndApt = which("dpkg", "apt") s "which dpkg apt"
@@ -20,6 +21,7 @@ data object WhichSamples {
     val isDpkgKommandAvailable = isKommandAvailable(dpkg()) rs "which dpkg"
 }
 
+@OptIn(DelicateKommandApi::class)
 data object DpkgSamples {
     val dpkgSearchBinWhich = dpkg(Search("*bin*which*")) s "dpkg -S *bin*which*"
     val dpkgStatusDebianUtils = dpkg(Status("debianutils")) s "dpkg -l debianutils"
