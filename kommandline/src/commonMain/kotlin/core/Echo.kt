@@ -39,6 +39,6 @@ data class Echo(
 interface EchoOpt: KOptTypical {
     data object NoNewLine : KOptS("n"), EchoOpt
     data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt
-    data object Help : KOptL("help"), EchoOpt
-    data object Version : KOptL("version"), EchoOpt
+    data object Help : KOptLN(), EchoOpt
+    data object Version : KOptLN(), EchoOpt
 }
