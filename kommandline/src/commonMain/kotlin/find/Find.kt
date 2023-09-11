@@ -70,9 +70,11 @@ private val typicalDetails: FindDetailsDef = listOf(
     "symbolic permissions" to "%M",
 )
 
+@OptIn(DelicateKommandApi::class)
 fun findTypicalDetailsTable(path: String) =
     findDetailsTable(path, details = typicalDetails)
 
+@OptIn(DelicateKommandApi::class)
 fun findTypicalDetailsTableToList(path: String) =
     findDetailsTable(path, details = typicalDetails).reducedOutToList()
 
@@ -82,6 +84,7 @@ fun findTypicalDetailsTableToList(path: String) =
  * @param useNamedArgs requires named args if nondefault used; avoids name clash with base / low level find fun.
  * @param whenFoundPrintF null means using ActPrint, non-null means ActPrintF(whenFoundPrintF!!)
  */
+@OptIn(DelicateKommandApi::class)
 fun find(
     path: String,
     vararg useNamedArgs: Unit,
@@ -95,15 +98,19 @@ fun find(
     path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit
 )
 
+@OptIn(DelicateKommandApi::class)
 fun findNameFull(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, NameFull(pattern, ignoreCase))
 
+@OptIn(DelicateKommandApi::class)
 fun findNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, NameBase(pattern, ignoreCase))
 
+@OptIn(DelicateKommandApi::class)
 fun findRegularNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
     findTypeNameBase(path, "f", pattern, ignoreCase)
 
+@OptIn(DelicateKommandApi::class)
 fun findDirNameBase(
     path: String,
     pattern: String,
@@ -201,6 +208,7 @@ data class Find(
 
 private fun String.iff(condition: Boolean) = if (condition) this else ""
 
+@DelicateKommandApi
 interface FindExpr: KOpt {
 
 // region Find Expression Category: POSITIONAL OPTIONS
@@ -530,6 +538,7 @@ interface FindExpr: KOpt {
 }
 
 
+@DelicateKommandApi
 interface FindOpt: KOpt {
 
     // Note: Help and Version are inside FindExpr (formally these are expressions for find)
