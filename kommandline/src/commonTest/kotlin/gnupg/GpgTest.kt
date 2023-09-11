@@ -8,14 +8,17 @@ import kotlin.test.*
 import kotlin.test.Test
 
 class GpgTest {
-    @Test fun testGpgHelp() = gpg { -help }
+    @Test fun testGpgHelp() = gpg { -Help }
         .chkWithUser("gpg --help")
 
-    @Test fun testGpgListKeys() = gpg(listkeys)
+    @Test fun testGpgListKeys() = gpg(ListKeys)
         .chkWithUser("gpg --list-keys")
 
-    @Test fun testGpgListKeysVerbose() = gpg(listkeys) { -verbose }
+    @Test fun testGpgListKeysVerbose() = gpg(ListKeys) { -Verbose }
         .chkWithUser("gpg --verbose --list-keys")
+
+    @Test fun testGpgListSecretKeysVerbose() = gpg(ListSecretKeys) { -Verbose }
+        .chkWithUser("gpg --verbose --list-secret-keys")
 
     @Suppress("DEPRECATION")
     @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmPlatform {
