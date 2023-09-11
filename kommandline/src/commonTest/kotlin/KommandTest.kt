@@ -8,8 +8,7 @@ import pl.mareklangiewicz.kommand.Ide.Cmd.Diff
 import pl.mareklangiewicz.kommand.Ide.Option.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
-import pl.mareklangiewicz.kommand.iproute2.Ss.Option.*
-import pl.mareklangiewicz.kommand.iproute2.Ss.Option.Tcp
+import pl.mareklangiewicz.kommand.iproute2.SsOpt.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
@@ -55,8 +54,8 @@ class KommandTest {
     @Test fun testCat1() = cat { +"/etc/fstab" }.chkInIdeap()
     @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInIdeap()
 
-    @Test fun testSs1() = ss { -Tcp; -Udp; -Listening; -Processes; -Numeric }.chkWithUser() // ss -tulpn
-    @Test fun testSs2() = ss { -Tcp; -Udp; -Listening; -Processes; -Numeric }.chkInIdeap() // ss -tulpn
+    @Test fun testSs1() = ssTulpn().chkWithUser() // ss -tulpn
+    @Test fun testSs2() = ssTulpn().chkInIdeap() // ss -tulpn
 
     @Test fun testManMan() = man { +"man" }.chkWithUser()
     @Test fun testManVim() = man { +"vim" }.chkWithUser()
