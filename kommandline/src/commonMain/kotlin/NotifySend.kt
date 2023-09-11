@@ -16,9 +16,9 @@ data class NotifySend(
     override val args get() = options.map { it.str } + summary plusIfNN body
     sealed class Option(val str: String) {
         /** Specifies the urgency level (low, normal, critical). */ // TODO_later: enum for level
-        data class urgency(val level: String) : Option("--urgency=$level")
-        data object help : Option("--help")
-        data object version : Option("--version")
+        data class Urgency(val level: String) : Option("--urgency=$level")
+        data object Help : Option("--help")
+        data object Version : Option("--version")
         // TODO_someday: other options like icon, category, hint..
     }
     operator fun Option.unaryMinus() = options.add(this)

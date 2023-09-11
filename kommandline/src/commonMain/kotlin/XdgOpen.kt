@@ -12,9 +12,9 @@ data class XdgOpen(
     override val args get() = options.map { it.str } plusIfNN file
 
     sealed class Option(val str: String) {
-        data object help : Option("--help")
-        data object manual : Option("--manual")
-        data object version : Option("--version")
+        data object Help : Option("--help")
+        data object Manual : Option("--manual")
+        data object Version : Option("--version")
     }
     operator fun Option.unaryMinus() = options.add(this)
 }

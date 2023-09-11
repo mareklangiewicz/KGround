@@ -30,32 +30,32 @@ data class Ide(
 
         open val str get() = listOf(name) plusIfNN arg
 
-        data object diff : Cmd("diff")
-        data object merge : Cmd("merge")
-        data object format : Cmd("format")
-        data object inspect : Cmd("inspect")
+        data object Diff : Cmd("diff")
+        data object Merge : Cmd("merge")
+        data object Format : Cmd("format")
+        data object Inspect : Cmd("inspect")
     }
 
     sealed class Option(val name: String, val arg: String? = null) {
         open val str get() = listOf(name) plusIfNN arg
-        data object nosplash : Option("nosplash")
-        data object dontReopenProjects : Option("nosplash")
-        data object disableNonBundledPlugins : Option("disableNonBundledPlugins")
-        data object wait : Option("--wait")
-        data class ln(val l: Int) : Option("--line", l.toString())
-        data class col(val c: Int) : Option("--column", c.toString())
+        data object NoSplash : Option("nosplash")
+        data object DontReopenProjects : Option("nosplash")
+        data object DisableNonBundledPlugins : Option("disableNonBundledPlugins")
+        data object Wait : Option("--wait")
+        data class Line(val l: Int) : Option("--line", l.toString())
+        data class Column(val c: Int) : Option("--column", c.toString())
 
         // options only for Cmd.format:
-        data object formathelp : Option("-h")
-        data object formatmask : Option("-m")
-        data object formatrecursive : Option("-r")
-        data object formatsettings : Option("-s")
+        data object FormatHelp : Option("-h")
+        data object FormatMask : Option("-m")
+        data object FormatRecursive : Option("-r")
+        data object FormatSettings : Option("-s")
 
         // options only for Cmd.inspect:
-        data object inspectchanges : Option("-changes")
-        data object inspectsubdir : Option("-d")
-        data object inspectformat : Option("-format")
-        data class inspectverbosity(val v: Int) : Option("-v", v.toString())
+        data object InspectChanges : Option("-changes")
+        data object InspectSubDir : Option("-d")
+        data object InspectFormat : Option("-format")
+        data class InspectVerbosity(val v: Int) : Option("-v", v.toString())
 
     }
     operator fun Option.unaryMinus() = options.add(this)

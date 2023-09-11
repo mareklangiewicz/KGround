@@ -18,10 +18,10 @@ data class DBusRunSession(
     sealed class Option(val name: String, val arg: String? = null) {
         val str get() = if (arg == null) name else "$name=$arg"
 
-        data class configfile(val filename: String) : Option("--config-file", filename)
-        data class dbusdaemon(val binary: String) : Option("--dbus-daemon", binary)
-        data object help : Option("--help")
-        data object version : Option("--version")
+        data class ConfigFile(val filename: String) : Option("--config-file", filename)
+        data class DbusDaemon(val binary: String) : Option("--dbus-daemon", binary)
+        data object Help : Option("--help")
+        data object Version : Option("--version")
     }
 
     operator fun Option.unaryMinus() = options.add(this)

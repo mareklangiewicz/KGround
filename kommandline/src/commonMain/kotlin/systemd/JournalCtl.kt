@@ -18,15 +18,15 @@ data class JournalCtl(
          * Show only the most recent journal entries, and continuously
          * print new entries as they are appended to the journal.
          */
-        data object follow : Option("-f")
+        data object Follow : Option("-f")
         /**
          * generates a very terse output, only showing the actual
          * message of each journal entry with no metadata, not even
          * a timestamp.
          */
-        data object cat : Option("-ocat") // FIXME_later: separate -o and type
-        data object help : Option("--help")
-        data object version : Option("--version")
+        data object Cat : Option("-ocat") // FIXME_later: separate -o and type
+        data object Help : Option("--help")
+        data object Version : Option("--version")
     }
     operator fun String.unaryPlus() = matches.add(this)
     operator fun Option.unaryMinus() = options.add(this)

@@ -4,12 +4,12 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Adb.*
 import pl.mareklangiewicz.kommand.Adb.Command.*
 import pl.mareklangiewicz.kommand.Adb.Option.*
-import pl.mareklangiewicz.kommand.Ide.Cmd.diff
+import pl.mareklangiewicz.kommand.Ide.Cmd.Diff
 import pl.mareklangiewicz.kommand.Ide.Option.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.kommand.iproute2.Ss.Option.*
-import pl.mareklangiewicz.kommand.iproute2.Ss.Option.tcp
+import pl.mareklangiewicz.kommand.iproute2.Ss.Option.Tcp
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
@@ -55,8 +55,8 @@ class KommandTest {
     @Test fun testCat1() = cat { +"/etc/fstab" }.chkInIdeap()
     @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInIdeap()
 
-    @Test fun testSs1() = ss { -tcp; -udp; -listening; -processes; -numeric }.chkWithUser() // ss -tulpn
-    @Test fun testSs2() = ss { -tcp; -udp; -listening; -processes; -numeric }.chkInIdeap() // ss -tulpn
+    @Test fun testSs1() = ss { -Tcp; -Udp; -Listening; -Processes; -Numeric }.chkWithUser() // ss -tulpn
+    @Test fun testSs2() = ss { -Tcp; -Udp; -Listening; -Processes; -Numeric }.chkInIdeap() // ss -tulpn
 
     @Test fun testManMan() = man { +"man" }.chkWithUser()
     @Test fun testManVim() = man { +"vim" }.chkWithUser()
@@ -66,11 +66,11 @@ class KommandTest {
     @Test fun testManApropos() = man { -ManOpt.Apropos(); +"package" }.chkWithUser()
     @Test fun testManWhatIs() = man { -ManOpt.WhatIs; +"which" }.chkWithUser()
 
-    @Test fun testAdbDevices() = adb(devices) { -Option.all; -usb }.chkWithUser("adb -a -d devices")
-    @Test fun testAdbShell() = adb(shell).chkWithUser("adb shell")
+    @Test fun testAdbDevices() = adb(Devices) { -Option.All; -Usb }.chkWithUser("adb -a -d devices")
+    @Test fun testAdbShell() = adb(Shell).chkWithUser("adb shell")
 
     @Test fun testVim() {
-        val kommand = vim(".") { -gui; -servername("DDDD") }
+        val kommand = vim(".") { -Gui; -ServerName("DDDD") }
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
         kommand.chkWithUser("vim -g --servername DDDD .")
     }
@@ -79,13 +79,13 @@ class KommandTest {
     @Ignore
     @Test fun testMkTemp() = println(mktemp().execb(SYS))
     @Test fun testBash() {
-        val kommand1 = vim(".") { -gui; -servername("DDDD") }
+        val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
         kommand2.chkWithUser("bash -c vim -g --servername DDDD .")
     }
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
-    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -ln(2); -col(13) }.chkWithUser()
-    @Test fun testIdeapDiff() = ideap(diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
+    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -Line(2); -Column(13) }.chkWithUser()
+    @Test fun testIdeapDiff() = ideap(Diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
 }
