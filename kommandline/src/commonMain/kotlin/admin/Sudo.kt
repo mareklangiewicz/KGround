@@ -62,28 +62,28 @@ data class Sudo(
 
 @DelicateKommandApi
 interface SudoOpt: KOptTypical {
-    data object Help : KOptL("help"), SudoOpt // there is also short -h but it does NOT always mean help
-    data object Version : KOptL("version"), SudoOpt
-    data object SetHome : KOptL("set-home"), SudoOpt
-    data class Host(val host: String) : KOptL("host", host), SudoOpt
-    data object Login : KOptL("login"), SudoOpt
-    data class Prompt(val prompt: String) : KOptL("prompt", prompt), SudoOpt
+    data object Help : KOptLN(), SudoOpt // there is also short -h but it does NOT always mean help
+    data object Version : KOptLN(), SudoOpt
+    data object SetHome : KOptLN(), SudoOpt
+    data class Host(val host: String) : KOptLN(host), SudoOpt
+    data object Login : KOptLN(), SudoOpt
+    data class Prompt(val prompt: String) : KOptLN(prompt), SudoOpt
     data class ChRoot(val dir: String) : KOptL("chroot", dir), SudoOpt
-    data class Role(val role: String) : KOptL("role", role), SudoOpt
+    data class Role(val role: String) : KOptLN(role), SudoOpt
     data object AskPass : KOptL("askpass"), SudoOpt
-    data object Edit : KOptL("edit"), SudoOpt
-    data object List : KOptL("list"), SudoOpt
-    data object NonInteractive : KOptL("non-interactive"), SudoOpt
-    data object Stdin : KOptL("stdin"), SudoOpt
-    data object Shell : KOptL("shell"), SudoOpt
-    data class Type(val type: String) : KOptL("type", type), SudoOpt
-    data class User(val user: String) : KOptL("user", user), SudoOpt
-    data class OtherUser(val user: String) : KOptL("other-user", user), SudoOpt
+    data object Edit : KOptLN(), SudoOpt
+    data object List : KOptLN(), SudoOpt
+    data object NonInteractive : KOptLN(), SudoOpt
+    data object Stdin : KOptLN(), SudoOpt
+    data object Shell : KOptLN(), SudoOpt
+    data class Type(val type: String) : KOptLN(type), SudoOpt
+    data class User(val user: String) : KOptLN(user), SudoOpt
+    data class OtherUser(val user: String) : KOptLN(user), SudoOpt
     data class Timeout(val timeout: String) : KOptL("command-timeout", timeout), SudoOpt
     /** Update the user's cached credentials, authenticating the user if necessary. */
-    data object Validate : KOptL("validate"), SudoOpt
-    data object NoUpdate : KOptL("no-update"), SudoOpt
-    data object RemoveTimestamp : KOptL("remove-timestamp"), SudoOpt
-    data object ResetTimestamp : KOptL("reset-timestamp"), SudoOpt
+    data object Validate : KOptLN(), SudoOpt
+    data object NoUpdate : KOptLN(), SudoOpt
+    data object RemoveTimestamp : KOptLN(), SudoOpt
+    data object ResetTimestamp : KOptLN(), SudoOpt
     data object EOOpt : KOptL(""), SudoOpt
 }

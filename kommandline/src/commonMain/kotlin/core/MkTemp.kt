@@ -29,8 +29,8 @@ interface MkTempOpt: KOptTypical {
     data object Directory : KOptS("d"), MkTempOpt
     data object DryRun : KOptS("u"), MkTempOpt
     data object Quiet : KOptS("q"), MkTempOpt
-    data class Suffix(val suffix: String) : KOptL("suffix", suffix), MkTempOpt
+    data class Suffix(val suffix: String) : KOptLN(suffix), MkTempOpt
     data class TmpDir(val dir: String? = null) : KOptS("p", dir), MkTempOpt
-    data object Help : KOptL("help"), MkTempOpt
-    data object Version : KOptL("version"), MkTempOpt
+    data object Help : KOptLN(), MkTempOpt
+    data object Version : KOptLN(), MkTempOpt
 }
