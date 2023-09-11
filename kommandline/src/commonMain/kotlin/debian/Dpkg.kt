@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.kommand.*
 
+@OptIn(DelicateKommandApi::class)
 fun searchCommandScript(command: String) =
     ReducedScript { platform, dir ->
         val first = whichFirstOrNull(command).exec(platform, dir) ?: return@ReducedScript null
@@ -11,13 +12,16 @@ fun searchCommandScript(command: String) =
     }
 
 /** There has to be exactly one action in each invocation */
+@DelicateKommandApi
 fun dpkg(act: DpkgAct, init: Dpkg.() -> Unit = {}) = dpkg { init(); -act }
 
 /** There has to be exactly one option: action (DpkgAct) in each invocation */
+@DelicateKommandApi
 fun dpkg(init: Dpkg.() -> Unit = {}) = Dpkg().apply(init)
 
 
 /** [linux man](https://man7.org/linux/man-pages/man1/dpkg.1.html) */
+@DelicateKommandApi
 data class Dpkg(
     val opts: MutableList<DpkgOpt> = mutableListOf(),
 ) : Kommand {
@@ -26,6 +30,7 @@ data class Dpkg(
     operator fun DpkgOpt.unaryMinus() = opts.add(this)
 }
 
+@DelicateKommandApi
 interface DpkgAct : DpkgOpt {
     data object Help : KOptL("help"), DpkgAct
     data object Version : KOptL("version"), DpkgAct
@@ -79,6 +84,7 @@ interface DpkgAct : DpkgOpt {
     data class Search(val fileSearchPattern: String) : KOptS("S", fileSearchPattern), DpkgAct
 }
 
+@DelicateKommandApi
 interface DpkgOpt: KOpt {
     data object Recursive : KOptS("R"), DpkgOpt
     data object Pending : KOptL("pending"), DpkgOpt
