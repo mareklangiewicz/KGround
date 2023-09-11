@@ -9,6 +9,7 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.debian.*
 import pl.mareklangiewicz.kommand.find.*
+import pl.mareklangiewicz.kommand.git.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.gnome.*
 import pl.mareklangiewicz.upue.*
@@ -26,12 +27,14 @@ fun main() {
     }
 }
 
+@OptIn(DelicateKommandApi::class)
 suspend fun playground() = withPrintingBadStreams {
     println("Let's play with kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
         println("out line: $it")
     }
     SYS.startInTermIfUserConfirms(EchoSamples.echoTwoParagraphsWithEscapes.kommand)
+//    gitStatus().x().logEach()
 //    searchCommandScript("pip").x()?.logEach()
 //    SshSamples.sshPimInTermGnome.x()
 //    SshSamples.sshPimLsInTermKitty.x()

@@ -20,42 +20,37 @@ fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs
 }
 
 @OptIn(DelicateKommandApi::class)
-fun git(command: GitCmd? = null, init: Git.() -> Unit = {}) = Git(command).apply(init)
+fun git(cmd: GitCmd? = null, init: Git.() -> Unit = {}) = Git().apply {
+    init()
+    cmd?.let {
+        chk(opts.all { it !is GitCmd }) { "There can be only one GitCmd" }
+        -cmd
+    }
+}
 
 /** https://git-scm.com/docs/user-manual.html */
 @DelicateKommandApi
 data class Git(
-    var command: GitCmd? = null,
-    val stuff: MutableList<String> = mutableListOf(),
-    val options: MutableList<GitOpt> = mutableListOf() // global options
-): Kommand {
-    override val name get() = "git"
-    override val args get() = options.flatMap { it.str } + stuff.prependIfNN(command?.name)
+    override val opts: MutableList<GitOpt> = mutableListOf(), // last GitOpt should always be GitCmd
+    override val nonopts: MutableList<String> = mutableListOf(), // here is all stuff local for given GitCmd
+): KommandTypical<GitOpt> { override val name get() = "git" }
 
-    operator fun GitOpt.unaryMinus() = options.add(this)
-    operator fun String.unaryPlus() = stuff.add(this)
-}
+@OptIn(DelicateKommandApi::class)
+interface GitOpt: KOptTypical {
+    data object Help : GitOpt, KOptLN()
+    data object Version : GitOpt, KOptLN()
+    data object Paginate : GitOpt, KOptLN()
+    data object Bare : GitOpt, KOptLN()
 
-sealed class GitOpt(val name: String, open val arg: String? = null) {
-    open val str get() = listOf(name) plusIfNN arg
-    data object Help : GitOpt("--help")
-    data object Version : GitOpt("--version")
-    data object Paginate : GitOpt("--paginate")
-    data object Bare : GitOpt("--bare")
+    data class InPath(val path: String): GitOpt, KOptS("C", path)
 
-    class InPath(val path: String): GitOpt("-C", path)
-
-    sealed class GitOptEq(name: String, arg: String) : GitOpt(name, arg) {
-        override val str get() = listOf("$name=$arg")
-    }
-
-    class GitDir(dir: String) : GitOptEq("--git-dir", dir)
-    class WorkTree(path: String) : GitOptEq("--work-tree", path)
-    class Namespace(path: String) : GitOptEq("--namespace", path)
+    data class GitDir(val dir: String) : GitOpt, KOptLN(dir)
+    data class WorkTree(val path: String) : GitOpt, KOptLN(path)
+    data class Namespace(val path: String) : GitOpt, KOptLN(path)
 }
 
 @OptIn(DelicateKommandApi::class)
-sealed class GitCmd: KOptLN(namePrefix = "") {
+sealed class GitCmd: GitOpt, KOptLN(namePrefix = "") {
     data object Add : GitCmd()
     data object Archive : GitCmd()
     data object Bisect : GitCmd()
