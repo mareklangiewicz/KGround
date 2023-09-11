@@ -6,87 +6,93 @@ import pl.mareklangiewicz.kommand.git.Git.*
 import pl.mareklangiewicz.kommand.git.Git.GitCmd.*
 
 /** @return single line with hash of given revision/commit */
-fun gitHash(revision: String = "HEAD") = git(revparse) { +revision }
-fun gitHelp(commandOrConcept: String? = null) = git(help) { commandOrConcept?.let { +it } }
-fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs: String) = git(status) {
+@OptIn(DelicateKommandApi::class)
+fun gitHash(revision: String = "HEAD") = git(RevParse) { +revision }
+
+@OptIn(DelicateKommandApi::class)
+fun gitHelp(commandOrConcept: String? = null) = git(Help) { commandOrConcept?.let { +it } }
+
+@OptIn(DelicateKommandApi::class)
+fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs: String) = git(Status) {
     if (short) +"-s"
     if (verbose) +"-v"
     if (pathSpecs.any { it.startsWith("-") }) +"--"
     pathSpecs.forEach { +it }
 }
 
+@OptIn(DelicateKommandApi::class)
 fun git(command: GitCmd? = null, init: Git.() -> Unit = {}) = Git(command).apply(init)
 
 /** https://git-scm.com/docs/user-manual.html */
+@DelicateKommandApi
 data class Git(
     var command: GitCmd? = null,
     val stuff: MutableList<String> = mutableListOf(),
-    val options: MutableList<Option> = mutableListOf() // global options
+    val options: MutableList<GitOpt> = mutableListOf() // global options
 ): Kommand {
     override val name get() = "git"
-    override val args get() = options.flatMap { it.str } + stuff.prependIfNN(command?.str)
+    override val args get() = options.flatMap { it.str } + stuff.prependIfNN(command?.name)
 
-    sealed class GitCmd(val str: String) {
-        data object add : GitCmd("add")
-        data object archive : GitCmd("archive")
-        data object bisect : GitCmd("bisect")
-        data object branch : GitCmd("branch")
-        data object bundle : GitCmd("bundle")
-        data object checkout : GitCmd("checkout")
-        data object cherrypick : GitCmd("cherry-pick")
-        data object citool : GitCmd("citool")
-        data object clean : GitCmd("clean")
-        data object clone : GitCmd("clone")
-        data object commit : GitCmd("commit")
-        data object describe : GitCmd("describe")
-        data object diff : GitCmd("diff")
-        data object fetch : GitCmd("fetch")
-        data object gc : GitCmd("gc")
-        data object grep : GitCmd("grep")
-        data object gui : GitCmd("gui")
-        data object help : GitCmd("help")
-        data object init : GitCmd("init")
-        data object log : GitCmd("log")
-        data object maintenance : GitCmd("maintenance")
-        data object merge : GitCmd("merge")
-        data object mv : GitCmd("mv")
-        data object notes : GitCmd("notes")
-        data object pull : GitCmd("pull")
-        data object push : GitCmd("push")
-        data object rebase : GitCmd("rebase")
-        data object reset : GitCmd("reset")
-        data object restore : GitCmd("restore")
-        data object revert : GitCmd("revert")
-        data object rm : GitCmd("rm")
-        data object shortlog : GitCmd("shortlog")
-        data object show : GitCmd("show")
-        data object stash : GitCmd("stash")
-        data object status : GitCmd("status")
-        data object submodule : GitCmd("submodule")
-        data object switch : GitCmd("switch")
-        data object tag : GitCmd("tag")
-        data object worktree : GitCmd("worktree")
-
-        data object revparse : GitCmd("rev-parse")
+    sealed class GitCmd: KOptLN(namePrefix = "") {
+        data object Add : GitCmd()
+        data object Archive : GitCmd()
+        data object Bisect : GitCmd()
+        data object Branch : GitCmd()
+        data object Bundle : GitCmd()
+        data object Checkout : GitCmd()
+        data object CherryPick : GitCmd()
+        data object Citool : GitCmd()
+        data object Clean : GitCmd()
+        data object Clone : GitCmd()
+        data object Commit : GitCmd()
+        data object Describe : GitCmd()
+        data object Diff : GitCmd()
+        data object Fetch : GitCmd()
+        data object Gc : GitCmd()
+        data object Grep : GitCmd()
+        data object Gui : GitCmd()
+        data object Help : GitCmd()
+        data object Init : GitCmd()
+        data object Log : GitCmd()
+        data object Maintenance : GitCmd()
+        data object Merge : GitCmd()
+        data object Mv : GitCmd()
+        data object Notes : GitCmd()
+        data object Pull : GitCmd()
+        data object Push : GitCmd()
+        data object Rebase : GitCmd()
+        data object Reset : GitCmd()
+        data object Restore : GitCmd()
+        data object Revert : GitCmd()
+        data object Rm : GitCmd()
+        data object Shortlog : GitCmd()
+        data object Show : GitCmd()
+        data object Stash : GitCmd()
+        data object Status : GitCmd()
+        data object Submodule : GitCmd()
+        data object Switch : GitCmd()
+        data object Tag : GitCmd()
+        data object Worktree : GitCmd()
+        data object RevParse : GitCmd()
     }
 
-    sealed class Option(val name: String, open val arg: String? = null) {
+    sealed class GitOpt(val name: String, open val arg: String? = null) {
         open val str get() = listOf(name) plusIfNN arg
-        data object help : Option("--help")
-        data object version : Option("--version")
-        data object paginate : Option("--paginate")
-        data object bare : Option("--bare")
+        data object Help : GitOpt("--help")
+        data object Version : GitOpt("--version")
+        data object Paginate : GitOpt("--paginate")
+        data object Bare : GitOpt("--bare")
 
-        class inpath(val path: String): Option("-C", path)
+        class InPath(val path: String): GitOpt("-C", path)
 
-        sealed class OptionEq(name: String, arg: String) : Option(name, arg) {
+        sealed class GitOptEq(name: String, arg: String) : GitOpt(name, arg) {
             override val str get() = listOf("$name=$arg")
         }
 
-        class gitdir(dir: String) : OptionEq("--git-dir", dir)
-        class worktree(path: String) : OptionEq("--work-tree", path)
-        class namespace(path: String) : OptionEq("--namespace", path)
+        class GitDir(dir: String) : GitOptEq("--git-dir", dir)
+        class WorkTree(path: String) : GitOptEq("--work-tree", path)
+        class Namespace(path: String) : GitOptEq("--namespace", path)
     }
-    operator fun Option.unaryMinus() = options.add(this)
+    operator fun GitOpt.unaryMinus() = options.add(this)
     operator fun String.unaryPlus() = stuff.add(this)
 }
