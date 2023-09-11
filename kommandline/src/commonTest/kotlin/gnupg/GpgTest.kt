@@ -2,23 +2,24 @@ package pl.mareklangiewicz.kommand.gnupg
 
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.gnupg.Gpg.Cmd.*
-import pl.mareklangiewicz.kommand.gnupg.Gpg.Option.*
+import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
+import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import kotlin.test.*
 import kotlin.test.Test
 
+@OptIn(DelicateKommandApi::class)
 class GpgTest {
     @Test fun testGpgHelp() = gpg { -Help }
         .chkWithUser("gpg --help")
 
-    @Test fun testGpgListKeys() = gpg(ListKeys)
-        .chkWithUser("gpg --list-keys")
+    @Test fun testGpgListKeys() = gpg(ListPublicKeys)
+        .chkWithUser("gpg --list-public-keys")
 
-    @Test fun testGpgListKeysVerbose() = gpg(ListKeys) { -Verbose }
-        .chkWithUser("gpg --verbose --list-keys")
+    @Test fun testGpgListKeysVerbose() = gpg(ListPublicKeys) { -Verbose }
+        .chkWithUser("gpg --list-public-keys --verbose")
 
     @Test fun testGpgListSecretKeysVerbose() = gpg(ListSecretKeys) { -Verbose }
-        .chkWithUser("gpg --verbose --list-secret-keys")
+        .chkWithUser("gpg --list-secret-keys --verbose")
 
     @Suppress("DEPRECATION")
     @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmPlatform {
