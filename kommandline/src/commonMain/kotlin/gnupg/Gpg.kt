@@ -42,60 +42,60 @@ data class Gpg(
 ) : KommandTypical<GpgOpt> { override val name get() = "gpg" }
 
 @DelicateKommandApi
-interface GpgCmd : GpgOpt {
+open class GpgCmd : GpgOpt, KOptLN() {
 
     /** make a signature */
-    data object Sign: GpgCmd, KOptL("sign")
+    data object Sign: GpgCmd()
     /** make a clear text signature */
-    data object ClearSign: GpgCmd, KOptL("clear-sign")
+    data object ClearSign: GpgCmd()
     /** make a detached signature */
-    data object DetachSign: GpgCmd, KOptL("detach-sign")
+    data object DetachSign: GpgCmd()
     /** encrypt data */
-    data object Encrypt: GpgCmd, KOptL("encrypt")
+    data object Encrypt: GpgCmd()
     /** encryption only with symmetric cipher */
-    data object Symmetric: GpgCmd, KOptL("symmetric")
+    data object Symmetric: GpgCmd()
     /** decrypt data */
-    data object Decrypt: GpgCmd, KOptL("decrypt")
+    data object Decrypt: GpgCmd()
     /** verify a signature */
-    data object Verify: GpgCmd, KOptL("verify")
+    data object Verify: GpgCmd()
     /** list public keys */
-    data object ListPublicKeys: GpgCmd, KOptL("list-public-keys")
+    data object ListPublicKeys: GpgCmd()
     /** list secret keys */
-    data object ListSecretKeys: GpgCmd, KOptL("list-secret-keys")
+    data object ListSecretKeys: GpgCmd()
 
-    data object Help : GpgCmd, KOptL("help")
+    data object Help : GpgCmd()
 
-    data object Version : GpgCmd, KOptL("version")
+    data object Version : GpgCmd()
 
-    data object Warranty : GpgCmd, KOptL("warranty")
+    data object Warranty : GpgCmd()
 
-    data object DumpOptions : GpgCmd, KOptL("dump-options")
+    data object DumpOptions : GpgCmd()
 }
 
 @DelicateKommandApi
 interface GpgOpt: KOptTypical {
 
-    data object Verbose : GpgOpt, KOptL("verbose")
+    data object Verbose : GpgOpt, KOptLN()
 
     /** Don't make any changes (this is not completely implemented). */
-    data object DryRun : GpgOpt, KOptL("dry-run")
+    data object DryRun : GpgOpt, KOptLN()
 
     /** Use batch mode.  Never ask, do not allow interactive commands. */
-    data object Batch : GpgOpt, KOptL("batch")
+    data object Batch : GpgOpt, KOptLN()
 
     /** Do not use batch mode. */
-    data object NoBatch : GpgOpt, KOptL("no-batch")
+    data object NoBatch : GpgOpt, KOptLN()
 
     /** Print key listings delimited by colons. Useful in scripts. */
-    data object WithColons : GpgOpt, KOptL("with-colons")
+    data object WithColons : GpgOpt, KOptLN()
 
     /** Set the pinentry mode to mode. */
     data class Pinentry(val mode: PinentryMode = Default) : GpgOpt, KOptL("pinentry-mode", mode.toString().lowercase())
     enum class PinentryMode { Default, Ask, Cancel, Error, LoopBack }
 
     /** create ascii armored output */
-    data object Armor : GpgOpt, KOptL("armor")
-    data object Interactive : GpgOpt, KOptL("interactive")
+    data object Armor : GpgOpt, KOptLN()
+    data object Interactive : GpgOpt, KOptLN()
 
     /** use canonical text mode */
     data object TextMode : GpgOpt, KOptL("textmode")
@@ -104,24 +104,24 @@ interface GpgOpt: KOptTypical {
     data object OpenPGP : GpgOpt, KOptL("openpgp")
 
     /** Disable the passphrase cache used for symmetrical en- and decryption. */
-    data object NoSymkeyCache : GpgOpt, KOptL("no-symkey-cache")
+    data object NoSymkeyCache : GpgOpt, KOptLN()
     data class HomeDir(val dir: String) : GpgOpt, KOptL("homedir", dir)
     data class OptionsFile(val file: String) : GpgOpt, KOptL("options", file)
     data class OutputFile(val file: String) : GpgOpt, KOptL("output", file)
 
     /** encrypt for userid */
-    data class Recipient(val userId: String) : GpgOpt, KOptL("recipient", userId)
+    data class Recipient(val userId: String) : GpgOpt, KOptLN(userId)
 
     /** use userid to sign or decrypt */
-    data class LocalUser(val userId: String) : GpgOpt, KOptL("local-user", userId)
-    data class CompressLevel(val level: Int) : GpgOpt, KOptL("compress-level", level.toString())
-    data class StatusFile(val file: String) : GpgOpt, KOptL("status-file", file)
-    data class StatusFd(val fileDescriptor: Int) : GpgOpt, KOptL("status-fd", fileDescriptor.toString())
-    data class LoggerFile(val file: String) : GpgOpt, KOptL("logger-file", file)
-    data class LoggerFd(val fileDescriptor: Int) : GpgOpt, KOptL("logger-fd", fileDescriptor.toString())
-    data class CipherAlgo(val algo: String) : GpgOpt, KOptL("cipher-algo", algo)
-    data class DigestAlgo(val algo: String) : GpgOpt, KOptL("digest-algo", algo)
-    data class CompressAlgo(val algo: String) : GpgOpt, KOptL("compress-algo", algo)
+    data class LocalUser(val userId: String) : GpgOpt, KOptLN(userId)
+    data class CompressLevel(val level: Int) : GpgOpt, KOptLN(level.toString())
+    data class StatusFile(val file: String) : GpgOpt, KOptLN(file)
+    data class StatusFd(val fileDescriptor: Int) : GpgOpt, KOptLN(fileDescriptor.toString())
+    data class LoggerFile(val file: String) : GpgOpt, KOptLN(file)
+    data class LoggerFd(val fileDescriptor: Int) : GpgOpt, KOptLN(fileDescriptor.toString())
+    data class CipherAlgo(val algo: String) : GpgOpt, KOptLN(algo)
+    data class DigestAlgo(val algo: String) : GpgOpt, KOptLN(algo)
+    data class CompressAlgo(val algo: String) : GpgOpt, KOptLN(algo)
 
     /**
      * Use string as the passphrase. This can only be used if only one passphrase is supplied.

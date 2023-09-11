@@ -23,7 +23,7 @@ interface TouchOpt: KOptTypical {
     data object TimeOfAccessOnly : TouchOpt, KOptS("a")
     data object TimeOfChangeOnly : TouchOpt, KOptS("m")
     data object DisableCreation : TouchOpt, KOptS("c")
-    data class Date(val date: String): TouchOpt, KOptL("date", date)
-    data object Help : TouchOpt, KOptL("help")
-    data object Version : TouchOpt, KOptL("version")
+    data class Date(val date: String): TouchOpt, KOptLN(date)
+    data object Help : TouchOpt, KOptLN()
+    data object Version : TouchOpt, KOptLN()
 }
