@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.git
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.git.Git.*
-import pl.mareklangiewicz.kommand.git.Git.Command.*
+import pl.mareklangiewicz.kommand.git.Git.GitCmd.*
 
 /** @return single line with hash of given revision/commit */
 fun gitHash(revision: String = "HEAD") = git(revparse) { +revision }
@@ -15,59 +15,59 @@ fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs
     pathSpecs.forEach { +it }
 }
 
-fun git(command: Command? = null, init: Git.() -> Unit = {}) = Git(command).apply(init)
+fun git(command: GitCmd? = null, init: Git.() -> Unit = {}) = Git(command).apply(init)
 
 /** https://git-scm.com/docs/user-manual.html */
 data class Git(
-    var command: Command? = null,
+    var command: GitCmd? = null,
     val stuff: MutableList<String> = mutableListOf(),
     val options: MutableList<Option> = mutableListOf() // global options
 ): Kommand {
     override val name get() = "git"
     override val args get() = options.flatMap { it.str } + stuff.prependIfNN(command?.str)
 
-    sealed class Command(val str: String) {
-        data object add : Command("add")
-        data object archive : Command("archive")
-        data object bisect : Command("bisect")
-        data object branch : Command("branch")
-        data object bundle : Command("bundle")
-        data object checkout : Command("checkout")
-        data object cherrypick : Command("cherry-pick")
-        data object citool : Command("citool")
-        data object clean : Command("clean")
-        data object clone : Command("clone")
-        data object commit : Command("commit")
-        data object describe : Command("describe")
-        data object diff : Command("diff")
-        data object fetch : Command("fetch")
-        data object gc : Command("gc")
-        data object grep : Command("grep")
-        data object gui : Command("gui")
-        data object help : Command("help")
-        data object init : Command("init")
-        data object log : Command("log")
-        data object maintenance : Command("maintenance")
-        data object merge : Command("merge")
-        data object mv : Command("mv")
-        data object notes : Command("notes")
-        data object pull : Command("pull")
-        data object push : Command("push")
-        data object rebase : Command("rebase")
-        data object reset : Command("reset")
-        data object restore : Command("restore")
-        data object revert : Command("revert")
-        data object rm : Command("rm")
-        data object shortlog : Command("shortlog")
-        data object show : Command("show")
-        data object stash : Command("stash")
-        data object status : Command("status")
-        data object submodule : Command("submodule")
-        data object switch : Command("switch")
-        data object tag : Command("tag")
-        data object worktree : Command("worktree")
+    sealed class GitCmd(val str: String) {
+        data object add : GitCmd("add")
+        data object archive : GitCmd("archive")
+        data object bisect : GitCmd("bisect")
+        data object branch : GitCmd("branch")
+        data object bundle : GitCmd("bundle")
+        data object checkout : GitCmd("checkout")
+        data object cherrypick : GitCmd("cherry-pick")
+        data object citool : GitCmd("citool")
+        data object clean : GitCmd("clean")
+        data object clone : GitCmd("clone")
+        data object commit : GitCmd("commit")
+        data object describe : GitCmd("describe")
+        data object diff : GitCmd("diff")
+        data object fetch : GitCmd("fetch")
+        data object gc : GitCmd("gc")
+        data object grep : GitCmd("grep")
+        data object gui : GitCmd("gui")
+        data object help : GitCmd("help")
+        data object init : GitCmd("init")
+        data object log : GitCmd("log")
+        data object maintenance : GitCmd("maintenance")
+        data object merge : GitCmd("merge")
+        data object mv : GitCmd("mv")
+        data object notes : GitCmd("notes")
+        data object pull : GitCmd("pull")
+        data object push : GitCmd("push")
+        data object rebase : GitCmd("rebase")
+        data object reset : GitCmd("reset")
+        data object restore : GitCmd("restore")
+        data object revert : GitCmd("revert")
+        data object rm : GitCmd("rm")
+        data object shortlog : GitCmd("shortlog")
+        data object show : GitCmd("show")
+        data object stash : GitCmd("stash")
+        data object status : GitCmd("status")
+        data object submodule : GitCmd("submodule")
+        data object switch : GitCmd("switch")
+        data object tag : GitCmd("tag")
+        data object worktree : GitCmd("worktree")
 
-        data object revparse : Command("rev-parse")
+        data object revparse : GitCmd("rev-parse")
     }
 
     sealed class Option(val name: String, open val arg: String? = null) {
