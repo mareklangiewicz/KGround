@@ -14,7 +14,7 @@ defaultBuildTemplateForRootProject(
         name = "TemplateMPP",
         description = "Template for multi platform projects.",
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
-        version = Ver(0, 0, 7)
+        version = Ver(0, 0, 8)
     ),
     withSonatypeOssPublishing = true
 )
