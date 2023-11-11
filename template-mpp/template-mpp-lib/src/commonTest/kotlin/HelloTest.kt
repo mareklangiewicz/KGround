@@ -4,11 +4,15 @@ import kotlin.test.*
 
 class HelloTest {
     @Test fun testHello() = uspek {
-        "On helloCommon" o {
-            helloCommon()
-        }
-        "On helloPlatform" o {
-            helloPlatform()
-        }
+        OnHelloStuff()
+    }
+}
+
+fun OnHelloStuff() {
+    "On helloCommon" o {
+        helloCommon()
+    }
+    "On helloPlatform" o {
+        helloPlatform()
     }
 }
