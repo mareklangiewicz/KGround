@@ -16,8 +16,6 @@ repositories { maven(repos.composeJbDev) }
 defaultBuildTemplateForComposeMppApp(
     appMainPackage = "pl.mareklangiewicz.hello",
     withJs = true,
-    // TODO: jsBrowserDevelopmentRun fails, but jsBrowserProductionRun works. Check again when kotlin 1.9.10 is released.
-    // https://youtrack.jetbrains.com/issue/KT-60852/Kotlin-JSIR-IllegalArgumentException-Cross-module-dependency-resolution-failed-when-updating-to-Kotlin-1.9.0
     withNativeLinux64 = false,
     withKotlinxHtml = true,
 ) {
