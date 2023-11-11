@@ -425,12 +425,22 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     withComposeWebCore: Boolean = withJs,
     withComposeWebSvg: Boolean = withJs,
     withComposeTestUiJUnit4: Boolean = withJvm,
+    withComposeTestUiJUnit5: Boolean = false,
+        // Not yet supported, but let's use this flag to use when I want to experiment with junit5 anyway.
+        // (Theoretically JUnit5 should live with JUnit4 peacefully, but I expect issues with Gradle or IDE)
+        // https://issuetracker.google.com/issues/127100532?pli=1
+        // https://github.com/android/android-test/issues/224
+        // https://github.com/JetBrains/compose-multiplatform/issues/2371
+
     withComposeTestWebUtils: Boolean = withJs,
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
     if (withComposeCompilerVer != null) compose {
         val cc = AndroidX.Compose.Compiler.compiler.withVer(withComposeCompilerVer)
         kotlinCompilerPlugin.set(cc.mvn)
+    }
+    if (withComposeTestUiJUnit5) {
+        logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
     }
     defaultBuildTemplateForMppLib(
         details = details,
@@ -441,7 +451,7 @@ fun Project.defaultBuildTemplateForComposeMppLib(
         withComposeJbDevRepo = true,
         withComposeCompilerAndroidxDevRepo = withComposeCompilerVer != null,
         withTestJUnit4 = withComposeTestUiJUnit4, // Unfortunately Compose UI still uses JUnit4 instead of 5
-        withTestJUnit5 = false,
+        withTestJUnit5 = withComposeTestUiJUnit5,
         withTestUSpekX = true,
         addCommonMainDependencies = addCommonMainDependencies
     )
