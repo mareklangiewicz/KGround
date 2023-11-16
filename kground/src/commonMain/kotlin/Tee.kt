@@ -32,13 +32,14 @@ fun <T> T.tee(
     val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName()}]" else ""
     val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
     val p5 = if (withValue) " $this" else ""
-    into.ulog(ULogLevel.INFO,  "tee $p1$p2$p3$p4$p5")
+    into.ulog(ULogLevel.INFO,  "$p1$p2$p3$p4$p5")
     return this
 }
 
 val String.tee: String get() = tee()
 
-// One default example shortcut, usually users would create their own versions of .teeXXX
+// Some example shortcuts, usually users would create their own versions of .teeSomething
+val String.teeP: String get() = tee(withCurrentPlatform = true)
 val String.teePP: String get() = tee(withCurrentPlatform = true, withCurrentPath = true)
 
 private val TeeDefaultLog = ULogPrintLn(prefix = "tee")
