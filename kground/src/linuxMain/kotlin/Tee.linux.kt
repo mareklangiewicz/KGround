@@ -36,7 +36,7 @@ actual fun getCurrentAbsolutePath(): String = getCurrentDirectoryFromGPTAdvice()
 @OptIn(ExperimentalForeignApi::class)
 private fun getCurrentDirectoryFromGPTAdvice(): String {
     val bufferLength = 4096 // Adjust buffer length as needed
-    TODO() // FIXME
+    return "FIXME (linux getcwd)"
 /*
     val buffer = nativeHeap.alloc<uint8_tVar>(bufferLength)
     getcwd(buffer, bufferLength.convert())

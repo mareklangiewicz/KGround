@@ -39,8 +39,8 @@ fun <T> T.tee(
 val String.tee: String get() = tee()
 
 // Some example shortcuts, usually users would create their own versions of .teeSomething
-val String.teeP: String get() = tee(withCurrentPlatform = true)
-val String.teePP: String get() = tee(withCurrentPlatform = true, withCurrentPath = true)
+val <T> T.teeP: T get() = tee(withCurrentPlatform = true)
+val <T> T.teePP: T get() = tee(withCurrentPlatform = true, withCurrentPath = true)
 
 private val TeeDefaultLog = ULogPrintLn(prefix = "tee")
 
