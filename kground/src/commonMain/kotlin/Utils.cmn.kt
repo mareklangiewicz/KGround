@@ -7,9 +7,6 @@ import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
 
-val Any?.unit get() = Unit
-
-
 /** @throws BadArgErr if not found or found more than one */
 fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult {
     val r1 = find(input, startIndex).reqNN { "this regex: \"$this\" is nowhere in input" }
