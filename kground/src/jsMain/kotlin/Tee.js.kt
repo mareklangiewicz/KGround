@@ -14,4 +14,6 @@ actual fun getCurrentThreadName(): String = "JS Thread"
 
 
 actual fun getCurrentPlatformName(): String = window.navigator.userAgent.let { "JS Agent $it" }
-actual fun getCurrentAbsolutePath(): String = TODO()
+
+// FIXME_someday: real path on node.js platform? something more appropriate in browser too? rename? write kdoc?
+actual fun getCurrentAbsolutePath(): String = window.document.location.toString()

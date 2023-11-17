@@ -29,7 +29,7 @@ fun <T> T.tee(
 ): T {
     val p1 = if (withCurrentThread) " [${getCurrentThreadName().padEnd(40).substring(0, 40)}]" else ""
     val p2 = if (withCurrentTime) " [${getCurrentTimeStr()}]" else ""
-    val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName()}]" else ""
+    val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().padEnd(40).substring(0, 40)}]" else ""
     val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
     val p5 = if (withValue) " $this" else ""
     into.ulog(ULogLevel.INFO,  "$p1$p2$p3$p4$p5")
