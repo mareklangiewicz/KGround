@@ -62,7 +62,7 @@ val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
 suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
     ghLangaraRepoList(onlyPublic = onlyPublic)
         .outputFields("name")
-        .reduced { stdout }
+        .reducedOut { this }
         .exec(SYS)
 
 suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
