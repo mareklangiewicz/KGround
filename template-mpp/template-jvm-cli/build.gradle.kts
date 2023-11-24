@@ -185,7 +185,6 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
     }
 }
 
-@Suppress("UNUSED_VARIABLE")
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
     withTestJUnit4: Boolean = false,
@@ -231,7 +230,6 @@ fun Project.defaultBuildTemplateForJvmLib(
 
 // region [Jvm App Build Template]
 
-@Suppress("UNUSED_VARIABLE")
 fun Project.defaultBuildTemplateForJvmApp(
     appMainPackage: String,
     appMainClass: String = "MainKt",

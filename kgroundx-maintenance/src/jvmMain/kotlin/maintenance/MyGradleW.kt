@@ -30,7 +30,8 @@ fun updateGradlewFilesInProject(fullPath: Path, log: (Any?) -> Unit = ::println)
 @OptIn(DelicateKommandApi::class)
 private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
     findTypeRegex(path.toString(), "f", ".*/settings.gradle\\(.kts\\)?")
-        .reducedOut {
+        .reducedOutToFlow()
+        .reducedMap {
             // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl
             val regex = Regex("/settings\\.gradle(\\.kts)?\$")
             map { regex.replace(it, "").toPath() }

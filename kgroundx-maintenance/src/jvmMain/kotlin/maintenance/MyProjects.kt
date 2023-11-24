@@ -62,8 +62,13 @@ val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
 suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
     ghLangaraRepoList(onlyPublic = onlyPublic)
         .outputFields("name")
-        .reducedOut { this }
+        .reducedOutToFlow()
         .exec(SYS)
+
+
+// TODO: Move to KommandLine; add kdoc about cleanup
+fun <K: Kommand> K.reducedOutToFlow(): ReducedKommand<Flow<String>> =
+    reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
 
 suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
     fetchMyProjectsNameS(onlyPublic).toList().let { if (sorted) it.sorted() else it }
