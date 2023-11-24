@@ -1,12 +1,13 @@
 import pl.mareklangiewicz.defaults.*
-import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 
 plugins {
     plug(plugs.NexusPublish)
-    plug(plugs.AndroLib) apply false
-    plug(plugs.AndroApp) apply false
+    id("com.android.library") version "8.3.0-alpha14" apply false
+    id("com.android.application") version "8.3.0-alpha14" apply false
+    // plug(plugs.AndroLib) apply false
+    // plug(plugs.AndroApp) apply false
     plug(plugs.KotlinAndro) apply false
 }
 
@@ -15,7 +16,7 @@ defaultBuildTemplateForRootProject(
         name = "TemplateAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/langara/deps.kt/template-andro",
-        version = Ver(0, 0, 6)
+        version = Ver(0, 0, 7)
     )
 )
 

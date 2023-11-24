@@ -1,7 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 pluginManagement {
-   includeBuild("..") // this is DepsKt
     repositories {
         mavenLocal()
         google()
@@ -11,10 +10,9 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.45"
+    id("pl.mareklangiewicz.deps.settings") version "0.2.60"
 }
 
 rootProject.name = "template-andro"
-include(":template-andro-app")
 include(":template-andro-lib")
-
+include(":template-andro-app")

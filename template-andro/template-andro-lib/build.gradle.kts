@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
@@ -6,7 +8,9 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-    plugAll(plugs.AndroLib, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
+    // plugAll(plugs.AndroLib, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
+    id("com.android.library")
+    plugAll(plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
 defaultBuildTemplateForAndroidLib(
@@ -181,7 +185,6 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
     }
 }
 
-@Suppress("UNUSED_VARIABLE")
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
     withTestJUnit4: Boolean = false,
