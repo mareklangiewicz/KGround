@@ -1,10 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import okio.Path.Companion.toOkioPath
-import pl.mareklangiewicz.deps.Langiewicz
-import pl.mareklangiewicz.evts.*
-import pl.mareklangiewicz.utils.includeAndSubstituteBuild
-
 //gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
 pluginManagement {
@@ -17,7 +12,7 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.59" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("pl.mareklangiewicz.deps.settings") version "0.2.61" // https://plugins.gradle.org/search?term=mareklangiewicz
     id("com.gradle.enterprise") version "3.15.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 

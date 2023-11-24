@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib {
-    api("pl.mareklangiewicz:kground:0.0.13") // FIXME https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
+    api("pl.mareklangiewicz:kground:0.0.21") // FIXME https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
 }
 
 kotlin { js(IR) { nodejs() } }
