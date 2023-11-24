@@ -181,7 +181,6 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
     }
 }
 
-@Suppress("UNUSED_VARIABLE")
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
     withTestJUnit4: Boolean = false,
@@ -272,7 +271,6 @@ fun Project.defaultBuildTemplateForMppLib(
 }
 
 /** Only for very standard small libs. In most cases it's better to not use this function. */
-@Suppress("UNUSED_VARIABLE")
 fun KotlinMultiplatformExtension.allDefault(
     withJvm: Boolean = true,
     withJs: Boolean = true,
@@ -328,14 +326,14 @@ fun KotlinMultiplatformExtension.jsDefault(
 ) {
     js(IR) {
         if (withBrowser) browser {
-            testTask(Action {
+            testTask {
                 useKarma {
                     when (testWithChrome to testHeadless) {
                         true to true -> useChromeHeadless()
                         true to false -> useChrome()
                     }
                 }
-            })
+            }
         }
         if (withNode) nodejs()
     }
