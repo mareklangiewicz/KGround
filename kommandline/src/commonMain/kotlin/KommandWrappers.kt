@@ -182,8 +182,10 @@ fun <K: Kommand, ReducedExit> K.reducedExit(
 
 // These four below look unnecessary, but I like how they explicitly suggest common correct thing to do in the IDE.
 
-fun <K: Kommand> K.reducedOutToList(): ReducedKommand<List<String>> = reducedOut { toList() }
 fun <K: Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = reducedOut {}
+fun <K: Kommand> K.reducedOutToList(): ReducedKommand<List<String>> = reducedOut { toList() }
+fun <K: Kommand> K.reducedOutToFlow(): ReducedKommand<Flow<String>> =
+    reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
 
 fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToList(): ReducedKommand<List<OutItem>> =
     reducedOut { toList() }
@@ -191,4 +193,6 @@ fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToL
 fun <In, Out> TypedKommand<*, In, Out, Flow<String>>.reducedOutToUnit(): ReducedKommand<Unit> =
     reducedOut {}
 
+fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToFlow(): ReducedKommand<Flow<OutItem>> =
+    reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
 
