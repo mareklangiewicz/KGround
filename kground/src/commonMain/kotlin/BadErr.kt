@@ -7,7 +7,7 @@ import kotlin.contracts.contract
 /**
  * Why introducing own strange exceptions? To easily spot when my own exceptions happen in large codebases.
  * I'm using bad/hacky practices (like funny shortcut names) intentionally to avoid name clashes with other code.
- * These exceptions still override std "Illegal(State/Argument)" so can still be handled as usual.
+ * These exceptions still inherit from std "Illegal(State/Argument)" so can still be handled as usual.
  */
 interface BadErr
 
