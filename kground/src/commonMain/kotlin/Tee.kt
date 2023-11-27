@@ -32,7 +32,7 @@ fun <T> T.tee(
     val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().padEnd(40).substring(0, 40)}]" else ""
     val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
     val p5 = if (withValue) " $this" else ""
-    into.ulog(ULogLevel.INFO,  "$p1$p2$p3$p4$p5")
+    into.i("$p1$p2$p3$p4$p5")
     return this
 }
 

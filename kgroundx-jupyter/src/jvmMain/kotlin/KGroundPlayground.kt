@@ -17,6 +17,7 @@ fun main() {
     }
 }
 
+@OptIn(DelicateKommandApi::class)
 suspend fun playground() {
     println("Let's play with kground and kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
