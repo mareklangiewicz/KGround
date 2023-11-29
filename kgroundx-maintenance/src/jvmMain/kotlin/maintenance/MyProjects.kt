@@ -6,10 +6,65 @@ import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.ure.*
+
+
+// TODO_later: refactor this little experiment fun
+@OptIn(DelicateKommandApi::class)
+internal suspend fun searchKotlinCodeInMyProjects(
+    codeInLineUre: Ure,
+    onlyPublic: Boolean = false,
+    alsoFilterProjectPath: suspend FileSystem.(Path) -> Boolean = { true },
+    log: (Any?) -> Unit = ::println,
+) {
+    var foundCount = 0
+    fetchMyProjectsNameS(onlyPublic)
+        .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
+        .collect { projectPath ->
+            log("Searching in project: $projectPath")
+            findMyKotlinCode(projectPath.toString()).exec(SYS).forEach { ktFilePathStr ->
+                val ktFilePath = ktFilePathStr.toPath()
+                val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
+                val result = SYSTEM.readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
+                result?.value?.let {
+                    foundCount ++
+                    log("found in file ($foundCount): $ktFilePathStr")
+                    log("found code:")
+                    log(it)
+                }
+            }
+        }
+    log("Total found files: $foundCount")
+}
+
+
+// TODO_later: sth like this public in UreIO.kt
+private fun FileSystem.readAndFindUreLineContentWithSomeLinesAround(
+    file: Path,
+    ureLineContent: Ure,
+    maxLinesAround: Int = 1,
+): MatchResult? = readUtf8(file).let { fileContent ->
+    ureLineContent.withSomeLinesAround(
+        maxLinesBefore = maxLinesAround,
+        maxLinesAfter = maxLinesAround
+    ).compile().find(fileContent)
+}
+
+private fun Ure.withSomeLinesAround(
+    maxLinesBefore: Int = 1,
+    maxLinesAfter: Int = 1,
+) = ure {
+    if (maxLinesBefore > 2) println("FIXME: this is terribly slow for maxLinesBefore > 2")
+        // FIXME_later investigate if it can be optimized easily.
+    0..maxLinesBefore of ureAnyLine()
+    1 of ureLineWithContent(this@withSomeLinesAround)
+    0..maxLinesAfter of ureAnyLine()
+}
 
 suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)

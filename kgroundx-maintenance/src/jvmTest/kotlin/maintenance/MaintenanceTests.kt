@@ -31,5 +31,7 @@ class MaintenanceTests {
 
        // "DANGEROUS inject hacky workflow to refreshDeps repo" o { injectHackyGenerateDepsWorkflowToRefreshDepsRepo() }
        // "DANGEROUS inject updateGeneratedDeps workflow to DepsKt repo" o { injectUpdateGeneratedDepsWorkflowToDepsKtRepo() }
+
+       // "search sth in my projects" o { runBlocking { searchKotlinCodeInMyProjects(ir("ontext recei").withOptWhatevaAroundInLine()) } }
     }
 }

@@ -13,8 +13,8 @@ defaultBuildTemplateForMppLib(
 ) {
     api(project(":kgroundx"))
     api(project(":kground-io"))
-    api(Langiewicz.kommandline.withVer("0.0.31")) // FIXME hardcoded ver
-    api(Langiewicz.kommandsamples.withVer("0.0.31")) // FIXME hardcoded ver
+    api(Langiewicz.kommandline.withVer("0.0.32")) // FIXME hardcoded ver
+    api(Langiewicz.kommandsamples.withVer("0.0.32")) // FIXME hardcoded ver
 }
 
 kotlin { js(IR) { nodejs() } }
