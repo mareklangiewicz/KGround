@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kground.io
 import kotlinx.coroutines.*
 import okio.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
@@ -11,7 +12,7 @@ interface WithCLI {
     val cli: CliPlatform
 }
 
-interface KGroundXIO: KGroundIO, WithCLI
+interface WithKGroundXIO: WithKGroundIO, WithCLI
 
 /**
  * Sth like this be used as a context receiver when Kotlin supports it.
@@ -23,7 +24,7 @@ interface KGroundXIO: KGroundIO, WithCLI
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundXIOCtx(override val cli: CliPlatform, fs: FileSystem, ulog: ULog): KGroundIOCtx(fs, ulog), KGroundXIO {
+open class KGroundXIOCtx(override val cli: CliPlatform, fs: FileSystem, ulog: ULog, usubmit: USubmit): KGroundIOCtx(fs, ulog, usubmit), WithKGroundXIO {
     companion object Key : AbstractCoroutineContextKey<KGroundIOCtx, KGroundXIOCtx>(KGroundIOCtx, { it as? KGroundXIOCtx })
 }
 
@@ -44,12 +45,14 @@ suspend fun <T> withKGroundXIOCtx(
     cli: CliPlatform? = null,
     fs: FileSystem? = null,
     ulog: ULog? = null,
+    usubmit: USubmit? = null,
     block: suspend CoroutineScope.() -> T,
 ): T = withContext(
     KGroundXIOCtx(
         cli ?: coroutineContext[KGroundXIOCtx]?.cli ?: SysPlatform(),
         fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
-        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn()
+        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+        usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
     ) plusIfNN name?.let(::CoroutineName),
     block
 )

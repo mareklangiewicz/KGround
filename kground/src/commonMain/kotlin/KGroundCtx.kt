@@ -1,12 +1,11 @@
 package pl.mareklangiewicz.kground
 
 import kotlinx.coroutines.*
+import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
-interface WithULog { val ulog: ULog }
-
-interface KGround: WithULog
+interface WithKGround: WithULog, WithUSubmit
 
 /**
  * Sth like this be used as a context receiver when Kotlin supports it.
@@ -18,7 +17,7 @@ interface KGround: WithULog
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundCtx(override val ulog: ULog): KGround, CoroutineContext.Element {
+open class KGroundCtx(override val ulog: ULog, override val usubmit: USubmit): WithKGround, CoroutineContext.Element {
     companion object Key : CoroutineContext.Key<KGroundCtx>
     override val key: CoroutineContext.Key<*> get() = Key
     override fun <E : CoroutineContext.Element> get(key: CoroutineContext.Key<E>): E? = getPolymorphicElement(key)
@@ -36,10 +35,12 @@ infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) { null -> t
 suspend fun <T> withKGroundCtx(
     name: String? = null,
     ulog: ULog? = null,
+    usubmit: USubmit? = null,
     block: suspend CoroutineScope.() -> T,
 ): T = withContext(
     KGroundCtx(
-        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn()
+        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+        usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
     ) plusIfNN name?.let(::CoroutineName),
     block
 )

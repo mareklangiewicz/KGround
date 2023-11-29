@@ -3,12 +3,13 @@ package pl.mareklangiewicz.kground.io
 import kotlinx.coroutines.*
 import okio.FileSystem
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
 interface WithFS { val fs: FileSystem }
 
-interface KGroundIO: KGround, WithFS
+interface WithKGroundIO: WithKGround, WithFS
 
 /**
  * Sth like this be used as a context receiver when Kotlin supports it.
@@ -20,7 +21,7 @@ interface KGroundIO: KGround, WithFS
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog): KGroundCtx(ulog), KGroundIO {
+open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmit): KGroundCtx(ulog, usubmit), WithKGroundIO {
     companion object Key : AbstractCoroutineContextKey<KGroundCtx, KGroundIOCtx>(KGroundCtx, { it as? KGroundIOCtx })
 }
 
@@ -37,11 +38,13 @@ suspend fun <T> withKGroundIOCtx(
     name: String? = null,
     fs: FileSystem? = null,
     ulog: ULog? = null,
+    usubmit: USubmit? = null,
     block: suspend CoroutineScope.() -> T,
 ): T = withContext(
     KGroundIOCtx(
         fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
-        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn()
+        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+        usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
     ) plusIfNN name?.let(::CoroutineName),
     block
 )

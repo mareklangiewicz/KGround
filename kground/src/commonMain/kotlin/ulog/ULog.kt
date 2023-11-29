@@ -24,6 +24,8 @@ fun interface ULog {
     operator fun invoke(level: ULogLevel, data: Any?)
 }
 
+interface WithULog { val ulog: ULog }
+
 fun ULog.d(data: Any?) = this(DEBUG, data)
 fun ULog.i(data: Any?) = this(INFO, data)
 fun ULog.w(data: Any?) = this(WARN, data)
