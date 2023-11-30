@@ -11,7 +11,8 @@ import pl.mareklangiewicz.uspek.*
 
 class MaintenanceTests {
 
-    // TODO: I have to run it from command line, due to issue (todo track it):
+    // Note: In the past I had to run it from command line, due to issue:
+    // Update: It's working now, but leaving info here about running from CLI just in case
     // https://youtrack.jetbrains.com/issue/IDEA-320303
     // KGround$ ./gradlew cleanTest
     // KGround$ ./gradlew test --tests MaintenanceTests.maintenanceTestFactory
