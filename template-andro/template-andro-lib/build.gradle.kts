@@ -51,7 +51,7 @@ fun RepositoryHandler.defaultRepos(
 }
 
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-    jvmTargetVer: String = versNew.JvmDefaultVer,
+    jvmTargetVer: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
     renderInternalDiagnosticNames: Boolean = false,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
@@ -318,7 +318,7 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = versNew.JvmDefaultVer,
+    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
 ) = compileOptions {
     sourceCompatibility(jvmVersion)
     targetCompatibility(jvmVersion)
@@ -364,7 +364,7 @@ fun Project.defaultPublishingOfAndroApp(
 
 fun Project.defaultBuildTemplateForAndroidLib(
     libNamespace: String,
-    jvmVersion: String = versNew.JvmDefaultVer,
+    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
     sdkCompile: Int = versNew.AndroSdkCompile,
     sdkMin: Int = versNew.AndroSdkMin,
     withCompose: Boolean = false,
@@ -394,7 +394,7 @@ fun Project.defaultBuildTemplateForAndroidLib(
 
 fun LibraryExtension.defaultAndroLib(
     libNamespace: String,
-    jvmVersion: String = versNew.JvmDefaultVer,
+    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
     sdkCompile: Int = versNew.AndroSdkCompile,
     sdkMin: Int = versNew.AndroSdkMin,
     withCompose: Boolean = false,
