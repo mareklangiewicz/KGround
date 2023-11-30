@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForMppLib(
-    // TODO_later: withNativeLinux64 = true,
+    withNativeLinux64 = true,
 ) {
     api(project(":kground"))
 }
