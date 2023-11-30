@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kground.playground
+package pl.mareklangiewicz.kgroundx.jupyter.playground
 
 import kotlinx.coroutines.*
 import pl.mareklangiewicz.kommand.*

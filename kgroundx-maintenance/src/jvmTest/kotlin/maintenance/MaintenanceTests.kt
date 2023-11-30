@@ -1,6 +1,6 @@
 @file:Suppress("UnusedImport")
 
-package pl.mareklangiewicz.maintenance
+package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.*
 import okio.Path.Companion.toPath

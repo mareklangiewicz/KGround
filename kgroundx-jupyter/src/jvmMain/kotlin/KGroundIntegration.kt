@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kground
+package pl.mareklangiewicz.kgroundx.jupyter
 
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
 

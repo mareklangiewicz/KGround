@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package pl.mareklangiewicz.maintenance
+package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.flow.*
 import okio.*

@@ -1,6 +1,6 @@
 @file:Suppress("unused", "PackageDirectoryMismatch")
 
-package pl.mareklangiewicz.maintenance
+package pl.mareklangiewicz.kgroundx.maintenance
 
 import io.github.typesafegithub.workflows.actions.actions.*
 import io.github.typesafegithub.workflows.actions.endbug.AddAndCommitV9

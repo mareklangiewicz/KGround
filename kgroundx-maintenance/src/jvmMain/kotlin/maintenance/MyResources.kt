@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.maintenance
+package pl.mareklangiewicz.kgroundx.maintenance
 
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
