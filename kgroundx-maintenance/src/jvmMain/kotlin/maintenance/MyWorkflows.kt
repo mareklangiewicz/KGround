@@ -1,7 +1,8 @@
+@file:Suppress("unused", "PackageDirectoryMismatch")
+
 package pl.mareklangiewicz.maintenance
 
-import io.github.typesafegithub.workflows.actions.actions.CheckoutV3
-import io.github.typesafegithub.workflows.actions.actions.SetupJavaV3
+import io.github.typesafegithub.workflows.actions.actions.*
 import io.github.typesafegithub.workflows.actions.endbug.AddAndCommitV9
 import io.github.typesafegithub.workflows.actions.gradle.GradleBuildActionV2
 import io.github.typesafegithub.workflows.domain.JobOutputs
@@ -39,7 +40,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
             runsOn = RunnerType.UbuntuLatest,
             _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
         ) {
-            uses(action = CheckoutV3())
+            uses(action = CheckoutV4())
             usesJdk()
             uses(
                 name = "MyExperiments.generateDeps",
@@ -62,7 +63,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
 
 
 // FIXME NOW: stop using MaintenanceTests
-// FIXME: something less hacky/hardcoded/repetative
+// FIXME: something less hacky/hardcoded/repetitive
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
     val everyMondayAt8am = Cron(minute = "0", hour = "8", dayWeek = "1")
     val workflow = workflow(
@@ -75,7 +76,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
             runsOn = RunnerType.UbuntuLatest,
             _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
         ) {
-            uses(action = CheckoutV3())
+            uses(action = CheckoutV4())
             usesJdk()
             uses(
                 name = "updateGeneratedDeps",
@@ -106,6 +107,7 @@ fun FileSystem.checkMyDWorkflowsInProject(
     log: (Any?) -> Unit = ::println,
 ) {
     if (verbose) log("Check my dworkflows in project: $projectPath")
+    @Suppress("DEPRECATION")
     val yamlFiles = findAllFiles(yamlFilesPath, maxDepth = 1).filterExt(yamlFilesExt)
     val yamlNames = yamlFiles.map { it.name.substringBeforeLast('.') }
     for (dname in MyDWorkflowNames) {
@@ -183,7 +185,7 @@ private fun defaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.U
                 runsOn = runnerType,
                 env = mySecretsEnv,
             ) {
-                uses(action = CheckoutV3())
+                uses(action = CheckoutV4())
                 usesJdk()
                 usesGradleBuild()
             }
@@ -200,7 +202,7 @@ private fun defaultReleaseWorkflow() =
             env = mySecretsEnv,
             runsOn = RunnerType.UbuntuLatest,
         ) {
-            uses(action = CheckoutV3())
+            uses(action = CheckoutV4())
             usesJdk()
             usesGradleBuild()
             uses(
@@ -216,7 +218,7 @@ private fun defaultReleaseWorkflow() =
     }
 
 private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
-    version: String? = "17", // fixme_maybe: take from DepsNew.ver...? [Deps Selected]
+    version: String? = "21", // fixme_maybe: take from DepsNew.ver...? [Deps Selected]
     distribution: SetupJavaV3.Distribution = SetupJavaV3.Distribution.Zulu, // fixme_later: which dist?
 ) = uses(
         name = "Set up JDK",
