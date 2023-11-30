@@ -8,7 +8,9 @@ plugins {
     plugAll(plugs.KotlinMulti, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForMppLib {
+defaultBuildTemplateForMppLib(
+    withNativeLinux64 = true,
+) {
     api(project(":kommandline"))
     implementation(kotlin("reflect")) // FIXME: Add to DepsNew
 }
