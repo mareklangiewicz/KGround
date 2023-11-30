@@ -11,7 +11,7 @@ plugins {
 defaultBuildTemplateForMppLib(
     withNativeLinux64 = true,
 ) {
-    api("pl.mareklangiewicz:kground:0.0.25") // FIXME https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
+    api("pl.mareklangiewicz:kground:0.0.27") // FIXME https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
 }
 
 kotlin { js(IR) { nodejs() } }
@@ -43,7 +43,7 @@ fun RepositoryHandler.defaultRepos(
 }
 
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-    jvmTargetVer: String = "21",  // FIXME NOW: update deps and use versNew.JvmDefaultVer,
+    jvmTargetVer: String = versNew.JvmDefaultVer,
     renderInternalDiagnosticNames: Boolean = false,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
