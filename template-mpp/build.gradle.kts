@@ -14,7 +14,7 @@ defaultBuildTemplateForRootProject(
         name = "TemplateMPP",
         description = "Template for multi platform projects.",
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
-        version = Ver(0, 0, 9) // 0.0.09 is compiled with Kotlin 2.0.0-Beta1
+        version = Ver(0, 0, 10)
     ),
     withSonatypeOssPublishing = true
 )
