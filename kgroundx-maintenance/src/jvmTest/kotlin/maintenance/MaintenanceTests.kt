@@ -29,6 +29,9 @@ class MaintenanceTests {
 
        // "DANGEROUS updateKGroundResourcesSymLinks" o { updateKGroundResourcesSymLinks() }
        // "DANGEROUS updateGradlewFilesInMyProjects" o { runBlocking { updateGradlewFilesInMyProjects(onlyPublic = false) } }
+       //  "DANGEROUS updateGradlewFilesInCMC" o { runBlocking {
+       //      updateGradlewFilesInProject("/home/marek/code/kotlin/compose-multiplatform-core".toPath())
+       //  } }
 
        // "DANGEROUS inject hacky workflow to refreshDeps repo" o { injectHackyGenerateDepsWorkflowToRefreshDepsRepo() }
        // "DANGEROUS inject updateGeneratedDeps workflow to DepsKt repo" o { injectUpdateGeneratedDepsWorkflowToDepsKtRepo() }
