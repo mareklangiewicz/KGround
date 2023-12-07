@@ -74,6 +74,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
         job(
             id = "update-generated-deps",
             runsOn = RunnerType.UbuntuLatest,
+            env = mySecretsEnv,
             _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
         ) {
             uses(action = CheckoutV4())
