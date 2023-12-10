@@ -4,10 +4,8 @@ import pl.mareklangiewicz.deps.*
 
 plugins {
     plug(plugs.NexusPublish)
-    id("com.android.library") version "8.3.0-alpha15" apply false
-    id("com.android.application") version "8.3.0-alpha15" apply false
-    // plug(plugs.AndroLib) apply false
-    // plug(plugs.AndroApp) apply false
+    plug(plugs.AndroLibStable) apply false
+    plug(plugs.AndroAppStable) apply false
     plug(plugs.KotlinAndro) apply false
 }
 

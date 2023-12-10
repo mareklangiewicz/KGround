@@ -8,9 +8,7 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-    // plugAll(plugs.AndroApp, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
-    id("com.android.application")
-    plugAll(plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
+    plugAll(plugs.AndroAppNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
 defaultBuildTemplateForAndroidApp(
@@ -323,7 +321,7 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
+    jvmVersion: String = versNew.JvmDefaultVer,
 ) = compileOptions {
     sourceCompatibility(jvmVersion)
     targetCompatibility(jvmVersion)
@@ -372,7 +370,7 @@ fun Project.defaultBuildTemplateForAndroidApp(
     appNamespace: String = appId,
     appVerCode: Int = 1,
     appVerName: String = v(patch = appVerCode),
-    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
+    jvmVersion: String = versNew.JvmDefaultVer,
     sdkCompile: Int = versNew.AndroSdkCompile,
     sdkTarget: Int = versNew.AndroSdkTarget,
     sdkMin: Int = versNew.AndroSdkMin,
@@ -406,14 +404,14 @@ fun ApplicationExtension.defaultAndroApp(
     appNamespace: String = appId,
     appVerCode: Int = 1,
     appVerName: String = v(patch = appVerCode),
-    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
+    jvmVersion: String = versNew.JvmDefaultVer,
     sdkCompile: Int = versNew.AndroSdkCompile,
     sdkTarget: Int = versNew.AndroSdkTarget,
     sdkMin: Int = versNew.AndroSdkMin,
     withCompose: Boolean = false,
     withComposeCompilerVer: Ver? = VersNew.ComposeCompiler,
 ) {
-    if (sdkCompile == 34) compileSdkPreview = "UpsideDownCake" else compileSdk = sdkCompile
+    compileSdk = sdkCompile
     defaultCompileOptions(jvmVersion)
     defaultDefaultConfig(appId, appNamespace, appVerCode, appVerName, sdkTarget, sdkMin)
     defaultBuildTypes()
@@ -431,7 +429,7 @@ fun ApplicationExtension.defaultDefaultConfig(
 ) = defaultConfig {
     applicationId = appId
     namespace = appNamespace
-    if (sdkTarget == 34) targetSdkPreview = "UpsideDownCake" else targetSdk = sdkTarget
+    targetSdk = sdkTarget
     minSdk = sdkMin
     versionCode = appVerCode
     versionName = appVerName

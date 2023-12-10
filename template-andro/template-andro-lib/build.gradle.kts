@@ -8,9 +8,7 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-    // plugAll(plugs.AndroLib, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
-    id("com.android.library")
-    plugAll(plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
+    plugAll(plugs.AndroLibNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
 defaultBuildTemplateForAndroidLib(
@@ -318,7 +316,7 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
+    jvmVersion: String = versNew.JvmDefaultVer,
 ) = compileOptions {
     sourceCompatibility(jvmVersion)
     targetCompatibility(jvmVersion)
@@ -364,7 +362,7 @@ fun Project.defaultPublishingOfAndroApp(
 
 fun Project.defaultBuildTemplateForAndroidLib(
     libNamespace: String,
-    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
+    jvmVersion: String = versNew.JvmDefaultVer,
     sdkCompile: Int = versNew.AndroSdkCompile,
     sdkMin: Int = versNew.AndroSdkMin,
     withCompose: Boolean = false,
@@ -394,13 +392,13 @@ fun Project.defaultBuildTemplateForAndroidLib(
 
 fun LibraryExtension.defaultAndroLib(
     libNamespace: String,
-    jvmVersion: String = "21", // FIXME NOW update deps and use versNew.JvmDefaultVer,
+    jvmVersion: String = versNew.JvmDefaultVer,
     sdkCompile: Int = versNew.AndroSdkCompile,
     sdkMin: Int = versNew.AndroSdkMin,
     withCompose: Boolean = false,
     withComposeCompilerVer: Ver? = VersNew.ComposeCompiler,
 ) {
-    if (sdkCompile == 34) compileSdkPreview = "UpsideDownCake" else compileSdk = sdkCompile
+    compileSdk = sdkCompile
     defaultCompileOptions(jvmVersion)
     defaultDefaultConfig(libNamespace, sdkMin)
     defaultBuildTypes()
