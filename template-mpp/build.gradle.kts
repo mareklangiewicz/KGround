@@ -6,6 +6,8 @@ plugins {
     plug(plugs.KotlinMulti) apply false
     plug(plugs.KotlinJvm) apply false
     plug(plugs.Compose) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
+    plug(plugs.AndroLib) apply false
+    plug(plugs.AndroApp) apply false
     plug(plugs.NexusPublish)
 }
 
@@ -14,7 +16,7 @@ defaultBuildTemplateForRootProject(
         name = "TemplateMPP",
         description = "Template for multi platform projects.",
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
-        version = Ver(0, 0, 10)
+        version = Ver(0, 0, 20)
     ),
     withSonatypeOssPublishing = true
 )

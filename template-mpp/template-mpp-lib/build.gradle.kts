@@ -1,12 +1,20 @@
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-    plugAll(plugs.KotlinMulti, plugs.Compose, plugs.MavenPublish, plugs.Signing)
+    plugAll(
+        plugs.KotlinMulti,
+        plugs.Compose,
+        plugs.AndroLibNoVer,
+        plugs.MavenPublish,
+        plugs.Signing,
+    )
 }
 
 // workaround for crazy gradle bugs like this one or similar:
@@ -23,6 +31,31 @@ defaultBuildTemplateForComposeMppLib(
 // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
     implementation(KotlinX.coroutines_core)
 }
+
+
+
+
+// FIXME NOW: integrate into mpp regions
+
+// region Temporary Mpp Andro Lib Addon
+
+kotlin {
+    androidTarget {
+        publishAllLibraryVariants()
+    }
+}
+
+extensions.configure<LibraryExtension> {
+    defaultAndroLib(
+        libNamespace = "pl.mareklangiewicz.templatempp"
+    )
+}
+
+// endregion Temporary Mpp Andro Lib Addon
+
+
+
+
 
 // region [Kotlin Module Build Template]
 
@@ -110,7 +143,7 @@ fun Project.defaultPublishing(
     lib: LibDetails,
     readmeFile: File = File(rootDir, "README.md"),
     withSignErrorWorkaround: Boolean = true,
-    withPublishingPrintln: Boolean = true,
+    withPublishingPrintln: Boolean = false, // FIXME NOW: enabling brakes gradle android publications
 ) {
 
     val readmeJavadocJar by tasks.registering(Jar::class) {
@@ -459,3 +492,224 @@ fun Project.defaultBuildTemplateForComposeMppLib(
 }
 
 // endregion [Compose MPP Module Build Template]
+
+
+// region [Andro Common Build Template]
+
+
+@Deprecated("Use plugins { plugAll(..) }") // FIXME_later: do I still need to use it somewhere?
+fun ScriptHandlerScope.defaultAndroBuildScript() {
+    repositories {
+        defaultRepos(withGradle = true)
+    }
+    dependencies {
+        defaultAndroBuildScriptDeps()
+    }
+}
+
+
+@Deprecated("Use plugins { plugAll(..) }") // FIXME_later: do I still need to use it somewhere?
+fun DependencyHandler.defaultAndroBuildScriptDeps(
+) {
+    add("classpath", plugs.KotlinAndro.mvn)
+    add("classpath", "com.android.tools.build:gradle:${versNew.AndroPlug.ver}")
+}
+
+
+fun DependencyHandler.defaultAndroDeps(
+    configuration: String = "implementation",
+    withCompose: Boolean = false,
+    withMDC: Boolean = false,
+) {
+    addAll(
+        configuration,
+        AndroidX.Core.ktx,
+        AndroidX.AppCompat.appcompat,
+        AndroidX.Lifecycle.compiler,
+        AndroidX.Lifecycle.runtime_ktx,
+    )
+    if (withCompose) {
+        addAllWithVer(
+            configuration,
+            VersNew.ComposeAndro,
+            AndroidX.Compose.Ui.ui,
+            AndroidX.Compose.Ui.tooling,
+            AndroidX.Compose.Ui.tooling_preview,
+            AndroidX.Compose.Material.material,
+        )
+        addAll(
+            configuration,
+            AndroidX.Activity.compose,
+            AndroidX.Compose.Material3.material3,
+        )
+    }
+    if (withMDC) add(configuration, Com.Google.Android.Material.material)
+}
+
+fun DependencyHandler.defaultAndroTestDeps(
+    configuration: String = "testImplementation",
+    withCompose: Boolean = false,
+) {
+    addAll(
+        configuration,
+        Kotlin.test_junit.withVer(VersNew.Kotlin),
+        JUnit.junit, // FIXME_someday: when will android move to JUnit5?
+        Langiewicz.uspekx_junit4,
+        AndroidX.Test.Espresso.core,
+        Com.Google.Truth.truth,
+        AndroidX.Test.rules,
+        AndroidX.Test.runner,
+        AndroidX.Test.Ext.truth,
+        AndroidX.Test.Ext.junit,
+        Org.Mockito.Kotlin.mockito_kotlin,
+    )
+    if (withCompose) addAllWithVer(
+        configuration,
+        versNew.ComposeAndro,
+        AndroidX.Compose.Ui.test,
+        AndroidX.Compose.Ui.test_junit4,
+        AndroidX.Compose.Ui.test_manifest,
+    )
+}
+
+fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
+    listOf(
+        "**/*.md",
+        "**/attach_hotspot_windows.dll",
+        "META-INF/licenses/**",
+        "META-INF/AL2.0",
+        "META-INF/LGPL2.1",
+        "META-INF/kotlinx_coroutines_core.version",
+    )
+)
+
+fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
+    jvmVersion: String = versNew.JvmDefaultVer,
+) = compileOptions {
+    sourceCompatibility(jvmVersion)
+    targetCompatibility(jvmVersion)
+}
+
+fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = VersNew.ComposeCompiler) {
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = withComposeCompilerVer?.ver
+    }
+}
+
+fun CommonExtension<*, *, *, *, *>.defaultPackagingOptions() = packaging {
+    resources.excludes.defaultAndroExcludedResources()
+}
+
+/** Use template-andro/build.gradle.kts:fun defaultAndroLibPublishAllVariants() to create component with name "default". */
+fun Project.defaultPublishingOfAndroLib(
+    lib: LibDetails,
+    componentName: String = "default",
+) {
+    afterEvaluate {
+        extensions.configure<PublishingExtension> {
+            publications.register<MavenPublication>(componentName) {
+                from(components[componentName])
+                defaultPOM(lib)
+            }
+        }
+    }
+}
+
+fun Project.defaultPublishingOfAndroApp(
+    lib: LibDetails,
+    componentName: String = "release",
+) = defaultPublishingOfAndroLib(lib, componentName)
+
+
+// endregion [Andro Common Build Template]
+
+// region [Andro Lib Build Template]
+
+fun Project.defaultBuildTemplateForAndroidLib(
+    libNamespace: String,
+    jvmVersion: String = versNew.JvmDefaultVer,
+    sdkCompile: Int = versNew.AndroSdkCompile,
+    sdkMin: Int = versNew.AndroSdkMin,
+    withCompose: Boolean = false,
+    withComposeCompilerVer: Ver? = VersNew.ComposeCompiler,
+    withMDC: Boolean = false,
+    details: LibDetails = rootExtLibDetails,
+    publishVariant: String? = null, // null means disable publishing to maven repo
+) {
+    repositories { defaultRepos(withComposeCompilerAndroidxDev = withCompose) }
+    extensions.configure<LibraryExtension> {
+        defaultAndroLib(libNamespace, jvmVersion, sdkCompile, sdkMin, withCompose, withComposeCompilerVer)
+        publishVariant?.let { defaultAndroLibPublishVariant(it) }
+    }
+    dependencies {
+        defaultAndroDeps(withCompose = withCompose, withMDC = withMDC)
+        defaultAndroTestDeps(withCompose = withCompose)
+        // debugImplementation(AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
+        add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
+    }
+    configurations.checkVerSync()
+    tasks.defaultKotlinCompileOptions()
+    defaultGroupAndVerAndDescription(details)
+    publishVariant?.let {
+        defaultPublishingOfAndroLib(details, it)
+        defaultSigning()
+    }
+}
+
+fun LibraryExtension.defaultAndroLib(
+    libNamespace: String,
+    jvmVersion: String = versNew.JvmDefaultVer,
+    sdkCompile: Int = versNew.AndroSdkCompile,
+    sdkMin: Int = versNew.AndroSdkMin,
+    withCompose: Boolean = false,
+    withComposeCompilerVer: Ver? = VersNew.ComposeCompiler,
+) {
+    compileSdk = sdkCompile
+    defaultCompileOptions(jvmVersion)
+    defaultDefaultConfig(libNamespace, sdkMin)
+    defaultBuildTypes()
+    if (withCompose) defaultComposeStuff(withComposeCompilerVer)
+    defaultPackagingOptions()
+}
+
+fun LibraryExtension.defaultDefaultConfig(
+    libNamespace: String,
+    sdkMin: Int = versNew.AndroSdkMin,
+) = defaultConfig {
+    namespace = libNamespace
+    minSdk = sdkMin
+    testInstrumentationRunner = versNew.AndroTestRunner
+}
+
+fun LibraryExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }
+
+fun LibraryExtension.defaultAndroLibPublishVariant(
+    variant: String = "debug",
+    withSources: Boolean = true,
+    withJavadoc: Boolean = false,
+) {
+    publishing {
+        singleVariant(variant) {
+            if (withSources) withSourcesJar()
+            if (withJavadoc) withJavadocJar()
+        }
+    }
+}
+
+fun LibraryExtension.defaultAndroLibPublishAllVariants(
+    withSources: Boolean = true,
+    withJavadoc: Boolean = false,
+) {
+    publishing {
+        multipleVariants {
+            allVariants()
+            if (withSources) withSourcesJar()
+            if (withJavadoc) withJavadocJar()
+        }
+    }
+}
+
+// endregion [Andro Lib Build Template]
