@@ -178,6 +178,7 @@ private fun defaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.U
         on = listOf(
             Push(branches = listOf("master", "main")),
             PullRequest(),
+            WorkflowDispatch(),
         ),
     ) {
         runners.forEach { runnerType ->

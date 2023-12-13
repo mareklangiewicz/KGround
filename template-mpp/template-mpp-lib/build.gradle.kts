@@ -1,8 +1,7 @@
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
-import com.android.build.api.dsl.CommonExtension
-import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
