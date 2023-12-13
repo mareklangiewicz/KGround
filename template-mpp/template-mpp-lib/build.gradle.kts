@@ -626,7 +626,6 @@ fun Project.defaultBuildTemplateForAndroidLib(
     dependencies {
         defaultAndroDeps(withCompose = withCompose, withMDC = withMDC)
         defaultAndroTestDeps(withCompose = withCompose)
-        // debugImplementation(AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     }
     configurations.checkVerSync()
