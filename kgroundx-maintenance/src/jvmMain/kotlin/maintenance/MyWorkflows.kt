@@ -87,7 +87,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
             )
             uses(
                 name = "Commit",
-                action = AddAndCommitV9(add = "src/main/kotlin/deps/DepsNew.kt"),
+                action = AddAndCommitV9(add = "src/main/kotlin/deps/Deps.kt"),
             )
         }
     }
