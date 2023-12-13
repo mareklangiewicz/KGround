@@ -24,9 +24,9 @@ gradleEnterprise {
 rootProject.name = "KGround"
 
 include(":kground")
-include(":kgroundx")
-include(":kground-io")
-include(":kgroundx-io")
-include(":kgroundx-maintenance")
-include(":kgroundx-jupyter")
+// include(":kgroundx")
+// include(":kground-io")
+// include(":kgroundx-io")
+// include(":kgroundx-maintenance")
+// include(":kgroundx-jupyter")
 

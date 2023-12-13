@@ -16,6 +16,10 @@ defaultBuildTemplateForMppLib(
     api(Langiewicz.upue)
     api(KotlinX.datetime)
     api(KotlinX.coroutines_core)
+
+    // FIXME: remove hardcoded atomicfu when bug is fixed.
+    // https://youtrack.jetbrains.com/issue/KT-64111/kotlinx-coroutines-1.8.0-RC-cant-be-used-Could-not-find-org.jetbrains.kotlinxatomicfu-cinterop-interop
+    api("org.jetbrains.kotlinx:atomicfu:0.23.1")
 }
 
 kotlin { js(IR) { nodejs() } }
