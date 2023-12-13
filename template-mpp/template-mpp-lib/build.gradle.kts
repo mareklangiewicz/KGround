@@ -83,7 +83,7 @@ fun RepositoryHandler.defaultRepos(
 }
 
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-    jvmTargetVer: String = versNew.JvmDefaultVer,
+    jvmTargetVer: String = vers.JvmDefaultVer,
     renderInternalDiagnosticNames: Boolean = false,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
@@ -495,26 +495,6 @@ fun Project.defaultBuildTemplateForComposeMppLib(
 
 // region [Andro Common Build Template]
 
-
-@Deprecated("Use plugins { plugAll(..) }") // FIXME_later: do I still need to use it somewhere?
-fun ScriptHandlerScope.defaultAndroBuildScript() {
-    repositories {
-        defaultRepos(withGradle = true)
-    }
-    dependencies {
-        defaultAndroBuildScriptDeps()
-    }
-}
-
-
-@Deprecated("Use plugins { plugAll(..) }") // FIXME_later: do I still need to use it somewhere?
-fun DependencyHandler.defaultAndroBuildScriptDeps(
-) {
-    add("classpath", plugs.KotlinAndro.mvn)
-    add("classpath", "com.android.tools.build:gradle:${versNew.AndroPlug.ver}")
-}
-
-
 fun DependencyHandler.defaultAndroDeps(
     configuration: String = "implementation",
     withCompose: Boolean = false,
@@ -530,7 +510,7 @@ fun DependencyHandler.defaultAndroDeps(
     if (withCompose) {
         addAllWithVer(
             configuration,
-            VersNew.ComposeAndro,
+            Vers.ComposeAndro,
             AndroidX.Compose.Ui.ui,
             AndroidX.Compose.Ui.tooling,
             AndroidX.Compose.Ui.tooling_preview,
@@ -551,7 +531,7 @@ fun DependencyHandler.defaultAndroTestDeps(
 ) {
     addAll(
         configuration,
-        Kotlin.test_junit.withVer(VersNew.Kotlin),
+        Kotlin.test_junit.withVer(Vers.Kotlin),
         JUnit.junit, // FIXME_someday: when will android move to JUnit5?
         Langiewicz.uspekx_junit4,
         AndroidX.Test.Espresso.core,
@@ -564,7 +544,7 @@ fun DependencyHandler.defaultAndroTestDeps(
     )
     if (withCompose) addAllWithVer(
         configuration,
-        versNew.ComposeAndro,
+        vers.ComposeAndro,
         AndroidX.Compose.Ui.test,
         AndroidX.Compose.Ui.test_junit4,
         AndroidX.Compose.Ui.test_manifest,
@@ -583,13 +563,13 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = versNew.JvmDefaultVer,
+    jvmVersion: String = vers.JvmDefaultVer,
 ) = compileOptions {
     sourceCompatibility(jvmVersion)
     targetCompatibility(jvmVersion)
 }
 
-fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = VersNew.ComposeCompiler) {
+fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = Vers.ComposeCompiler) {
     buildFeatures {
         compose = true
     }
@@ -629,11 +609,11 @@ fun Project.defaultPublishingOfAndroApp(
 
 fun Project.defaultBuildTemplateForAndroidLib(
     libNamespace: String,
-    jvmVersion: String = versNew.JvmDefaultVer,
-    sdkCompile: Int = versNew.AndroSdkCompile,
-    sdkMin: Int = versNew.AndroSdkMin,
+    jvmVersion: String = vers.JvmDefaultVer,
+    sdkCompile: Int = vers.AndroSdkCompile,
+    sdkMin: Int = vers.AndroSdkMin,
     withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = VersNew.ComposeCompiler,
+    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
     withMDC: Boolean = false,
     details: LibDetails = rootExtLibDetails,
     publishVariant: String? = null, // null means disable publishing to maven repo
@@ -660,11 +640,11 @@ fun Project.defaultBuildTemplateForAndroidLib(
 
 fun LibraryExtension.defaultAndroLib(
     libNamespace: String,
-    jvmVersion: String = versNew.JvmDefaultVer,
-    sdkCompile: Int = versNew.AndroSdkCompile,
-    sdkMin: Int = versNew.AndroSdkMin,
+    jvmVersion: String = vers.JvmDefaultVer,
+    sdkCompile: Int = vers.AndroSdkCompile,
+    sdkMin: Int = vers.AndroSdkMin,
     withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = VersNew.ComposeCompiler,
+    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
 ) {
     compileSdk = sdkCompile
     defaultCompileOptions(jvmVersion)
@@ -676,11 +656,11 @@ fun LibraryExtension.defaultAndroLib(
 
 fun LibraryExtension.defaultDefaultConfig(
     libNamespace: String,
-    sdkMin: Int = versNew.AndroSdkMin,
+    sdkMin: Int = vers.AndroSdkMin,
 ) = defaultConfig {
     namespace = libNamespace
     minSdk = sdkMin
-    testInstrumentationRunner = versNew.AndroTestRunner
+    testInstrumentationRunner = vers.AndroTestRunner
 }
 
 fun LibraryExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }
