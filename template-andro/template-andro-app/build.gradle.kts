@@ -113,7 +113,7 @@ fun Project.defaultPublishing(
     lib: LibDetails,
     readmeFile: File = File(rootDir, "README.md"),
     withSignErrorWorkaround: Boolean = true,
-    withPublishingPrintln: Boolean = true,
+    withPublishingPrintln: Boolean = false, // FIXME_later: enabling brakes gradle android publications
 ) {
 
     val readmeJavadocJar by tasks.registering(Jar::class) {
