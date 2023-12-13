@@ -361,14 +361,14 @@ fun Project.defaultBuildTemplateForAndroidApp(
     publishVariant: String? = null, // null means disable publishing to maven repo
 ) {
     repositories { defaultRepos(withComposeCompilerAndroidxDev = withCompose) }
-    android {
+    extensions.configure<ApplicationExtension> {
         defaultAndroApp(appId, appNamespace, appVerCode, appVerName, jvmVersion, sdkCompile, sdkTarget, sdkMin, withCompose, withComposeCompilerVer)
         publishVariant?.let { defaultAndroAppPublishVariant(it) }
     }
     dependencies {
         defaultAndroDeps(withCompose = withCompose, withMDC = withMDC)
         defaultAndroTestDeps(withCompose = withCompose)
-        debugImplementation(AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
+        add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions()
