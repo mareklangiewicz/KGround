@@ -11,7 +11,8 @@ plugins {
 defaultBuildTemplateForMppLib(
     withNativeLinux64 = true,
 ) {
-    api("pl.mareklangiewicz:kground:0.0.30") // FIXME https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
+    api("pl.mareklangiewicz:kground:0.0.29")
+    // FIXME https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 }
 
 kotlin { js(IR) { nodejs() } }
