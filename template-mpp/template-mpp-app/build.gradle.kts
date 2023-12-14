@@ -614,7 +614,7 @@ fun Project.defaultBuildTemplateForComposeMppApp(
                 nativeDistributions {
                     targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb)
                     packageName = details.name
-                    packageVersion = details.version?.ver
+                    packageVersion = details.version.ver
                     description = details.description
                 }
             }

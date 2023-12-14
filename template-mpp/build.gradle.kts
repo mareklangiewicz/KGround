@@ -16,9 +16,14 @@ defaultBuildTemplateForRootProject(
         name = "TemplateMPP",
         description = "Template for multi platform projects.",
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
-        version = Ver(0, 0, 20)
+        version = Ver(0, 0, 20),
+        settings = LibSettings(
+            withJs = true,
+            withNativeLinux64 = false,
+            withKotlinxHtml = true,
+        ),
     ),
-    withSonatypeOssPublishing = true
+    withSonatypeOssPublishing = true // FIXME NOW: move it to settings???
 )
 
 // region [Root Build Template]

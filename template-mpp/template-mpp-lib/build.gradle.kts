@@ -1,3 +1,5 @@
+@file:Suppress("UnusedVariable", "unused")
+
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
@@ -20,12 +22,7 @@ plugins {
 // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
 repositories { maven(repos.composeJbDev) }
 
-defaultBuildTemplateForComposeMppLib(
-    withJs = true,
-    withNativeLinux64 = false,
-    withKotlinxHtml = true,
-    withComposeTestUiJUnit5 = true,
-) {
+defaultBuildTemplateForComposeMppLib {
 // workaround for crazy gradle bugs like this one or similar:
 // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
     implementation(KotlinX.coroutines_core)
@@ -58,18 +55,7 @@ extensions.configure<LibraryExtension> {
 
 // region [Kotlin Module Build Template]
 
-fun RepositoryHandler.defaultRepos(
-    withMavenLocal: Boolean = true,
-    withMavenCentral: Boolean = true,
-    withGradle: Boolean = false,
-    withGoogle: Boolean = true,
-    withKotlinx: Boolean = true,
-    withKotlinxHtml: Boolean = false,
-    withComposeJbDev: Boolean = false,
-    withComposeCompilerAndroidxDev: Boolean = false,
-    withKtorEap: Boolean = false,
-    withJitpack: Boolean = false,
-) {
+fun RepositoryHandler.defaultRepos(settings: LibReposSettings = LibReposSettings()) = with(settings) {
     if (withMavenLocal) mavenLocal()
     if (withMavenCentral) mavenCentral()
     if (withGradle) gradlePluginPortal()
@@ -265,40 +251,18 @@ fun Project.defaultBuildTemplateForJvmLib(
 /** Only for very standard small libs. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForMppLib(
     details: LibDetails = rootExtLibDetails,
-    withJvm: Boolean = true,
-    withJs: Boolean = true,
-    withNativeLinux64: Boolean = false,
-    withKotlinxHtml: Boolean = false,
-    withComposeJbDevRepo: Boolean = false,
-    withComposeCompilerAndroidxDevRepo: Boolean = false,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
+    ignoreCompose: Boolean = false, // so user have to explicitly say he wants to ignore compose settings here.
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    repositories {
-        defaultRepos(
-            withKotlinxHtml = withKotlinxHtml,
-            withComposeJbDev = withComposeJbDevRepo,
-            withComposeCompilerAndroidxDev = withComposeCompilerAndroidxDevRepo,
-        )
-    }
+    require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForMppLib can not configure compose stuff" }
+    repositories { defaultRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
     kotlin {
-        allDefault(
-            withJvm,
-            withJs,
-            withNativeLinux64,
-            withKotlinxHtml,
-            withTestJUnit4,
-            withTestJUnit5,
-            withTestUSpekX,
-            addCommonMainDependencies
-        )
+        allDefault(details.settings, ignoreCompose, addCommonMainDependencies)
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
         if (plugins.hasPlugin("signing")) defaultSigning()
@@ -308,15 +272,11 @@ fun Project.defaultBuildTemplateForMppLib(
 
 /** Only for very standard small libs. In most cases it's better to not use this function. */
 fun KotlinMultiplatformExtension.allDefault(
-    withJvm: Boolean = true,
-    withJs: Boolean = true,
-    withNativeLinux64: Boolean = false,
-    withKotlinxHtml: Boolean = false,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
+    settings: LibSettings,
+    ignoreCompose: Boolean = false,
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+) = with(settings) {
+    require(ignoreCompose || compose == null) { "allDefault can not configure compose stuff" }
     if (withJvm) jvm()
     if (withJs) jsDefault()
     if (withNativeLinux64) linuxX64()
@@ -383,107 +343,80 @@ fun KotlinMultiplatformExtension.jsDefault(
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForComposeMppLib(
     details: LibDetails = rootExtLibDetails,
-    withJvm: Boolean = true,
-    withJs: Boolean = true,
-    withNativeLinux64: Boolean = false,
-    withKotlinxHtml: Boolean = false,
-    withComposeCompilerVer: Ver? = null,
-    withComposeUi: Boolean = true,
-    withComposeFoundation: Boolean = true,
-    withComposeMaterial2: Boolean = withJvm,
-    withComposeMaterial3: Boolean = withJvm,
-    withComposeMaterialIconsExtended: Boolean = false,
-        // https://mvnrepository.com/artifact/org.jetbrains.compose.material/material-icons-extended?repo=space-public-compose-dev
-    withComposeFullAnimation: Boolean = withJvm,
-    withComposeDesktop: Boolean = withJvm,
-    withComposeDesktopComponents: Boolean = false,
-        // https://mvnrepository.com/artifact/org.jetbrains.compose.components/components-splitpane?repo=space-public-compose-dev
-    withComposeWebCore: Boolean = withJs,
-    withComposeWebSvg: Boolean = withJs,
-    withComposeTestUiJUnit4: Boolean = withJvm,
-    withComposeTestUiJUnit5: Boolean = false,
-        // Not yet supported, but let's use this flag to use when I want to experiment with junit5 anyway.
-        // (Theoretically JUnit5 should live with JUnit4 peacefully, but I expect issues with Gradle or IDE)
-        // https://issuetracker.google.com/issues/127100532?pli=1
-        // https://github.com/android/android-test/issues/224
-        // https://github.com/JetBrains/compose-multiplatform/issues/2371
-
-    withComposeTestWebUtils: Boolean = withJs,
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
-    if (withComposeCompilerVer != null) compose {
-        val cc = AndroidX.Compose.Compiler.compiler.withVer(withComposeCompilerVer)
-        kotlinCompilerPlugin.set(cc.mvn)
+) = with(details.settings.compose ?: error("Compose settings not set.")) {
+    withComposeCompilerVer?.let {
+        val cc = AndroidX.Compose.Compiler.compiler.withVer(it)
+        compose { kotlinCompilerPlugin.set(cc.mvn) }
     }
-    if (withComposeTestUiJUnit5) {
+    if (withComposeTestUiJUnit5)
         logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
-    }
-    defaultBuildTemplateForMppLib(
-        details = details,
-        withJvm = withJvm,
-        withJs = withJs,
-        withNativeLinux64 = withNativeLinux64,
-        withKotlinxHtml = withKotlinxHtml,
-        withComposeJbDevRepo = true,
-        withComposeCompilerAndroidxDevRepo = withComposeCompilerVer != null,
-        withTestJUnit4 = withComposeTestUiJUnit4, // Unfortunately Compose UI still uses JUnit4 instead of 5
-        withTestJUnit5 = withComposeTestUiJUnit5,
-        withTestUSpekX = true,
-        addCommonMainDependencies = addCommonMainDependencies
-    )
+    defaultBuildTemplateForMppLib(details, ignoreCompose = true, addCommonMainDependencies)
     kotlin {
-        sourceSets {
-            val commonMain by getting {
+        allDefaultSourceSetsForCompose(details.settings)
+    }
+}
+
+
+/**
+ * Normal fun KotlinMultiplatformExtension.allDefault ignores compose stuff,
+ * because it's also used for libs without compose plugin.
+ * This one does the rest, so it has to be called additionally for compose libs, after .allDefault */
+@OptIn(ExperimentalComposeLibrary::class)
+fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
+    settings: LibSettings,
+) = with(settings.compose ?: error("Compose settings not set.")) {
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                if (withComposeUi) {
+                    implementation(compose.ui)
+                }
+                if (withComposeFoundation) implementation(compose.foundation)
+                if (withComposeFullAnimation) {
+                    implementation(compose.animation)
+                    implementation(compose.animationGraphics)
+                }
+                if (withComposeMaterial2) implementation(compose.material)
+                if (withComposeMaterial3) implementation(compose.material3)
+            }
+        }
+        if (settings.withJvm) {
+            val jvmMain by getting {
+                dependencies {
+                    if (withComposeUi) {
+                        implementation(compose.uiTooling)
+                        implementation(compose.preview)
+                    }
+                    if (withComposeMaterialIconsExtended) implementation(compose.materialIconsExtended)
+                    if (withComposeDesktop) {
+                        implementation(compose.desktop.common)
+                        implementation(compose.desktop.currentOs)
+                    }
+                    if (withComposeDesktopComponents) {
+                        implementation(compose.desktop.components.splitPane)
+                    }
+                }
+            }
+            val jvmTest by getting {
+                dependencies {
+                    @Suppress("DEPRECATION")
+                    if (withComposeTestUiJUnit4) implementation(compose.uiTestJUnit4)
+                }
+            }
+        }
+        if (settings.withJs) {
+            val jsMain by getting {
                 dependencies {
                     implementation(compose.runtime)
-                    if (withComposeUi) {
-                        implementation(compose.ui)
-                    }
-                    if (withComposeFoundation) implementation(compose.foundation)
-                    if (withComposeFullAnimation) {
-                        implementation(compose.animation)
-                        implementation(compose.animationGraphics)
-                    }
-                    if (withComposeMaterial2) implementation(compose.material)
-                    if (withComposeMaterial3) implementation(compose.material3)
+                    if (withComposeWebCore) implementation(compose.html.core)
+                    if (withComposeWebSvg) implementation(compose.html.svg)
                 }
             }
-            if (withJvm) {
-                val jvmMain by getting {
-                    dependencies {
-                        if (withComposeUi) {
-                            implementation(compose.uiTooling)
-                            implementation(compose.preview)
-                        }
-                        if (withComposeMaterialIconsExtended) implementation(compose.materialIconsExtended)
-                        if (withComposeDesktop) {
-                            implementation(compose.desktop.common)
-                            implementation(compose.desktop.currentOs)
-                        }
-                        if (withComposeDesktopComponents) {
-                            implementation(compose.desktop.components.splitPane)
-                        }
-                    }
-                }
-                val jvmTest by getting {
-                    dependencies {
-                        @Suppress("DEPRECATION")
-                        if (withComposeTestUiJUnit4) implementation(compose.uiTestJUnit4)
-                    }
-                }
-            }
-            if (withJs) {
-                val jsMain by getting {
-                    dependencies {
-                        implementation(compose.runtime)
-                        if (withComposeWebCore) implementation(compose.html.core)
-                        if (withComposeWebSvg) implementation(compose.html.svg)
-                    }
-                }
-                val jsTest by getting {
-                    dependencies {
-                        if (withComposeTestWebUtils) implementation(compose.html.testUtils)
-                    }
+            val jsTest by getting {
+                dependencies {
+                    if (withComposeTestWebUtils) implementation(compose.html.testUtils)
                 }
             }
         }
@@ -618,7 +551,12 @@ fun Project.defaultBuildTemplateForAndroidLib(
     details: LibDetails = rootExtLibDetails,
     publishVariant: String? = null, // null means disable publishing to maven repo
 ) {
-    repositories { defaultRepos(withComposeCompilerAndroidxDev = withCompose) }
+    repositories {
+        defaultRepos(
+            // FIXME now: get lib settings from upstream and just warn if suspicious repo settings
+            LibReposSettings(withComposeCompilerAndroidxDev = withCompose)
+        )
+    }
     extensions.configure<LibraryExtension> {
         defaultAndroLib(libNamespace, jvmVersion, sdkCompile, sdkMin, withCompose, withComposeCompilerVer)
         publishVariant?.let { defaultAndroLibPublishVariant(it) }
