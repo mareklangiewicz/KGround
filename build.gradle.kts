@@ -13,8 +13,8 @@ defaultBuildTemplateForRootProject(
         name = "KGround",
         description = "Kotlin Common Ground.",
         githubUrl = "https://github.com/langara/KGround",
-        version = Ver(0, 0, 30)
-        // https://repo1.maven.org/maven2/pl/mareklangiewicz/kground/
+        version = Ver(0, 0, 31)
+        // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
         // https://github.com/langara/KGround/releases
     ),
     withSonatypeOssPublishing = true,

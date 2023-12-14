@@ -13,9 +13,9 @@ defaultBuildTemplateForMppLib(
 ) {
     api(project(":kgroundx"))
     api(project(":kground-io"))
-    api(Langiewicz.kommandline.withVer("0.0.37")) // FIXME hardcoded ver
-    api(Langiewicz.kommandsamples.withVer("0.0.37")) // FIXME hardcoded ver
-    // https://repo1.maven.org/maven2/pl/mareklangiewicz/kommandline/
+    api(Langiewicz.kommandline.withVer("0.0.39")) // FIXME hardcoded ver
+    api(Langiewicz.kommandsamples.withVer("0.0.39")) // FIXME hardcoded ver
+    // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
 }
 
 kotlin { js(IR) { nodejs() } }
