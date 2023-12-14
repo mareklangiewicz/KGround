@@ -29,18 +29,7 @@ dependencies { implementation(project(":template-andro-lib")) }
 
 // region [Kotlin Module Build Template]
 
-fun RepositoryHandler.defaultRepos(
-    withMavenLocal: Boolean = true,
-    withMavenCentral: Boolean = true,
-    withGradle: Boolean = false,
-    withGoogle: Boolean = true,
-    withKotlinx: Boolean = true,
-    withKotlinxHtml: Boolean = false,
-    withComposeJbDev: Boolean = false,
-    withComposeCompilerAndroidxDev: Boolean = false,
-    withKtorEap: Boolean = false,
-    withJitpack: Boolean = false,
-) {
+fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withMavenLocal) mavenLocal()
     if (withMavenCentral) mavenCentral()
     if (withGradle) gradlePluginPortal()
@@ -195,7 +184,7 @@ fun Project.defaultBuildTemplateForJvmLib(
     withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    repositories { defaultRepos() }
+    repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
     kotlin {
@@ -360,7 +349,10 @@ fun Project.defaultBuildTemplateForAndroidApp(
     details: LibDetails = rootExtLibDetails,
     publishVariant: String? = null, // null means disable publishing to maven repo
 ) {
-    repositories { defaultRepos(withComposeCompilerAndroidxDev = withCompose) }
+    repositories { addRepos(details.settings.repos) }
+    // temporary (before moving andro stuff to settings)
+    val withCompose = details.settings.compose != null
+    val withComposeCompilerVer = details.settings.compose?.withComposeCompilerVer
     extensions.configure<ApplicationExtension> {
         defaultAndroApp(appId, appNamespace, appVerCode, appVerName, jvmVersion, sdkCompile, sdkTarget, sdkMin, withCompose, withComposeCompilerVer)
         publishVariant?.let { defaultAndroAppPublishVariant(it) }
