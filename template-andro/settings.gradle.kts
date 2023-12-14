@@ -7,10 +7,11 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
+    includeBuild("../../DepsKt")
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.69" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("pl.mareklangiewicz.deps.settings") version "0.2.71" // https://plugins.gradle.org/search?term=mareklangiewicz
 }
 
 rootProject.name = "template-andro"

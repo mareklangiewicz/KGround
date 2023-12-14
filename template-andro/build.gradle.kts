@@ -11,7 +11,7 @@ plugins {
 
 defaultBuildTemplateForRootProject(
     langaraLibDetails(
-        name = "TemplateAndro",
+        name = "TemplateOnlyAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/langara/deps.kt/template-andro",
         version = Ver(0, 0, 8)

@@ -11,7 +11,7 @@ plugins {
     plugAll(plugs.AndroLibNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForAndroidLib(
+defaultBuildTemplateForAndroLib(
     libNamespace = "pl.mareklangiewicz.templateandrolib",
     publishVariant = "debug",
 )
@@ -173,11 +173,9 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
 
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
+    require(details.settings.withJvm) { "JVM disabled in settings. "}
     repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
@@ -190,12 +188,12 @@ fun Project.defaultBuildTemplateForJvmLib(
             }
             val test by getting {
                 dependencies {
-                    if (withTestJUnit4) implementation(JUnit.junit)
-                    if (withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
-                    if (withTestUSpekX) {
+                    if (details.settings.withTestJUnit4) implementation(JUnit.junit)
+                    if (details.settings.withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+                    if (details.settings.withTestUSpekX) {
                         implementation(Langiewicz.uspekx)
-                        if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-                        if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+                        if (details.settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+                        if (details.settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
                     }
                 }
             }
@@ -203,8 +201,8 @@ fun Project.defaultBuildTemplateForJvmLib(
     }
 
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
         if (plugins.hasPlugin("signing")) defaultSigning()
@@ -284,10 +282,10 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = vers.JvmDefaultVer,
+    jvmVer: String = vers.JvmDefaultVer,
 ) = compileOptions {
-    sourceCompatibility(jvmVersion)
-    targetCompatibility(jvmVersion)
+    sourceCompatibility(jvmVer)
+    targetCompatibility(jvmVer)
 }
 
 fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = Vers.ComposeCompiler) {
@@ -328,9 +326,8 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro Lib Build Template]
 
-fun Project.defaultBuildTemplateForAndroidLib(
+fun Project.defaultBuildTemplateForAndroLib(
     libNamespace: String,
-    jvmVersion: String = vers.JvmDefaultVer,
     sdkCompile: Int = vers.AndroSdkCompile,
     sdkMin: Int = vers.AndroSdkMin,
     withMDC: Boolean = false,
@@ -342,7 +339,7 @@ fun Project.defaultBuildTemplateForAndroidLib(
     val withCompose = details.settings.compose != null
     val withComposeCompilerVer = details.settings.compose?.withComposeCompilerVer
     extensions.configure<LibraryExtension> {
-        defaultAndroLib(libNamespace, jvmVersion, sdkCompile, sdkMin, withCompose, withComposeCompilerVer)
+        defaultAndroLib(libNamespace, sdkCompile, sdkMin, details)
         publishVariant?.let { defaultAndroLibPublishVariant(it) }
     }
     dependencies {
@@ -351,7 +348,7 @@ fun Project.defaultBuildTemplateForAndroidLib(
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     }
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     defaultGroupAndVerAndDescription(details)
     publishVariant?.let {
         defaultPublishingOfAndroLib(details, it)
@@ -361,17 +358,15 @@ fun Project.defaultBuildTemplateForAndroidLib(
 
 fun LibraryExtension.defaultAndroLib(
     libNamespace: String,
-    jvmVersion: String = vers.JvmDefaultVer,
     sdkCompile: Int = vers.AndroSdkCompile,
     sdkMin: Int = vers.AndroSdkMin,
-    withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
+    details: LibDetails = rootExtLibDetails,
 ) {
     compileSdk = sdkCompile
-    defaultCompileOptions(jvmVersion)
+    defaultCompileOptions(details.settings.withJvmVer!!)
     defaultDefaultConfig(libNamespace, sdkMin)
     defaultBuildTypes()
-    if (withCompose) defaultComposeStuff(withComposeCompilerVer)
+    details.settings.compose?.let { defaultComposeStuff(it.withComposeCompilerVer) }
     defaultPackagingOptions()
 }
 

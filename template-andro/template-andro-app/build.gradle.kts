@@ -11,13 +11,12 @@ plugins {
     plugAll(plugs.AndroAppNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForAndroidApp(
+defaultBuildTemplateForAndroApp(
     appId = "pl.mareklangiewicz.templateandro",
-    withCompose = true,
     publishVariant = "debug",
 )
 
-// besides default dependencies declared by fun defaultBuildTemplateForAndroidApp
+// besides default dependencies declared by fun defaultBuildTemplateForAndroApp
 dependencies { implementation(project(":template-andro-lib")) }
 
 
@@ -179,9 +178,6 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
 
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
     repositories { addRepos(details.settings.repos) }
@@ -196,12 +192,12 @@ fun Project.defaultBuildTemplateForJvmLib(
             }
             val test by getting {
                 dependencies {
-                    if (withTestJUnit4) implementation(JUnit.junit)
-                    if (withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
-                    if (withTestUSpekX) {
+                    if (details.settings.withTestJUnit4) implementation(JUnit.junit)
+                    if (details.settings.withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+                    if (details.settings.withTestUSpekX) {
                         implementation(Langiewicz.uspekx)
-                        if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-                        if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+                        if (details.settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+                        if (details.settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
                     }
                 }
             }
@@ -209,8 +205,8 @@ fun Project.defaultBuildTemplateForJvmLib(
     }
 
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
         if (plugins.hasPlugin("signing")) defaultSigning()
@@ -290,10 +286,10 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = vers.JvmDefaultVer,
+    jvmVer: String = vers.JvmDefaultVer,
 ) = compileOptions {
-    sourceCompatibility(jvmVersion)
-    targetCompatibility(jvmVersion)
+    sourceCompatibility(jvmVer)
+    targetCompatibility(jvmVer)
 }
 
 fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = Vers.ComposeCompiler) {
@@ -334,17 +330,14 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro App Build Template]
 
-fun Project.defaultBuildTemplateForAndroidApp(
+fun Project.defaultBuildTemplateForAndroApp(
     appId: String,
     appNamespace: String = appId,
     appVerCode: Int = 1,
     appVerName: String = v(patch = appVerCode),
-    jvmVersion: String = vers.JvmDefaultVer,
     sdkCompile: Int = vers.AndroSdkCompile,
     sdkTarget: Int = vers.AndroSdkTarget,
     sdkMin: Int = vers.AndroSdkMin,
-    withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
     withMDC: Boolean = false,
     details: LibDetails = rootExtLibDetails,
     publishVariant: String? = null, // null means disable publishing to maven repo
@@ -352,9 +345,8 @@ fun Project.defaultBuildTemplateForAndroidApp(
     repositories { addRepos(details.settings.repos) }
     // temporary (before moving andro stuff to settings)
     val withCompose = details.settings.compose != null
-    val withComposeCompilerVer = details.settings.compose?.withComposeCompilerVer
     extensions.configure<ApplicationExtension> {
-        defaultAndroApp(appId, appNamespace, appVerCode, appVerName, jvmVersion, sdkCompile, sdkTarget, sdkMin, withCompose, withComposeCompilerVer)
+        defaultAndroApp(appId, appNamespace, appVerCode, appVerName, sdkCompile, sdkTarget, sdkMin, details)
         publishVariant?.let { defaultAndroAppPublishVariant(it) }
     }
     dependencies {
@@ -363,7 +355,7 @@ fun Project.defaultBuildTemplateForAndroidApp(
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     }
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
     defaultGroupAndVerAndDescription(details)
     publishVariant?.let {
         defaultPublishingOfAndroApp(details, it)
@@ -376,18 +368,16 @@ fun ApplicationExtension.defaultAndroApp(
     appNamespace: String = appId,
     appVerCode: Int = 1,
     appVerName: String = v(patch = appVerCode),
-    jvmVersion: String = vers.JvmDefaultVer,
     sdkCompile: Int = vers.AndroSdkCompile,
     sdkTarget: Int = vers.AndroSdkTarget,
     sdkMin: Int = vers.AndroSdkMin,
-    withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
+    details: LibDetails = rootExtLibDetails,
 ) {
     compileSdk = sdkCompile
-    defaultCompileOptions(jvmVersion)
+    defaultCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     defaultDefaultConfig(appId, appNamespace, appVerCode, appVerName, sdkTarget, sdkMin)
     defaultBuildTypes()
-    if (withCompose) defaultComposeStuff(withComposeCompilerVer)
+    details.settings.compose?.let { defaultComposeStuff(it.withComposeCompilerVer) }
     defaultPackagingOptions()
 }
 
