@@ -11,10 +11,19 @@ plugins {
 
 defaultBuildTemplateForRootProject(
     langaraLibDetails(
-        name = "TemplateOnlyAndro",
+        name = "TemplateAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/langara/deps.kt/template-andro",
-        version = Ver(0, 0, 8)
+        version = Ver(0, 0, 9),
+        settings = LibSettings(
+            andro = LibAndroSettings(
+                namespace = "pl.mareklangiewicz.templateandro",
+                publishVariant = "debug",
+                app = AppAndroSettings(
+                    appId = "pl.mareklangiewicz.templateandro"
+                ),
+            )
+        )
     )
 )
 

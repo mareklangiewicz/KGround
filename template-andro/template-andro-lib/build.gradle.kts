@@ -11,15 +11,12 @@ plugins {
     plugAll(plugs.AndroLibNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForAndroLib(
-    libNamespace = "pl.mareklangiewicz.templateandrolib",
-    publishVariant = "debug",
-)
+defaultBuildTemplateForAndroLib()
 
-dependencies {
-    defaultAndroTestDeps(configuration = "androidTestImplementation", withCompose = true)
-        // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
-}
+// dependencies {
+//     defaultAndroTestDeps(configuration = "androidTestImplementation", withCompose = true)
+//         // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
+// }
 
 // region [Kotlin Module Build Template]
 
@@ -326,57 +323,41 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro Lib Build Template]
 
-fun Project.defaultBuildTemplateForAndroLib(
-    libNamespace: String,
-    sdkCompile: Int = vers.AndroSdkCompile,
-    sdkMin: Int = vers.AndroSdkMin,
-    withMDC: Boolean = false,
-    details: LibDetails = rootExtLibDetails,
-    publishVariant: String? = null, // null means disable publishing to maven repo
-) {
+fun Project.defaultBuildTemplateForAndroLib(details: LibDetails = rootExtLibDetails) {
+    val andro = details.settings.andro ?: error("No andro settings.")
     repositories { addRepos(details.settings.repos) }
-    // temporary (before moving andro stuff to settings)
-    val withCompose = details.settings.compose != null
-    val withComposeCompilerVer = details.settings.compose?.withComposeCompilerVer
     extensions.configure<LibraryExtension> {
-        defaultAndroLib(libNamespace, sdkCompile, sdkMin, details)
-        publishVariant?.let { defaultAndroLibPublishVariant(it) }
+        defaultAndroLib(details)
+        andro.publishVariant?.let { defaultAndroLibPublishVariant(it) }
     }
     dependencies {
-        defaultAndroDeps(withCompose = withCompose, withMDC = withMDC)
-        defaultAndroTestDeps(withCompose = withCompose)
+        defaultAndroDeps(withCompose = details.settings.withCompose, withMDC = andro.withMDC)
+        defaultAndroTestDeps(withCompose = details.settings.withCompose)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     defaultGroupAndVerAndDescription(details)
-    publishVariant?.let {
+    andro.publishVariant?.let {
         defaultPublishingOfAndroLib(details, it)
         defaultSigning()
     }
 }
 
-fun LibraryExtension.defaultAndroLib(
-    libNamespace: String,
-    sdkCompile: Int = vers.AndroSdkCompile,
-    sdkMin: Int = vers.AndroSdkMin,
-    details: LibDetails = rootExtLibDetails,
-) {
-    compileSdk = sdkCompile
+fun LibraryExtension.defaultAndroLib(details: LibDetails = rootExtLibDetails) {
+    val andro = details.settings.andro ?: error("No andro settings.")
+    compileSdk = andro.sdkCompile
     defaultCompileOptions(details.settings.withJvmVer!!)
-    defaultDefaultConfig(libNamespace, sdkMin)
+    defaultDefaultConfig(andro)
     defaultBuildTypes()
     details.settings.compose?.let { defaultComposeStuff(it.withComposeCompilerVer) }
     defaultPackagingOptions()
 }
 
-fun LibraryExtension.defaultDefaultConfig(
-    libNamespace: String,
-    sdkMin: Int = vers.AndroSdkMin,
-) = defaultConfig {
-    namespace = libNamespace
-    minSdk = sdkMin
-    testInstrumentationRunner = vers.AndroTestRunner
+fun LibraryExtension.defaultDefaultConfig(settings: LibAndroSettings) = defaultConfig {
+    namespace = settings.namespace
+    minSdk = settings.sdkMin
+    testInstrumentationRunner = settings.withTestRunner
 }
 
 fun LibraryExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }

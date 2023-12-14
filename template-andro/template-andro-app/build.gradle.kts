@@ -11,10 +11,7 @@ plugins {
     plugAll(plugs.AndroAppNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForAndroApp(
-    appId = "pl.mareklangiewicz.templateandro",
-    publishVariant = "debug",
-)
+defaultBuildTemplateForAndroApp()
 
 // besides default dependencies declared by fun defaultBuildTemplateForAndroApp
 dependencies { implementation(project(":template-andro-lib")) }
@@ -330,72 +327,48 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro App Build Template]
 
-fun Project.defaultBuildTemplateForAndroApp(
-    appId: String,
-    appNamespace: String = appId,
-    appVerCode: Int = 1,
-    appVerName: String = v(patch = appVerCode),
-    sdkCompile: Int = vers.AndroSdkCompile,
-    sdkTarget: Int = vers.AndroSdkTarget,
-    sdkMin: Int = vers.AndroSdkMin,
-    withMDC: Boolean = false,
-    details: LibDetails = rootExtLibDetails,
-    publishVariant: String? = null, // null means disable publishing to maven repo
-) {
+fun Project.defaultBuildTemplateForAndroApp(details: LibDetails = rootExtLibDetails) {
+    val andro = details.settings.andro ?: error("No andro settings.")
     repositories { addRepos(details.settings.repos) }
-    // temporary (before moving andro stuff to settings)
-    val withCompose = details.settings.compose != null
     extensions.configure<ApplicationExtension> {
-        defaultAndroApp(appId, appNamespace, appVerCode, appVerName, sdkCompile, sdkTarget, sdkMin, details)
-        publishVariant?.let { defaultAndroAppPublishVariant(it) }
+        defaultAndroApp(details)
+        andro.publishVariant?.let { defaultAndroAppPublishVariant(it) }
     }
     dependencies {
-        defaultAndroDeps(withCompose = withCompose, withMDC = withMDC)
-        defaultAndroTestDeps(withCompose = withCompose)
+        defaultAndroDeps(withCompose = details.settings.withCompose, withMDC = andro.withMDC)
+        defaultAndroTestDeps(withCompose = details.settings.withCompose)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
     defaultGroupAndVerAndDescription(details)
-    publishVariant?.let {
+    andro.publishVariant?.let {
         defaultPublishingOfAndroApp(details, it)
         defaultSigning()
     }
 }
 
-fun ApplicationExtension.defaultAndroApp(
-    appId: String,
-    appNamespace: String = appId,
-    appVerCode: Int = 1,
-    appVerName: String = v(patch = appVerCode),
-    sdkCompile: Int = vers.AndroSdkCompile,
-    sdkTarget: Int = vers.AndroSdkTarget,
-    sdkMin: Int = vers.AndroSdkMin,
-    details: LibDetails = rootExtLibDetails,
-) {
-    compileSdk = sdkCompile
+fun ApplicationExtension.defaultAndroApp(details: LibDetails = rootExtLibDetails) {
+    val andro = details.settings.andro ?: error("No andro settings.")
+    compileSdk = andro.sdkCompile
     defaultCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
-    defaultDefaultConfig(appId, appNamespace, appVerCode, appVerName, sdkTarget, sdkMin)
+    defaultDefaultConfig(andro)
     defaultBuildTypes()
     details.settings.compose?.let { defaultComposeStuff(it.withComposeCompilerVer) }
     defaultPackagingOptions()
 }
 
 fun ApplicationExtension.defaultDefaultConfig(
-    appId: String,
-    appNamespace: String = appId,
-    appVerCode: Int = 1,
-    appVerName: String = v(patch = appVerCode),
-    sdkTarget: Int = vers.AndroSdkTarget,
-    sdkMin: Int = vers.AndroSdkMin,
+    settings: LibAndroSettings,
 ) = defaultConfig {
-    applicationId = appId
-    namespace = appNamespace
-    targetSdk = sdkTarget
-    minSdk = sdkMin
-    versionCode = appVerCode
-    versionName = appVerName
-    testInstrumentationRunner = vers.AndroTestRunner
+    val app = settings.app ?: error("No app settings.")
+    applicationId = app.appId
+    namespace = settings.namespace
+    targetSdk = settings.sdkTarget
+    minSdk = settings.sdkMin
+    versionCode = app.appVerCode
+    versionName = app.appVerName
+    testInstrumentationRunner = settings.withTestRunner
 }
 
 fun ApplicationExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }
