@@ -201,11 +201,9 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
 
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
+    require(details.settings.withJvm) { "JVM disabled in settings. "}
     repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
@@ -218,12 +216,12 @@ fun Project.defaultBuildTemplateForJvmLib(
             }
             val test by getting {
                 dependencies {
-                    if (withTestJUnit4) implementation(JUnit.junit)
-                    if (withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
-                    if (withTestUSpekX) {
+                    if (details.settings.withTestJUnit4) implementation(JUnit.junit)
+                    if (details.settings.withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+                    if (details.settings.withTestUSpekX) {
                         implementation(Langiewicz.uspekx)
-                        if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-                        if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+                        if (details.settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+                        if (details.settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
                     }
                 }
             }
@@ -231,8 +229,8 @@ fun Project.defaultBuildTemplateForJvmLib(
     }
 
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
         if (plugins.hasPlugin("signing")) defaultSigning()

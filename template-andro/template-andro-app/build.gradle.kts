@@ -177,6 +177,7 @@ fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
+    require(details.settings.withJvm) { "JVM disabled in settings. "}
     repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
@@ -202,7 +203,7 @@ fun Project.defaultBuildTemplateForJvmLib(
     }
 
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
