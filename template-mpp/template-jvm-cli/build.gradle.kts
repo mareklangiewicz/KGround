@@ -7,13 +7,16 @@ plugins {
     plugAll(plugs.KotlinJvm, plugs.JvmApp)
 }
 
-// workaround for crazy gradle bugs like this one or simillar:
-// https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
-repositories { maven(repos.composeJbDev) }
+// FIXME: some old workaround: probably it's not necessary anymore
+// // workaround for crazy gradle bugs like this one or simillar:
+// // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
+// repositories { maven(repos.composeJbDev) }
 
-repositories { // TODO_later: why gradle needs compose repo here?
-    defaultRepos(withKotlinxHtml = true, withComposeJbDev = true)
-}
+
+// FIXME: some old workaround: probably it's not necessary anymore
+// repositories { // TODO_later: why gradle needs compose repo here?
+//     defaultRepos(withKotlinxHtml = true, withComposeJbDev = true)
+// }
 
 defaultBuildTemplateForJvmApp(
     appMainPackage = "pl.mareklangiewicz.hello.cli",
@@ -26,18 +29,7 @@ defaultBuildTemplateForJvmApp(
 
 // region [Kotlin Module Build Template]
 
-fun RepositoryHandler.defaultRepos(
-    withMavenLocal: Boolean = true,
-    withMavenCentral: Boolean = true,
-    withGradle: Boolean = false,
-    withGoogle: Boolean = true,
-    withKotlinx: Boolean = true,
-    withKotlinxHtml: Boolean = false,
-    withComposeJbDev: Boolean = false,
-    withComposeCompilerAndroidxDev: Boolean = false,
-    withKtorEap: Boolean = false,
-    withJitpack: Boolean = false,
-) {
+fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withMavenLocal) mavenLocal()
     if (withMavenCentral) mavenCentral()
     if (withGradle) gradlePluginPortal()
@@ -192,7 +184,7 @@ fun Project.defaultBuildTemplateForJvmLib(
     withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    repositories { defaultRepos() }
+    repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
     kotlin {

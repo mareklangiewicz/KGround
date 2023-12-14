@@ -55,7 +55,7 @@ extensions.configure<LibraryExtension> {
 
 // region [Kotlin Module Build Template]
 
-fun RepositoryHandler.defaultRepos(settings: LibReposSettings = LibReposSettings()) = with(settings) {
+fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withMavenLocal) mavenLocal()
     if (withMavenCentral) mavenCentral()
     if (withGradle) gradlePluginPortal()
@@ -210,7 +210,7 @@ fun Project.defaultBuildTemplateForJvmLib(
     withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    repositories { defaultRepos() }
+    repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
     kotlin {
@@ -255,7 +255,7 @@ fun Project.defaultBuildTemplateForMppLib(
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
     require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForMppLib can not configure compose stuff" }
-    repositories { defaultRepos(details.settings.repos) }
+    repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
     kotlin {
         allDefault(details.settings, ignoreCompose, addCommonMainDependencies)
@@ -545,18 +545,14 @@ fun Project.defaultBuildTemplateForAndroidLib(
     jvmVersion: String = vers.JvmDefaultVer,
     sdkCompile: Int = vers.AndroSdkCompile,
     sdkMin: Int = vers.AndroSdkMin,
-    withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
     withMDC: Boolean = false,
     details: LibDetails = rootExtLibDetails,
     publishVariant: String? = null, // null means disable publishing to maven repo
 ) {
-    repositories {
-        defaultRepos(
-            // FIXME now: get lib settings from upstream and just warn if suspicious repo settings
-            LibReposSettings(withComposeCompilerAndroidxDev = withCompose)
-        )
-    }
+    repositories { addRepos(details.settings.repos) }
+    // temporary (before moving andro stuff to settings)
+    val withCompose = details.settings.compose != null
+    val withComposeCompilerVer = details.settings.compose?.withComposeCompilerVer
     extensions.configure<LibraryExtension> {
         defaultAndroLib(libNamespace, jvmVersion, sdkCompile, sdkMin, withCompose, withComposeCompilerVer)
         publishVariant?.let { defaultAndroLibPublishVariant(it) }
