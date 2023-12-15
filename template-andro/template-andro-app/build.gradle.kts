@@ -328,22 +328,28 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro App Build Template]
 
-fun Project.defaultBuildTemplateForAndroApp(details: LibDetails = rootExtLibDetails) {
+fun Project.defaultBuildTemplateForAndroApp(
+    details: LibDetails = rootExtLibDetails,
+    addAndroDependencies: DependencyHandler.() -> Unit = {},
+) {
     val andro = details.settings.andro ?: error("No andro settings.")
+    require(!andro.publishAllVariants) { "Only single app variant can be published" }
+    val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
     repositories { addRepos(details.settings.repos) }
     extensions.configure<ApplicationExtension> {
         defaultAndroApp(details)
-        andro.publishVariant?.let { defaultAndroAppPublishVariant(it) }
+        variant?.let { defaultAndroAppPublishVariant(it) }
     }
     dependencies {
         defaultAndroDeps(withCompose = details.settings.withCompose, withMDC = andro.withMDC)
         defaultAndroTestDeps(withCompose = details.settings.withCompose)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
+        addAndroDependencies()
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
     defaultGroupAndVerAndDescription(details)
-    andro.publishVariant?.let {
+    variant?.let {
         defaultPublishingOfAndroApp(details, it)
         defaultSigning()
     }
@@ -359,9 +365,7 @@ fun ApplicationExtension.defaultAndroApp(details: LibDetails = rootExtLibDetails
     defaultPackagingOptions()
 }
 
-fun ApplicationExtension.defaultDefaultConfig(
-    settings: LibAndroSettings,
-) = defaultConfig {
+fun ApplicationExtension.defaultDefaultConfig(settings: LibAndroSettings) = defaultConfig {
     val app = settings.app ?: error("No app settings.")
     applicationId = app.appId
     namespace = settings.namespace

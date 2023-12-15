@@ -323,25 +323,29 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro Lib Build Template]
 
-fun Project.defaultBuildTemplateForAndroLib(details: LibDetails = rootExtLibDetails) {
+fun Project.defaultBuildTemplateForAndroLib(
+    details: LibDetails = rootExtLibDetails,
+    addAndroMainDependencies: DependencyHandler.() -> Unit = {},
+) {
     val andro = details.settings.andro ?: error("No andro settings.")
     repositories { addRepos(details.settings.repos) }
     extensions.configure<LibraryExtension> {
         defaultAndroLib(details)
-        andro.publishVariant?.let { defaultAndroLibPublishVariant(it) }
+        if (andro.publishAllVariants) defaultAndroLibPublishAllVariants()
+        if (andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
     }
     dependencies {
         defaultAndroDeps(withCompose = details.settings.withCompose, withMDC = andro.withMDC)
         defaultAndroTestDeps(withCompose = details.settings.withCompose)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
+        addAndroMainDependencies()
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     defaultGroupAndVerAndDescription(details)
-    andro.publishVariant?.let {
-        defaultPublishingOfAndroLib(details, it)
-        defaultSigning()
-    }
+    if (andro.publishAllVariants) defaultPublishingOfAndroLib(details, "default")
+    if (andro.publishOneVariant) defaultPublishingOfAndroLib(details, andro.publishVariant)
+    if (!andro.publishNoVariants) defaultSigning()
 }
 
 fun LibraryExtension.defaultAndroLib(details: LibDetails = rootExtLibDetails) {
