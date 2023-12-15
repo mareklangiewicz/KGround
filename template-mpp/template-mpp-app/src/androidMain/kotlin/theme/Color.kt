@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templatemppapp
+package pl.mareklangiewicz.templatempp
 
 import androidx.compose.ui.graphics.Color
 

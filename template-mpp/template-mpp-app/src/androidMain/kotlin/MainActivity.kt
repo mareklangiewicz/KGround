@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templatemppapp
+package pl.mareklangiewicz.templatempp
 
 import android.os.*
 import androidx.activity.*

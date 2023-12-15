@@ -33,7 +33,7 @@ kotlin {
 }
 
 extensions.configure<ApplicationExtension> {
-    defaultAndroApp("pl.mareklangiewicz.templatemppapp")
+    defaultAndroApp()
     dependencies {
         defaultAndroDeps() // withCompose == false because we have compose from compose-multiplatform already
 
@@ -567,10 +567,10 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
-    jvmVersion: String = vers.JvmDefaultVer,
+    jvmVer: String = vers.JvmDefaultVer,
 ) = compileOptions {
-    sourceCompatibility(jvmVersion)
-    targetCompatibility(jvmVersion)
+    sourceCompatibility(jvmVer)
+    targetCompatibility(jvmVer)
 }
 
 fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = Vers.ComposeCompiler) {
@@ -611,75 +611,52 @@ fun Project.defaultPublishingOfAndroApp(
 
 // region [Andro App Build Template]
 
-fun Project.defaultBuildTemplateForAndroidApp(
-    appId: String,
-    appNamespace: String = appId,
-    appVerCode: Int = 1,
-    appVerName: String = v(patch = appVerCode),
-    jvmVersion: String = vers.JvmDefaultVer,
-    sdkCompile: Int = vers.AndroSdkCompile,
-    sdkTarget: Int = vers.AndroSdkTarget,
-    sdkMin: Int = vers.AndroSdkMin,
-    withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
-    withMDC: Boolean = false,
+fun Project.defaultBuildTemplateForAndroApp(
     details: LibDetails = rootExtLibDetails,
-    publishVariant: String? = null, // null means disable publishing to maven repo
+    addAndroDependencies: DependencyHandler.() -> Unit = {},
 ) {
+    val andro = details.settings.andro ?: error("No andro settings.")
+    require(!andro.publishAllVariants) { "Only single app variant can be published" }
+    val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
     repositories { addRepos(details.settings.repos) }
     extensions.configure<ApplicationExtension> {
-        defaultAndroApp(appId, appNamespace, appVerCode, appVerName, jvmVersion, sdkCompile, sdkTarget, sdkMin, withCompose, withComposeCompilerVer)
-        publishVariant?.let { defaultAndroAppPublishVariant(it) }
+        defaultAndroApp(details)
+        variant?.let { defaultAndroAppPublishVariant(it) }
     }
     dependencies {
-        defaultAndroDeps(withCompose = withCompose, withMDC = withMDC)
-        defaultAndroTestDeps(withCompose = withCompose)
+        defaultAndroDeps(withCompose = details.settings.withCompose, withMDC = andro.withMDC)
+        defaultAndroTestDeps(withCompose = details.settings.withCompose)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
+        addAndroDependencies()
     }
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
     defaultGroupAndVerAndDescription(details)
-    publishVariant?.let {
+    variant?.let {
         defaultPublishingOfAndroApp(details, it)
         defaultSigning()
     }
 }
 
-fun ApplicationExtension.defaultAndroApp(
-    appId: String,
-    appNamespace: String = appId,
-    appVerCode: Int = 1,
-    appVerName: String = v(patch = appVerCode),
-    jvmVersion: String = vers.JvmDefaultVer,
-    sdkCompile: Int = vers.AndroSdkCompile,
-    sdkTarget: Int = vers.AndroSdkTarget,
-    sdkMin: Int = vers.AndroSdkMin,
-    withCompose: Boolean = false,
-    withComposeCompilerVer: Ver? = Vers.ComposeCompiler,
-) {
-    compileSdk = sdkCompile
-    defaultCompileOptions(jvmVersion)
-    defaultDefaultConfig(appId, appNamespace, appVerCode, appVerName, sdkTarget, sdkMin)
+fun ApplicationExtension.defaultAndroApp(details: LibDetails = rootExtLibDetails) {
+    val andro = details.settings.andro ?: error("No andro settings.")
+    compileSdk = andro.sdkCompile
+    defaultCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
+    defaultDefaultConfig(andro)
     defaultBuildTypes()
-    if (withCompose) defaultComposeStuff(withComposeCompilerVer)
+    details.settings.compose?.let { defaultComposeStuff(it.withComposeCompilerVer) }
     defaultPackagingOptions()
 }
 
-fun ApplicationExtension.defaultDefaultConfig(
-    appId: String,
-    appNamespace: String = appId,
-    appVerCode: Int = 1,
-    appVerName: String = v(patch = appVerCode),
-    sdkTarget: Int = vers.AndroSdkTarget,
-    sdkMin: Int = vers.AndroSdkMin,
-) = defaultConfig {
-    applicationId = appId
-    namespace = appNamespace
-    targetSdk = sdkTarget
-    minSdk = sdkMin
-    versionCode = appVerCode
-    versionName = appVerName
-    testInstrumentationRunner = vers.AndroTestRunner
+fun ApplicationExtension.defaultDefaultConfig(settings: LibAndroSettings) = defaultConfig {
+    val app = settings.app ?: error("No app settings.")
+    applicationId = app.appId
+    namespace = settings.namespace
+    targetSdk = settings.sdkTarget
+    minSdk = settings.sdkMin
+    versionCode = app.appVerCode
+    versionName = app.appVerName
+    testInstrumentationRunner = settings.withTestRunner
 }
 
 fun ApplicationExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }

@@ -224,12 +224,9 @@ fun Project.defaultBuildTemplateForJvmApp(
     appMainPackage: String,
     appMainClass: String = "MainKt",
     details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    defaultBuildTemplateForJvmLib(details, withTestJUnit4, withTestJUnit5, withTestUSpekX, addMainDependencies)
+    defaultBuildTemplateForJvmLib(details, addMainDependencies)
     application { mainClass put "$appMainPackage.$appMainClass" }
 }
 

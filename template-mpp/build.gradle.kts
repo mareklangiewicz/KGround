@@ -21,6 +21,12 @@ defaultBuildTemplateForRootProject(
             withJs = true,
             withNativeLinux64 = false,
             withKotlinxHtml = true,
+            andro = LibAndroSettings(
+                namespace = "pl.mareklangiewicz.templatempp",
+                app = AppAndroSettings(
+                    appId = "pl.mareklangiewicz.templatemppapp"
+                )
+            )
         ),
     ),
     withSonatypeOssPublishing = true // FIXME NOW: move it to settings???
