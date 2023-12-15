@@ -8,9 +8,7 @@ plugins {
     plugAll(plugs.KotlinMulti, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForMppLib(
-    withNativeLinux64 = true,
-) {
+defaultBuildTemplateForMppLib {
     api(project(":kground"))
     api(Com.SquareUp.Okio.okio)
 }
@@ -19,18 +17,7 @@ kotlin { js(IR) { nodejs() } }
 
 // region [Kotlin Module Build Template]
 
-fun RepositoryHandler.defaultRepos(
-    withMavenLocal: Boolean = true,
-    withMavenCentral: Boolean = true,
-    withGradle: Boolean = false,
-    withGoogle: Boolean = true,
-    withKotlinx: Boolean = true,
-    withKotlinxHtml: Boolean = false,
-    withComposeJbDev: Boolean = false,
-    withComposeCompilerAndroidxDev: Boolean = false,
-    withKtorEap: Boolean = false,
-    withJitpack: Boolean = false,
-) {
+fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withMavenLocal) mavenLocal()
     if (withMavenCentral) mavenCentral()
     if (withGradle) gradlePluginPortal()
@@ -180,12 +167,10 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
 
 fun Project.defaultBuildTemplateForJvmLib(
     details: LibDetails = rootExtLibDetails,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
     addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    repositories { defaultRepos() }
+    require(details.settings.withJvm) { "JVM disabled in settings. "}
+    repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
 
     kotlin {
@@ -197,12 +182,12 @@ fun Project.defaultBuildTemplateForJvmLib(
             }
             val test by getting {
                 dependencies {
-                    if (withTestJUnit4) implementation(JUnit.junit)
-                    if (withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
-                    if (withTestUSpekX) {
+                    if (details.settings.withTestJUnit4) implementation(JUnit.junit)
+                    if (details.settings.withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+                    if (details.settings.withTestUSpekX) {
                         implementation(Langiewicz.uspekx)
-                        if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-                        if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+                        if (details.settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+                        if (details.settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
                     }
                 }
             }
@@ -210,8 +195,8 @@ fun Project.defaultBuildTemplateForJvmLib(
     }
 
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
         if (plugins.hasPlugin("signing")) defaultSigning()
@@ -226,40 +211,18 @@ fun Project.defaultBuildTemplateForJvmLib(
 /** Only for very standard small libs. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForMppLib(
     details: LibDetails = rootExtLibDetails,
-    withJvm: Boolean = true,
-    withJs: Boolean = true,
-    withNativeLinux64: Boolean = false,
-    withKotlinxHtml: Boolean = false,
-    withComposeJbDevRepo: Boolean = false,
-    withComposeCompilerAndroidxDevRepo: Boolean = false,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
+    ignoreCompose: Boolean = false, // so user have to explicitly say he wants to ignore compose settings here.
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-    repositories {
-        defaultRepos(
-            withKotlinxHtml = withKotlinxHtml,
-            withComposeJbDev = withComposeJbDevRepo,
-            withComposeCompilerAndroidxDev = withComposeCompilerAndroidxDevRepo,
-        )
-    }
+    require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForMppLib can not configure compose stuff" }
+    repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
     kotlin {
-        allDefault(
-            withJvm,
-            withJs,
-            withNativeLinux64,
-            withKotlinxHtml,
-            withTestJUnit4,
-            withTestJUnit5,
-            withTestUSpekX,
-            addCommonMainDependencies
-        )
+        allDefault(details.settings, ignoreCompose, addCommonMainDependencies)
     }
     configurations.checkVerSync()
     tasks.defaultKotlinCompileOptions()
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = withTestJUnit5)
+    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
     if (plugins.hasPlugin("maven-publish")) {
         defaultPublishing(details)
         if (plugins.hasPlugin("signing")) defaultSigning()
@@ -269,15 +232,11 @@ fun Project.defaultBuildTemplateForMppLib(
 
 /** Only for very standard small libs. In most cases it's better to not use this function. */
 fun KotlinMultiplatformExtension.allDefault(
-    withJvm: Boolean = true,
-    withJs: Boolean = true,
-    withNativeLinux64: Boolean = false,
-    withKotlinxHtml: Boolean = false,
-    withTestJUnit4: Boolean = false,
-    withTestJUnit5: Boolean = true,
-    withTestUSpekX: Boolean = true,
+    settings: LibSettings,
+    ignoreCompose: Boolean = false,
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+) = with(settings) {
+    require(ignoreCompose || compose == null) { "allDefault can not configure compose stuff" }
     if (withJvm) jvm()
     if (withJs) jsDefault()
     if (withNativeLinux64) linuxX64()

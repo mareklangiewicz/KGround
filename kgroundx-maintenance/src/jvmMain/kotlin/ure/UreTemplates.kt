@@ -58,9 +58,10 @@ private val regionsInfos = listOf(
     info(labelJvmApp, pathJvmApp),
     info(labelComposeMppModule, pathMppLib, pathMppApp),
     info(labelComposeMppApp, pathMppApp),
-    info(labelAndroCommon, pathAndroLib, pathAndroApp),
-    info(labelAndroLib, pathAndroLib),
-    info(labelAndroApp, pathAndroApp),
+    // update: notice that even for andro stuff, the source of truth is now mpp template
+    info(labelAndroCommon, pathMppLib, pathMppApp, pathAndroLib, pathAndroApp),
+    info(labelAndroLib, pathMppLib, pathAndroLib),
+    info(labelAndroApp, pathMppApp, pathAndroApp),
 )
 
 private operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: error("Unknown region label: $label")
