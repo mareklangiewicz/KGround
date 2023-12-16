@@ -1,5 +1,5 @@
 import kotlinx.browser.*
-import pl.mareklangiewicz.hello.*
+import pl.mareklangiewicz.templatempp.*
 
 fun main() {
     console.log("TemplateMPPWebApp started.")

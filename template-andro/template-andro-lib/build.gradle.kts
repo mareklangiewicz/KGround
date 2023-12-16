@@ -34,11 +34,11 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
 }
 
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-    jvmTargetVer: String = vers.JvmDefaultVer,
+    jvmTargetVer: String? = vers.JvmDefaultVer,
     renderInternalDiagnosticNames: Boolean = false,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = jvmTargetVer
+        jvmTargetVer?.let { jvmTarget = it }
         if (renderInternalDiagnosticNames) freeCompilerArgs = freeCompilerArgs + "-Xrender-internal-diagnostic-names"
         // useful, for example, to suppress some errors when accessing internal code from some library, like:
         // @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "EXPOSED_PARAMETER_TYPE", "EXPOSED_PROPERTY_TYPE", "CANNOT_OVERRIDE_INVISIBLE_MEMBER")
@@ -166,45 +166,6 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
             println("Publishing $coordinates to $localPath")
         }
     }
-}
-
-fun Project.defaultBuildTemplateForJvmLib(
-    details: LibDetails = rootExtLibDetails,
-    addMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
-    require(details.settings.withJvm) { "JVM disabled in settings. "}
-    repositories { addRepos(details.settings.repos) }
-    defaultGroupAndVerAndDescription(details)
-
-    kotlin {
-        sourceSets {
-            val main by getting {
-                dependencies {
-                    addMainDependencies()
-                }
-            }
-            val test by getting {
-                dependencies {
-                    if (details.settings.withTestJUnit4) implementation(JUnit.junit)
-                    if (details.settings.withTestJUnit5) implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
-                    if (details.settings.withTestUSpekX) {
-                        implementation(Langiewicz.uspekx)
-                        if (details.settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-                        if (details.settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
-                    }
-                }
-            }
-        }
-    }
-
-    configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
-    tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-    if (plugins.hasPlugin("maven-publish")) {
-        defaultPublishing(details)
-        if (plugins.hasPlugin("signing")) defaultSigning()
-        else println("JVM Module ${name}: signing disabled")
-    } else println("JVM Module ${name}: publishing (and signing) disabled")
 }
 
 // endregion [Kotlin Module Build Template]
@@ -348,20 +309,24 @@ fun Project.defaultBuildTemplateForAndroLib(
     if (!andro.publishNoVariants) defaultSigning()
 }
 
-fun LibraryExtension.defaultAndroLib(details: LibDetails = rootExtLibDetails) {
+fun LibraryExtension.defaultAndroLib(
+    details: LibDetails = rootExtLibDetails,
+    ignoreCompose: Boolean = false,
+) {
     val andro = details.settings.andro ?: error("No andro settings.")
     compileSdk = andro.sdkCompile
     defaultCompileOptions(details.settings.withJvmVer!!)
-    defaultDefaultConfig(andro)
+    defaultDefaultConfig(details)
     defaultBuildTypes()
-    details.settings.compose?.let { defaultComposeStuff(it.withComposeCompilerVer) }
+    details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompilerVer) }
     defaultPackagingOptions()
 }
 
-fun LibraryExtension.defaultDefaultConfig(settings: LibAndroSettings) = defaultConfig {
-    namespace = settings.namespace
-    minSdk = settings.sdkMin
-    testInstrumentationRunner = settings.withTestRunner
+fun LibraryExtension.defaultDefaultConfig(details: LibDetails) = defaultConfig {
+    val asettings = details.settings.andro ?: error("No andro settings.")
+    namespace = details.namespace
+    minSdk = asettings.sdkMin
+    testInstrumentationRunner = asettings.withTestRunner
 }
 
 fun LibraryExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }

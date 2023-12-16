@@ -4,7 +4,6 @@ import pl.mareklangiewicz.utils.*
 
 plugins {
     plug(plugs.KotlinMulti) apply false
-    plug(plugs.KotlinJvm) apply false
     plug(plugs.Compose) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
     plug(plugs.AndroLib) apply false
     plug(plugs.AndroApp) apply false
@@ -21,30 +20,31 @@ defaultBuildTemplateForRootProject(
             withJs = true,
             withNativeLinux64 = false,
             withKotlinxHtml = true,
-            andro = LibAndroSettings(
-                namespace = "pl.mareklangiewicz.templatempp",
-                app = AppAndroSettings(
-                    appId = "pl.mareklangiewicz.templatemppapp"
-                )
-            )
+            andro = LibAndroSettings()
         ),
     ),
-    withSonatypeOssPublishing = true // FIXME NOW: move it to settings???
 )
+
+
+// FIXME NOW: jednak nie moge defaultowo wrzucac andro compose compilera :/
+// > Task :prepareKotlinBuildScriptModel UP-TO-DATE
+// WARNING: Usage of the Custom Compose Compiler plugin ('androidx.compose.compiler')
+// with non-JVM targets (Kotlin/Native, Kotlin/JS, Kotlin/WASM) is not supported.
+// For more information, please visit: https://github.com/JetBrains/compose-jb/blob/master/VERSIONING.md#using-compose-multiplatform-compiler
+// WARNING: Usage of the Custom Compose Compiler plugin ('androidx.compose.compiler')
+// with non-JVM targets (Kotlin/Native, Kotlin/JS, Kotlin/WASM) is not supported.
+// For more information, please visit: https://github.com/JetBrains/compose-jb/blob/master/VERSIONING.md#using-compose-multiplatform-compiler
+
 
 // region [Root Build Template]
 
 /** Publishing to Sonatype OSSRH has to be explicitly allowed here, by setting withSonatypeOssPublishing to true. */
-fun Project.defaultBuildTemplateForRootProject(
-    libDetails: LibDetails? = null,
-    withSonatypeOssPublishing: Boolean = false
-) {
-    check(libDetails != null || !withSonatypeOssPublishing)
+fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
     ext.addDefaultStuffFromSystemEnvs()
-    libDetails?.let {
+    details?.let {
         rootExtLibDetails = it
         defaultGroupAndVerAndDescription(it)
-        if (withSonatypeOssPublishing) defaultSonatypeOssNexusPublishing()
+        if (it.settings.withSonatypeOssPublishing) defaultSonatypeOssNexusPublishing()
     }
 
     // kinda workaround for kinda issue with kotlin native

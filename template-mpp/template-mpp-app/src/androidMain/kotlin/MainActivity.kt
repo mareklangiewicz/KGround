@@ -6,10 +6,7 @@ import androidx.activity.compose.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.*
 import androidx.compose.ui.Modifier as Mod
-import pl.mareklangiewicz.hello.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

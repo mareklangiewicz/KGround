@@ -30,16 +30,12 @@ defaultBuildTemplateForRootProject(
 // region [Root Build Template]
 
 /** Publishing to Sonatype OSSRH has to be explicitly allowed here, by setting withSonatypeOssPublishing to true. */
-fun Project.defaultBuildTemplateForRootProject(
-    libDetails: LibDetails? = null,
-    withSonatypeOssPublishing: Boolean = false
-) {
-    check(libDetails != null || !withSonatypeOssPublishing)
+fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
     ext.addDefaultStuffFromSystemEnvs()
-    libDetails?.let {
+    details?.let {
         rootExtLibDetails = it
         defaultGroupAndVerAndDescription(it)
-        if (withSonatypeOssPublishing) defaultSonatypeOssNexusPublishing()
+        if (it.settings.withSonatypeOssPublishing) defaultSonatypeOssNexusPublishing()
     }
 
     // kinda workaround for kinda issue with kotlin native

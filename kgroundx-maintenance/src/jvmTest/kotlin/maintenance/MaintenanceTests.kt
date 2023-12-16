@@ -15,7 +15,7 @@ class MaintenanceTests {
     // Update: It's working now, but leaving info here about running from CLI just in case
     // https://youtrack.jetbrains.com/issue/IDEA-320303
     // KGround$ ./gradlew cleanTest
-    // KGround$ ./gradlew test --tests MaintenanceTests.maintenanceTestFactory
+    // KGround$ ./gradlew jvmTest --tests MaintenanceTests.maintenanceTestFactory
     @TestFactory
     fun maintenanceTestFactory() = uspekTestFactory {
        // "check all known regions synced" o { checkAllKnownRegionsSynced(verbose = true) }

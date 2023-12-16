@@ -17,7 +17,6 @@ const val labelRoot = "Root Build Template"
 const val labelKotlinModule = "Kotlin Module Build Template"
 const val labelMppModule = "MPP Module Build Template"
 const val labelMppApp = "MPP App Build Template"
-const val labelJvmApp = "Jvm App Build Template"
 const val labelComposeMppModule = "Compose MPP Module Build Template"
 const val labelComposeMppApp = "Compose MPP App Build Template"
 const val labelAndroCommon = "Andro Common Build Template"
@@ -28,8 +27,6 @@ const val labelAndroApp = "Andro App Build Template"
 private const val pathMppRoot = "template-mpp"
 private const val pathMppLib = "template-mpp/template-mpp-lib"
 private const val pathMppApp = "template-mpp/template-mpp-app"
-private const val pathJvmLib = "template-mpp/template-jvm-lib"
-private const val pathJvmApp = "template-mpp/template-jvm-cli"
 private const val pathAndroRoot = "template-andro"
 private const val pathAndroLib = "template-andro/template-andro-lib"
 private const val pathAndroApp = "template-andro/template-andro-app"
@@ -52,10 +49,9 @@ private fun info(label: String, dir: String, vararg syncedDirs: String) =
 
 private val regionsInfos = listOf(
     info(labelRoot, pathMppRoot, pathAndroRoot),
-    info(labelKotlinModule, pathMppLib, pathMppApp, pathJvmLib, pathJvmApp, pathAndroLib, pathAndroApp),
+    info(labelKotlinModule, pathMppLib, pathMppApp, pathAndroLib, pathAndroApp),
     info(labelMppModule, pathMppLib, pathMppApp),
     info(labelMppApp, pathMppApp),
-    info(labelJvmApp, pathJvmApp),
     info(labelComposeMppModule, pathMppLib, pathMppApp),
     info(labelComposeMppApp, pathMppApp),
     // update: notice that even for andro stuff, the source of truth is now mpp template

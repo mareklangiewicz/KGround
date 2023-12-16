@@ -1,4 +1,4 @@
-import pl.mareklangiewicz.hello.*
+import pl.mareklangiewicz.templatempp.*
 import pl.mareklangiewicz.uspek.*
 import kotlin.test.*
 

@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.hello
+package pl.mareklangiewicz.templatempp
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
