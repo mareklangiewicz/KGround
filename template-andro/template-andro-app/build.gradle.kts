@@ -177,59 +177,83 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
 
 // region [Andro Common Build Template]
 
+/** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroDeps(
+    settings: LibSettings,
+    ignoreCompose: Boolean = false,
     configuration: String = "implementation",
-    withCompose: Boolean = false,
-    withMDC: Boolean = false,
 ) {
+    val andro = settings.andro ?: error("No andro settings.")
     addAll(
         configuration,
         AndroidX.Core.ktx,
-        AndroidX.AppCompat.appcompat,
-        AndroidX.Lifecycle.compiler,
-        AndroidX.Lifecycle.runtime_ktx,
+        AndroidX.AppCompat.appcompat.takeIf { andro.withAppCompat },
+        AndroidX.Activity.compose.takeIf { andro.withActivityCompose }, // this should not depend on ignoreCompose!
+        AndroidX.Lifecycle.compiler.takeIf { andro.withLifecycle },
+        AndroidX.Lifecycle.runtime_ktx.takeIf { andro.withLifecycle },
+        // TODO_someday_maybe: more lifecycle related stuff by default (viewmodel, compose)?
+        Com.Google.Android.Material.material.takeIf { andro.withMDC },
     )
-    if (withCompose) {
+    if (!ignoreCompose && settings.withCompose) {
+        val compose = settings.compose!!
         addAllWithVer(
             configuration,
             Vers.ComposeAndro,
             AndroidX.Compose.Ui.ui,
             AndroidX.Compose.Ui.tooling,
             AndroidX.Compose.Ui.tooling_preview,
-            AndroidX.Compose.Material.material,
+            AndroidX.Compose.Material.material.takeIf { compose.withComposeMaterial2 },
         )
         addAll(
             configuration,
-            AndroidX.Activity.compose,
-            AndroidX.Compose.Material3.material3,
+            AndroidX.Compose.Material3.material3.takeIf { compose.withComposeMaterial3 },
         )
     }
-    if (withMDC) add(configuration, Com.Google.Android.Material.material)
 }
 
+/** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroTestDeps(
+    settings: LibSettings,
+    ignoreCompose: Boolean = false,
     configuration: String = "testImplementation",
-    withCompose: Boolean = false,
 ) {
+    val andro = settings.andro ?: error("No andro settings.")
     addAll(
         configuration,
-        Kotlin.test_junit.withVer(Vers.Kotlin),
-        JUnit.junit, // FIXME_someday: when will android move to JUnit5?
-        Langiewicz.uspekx_junit4,
-        AndroidX.Test.Espresso.core,
-        Com.Google.Truth.truth,
+        AndroidX.Test.Espresso.core.takeIf { andro.withTestEspresso },
+        Com.Google.Truth.truth.takeIf { settings.withTestGoogleTruth },
         AndroidX.Test.rules,
         AndroidX.Test.runner,
-        AndroidX.Test.Ext.truth,
-        AndroidX.Test.Ext.junit,
-        Org.Mockito.Kotlin.mockito_kotlin,
+        AndroidX.Test.Ext.truth.takeIf { settings.withTestGoogleTruth },
+        Org.Mockito.Kotlin.mockito_kotlin.takeIf { settings.withTestMockitoKotlin },
     )
-    if (withCompose) addAllWithVer(
+
+    if (settings.withTestJUnit4) {
+        addAll(
+            configuration,
+            Kotlin.test_junit.withVer(Vers.Kotlin),
+            JUnit.junit,
+            Langiewicz.uspekx_junit4.takeIf { settings.withTestUSpekX },
+            AndroidX.Test.Ext.junit_ktx,
+        )
+    }
+    // android doesn't fully support JUnit5, but adding deps anyway to be able to write JUnit5 dependent code
+    if (settings.withTestJUnit5) {
+        addAll(
+            configuration,
+            Kotlin.test_junit5.withVer(Vers.Kotlin),
+            Org.JUnit.Jupiter.junit_jupiter_api,
+            Org.JUnit.Jupiter.junit_jupiter_engine,
+            Langiewicz.uspekx_junit5.takeIf { settings.withTestUSpekX },
+        )
+    }
+
+    if (!ignoreCompose && settings.withCompose) addAllWithVer(
         configuration,
         vers.ComposeAndro,
         AndroidX.Compose.Ui.test,
-        AndroidX.Compose.Ui.test_junit4,
         AndroidX.Compose.Ui.test_manifest,
+        AndroidX.Compose.Ui.test_junit4.takeIf { settings.withTestJUnit4 },
     )
 }
 
@@ -302,8 +326,8 @@ fun Project.defaultBuildTemplateForAndroApp(
         variant?.let { defaultAndroAppPublishVariant(it) }
     }
     dependencies {
-        defaultAndroDeps(withCompose = details.settings.withCompose, withMDC = andro.withMDC)
-        defaultAndroTestDeps(withCompose = details.settings.withCompose)
+        defaultAndroDeps(details.settings)
+        defaultAndroTestDeps(details.settings)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
         addAndroDependencies()
     }

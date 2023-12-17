@@ -14,15 +14,9 @@ defaultBuildTemplateForRootProject(
         name = "TemplateAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/langara/deps.kt/template-andro",
-        version = Ver(0, 0, 9),
+        version = Ver(0, 0, 10),
         settings = LibSettings(
-            andro = LibAndroSettings(
-                namespace = "pl.mareklangiewicz.templateandro",
-                publishVariant = "debug",
-                app = AppAndroSettings(
-                    appId = "pl.mareklangiewicz.templateandro"
-                ),
-            )
+            andro = LibAndroSettings(publishVariant = "debug")
         )
     )
 )
