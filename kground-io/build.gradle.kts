@@ -261,6 +261,8 @@ fun KotlinMultiplatformExtension.allDefault(
                         if (withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
                         if (withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
                     }
+                    if (withTestGoogleTruth) implementation(Com.Google.Truth.truth)
+                    if (withTestMockitoKotlin) implementation(Org.Mockito.Kotlin.mockito_kotlin)
                 }
             }
         }
