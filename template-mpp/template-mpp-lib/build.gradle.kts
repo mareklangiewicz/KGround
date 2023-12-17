@@ -51,8 +51,8 @@ fun Project.defaultBuildTemplateForFullMppLib(
     // (trust me future Marek: I've tried this already :) )
     dependencies {
         // ignoreCompose because we have compose configured mpp way already.
-        defaultAndroDeps(details, ignoreCompose = true)
-        defaultAndroTestDeps(details, ignoreCompose = true)
+        defaultAndroDeps(details.settings, ignoreCompose = true)
+        defaultAndroTestDeps(details.settings, ignoreCompose = true)
     }
 }
 
@@ -444,21 +444,23 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroDeps(
-    details: LibDetails,
+    settings: LibSettings,
     ignoreCompose: Boolean = false,
     configuration: String = "implementation",
 ) {
-    val andro = details.settings.andro ?: error("No andro settings.")
+    val andro = settings.andro ?: error("No andro settings.")
     addAll(
         configuration,
         AndroidX.Core.ktx,
         AndroidX.AppCompat.appcompat.takeIf { andro.withAppCompat },
+        AndroidX.Activity.compose.takeIf { andro.withActivityCompose }, // this should not depend on ignoreCompose!
         AndroidX.Lifecycle.compiler.takeIf { andro.withLifecycle },
         AndroidX.Lifecycle.runtime_ktx.takeIf { andro.withLifecycle },
         // TODO_someday_maybe: more lifecycle related stuff by default (viewmodel, compose)?
+        Com.Google.Android.Material.material.takeIf { andro.withMDC },
     )
-    if (!ignoreCompose && details.settings.withCompose) {
-        val compose = details.settings.compose!!
+    if (!ignoreCompose && settings.withCompose) {
+        val compose = settings.compose!!
         addAllWithVer(
             configuration,
             Vers.ComposeAndro,
@@ -469,20 +471,17 @@ fun DependencyHandler.defaultAndroDeps(
         )
         addAll(
             configuration,
-            AndroidX.Activity.compose.takeIf { andro.withActivityCompose },
             AndroidX.Compose.Material3.material3.takeIf { compose.withComposeMaterial3 },
         )
     }
-    if (andro.withMDC) add(configuration, Com.Google.Android.Material.material)
 }
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroTestDeps(
-    details: LibDetails,
+    settings: LibSettings,
     ignoreCompose: Boolean = false,
     configuration: String = "testImplementation",
 ) {
-    val settings = details.settings
     val andro = settings.andro ?: error("No andro settings.")
     addAll(
         configuration,
@@ -514,7 +513,7 @@ fun DependencyHandler.defaultAndroTestDeps(
         )
     }
 
-    if (!ignoreCompose && details.settings.withCompose) addAllWithVer(
+    if (!ignoreCompose && settings.withCompose) addAllWithVer(
         configuration,
         vers.ComposeAndro,
         AndroidX.Compose.Ui.test,
@@ -591,8 +590,8 @@ fun Project.defaultBuildTemplateForAndroLib(
         if (andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
     }
     dependencies {
-        defaultAndroDeps(details)
-        defaultAndroTestDeps(details)
+        defaultAndroDeps(details.settings)
+        defaultAndroTestDeps(details.settings)
         add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
         addAndroMainDependencies()
     }
