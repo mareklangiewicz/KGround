@@ -33,7 +33,7 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withKotlinx) maven(repos.kotlinx)
     if (withKotlinxHtml) maven(repos.kotlinxHtml)
     if (withComposeJbDev) maven(repos.composeJbDev)
-    if (withComposeCompilerAndroidxDev) maven(repos.composeCompilerAndroidxDev)
+    if (withComposeCompilerAxDev) maven(repos.composeCompilerAxDev)
     if (withKtorEap) maven(repos.ktorEap)
     if (withJitpack) maven(repos.jitpack)
 }
@@ -275,12 +275,17 @@ fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
     targetCompatibility(jvmVer)
 }
 
-fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = Vers.ComposeCompiler) {
+fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompiler: Dep? = null) {
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = withComposeCompilerVer?.ver
+        kotlinCompilerExtensionVersion = withComposeCompiler?.run {
+            require(group == AndroidX.Compose.Compiler.compiler.group) {
+                "Wrong compiler group: $group. Only AndroidX compose compilers are supported on android (without mpp)."
+            }
+            ver?.ver ?: error("Compose compiler without version provided: $this")
+        }
     }
 }
 
@@ -349,7 +354,7 @@ fun ApplicationExtension.defaultAndroApp(
     defaultCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     defaultDefaultConfig(details)
     defaultBuildTypes()
-    details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompilerVer) }
+    details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompiler) }
     defaultPackagingOptions()
 }
 

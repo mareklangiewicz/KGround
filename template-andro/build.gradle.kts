@@ -14,8 +14,12 @@ defaultBuildTemplateForRootProject(
         name = "TemplateAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/langara/deps.kt/template-andro",
-        version = Ver(0, 0, 10),
+        version = Ver(0, 0, 11),
         settings = LibSettings(
+            compose = LibComposeSettings(
+                // withComposeCompiler = ComposeCompilerJb, // can't use Jb because andro plugin doesn't support it.
+                withComposeCompiler = ComposeCompilerAx,
+            ),
             andro = LibAndroSettings(publishVariant = "debug")
         )
     )

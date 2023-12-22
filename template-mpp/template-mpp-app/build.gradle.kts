@@ -222,8 +222,8 @@ fun Project.defaultBuildTemplateForBasicMppLib(
 ) {
     require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForMppLib can not configure compose stuff" }
     details.settings.andro?.let {
-        require(ignoreAndroConfig) { "defaultBuildTemplateForMppLib can not configure android stuff (besides just adding target)" }
-        require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForMppLib can not publish android stuff YET" }
+        require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
+        require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }
     }
     repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)
