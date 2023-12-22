@@ -10,6 +10,10 @@ plugins {
     plug(plugs.NexusPublish)
 }
 
+val enableJs = true
+val enableNative = false
+val enableAndro = true
+
 defaultBuildTemplateForRootProject(
     langaraLibDetails(
         name = "TemplateMPP",
@@ -17,23 +21,21 @@ defaultBuildTemplateForRootProject(
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
         version = Ver(0, 0, 20),
         settings = LibSettings(
-            withJs = true,
-            withNativeLinux64 = false,
-            withKotlinxHtml = true,
-            andro = LibAndroSettings()
+            withJs = enableJs,
+            withNativeLinux64 = enableNative,
+            withKotlinxHtml = enableJs,
+            compose = LibComposeSettings(
+                withComposeCompiler = ComposeCompilerJb,
+                withComposeHtmlCore = enableJs,
+                withComposeHtmlSvg = enableJs,
+                withComposeTestHtmlUtils = enableJs,
+            ),
+            andro = if (enableAndro) LibAndroSettings() else null
         ),
     ),
 )
 
 
-// FIXME NOW: jednak nie moge defaultowo wrzucac andro compose compilera :/
-// > Task :prepareKotlinBuildScriptModel UP-TO-DATE
-// WARNING: Usage of the Custom Compose Compiler plugin ('androidx.compose.compiler')
-// with non-JVM targets (Kotlin/Native, Kotlin/JS, Kotlin/WASM) is not supported.
-// For more information, please visit: https://github.com/JetBrains/compose-jb/blob/master/VERSIONING.md#using-compose-multiplatform-compiler
-// WARNING: Usage of the Custom Compose Compiler plugin ('androidx.compose.compiler')
-// with non-JVM targets (Kotlin/Native, Kotlin/JS, Kotlin/WASM) is not supported.
-// For more information, please visit: https://github.com/JetBrains/compose-jb/blob/master/VERSIONING.md#using-compose-multiplatform-compiler
 
 
 // region [Root Build Template]

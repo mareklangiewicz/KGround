@@ -63,7 +63,7 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withKotlinx) maven(repos.kotlinx)
     if (withKotlinxHtml) maven(repos.kotlinxHtml)
     if (withComposeJbDev) maven(repos.composeJbDev)
-    if (withComposeCompilerAndroidxDev) maven(repos.composeCompilerAndroidxDev)
+    if (withComposeCompilerAxDev) maven(repos.composeCompilerAxDev)
     if (withKtorEap) maven(repos.ktorEap)
     if (withJitpack) maven(repos.jitpack)
 }
@@ -392,9 +392,8 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) = with(details.settings.compose ?: error("Compose settings not set.")) {
-    withComposeCompilerVer?.let {
-        val cc = AndroidX.Compose.Compiler.compiler.withVer(it)
-        extensions.configure<ComposeExtension> { kotlinCompilerPlugin.set(cc.mvn) }
+    withComposeCompiler?.let {
+        extensions.configure<ComposeExtension> { kotlinCompilerPlugin.set(it.mvn) }
     }
     if (withComposeTestUiJUnit5)
         logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
@@ -464,13 +463,13 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
             val jsMain by getting {
                 dependencies {
                     implementation(compose.runtime)
-                    if (withComposeWebCore) implementation(compose.html.core)
-                    if (withComposeWebSvg) implementation(compose.html.svg)
+                    if (withComposeHtmlCore) implementation(compose.html.core)
+                    if (withComposeHtmlSvg) implementation(compose.html.svg)
                 }
             }
             val jsTest by getting {
                 dependencies {
-                    if (withComposeTestWebUtils) implementation(compose.html.testUtils)
+                    if (withComposeTestHtmlUtils) implementation(compose.html.testUtils)
                 }
             }
         }
@@ -626,12 +625,17 @@ fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
     targetCompatibility(jvmVer)
 }
 
-fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompilerVer: Ver? = Vers.ComposeCompiler) {
+fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompiler: Dep? = null) {
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = withComposeCompilerVer?.ver
+        kotlinCompilerExtensionVersion = withComposeCompiler?.run {
+            require(group == AndroidX.Compose.Compiler.compiler.group) {
+                "Wrong compiler group: $group. Only AndroidX compose compilers are supported on android (without mpp)."
+            }
+            ver?.ver ?: error("Compose compiler without version provided: $this")
+        }
     }
 }
 
@@ -700,7 +704,7 @@ fun ApplicationExtension.defaultAndroApp(
     defaultCompileOptions(details.settings.withJvmVer ?: error("No JVM version in settings."))
     defaultDefaultConfig(details)
     defaultBuildTypes()
-    details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompilerVer) }
+    details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompiler) }
     defaultPackagingOptions()
 }
 
