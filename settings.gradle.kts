@@ -8,8 +8,8 @@ pluginManagement {
 }
 
 plugins {
-    id("pl.mareklangiewicz.deps.settings") version "0.2.74" // https://plugins.gradle.org/search?term=mareklangiewicz
-    id("com.gradle.enterprise") version "3.16" // https://docs.gradle.com/enterprise/gradle-plugin/
+    id("pl.mareklangiewicz.deps.settings") version "0.2.76" // https://plugins.gradle.org/search?term=mareklangiewicz
+    id("com.gradle.enterprise") version "3.16.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
 gradleEnterprise {

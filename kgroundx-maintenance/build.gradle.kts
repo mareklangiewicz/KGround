@@ -29,7 +29,7 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
     if (withKotlinx) maven(repos.kotlinx)
     if (withKotlinxHtml) maven(repos.kotlinxHtml)
     if (withComposeJbDev) maven(repos.composeJbDev)
-    if (withComposeCompilerAndroidxDev) maven(repos.composeCompilerAndroidxDev)
+    if (withComposeCompilerAxDev) maven(repos.composeCompilerAxDev)
     if (withKtorEap) maven(repos.ktorEap)
     if (withJitpack) maven(repos.jitpack)
 }
@@ -188,8 +188,8 @@ fun Project.defaultBuildTemplateForBasicMppLib(
 ) {
     require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForMppLib can not configure compose stuff" }
     details.settings.andro?.let {
-        require(ignoreAndroConfig) { "defaultBuildTemplateForMppLib can not configure android stuff (besides just adding target)" }
-        require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForMppLib can not publish android stuff YET" }
+        require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
+        require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }
     }
     repositories { addRepos(details.settings.repos) }
     defaultGroupAndVerAndDescription(details)

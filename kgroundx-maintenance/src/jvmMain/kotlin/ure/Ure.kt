@@ -374,7 +374,7 @@ val chNonSpace = ch("\\S")
 /** [a-zA-Z_0-9] */
 val chWord = ch("\\w")
 val chNonWord = ch("\\W")
-val chWordOrHyphen = ch("\\W") or ch("-") // also points out (when typing chWo..) that normal chWord doesn't match hyphen.
+val chWordOrHyphen = ch("\\w") or ch("-") // also points out (when typing chWo..) that normal chWord doesn't match hyphen.
 
 val chaz = oneCharOfRange("a", "z")
 val chAZ = oneCharOfRange("A", "Z")
