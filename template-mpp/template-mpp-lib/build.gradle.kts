@@ -41,18 +41,20 @@ fun Project.defaultBuildTemplateForFullMppLib(
         addCommonMainDependencies = addCommonMainDependencies,
     )
 
-    extensions.configure<LibraryExtension> {
-        defaultAndroLib(ignoreCompose = true) // compose mpp configured already
-    }
+    if (details.settings.withAndro) {
+        extensions.configure<LibraryExtension> {
+            defaultAndroLib(ignoreCompose = true) // compose mpp configured already
+        }
 
-    // this is "single platform way" / "android way" to declare deps,
-    // it would be more "correct" to configure everything "mpp way" (android deps too),
-    // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
-    // (trust me future Marek: I've tried this already :) )
-    dependencies {
-        // ignoreCompose because we have compose configured mpp way already.
-        defaultAndroDeps(details.settings, ignoreCompose = true)
-        defaultAndroTestDeps(details.settings, ignoreCompose = true)
+        // this is "single platform way" / "android way" to declare deps,
+        // it would be more "correct" to configure everything "mpp way" (android deps too),
+        // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
+        // (trust me future Marek: I've tried this already :) )
+        dependencies {
+            // ignoreCompose because we have compose configured mpp way already.
+            defaultAndroDeps(details.settings, ignoreCompose = true)
+            defaultAndroTestDeps(details.settings, ignoreCompose = true)
+        }
     }
 }
 
