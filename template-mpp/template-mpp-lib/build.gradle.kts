@@ -12,10 +12,10 @@ plugins {
     plugAll(
         plugs.KotlinMulti,
         plugs.Compose,
-        plugs.AndroLibNoVer,
         plugs.MavenPublish,
         plugs.Signing,
     )
+    plug(plugs.AndroLibNoVer) apply false // will be applied conditionally depending on LibSettings
 }
 
 // workaround for crazy gradle bugs like this one or similar:
@@ -35,6 +35,10 @@ fun Project.defaultBuildTemplateForFullMppLib(
     details: LibDetails = rootExtLibDetails,
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
+    if (details.settings.withAndro) {
+        apply(plugin = plugs.AndroLibNoVer.group) // group is actually id for plugins
+        // TODO_later: try to move the rest of andro config from below here
+    }
     defaultBuildTemplateForComposeMppLib(
         details = details,
         ignoreAndroConfig = true, // andro configured below
