@@ -13,11 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TemplateMppAndroTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Mod.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
+                Surface(modifier = Mod.fillMaxSize()) {
                     HelloComposable("Android")
                 }
             }
