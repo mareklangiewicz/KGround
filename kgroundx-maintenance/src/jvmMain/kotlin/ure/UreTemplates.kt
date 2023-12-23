@@ -22,6 +22,8 @@ const val labelComposeMppApp = "Compose MPP App Build Template"
 const val labelAndroCommon = "Andro Common Build Template"
 const val labelAndroLib = "Andro Lib Build Template"
 const val labelAndroApp = "Andro App Build Template"
+const val labelFullMppLib = "Full MPP Lib Build Template"
+const val labelFullMppApp = "Full MPP App Build Template"
 
 // paths to templates dirs with build files, relative to MyKGroundRootPath
 private const val pathMppRoot = "template-mpp"
@@ -58,6 +60,8 @@ private val regionsInfos = listOf(
     info(labelAndroCommon, pathMppLib, pathMppApp, pathAndroLib, pathAndroApp),
     info(labelAndroLib, pathMppLib, pathAndroLib),
     info(labelAndroApp, pathMppApp, pathAndroApp),
+    info(labelFullMppLib, pathMppLib),
+    info(labelFullMppApp, pathMppApp),
 )
 
 private operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: error("Unknown region label: $label")
