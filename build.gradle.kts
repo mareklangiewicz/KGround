@@ -8,31 +8,35 @@ plugins {
     plug(plugs.KotlinJvm) apply false
 }
 
+val enableJs = true
+val enableNative = true
+
 defaultBuildTemplateForRootProject(
     langaraLibDetails(
         name = "KommandLine",
         description = "Kotlin DSL for popular CLI commands.",
-        githubUrl = "https://github.com/langara/KommandLine",
-        version = Ver(0, 0, 39)
+        githubUrl = "https://github.com/mareklangiewicz/KommandLine",
+        version = Ver(0, 0, 40),
         // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
         // https://github.com/langara/KommandLine/releases
+        settings = LibSettings(
+            withJs = enableJs,
+            withNativeLinux64 = enableNative,
+            compose = null,
+            withSonatypeOssPublishing = true,
+        ),
     ),
-    withSonatypeOssPublishing = true,
 )
 
 // region [Root Build Template]
 
 /** Publishing to Sonatype OSSRH has to be explicitly allowed here, by setting withSonatypeOssPublishing to true. */
-fun Project.defaultBuildTemplateForRootProject(
-    libDetails: LibDetails? = null,
-    withSonatypeOssPublishing: Boolean = false
-) {
-    check(libDetails != null || !withSonatypeOssPublishing)
+fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
     ext.addDefaultStuffFromSystemEnvs()
-    libDetails?.let {
+    details?.let {
         rootExtLibDetails = it
         defaultGroupAndVerAndDescription(it)
-        if (withSonatypeOssPublishing) defaultSonatypeOssNexusPublishing()
+        if (it.settings.withSonatypeOssPublishing) defaultSonatypeOssNexusPublishing()
     }
 
     // kinda workaround for kinda issue with kotlin native
