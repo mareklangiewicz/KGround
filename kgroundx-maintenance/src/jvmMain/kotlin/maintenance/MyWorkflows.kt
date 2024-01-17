@@ -28,6 +28,7 @@ private val mySecretsEnv = listOf(
 
 
 // FIXME: something less hacky/hardcoded
+@Suppress("IdentifierGrammar")
 fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
     val everyMondayAt7am = Cron(minute = "0", hour = "7", dayWeek = "1")
     val workflow = workflow(
@@ -221,10 +222,10 @@ private fun defaultReleaseWorkflow() =
 
 private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
     version: String? = "21", // fixme_maybe: take from DepsNew.ver...? [Deps Selected]
-    distribution: SetupJavaV3.Distribution = SetupJavaV3.Distribution.Zulu, // fixme_later: which dist?
+    distribution: SetupJavaV4.Distribution = SetupJavaV4.Distribution.Zulu, // fixme_later: which dist?
 ) = uses(
         name = "Set up JDK",
-        action = SetupJavaV3(
+        action = SetupJavaV4(
             javaVersion = version,
             distribution = distribution
         )
