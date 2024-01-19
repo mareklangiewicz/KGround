@@ -4,7 +4,7 @@ import pl.mareklangiewicz.kground.*
 import kotlin.jvm.*
 
 fun interface USubmit {
-    operator fun invoke(data: Any?): Any?
+    suspend operator fun invoke(data: Any?): Any?
 }
 
 interface WithUSubmit { val usubmit: USubmit }
@@ -18,8 +18,8 @@ interface WithUSubmit { val usubmit: USubmit }
  * Then (if user selects some task in between submits), at the next submit, the manager should check again,
  * if the worker still has "ability" to do this task, and only if so:
  * manager can return the selected task from [USubmit.invoke], so worker can do it now.
- * Manager always can pause the worker by suspending submit call for long time;
- * Manager always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from submit call.
+ * Manager always can pause the worker by suspending [USubmit.invoke] call for long time;
+ * Manager always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from [USubmit.invoke].
  */
 @JvmInline
 value class UTask(val name: String)
@@ -34,5 +34,5 @@ value class UTask(val name: String)
 value class UIssue(val name: String)
 
 class USubmitNotSupportedErr: USubmit {
-    override fun invoke(data: Any?): Nothing = bad { "USubmit is not supported in this context." }
+    override suspend fun invoke(data: Any?): Nothing = bad { "USubmit is not supported in this context." }
 }

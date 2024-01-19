@@ -5,6 +5,7 @@ import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
+// TODO NOW: experiment and test it! (maybe incorporate ulogging everywhere first?)
 interface WithKGround: WithULog, WithUSubmit
 
 /**
