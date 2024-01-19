@@ -10,7 +10,7 @@ pluginManagement {
         gradlePluginPortal()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
-   includeBuild("../../DepsKt")
+   // includeBuild("../../DepsKt")
 }
 
 plugins {
