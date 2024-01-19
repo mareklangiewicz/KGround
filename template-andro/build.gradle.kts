@@ -4,8 +4,8 @@ import pl.mareklangiewicz.deps.*
 
 plugins {
     plug(plugs.NexusPublish)
-    plug(plugs.AndroLibStable) apply false
-    plug(plugs.AndroAppStable) apply false
+    plug(plugs.AndroLibEdge) apply false
+    plug(plugs.AndroAppEdge) apply false
     plug(plugs.KotlinAndro) apply false
 }
 
@@ -14,11 +14,12 @@ defaultBuildTemplateForRootProject(
         name = "TemplateAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/langara/deps.kt/template-andro",
-        version = Ver(0, 0, 11),
+        version = Ver(0, 0, 12),
         settings = LibSettings(
             compose = LibComposeSettings(
                 // withComposeCompiler = ComposeCompilerJb, // can't use Jb because andro plugin doesn't support it.
                 withComposeCompiler = ComposeCompilerAx,
+                withComposeCompilerAllowWrongKotlinVer = Ver("2.0.0-Beta3"),
             ),
             andro = LibAndroSettings(publishVariant = "debug")
         )

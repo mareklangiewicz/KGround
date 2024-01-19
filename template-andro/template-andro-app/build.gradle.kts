@@ -41,12 +41,16 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
     jvmTargetVer: String? = vers.JvmDefaultVer,
     renderInternalDiagnosticNames: Boolean = false,
+    suppressComposeCheckKotlinVer: Ver? = null,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTargetVer?.let { jvmTarget = it }
         if (renderInternalDiagnosticNames) freeCompilerArgs = freeCompilerArgs + "-Xrender-internal-diagnostic-names"
         // useful, for example, to suppress some errors when accessing internal code from some library, like:
         // @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "EXPOSED_PARAMETER_TYPE", "EXPOSED_PROPERTY_TYPE", "CANNOT_OVERRIDE_INVISIBLE_MEMBER")
+        suppressComposeCheckKotlinVer?.ver?.let {
+            freeCompilerArgs = freeCompilerArgs + "-P" + "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it"
+        }
     }
 }
 
@@ -268,14 +272,14 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
     )
 )
 
-fun CommonExtension<*, *, *, *, *>.defaultCompileOptions(
+fun CommonExtension<*, *, *, *, *, *>.defaultCompileOptions(
     jvmVer: String = vers.JvmDefaultVer,
 ) = compileOptions {
     sourceCompatibility(jvmVer)
     targetCompatibility(jvmVer)
 }
 
-fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompiler: Dep? = null) {
+fun CommonExtension<*, *, *, *, *, *>.defaultComposeStuff(withComposeCompiler: Dep? = null) {
     buildFeatures {
         compose = true
     }
@@ -289,7 +293,7 @@ fun CommonExtension<*, *, *, *, *>.defaultComposeStuff(withComposeCompiler: Dep?
     }
 }
 
-fun CommonExtension<*, *, *, *, *>.defaultPackagingOptions() = packaging {
+fun CommonExtension<*, *, *, *, *, *>.defaultPackagingOptions() = packaging {
     resources.excludes.defaultAndroExcludedResources()
 }
 
@@ -337,7 +341,10 @@ fun Project.defaultBuildTemplateForAndroApp(
         addAndroDependencies()
     }
     configurations.checkVerSync()
-    tasks.defaultKotlinCompileOptions(details.settings.withJvmVer!!)
+    tasks.defaultKotlinCompileOptions(
+        details.settings.withJvmVer ?: error("No JVM version in settings."),
+        suppressComposeCheckKotlinVer = details.settings.compose?.withComposeCompilerAllowWrongKotlinVer,
+    )
     defaultGroupAndVerAndDescription(details)
     variant?.let {
         defaultPublishingOfAndroApp(details, it)
