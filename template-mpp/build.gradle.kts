@@ -5,8 +5,8 @@ import pl.mareklangiewicz.utils.*
 plugins {
     plug(plugs.KotlinMulti) apply false
     plug(plugs.Compose) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
-    plug(plugs.AndroLib) apply false
-    plug(plugs.AndroApp) apply false
+    plug(plugs.AndroLibEdge) apply false
+    plug(plugs.AndroAppEdge) apply false
     plug(plugs.NexusPublish)
 }
 
