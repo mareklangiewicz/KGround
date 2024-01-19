@@ -9,6 +9,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.uspek.*
 
+@Suppress("GrazieInspection", "SpellCheckingInspection")
 class MaintenanceTests {
 
     // Note: In the past I had to run it from command line, due to issue:
