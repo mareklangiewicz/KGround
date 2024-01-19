@@ -19,7 +19,7 @@ defaultBuildTemplateForRootProject(
         name = "TemplateMPP",
         description = "Template for multi platform projects.",
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
-        version = Ver(0, 0, 21),
+        version = Ver(0, 0, 22),
         settings = LibSettings(
             withJs = enableJs,
             withNativeLinux64 = enableNative,
