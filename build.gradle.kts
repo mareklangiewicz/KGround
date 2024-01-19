@@ -11,10 +11,10 @@ defaultBuildTemplateForRootProject(
     langaraLibDetails(
         name = "KGround",
         description = "Kotlin Common Ground.",
-        githubUrl = "https://github.com/langara/KGround",
+        githubUrl = "https://github.com/mareklangiewicz/KGround",
         version = Ver(0, 0, 35),
         // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
-        // https://github.com/langara/KGround/releases
+        // https://github.com/mareklangiewicz/KGround/releases
         settings = LibSettings(
             withNativeLinux64 = true,
             compose = null,

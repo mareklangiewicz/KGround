@@ -117,7 +117,7 @@ val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
 
 @Suppress("IdentifierGrammar")
 suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
-    ghLangaraRepoList(onlyPublic = onlyPublic)
+    ghMarekLangiewiczRepoList(onlyPublic = onlyPublic)
         .outputFields("name")
         .reducedOutToFlow()
         .exec(SYS)
