@@ -19,16 +19,16 @@ fun isUserTestClassEnabled(context: ExtensionContext) =
 
 @OptIn(DelicateKommandApi::class)
 @EnabledIf(
-    value = "pl.mareklangiewicz.kommand.demos.LangaraKt#isUserTestClassEnabled",
-    disabledReason = "tests.Langara not enabled in user konfig"
+    value = "pl.mareklangiewicz.kommand.demos.MarekLangiewiczKt#isUserTestClassEnabled",
+    disabledReason = "tests.MarekLangiewicz not enabled in user konfig"
 )
-class Langara {
+class MarekLangiewicz {
 
     companion object {
         const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
     }
 
-    @Test fun demo_repl() = idemo { LangaraREPL() }
+    @Test fun demo_repl() = idemo { MarekLangiewiczREPL() }
 
     @Test fun demo_htop() = idemo { termKitty(kommand("htop")).execb(this) }
 

@@ -34,8 +34,8 @@ data object GhSamples {
                 "gh status"
 
     val statusOrgExclude =
-        ghStatus { -Org("orgbla"); -Exclude("langara/bla", "langara/ble") } s
-                "gh status --org orgbla --exclude langara/bla,langara/ble"
+        ghStatus { -Org("orgbla"); -Exclude("mareklangiewicz/bla", "mareklangiewicz/ble") } s
+                "gh status --org orgbla --exclude mareklangiewicz/bla,mareklangiewicz/ble"
 
     val secretList =
         ghSecretList() s
@@ -46,29 +46,29 @@ data object GhSamples {
                 "gh secret list --help"
 
     val secretListForAbcdK =
-        ghSecretList("langara/AbcdK") s
-                "gh secret list --repo langara/AbcdK"
+        ghSecretList("mareklangiewicz/AbcdK") s
+                "gh secret list --repo mareklangiewicz/AbcdK"
 
     /** Not providing fake secret as input stream when starting this kommand will ask for it interactively */
     val secretSetFakeSecretInAbcdK =
-        ghSecretSet("FAKE_SECRET", repoPath = "langara/AbcdK") s
-                "gh secret set FAKE_SECRET --repo langara/AbcdK"
+        ghSecretSet("FAKE_SECRET", repoPath = "mareklangiewicz/AbcdK") s
+                "gh secret set FAKE_SECRET --repo mareklangiewicz/AbcdK"
 
     val secretSetConcreteFakeSecret66InAbcdK =
-        ghSecretSet(secretName = "FAKE_SECRET_66", secretValue = "concretevalue66", repoPath = "langara/AbcdK") rs
-                "gh secret set FAKE_SECRET_66 --repo langara/AbcdK"
+        ghSecretSet(secretName = "FAKE_SECRET_66", secretValue = "concretevalue66", repoPath = "mareklangiewicz/AbcdK") rs
+                "gh secret set FAKE_SECRET_66 --repo mareklangiewicz/AbcdK"
 
     val secretSetConcreteFakeSecret67InAbcdK =
-        ghSecretSet(secretName = "FAKE_SECRET_67", secretValue = "concretevalue67", repoPath = "langara/AbcdK") rs
-                "gh secret set FAKE_SECRET_67 --repo langara/AbcdK"
+        ghSecretSet(secretName = "FAKE_SECRET_67", secretValue = "concretevalue67", repoPath = "mareklangiewicz/AbcdK") rs
+                "gh secret set FAKE_SECRET_67 --repo mareklangiewicz/AbcdK"
 
     val secretDeleteFakeSecretInAbcdK =
-        ghSecretDelete(secretName = "FAKE_SECRET", repoPath = "langara/AbcdK") s
-                "gh secret delete FAKE_SECRET --repo langara/AbcdK"
+        ghSecretDelete(secretName = "FAKE_SECRET", repoPath = "mareklangiewicz/AbcdK") s
+                "gh secret delete FAKE_SECRET --repo mareklangiewicz/AbcdK"
 
     val repoViewAbcdKWeb =
-        ghRepoView("langara/AbcdK", web = true) s
-                "gh repo view langara/AbcdK --web"
+        ghRepoView("mareklangiewicz/AbcdK", web = true) s
+                "gh repo view mareklangiewicz/AbcdK --web"
 
     val repoViewKotlinXCoroutinesDevelopWeb =
         ghRepoView("Kotlin/kotlinx.coroutines", branch = "develop", web = true) s
@@ -86,19 +86,19 @@ data object GhSamples {
         ghRepoList { -Json() } s
                 "gh repo list --json"
 
-    val langaraPublicRepoListNamesAndUrls =
-        ghLangaraRepoList().outputFields("name", "url") s
-                "gh repo list langara --limit 1000 --language kotlin --no-archived --source --visibility public --json name,url --jq .[]|.name,.url"
+    val mareklangiewiczPublicRepoListNamesAndUrls =
+        ghMarekLangiewiczRepoList().outputFields("name", "url") s
+                "gh repo list mareklangiewicz --limit 1000 --language kotlin --no-archived --source --visibility public --json name,url --jq .[]|.name,.url"
 
 
-    val langaraPublicRepoMarkdownList =
-        ghLangaraRepoList().reducedToMarkdownList() rs
-                langaraPublicRepoListNamesAndUrls.expectedLineRaw
+    val mareklangiewiczPublicRepoMarkdownList =
+        ghMarekLangiewiczRepoList().reducedToMarkdownList() rs
+                mareklangiewiczPublicRepoListNamesAndUrls.expectedLineRaw
 
 }
 
-fun ghLangaraRepoList(limit: Int = 1000, language: String? = "kotlin", onlyPublic: Boolean = true) = ghRepoList(
-    "langara",
+fun ghMarekLangiewiczRepoList(limit: Int = 1000, language: String? = "kotlin", onlyPublic: Boolean = true) = ghRepoList(
+    "mareklangiewicz",
     limit = limit,
     onlyLanguage = language,
     onlyNotArchived = true,

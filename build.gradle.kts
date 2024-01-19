@@ -18,7 +18,7 @@ defaultBuildTemplateForRootProject(
         githubUrl = "https://github.com/mareklangiewicz/KommandLine",
         version = Ver(0, 0, 41),
         // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-        // https://github.com/langara/KommandLine/releases
+        // https://github.com/mareklangiewicz/KommandLine/releases
         settings = LibSettings(
             withJs = enableJs,
             withNativeLinux64 = enableNative,

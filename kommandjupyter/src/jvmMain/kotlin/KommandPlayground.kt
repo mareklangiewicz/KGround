@@ -40,7 +40,7 @@ suspend fun playground() = withPrintingBadStreams {
 //    SshSamples.sshPimLsInTermKitty.x()
 //    SshSamples.sshPimLsLAH.x(errToOut = true).logEach()
 //    prepareMyExcludeFolderInKotlinMultiProject()
-//    showLangaraRepoMarkdownListInIdeaP()
+//    showMarekLangiewiczRepoMarkdownListInIdeaP()
 //    readFileHead("/home/marek/non-existent-file-46578563").x() // should print BadExitStateErr.stderr
 //    readFileHead("/home/marek/.vimrc").x().logEach()
 }
@@ -58,8 +58,8 @@ suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
 
 
 @OptIn(DelicateKommandApi::class)
-suspend fun showLangaraRepoMarkdownListInIdeaP() {
-    val reposMdContent = GhSamples.langaraPublicRepoMarkdownList.reducedKommand.x()
+suspend fun showMarekLangiewiczRepoMarkdownListInIdeaP() {
+    val reposMdContent = GhSamples.mareklangiewiczPublicRepoMarkdownList.reducedKommand.x()
     println(reposMdContent)
     val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
     writeToFileAndOpenInIdeaP(reposMdContent, tmpReposFileMd)
