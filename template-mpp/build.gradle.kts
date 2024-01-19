@@ -19,13 +19,14 @@ defaultBuildTemplateForRootProject(
         name = "TemplateMPP",
         description = "Template for multi platform projects.",
         githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
-        version = Ver(0, 0, 20),
+        version = Ver(0, 0, 21),
         settings = LibSettings(
             withJs = enableJs,
             withNativeLinux64 = enableNative,
             withKotlinxHtml = enableJs,
             compose = LibComposeSettings(
                 withComposeCompiler = ComposeCompilerJb,
+                withComposeCompilerAllowWrongKotlinVer = Ver("2.0.0-Beta3"),
                 withComposeHtmlCore = enableJs,
                 withComposeHtmlSvg = enableJs,
                 withComposeTestHtmlUtils = enableJs,

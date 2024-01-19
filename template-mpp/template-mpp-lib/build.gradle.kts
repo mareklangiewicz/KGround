@@ -358,8 +358,13 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
     addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) = with(details.settings.compose ?: error("Compose settings not set.")) {
-    withComposeCompiler?.let {
-        extensions.configure<ComposeExtension> { kotlinCompilerPlugin.set(it.mvn) }
+    extensions.configure<ComposeExtension> {
+        withComposeCompiler?.let {
+            kotlinCompilerPlugin.set(it.mvn)
+        }
+        withComposeCompilerAllowWrongKotlinVer?.ver?.let {
+            kotlinCompilerPluginArgs.add("suppressKotlinVersionCompatibilityCheck=$it")
+        }
     }
     if (withComposeTestUiJUnit5)
         logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")

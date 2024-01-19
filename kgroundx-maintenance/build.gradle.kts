@@ -15,7 +15,7 @@ val settings = rootExtLibDetails.settings.copy(
 val details = rootExtLibDetails.copy(settings = settings)
 defaultBuildTemplateForBasicMppLib(details) {
     api(project(":kgroundx-io"))
-    implementation(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
+    api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
 }
 
 
