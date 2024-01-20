@@ -1,5 +1,23 @@
 package pl.mareklangiewicz.ure
 
+
+// FIXME_maybe: Better version of basic email ure? It's just moved here from tests for now.
+val ureBasicEmail = ure {
+    1 of bBOLine
+    1 of ure("user") {
+        1..MAX of oneCharOf("\\w", "-", "\\.")
+    }
+    1 of ch("@")
+    1 of ure("domain") {
+        1..MAX of {
+            1..MAX of oneCharOf("\\w", "-")
+            1 of ch("\\.")
+        }
+        2..4 of oneCharOf("\\w", "-")
+    }
+    1 of bEOLine
+}
+
 fun ureIdent(first: Ure = chazAZ, withWordBoundaries: Boolean = true, allowHyphensInside: Boolean = false) = ure {
     1 of first
     0..MAX of chWord

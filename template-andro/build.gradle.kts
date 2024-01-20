@@ -13,7 +13,7 @@ defaultBuildTemplateForRootProject(
     langaraLibDetails(
         name = "TemplateAndro",
         description = "Template for android projects.",
-        githubUrl = "https://github.com/langara/deps.kt/template-andro",
+        githubUrl = "https://github.com/mareklangiewicz/KGround",
         version = Ver(0, 0, 12),
         settings = LibSettings(
             compose = LibComposeSettings(
