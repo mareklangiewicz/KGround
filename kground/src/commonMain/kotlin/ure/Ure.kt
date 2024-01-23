@@ -1,3 +1,4 @@
+@file:Suppress("SpellCheckingInspection")
 
 package pl.mareklangiewicz.ure
 
@@ -8,9 +9,9 @@ import kotlin.text.RegexOption.*
 /**
  * Multiplatform Kotlin Frontend / DSL for regular expressions. Actual regular expressions are used like IR
  * (intermediate representation) just to compile it to standard kotlin.text.Regex,
- * but developer is using nice DSL to build regular expressions instead of writing them by hand.
+ * but the developer is using nice DSL to build regular expressions instead of writing them by hand.
  *
- * Reference links to RE engines/backends docs, etc:
+ * Reference links to RE engines/backends docs, etc.:
  * https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-regex/
  * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
  * https://docs.oracle.com/javase/tutorial/essential/regex/quant.html
@@ -18,7 +19,30 @@ import kotlin.text.RegexOption.*
  * https://www.w3schools.com/jsref/jsref_obj_regexp.asp
  * https://www.regular-expressions.info/ (comprehensive information, notes about different implementations)
  * https://regexr.com/
+ * https://regex101.com/ (nice but closed source)
  */
+
+
+
+// TODO_someday: Review these annotation settings below; I just copied from ExperimentalNativeApi for now.
+// TODO_maybe: Introduce more annotations for different regex flavors/extensions?
+@RequiresOptIn(level = RequiresOptIn.Level.ERROR)
+@Retention(AnnotationRetention.BINARY)
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.ANNOTATION_CLASS,
+    AnnotationTarget.PROPERTY,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.LOCAL_VARIABLE,
+    AnnotationTarget.VALUE_PARAMETER,
+    AnnotationTarget.CONSTRUCTOR,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.TYPEALIAS
+)
+annotation class UreNonMP
+
 
 /** UreIR is the traditional regular expression - no human should read - kind of "intermediate representation" */
 @JvmInline
@@ -270,8 +294,12 @@ value class UreChar(val ir: UreIR) : Ure {
 
 // TODO: can I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
 data class UreCharSet(val chars: Set<String>, val positive: Boolean = true) : Ure {
-    override fun toIR(): UreIR = chars.joinToString("", if (positive) "[" else "[^", "]").asUreIR
     override fun toClosedIR(): UreIR = toIR()
+    override fun toIR(): UreIR = chars
+        .joinToString("", if (positive) "[" else "[^", "]") {
+            if (it in setOf("]", "\\", "-")) "\\$it" else it
+        }
+        .asUreIR
 }
 
 // TODO_later: more complicated combinations of char classes
@@ -280,6 +308,27 @@ data class UreCharRange(val from: String, val to: String, val positive: Boolean 
     private val neg = if (positive) "" else "^"
     override fun toIR(): UreIR = "[$neg$from-$to]".asUreIR
     override fun toClosedIR(): UreIR = toIR()
+}
+
+/**
+ * Predefined char set with some property.
+ * It uses regex like \p{Latin} or \P{Emoji} etc.
+ *
+ * Warning: different platforms support different character properties/classes.
+ *   https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
+ *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
+ *
+ * Note: It can sometimes match more than one char technically.
+ *   For example, most (all?) emoji "code points" take two "code units" (16b chars).
+ *   Such 32b encoding is also called "surrogate pair".
+ *
+ * Note: Kotlin/JS: RegExp objects under the hood are constructed with the "u" flag,
+ *   that enables unicode features in regular expressions (and makes the syntax stricter).
+ *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
+ */
+@UreNonMP data class UreCharProp(val prop: String, val positive: Boolean = true) : Ure {
+    override fun toClosedIR(): UreIR = toIR()
+    override fun toIR(): UreIR =  "\\${if (positive) "p" else "P"}{$prop}".asUreIR
 }
 
 @JvmInline
@@ -303,6 +352,7 @@ value class UreQuote(val str: String) : Ure {
     override fun toClosedIR(): UreIR = toIR()
 }
 
+@OptIn(UreNonMP::class) // it only returns NonMP ure if argument was already NonMP (in case of UreCharProp).
 operator fun Ure.not(): Ure = when (this) {
     is UreChar -> when (this) {
         chWord -> chNonWord
@@ -323,6 +373,7 @@ operator fun Ure.not(): Ure = when (this) {
 
     is UreCharRange -> UreCharRange(from, to, !positive)
     is UreCharSet -> UreCharSet(chars, !positive)
+    is UreCharProp -> UreCharProp(prop, !positive)
     is UreGroup -> when (this) {
         is UreLookGroup -> UreLookGroup(content, ahead, !positive)
         else -> error("Unsupported UreGroup for negation: ${this::class.simpleName}")
@@ -371,26 +422,101 @@ val chSpace = ch("\\s")
 val chSpaceInLine = ch(" ") or chTab
 val chNonSpace = ch("\\S")
 
-/** [a-zA-Z_0-9] */
+
+
+/** Same as [a-zA-Z0-9_] */
 val chWord = ch("\\w")
+
+/** Same as [^a-zA-Z0-9_] */
 val chNonWord = ch("\\W")
-val chWordOrHyphen = ch("\\w") or ch("-") // also points out (when typing chWo..) that normal chWord doesn't match hyphen.
+
+fun chWord(orDot: Boolean = false, orHyphen: Boolean = false) = oneCharOf(
+    "\\w" + if (orDot) "." else "" + if (orHyphen) "\\-" else ""
+)
+
+@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+fun chNonWord(norDot: Boolean = false, norHyphen: Boolean = false) = !chWord(orDot = norDot, orHyphen = norHyphen)
+
+val chWordOrDot = chWord(orHyphen = true)
+val chWordOrHyphen = chWord(orHyphen = true) // also hints (when typing chWo) that chWord doesn't match hyphen.
+val chWordOrDotOrHyphen = chWord(orDot = true, orHyphen = true)
+
+// Note: All these different flavors of "word-like" classes seem unnecessary/not-micro-enough,
+//   but let's keep them because I suspect I will reuse them a lot in practice.
+
+@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+val chNonWordNorDot = !chWordOrDot
+@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+val chNonWordNorHyphen = !chWordOrHyphen
+@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+val chNonWordNorDotNorHyphen = !chWordOrDotOrHyphen
+
+
 
 val chaz = oneCharOfRange("a", "z")
 val chAZ = oneCharOfRange("A", "Z")
 val chazAZ = chaz or chAZ
 
-val chPosixLower = ch("\\p{Lower}")
-val chPosixUpper = ch("\\p{Upper}")
-val chPosixAlpha = ch("\\p{Alpha}")
-val chPosixDigit = ch("\\p{Digit}")
-val chPosixAlnum = ch("\\p{Alnum}")
-val chPosixPunct = ch("\\p{Punct}")
-val chPosixPrint = ch("\\p{Print}")
-val chPosixBlank = ch("\\p{Blank}")
-val chPosixCntrl = ch("\\p{Cntrl}")
-val chPosixXDigit = ch("\\p{XDigit}")
-val chPosixSpace = ch("\\p{Space}")
+@UreNonMP fun chp(prop: String, positive: Boolean = true) = UreCharProp(prop, positive)
+
+@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+@UreNonMP fun chpNot(prop: String) = chp(prop, positive = false)
+
+
+// Some of the more popular char props available on (probably) all platforms:
+
+/**
+ * Warning: It works differently on JS than on other platforms.
+ * On JS, it is more correct because matches letters like: "ε", "ł", "ź"
+ */
+@UreNonMP val chpLower = chp("Lower")
+
+/**
+ * Warning: It works differently on JS than on other platforms.
+ * On JS, it is more correct because matches letters like: "Λ", "Ξ", "Ł", "Ź"
+ */
+@UreNonMP val chpUpper = chp("Upper")
+
+/**
+ * Warning: It works differently on JS than on other platforms.
+ * On JS, it is more correct because matches letters like: "Λ", "Ξ", "Ł", "Ź", "λ", "ξ", "ł", "ź"
+ */
+@UreNonMP val chpAlpha = chp("Alpha")
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. */
+@UreNonMP val chpDigit = chp("Digit")
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. */
+@UreNonMP val chpAlnum = chp("Alnum")
+
+/**
+ * Warning: Currently does NOT compile (Ure.compile) on JS.
+ * Warning: On LINUX it also somehow matches numbers, like "2", "3", etc. Why??
+ */
+@UreNonMP val chpPunct = chp("Punct")
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. */
+@UreNonMP val chpBlank = chp("Blank")
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. */
+@UreNonMP val chpSpace = chp("Space")
+
+@OptIn(UreNonMP::class) val chpCurrency = chp("Sc")
+
+/**
+ * Warning: Currently it compiles (Ure.compile) only on JS.
+ * Note: I guess this one is pretty good class to match actual emojis.
+ *   Other like chp("Emoji") or chp("Emoji_Presentation") match/don't match weird characters.
+ *   https://unicode.org/reports/tr51/#Emoji_Properties
+ */
+@UreNonMP val chpExtPict = chp("ExtPict")
+
+/** Warning: Currently does NOT compile (Ure.compile) on LINUX. */
+@UreNonMP val chpLatin = chp("sc=Latin")
+
+/** Warning: Currently does NOT compile (Ure.compile) on LINUX. */
+@UreNonMP val chpGreek = chp("sc=Greek")
+
 
 
 // boundaries (b...)
@@ -402,7 +528,7 @@ val bEOInput = ir("\\z")
 val bEOPreviousMatch = ir("\\G")
 
 val bchWord = ir("\\b")
-val bchWordNot = ir("\\B") // calling it "non-word boundary" is wrong. it's more like negation of bchWord
+val bchWordNot = ir("\\B") // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
 
 val bBOWord = bchWord then chWord.lookAhead() // emulating sth like in vim: "\<"
 val bEOWord = bchWord then chWord.lookBehind() // emulating sth like in vim: "\>"

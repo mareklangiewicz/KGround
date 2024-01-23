@@ -11,6 +11,6 @@ import pl.mareklangiewicz.uspek.*
  */
 class UreTestsJvmTemp {
     init { "INIT ${this::class.simpleName}".teePP }
-    @TestFactory fun testUreStuffJvmFactory() = uspekTestFactory { testUreBasicEmail() }
+    @TestFactory fun testUreStuffJvmFactory() = uspekTestFactory { testUreCmn() }
 }
 

@@ -53,4 +53,7 @@ expect fun getCurrentThreadName(): String
 expect fun getCurrentPlatformName(): String
 expect fun getCurrentAbsolutePath(): String
 
+/** JVM, JS, LINUX, ... */
+fun getCurrentPlatformKind(): String = getCurrentPlatformName().takeWhile { it.isLetter() }.uppercase()
+
 

@@ -13,7 +13,7 @@ fun String.undoCommentOutMultiplatformFun(): String {
     return ir("/\\*actual\\*/").compile().replace(output1) { "actual" }
 }
 
-private val ureKeyword = ure { 1..MAX of chPosixLower }.withWordBoundaries()
+private val ureKeyword = ure { 1..MAX of chaz }.withWordBoundaries()
 
 private val ureTypedef = ure {
     1 of chWord

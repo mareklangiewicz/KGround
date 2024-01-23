@@ -15,7 +15,7 @@ actual fun getCurrentThreadName(): String = "JS Thread"
 
 
 actual fun getCurrentPlatformName(): String =
-    windowOrNull?.navigator?.userAgent?.let { "JS Agent $it" } ?: "Probably Node.js"
+    windowOrNull?.navigator?.userAgent?.let { "JS Agent $it" } ?: "JS Node probably"
 
 // FIXME_someday: real path on node.js platform? something more appropriate in browser too? rename? write kdoc?
 actual fun getCurrentAbsolutePath(): String =
