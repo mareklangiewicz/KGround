@@ -82,8 +82,6 @@ fun testSomeUreCharClasses() {
         matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "2", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-
-
     onUreClass(name = "chpCurrency", ure = chpCurrency,
         match = listOf("¥", "₿", "₤"),
         matchNot = listOf("@", "#", ":", "-", ")", "a", "Y", "😀", "1", "2", "😈"),
@@ -165,7 +163,7 @@ fun testUreBasicEmail() {
         "assert IR as expected" o {
             // This assertion is kinda lame (expecting exact impl/ir / cementing impl),
             // but it's useful for me now as documentation and to track if sth changes.
-            ureBasicEmail.toIR().str eq """^(?<user>[\w.]+)@(?<domain>(?:[\w\-]+\.)+[\w\-]{2,4})$"""
+            ureBasicEmail.toIR().str eq """\b(?<user>[\w.]+)@(?<domain>(?:[\w\-]+\.)+[\w\-]{2,16})\b"""
         }
         testUreEmail(ureBasicEmail)
     }

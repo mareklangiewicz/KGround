@@ -4,7 +4,7 @@ import pl.mareklangiewicz.annotations.*
 
 
 val ureBasicEmail = ure {
-    1 of bBOLine
+    1 of bchWord
     1 of ure("user") {
         1..MAX of chWordOrDotOrHyphen
     }
@@ -14,9 +14,9 @@ val ureBasicEmail = ure {
             1..MAX of chWordOrHyphen
             1 of chDot
         }
-        2..4 of chWordOrHyphen
+        2..16 of chWordOrHyphen
     }
-    1 of bEOLine
+    1 of bchWord
 }
 
 fun ureIdent(first: Ure = chazAZ, withWordBoundaries: Boolean = true, allowHyphensInside: Boolean = false) = ure {
