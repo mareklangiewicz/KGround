@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.ure
 
+import pl.mareklangiewicz.annotations.*
+
 /**
  * Micro regular expressions for XML, HTML, etc.
  * WARNING: regular expressions are generally TERRIBLE for ML languages.
@@ -31,8 +33,10 @@ package pl.mareklangiewicz.ure
  */
 fun ureStartTag(name: String, vararg expectedAttrs: Ure) = ureSomeTag(name, *expectedAttrs)
 
+@OptIn(DelicateApi::class)
 fun ureEndTag(name: String) = ureSomeTag(name, ureBegin = ir("</"))
 
+@OptIn(DelicateApi::class)
 fun ureCollapsedTag(name: String, vararg expectedAttrs: Ure) =
     ureSomeTag(name, *expectedAttrs, ureEnd = ir("/>"))
 
@@ -47,6 +51,7 @@ fun Ure.withTagAround(name: String, vararg expectedAttrs: Ure, withOptSpacesArou
  * (like ureWhateva().withTagAroundOrJustTagCollapsed(..) ure { 0..MAX of space }.withTAOJTC..)
  * Purposefully long name to discourage using it directly. Use ureEmptyContentElement, ureWhatevaContentElement..
  */
+@OptIn(DelicateApi::class, NotPortableApi::class)
 fun Ure.withTagAroundOrJustTagCollapsed(
     name: String,
     vararg expectedAttrs: Ure,
@@ -88,6 +93,7 @@ fun ureWhatevaContentElement(
 private val ureOptIgnoredAttrsOptSpaces = ureChain(ureTagAttr(), times = 0..MAX, reluctant = true)
     .withOptSpacesAround()
 
+@OptIn(DelicateApi::class) // TODO_later: check for names that would break ir(name)
 private fun ureSomeTag(
     name: String,
     vararg expectedAttrs: Ure,
@@ -105,6 +111,7 @@ private fun ureSomeTag(
     1 of ureEnd
 }
 
+@OptIn(DelicateApi::class) // TODO_later: check for names that would break ir(name)
 fun ureExpectAttr(
     name: String,
     value: Ure = ureWhatevaInLine(), // let's keep default inline, matching long multiline whateva can lead to hard to debug mismatches

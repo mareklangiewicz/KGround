@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
@@ -97,6 +98,7 @@ internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
 
 
 
+@NotPortableApi
 suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalKotlinProjectsPathS()
@@ -105,6 +107,7 @@ suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false, log: (
             SYSTEM.checkAllKnownRegionsInAllFoundFiles(it, verbose = true, log = log)
         }
 
+@NotPortableApi
 suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalKotlinProjectsPathS()

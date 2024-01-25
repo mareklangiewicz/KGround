@@ -1,5 +1,9 @@
 package pl.mareklangiewicz.ure
 
+import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
+
+@OptIn(DelicateApi::class) @NotPortableApi
 fun String.commentOutMultiplatformFun(): String {
     val output1 = ureExpectFun.notCommentedOut().compile().replace(this) { "/*\n${it.value}\n*/" }
     val output2 = ir("actual fun").compile().replace(output1) { "/*actual*/ fun" }
@@ -7,6 +11,7 @@ fun String.commentOutMultiplatformFun(): String {
     // FIXME_maybe: merge this two replaces to one using better URE
 }
 
+@OptIn(DelicateApi::class) @NotPortableApi
 fun String.undoCommentOutMultiplatformFun(): String {
     val myFun = ure("myFun") { 1 of ureExpectFun }
     val output1 = myFun.commentedOut().compile().replace(this) { it["myFun"] }
@@ -42,6 +47,7 @@ private val ureFunParamsMultiLine = ure {
 
 private val ureFunParams = ureFunParamsInLine or ureFunParamsMultiLine
 
+@OptIn(DelicateApi::class)
 private val ureFunDeclaration = ure {
     1 of ir("fun")
     1..MAX of chSpace
@@ -59,6 +65,7 @@ private val ureFunDeclaration = ure {
     }
 }
 
+@OptIn(DelicateApi::class)
 val ureExpectFun = ure {
     1 of bBOLine
     0..1 of { 1 of ir("@Composable"); 1..MAX of chSpace }

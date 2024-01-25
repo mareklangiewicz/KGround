@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.ure
 
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.chk
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.kground.teePP
@@ -41,7 +42,7 @@ fun testUreCmn() {
     testUreBasicEmail()
 }
 
-@OptIn(UreNonMP::class)
+@OptIn(NotPortableApi::class)
 fun testSomeUreCharClasses() {
     onUreClass(name = "chpLower", ure = chpLower,
         match = listOf("a", "b", "x"), // on JS (only!) also matches letters like: "λ", "ξ", etc.
@@ -95,7 +96,7 @@ fun testSomeUreCharClasses() {
     onUreClass(name = "chpGreek", ure = chpGreek,
         match = listOf("ε", "β", "δ", "Λ", "Ξ", "ξ"),
         matchNot = listOf("@", "#", ":", "-", ")", "a", "B", "Ż", "ó", "ł", "Ź", "😈"),
-        // onPlatforms = listOf("JS"),
+        onPlatforms = listOf("JVM", "JS"),
     )
     onUreClass(name = "chpExtPict", ure = chpExtPict,
         match = listOf("😀", "🫠", "🥶", "😈"),

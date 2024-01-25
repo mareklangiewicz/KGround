@@ -3,9 +3,11 @@ package pl.mareklangiewicz.ure
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import org.junit.jupiter.api.*
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.uspek.*
 
+@OptIn(NotPortableApi::class)
 class UreTestsMaintenance {
 
     @TestFactory

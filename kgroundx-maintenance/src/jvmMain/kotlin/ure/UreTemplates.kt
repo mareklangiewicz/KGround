@@ -4,6 +4,7 @@ import okio.*
 import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kgroundx.maintenance.*
@@ -66,6 +67,7 @@ private val regionsInfos = listOf(
 
 private operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: error("Unknown region label: $label")
 
+@NotPortableApi
 private fun knownRegion(regionLabel: String): String {
     val inputResPath = regionsInfos[regionLabel].pathInRes
     val ureWithRegion = ureWithSpecialRegion(regionLabel)
@@ -76,6 +78,7 @@ private fun knownRegion(regionLabel: String): String {
 private fun knownRegionFullTemplatePath(regionLabel: String) =
     SYSTEM.canonicalize(regionsInfos[regionLabel].pathInSrc)
 
+@NotPortableApi
 fun checkAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::println) = try {
     log("BEGIN: Check all known regions in project:")
     SYSTEM.checkAllKnownRegionsInAllFoundFiles(projectPath, verbose = true, log = log)
@@ -84,6 +87,7 @@ fun checkAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::pri
     log("ERROR: ${e.message}")
 }
 
+@NotPortableApi
 fun injectAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::println) {
     log("BEGIN: Inject all known regions in project:")
     SYSTEM.injectAllKnownRegionsToAllFoundFiles(projectPath, log = log)
@@ -91,16 +95,19 @@ fun injectAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::pr
 }
 
 // This actually is self-check for templates in KGround, so it should be in some integration test.
+@NotPortableApi
 fun checkAllKnownRegionsSynced(verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
         SYSTEM.checkKnownRegion(it.label, it.pathInSrc, *it.syncedPathsArrInSrc, verbose = verbose, log = log)
     }
 
+@NotPortableApi
 fun injectAllKnownRegionsToSync(log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
         SYSTEM.injectKnownRegion(it.label, *it.syncedPathsArrInSrc, addIfNotFound = false, log = log)
     }
 
+@NotPortableApi
 fun FileSystem.checkAllKnownRegionsInAllFoundFiles(
     outputTreePath: Path,
     outputFileExt: String = "gradle.kts",
@@ -113,6 +120,7 @@ fun FileSystem.checkAllKnownRegionsInAllFoundFiles(
         checkKnownRegion(label, *outputPaths, failIfNotFound = failIfNotFound, verbose = verbose, log = log)
 }
 
+@NotPortableApi
 fun FileSystem.checkKnownRegionInAllFoundFiles(
     regionLabel: String,
     outputTreePath: Path,
@@ -125,6 +133,7 @@ fun FileSystem.checkKnownRegionInAllFoundFiles(
     checkKnownRegion(regionLabel, *outputPaths, failIfNotFound = failIfNotFound, verbose = verbose, log = log)
 }
 
+@NotPortableApi
 fun FileSystem.injectAllKnownRegionsToAllFoundFiles(
     outputTreePath: Path,
     outputFileExt: String = "gradle.kts",
@@ -136,6 +145,7 @@ fun FileSystem.injectAllKnownRegionsToAllFoundFiles(
         injectKnownRegion(label, *outputPaths, addIfNotFound = addIfNotFound, log = log)
 }
 
+@NotPortableApi
 fun FileSystem.injectKnownRegionToAllFoundFiles(
     regionLabel: String,
     outputTreePath: Path,
@@ -147,6 +157,7 @@ fun FileSystem.injectKnownRegionToAllFoundFiles(
     injectKnownRegion(regionLabel, *outputPaths, addIfNotFound = addIfNotFound, log = log)
 }
 
+@NotPortableApi
 fun FileSystem.checkKnownRegion(
     regionLabel: String,
     vararg outputPaths: Path,
@@ -158,6 +169,7 @@ fun FileSystem.checkKnownRegion(
     checkCustomRegion(regionLabel, knownRegion(regionLabel), path, failIfNotFound, verbose, hint.takeIf { verbose }, log = log)
 }
 
+@NotPortableApi
 private fun FileSystem.checkCustomRegion(
     regionLabel: String,
     regionExpected: String,
@@ -181,6 +193,7 @@ private fun FileSystem.checkCustomRegion(
     if (verbose) log("OK [$regionLabel] in $outputPath")
 }
 
+@NotPortableApi
 fun FileSystem.injectKnownRegion(
     regionLabel: String,
     vararg outputPaths: Path,
@@ -188,6 +201,7 @@ fun FileSystem.injectKnownRegion(
     log: (Any?) -> Unit = ::println,
 ) = injectCustomRegion(regionLabel, knownRegion(regionLabel), *outputPaths, addIfNotFound = addIfNotFound, log = log)
 
+@NotPortableApi
 fun FileSystem.injectCustomRegion(
     regionLabel: String,
     region: String,
@@ -243,6 +257,7 @@ private fun CliPlatform.download(url: String, to: Path) {
     }
 }
 
+@NotPortableApi
 fun downloadAndInjectFileToSpecialRegion(
     inFileUrl: String,
     outFilePath: Path,

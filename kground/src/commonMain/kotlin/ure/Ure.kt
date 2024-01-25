@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.ure
 
+import pl.mareklangiewicz.annotations.*
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
 import kotlin.text.RegexOption.*
@@ -24,50 +25,31 @@ import kotlin.text.RegexOption.*
 
 
 
-// TODO_someday: Review these annotation settings below; I just copied from ExperimentalNativeApi for now.
-// TODO_maybe: Introduce more annotations for different regex flavors/extensions?
-@RequiresOptIn(level = RequiresOptIn.Level.ERROR)
-@Retention(AnnotationRetention.BINARY)
-@Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.ANNOTATION_CLASS,
-    AnnotationTarget.PROPERTY,
-    AnnotationTarget.FIELD,
-    AnnotationTarget.LOCAL_VARIABLE,
-    AnnotationTarget.VALUE_PARAMETER,
-    AnnotationTarget.CONSTRUCTOR,
-    AnnotationTarget.FUNCTION,
-    AnnotationTarget.PROPERTY_GETTER,
-    AnnotationTarget.PROPERTY_SETTER,
-    AnnotationTarget.TYPEALIAS
-)
-annotation class UreNonMP
-
-
 /** UreIR is the traditional regular expression - no human should read - kind of "intermediate representation" */
 @JvmInline
-value class UreIR(val str: String) {
+value class UreIR @DelicateApi internal constructor(val str: String) {
     override fun toString(): String = str
 }
 
-private val String.asUreIR get() = UreIR(this)
+@OptIn(DelicateApi::class) private val String.asUreIR get() = UreIR(this)
 
 fun ure(vararg opts: RegexOption, init: UreProduct.() -> Unit) = ure(enable = opts.toSet(), disable = emptySet(), init)
 
 // TODO_later: maybe remove options here? and always use Ure.withOptions? (check in practice first)
 fun ure(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet(), init: UreProduct.() -> Unit) =
-    if (enable.isEmpty() && disable.isEmpty()) UreProduct(init)
-    else UreProduct(init).withOptions(enable, disable)
+    if (enable.isEmpty() && disable.isEmpty()) UreProduct().apply(init)
+    else UreProduct().apply(init).withOptions(enable, disable)
 
-@Deprecated("Use Ure.withOptions")
+@SecondaryApi("Use Ure.withOptions", ReplaceWith("content.withOptions(enable, disable)"))
 fun ureWithOptions(content: Ure, enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
     UreChangeOptionsGroup(content, enable, disable)
 
-// TODO_later: maybe remove name and opts here? and always use Ure.with...? (check in practice first)
+// TODO_someday_maybe: maybe remove name and opts here? and always use Ure.with...? (check in practice first)
 fun ure(name: String, vararg opts: RegexOption, init: UreProduct.() -> Unit) =
-    if (opts.isEmpty()) UreProduct(init).withName(name)
-    else UreProduct(init).withOptionsEnabled(*opts).withName(name)
+    if (opts.isEmpty()) UreProduct().apply(init).withName(name)
+    else UreProduct().apply(init).withOptionsEnabled(*opts).withName(name)
 
+@SecondaryApi("Use Ure.withName", ReplaceWith("content.withName(name"))
 fun ureWithName(name: String, content: Ure) = UreNamedGroup(content, name)
 
 fun Ure.withName(name: String?) = if (name == null) this else UreNamedGroup(this, name)
@@ -118,11 +100,8 @@ infix fun Ure.then(that: Ure) = UreProduct(mutableListOf(this, that))
 // Do not rename "then" to "and". The "and" is more like special lookahead/lookbehind group
 
 
-@Deprecated("Or not?? I added it because had to remove UreProduct secondary constructor")
-private fun UreProduct(init: UreProduct.() -> Unit) = UreProduct().apply { init() }
-
 @JvmInline
-value class UreProduct(val product: MutableList<Ure> = mutableListOf()) : Ure {
+value class UreProduct internal constructor(val product: MutableList<Ure> = mutableListOf()) : Ure {
 
     override fun toIR(): UreIR = when (product.size) {
         0 -> "".asUreIR
@@ -138,7 +117,12 @@ value class UreProduct(val product: MutableList<Ure> = mutableListOf()) : Ure {
         // (like when creating UREs with some compose UI)
     }
 
-    class UreX(val times: IntRange, val reluctant: Boolean, val possessive: Boolean)
+    // Can't decide if this syntax is better in case of "1 of ..."; let's leave it for now.
+    // TODO_later: rethink syntax when context receivers become multiplatform.
+    //   Maybe somehow force '+' in other cases too, but I don't want to force syntax with additional parentheses.
+    operator fun Ure.unaryPlus() { product.add(this) }
+
+    class UreX internal constructor(val times: IntRange, val reluctant: Boolean, val possessive: Boolean)
 
     fun x(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) = UreX(times, reluctant, possessive)
     fun x(times: Int) = x(times..times)
@@ -156,7 +140,7 @@ value class UreProduct(val product: MutableList<Ure> = mutableListOf()) : Ure {
     infix fun Int.of(init: UreProduct.() -> Unit) = x(this) of init
 }
 
-data class UreUnion(val first: Ure, val second: Ure) : Ure {
+data class UreUnion internal constructor(val first: Ure, val second: Ure) : Ure {
     override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asUreIR
     override fun toClosedIR() = this.groupNonCapt().toIR()
 }
@@ -173,22 +157,22 @@ sealed interface UreGroup : Ure {
     override fun toClosedIR() = toIR() // group is always "closed" - has parentheses outside
 }
 
-data class UreNamedGroup(override val content: Ure, val name: String) : UreGroup {
+data class UreNamedGroup internal constructor(override val content: Ure, val name: String) : UreGroup {
     override val typeIR get() = "?<$name>".asUreIR
 }
 
 @JvmInline
-value class UreNonCaptGroup(override val content: Ure) : UreGroup {
+value class UreNonCaptGroup internal constructor(override val content: Ure) : UreGroup {
     override val typeIR get() = "?:".asUreIR
 }
 
 @JvmInline
-value class UreCaptGroup(override val content: Ure) : UreGroup {
+value class UreCaptGroup internal constructor(override val content: Ure) : UreGroup {
     override val typeIR get() = "".asUreIR
 }
 
 // TODO: test it!
-data class UreChangeOptionsGroup(
+data class UreChangeOptionsGroup internal constructor(
     override val content: Ure,
     val enable: Set<RegexOption> = emptySet(),
     val disable: Set<RegexOption> = emptySet(),
@@ -200,12 +184,12 @@ data class UreChangeOptionsGroup(
 
     override val typeIR get() = "?${enable.ir}-${disable.ir}:".asUreIR // TODO_later: check if either set can be empty
 
-    // TODO_later: review flags we support - but probably want to be multiplatform??
+    // TODO: review flags we support; support non-multi-platform, but add annotations and docs for different platforms.
     private val RegexOption.code
         get() = when (this) {
             IGNORE_CASE -> "i"
             MULTILINE -> "m"
-            else -> error("Only multiplatform regex options are supported.")
+            else -> error("Only multiplatform regex options are supported for now.")
 //            LITERAL -> TODO()
 //            UNIX_LINES -> "d"
 //            COMMENTS -> "x" // but not really supported... maybe in UreRawIR, but I wouldn't use it
@@ -219,7 +203,14 @@ data class UreChangeOptionsGroup(
 // TODO_someday: there are also similar "groups" without content (see Pattern.java), add support for it (content nullable?)
 
 
-data class UreLookGroup(override val content: Ure, val ahead: Boolean = true, val positive: Boolean = true) : UreGroup {
+// Note: For delicate/not portable reasons, see
+//   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Lookbehind_assertion#description
+//   search: "This behavior is reasonable...Therefore, it starts... Regexes in some other languages forbid..."
+data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
+    override val content: Ure,
+    val ahead: Boolean = true,
+    val positive: Boolean = true,
+) : UreGroup {
     override val typeIR
         get() = when (ahead to positive) {
             true to true -> "?="
@@ -233,7 +224,7 @@ data class UreLookGroup(override val content: Ure, val ahead: Boolean = true, va
 
 // TODO_someday: "independent" non-capturing group - what is that? (see Pattern.java)
 
-data class UreGroupRef(val nr: Int? = null, val name: String? = null) : Ure {
+data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : Ure {
     init {
         nr == null || name == null || error("Can not reference capturing group by both nr ($nr) and name ($name)")
         nr == null && name == null && error("Either nr or name has to be provided for the group reference")
@@ -250,7 +241,7 @@ const val MAX = Int.MAX_VALUE
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
  * @param possessive - It's like more greedy than default greedy. Never backs off - fails instead.
  */
-data class UreQuantifier(
+data class UreQuantifier internal constructor(
     val content: Ure,
     val times: IntRange,
     val reluctant: Boolean = false,
@@ -286,14 +277,19 @@ data class UreQuantifier(
 }
 
 @JvmInline
-value class UreChar(val ir: UreIR) : Ure {
-    // TODO_later: separate sealed class for specials etc. We should never ask user to manually provide UreIR
+value class UreChar @DelicateApi internal constructor(val ir: UreIR) : Ure {
+    // TODO_maybe: separate sealed class for specials etc. We should never ask user to manually provide UreIR
+    init {
+        // TODO NOW: check if ir correctly represent full "char-like" regex.
+        //   (escaped chars, or surrogate pairs (two code units representing one code point), are also "char-like")
+    }
     override fun toIR(): UreIR = ir
-    override fun toClosedIR(): UreIR = UreRawIR(ir).toClosedIR()
+    @OptIn(DelicateApi::class)
+    override fun toClosedIR(): UreIR = ir(ir).toClosedIR()
 }
 
 // TODO: can I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
-data class UreCharSet(val chars: Set<String>, val positive: Boolean = true) : Ure {
+data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : Ure {
     override fun toClosedIR(): UreIR = toIR()
     override fun toIR(): UreIR = chars
         .joinToString("", if (positive) "[" else "[^", "]") {
@@ -304,37 +300,22 @@ data class UreCharSet(val chars: Set<String>, val positive: Boolean = true) : Ur
 
 // TODO_later: more complicated combinations of char classes
 // TODO_later: analyze if some special kotlin progression/range would fit here better
-data class UreCharRange(val from: String, val to: String, val positive: Boolean = true) : Ure {
+data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : Ure {
     private val neg = if (positive) "" else "^"
     override fun toIR(): UreIR = "[$neg$from-$to]".asUreIR
     override fun toClosedIR(): UreIR = toIR()
 }
 
-/**
- * Predefined char set with some property.
- * It uses regex like \p{Latin} or \P{Emoji} etc.
- *
- * Warning: different platforms support different character properties/classes.
- *   https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
- *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
- *
- * Note: It can sometimes match more than one char technically.
- *   For example, most (all?) emoji "code points" take two "code units" (16b chars).
- *   Such 32b encoding is also called "surrogate pair".
- *
- * Note: Kotlin/JS: RegExp objects under the hood are constructed with the "u" flag,
- *   that enables unicode features in regular expressions (and makes the syntax stricter).
- *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
- */
-@UreNonMP data class UreCharProp(val prop: String, val positive: Boolean = true) : Ure {
+data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : Ure {
     override fun toClosedIR(): UreIR = toIR()
     override fun toIR(): UreIR =  "\\${if (positive) "p" else "P"}{$prop}".asUreIR
 }
 
 @JvmInline
-value class UreRawIR(val ir: UreIR) : Ure {
-    // This is a dirty way to inject whole strings fast. TODO_someday_maybe: think what would be better.
-    // Maybe still ask user for string, but validate and transform to the actual UreProduct of UreChar's
+/** "Dirty way to inject whole strings fast.") */
+// TODO_someday_maybe: think what would be better.
+// Maybe still ask user for string, but validate and transform to the actual UreProduct of UreChar's
+value class UreRawIR @DelicateApi internal constructor(val ir: UreIR) : Ure {
 
     override fun toIR(): UreIR = ir
     override fun toClosedIR(): UreIR = if (isClosed) ir else this.groupNonCapt().toIR()
@@ -347,12 +328,13 @@ value class UreRawIR(val ir: UreIR) : Ure {
 }
 
 @JvmInline
-value class UreQuote(val str: String) : Ure {
+value class UreQuote internal constructor(val str: String) : Ure {
     override fun toIR() = "\\Q$str\\E".asUreIR
     override fun toClosedIR(): UreIR = toIR()
 }
 
-@OptIn(UreNonMP::class) // it only returns NonMP ure if argument was already NonMP (in case of UreCharProp).
+// It only returns NotPortableApi ure if argument was already NotPortableApi (UreCharProp).
+@OptIn(NotPortableApi::class, SecondaryApi::class, DelicateApi::class)
 operator fun Ure.not(): Ure = when (this) {
     is UreChar -> when (this) {
         chWord -> chNonWord
@@ -391,51 +373,62 @@ operator fun Ure.not(): Ure = when (this) {
 // TODO_later: experiment more with different operators overloading (after impl some working examples)
 //  especially indexed access operators and invoke operators..
 
-fun ir(ir: UreIR) = UreRawIR(ir)
-fun ir(str: String) = UreRawIR(UreIR(str))
-fun ch(ir: UreIR) = UreChar(ir)
-fun ch(str: String) = ch(UreIR(str))
+@DelicateApi fun ir(ir: UreIR) = UreRawIR(ir)
+@DelicateApi fun ir(str: String) = ir(UreIR(str))
+@DelicateApi fun ch(ir: UreIR) = UreChar(ir)
+@OptIn(DelicateApi::class) fun ch(str: String) = ch(UreIR(str)) // TODO check for the wrong strings in UreChar.init.
 fun ch(chr: Char) = ch(chr.toString())
 
 
 // Ure constants matching one char (special chars; common categories). All names start with ch.
-// (turns out it's really more important to have common prefix, than to be shorter)
+// Note from experience: It's really more important to have a common prefix than to be a bit shorter.
 
-val chBackSlash = ch("\\\\")
 
-fun chUniCode(name: String) = ch("\\N{$name}")
+// just private shortcuts
+@OptIn(DelicateApi::class) private val String.ch get() = ch(this)
+@OptIn(DelicateApi::class) private val String.raw get() = ir(this)
 
-val chTab = ch("\\t")
-val chLF = ch("\\n")
-val chCR = ch("\\r")
-val chFF = ch("\\f")
-val chAlert = ch("\\a")
-val chEsc = ch("\\e")
+val chBackSlash = "\\\\".ch
 
-val chDot = ch("\\.")
-val chAny = ch(".")
-val chAnyMultiLine = ch("(?s:.)")
+fun chUniCode(name: String) = "\\N{$name}".ch
 
-val chDigit = ch("\\d")
-val chNonDigit = ch("\\D")
-val chSpace = ch("\\s")
-val chSpaceInLine = ch(" ") or chTab
-val chNonSpace = ch("\\S")
+val chTab = "\\t".ch
+val chLF = "\\n".ch
+val chCR = "\\r".ch
+val chFF = "\\f".ch
+val chAlert = "\\a".ch
+val chEsc = "\\e".ch
+
+val chDot = "\\.".ch
+val chAny = ".".ch
+val chAnyMultiLine = "(?s:.)".ch
+
+val chDigit = "\\d".ch
+
+val chSpace = "\\s".ch
+val chSpaceInLine = " ".ch or chTab
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chDigit"))
+val chNonDigit = "\\D".ch
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chSpace"))
+val chNonSpace = "\\S".ch
 
 
 
 /** Same as [a-zA-Z0-9_] */
-val chWord = ch("\\w")
+val chWord = "\\w".ch
 
 /** Same as [^a-zA-Z0-9_] */
-val chNonWord = ch("\\W")
+val chNonWord = "\\W".ch
 
 fun chWord(orDot: Boolean = false, orHyphen: Boolean = false) = oneCharOf(
     "\\w" + if (orDot) "." else "" + if (orHyphen) "\\-" else ""
 )
 
-@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord(orDot = norDot, orHyphen = norHyphen"))
 fun chNonWord(norDot: Boolean = false, norHyphen: Boolean = false) = !chWord(orDot = norDot, orHyphen = norHyphen)
+// Let it stay as a hint for user that negation (operator) does the same.
 
 val chWordOrDot = chWord(orHyphen = true)
 val chWordOrHyphen = chWord(orHyphen = true) // also hints (when typing chWo) that chWord doesn't match hyphen.
@@ -443,12 +436,15 @@ val chWordOrDotOrHyphen = chWord(orDot = true, orHyphen = true)
 
 // Note: All these different flavors of "word-like" classes seem unnecessary/not-micro-enough,
 //   but let's keep them because I suspect I will reuse them a lot in practice.
+//   I'll also keep negative versions as a hint for user that negation (operator) does the same.
 
-@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDot"))
 val chNonWordNorDot = !chWordOrDot
-@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+
+@Deprecated("Use operator fun Ure.not()", ReplaceWith("!chWordOrHyphen"))
 val chNonWordNorHyphen = !chWordOrHyphen
-@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
+
+@Deprecated("Use operator fun Ure.not()", ReplaceWith("!chWordOrDotOrHyphen"))
 val chNonWordNorDotNorHyphen = !chWordOrDotOrHyphen
 
 
@@ -457,10 +453,28 @@ val chaz = oneCharOfRange("a", "z")
 val chAZ = oneCharOfRange("A", "Z")
 val chazAZ = chaz or chAZ
 
-@UreNonMP fun chp(prop: String, positive: Boolean = true) = UreCharProp(prop, positive)
+/**
+ * Predefined char set with some property.
+ * It uses regex like \p{Latin} or \P{Emoji} etc.
+ *
+ * Warning: different platforms support different character properties/classes.
+ *   https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
+ *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
+ *
+ * Note: It can sometimes match more than one char technically.
+ *   For example, most (all?) emoji "code points" take two "code units" (16b chars).
+ *   Such 32b encoding is also called "surrogate pair".
+ *
+ * Note: Kotlin/JS: RegExp objects under the hood are constructed with the "u" flag,
+ *   that enables unicode features in regular expressions (and makes the syntax stricter).
+ *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
+ */
+@NotPortableApi("Different platforms support different character properties/classes")
+fun chp(prop: String) = UreCharProp(prop, positive = true)
 
-@Deprecated("Use operator fun Ure.not()") // Let it stay as a hint for user that negation (operator) does the same.
-@UreNonMP fun chpNot(prop: String) = chp(prop, positive = false)
+@NotPortableApi
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chp(prop)"))
+fun chpNot(prop: String) = !chp(prop)
 
 
 // Some of the more popular char props available on (probably) all platforms:
@@ -469,76 +483,91 @@ val chazAZ = chaz or chAZ
  * Warning: It works differently on JS than on other platforms.
  * On JS, it is more correct because matches letters like: "ε", "ł", "ź"
  */
-@UreNonMP val chpLower = chp("Lower")
+@NotPortableApi("It works differently on JS than on other platforms.")
+val chpLower = chp("Lower")
 
 /**
  * Warning: It works differently on JS than on other platforms.
  * On JS, it is more correct because matches letters like: "Λ", "Ξ", "Ł", "Ź"
  */
-@UreNonMP val chpUpper = chp("Upper")
+@NotPortableApi("It works differently on JS than on other platforms.")
+val chpUpper = chp("Upper")
 
 /**
  * Warning: It works differently on JS than on other platforms.
  * On JS, it is more correct because matches letters like: "Λ", "Ξ", "Ł", "Ź", "λ", "ξ", "ł", "ź"
  */
-@UreNonMP val chpAlpha = chp("Alpha")
+@NotPortableApi("It works differently on JS than on other platforms.")
+val chpAlpha = chp("Alpha")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@UreNonMP val chpDigit = chp("Digit")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
+val chpDigit = chp("Digit")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@UreNonMP val chpAlnum = chp("Alnum")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
+val chpAlnum = chp("Alnum")
 
 /**
  * Warning: Currently does NOT compile (Ure.compile) on JS.
  * Warning: On LINUX it also somehow matches numbers, like "2", "3", etc. Why??
  */
-@UreNonMP val chpPunct = chp("Punct")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
+val chpPunct = chp("Punct")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@UreNonMP val chpBlank = chp("Blank")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
+val chpBlank = chp("Blank")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@UreNonMP val chpSpace = chp("Space")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
+val chpSpace = chp("Space")
 
-@OptIn(UreNonMP::class) val chpCurrency = chp("Sc")
+@OptIn(NotPortableApi::class)
+val chpCurrency = chp("Sc")
 
 /**
  * Warning: Currently it compiles (Ure.compile) only on JS.
  * Note: I guess this one is pretty good class to match actual emojis.
- *   Other like chp("Emoji") or chp("Emoji_Presentation") match/don't match weird characters.
+ *   Others like chp("Emoji") or chp("Emoji_Presentation") match/don't match weird characters.
  *   https://unicode.org/reports/tr51/#Emoji_Properties
  */
-@UreNonMP val chpExtPict = chp("ExtPict")
+@NotPortableApi("Currently it compiles (Ure.compile) only on JS.")
+val chpExtPict = chp("ExtPict")
 
 /** Warning: Currently does NOT compile (Ure.compile) on LINUX. */
-@UreNonMP val chpLatin = chp("sc=Latin")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on LINUX.")
+val chpLatin = chp("sc=Latin")
 
 /** Warning: Currently does NOT compile (Ure.compile) on LINUX. */
-@UreNonMP val chpGreek = chp("sc=Greek")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on LINUX.")
+val chpGreek = chp("sc=Greek")
 
 
 
 // boundaries (b...)
 
-val bBOLine = ir("^")
-val bEOLine = ir("$")
-val bBOInput = ir("\\A")
-val bEOInput = ir("\\z")
-val bEOPreviousMatch = ir("\\G")
+val bBOLine = "^".raw
+val bEOLine = "$".raw
+val bBOInput = "\\A".raw
+val bEOInput = "\\z".raw
+val bEOPreviousMatch = "\\G".raw
 
-val bchWord = ir("\\b")
-val bchWordNot = ir("\\B") // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
+val bchWord = "\\b".raw
+val bchWordNot = "\\B".raw // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
 
+@OptIn(NotPortableApi::class, DelicateApi::class)
 val bBOWord = bchWord then chWord.lookAhead() // emulating sth like in vim: "\<"
+@OptIn(NotPortableApi::class, DelicateApi::class)
 val bEOWord = bchWord then chWord.lookBehind() // emulating sth like in vim: "\>"
 
 /** Any Unicode linebreak sequence, is equivalent to \u000D\u000A|[\u000A\u000B\u000C\u000D\u0085\u2028\u2029] */
-val ureLineBreak = ir("\\R")
+val ureLineBreak = "\\R".raw
 
-fun control(x: String) = ch("\\c$x") // FIXME_later: what exactly is this?? (see std Pattern.java)
-fun oneCharOf(vararg chars: String) = UreCharSet(chars.toSet()) // TODO_later: Use UreChar as vararg type
-fun oneCharNotOf(vararg chars: String) = UreCharSet(chars.toSet(), positive = false) // TODO_later: jw
+@DelicateApi
+fun control(x: String) = "\\c$x".ch // FIXME_later: what exactly is this?? (see std Pattern.java)
+fun oneCharOf(vararg chars: String) = UreCharSet(chars.toSet()) // TODO_maybe: Use UreChar as vararg type
+fun oneCharNotOf(vararg chars: String) = UreCharSet(chars.toSet(), positive = false) // TODO_maybe: as above
 fun oneCharOfRange(from: String, to: String) = UreCharRange(from, to)
 fun oneCharNotOfRange(from: String, to: String) = UreCharRange(from, to, positive = false)
 
@@ -554,10 +583,21 @@ fun Ure.group(capture: Boolean = true, name: String? = null) = when {
 
 fun Ure.groupNonCapt() = UreNonCaptGroup(this)
 
+@OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
 fun Ure.lookAhead(positive: Boolean = true) = UreLookGroup(this, true, positive)
+
+@DelicateApi("Can be suprisingly slow for some ures. Or even can throw on some platforms, when looking behind for non-fixed length ure.")
+@NotPortableApi("Behavior can differ on different platforms. Read docs for each used platform.")
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Lookbehind_assertion#description
 fun Ure.lookBehind(positive: Boolean = true) = UreLookGroup(this, false, positive)
 
+@OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
+@SecondaryApi("Use Ure.lookAhead", ReplaceWith("ure(init = init).lookAhead(positive)"))
 fun ureLookAhead(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(init = init).lookAhead(positive)
+
+@DelicateApi("Can be suprisingly slow for some ures. Or even can throw on some platforms, when looking behind for non-fixed length ure.")
+@NotPortableApi("Behavior can differ on different platforms. Read docs for each used platform.")
+@SecondaryApi("Use Ure.lookBehind", ReplaceWith("ure(init = init).lookBehind(positive)"))
 fun ureLookBehind(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(init = init).lookBehind(positive)
 
 
@@ -591,7 +631,7 @@ fun quantify(
     reluctant: Boolean = false,
     possessive: Boolean = false,
     init: UreProduct.() -> Unit,
-) = quantify(UreProduct(init), times, reluctant, possessive)
+) = quantify(ure(init = init), times, reluctant, possessive)
 
 fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
 
@@ -604,8 +644,10 @@ fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = ure.compile().findAll(
 fun CharSequence.find(ure: Ure, startIndex: Int = 0) = ure.compile().find(this, startIndex)
 fun CharSequence.matchEntire(ure: Ure) = ure.compile().matchEntire(this)
 
+@NotPortableApi("Not all platforms support retreiving groups by name.")
 operator fun MatchResult.get(name: String) = namedValues[name] ?: error("Group named \"$name\" not found in MatchResult.")
 
+@NotPortableApi("Not all platforms support retreiving groups by name.")
 operator fun MatchResult.getValue(thisObj: Any?, property: KProperty<*>) = get(property.name)
 
 // FIXME_someday: this is hack, but I can't reliably get named groups from MatchResult (at least in multiplatform)
@@ -615,13 +657,15 @@ operator fun MatchResult.getValue(thisObj: Any?, property: KProperty<*>) = get(p
 //    https://youtrack.jetbrains.com/issue/KT-29241/Unable-to-use-named-Regex-groups-on-JDK-11
 //    https://youtrack.jetbrains.com/issue/KT-20865/Retrieving-groups-by-name-is-not-supported-on-Java-9-even-with-kotlin-stdlib-jre8-in-the-classpath
 //    https://github.com/JetBrains/kotlin/commit/9c4c1ed557a889bf57c754b81f4897a0d8405b0d
+@NotPortableApi("Not all platforms support retreiving groups by name.")
 val MatchResult.named get() = groups as? MatchNamedGroupCollection
     ?: throw UnsupportedOperationException("Retrieving groups by name is not supported on this platform.")
 
+@NotPortableApi("Not all platforms support retreiving groups by name.")
 val MatchResult.namedValues: Map<String, String?> get() = MatchNamedValues(named)
 
 @JvmInline
-value class MatchNamedValues(private val groups: MatchNamedGroupCollection): Map<String, String?> {
+value class MatchNamedValues internal constructor(private val groups: MatchNamedGroupCollection): Map<String, String?> {
     override val entries: Set<Map.Entry<String, String?>> get() = error("Operation not implemented.")
     override val keys: Set<String> get() = error("Operation not implemented.")
     override val size: Int get() = groups.size

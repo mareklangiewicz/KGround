@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.ure
 
+import pl.mareklangiewicz.annotations.*
+
 
 val ureBasicEmail = ure {
     1 of bBOLine
@@ -34,6 +36,7 @@ fun ureChain(
     possessive: Boolean = false,
 ): Ure = when (times.first) {
     0 ->
+        @OptIn(DelicateApi::class)
         if (times.last <= 0) ir("(?:)") // FIXME later: it should always match 0 chars. can it be totally empty?? be careful
         else ure { x(0..1, reluctant, possessive) of ureChain(element, separator, 1..times.last, reluctant, possessive) }
     else -> ure {
@@ -105,6 +108,7 @@ fun Ure.withOptWhatevaAround(
 fun Ure.withOptWhatevaAroundInLine(reluctant: Boolean = true, allowBefore: Boolean = true, allowAfter: Boolean = true) =
     withOptWhatevaAround(reluctant, inLine = true, allowBefore, allowAfter)
 
+@OptIn(DelicateApi::class)
 fun Ure.commentedOut(inLine: Boolean = false, traditional: Boolean = true, kdoc: Boolean = false) = ure {
     require(inLine || traditional) { "Non traditional comments are only single line" }
     require(!kdoc || traditional) { "Non traditional comments can't be used as kdoc" }
@@ -117,11 +121,12 @@ fun Ure.commentedOut(inLine: Boolean = false, traditional: Boolean = true, kdoc:
     if (traditional) 1 of ir("\\*/")
 }
 
+@OptIn(SecondaryApi::class) @DelicateApi @NotPortableApi
 fun Ure.notCommentedOut(traditional: Boolean = true, maxSpacesBehind: Int = 100) = ure {
     1 of ureLookBehind(positive = false) {
         1 of if (traditional) ir("/\\*") else ir("//")
         0..maxSpacesBehind of if (traditional) chSpace else chSpaceInLine
-        // Can not use MAX - java look-behind implementation complains (throws)
+        // Cannot use MAX - java look-behind implementation complains (throws) (JVM)
     }
     1 of this@notCommentedOut
     if (traditional) 1 of ureLookAhead(positive = false) {
@@ -149,11 +154,13 @@ fun ureRegion(content: Ure, regionName: Ure? = null) = ure {
 // the promise is: all special regions with some label should contain exactly the same content (synced)
 fun ureWithSpecialRegion(regionLabel: String) = ure {
     1 of ureWhateva().withName("before")
+    @OptIn(DelicateApi::class)
     1 of ureRegion(ureWhateva(), ir("\\[$regionLabel\\]")).withName("region")
     1 of ureWhateva(reluctant = false).withName("after")
 }
 
 
+@OptIn(DelicateApi::class)
 fun ureKeywordAndOptArg(keyword: String, arg: Ure? = null, separator: Ure = chSpaceInLine.timesMin(1)) =
     ureKeywordAndOptArg(ir(keyword).withWordBoundaries(), arg, separator)
 
