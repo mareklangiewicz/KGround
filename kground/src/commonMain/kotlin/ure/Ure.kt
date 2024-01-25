@@ -127,12 +127,13 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
 
     fun x(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) = UreX(times, reluctant, possessive)
     fun x(times: Int) = x(times..times)
+
     infix fun UreX.of(ure: Ure) {
-        product.add(quantify(ure, times, reluctant, possessive))
+        product.add(ure.times(times, reluctant, possessive))
     }
 
     infix fun UreX.of(init: UreProduct.() -> Unit) {
-        product.add(quantify(times, reluctant, possessive, init))
+        this of ure(init = init)
     }
 
     infix fun IntRange.of(ure: Ure) = x(this) of ure
@@ -445,10 +446,10 @@ val chWordOrDotOrHyphen = chWord(orDot = true, orHyphen = true)
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDot"))
 val chNonWordNorDot = !chWordOrDot
 
-@Deprecated("Use operator fun Ure.not()", ReplaceWith("!chWordOrHyphen"))
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrHyphen"))
 val chNonWordNorHyphen = !chWordOrHyphen
 
-@Deprecated("Use operator fun Ure.not()", ReplaceWith("!chWordOrDotOrHyphen"))
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDotOrHyphen"))
 val chNonWordNorDotNorHyphen = !chWordOrDotOrHyphen
 
 
@@ -607,37 +608,33 @@ fun ureLookAhead(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(in
 fun ureLookBehind(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(init = init).lookBehind(positive)
 
 
+fun Ure.times(exactly: Int) = UreQuantifier(this, exactly..exactly)
+
 /**
- * By default, it's "greedy" - tries to match as many "times" as possible. But backs off one by one if it fails.
+ * By default, it's "greedy" - tries to match as many "times" as possible. But back off one by one if it fails.
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
  * @param possessive - It's like more greedy than default greedy. Never backs off - fails instead.
  */
+fun Ure.times(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
+    if (times.start == 1 && times.endInclusive == 1) this else UreQuantifier(this, times, reluctant, possessive)
+
 fun Ure.timesMinMax(min: Int, max: Int, reluctant: Boolean = false, possessive: Boolean = false) =
-    if (min == 1 && max == 1) this else UreQuantifier(this, min..max, reluctant, possessive)
+    times(min..max, reluctant, possessive)
 
 fun Ure.timesMin(min: Int, reluctant: Boolean = false, possessive: Boolean = false) =
-    UreQuantifier(this, min..MAX, reluctant, possessive)
+    timesMinMax(min, MAX, reluctant, possessive)
 
 fun Ure.timesMax(max: Int, reluctant: Boolean = false, possessive: Boolean = false) =
-    UreQuantifier(this, 0..max, reluctant, possessive)
+    timesMinMax(0, max, reluctant, possessive)
 
-fun Ure.times(exactly: Int) = UreQuantifier(this, exactly..exactly)
 
-@Deprecated("Let's try to use .times instead")
-fun quantify(
-    content: Ure,
-    times: IntRange,
-    reluctant: Boolean = false,
-    possessive: Boolean = false,
-) = if (times == 1..1) content else UreQuantifier(content, times, reluctant, possessive)
+@Deprecated("Let's try to use .times instead", ReplaceWith("content.times(times, reluctant, possessive)"))
+fun quantify(content: Ure, times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
+    content.times(times, reluctant, possessive)
 
-@Deprecated("Let's try to use .times instead")
-fun quantify(
-    times: IntRange,
-    reluctant: Boolean = false,
-    possessive: Boolean = false,
-    init: UreProduct.() -> Unit,
-) = quantify(ure(init = init), times, reluctant, possessive)
+@Deprecated("Let's try to use .times instead", ReplaceWith("ure(init = init).times(times, reluctant, possessive)"))
+fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false, init: UreProduct.() -> Unit) =
+    ure(init = init).times(times, reluctant, possessive)
 
 fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
 
