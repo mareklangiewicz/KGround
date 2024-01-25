@@ -158,6 +158,7 @@ fun testUreMatchesNone(ure: Ure, vararg examples: String, verbose: Boolean = fal
         else chk(!re.matches(e)) { "$re matches $e" }
 }
 
+@OptIn(DelicateApi::class)
 fun testUreBasicEmail() {
     "On ureBasicEmail" o {
         "assert IR as expected" o {

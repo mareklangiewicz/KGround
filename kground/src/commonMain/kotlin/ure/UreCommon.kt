@@ -3,6 +3,7 @@ package pl.mareklangiewicz.ure
 import pl.mareklangiewicz.annotations.*
 
 
+@DelicateApi("Very basic email Ure. It will not match many strange but correct emails. Can also match some incorrect.")
 val ureBasicEmail = ure {
     1 of bchWord
     1 of ure("user") {
