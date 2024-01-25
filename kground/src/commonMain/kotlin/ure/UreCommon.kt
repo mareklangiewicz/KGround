@@ -37,7 +37,7 @@ fun ureChain(
 ): Ure = when (times.first) {
     0 ->
         @OptIn(DelicateApi::class)
-        if (times.last <= 0) ir("(?:)") // FIXME later: it should always match 0 chars. can it be totally empty?? be careful
+        if (times.last <= 0) ureIR("(?:)") // FIXME later: it should always match 0 chars. can it be totally empty?? be careful
         else ure { x(0..1, reluctant, possessive) of ureChain(element, separator, 1..times.last, reluctant, possessive) }
     else -> ure {
         1 of element
@@ -113,25 +113,25 @@ fun Ure.commentedOut(inLine: Boolean = false, traditional: Boolean = true, kdoc:
     require(inLine || traditional) { "Non traditional comments are only single line" }
     require(!kdoc || traditional) { "Non traditional comments can't be used as kdoc" }
     1 of when {
-        kdoc -> ir("/\\**")
-        traditional -> ir("/\\*")
-        else -> ir("//")
+        kdoc -> ureIR("/\\**")
+        traditional -> ureIR("/\\*")
+        else -> ureIR("//")
     }
     1 of this@commentedOut.withOptSpacesAround(inLine)
-    if (traditional) 1 of ir("\\*/")
+    if (traditional) 1 of ureIR("\\*/")
 }
 
 @OptIn(SecondaryApi::class) @DelicateApi @NotPortableApi
 fun Ure.notCommentedOut(traditional: Boolean = true, maxSpacesBehind: Int = 100) = ure {
     1 of ureLookBehind(positive = false) {
-        1 of if (traditional) ir("/\\*") else ir("//")
+        1 of if (traditional) ureIR("/\\*") else ureIR("//")
         0..maxSpacesBehind of if (traditional) chSpace else chSpaceInLine
         // Cannot use MAX - java look-behind implementation complains (throws) (JVM)
     }
     1 of this@notCommentedOut
     if (traditional) 1 of ureLookAhead(positive = false) {
         0..MAX of chSpace
-        1 of ir("\\*/")
+        1 of ureIR("\\*/")
     }
 }
 
@@ -155,14 +155,14 @@ fun ureRegion(content: Ure, regionName: Ure? = null) = ure {
 fun ureWithSpecialRegion(regionLabel: String) = ure {
     1 of ureWhateva().withName("before")
     @OptIn(DelicateApi::class)
-    1 of ureRegion(ureWhateva(), ir("\\[$regionLabel\\]")).withName("region")
+    1 of ureRegion(ureWhateva(), ureIR("\\[$regionLabel\\]")).withName("region")
     1 of ureWhateva(reluctant = false).withName("after")
 }
 
 
 @OptIn(DelicateApi::class)
 fun ureKeywordAndOptArg(keyword: String, arg: Ure? = null, separator: Ure = chSpaceInLine.timesMin(1)) =
-    ureKeywordAndOptArg(ir(keyword).withWordBoundaries(), arg, separator)
+    ureKeywordAndOptArg(ureIR(keyword).withWordBoundaries(), arg, separator)
 
 fun ureKeywordAndOptArg(
     keyword: Ure,

@@ -34,11 +34,11 @@ import pl.mareklangiewicz.annotations.*
 fun ureStartTag(name: String, vararg expectedAttrs: Ure) = ureSomeTag(name, *expectedAttrs)
 
 @OptIn(DelicateApi::class)
-fun ureEndTag(name: String) = ureSomeTag(name, ureBegin = ir("</"))
+fun ureEndTag(name: String) = ureSomeTag(name, ureBegin = ureIR("</"))
 
 @OptIn(DelicateApi::class)
 fun ureCollapsedTag(name: String, vararg expectedAttrs: Ure) =
-    ureSomeTag(name, *expectedAttrs, ureEnd = ir("/>"))
+    ureSomeTag(name, *expectedAttrs, ureEnd = ureIR("/>"))
 
 fun Ure.withTagAround(name: String, vararg expectedAttrs: Ure, withOptSpacesAroundContent: Boolean = true) = ure {
     1 of ureStartTag(name, *expectedAttrs)
@@ -58,10 +58,10 @@ fun Ure.withTagAroundOrJustTagCollapsed(
     withOptSpacesAroundContent: Boolean = true,
     allowJustTagCollapsed: Boolean = true,
 ) = ure {
-    1 of ureSomeTag(name, *expectedAttrs, ureEnd = ir("/?>"))
-    val collapsed = ir("/>").lookBehind()
+    1 of ureSomeTag(name, *expectedAttrs, ureEnd = ureIR("/?>"))
+    val collapsed = ureIR("/>").lookBehind()
     val notCollapsed = ure {
-        1 of ir("/>").lookBehind(positive = false)
+        1 of ureIR("/>").lookBehind(positive = false)
         1 of this@withTagAroundOrJustTagCollapsed
             .withOptSpacesAround(allowBefore = withOptSpacesAroundContent, allowAfter = withOptSpacesAroundContent)
         1 of ureEndTag(name)
@@ -101,7 +101,7 @@ private fun ureSomeTag(
     ureEnd: Ure = ch(">"),
 ) = ure {
     1 of ureBegin
-    1 of ir(name).withWordBoundaries().withOptSpacesAround()
+    1 of ureIR(name).withWordBoundaries().withOptSpacesAround()
         // boundaries in case we have no space after (we need to match <tag> but not glued <tagargname>)
     1 of ureOptIgnoredAttrsOptSpaces
     for (expectedAttr in expectedAttrs) {
@@ -117,7 +117,7 @@ fun ureExpectAttr(
     value: Ure = ureWhatevaInLine(), // let's keep default inline, matching long multiline whateva can lead to hard to debug mismatches
     valueGroupName: String? = name.filter { it != '-' },
     optional: Boolean = false,
-) = ureTagAttr(ir(name), value, valueGroupName).let { if (optional) ure { 0..1 of it } else it }
+) = ureTagAttr(ureIR(name), value, valueGroupName).let { if (optional) ure { 0..1 of it } else it }
 
 fun ureTagAttr(
     name: Ure = ureIdent(allowHyphensInside = true),

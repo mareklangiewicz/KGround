@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.kground.req
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
 import kotlin.text.RegexOption.*
@@ -25,13 +26,13 @@ import kotlin.text.RegexOption.*
 
 
 
-/** UreIR is the traditional regular expression - no human should read - kind of "intermediate representation" */
+/** IR is the traditional regular expression - no human should read - kind of "intermediate representation" */
 @JvmInline
-value class UreIR @DelicateApi internal constructor(val str: String) {
+value class IR @DelicateApi internal constructor(val str: String) {
     override fun toString(): String = str
 }
 
-@OptIn(DelicateApi::class) private val String.asUreIR get() = UreIR(this)
+@OptIn(DelicateApi::class) private val String.asIR get() = IR(this)
 
 fun ure(vararg opts: RegexOption, init: UreProduct.() -> Unit) = ure(enable = opts.toSet(), disable = emptySet(), init)
 
@@ -68,14 +69,14 @@ fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolea
 
 sealed interface Ure {
 
-    fun toIR(): UreIR
+    fun toIR(): IR
 
     /**
      * Optionally wraps in non-capturing group before generating IR, so it's safe to use with quantifiers, unions, etc
      * Wrapping is done only when needed. For example concatenation(product) with more than one element is wrapped.
      * (UreProduct with 0 elements also is wrapped - so f. e. external UreQuantifier only catches empty product)
      */
-    fun toClosedIR(): UreIR
+    fun toClosedIR(): IR
 
     /**
      * It sets MULTILINE by default.
@@ -103,10 +104,10 @@ infix fun Ure.then(that: Ure) = UreProduct(mutableListOf(this, that))
 @JvmInline
 value class UreProduct internal constructor(val product: MutableList<Ure> = mutableListOf()) : Ure {
 
-    override fun toIR(): UreIR = when (product.size) {
-        0 -> "".asUreIR
+    override fun toIR(): IR = when (product.size) {
+        0 -> "".asIR
         1 -> product[0].toIR()
-        else -> product.joinToString("") { if (it is UreProduct) it.toIR().str else it.toClosedIR().str }.asUreIR
+        else -> product.joinToString("") { if (it is UreProduct) it.toIR().str else it.toClosedIR().str }.asIR
     }
 
     override fun toClosedIR() = when (product.size) {
@@ -141,16 +142,16 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
 }
 
 data class UreUnion internal constructor(val first: Ure, val second: Ure) : Ure {
-    override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asUreIR
+    override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asIR
     override fun toClosedIR() = this.groupNonCapt().toIR()
 }
 
 sealed interface UreGroup : Ure {
     val content: Ure
     private val contentIR get() = content.toIR()
-    val typeIR: UreIR // it's not full IR but just the part that signifies the type of group
+    val typeIR: IR // it's not full IR but just the part that signifies the type of group
 
-    override fun toIR(): UreIR = "($typeIR$contentIR)".asUreIR
+    override fun toIR(): IR = "($typeIR$contentIR)".asIR
     // looks like all possible typeIR prefixes can not be confused with first contentIR characters.
     // (meaning: RE designers thought about it, so I don't have to be extra careful here)
 
@@ -158,17 +159,17 @@ sealed interface UreGroup : Ure {
 }
 
 data class UreNamedGroup internal constructor(override val content: Ure, val name: String) : UreGroup {
-    override val typeIR get() = "?<$name>".asUreIR
+    override val typeIR get() = "?<$name>".asIR
 }
 
 @JvmInline
 value class UreNonCaptGroup internal constructor(override val content: Ure) : UreGroup {
-    override val typeIR get() = "?:".asUreIR
+    override val typeIR get() = "?:".asIR
 }
 
 @JvmInline
 value class UreCaptGroup internal constructor(override val content: Ure) : UreGroup {
-    override val typeIR get() = "".asUreIR
+    override val typeIR get() = "".asIR
 }
 
 // TODO: test it!
@@ -182,7 +183,7 @@ data class UreChangeOptionsGroup internal constructor(
         require(enable.isNotEmpty() || disable.isNotEmpty()) { "No options provided" }
     }
 
-    override val typeIR get() = "?${enable.ir}-${disable.ir}:".asUreIR // TODO_later: check if either set can be empty
+    override val typeIR get() = "?${enable.ir}-${disable.ir}:".asIR // TODO_later: check if either set can be empty
 
     // TODO: review flags we support; support non-multi-platform, but add annotations and docs for different platforms.
     private val RegexOption.code
@@ -218,7 +219,7 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
             false to true -> "?<="
             false to false -> "?<!"
             else -> error("Impossible case")
-        }.asUreIR
+        }.asIR
 }
 
 
@@ -230,8 +231,8 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
         nr == null && name == null && error("Either nr or name has to be provided for the group reference")
     }
 
-    override fun toIR(): UreIR = if (nr != null) "\\$nr".asUreIR else "\\k<$name>".asUreIR
-    override fun toClosedIR(): UreIR = toIR()
+    override fun toIR(): IR = if (nr != null) "\\$nr".asIR else "\\k<$name>".asIR
+    override fun toClosedIR(): IR = toIR()
 }
 
 const val MAX = Int.MAX_VALUE
@@ -252,7 +253,7 @@ data class UreQuantifier internal constructor(
     }
 
     val greedy get() = !reluctant && !possessive
-    override fun toIR(): UreIR {
+    override fun toIR(): IR {
         val timesIR = when (times) {
             1..1 -> return content.toIR()
             0..1 -> "?"
@@ -263,13 +264,13 @@ data class UreQuantifier internal constructor(
                 MAX -> "{${times.first},}"
                 else -> "{${times.first},${times.last}}"
             }
-        }.asUreIR
+        }.asIR
         val suffixIR = when {
             reluctant -> "?"
             possessive -> "+"
             else -> ""
-        }.asUreIR
-        return "${content.toClosedIR()}$timesIR$suffixIR".asUreIR
+        }.asIR
+        return "${content.toClosedIR()}$timesIR$suffixIR".asIR
     }
     //    override fun toClosedIR(): UreIR = ncapt(this).toIR()
     override fun toClosedIR() = toIR()
@@ -277,48 +278,52 @@ data class UreQuantifier internal constructor(
 }
 
 @JvmInline
-value class UreChar @DelicateApi internal constructor(val ir: UreIR) : Ure {
+value class UreChar @DelicateApi internal constructor(val ir: IR) : Ure {
     // TODO_maybe: separate sealed class for specials etc. We should never ask user to manually provide UreIR
     init {
-        // TODO NOW: check if ir correctly represent full "char-like" regex.
-        //   (escaped chars, or surrogate pairs (two code units representing one code point), are also "char-like")
+        req(ir.isCharLike) { "Provided IR doesn't represent a character: $ir" }
     }
-    override fun toIR(): UreIR = ir
+    override fun toIR(): IR = ir
     @OptIn(DelicateApi::class)
-    override fun toClosedIR(): UreIR = ir(ir).toClosedIR()
+    override fun toClosedIR(): IR = ureIR(ir).toClosedIR()
 }
+
+private val IR.isCharLike: Boolean get() = true
+// FIXME: check if IR is correct full regex matching "char-like" texts (BTW use Ure for checking :-))
+//   escaped chars, char classes, or surrogate pairs (two codeunits representing one codepoint), are also "char-like")
+
 
 // TODO: can I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
 data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : Ure {
-    override fun toClosedIR(): UreIR = toIR()
-    override fun toIR(): UreIR = chars
+    override fun toClosedIR(): IR = toIR()
+    override fun toIR(): IR = chars
         .joinToString("", if (positive) "[" else "[^", "]") {
             if (it in setOf("]", "\\", "-")) "\\$it" else it
         }
-        .asUreIR
+        .asIR
 }
 
 // TODO_later: more complicated combinations of char classes
 // TODO_later: analyze if some special kotlin progression/range would fit here better
 data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : Ure {
     private val neg = if (positive) "" else "^"
-    override fun toIR(): UreIR = "[$neg$from-$to]".asUreIR
-    override fun toClosedIR(): UreIR = toIR()
+    override fun toIR(): IR = "[$neg$from-$to]".asIR
+    override fun toClosedIR(): IR = toIR()
 }
 
 data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : Ure {
-    override fun toClosedIR(): UreIR = toIR()
-    override fun toIR(): UreIR =  "\\${if (positive) "p" else "P"}{$prop}".asUreIR
+    override fun toClosedIR(): IR = toIR()
+    override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
 }
 
 @JvmInline
 /** "Dirty way to inject whole strings fast.") */
 // TODO_someday_maybe: think what would be better.
 // Maybe still ask user for string, but validate and transform to the actual UreProduct of UreChar's
-value class UreRawIR @DelicateApi internal constructor(val ir: UreIR) : Ure {
+value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
 
-    override fun toIR(): UreIR = ir
-    override fun toClosedIR(): UreIR = if (isClosed) ir else this.groupNonCapt().toIR()
+    override fun toIR(): IR = ir
+    override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
     private val isClosed get() = when {
         ir.str.length == 1 -> true
         ir.str.length == 2 && ir.str[0] == '\\' -> true
@@ -329,8 +334,8 @@ value class UreRawIR @DelicateApi internal constructor(val ir: UreIR) : Ure {
 
 @JvmInline
 value class UreQuote internal constructor(val str: String) : Ure {
-    override fun toIR() = "\\Q$str\\E".asUreIR
-    override fun toClosedIR(): UreIR = toIR()
+    override fun toIR() = "\\Q$str\\E".asIR
+    override fun toClosedIR(): IR = toIR()
 }
 
 // It only returns NotPortableApi ure if argument was already NotPortableApi (UreCharProp).
@@ -347,7 +352,7 @@ operator fun Ure.not(): Ure = when (this) {
         // TODO: check if particular ir is appropriate for such wrapping
         // TODO_later: other special cases?
     }
-    is UreRawIR -> when (this) {
+    is UreIR -> when (this) {
         bchWord -> bchWordNot
         bchWordNot -> bchWord
         else -> error("This UreRawIR can not be negated")
@@ -373,10 +378,10 @@ operator fun Ure.not(): Ure = when (this) {
 // TODO_later: experiment more with different operators overloading (after impl some working examples)
 //  especially indexed access operators and invoke operators..
 
-@DelicateApi fun ir(ir: UreIR) = UreRawIR(ir)
-@DelicateApi fun ir(str: String) = ir(UreIR(str))
-@DelicateApi fun ch(ir: UreIR) = UreChar(ir)
-@OptIn(DelicateApi::class) fun ch(str: String) = ch(UreIR(str)) // TODO check for the wrong strings in UreChar.init.
+@DelicateApi fun ureIR(ir: IR) = UreIR(ir)
+@DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
+@OptIn(DelicateApi::class) fun ch(ir: IR) = UreChar(ir) // TODO check for the wrong strings in UreChar.init.
+@OptIn(DelicateApi::class) fun ch(str: String) = ch(str.asIR)
 fun ch(chr: Char) = ch(chr.toString())
 
 
@@ -385,42 +390,41 @@ fun ch(chr: Char) = ch(chr.toString())
 
 
 // just private shortcuts
-@OptIn(DelicateApi::class) private val String.ch get() = ch(this)
-@OptIn(DelicateApi::class) private val String.raw get() = ir(this)
+@OptIn(DelicateApi::class) private inline val String.c get() = ch(this)
 
-val chBackSlash = "\\\\".ch
+val chBackSlash = "\\\\".c
 
-fun chUniCode(name: String) = "\\N{$name}".ch
+fun chUniCode(name: String) = "\\N{$name}".c
 
-val chTab = "\\t".ch
-val chLF = "\\n".ch
-val chCR = "\\r".ch
-val chFF = "\\f".ch
-val chAlert = "\\a".ch
-val chEsc = "\\e".ch
+val chTab = "\\t".c
+val chLF = "\\n".c
+val chCR = "\\r".c
+val chFF = "\\f".c
+val chAlert = "\\a".c
+val chEsc = "\\e".c
 
-val chDot = "\\.".ch
-val chAny = ".".ch
-val chAnyMultiLine = "(?s:.)".ch
+val chDot = "\\.".c
+val chAny = ".".c
+val chAnyMultiLine = "(?s:.)".c
 
-val chDigit = "\\d".ch
+val chDigit = "\\d".c
 
-val chSpace = "\\s".ch
-val chSpaceInLine = " ".ch or chTab
+val chSpace = "\\s".c
+val chSpaceInLine = " ".c or chTab
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chDigit"))
-val chNonDigit = "\\D".ch
+val chNonDigit = "\\D".c
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chSpace"))
-val chNonSpace = "\\S".ch
+val chNonSpace = "\\S".c
 
 
 
 /** Same as [a-zA-Z0-9_] */
-val chWord = "\\w".ch
+val chWord = "\\w".c
 
 /** Same as [^a-zA-Z0-9_] */
-val chNonWord = "\\W".ch
+val chNonWord = "\\W".c
 
 fun chWord(orDot: Boolean = false, orHyphen: Boolean = false) = oneCharOf(
     "\\w" + if (orDot) "." else "" + if (orHyphen) "\\-" else ""
@@ -547,14 +551,16 @@ val chpGreek = chp("sc=Greek")
 
 // boundaries (b...)
 
-val bBOLine = "^".raw
-val bEOLine = "$".raw
-val bBOInput = "\\A".raw
-val bEOInput = "\\z".raw
-val bEOPreviousMatch = "\\G".raw
+@OptIn(DelicateApi::class) private inline val String.r get() = ureIR(this)
 
-val bchWord = "\\b".raw
-val bchWordNot = "\\B".raw // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
+val bBOLine = "^".r
+val bEOLine = "$".r
+val bBOInput = "\\A".r
+val bEOInput = "\\z".r
+val bEOPreviousMatch = "\\G".r
+
+val bchWord = "\\b".r
+val bchWordNot = "\\B".r // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
 val bBOWord = bchWord then chWord.lookAhead() // emulating sth like in vim: "\<"
@@ -562,10 +568,10 @@ val bBOWord = bchWord then chWord.lookAhead() // emulating sth like in vim: "\<"
 val bEOWord = bchWord then chWord.lookBehind() // emulating sth like in vim: "\>"
 
 /** Any Unicode linebreak sequence, is equivalent to \u000D\u000A|[\u000A\u000B\u000C\u000D\u0085\u2028\u2029] */
-val ureLineBreak = "\\R".raw
+val ureLineBreak = "\\R".r
 
 @DelicateApi
-fun control(x: String) = "\\c$x".ch // FIXME_later: what exactly is this?? (see std Pattern.java)
+fun control(x: String) = "\\c$x".c // FIXME_later: what exactly is this?? (see std Pattern.java)
 fun oneCharOf(vararg chars: String) = UreCharSet(chars.toSet()) // TODO_maybe: Use UreChar as vararg type
 fun oneCharNotOf(vararg chars: String) = UreCharSet(chars.toSet(), positive = false) // TODO_maybe: as above
 fun oneCharOfRange(from: String, to: String) = UreCharRange(from, to)
