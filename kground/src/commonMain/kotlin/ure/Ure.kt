@@ -25,47 +25,13 @@ import kotlin.text.RegexOption.*
  */
 
 
+// region [Ure Core Classes]
 
 /** IR is the traditional regular expression - no human should read - kind of "intermediate representation" */
 @JvmInline
 value class IR @DelicateApi internal constructor(val str: String) {
     override fun toString(): String = str
 }
-
-@OptIn(DelicateApi::class) private val String.asIR get() = IR(this)
-
-fun ure(vararg opts: RegexOption, init: UreProduct.() -> Unit) = ure(enable = opts.toSet(), disable = emptySet(), init)
-
-// TODO_later: maybe remove options here? and always use Ure.withOptions? (check in practice first)
-fun ure(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet(), init: UreProduct.() -> Unit) =
-    if (enable.isEmpty() && disable.isEmpty()) UreProduct().apply(init)
-    else UreProduct().apply(init).withOptions(enable, disable)
-
-@SecondaryApi("Use Ure.withOptions", ReplaceWith("content.withOptions(enable, disable)"))
-fun ureWithOptions(content: Ure, enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
-    UreChangeOptionsGroup(content, enable, disable)
-
-// TODO_someday_maybe: maybe remove name and opts here? and always use Ure.with...? (check in practice first)
-fun ure(name: String, vararg opts: RegexOption, init: UreProduct.() -> Unit) =
-    if (opts.isEmpty()) UreProduct().apply(init).withName(name)
-    else UreProduct().apply(init).withOptionsEnabled(*opts).withName(name)
-
-@SecondaryApi("Use Ure.withName", ReplaceWith("content.withName(name"))
-fun ureWithName(name: String, content: Ure) = UreNamedGroup(content, name)
-
-fun Ure.withName(name: String?) = if (name == null) this else UreNamedGroup(this, name)
-fun Ure.withOptions(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
-    UreChangeOptionsGroup(this, enable, disable)
-
-fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = options.toSet())
-fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
-
-fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
-    if (!boundaryBefore && !boundaryAfter) this else ure {
-        if (boundaryBefore) 1 of bBOWord
-        1 of this@withWordBoundaries // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
-        if (boundaryAfter) 1 of bEOWord
-    }
 
 sealed interface Ure {
 
@@ -96,9 +62,6 @@ sealed interface Ure {
     // I'm leaving it for now to have more unique names and less clashes, but design is not final.
 }
 
-infix fun Ure.or(that: Ure) = UreUnion(this, that)
-infix fun Ure.then(that: Ure) = UreProduct(mutableListOf(this, that))
-// Do not rename "then" to "and". The "and" is more like special lookahead/lookbehind group
 
 
 @JvmInline
@@ -236,10 +199,8 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
     override fun toClosedIR(): IR = toIR()
 }
 
-const val MAX = Int.MAX_VALUE
-
 /**
- * By default it's "greedy" - tries to match as many "times" as possible. But backs off one by one if it would fail.
+ * By default, it's "greedy" - tries to match as many "times" as possible, but backs off one by one when about to fail.
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
  * @param possessive - It's like more greedy than default greedy. Never backs off - fails instead.
  */
@@ -339,6 +300,53 @@ value class UreQuote internal constructor(val str: String) : Ure {
     override fun toClosedIR(): IR = toIR()
 }
 
+// endregion [Ure Core Classes]
+
+
+// region [Ure Core DSL fun]
+
+const val MAX = Int.MAX_VALUE
+
+@OptIn(DelicateApi::class) private val String.asIR get() = IR(this)
+
+fun ure(vararg opts: RegexOption, init: UreProduct.() -> Unit) = ure(enable = opts.toSet(), disable = emptySet(), init)
+
+// TODO_later: maybe remove options here? and always use Ure.withOptions? (check in practice first)
+fun ure(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet(), init: UreProduct.() -> Unit) =
+    if (enable.isEmpty() && disable.isEmpty()) UreProduct().apply(init)
+    else UreProduct().apply(init).withOptions(enable, disable)
+
+@SecondaryApi("Use Ure.withOptions", ReplaceWith("content.withOptions(enable, disable)"))
+fun ureWithOptions(content: Ure, enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
+    UreChangeOptionsGroup(content, enable, disable)
+
+// TODO_someday_maybe: maybe remove name and opts here? and always use Ure.with...? (check in practice first)
+fun ure(name: String, vararg opts: RegexOption, init: UreProduct.() -> Unit) =
+    if (opts.isEmpty()) UreProduct().apply(init).withName(name)
+    else UreProduct().apply(init).withOptionsEnabled(*opts).withName(name)
+
+@SecondaryApi("Use Ure.withName", ReplaceWith("content.withName(name"))
+fun ureWithName(name: String, content: Ure) = UreNamedGroup(content, name)
+
+fun Ure.withName(name: String?) = if (name == null) this else UreNamedGroup(this, name)
+fun Ure.withOptions(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
+    UreChangeOptionsGroup(this, enable, disable)
+
+fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = options.toSet())
+fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
+
+fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
+    if (!boundaryBefore && !boundaryAfter) this else ure {
+        if (boundaryBefore) 1 of bBOWord
+        1 of this@withWordBoundaries // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
+        if (boundaryAfter) 1 of bEOWord
+    }
+
+infix fun Ure.or(that: Ure) = UreUnion(this, that)
+infix fun Ure.then(that: Ure) = UreProduct(mutableListOf(this, that))
+// Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
+
+
 // It only returns NotPortableApi ure if argument was already NotPortableApi (UreCharProp).
 @OptIn(NotPortableApi::class, SecondaryApi::class, DelicateApi::class)
 operator fun Ure.not(): Ure = when (this) {
@@ -356,7 +364,7 @@ operator fun Ure.not(): Ure = when (this) {
     is UreIR -> when (this) {
         bchWord -> bchWordNot
         bchWordNot -> bchWord
-        else -> error("This UreRawIR can not be negated")
+        else -> error("This UreIR can not be negated")
     }
 
     is UreCharRange -> UreCharRange(from, to, !positive)
@@ -381,6 +389,14 @@ operator fun Ure.not(): Ure = when (this) {
 
 @DelicateApi fun ureIR(ir: IR) = UreIR(ir)
 @DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
+
+fun ureQuote(string: String) = UreQuote(string)
+
+// endregion [Ure Core DSL fun]
+
+
+// region [Ure Character Related Stuff]
+
 @OptIn(DelicateApi::class) fun ch(ir: IR) = UreChar(ir) // TODO check for the wrong strings in UreChar.init.
 @OptIn(DelicateApi::class) fun ch(str: String) = ch(str.asIR)
 fun ch(chr: Char) = ch(chr.toString())
@@ -425,13 +441,14 @@ val chNonSpace = "\\S".c
 val chWord = "\\w".c
 
 /** Same as [^a-zA-Z0-9_] */
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord"))
 val chNonWord = "\\W".c
 
 fun chWord(orDot: Boolean = false, orHyphen: Boolean = false) = oneCharOf(
     "\\w" + if (orDot) "." else "" + if (orHyphen) "\\-" else ""
 )
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord(orDot = norDot, orHyphen = norHyphen"))
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord(orDot = norDot, orHyphen = norHyphen)"))
 fun chNonWord(norDot: Boolean = false, norHyphen: Boolean = false) = !chWord(orDot = norDot, orHyphen = norHyphen)
 // Let it stay as a hint for user that negation (operator) does the same.
 
@@ -548,9 +565,19 @@ val chpLatin = chp("sc=Latin")
 @NotPortableApi("Currently does NOT compile (Ure.compile) on LINUX.")
 val chpGreek = chp("sc=Greek")
 
+@DelicateApi
+fun control(x: String) = "\\c$x".c // FIXME_later: what exactly is this?? (see std Pattern.java)
+
+fun oneCharOf(vararg chars: String) = UreCharSet(chars.toSet()) // TODO_maybe: Use UreChar as vararg type
+fun oneCharNotOf(vararg chars: String) = UreCharSet(chars.toSet(), positive = false) // TODO_maybe: as above
+fun oneCharOfRange(from: String, to: String) = UreCharRange(from, to)
+fun oneCharNotOfRange(from: String, to: String) = UreCharRange(from, to, positive = false)
 
 
-// boundaries (b...)
+// endregion [Ure Character Related Stuff]
+
+
+// region [Ure Boundaries Related Stuff]
 
 @OptIn(DelicateApi::class) private inline val String.r get() = ureIR(this)
 
@@ -571,13 +598,10 @@ val bEOWord = bchWord then chWord.lookBehind() // emulating sth like in vim: "\>
 /** Any Unicode linebreak sequence, is equivalent to \u000D\u000A|[\u000A\u000B\u000C\u000D\u0085\u2028\u2029] */
 val ureLineBreak = "\\R".r
 
-@DelicateApi
-fun control(x: String) = "\\c$x".c // FIXME_later: what exactly is this?? (see std Pattern.java)
-fun oneCharOf(vararg chars: String) = UreCharSet(chars.toSet()) // TODO_maybe: Use UreChar as vararg type
-fun oneCharNotOf(vararg chars: String) = UreCharSet(chars.toSet(), positive = false) // TODO_maybe: as above
-fun oneCharOfRange(from: String, to: String) = UreCharRange(from, to)
-fun oneCharNotOfRange(from: String, to: String) = UreCharRange(from, to, positive = false)
+// endregion [Ure Boundaries Related Stuff]
 
+
+// region [Ure Groups Related Stuff]
 
 fun Ure.group(capture: Boolean = true, name: String? = null) = when {
     name != null -> {
@@ -607,6 +631,12 @@ fun ureLookAhead(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(in
 @SecondaryApi("Use Ure.lookBehind", ReplaceWith("ure(init = init).lookBehind(positive)"))
 fun ureLookBehind(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(init = init).lookBehind(positive)
 
+fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
+
+// endregion [Ure Groups Related Stuff]
+
+
+// region [Ure Quantifiers Related Stuff]
 
 fun Ure.times(exactly: Int) = UreQuantifier(this, exactly..exactly)
 
@@ -636,9 +666,10 @@ fun quantify(content: Ure, times: IntRange, reluctant: Boolean = false, possessi
 fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false, init: UreProduct.() -> Unit) =
     ure(init = init).times(times, reluctant, possessive)
 
-fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
+// endregion [Ure Quantifiers Related Stuff]
 
-fun ureQuote(string: String) = UreQuote(string)
+
+// region [Ure Match Related Stuff]
 
 fun CharSequence.replace(ure: Ure, transform: (MatchResult) -> CharSequence) = ure.compile().replace(this, transform)
 fun CharSequence.replace(ure: Ure, replacement: String): String = ure.compile().replace(this, replacement)
@@ -679,3 +710,5 @@ value class MatchNamedValues internal constructor(private val groups: MatchNamed
     override fun containsValue(value: String?): Boolean = error("Operation not implemented.")
     override fun containsKey(key: String): Boolean = error("Operation not implemented.")
 }
+
+// endregion [Ure Match Related Stuff]
