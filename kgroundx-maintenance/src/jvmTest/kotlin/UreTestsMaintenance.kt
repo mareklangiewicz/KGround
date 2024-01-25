@@ -16,6 +16,11 @@ class UreTestsMaintenance {
     }
 
     private fun testUreMultiplatform() {
+    }
+
+    @TestFactory
+    @Disabled("Has side effects in other project. Or rather assumes existence of UWidgets sources.")
+    fun testsOnUWidgetsFiles() = uspekTestFactory {
         "On UWidgetsCmnKt" o {
             val path = "/home/marek/code/kotlin/UWidgets/uwidgets/src/commonMain/kotlin/uwidgets/UWidgets.cmn.kt".toPath()
             val content = SYSTEM.readUtf8(path)
