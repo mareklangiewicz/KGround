@@ -5,7 +5,9 @@ import pl.mareklangiewicz.uspek.*
 
 fun testSomeUreBasicStuff() {
     testUreBasicEmail()
-
+    // TODO NOW
+    // TODO("Test some withOptions")
+    // TODO("Test some quantifiers (is UreQuantifier.toClosedIR() correct?)")
 }
 
 @OptIn(DelicateApi::class)

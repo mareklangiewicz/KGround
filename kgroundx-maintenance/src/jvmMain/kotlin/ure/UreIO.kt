@@ -5,8 +5,8 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
 
 
-fun FileSystem.readAndMatchUre(file: Path, vararg opts: RegexOption, init: UreProduct.() -> Unit): MatchResult? =
-    readAndMatchUre(file, ure(*opts) { init() })
+fun FileSystem.readAndMatchUre(file: Path, init: UreProduct.() -> Unit): MatchResult? =
+    readAndMatchUre(file, ure(init = init))
 
 fun FileSystem.readAndMatchUre(file: Path, ure: Ure): MatchResult? = readUtf8(file).let { ure.compile().matchEntire(it) }
 

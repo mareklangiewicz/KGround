@@ -3,6 +3,8 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.kground.bad
+import pl.mareklangiewicz.kground.chk
 import pl.mareklangiewicz.kground.req
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
@@ -38,17 +40,17 @@ sealed interface Ure {
     fun toIR(): IR
 
     /**
-     * Optionally wraps in non-capturing group before generating IR, so it's safe to use with quantifiers, unions, etc
-     * Wrapping is done only when needed. For example concatenation(product) with more than one element is wrapped.
-     * (UreProduct with 0 elements also is wrapped - so f. e. external UreQuantifier only catches empty product)
+     * Optionally wraps in a non-capturing group before generating IR, so it's safe to use with quantifiers, unions, etc.
+     * Wrapping is done only when needed. For example, concatenation(product) with more than one element is wrapped.
+     * (UreProduct with zero elements also is wrapped - so f. e. external UreQuantifier only catches empty product)
      */
     fun toClosedIR(): IR
 
     /**
      * It sets MULTILINE by default.
-     * Also I decided NOT to use DO_MATCHES_ALL by default. Lets keep "any" as single line matcher.
-     * Lets use explicit ureAnyLine and/or ureWhateva utils instead of changing "any" meaning freely.
-     * Lets assume in all normal val/fun ureSth.. that DOT_MATCHES_ALL is disabled
+     * Also, I decided NOT to use DOT_MATCHES_ALL by default. Let's keep "any" as single line matcher.
+     * Let's use explicit ureAnyLine and/or ureWhateva utils instead of changing "any" meaning freely.
+     * Let's assume in all normal val/fun ureSth... That DOT_MATCHES_ALL is disabled
      * (so we don't enable/disable it all the time "just to make sure")
      */
     fun compile(vararg options: RegexOption) = compileMultiLine(*options)
@@ -56,10 +58,7 @@ sealed interface Ure {
     fun compileMultiLine(vararg options: RegexOption) = Regex(toIR().str, setOf(MULTILINE) + options)
 
     fun compileSingleLine(vararg options: RegexOption) = Regex(toIR().str, options.toSet())
-        .also { check(MULTILINE !in options) }
-
-    // TODO_later: experiment with dropping U (Micro) prefix in classes nested in Ure when I have some examples working.
-    // I'm leaving it for now to have more unique names and less clashes, but design is not final.
+        .also { chk(MULTILINE !in options) }
 }
 
 
@@ -75,15 +74,15 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
 
     override fun toClosedIR() = when (product.size) {
         1 -> product[0].toClosedIR()
-        else -> this.groupNonCapt().toIR() // in 0 case we also want ncapt!
+        else -> this.groupNonCapt().toIR() // In case 0, we also want to wrap it in groupNonCapt!
         // To avoid issues when outside operator captures something else instead of empty product.
-        // I decided NOT to throw IllegalStateError in 0 case so we can always monitor IR in half-baked UREs.
-        // (like when creating UREs with some compose UI)
+        // I decided NOT to throw IllegalStateError in case 0, so we can always monitor IR in half-baked UREs.
+        // (Like when creating UREs with some @Composable UI)
     }
 
     // Can't decide if this syntax is better in case of "1 of ..."; let's leave it for now.
     // TODO_later: rethink syntax when context receivers become multiplatform.
-    //   Maybe somehow force '+' in other cases too, but I don't want to force syntax with additional parentheses.
+    //   Maybe somehow force '+' in other cases too, but I don't want to force some syntax with additional parentheses.
     operator fun Ure.unaryPlus() { product.add(this) }
 
     class UreX internal constructor(val times: IntRange, val reluctant: Boolean, val possessive: Boolean)
@@ -116,8 +115,8 @@ sealed interface UreGroup : Ure {
     val typeIR: IR // it's not full IR but just the part that signifies the type of group
 
     override fun toIR(): IR = "($typeIR$contentIR)".asIR
-    // looks like all possible typeIR prefixes can not be confused with first contentIR characters.
-    // (meaning: RE designers thought about it, so I don't have to be extra careful here)
+    // it looks like all possible typeIR prefixes cannot be confused with first contentIR characters.
+    // (meaning: RE designers thought about it, so I don't have to be extra careful here.)
 
     override fun toClosedIR() = toIR() // group is always "closed" - has parentheses outside
 }
@@ -136,31 +135,32 @@ value class UreCaptGroup internal constructor(override val content: Ure) : UreGr
     override val typeIR get() = "".asIR
 }
 
-// TODO: test it!
-data class UreChangeOptionsGroup internal constructor(
+data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal constructor(
     override val content: Ure,
     val enable: Set<RegexOption> = emptySet(),
     val disable: Set<RegexOption> = emptySet(),
 ) : UreGroup {
     init {
-        require((enable intersect disable).isEmpty()) { "Can not enable and disable the same option at the same time" }
-        require(enable.isNotEmpty() || disable.isNotEmpty()) { "No options provided" }
+        req((enable intersect disable).isEmpty()) { "Can not enable and disable the same option at the same time" }
+        req(enable.isNotEmpty() || disable.isNotEmpty()) { "No options provided" }
     }
 
     override val typeIR get() = "?${enable.ir}-${disable.ir}:".asIR // TODO_later: check if either set can be empty
 
-    // TODO: review flags we support; support non-multi-platform, but add annotations and docs for different platforms.
+    @Suppress("StructuralWrap", "GrazieInspection")
     private val RegexOption.code
         get() = when (this) {
+            // Note: Kotlin stdlib RegexOption will probably evolve, so I'll enable more options here in the future.
+            // See also: https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
             IGNORE_CASE -> "i"
             MULTILINE -> "m"
-            else -> error("Only multiplatform regex options are supported for now.")
-//            LITERAL -> TODO()
-//            UNIX_LINES -> "d"
-//            COMMENTS -> "x" // but not really supported... maybe in UreRawIR, but I wouldn't use it
-//            DOT_MATCHES_ALL -> "s" // s means - treat all as a single line (so dot matches terminators too)
-//            CANON_EQ -> TODO()
-//            // TODO_someday "u" is not supported (unicode case)
+            // LITERAL -> bad { "Looks like not even supported by kotlin stdlib RegexOption in common code." }
+            // UNIX_LINES -> "d" // bad { "Looks like not even supported by kotlin stdlib RegexOption in common code." }
+            // COMMENTS -> "x" // bad { "not really supported... maybe in UreIR, but I wouldn't use it." }
+            // DOT_MATCHES_ALL -> "s" // bad { "Looks like not even supported by kotlin stdlib RegexOption in common code." }
+            // CANON_EQ -> bad { "Looks like not even supported by kotlin stdlib RegexOption." }
+            // UNICODE_CASE -> "u" // bad { "Looks like not even supported by kotlin stdlib RegexOption in common code." }
+            else -> bad { "RegexOption: $this is not supported." }
         }
 
     private val Set<RegexOption>.ir get() = joinToString("") { it.code }
@@ -186,8 +186,8 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
         }.asIR
 }
 
+// TODO_someday_maybe: "independent"/"atomic" non-capturing group https://www.regular-expressions.info/atomic.html
 
-// TODO_someday: "independent" non-capturing group - what is that? (see Pattern.java)
 
 data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : Ure {
     init {
@@ -201,6 +201,7 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
 
 /**
  * By default, it's "greedy" - tries to match as many "times" as possible, but backs off one by one when about to fail.
+ * @param times - Uses shorter notation when appropriate, like: 0..1 -> "?"; 0..MAX -> "*"; 1..MAX -> "+"
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
  * @param possessive - It's like more greedy than default greedy. Never backs off - fails instead.
  */
@@ -234,43 +235,39 @@ data class UreQuantifier internal constructor(
         }.asIR
         return "${content.toClosedIR()}$timesIR$suffixIR".asIR
     }
-    //    override fun toClosedIR(): UreIR = ncapt(this).toIR()
+    // override fun toClosedIR(): IR = this.groupNonCapt().toIR()
     override fun toClosedIR() = toIR()
-    // TODO_later: I think it's correct, but should be analyzed more carefully (and write tests!).
+        // TODO: I think it's correct, but should be analyzed more carefully (and write some tests!).
 }
 
 @JvmInline
 value class UreChar @DelicateApi internal constructor(val ir: IR) : Ure {
-    // TODO_maybe: separate sealed class for specials etc. We should never ask user to manually provide UreIR
-    init {
-        req(ir.isCharLike) { "Provided IR doesn't represent a character: $ir" }
-    }
+    // TODO_someday_maybe: separate sealed class for specials etc. so we never ask user to manually provide IR
+    init { req(ir.isCharLike) { "Provided IR doesn't represent a character: $ir" } }
     override fun toIR(): IR = ir
     @OptIn(DelicateApi::class)
     override fun toClosedIR(): IR = ureIR(ir).toClosedIR()
 }
 
 private val IR.isCharLike: Boolean get() = true
-// FIXME: check if IR is correct full regex matching "char-like" texts (BTW use Ure for checking :-))
+// FIXME NOW: check if IR is correct full regex matching "char-like" texts (BTW use Ure for checking :-))
 //   escaped chars, char classes, or surrogate pairs (two codeunits representing one codepoint), are also "char-like")
 
 
-// TODO: can I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
+// TODO_someday_maybe: Should I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
 data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : Ure {
     override fun toClosedIR(): IR = toIR()
-    override fun toIR(): IR = chars
-        .joinToString("", if (positive) "[" else "[^", "]") {
-            if (it in setOf("]", "\\", "-")) "\\$it" else it
-        }
-        .asIR
+    override fun toIR(): IR = chars.joinToString("", if (positive) "[" else "[^", "]") {
+        if (it in setOf("]", "\\", "-")) "\\$it" else it
+    }.asIR
 }
 
 // TODO_later: more complicated combinations of char classes
 // TODO_later: analyze if some special kotlin progression/range would fit here better
 data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : Ure {
     private val neg = if (positive) "" else "^"
-    override fun toIR(): IR = "[$neg$from-$to]".asIR
     override fun toClosedIR(): IR = toIR()
+    override fun toIR(): IR = "[$neg$from-$to]".asIR
 }
 
 data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : Ure {
@@ -278,11 +275,10 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
     override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
 }
 
-@JvmInline
-/** "Dirty way to inject whole strings fast.") */
 // TODO_someday_maybe: think what would be better.
-// Maybe still ask user for string, but validate and transform to the actual UreProduct of UreChar's
-value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
+//   Maybe still ask user for string, but validate and transform to the actual UreProduct of UreChar's
+/** Dirty way to inject whole strings fast. */
+@JvmInline value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
 
     override fun toIR(): IR = ir
     override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
@@ -296,8 +292,8 @@ value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
 
 @JvmInline
 value class UreQuote internal constructor(val str: String) : Ure {
-    override fun toIR() = "\\Q$str\\E".asIR
     override fun toClosedIR(): IR = toIR()
+    override fun toIR() = "\\Q$str\\E".asIR
 }
 
 // endregion [Ure Core Classes]
@@ -309,30 +305,31 @@ const val MAX = Int.MAX_VALUE
 
 @OptIn(DelicateApi::class) private val String.asIR get() = IR(this)
 
-fun ure(vararg opts: RegexOption, init: UreProduct.() -> Unit) = ure(enable = opts.toSet(), disable = emptySet(), init)
+fun ure(name: String? = null, init: UreProduct.() -> Unit) =
+    UreProduct().apply(init).withName(name) // when name is null, the withName doesn't wrap ure at all.
 
-// TODO_later: maybe remove options here? and always use Ure.withOptions? (check in practice first)
-fun ure(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet(), init: UreProduct.() -> Unit) =
-    if (enable.isEmpty() && disable.isEmpty()) UreProduct().apply(init)
-    else UreProduct().apply(init).withOptions(enable, disable)
-
+@DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
+@NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 @SecondaryApi("Use Ure.withOptions", ReplaceWith("content.withOptions(enable, disable)"))
 fun ureWithOptions(content: Ure, enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
     UreChangeOptionsGroup(content, enable, disable)
-
-// TODO_someday_maybe: maybe remove name and opts here? and always use Ure.with...? (check in practice first)
-fun ure(name: String, vararg opts: RegexOption, init: UreProduct.() -> Unit) =
-    if (opts.isEmpty()) UreProduct().apply(init).withName(name)
-    else UreProduct().apply(init).withOptionsEnabled(*opts).withName(name)
 
 @SecondaryApi("Use Ure.withName", ReplaceWith("content.withName(name"))
 fun ureWithName(name: String, content: Ure) = UreNamedGroup(content, name)
 
 fun Ure.withName(name: String?) = if (name == null) this else UreNamedGroup(this, name)
+
+@DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
+@NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptions(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
     UreChangeOptionsGroup(this, enable, disable)
 
+@DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
+@NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = options.toSet())
+
+@DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
+@NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
 
 fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
@@ -605,7 +602,7 @@ val ureLineBreak = "\\R".r
 
 fun Ure.group(capture: Boolean = true, name: String? = null) = when {
     name != null -> {
-        require(capture) { "Named group is always capturing." }
+        req(capture) { "Named group is always capturing." }
         withName(name)
     }
     capture -> UreCaptGroup(this)

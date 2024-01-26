@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import kotlin.text.RegexOption.*
 
 fun urePackageLine(withNamePrefix: String = "ktPackage") = ureKtKeywordLine("package", withNamePrefix)
@@ -15,7 +16,7 @@ fun ureKtKeywordLine(keyword: String, withNamePrefix: String = keyword) =
     ).withName(withNamePrefix + "Line")
 
 
-@OptIn(DelicateApi::class)
+@OptIn(DelicateApi::class, NotPortableApi::class)
 private val ureLicenceMarker = (ureIR("licence") or ureIR("copyright")).withOptionsEnabled(IGNORE_CASE)
 
 fun ureLicenceComment(licenceMarker: Ure = ureLicenceMarker, withName: String = "ktLicenceComment") = ure {
