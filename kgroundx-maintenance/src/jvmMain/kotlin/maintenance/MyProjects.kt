@@ -45,6 +45,7 @@ internal suspend fun searchKotlinCodeInMyProjects(
 }
 
 
+// TODO_someday: sth like this public in UreIO.kt
 @DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesAround < 3.")
 private fun FileSystem.readAndFindUreLineContentWithSomeLinesAround(
     file: Path,
