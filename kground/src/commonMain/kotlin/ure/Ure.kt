@@ -69,7 +69,7 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
     override fun toIR(): IR = when (product.size) {
         0 -> "".asIR
         1 -> product[0].toIR()
-        else -> product.joinToString("") { if (it is UreProduct) it.toIR().str else it.toClosedIR().str }.asIR
+        else -> product.joinToString("") { if (it is UreProduct) it.toIR().str else it.toAtomicIR().str }.asIR
     }
 
     override fun toAtomicIR() = when (product.size) {
