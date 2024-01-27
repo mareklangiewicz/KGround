@@ -2,12 +2,34 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.uspek.*
+import kotlin.text.RegexOption.*
 
 fun testSomeUreBasicStuff() {
-    testUreBasicEmail()
-    // TODO NOW
-    // TODO("Test some withOptions")
+    testUreWithDifferentOptions()
     // TODO("Test some quantifiers (is UreQuantifier.toClosedIR() correct?)")
+    // TODO NOW
+
+    testUreBasicEmail()
+}
+
+
+@OptIn(DelicateApi::class)
+fun testUreWithDifferentOptions() {
+    val txt = "aBcDe\naBcDe\nABCDE"
+    val ureBOLaBcD = bBOLine then ureText("aBcD")
+    val ureBcDeEOL = ureText("BcDe") then bEOLine
+
+    "examples constructed as expected" o {
+        ureBOLaBcD.toIR() eq IR("^aBcD")
+        ureBcDeEOL.toIR() eq IR("BcDe\$")
+    }
+
+    "by default it gets compiled with just multiline option" o {
+        val re = ureBOLaBcD.compile()
+        re.options eq setOf(MULTILINE)
+    }
+
+    // TODO NOW: continue
 }
 
 @OptIn(DelicateApi::class)

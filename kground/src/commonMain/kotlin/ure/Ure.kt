@@ -4,7 +4,6 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.bad
-import pl.mareklangiewicz.kground.chk
 import pl.mareklangiewicz.kground.req
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
@@ -41,7 +40,7 @@ sealed interface Ure {
 
     /**
      * Optionally wraps in a non-capturing group before generating IR, so it's safe to use with quantifiers, unions, etc.
-     * Wrapping is done only when needed. For example, concatenation(product) with more than one element is wrapped.
+     * Wrapping is done only when needed. For example, [UreProduct] with more than one element is wrapped.
      * (UreProduct with zero elements also is wrapped - so f. e. external UreQuantifier only catches empty product)
      */
     fun toClosedIR(): IR
@@ -50,15 +49,16 @@ sealed interface Ure {
      * It sets MULTILINE by default.
      * Also, I decided NOT to use DOT_MATCHES_ALL by default. Let's keep "any" as single line matcher.
      * Let's use explicit ureAnyLine and/or ureWhateva utils instead of changing "any" meaning freely.
-     * Let's assume in all normal val/fun ureSth... That DOT_MATCHES_ALL is disabled
-     * (so we don't enable/disable it all the time "just to make sure")
+     * IMPORTANT:
+     * We assume in all normal val/fun ureSth... That DOT_MATCHES_ALL is DISABLED, and MULTILINE is ENABLED,
+     * so we don't have to enable/disable it all the time "just to make sure".
      */
-    fun compile(vararg options: RegexOption) = compileMultiLine(*options)
+    @OptIn(DelicateApi::class, NotPortableApi::class)
+    fun compile() = compileWithOptions(MULTILINE)
 
-    fun compileMultiLine(vararg options: RegexOption) = Regex(toIR().str, setOf(MULTILINE) + options)
-
-    fun compileSingleLine(vararg options: RegexOption) = Regex(toIR().str, options.toSet())
-        .also { chk(MULTILINE !in options) }
+    @DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
+    @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
+    fun compileWithOptions(vararg options: RegexOption) = Regex(toIR().str, options.toSet())
 }
 
 
@@ -290,10 +290,15 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
     // TODO_someday: analyze more carefully and drop grouping when actually not needed.
 }
 
-@JvmInline
-value class UreQuote internal constructor(val str: String) : Ure {
+@JvmInline value class UreQuote internal constructor(val str: String) : Ure {
     override fun toClosedIR(): IR = toIR()
     override fun toIR() = "\\Q$str\\E".asIR
+}
+
+@JvmInline value class UreText internal constructor(val str: String) : Ure {
+    override fun toClosedIR(): IR = this.groupNonCapt().toIR()
+    override fun toIR() = str.map { if (it in special) "\\$it" else "$it" }.joinToString("").asIR
+    private val special get() = "\\[].&^\$?*+{}|():!<>="
 }
 
 // endregion [Ure Core Classes]
@@ -387,7 +392,11 @@ operator fun Ure.not(): Ure = when (this) {
 @DelicateApi fun ureIR(ir: IR) = UreIR(ir)
 @DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
 
-fun ureQuote(string: String) = UreQuote(string)
+/** Wraps the [text] with \Q...\E, so it's interpreted as exact text to match (no chars treated as special). */
+fun ureQuote(text: String) = UreQuote(text)
+
+/** Similar to [ureQuote] but quotes each character (which could be treated as special) separately with backslash */
+fun ureText(text: String) = UreText(text)
 
 // endregion [Ure Core DSL fun]
 
