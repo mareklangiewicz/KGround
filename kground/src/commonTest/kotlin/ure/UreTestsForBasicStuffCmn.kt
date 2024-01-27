@@ -18,6 +18,8 @@ fun testUreWithDifferentOptions() {
 
     val txt = "aBcDe\naBcDe\nABCDE"
 
+    "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(txt).count() eq 2 }
+
     "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(txt).count() eq txt.length - 2 }
 
     "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(txt).count() eq txt.length }
@@ -26,8 +28,8 @@ fun testUreWithDifferentOptions() {
     val ureBcDeEOL = ureText("BcDe") then bEOLine
 
     "examples constructed as expected" o {
-        ureBOLaBcD.toIR() eq IR("^aBcD")
-        ureBcDeEOL.toIR() eq IR("BcDe\$")
+        ureBOLaBcD.toIR() eq IR("^(?:aBcD)")
+        ureBcDeEOL.toIR() eq IR("(?:BcDe)\$")
     }
 
     "by default it gets compiled with just multiline option" o {
