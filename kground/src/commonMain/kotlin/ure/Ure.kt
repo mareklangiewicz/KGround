@@ -47,8 +47,8 @@ sealed interface Ure {
 
     /**
      * It sets MULTILINE by default.
-     * Also, I decided NOT to use DOT_MATCHES_ALL by default. Let's keep "any" as single line matcher.
-     * Let's use explicit ureAnyLine and/or ureWhateva utils instead of changing "any" meaning freely.
+     * Also, I decided NOT to use DOT_MATCHES_ALL by default. Let's keep the ".": [chAnyInLine] as single line matcher.
+     * Let's use explicit [chAnyAtAll] instead of changing the "." meaning all the time.
      * IMPORTANT:
      * We assume in all normal val/fun ureSth... That DOT_MATCHES_ALL is DISABLED, and MULTILINE is ENABLED,
      * so we don't have to enable/disable it all the time "just to make sure".
@@ -426,9 +426,11 @@ val chFF = "\\f".c
 val chAlert = "\\a".c
 val chEsc = "\\e".c
 
-val chDot = "\\.".c
-val chAny = ".".c
-val chAnyMultiLine = "(?s:.)".c
+val chDotQuoted = "\\.".c
+val chAnyInLine = ".".c
+val chAnyAtAll = oneCharOf("\\s", "\\S") // should work everywhere and should be fast.
+// Note: following impl would not work on JS: "(?s:.)".c
+//   see details: https://www.regular-expressions.info/dot.html
 
 val chDigit = "\\d".c
 

@@ -25,7 +25,7 @@ private val ureTypedef = ure {
     0..1 of {
         0..1 of chSpace
         ch("\\<")
-        1..MAX of chAny
+        1..MAX of chAnyInLine
         ch("\\>")
     }
 }
@@ -33,27 +33,28 @@ private val ureTypedef = ure {
 
 private val ureFunParamsInLine = ure {
     1 of ch("\\(")
-    0..MAX of chAny
+    0..MAX of chAnyInLine
     1 of ch("\\)")
 }
 
+@DelicateApi("Matches correctly only in typical cases.")
 private val ureFunParamsMultiLine = ure {
     1 of ch("\\(")
     1 of ureBlankRestOfLine()
-    x(0..MAX, reluctant = true) of ureAnyLine()
+    x(0..MAX, reluctant = true) of chAnyAtAll
     1 of ch("\\)")
-    1 of ureBlankRestOfLine()
 }
 
+@DelicateApi("Matches correctly only in typical cases.")
 private val ureFunParams = ureFunParamsInLine or ureFunParamsMultiLine
 
-@OptIn(DelicateApi::class)
+@DelicateApi("Matches correctly only in typical cases.")
 private val ureFunDeclaration = ure {
     1 of ureIR("fun")
     1..MAX of chSpace
     0..1 of { // receiver
         1 of ureTypedef
-        1 of chDot
+        1 of chDotQuoted
     }
     1..MAX of chWord // funname
     1 of ureFunParams
@@ -65,7 +66,7 @@ private val ureFunDeclaration = ure {
     }
 }
 
-@OptIn(DelicateApi::class)
+@DelicateApi("Matches correctly only in typical cases.")
 val ureExpectFun = ure {
     1 of bBOLine
     0..1 of { 1 of ureIR("@Composable"); 1..MAX of chSpace }

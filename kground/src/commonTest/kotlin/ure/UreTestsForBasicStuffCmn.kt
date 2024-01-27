@@ -15,7 +15,13 @@ fun testSomeUreBasicStuff() {
 
 @OptIn(DelicateApi::class)
 fun testUreWithDifferentOptions() {
+
     val txt = "aBcDe\naBcDe\nABCDE"
+
+    "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(txt).count() eq txt.length - 2 }
+
+    "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(txt).count() eq txt.length }
+
     val ureBOLaBcD = bBOLine then ureText("aBcD")
     val ureBcDeEOL = ureText("BcDe") then bEOLine
 

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
@@ -16,7 +17,7 @@ import pl.mareklangiewicz.ure.*
 
 
 // TODO_later: refactor this little experiment fun
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateKommandApi::class, DelicateApi::class)
 internal suspend fun searchKotlinCodeInMyProjects(
     codeInLineUre: Ure,
     onlyPublic: Boolean = false,
@@ -44,7 +45,7 @@ internal suspend fun searchKotlinCodeInMyProjects(
 }
 
 
-// TODO_later: sth like this public in UreIO.kt
+@DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesAround < 3.")
 private fun FileSystem.readAndFindUreLineContentWithSomeLinesAround(
     file: Path,
     ureLineContent: Ure,
@@ -56,12 +57,13 @@ private fun FileSystem.readAndFindUreLineContentWithSomeLinesAround(
     ).compile().find(fileContent)
 }
 
+@DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesBefore < 3.")
 private fun Ure.withSomeLinesAround(
     maxLinesBefore: Int = 1,
     maxLinesAfter: Int = 1,
 ) = ure {
     if (maxLinesBefore > 2) println("FIXME: this is terribly slow for maxLinesBefore > 2")
-        // FIXME_later investigate if it can be optimized easily.
+        // FIXME investigate if it can be optimized. https://www.regular-expressions.info/catastrophic.html
     0..maxLinesBefore of ureAnyLine()
     1 of ureLineWithContent(this@withSomeLinesAround)
     0..maxLinesAfter of ureAnyLine()

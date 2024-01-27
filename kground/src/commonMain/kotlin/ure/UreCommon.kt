@@ -13,7 +13,7 @@ val ureBasicEmail = ure {
     1 of ure("domain") {
         1..MAX of {
             1..MAX of chWordOrHyphen
-            1 of chDot
+            1 of chDotQuoted
         }
         2..16 of chWordOrHyphen
     }
@@ -51,7 +51,7 @@ fun ureChain(
 }
 
 fun ureWhateva(reluctant: Boolean = true, inLine: Boolean = false) =
-    ure { x(0..MAX, reluctant = reluctant) of if (inLine) chAny else chAnyMultiLine }
+    ure { x(0..MAX, reluctant = reluctant) of if (inLine) chAnyInLine else chAnyAtAll }
 
 fun ureWhatevaInLine(reluctant: Boolean = true) = ureWhateva(reluctant, inLine = true)
 
@@ -63,7 +63,7 @@ fun ureBlankStartOfLine() = ure {
 fun ureBlankRestOfLine(withOptLineBreak: Boolean = true) = ure {
     0..MAX of chSpaceInLine
     1 of bEOLine
-    if (withOptLineBreak) 0..1 of ureLineBreak
+    if (withOptLineBreak) x(0..1, possessive = true) of ureLineBreak
 }
 
 fun ureLineWithContent(content: Ure, withOptLineBreak: Boolean = true) = ure {
