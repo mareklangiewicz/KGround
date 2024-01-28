@@ -134,6 +134,13 @@ value class UreCaptGroup internal constructor(override val content: Ure) : UreGr
     override val typeIR get() = "".asIR
 }
 
+
+/** https://www.regular-expressions.info/atomic.html */
+@JvmInline
+value class UreAtomicGroup internal constructor(override val content: Ure) : UreGroup {
+    override val typeIR get() = "?>".asIR
+}
+
 data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal constructor(
     override val content: Ure,
     val enable: Set<RegexOption> = emptySet(),
@@ -185,8 +192,6 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
         }.asIR
 }
 
-// TODO NOW: "atomic" non-capturing group https://www.regular-expressions.info/atomic.html
-
 
 data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : Ure {
     init {
@@ -202,7 +207,7 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
  * By default, it's "greedy" - tries to match as many "times" as possible, but backs off one by one when about to fail.
  * @param times - Uses shorter notation when appropriate, like: 0..1 -> "?"; 0..MAX -> "*"; 1..MAX -> "+"
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
- * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as atomic group.
+ * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as [UreAtomicGroup].
  */
 data class UreQuantif internal constructor(
     val content: Ure,
@@ -640,6 +645,9 @@ fun Ure.group(capture: Boolean = true, name: String? = null) = when {
 
 fun Ure.groupNonCapt() = UreNonCaptGroup(this)
 
+/** https://www.regular-expressions.info/atomic.html */
+fun Ure.groupAtomic() = UreAtomicGroup(this)
+
 @OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
 fun Ure.lookAhead(positive: Boolean = true) = UreLookGroup(this, true, positive)
 
@@ -669,7 +677,7 @@ fun Ure.times(exactly: Int) = UreQuantif(this, exactly..exactly)
 /**
  * By default, it's "greedy" - tries to match as many "times" as possible. But back off one by one if it fails.
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
- * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as atomic group.
+ * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as [UreAtomicGroup]
  */
 fun Ure.times(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
     if (times.start == 1 && times.endInclusive == 1) this else UreQuantif(this, times, reluctant, possessive)
