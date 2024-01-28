@@ -43,7 +43,7 @@ sealed interface Ure {
      * Wrapping is done only when needed. For example, [UreProduct] with more than one element is wrapped.
      * (UreProduct with zero elements also is wrapped - so f. e. external UreQuantifier only catches empty product)
      */
-    fun toAtomicIR(): IR
+    fun toClosedIR(): IR
 
     /**
      * It sets MULTILINE by default.
@@ -68,12 +68,11 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
 
     override fun toIR(): IR = when (product.size) {
         0 -> "".asIR
-        1 -> product[0].toIR()
-        else -> product.joinToString("") { if (it is UreProduct) it.toIR().str else it.toAtomicIR().str }.asIR
+        else -> product.joinToString("") { if (it is UreUnion) it.toClosedIR().str else it.toIR().str }.asIR
     }
 
-    override fun toAtomicIR() = when (product.size) {
-        1 -> product[0].toAtomicIR()
+    override fun toClosedIR() = when (product.size) {
+        1 -> product[0].toClosedIR()
         else -> this.groupNonCapt().toIR() // In case 0, we also want to wrap it in groupNonCapt!
         // To avoid issues when outside operator captures something else instead of empty product.
         // I decided NOT to throw IllegalStateError in case 0, so we can always monitor IR in half-baked UREs.
@@ -105,8 +104,8 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
 }
 
 data class UreUnion internal constructor(val first: Ure, val second: Ure) : Ure {
-    override fun toIR() = "${first.toAtomicIR()}|${second.toAtomicIR()}".asIR
-    override fun toAtomicIR() = this.groupNonCapt().toIR()
+    override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asIR
+    override fun toClosedIR() = this.groupNonCapt().toIR()
 }
 
 sealed interface UreGroup : Ure {
@@ -118,7 +117,7 @@ sealed interface UreGroup : Ure {
     // it looks like all possible typeIR prefixes cannot be confused with first contentIR characters.
     // (meaning: RE designers thought about it, so I don't have to be extra careful here.)
 
-    override fun toAtomicIR() = toIR() // group is always "atomic" - has parentheses outside
+    override fun toClosedIR() = toIR() // group is always "closed" - has parentheses outside
 }
 
 data class UreNamedGroup internal constructor(override val content: Ure, val name: String) : UreGroup {
@@ -186,7 +185,7 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
         }.asIR
 }
 
-// TODO_someday_maybe: "independent"/"atomic" non-capturing group https://www.regular-expressions.info/atomic.html
+// TODO NOW: "atomic" non-capturing group https://www.regular-expressions.info/atomic.html
 
 
 data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : Ure {
@@ -196,7 +195,7 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
     }
 
     override fun toIR(): IR = if (nr != null) "\\$nr".asIR else "\\k<$name>".asIR
-    override fun toAtomicIR(): IR = toIR()
+    override fun toClosedIR(): IR = toIR()
 }
 
 /**
@@ -233,10 +232,10 @@ data class UreQuantifier internal constructor(
             possessive -> "+"
             else -> ""
         }.asIR
-        return "${content.toAtomicIR()}$timesIR$suffixIR".asIR
+        return "${content.toClosedIR()}$timesIR$suffixIR".asIR
     }
-    // override fun toAtomicIR(): IR = this.groupNonCapt().toIR()
-    override fun toAtomicIR() = toIR()
+    // override fun toClosedIR(): IR = this.groupNonCapt().toIR()
+    override fun toClosedIR() = toIR()
         // TODO: I think it's correct, but should be analyzed more carefully (and write some tests!).
 }
 
@@ -246,7 +245,7 @@ value class UreChar @DelicateApi internal constructor(val ir: IR) : Ure {
     init { req(ir.isCharLike) { "Provided IR doesn't represent a character: $ir" } }
     override fun toIR(): IR = ir
     @OptIn(DelicateApi::class)
-    override fun toAtomicIR(): IR = ureIR(ir).toAtomicIR()
+    override fun toClosedIR(): IR = ureIR(ir).toClosedIR()
 }
 
 private val IR.isCharLike: Boolean get() = true
@@ -256,7 +255,7 @@ private val IR.isCharLike: Boolean get() = true
 
 // TODO_someday_maybe: Should I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
 data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : Ure {
-    override fun toAtomicIR(): IR = toIR()
+    override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR = chars.joinToString("", if (positive) "[" else "[^", "]") {
         if (it in setOf("]", "\\", "-")) "\\$it" else it
     }.asIR
@@ -266,12 +265,12 @@ data class UreCharSet internal constructor(val chars: Set<String>, val positive:
 // TODO_later: analyze if some special kotlin progression/range would fit here better
 data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : Ure {
     private val neg = if (positive) "" else "^"
-    override fun toAtomicIR(): IR = toIR()
+    override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR = "[$neg$from-$to]".asIR
 }
 
 data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : Ure {
-    override fun toAtomicIR(): IR = toIR()
+    override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
 }
 
@@ -281,8 +280,8 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
 @JvmInline value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
 
     override fun toIR(): IR = ir
-    override fun toAtomicIR(): IR = if (isAtomic) ir else this.groupNonCapt().toIR()
-    private val isAtomic get() = when {
+    override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
+    private val isClosed get() = when {
         ir.str.length == 1 -> true
         ir.str.length == 2 && ir.str[0] == '\\' -> true
         else -> false
@@ -291,12 +290,12 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
 }
 
 @JvmInline value class UreQuote internal constructor(val str: String) : Ure {
-    override fun toAtomicIR(): IR = toIR()
+    override fun toClosedIR(): IR = toIR()
     override fun toIR() = "\\Q$str\\E".asIR
 }
 
 @JvmInline value class UreText internal constructor(val str: String) : Ure {
-    override fun toAtomicIR(): IR = this.groupNonCapt().toIR()
+    override fun toClosedIR(): IR = this.groupNonCapt().toIR()
     override fun toIR() = str.map { if (it in special) "\\$it" else "$it" }.joinToString("").asIR
     private val special get() = "\\[].&^\$?*+{}|():!<>="
 }
@@ -337,11 +336,20 @@ fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = o
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
 
-fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
+/**
+ * @param lookInside complicates generated IR by addin lookAhead / lookBehind,
+ * but assures found boundaries are "left" and "right". Sth like in vim \<SomeWord\>
+ */
+@OptIn(SecondaryApi::class)
+fun Ure.withWordBoundaries(
+    boundaryBefore: Boolean = true,
+    boundaryAfter: Boolean = true,
+    lookInside: Boolean = false,
+) =
     if (!boundaryBefore && !boundaryAfter) this else ure {
-        if (boundaryBefore) 1 of bBOWord
+        if (boundaryBefore) 1 of if (lookInside) bBOWord else bchWord
         1 of this@withWordBoundaries // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
-        if (boundaryAfter) 1 of bEOWord
+        if (boundaryAfter) 1 of if (lookInside) bEOWord else bchWord
     }
 
 infix fun Ure.or(that: Ure) = UreUnion(this, that)
@@ -599,8 +607,11 @@ val bchWord = "\\b".r
 val bchWordNot = "\\B".r // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
+@SecondaryApi("Usually just bchWord is also good. And simpler.")
 val bBOWord = bchWord then chWord.lookAhead() // emulating sth like in vim: "\<"
+
 @OptIn(NotPortableApi::class, DelicateApi::class)
+@SecondaryApi("Usually just bchWord is also good. And simpler.")
 val bEOWord = bchWord then chWord.lookBehind() // emulating sth like in vim: "\>"
 
 val ureLineBreakBasic = "\\r?\\n".r

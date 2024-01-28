@@ -28,8 +28,8 @@ fun testUreWithDifferentOptions() {
     val ureBcDeEOL = ureText("BcDe") then bEOLine
 
     "examples constructed as expected" o {
-        ureBOLaBcD.toIR() eq IR("^(?:aBcD)")
-        ureBcDeEOL.toIR() eq IR("(?:BcDe)\$")
+        ureBOLaBcD.toIR() eq IR("^aBcD")
+        ureBcDeEOL.toIR() eq IR("BcDe\$")
     }
 
     "by default it gets compiled with just multiline option" o {
