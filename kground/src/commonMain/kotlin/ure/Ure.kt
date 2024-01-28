@@ -39,9 +39,9 @@ sealed interface Ure {
     fun toIR(): IR
 
     /**
-     * Optionally wraps in a non-capturing group before generating IR, so it's safe to use with quantifiers, unions, etc.
-     * Wrapping is done only when needed. For example, [UreProduct] with more than one element is wrapped.
-     * (UreProduct with zero elements also is wrapped - so f. e. external UreQuantifier only catches empty product)
+     * Optionally wraps in a non-capturing group before generating IR, so it's safe to use with quantifiers, alternations, etc.
+     * Wrapping is done only when needed. For example, [UreConcat] with more than one element is wrapped.
+     * (UreConcat with zero elements also is wrapped - so f. e. external UreQuantif only catches empty concatenation)
      */
     fun toClosedIR(): IR
 
@@ -64,17 +64,17 @@ sealed interface Ure {
 
 
 @JvmInline
-value class UreProduct internal constructor(val product: MutableList<Ure> = mutableListOf()) : Ure {
+value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutableListOf()) : Ure {
 
-    override fun toIR(): IR = when (product.size) {
+    override fun toIR(): IR = when (tokens.size) {
         0 -> "".asIR
-        else -> product.joinToString("") { if (it is UreUnion) it.toClosedIR().str else it.toIR().str }.asIR
+        else -> tokens.joinToString("") { if (it is UreAlter) it.toClosedIR().str else it.toIR().str }.asIR
     }
 
-    override fun toClosedIR() = when (product.size) {
-        1 -> product[0].toClosedIR()
+    override fun toClosedIR() = when (tokens.size) {
+        1 -> tokens[0].toClosedIR()
         else -> this.groupNonCapt().toIR() // In case 0, we also want to wrap it in groupNonCapt!
-        // To avoid issues when outside operator captures something else instead of empty product.
+        // To avoid issues when outside operator captures something else instead of empty concatenation.
         // I decided NOT to throw IllegalStateError in case 0, so we can always monitor IR in half-baked UREs.
         // (Like when creating UREs with some @Composable UI)
     }
@@ -82,7 +82,7 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
     // Can't decide if this syntax is better in case of "1 of ..."; let's leave it for now.
     // TODO_later: rethink syntax when context receivers become multiplatform.
     //   Maybe somehow force '+' in other cases too, but I don't want to force some syntax with additional parentheses.
-    operator fun Ure.unaryPlus() { product.add(this) }
+    operator fun Ure.unaryPlus() { tokens.add(this) }
 
     class UreX internal constructor(val times: IntRange, val reluctant: Boolean, val possessive: Boolean)
 
@@ -90,20 +90,20 @@ value class UreProduct internal constructor(val product: MutableList<Ure> = muta
     fun x(times: Int) = x(times..times)
 
     infix fun UreX.of(ure: Ure) {
-        product.add(ure.times(times, reluctant, possessive))
+        tokens.add(ure.times(times, reluctant, possessive))
     }
 
-    infix fun UreX.of(init: UreProduct.() -> Unit) {
+    infix fun UreX.of(init: UreConcat.() -> Unit) {
         this of ure(init = init)
     }
 
     infix fun IntRange.of(ure: Ure) = x(this) of ure
     infix fun Int.of(ure: Ure) = x(this) of ure
-    infix fun IntRange.of(init: UreProduct.() -> Unit) = x(this) of init
-    infix fun Int.of(init: UreProduct.() -> Unit) = x(this) of init
+    infix fun IntRange.of(init: UreConcat.() -> Unit) = x(this) of init
+    infix fun Int.of(init: UreConcat.() -> Unit) = x(this) of init
 }
 
-data class UreUnion internal constructor(val first: Ure, val second: Ure) : Ure {
+data class UreAlter internal constructor(val first: Ure, val second: Ure) : Ure {
     override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asIR
     override fun toClosedIR() = this.groupNonCapt().toIR()
 }
@@ -202,16 +202,16 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
  * By default, it's "greedy" - tries to match as many "times" as possible, but backs off one by one when about to fail.
  * @param times - Uses shorter notation when appropriate, like: 0..1 -> "?"; 0..MAX -> "*"; 1..MAX -> "+"
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
- * @param possessive - It's like more greedy than default greedy. Never backs off - fails instead.
+ * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as atomic group.
  */
-data class UreQuantifier internal constructor(
+data class UreQuantif internal constructor(
     val content: Ure,
     val times: IntRange,
     val reluctant: Boolean = false,
     val possessive: Boolean = false,
 ) : Ure {
     init {
-        reluctant && possessive && error("Quantifier can't be reluctant and possessive at the same time")
+        reluctant && possessive && error("UreQuantif can't be reluctant and possessive at the same time")
     }
 
     val greedy get() = !reluctant && !possessive
@@ -275,7 +275,7 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
 }
 
 // TODO_someday_maybe: think what would be better.
-//   Maybe still ask user for string, but validate and transform to the actual UreProduct of UreChar's
+//   Maybe still ask user for string, but validate and transform to the actual UreConcat of UreChar's
 /** Dirty way to inject whole strings fast. */
 @JvmInline value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
 
@@ -309,8 +309,8 @@ const val MAX = Int.MAX_VALUE
 
 @OptIn(DelicateApi::class) private val String.asIR get() = IR(this)
 
-fun ure(name: String? = null, init: UreProduct.() -> Unit) =
-    UreProduct().apply(init).withName(name) // when name is null, the withName doesn't wrap ure at all.
+fun ure(name: String? = null, init: UreConcat.() -> Unit) =
+    UreConcat().apply(init).withName(name) // when name is null, the withName doesn't wrap ure at all.
 
 @DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
@@ -348,12 +348,12 @@ fun Ure.withWordBoundaries(
 ) =
     if (!boundaryBefore && !boundaryAfter) this else ure {
         if (boundaryBefore) 1 of if (lookInside) bBOWord else bchWord
-        1 of this@withWordBoundaries // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
+        1 of this@withWordBoundaries // it should flatten if this is UreConcat (see UreConcat.toIR()) TODO_later: doublecheck
         if (boundaryAfter) 1 of if (lookInside) bEOWord else bchWord
     }
 
-infix fun Ure.or(that: Ure) = UreUnion(this, that)
-infix fun Ure.then(that: Ure) = UreProduct(mutableListOf(this, that))
+infix fun Ure.or(that: Ure) = UreAlter(this, that)
+infix fun Ure.then(that: Ure) = UreConcat(mutableListOf(this, that))
 // Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
 
 
@@ -386,10 +386,10 @@ operator fun Ure.not(): Ure = when (this) {
     }
 
     is UreGroupRef -> error("UreGroupRef can not be negated")
-    is UreProduct -> error("UreProduct can not be negated")
-    is UreQuantifier -> error("UreQuantifier can not be negated")
+    is UreConcat -> error("UreConcat can not be negated")
+    is UreQuantif -> error("UreQuantif can not be negated")
     is UreQuote -> error("UreQuote can not be negated")
-    is UreUnion -> error("UreUnion can not be negated")
+    is UreAlter -> error("UreAlter can not be negated")
     else -> error("Unexpected Ure type: ${this::class.simpleName}")
     // had to add "else" branch because Android Studio 2021.2.1 canary 7 complains..
     // TODO_later: Remove "else" when newer AS stops complaining
@@ -650,12 +650,12 @@ fun Ure.lookBehind(positive: Boolean = true) = UreLookGroup(this, false, positiv
 
 @OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
 @SecondaryApi("Use Ure.lookAhead", ReplaceWith("ure(init = init).lookAhead(positive)"))
-fun ureLookAhead(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(init = init).lookAhead(positive)
+fun ureLookAhead(positive: Boolean = true, init: UreConcat.() -> Unit) = ure(init = init).lookAhead(positive)
 
 @DelicateApi("Can be suprisingly slow for some ures. Or even can throw on some platforms, when looking behind for non-fixed length ure.")
 @NotPortableApi("Behavior can differ on different platforms. Read docs for each used platform.")
 @SecondaryApi("Use Ure.lookBehind", ReplaceWith("ure(init = init).lookBehind(positive)"))
-fun ureLookBehind(positive: Boolean = true, init: UreProduct.() -> Unit) = ure(init = init).lookBehind(positive)
+fun ureLookBehind(positive: Boolean = true, init: UreConcat.() -> Unit) = ure(init = init).lookBehind(positive)
 
 fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
 
@@ -664,15 +664,15 @@ fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
 
 // region [Ure Quantifiers Related Stuff]
 
-fun Ure.times(exactly: Int) = UreQuantifier(this, exactly..exactly)
+fun Ure.times(exactly: Int) = UreQuantif(this, exactly..exactly)
 
 /**
  * By default, it's "greedy" - tries to match as many "times" as possible. But back off one by one if it fails.
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
- * @param possessive - It's like more greedy than default greedy. Never backs off - fails instead.
+ * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as atomic group.
  */
 fun Ure.times(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
-    if (times.start == 1 && times.endInclusive == 1) this else UreQuantifier(this, times, reluctant, possessive)
+    if (times.start == 1 && times.endInclusive == 1) this else UreQuantif(this, times, reluctant, possessive)
 
 fun Ure.timesMinMax(min: Int, max: Int, reluctant: Boolean = false, possessive: Boolean = false) =
     times(min..max, reluctant, possessive)
@@ -689,7 +689,7 @@ fun quantify(content: Ure, times: IntRange, reluctant: Boolean = false, possessi
     content.times(times, reluctant, possessive)
 
 @Deprecated("Let's try to use .times instead", ReplaceWith("ure(init = init).times(times, reluctant, possessive)"))
-fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false, init: UreProduct.() -> Unit) =
+fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false, init: UreConcat.() -> Unit) =
     ure(init = init).times(times, reluctant, possessive)
 
 // endregion [Ure Quantifiers Related Stuff]
