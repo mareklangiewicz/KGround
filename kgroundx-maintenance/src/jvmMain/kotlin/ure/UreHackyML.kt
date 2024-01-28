@@ -33,12 +33,11 @@ import pl.mareklangiewicz.annotations.*
  */
 fun ureStartTag(name: String, vararg expectedAttrs: Ure) = ureSomeTag(name, *expectedAttrs)
 
-@OptIn(DelicateApi::class)
-fun ureEndTag(name: String) = ureSomeTag(name, ureBegin = ureIR("</"))
+fun ureEndTag(name: String) = ureSomeTag(name, ureBegin = ureText("</"))
 
 @OptIn(DelicateApi::class)
 fun ureCollapsedTag(name: String, vararg expectedAttrs: Ure) =
-    ureSomeTag(name, *expectedAttrs, ureEnd = ureIR("/>"))
+    ureSomeTag(name, *expectedAttrs, ureEnd = ureText("/>"))
 
 fun Ure.withTagAround(name: String, vararg expectedAttrs: Ure, withOptSpacesAroundContent: Boolean = true) = ure {
     1 of ureStartTag(name, *expectedAttrs)
@@ -93,7 +92,6 @@ fun ureWhatevaContentElement(
 private val ureOptIgnoredAttrsOptSpaces = ureChain(ureTagAttr(), times = 0..MAX, reluctant = true)
     .withOptSpacesAround()
 
-@OptIn(DelicateApi::class) // TODO_later: check for names that would break ir(name)
 private fun ureSomeTag(
     name: String,
     vararg expectedAttrs: Ure,
@@ -101,7 +99,7 @@ private fun ureSomeTag(
     ureEnd: Ure = ch(">"),
 ) = ure {
     1 of ureBegin
-    1 of ureIR(name).withWordBoundaries().withOptSpacesAround()
+    1 of ureText(name).withWordBoundaries().withOptSpacesAround()
         // boundaries in case we have no space after (we need to match <tag> but not glued <tagargname>)
     1 of ureOptIgnoredAttrsOptSpaces
     for (expectedAttr in expectedAttrs) {
@@ -111,13 +109,12 @@ private fun ureSomeTag(
     1 of ureEnd
 }
 
-@OptIn(DelicateApi::class) // TODO_later: check for names that would break ir(name)
 fun ureExpectAttr(
     name: String,
     value: Ure = ureWhatevaInLine(), // let's keep default inline, matching long multiline whateva can lead to hard to debug mismatches
     valueGroupName: String? = name.filter { it != '-' },
     optional: Boolean = false,
-) = ureTagAttr(ureIR(name), value, valueGroupName).let { if (optional) ure { 0..1 of it } else it }
+) = ureTagAttr(ureText(name), value, valueGroupName).let { if (optional) ure { 0..1 of it } else it }
 
 fun ureTagAttr(
     name: Ure = ureIdent(allowHyphensInside = true),

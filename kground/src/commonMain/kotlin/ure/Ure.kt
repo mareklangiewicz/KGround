@@ -61,14 +61,39 @@ sealed interface Ure {
     fun compileWithOptions(vararg options: RegexOption) = Regex(toIR().str, options.toSet())
 }
 
+sealed interface UreNonCapt: Ure
+sealed interface UreCapt: Ure
+sealed interface UreNum: UreCapt
+sealed interface UreNamed: UreNum
+
+/**
+ * The first way it matches becomes the only way (backtracking info gets removed if there was any).
+ * So no trying if it could eat more or less chars (in particular place) when sth later failed.
+ * [UreAtomic] only means that this [Ure] is known to be atomic. Some others can also in practice be atomic.
+ * https://www.regular-expressions.info/atomic.html
+ */
+sealed interface UreAtomic: Ure
+sealed interface UreAnchor: UreAtomic, UreNonCapt
+
+/**
+ * It can sometimes match more than one char technically.
+ *   For example, most (all?) emoji "code points" take two "code units" (16b chars).
+ *   Such 32b encoding is also called "surrogate pair".
+ */
+sealed interface UreCharLike: UreAtomic, UreNonCapt
 
 
 @JvmInline
-value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutableListOf()) : Ure {
+value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutableListOf()) : UreNonCapt {
+
+    private val debugWithClosedTokens: Boolean get() = false
+        // In case of difficult issues: try to temporarily change it to true see if matching changes somehow.
 
     override fun toIR(): IR = when (tokens.size) {
         0 -> "".asIR
-        else -> tokens.joinToString("") { if (it is UreAlter) it.toClosedIR().str else it.toIR().str }.asIR
+        else -> tokens.joinToString("") {
+            if ((it is UreAlter) or debugWithClosedTokens) it.toClosedIR().str else it.toIR().str
+        }.asIR
     }
 
     override fun toClosedIR() = when (tokens.size) {
@@ -103,7 +128,7 @@ value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutabl
     infix fun Int.of(init: UreConcat.() -> Unit) = x(this) of init
 }
 
-data class UreAlter internal constructor(val first: Ure, val second: Ure) : Ure {
+data class UreAlter internal constructor(val first: Ure, val second: Ure) : UreNonCapt {
     override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asIR
     override fun toClosedIR() = this.groupNonCapt().toIR()
 }
@@ -120,24 +145,24 @@ sealed interface UreGroup : Ure {
     override fun toClosedIR() = toIR() // group is always "closed" - has parentheses outside
 }
 
-data class UreNamedGroup internal constructor(override val content: Ure, val name: String) : UreGroup {
+data class UreNamedGroup internal constructor(override val content: Ure, val name: String) : UreGroup, UreNamed {
     override val typeIR get() = "?<$name>".asIR
 }
 
 @JvmInline
-value class UreNonCaptGroup internal constructor(override val content: Ure) : UreGroup {
+value class UreNonCaptGroup internal constructor(override val content: Ure) : UreGroup, UreNonCapt {
     override val typeIR get() = "?:".asIR
 }
 
 @JvmInline
-value class UreCaptGroup internal constructor(override val content: Ure) : UreGroup {
+value class UreNumGroup internal constructor(override val content: Ure) : UreGroup, UreNum {
     override val typeIR get() = "".asIR
 }
 
 
 /** https://www.regular-expressions.info/atomic.html */
 @JvmInline
-value class UreAtomicGroup internal constructor(override val content: Ure) : UreGroup {
+value class UreAtomicGroup internal constructor(override val content: Ure) : UreGroup, UreAtomic, UreNonCapt {
     override val typeIR get() = "?>".asIR
 }
 
@@ -145,7 +170,7 @@ data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal construct
     override val content: Ure,
     val enable: Set<RegexOption> = emptySet(),
     val disable: Set<RegexOption> = emptySet(),
-) : UreGroup {
+) : UreGroup, UreNonCapt {
     init {
         req((enable intersect disable).isEmpty()) { "Can not enable and disable the same option at the same time" }
         req(enable.isNotEmpty() || disable.isNotEmpty()) { "No options provided" }
@@ -153,7 +178,7 @@ data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal construct
 
     override val typeIR get() = "?${enable.ir}-${disable.ir}:".asIR // TODO_later: check if either set can be empty
 
-    @Suppress("StructuralWrap", "GrazieInspection")
+    @Suppress("GrazieInspection")
     private val RegexOption.code
         get() = when (this) {
             // Note: Kotlin stdlib RegexOption will probably evolve, so I'll enable more options here in the future.
@@ -181,7 +206,7 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
     override val content: Ure,
     val ahead: Boolean = true,
     val positive: Boolean = true,
-) : UreGroup {
+) : UreGroup, UreAnchor {
     override val typeIR
         get() = when (ahead to positive) {
             true to true -> "?="
@@ -193,7 +218,7 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
 }
 
 
-data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : Ure {
+data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : UreAtomic, UreNonCapt {
     init {
         nr == null || name == null || error("Can not reference capturing group by both nr ($nr) and name ($name)")
         nr == null && name == null && error("Either nr or name has to be provided for the group reference")
@@ -214,7 +239,7 @@ data class UreQuantif internal constructor(
     val times: IntRange,
     val reluctant: Boolean = false,
     val possessive: Boolean = false,
-) : Ure {
+) : UreNonCapt {
     init {
         reluctant && possessive && error("UreQuantif can't be reluctant and possessive at the same time")
     }
@@ -245,11 +270,11 @@ data class UreQuantif internal constructor(
 }
 
 @JvmInline
-value class UreChar @DelicateApi internal constructor(val ir: IR) : Ure {
+value class UreChar @DelicateApi internal constructor(val ir: IR) : UreCharLike {
     // TODO_someday_maybe: separate sealed class for specials etc. so we never ask user to manually provide IR
     init { req(ir.isCharLike) { "Provided IR doesn't represent a character: $ir" } }
     override fun toIR(): IR = ir
-    @OptIn(DelicateApi::class)
+    @OptIn(DelicateApi::class, NotPortableApi::class)
     override fun toClosedIR(): IR = ureIR(ir).toClosedIR()
 }
 
@@ -259,7 +284,7 @@ private val IR.isCharLike: Boolean get() = true
 
 
 // TODO_someday_maybe: Should I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
-data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : Ure {
+data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : UreCharLike {
     override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR = chars.joinToString("", if (positive) "[" else "[^", "]") {
         if (it in setOf("]", "\\", "-")) "\\$it" else it
@@ -268,13 +293,13 @@ data class UreCharSet internal constructor(val chars: Set<String>, val positive:
 
 // TODO_later: more complicated combinations of char classes
 // TODO_later: analyze if some special kotlin progression/range would fit here better
-data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : Ure {
+data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : UreCharLike {
     private val neg = if (positive) "" else "^"
     override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR = "[$neg$from-$to]".asIR
 }
 
-data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : Ure {
+data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : UreCharLike {
     override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
 }
@@ -282,7 +307,7 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
 // TODO_someday_maybe: think what would be better.
 //   Maybe still ask user for string, but validate and transform to the actual UreConcat of UreChar's
 /** Dirty way to inject whole strings fast. */
-@JvmInline value class UreIR @DelicateApi internal constructor(val ir: IR) : Ure {
+@JvmInline value class UreIR @DelicateApi @NotPortableApi internal constructor(val ir: IR) : Ure {
 
     override fun toIR(): IR = ir
     override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
@@ -294,12 +319,12 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
     // TODO_someday: analyze more carefully and drop grouping when actually not needed.
 }
 
-@JvmInline value class UreQuote internal constructor(val str: String) : Ure {
+@JvmInline value class UreQuote internal constructor(val str: String) : UreAtomic, UreNonCapt {
     override fun toClosedIR(): IR = toIR()
     override fun toIR() = "\\Q$str\\E".asIR
 }
 
-@JvmInline value class UreText internal constructor(val str: String) : Ure {
+@JvmInline value class UreText internal constructor(val str: String) : UreAtomic, UreNonCapt {
     override fun toClosedIR(): IR = this.groupNonCapt().toIR()
     override fun toIR() = str.map { if (it in special) "\\$it" else "$it" }.joinToString("").asIR
     private val special get() = "\\[].&^\$?*+{}|():!<>="
@@ -402,8 +427,8 @@ operator fun Ure.not(): Ure = when (this) {
 // TODO_later: experiment more with different operators overloading (after impl some working examples)
 //  especially indexed access operators and invoke operators..
 
-@DelicateApi fun ureIR(ir: IR) = UreIR(ir)
-@DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
+@NotPortableApi @DelicateApi fun ureIR(ir: IR) = UreIR(ir)
+@NotPortableApi @DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
 
 /** Wraps the [text] with \Q...\E, so it's interpreted as exact text to match (no chars treated as special). */
 fun ureQuote(text: String) = UreQuote(text)
@@ -600,7 +625,7 @@ fun oneCharNotOfRange(from: String, to: String) = UreCharRange(from, to, positiv
 
 // region [Ure Boundaries Related Stuff]
 
-@OptIn(DelicateApi::class) private inline val String.r get() = ureIR(this)
+@OptIn(DelicateApi::class, NotPortableApi::class) private inline val String.r get() = ureIR(this)
 
 val bBOLine = "^".r
 val bEOLine = "$".r
@@ -639,7 +664,7 @@ fun Ure.group(capture: Boolean = true, name: String? = null) = when {
         req(capture) { "Named group is always capturing." }
         withName(name)
     }
-    capture -> UreCaptGroup(this)
+    capture -> UreNumGroup(this)
     else -> groupNonCapt()
 }
 

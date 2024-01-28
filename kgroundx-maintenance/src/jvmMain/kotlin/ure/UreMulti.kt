@@ -50,7 +50,7 @@ private val ureFunParams = ureFunParamsInLine or ureFunParamsMultiLine
 
 @DelicateApi("Matches correctly only in typical cases.")
 private val ureFunDeclaration = ure {
-    1 of ureIR("fun")
+    1 of ureText("fun")
     1..MAX of chSpace
     0..1 of { // receiver
         1 of ureTypedef
@@ -69,10 +69,10 @@ private val ureFunDeclaration = ure {
 @DelicateApi("Matches correctly only in typical cases.")
 val ureExpectFun = ure {
     1 of bBOLine
-    0..1 of { 1 of ureIR("@Composable"); 1..MAX of chSpace }
+    0..1 of { 1 of ureText("@Composable"); 1..MAX of chSpace }
     0..MAX of { 1 of ureKeyword; 1..MAX of chSpace }
-    1 of ureIR("expect ")
-    0..1 of ureIR("suspend ")
+    1 of ureText("expect ")
+    0..1 of ureText("suspend ")
     1 of ureFunDeclaration
     0..MAX of chSpace
     1 of bEOLine

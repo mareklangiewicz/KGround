@@ -4,25 +4,31 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.uspek.*
 import kotlin.text.RegexOption.*
 
+const val example1 = "aBcDe\naBcDe\nABCDE"
+
 fun testSomeUreBasicStuff() {
     testUreWithDifferentOptions()
-    // TODO("Test some quantifiers (is UreQuantifier.toClosedIR() correct?)")
+    testUreQuantifAndAtomic()
+    // TODO("Test some quantifiers (is UreQuantif.toClosedIR() correct?)")
     // TODO NOW
 
     testUreBasicEmail()
+}
+
+fun testUreQuantifAndAtomic() {
+    // TODO NOW (which platforms support atomic, which possessive quantifiers, etc)
 }
 
 
 @OptIn(DelicateApi::class)
 fun testUreWithDifferentOptions() {
 
-    val txt = "aBcDe\naBcDe\nABCDE"
 
-    "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(txt).count() eq 2 }
+    "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(example1).count() eq 2 }
 
-    "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(txt).count() eq txt.length - 2 }
+    "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(example1).count() eq example1.length - 2 }
 
-    "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(txt).count() eq txt.length }
+    "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(example1).count() eq example1.length }
 
     val ureBOLaBcD = bBOLine then ureText("aBcD")
     val ureBcDeEOL = ureText("BcDe") then bEOLine
