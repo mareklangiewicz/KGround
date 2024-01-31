@@ -20,6 +20,7 @@ fun Regex.replaceSingle(input: CharSequence, replacement: CharSequence, startInd
     input.replaceRange(findSingle(input, startIndex).range, replacement)
 
 
+fun Char.switchCase() = if (isLowerCase()) uppercaseChar() else lowercaseChar()
 
 infix fun <T: Any> List<T>.plusIfNN(element: T?) = if (element == null) this else this + element
 infix fun <T: Any> List<T>.prependIfNN(element: T?) = if (element == null) this else listOf(element) + this

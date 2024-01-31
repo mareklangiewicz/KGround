@@ -90,6 +90,8 @@ sealed interface UreCharClass: UreAtomic, UreNonCapt {
 
 @JvmInline
 value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutableListOf()) : UreNonCapt {
+    // TODO_someday: make tokens publicly List<Ure>, when kotlin have this feature:
+    // https://youtrack.jetbrains.com/issue/KT-14663/Support-having-a-public-and-a-private-type-for-the-same-property
 
     private val debugWithClosedTokens: Boolean get() = false
         // In case of difficult issues: try to temporarily change it to true see if matching changes somehow.
@@ -220,6 +222,8 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
             false to false -> "?<!"
             else -> error("Impossible case")
         }.asIR
+    @OptIn(DelicateApi::class, NotPortableApi::class)
+    operator fun not() = UreLookGroup(content, ahead, !positive)
 }
 
 
@@ -273,23 +277,6 @@ data class UreQuantif internal constructor(
     override fun toClosedIR() = toIR()
         // TODO: I think it's correct, but should be analyzed more carefully (and write some tests!).
 }
-
-@Deprecated("Trying to do too much.")
-@JvmInline
-value class UreCharOld @DelicateApi internal constructor(val ir: IR) : UreCharClass {
-    // TODO_someday_maybe: separate sealed class for specials etc. so we never ask user to manually provide IR
-    init { req(ir.looksLikeCharacter) { "Provided IR doesn't represent a character: $ir" } }
-    override fun toIR(): IR = ir
-    @OptIn(DelicateApi::class, NotPortableApi::class)
-    override fun toClosedIR(): IR = ureIR(ir).toClosedIR()
-    override fun toIRInCC(): IR = toIR()
-}
-
-@Deprecated("Trying to do too much.")
-private val IR.looksLikeCharacter: Boolean get() = true
-// FIXME not really? (better to avoid parsing regexes at all - we want to always go anoter way around: generating correct IR)
-//   check if IR is correct full regex matching "char-like" texts (BTW use Ure for checking :-))
-//   escaped chars or surrogate pairs (two codeunits representing one codepoint), are also "char-like")
 
 /**
  * Represents exactly one character (code point in Unicode). Will be automatically escaped if needed.
@@ -353,13 +340,11 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
     override fun toClosedIR(): IR = toIR()
     override fun toIRInCC(): IR = toIR()
 
-    // TODO NOW: use it in external .not, or just move it there.
     @OptIn(DelicateApi::class) operator fun not() =
         if (name == '.') bad { "The chAnyInLine can't be negated." }
-        else UreCharClassPreDef(name.oppositecaseChar())
+        else UreCharClassPreDef(name.switchCase())
 
     companion object {
-        private fun Char.oppositecaseChar() = if (isLowerCase()) uppercaseChar() else lowercaseChar()
         private val Char.isNameOfPreDefCC get() = this in ".dDhHsSvVwW"
     }
 }
@@ -375,6 +360,7 @@ data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>
     override fun toIRInCC(): IR = tokens.joinToString("", if (positive) "" else "[^", if (positive) "" else "]") { it.toIRInCC().str }.asIR
         // TODO: I don't wrap in [] here (when positive) to see if it works,
         //  but make sure to analyze all cases and write unit tests!!
+    operator fun not() = UreCharClassUnion(tokens, !positive)
 }
 
 // TODO_later: analyze if some special kotlin progression/range would fit here better
@@ -386,13 +372,17 @@ data class UreCharClassRange @NotPortableApi constructor(val from: UreCharClass,
     override fun toIR(): IR = "[${toIRInCC()}]".asIR
     override fun toIRInCC(): IR = "$neg${from.toIRInCC()}-${to.toIRInCC()}".asIR
         // TODO: I don't wrap in [] here to see if it works, but make sure to analyze all cases and write unit tests!!
+    @OptIn(NotPortableApi::class)
+    operator fun not() = UreCharClassRange(from, to, !positive)
 }
 
+// TODO NOW: test it!
 data class UreCharClassIntersect internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
     override fun toIR(): IR = tokens.joinToString("&&", if (positive) "[" else "[^", "]") { it.toIRInCC().str }.asIR
     override fun toClosedIR(): IR = toIR()
     override fun toIRInCC(): IR = toIR()
         // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
+    operator fun not() = UreCharClassIntersect(tokens, !positive)
 }
 
 // TODO_later: make it not portable and opt in when using "constructor" that checks if prop is known and portable.
@@ -400,6 +390,8 @@ data class UreCharClassProp @NotPortableApi internal constructor(val prop: Strin
     override fun toIR(): IR = "\\${if (positive) "p" else "P"}{$prop}".asIR
     override fun toClosedIR(): IR = toIR()
     override fun toIRInCC(): IR = toIR()
+    @OptIn(NotPortableApi::class)
+    operator fun not() = UreCharClassProp(prop, !positive)
 }
 
 /** Dirty way to inject whole regexes fast. Avoid if possible. */
@@ -481,23 +473,7 @@ infix fun Ure.then(that: Ure) = UreConcat(mutableListOf(this, that))
 // Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
 
 
-// It only returns NotPortableApi ure if argument was already NotPortableApi (UreCharProp).
-@OptIn(NotPortableApi::class, SecondaryApi::class, DelicateApi::class)
-// FIXME NOW: move it inside Ure (declaration) and implementations to concrete classes
-@Deprecated("FIXME NOW")
 operator fun Ure.not(): Ure = when (this) {
-    // FIXME NOW: rewrite whole thing..
-    // is UreCharOld -> when (this) {
-    //     chWord -> chNonWord
-    //     chNonWord -> chWord
-    //     chDigit -> chNonDigit
-    //     chNonDigit -> chDigit
-    //     chSpace -> chNonSpace
-    //     chNonSpace -> chSpace
-    //     else -> oneCharNotOf(ir.str)
-    //     // TODO: check if particular ir is appropriate for such wrapping
-    //     // TODO_later: other special cases?
-    // }
     is UreIR -> when (this) {
         bchWord -> bchWordNot
         bchWordNot -> bchWord
@@ -505,11 +481,12 @@ operator fun Ure.not(): Ure = when (this) {
     }
     is UreCharExact -> bad { "UreCharExact can not be negated" }
     is UreCharClassPreDef -> !this
-    is UreCharClassRange -> UreCharClassRange(from, to, !positive)
-    is UreCharClassUnion -> UreCharClassUnion(tokens, !positive)
-    is UreCharClassProp -> UreCharClassProp(prop, !positive)
+    is UreCharClassRange -> !this
+    is UreCharClassUnion -> !this
+    is UreCharClassIntersect -> !this
+    is UreCharClassProp -> !this
     is UreGroup -> when (this) {
-        is UreLookGroup -> UreLookGroup(content, ahead, !positive)
+        is UreLookGroup -> !this
         else -> error("Unsupported UreGroup for negation: ${this::class.simpleName}")
     }
 
@@ -517,13 +494,11 @@ operator fun Ure.not(): Ure = when (this) {
     is UreConcat -> error("UreConcat can not be negated")
     is UreQuantif -> error("UreQuantif can not be negated")
     is UreQuote -> error("UreQuote can not be negated")
+    is UreText -> error("UreText can not be negated")
     is UreAlter -> error("UreAlter can not be negated")
-    else -> error("Unexpected Ure type: ${this::class.simpleName}") // FIXME NOW: comment out
-    // had to add "else" branch because Android Studio 2021.2.1 canary 7 complains..
-    // TODO_later: Remove "else" when newer AS stops complaining
 }
-// TODO_later: experiment more with different operators overloading (after impl some working examples)
-//  especially indexed access operators and invoke operators..
+// TODO_someday: experiment more with different operators overloading,
+//  especially indexed access operators and invoke operators.
 
 @NotPortableApi @DelicateApi fun ureIR(ir: IR) = UreIR(ir)
 @NotPortableApi @DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
