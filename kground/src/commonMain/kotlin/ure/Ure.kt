@@ -396,7 +396,7 @@ data class UreCharClassIntersect internal constructor(val tokens: List<UreCharCl
 
 // TODO_later: make it not portable and opt in when using "constructor" that checks if prop is known and portable.
 data class UreCharClassProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : UreCharClass {
-    override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
+    override fun toIR(): IR = "\\${if (positive) "p" else "P"}{$prop}".asIR
     override fun toClosedIR(): IR = toIR()
     override fun toIRInCC(): IR = toIR()
 }
@@ -583,6 +583,7 @@ val chSpace = " ".ce
 val chWhiteSpace = 's'.cpd
 val chWhiteSpaceInLine = chSpace or chTab
 
+/** Basic printable characters. Only normal space. No emojis, etc. */
 val chPrint = oneCharOf(chGraph, chSpace)
 
 /** Same as [^0-9] */
@@ -693,7 +694,7 @@ val chPDigit = chProp("Digit")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chHexDigit] for a basic portable version.*/
 @NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chHexDigit for a basic portable version.")
-val chPHexDigit = chProp("XDigit") // TODO NOW unit test
+val chPHexDigit = chProp("XDigit")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chAlnum] for a basic portable version.*/
 @NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chAlnum for a basic portable version.")
@@ -701,18 +702,21 @@ val chPAlnum = chProp("Alnum")
 
 /**
  * Warning: Currently does NOT compile (Ure.compile) on JS. Check [chPunct] for a basic portable version.
- * Warning: On LINUX it also somehow matches numbers, like "2", "3", etc. Why??
+ * Warning: On LINUX it also somehow matches digits. Why??
  */
 @NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chPunct for a basic portable version.")
+@DelicateApi("On LINUX it also somehow matches digits. Why??") // TODO_later: report this?
 val chPPunct = chProp("Punct")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chGraph] for a basic portable version.*/
 @NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chGraph for a basic portable version.")
-val chPGraph = chProp("Graph") // TODO NOW unit test
+val chPGraph = chProp("Graph")
 
-/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chPrint] for a basic portable version.*/
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Also broken on LINUX. Check [chPrint] for a basic portable version.*/
 @NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chPrint for a basic portable version.")
-val chPPrint = chProp("Print") // TODO NOW unit test
+@DelicateApi("On LINUX it somehow doesn't match ANYTHING I tried. Why??") // TODO_later: report this?
+@Deprecated("It looks like it's really broken on LINUX so don't use it.", ReplaceWith("chPrint"))
+val chPPrint = chProp("Print")
 
 /** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chWhiteSpaceInLine] for a basic portable version.*/
 @NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chWhiteSpaceInLine for a basic portable version.")

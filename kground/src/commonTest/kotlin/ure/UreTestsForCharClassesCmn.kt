@@ -4,7 +4,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.chk
 import pl.mareklangiewicz.uspek.*
 
-@OptIn(NotPortableApi::class)
+@OptIn(NotPortableApi::class, DelicateApi::class)
 fun testSomeUreCharClasses() {
     // TODO NOW: add tests for the basic portable version of each of the chP*
     onUreClass(name = "chPLower", ure = chPLower,
@@ -25,6 +25,11 @@ fun testSomeUreCharClasses() {
         matchNot = listOf("A", "b", "c", "@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
+    onUreClass(name = "chPHexDigit", ure = chPHexDigit,
+        match = listOf("1", "2", "3", "8", "9", "a", "A", "c", "E", "F"),
+        matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
+        onPlatforms = listOf("JVM", "LINUX"),
+    )
     onUreClass(name = "chPAlnum", ure = chPAlnum,
         match = listOf("A", "B", "X", "c", "d", "1", "2", "8", "9", "0"),
         matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈", "ε", "β", "δ", "Λ", "Ξ", "ξ"),
@@ -35,6 +40,17 @@ fun testSomeUreCharClasses() {
         matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
+    onUreClass(name = "chPGraph", ure = chPGraph,
+        match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B"),
+        matchNot = listOf("¥", "₿", "₤", "😈"),
+        onPlatforms = listOf("JVM", "LINUX"),
+    )
+    // TODO_later: chPPrint is broken on LINUX. Doesn't match anything I tried. Report it, but for now it's deprecated.
+    // onUreClass(name = "chPPrint", ure = chPPrint,
+    //     match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
+    //     matchNot = listOf("¥", "₿", "₤", "😈", "\t"),
+    //     onPlatforms = listOf("JVM", "LINUX"),
+    // )
     onUreClass(name = "chPBlank", ure = chPBlank,
         match = listOf(" ", "\t"),
         matchNot = listOf("\n", "\r", "\u000B", "A", "a", "x", "¥", "₿", "₤", "2", "😈"),
