@@ -7,6 +7,11 @@ import kotlin.text.RegexOption.*
 const val example1 = "aBcDe\naBcDe\nABCDE"
 
 fun testSomeUreBasicStuff() {
+
+    // some example very basic sanity tests
+    "chDot compiled pattern is quoted dot" o { chDot.compile().pattern eq "\\." }
+    "chAnyInLine compiled pattern just a dot" o { chAnyInLine.compile().pattern eq "." }
+
     testUreWithDifferentOptions()
     testUreQuantifAndAtomic()
     // TODO("Test some quantifiers (is UreQuantif.toClosedIR() correct?)")
@@ -22,7 +27,6 @@ fun testUreQuantifAndAtomic() {
 
 @OptIn(DelicateApi::class)
 fun testUreWithDifferentOptions() {
-
 
     "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(example1).count() eq 2 }
 
@@ -52,7 +56,7 @@ fun testUreBasicEmail() {
         "assert IR as expected" o {
             // This assertion is kinda lame (expecting exact impl/ir / cementing impl),
             // but it's useful for me now as documentation and to track if sth changes.
-            ureBasicEmail.toIR().str eq """\b(?<user>[\w.]+)@(?<domain>(?:[\w\-]+\.)+[\w\-]{2,16})\b"""
+            ureBasicEmail.toIR().str eq """\b(?<user>[\w.\-]+)\b@\b(?<domain>(?:[\w\-]+\.)+[\w\-]{2,16})\b"""
         }
         testUreEmail(ureBasicEmail)
     }

@@ -11,7 +11,7 @@ fun ureKtKeywordLine(keyword: String, withNamePrefix: String = keyword) =
     ureLineWithContent(
         ureKeywordAndOptArg(
             keyword = keyword,
-            arg = ureChain(ureIdent(), chDotQuoted).withName(withNamePrefix + "Name")
+            arg = ureChain(ureIdent(), chDot).withName(withNamePrefix + "Name")
         )
     ).withName(withNamePrefix + "Line")
 

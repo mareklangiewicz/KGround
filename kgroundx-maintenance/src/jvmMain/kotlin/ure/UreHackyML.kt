@@ -72,7 +72,7 @@ fun Ure.withTagAroundOrJustTagCollapsed(
 }
 
 fun ureEmptyContentElement(name: String, vararg expectedAttrs: Ure, allowCollapsed: Boolean = false) =
-    ure { 0..MAX of chSpace }
+    ure { 0..MAX of chWhiteSpace }
         .withTagAroundOrJustTagCollapsed(
             name, *expectedAttrs, withOptSpacesAroundContent = false, allowJustTagCollapsed = allowCollapsed
         )
@@ -117,7 +117,7 @@ fun ureExpectAttr(
 ) = ureTagAttr(ureText(name), value, valueGroupName).let { if (optional) ure { 0..1 of it } else it }
 
 fun ureTagAttr(
-    name: Ure = ureIdent(allowHyphensInside = true),
+    name: Ure = ureIdent(allowDashesInside = true),
     value: Ure = ureWhatevaInLine(), // let's keep default inline, matching long multiline whateva can lead to hard to debug mismatches
     valueGroupName: String? = null
 ) = ure {

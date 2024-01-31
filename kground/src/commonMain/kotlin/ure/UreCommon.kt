@@ -5,33 +5,33 @@ import pl.mareklangiewicz.annotations.*
 
 @DelicateApi("Very basic email Ure. It will not match many strange but correct emails. Can also match some incorrect.")
 val ureBasicEmail = ure {
-    1 of bchWord
-    1 of ure("user") {
-        1..MAX of chWordOrDotOrHyphen
-    }
-    1 of ch("@")
-    1 of ure("domain") {
+    + bchWord // so the first user char is not dot nor dash
+    + ure("user") { 1..MAX of chWordOrDotOrDash }
+    + bchWord // so the last user char is not dot nor dash
+    + ch("@")
+    + bchWord // so the first domain char is not dot nor dash
+    + ure("domain") {
         1..MAX of {
-            1..MAX of chWordOrHyphen
-            1 of chDotQuoted
+            1..MAX of chWordOrDash
+            + chDot // so the domain has at least one dot
         }
-        2..16 of chWordOrHyphen
+        2..16 of chWordOrDash
     }
-    1 of bchWord
+    + bchWord // so the last domain char is not dash
 }
 
-fun ureIdent(first: Ure = chazAZ, withWordBoundaries: Boolean = true, allowHyphensInside: Boolean = false) = ure {
-    1 of first
+fun ureIdent(first: Ure = chazAZ, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
+    + first
     0..MAX of chWord
-    if (allowHyphensInside) 0..MAX of ure {
-        1 of ch("-")
+    if (allowDashesInside) 0..MAX of ure {
+        + chDash
         1..MAX of chWord
     }
 }.withWordBoundaries(withWordBoundaries, withWordBoundaries)
 
 fun ureChain(
     element: Ure,
-    separator: Ure = chSpaceInLine,
+    separator: Ure = chWhiteSpaceInLine,
     times: IntRange = 1..MAX,
     reluctant: Boolean = false,
     possessive: Boolean = false,
@@ -57,11 +57,11 @@ fun ureWhatevaInLine(reluctant: Boolean = true) = ureWhateva(reluctant, inLine =
 
 fun ureBlankStartOfLine() = ure {
     1 of bBOLine
-    0..MAX of chSpaceInLine
+    0..MAX of chWhiteSpaceInLine
 }
 
 fun ureBlankRestOfLine(withOptLineBreak: Boolean = true) = ure {
-    0..MAX of chSpaceInLine
+    0..MAX of chWhiteSpaceInLine
     1 of bEOLine
     if (withOptLineBreak) x(0..1, possessive = true) of ureLineBreak
 }
@@ -86,7 +86,7 @@ fun ureAnyLine(withOptLineBreak: Boolean = true) = ureLineWithContent(ureWhateva
 
 fun Ure.withOptSpacesAround(inLine: Boolean = false, allowBefore: Boolean = true, allowAfter: Boolean = true) =
     if (!allowBefore && !allowAfter) this else ure {
-        val s = if (inLine) chSpaceInLine else chSpace
+        val s = if (inLine) chWhiteSpaceInLine else chWhiteSpace
         if (allowBefore) 0..MAX of s
         1 of this@withOptSpacesAround // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
         if (allowAfter) 0..MAX of s
@@ -125,12 +125,12 @@ fun Ure.commentedOut(inLine: Boolean = false, traditional: Boolean = true, kdoc:
 fun Ure.notCommentedOut(traditional: Boolean = true, maxSpacesBehind: Int = 100) = ure {
     1 of ureLookBehind(positive = false) {
         1 of if (traditional) ureText("/*") else ureText("//")
-        0..maxSpacesBehind of if (traditional) chSpace else chSpaceInLine
+        0..maxSpacesBehind of if (traditional) chWhiteSpace else chWhiteSpaceInLine
         // Cannot use MAX - look-behind implementation complains (throws) (JVM)
     }
     1 of this@notCommentedOut
     if (traditional) 1 of ureLookAhead(positive = false) {
-        0..MAX of chSpace
+        0..MAX of chWhiteSpace
         1 of ureText("*/")
     }
 }
@@ -159,13 +159,13 @@ fun ureWithSpecialRegion(regionLabel: String) = ure {
 }
 
 
-fun ureKeywordAndOptArg(keyword: String, arg: Ure? = null, separator: Ure = chSpaceInLine.timesMin(1)) =
+fun ureKeywordAndOptArg(keyword: String, arg: Ure? = null, separator: Ure = chWhiteSpaceInLine.timesMin(1)) =
     ureKeywordAndOptArg(ureText(keyword).withWordBoundaries(), arg, separator)
 
 fun ureKeywordAndOptArg(
     keyword: Ure,
     arg: Ure? = null,
-    separator: Ure = chSpaceInLine.timesMin(1),
+    separator: Ure = chWhiteSpaceInLine.timesMin(1),
 ) = ure {
     1 of keyword
     arg?.let {

@@ -6,59 +6,60 @@ import pl.mareklangiewicz.uspek.*
 
 @OptIn(NotPortableApi::class)
 fun testSomeUreCharClasses() {
-    onUreClass(name = "chpLower", ure = chpLower,
+    // TODO NOW: add tests for the basic portable version of each of the chP*
+    onUreClass(name = "chPLower", ure = chPLower,
         match = listOf("a", "b", "x"), // on JS (only!) also matches letters like: "λ", "ξ", etc.
         matchNot = listOf("A", "B", "Z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
         // verbose = true,
     )
-    onUreClass(name = "chpUpper", ure = chpUpper,
+    onUreClass(name = "chPUpper", ure = chPUpper,
         match = listOf("A", "B", "X"), // on JS (only!) also matches letters like: "Λ", "Ξ", "Ż", etc.
         matchNot = listOf("a", "b", "z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
     )
-    onUreClass(name = "chpAlpha", ure = chpAlpha,
+    onUreClass(name = "chPAlpha", ure = chPAlpha,
         match = listOf("A", "B", "X", "c", "d"), // on JS (only!) also matches letters like: "ą", "ć", "Λ", "Ξ", "Ż", etc.
         matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
     )
-    onUreClass(name = "chpDigit", ure = chpDigit,
+    onUreClass(name = "chPDigit", ure = chPDigit,
         match = listOf("1", "2", "3", "8", "9"),
         matchNot = listOf("A", "b", "c", "@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chpAlnum", ure = chpAlnum,
+    onUreClass(name = "chPAlnum", ure = chPAlnum,
         match = listOf("A", "B", "X", "c", "d", "1", "2", "8", "9", "0"),
         matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈", "ε", "β", "δ", "Λ", "Ξ", "ξ"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chpPunct", ure = chpPunct,
+    onUreClass(name = "chPPunct", ure = chPPunct,
         match = listOf(".", ",", ":", "@", "#"), // on LINUX, it also matches numbers like "2", "3", etc. Why??
         matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chpBlank", ure = chpBlank,
+    onUreClass(name = "chPBlank", ure = chPBlank,
         match = listOf(" ", "\t"),
         matchNot = listOf("\n", "\r", "\u000B", "A", "a", "x", "¥", "₿", "₤", "2", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chpSpace", ure = chpSpace,
+    onUreClass(name = "chPSpace", ure = chPWhiteSpace,
         match = listOf(" ", "\t", "\n", "\r", "\u000B"),
         matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "2", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chpCurrency", ure = chpCurrency,
+    onUreClass(name = "chPCurrency", ure = chPCurrency,
         match = listOf("¥", "₿", "₤"),
         matchNot = listOf("@", "#", ":", "-", ")", "a", "Y", "😀", "1", "2", "😈"),
     )
-    onUreClass(name = "chpLatin", ure = chpLatin,
+    onUreClass(name = "chPLatin", ure = chPLatin,
         match = listOf("a", "B", "Ż", "ó", "ł", "Ź"),
         matchNot = listOf("@", "#", ":", "-", ")", "ε", "β", "δ", "Λ", "Ξ", "ξ", "😈"),
         onPlatforms = listOf("JVM", "JS"),
     )
-    onUreClass(name = "chpGreek", ure = chpGreek,
+    onUreClass(name = "chPGreek", ure = chPGreek,
         match = listOf("ε", "β", "δ", "Λ", "Ξ", "ξ"),
         matchNot = listOf("@", "#", ":", "-", ")", "a", "B", "Ż", "ó", "ł", "Ź", "😈"),
         onPlatforms = listOf("JVM", "JS"),
     )
-    onUreClass(name = "chpExtPict", ure = chpExtPict,
+    onUreClass(name = "chPExtPict", ure = chPExtPict,
         match = listOf("😀", "🫠", "🥶", "😈"),
         matchNot = listOf("@", "#", ":", "-", ")", "a", "b", "X", "Y", "1", "2"),
         onPlatforms = listOf("JS"),

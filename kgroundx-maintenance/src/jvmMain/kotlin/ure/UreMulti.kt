@@ -23,7 +23,7 @@ private val ureKeyword = ure { 1..MAX of chaz }.withWordBoundaries()
 private val ureTypedef = ure {
     1 of chWord
     0..1 of {
-        0..1 of chSpace
+        0..1 of chWhiteSpace
         ch("\\<")
         1..MAX of chAnyInLine
         ch("\\>")
@@ -51,17 +51,17 @@ private val ureFunParams = ureFunParamsInLine or ureFunParamsMultiLine
 @DelicateApi("Matches correctly only in typical cases.")
 private val ureFunDeclaration = ure {
     1 of ureText("fun")
-    1..MAX of chSpace
+    1..MAX of chWhiteSpace
     0..1 of { // receiver
         1 of ureTypedef
-        1 of chDotQuoted
+        1 of chDot
     }
     1..MAX of chWord // funname
     1 of ureFunParams
     0..1 of { // :Type<..>
-        0..1 of chSpace
+        0..1 of chWhiteSpace
         1 of ch(":")
-        0..MAX of chSpace
+        0..MAX of chWhiteSpace
         1 of ureTypedef
     }
 }
@@ -69,11 +69,11 @@ private val ureFunDeclaration = ure {
 @DelicateApi("Matches correctly only in typical cases.")
 val ureExpectFun = ure {
     1 of bBOLine
-    0..1 of { 1 of ureText("@Composable"); 1..MAX of chSpace }
-    0..MAX of { 1 of ureKeyword; 1..MAX of chSpace }
+    0..1 of { 1 of ureText("@Composable"); 1..MAX of chWhiteSpace }
+    0..MAX of { 1 of ureKeyword; 1..MAX of chWhiteSpace }
     1 of ureText("expect ")
     0..1 of ureText("suspend ")
     1 of ureFunDeclaration
-    0..MAX of chSpace
+    0..MAX of chWhiteSpace
     1 of bEOLine
 }

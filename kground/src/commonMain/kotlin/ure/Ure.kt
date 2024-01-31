@@ -3,8 +3,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.bad
-import pl.mareklangiewicz.kground.req
+import pl.mareklangiewicz.kground.*
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
 import kotlin.text.RegexOption.*
@@ -76,12 +75,18 @@ sealed interface UreAtomic: Ure
 sealed interface UreAnchor: UreAtomic, UreNonCapt
 
 /**
- * It can sometimes match more than one char technically.
+ * Also known as character set: https://www.regular-expressions.info/charclass.html
+ * Note:
+ *   It can sometimes match more than one char technically.
  *   For example, most (all?) emoji "code points" take two "code units" (16b chars).
  *   Such 32b encoding is also called "surrogate pair".
  */
-sealed interface UreCharLike: UreAtomic, UreNonCapt
-
+sealed interface UreCharClass: UreAtomic, UreNonCapt {
+    // FIXME NOW: this fun will be probably removed (for sure at least renamed),
+    //  but I need to experiment with such convention temporarily.
+    //  Can it even have the same meaning in all subclasses?
+    fun toIRInCC(): IR
+}
 
 @JvmInline
 value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutableListOf()) : UreNonCapt {
@@ -269,46 +274,135 @@ data class UreQuantif internal constructor(
         // TODO: I think it's correct, but should be analyzed more carefully (and write some tests!).
 }
 
+@Deprecated("Trying to do too much.")
 @JvmInline
-value class UreChar @DelicateApi internal constructor(val ir: IR) : UreCharLike {
+value class UreCharOld @DelicateApi internal constructor(val ir: IR) : UreCharClass {
     // TODO_someday_maybe: separate sealed class for specials etc. so we never ask user to manually provide IR
-    init { req(ir.isCharLike) { "Provided IR doesn't represent a character: $ir" } }
+    init { req(ir.looksLikeCharacter) { "Provided IR doesn't represent a character: $ir" } }
     override fun toIR(): IR = ir
     @OptIn(DelicateApi::class, NotPortableApi::class)
     override fun toClosedIR(): IR = ureIR(ir).toClosedIR()
+    override fun toIRInCC(): IR = toIR()
 }
 
-private val IR.isCharLike: Boolean get() = true
-// FIXME NOW: check if IR is correct full regex matching "char-like" texts (BTW use Ure for checking :-))
-//   escaped chars, char classes, or surrogate pairs (two codeunits representing one codepoint), are also "char-like")
+@Deprecated("Trying to do too much.")
+private val IR.looksLikeCharacter: Boolean get() = true
+// FIXME not really? (better to avoid parsing regexes at all - we want to always go anoter way around: generating correct IR)
+//   check if IR is correct full regex matching "char-like" texts (BTW use Ure for checking :-))
+//   escaped chars or surrogate pairs (two codeunits representing one codepoint), are also "char-like")
 
+/**
+ * Represents exactly one character (code point in Unicode). Will be automatically escaped if needed.
+ * @param str can contain more than one jvm char in cases when one codepoint in utf16 takes more than one char,
+ * but it does not accept regexes representing special characters, like "\\t", or "\\n" - use single backslash,
+ * so kotlin compiler changes "\n" into actual newline character, etc;
+ * UreCharExact.toIR() will recreate necessary regex (like \n or \x{h...h}) for weird characters.
+ */
+@JvmInline value class UreCharExact @DelicateApi internal constructor(val str: String) : UreCharClass {
+    init {
+        req(str.isNotEmpty()) { "Empty char point." }
+        req(str.isSingleCharacter) { "Looks like more than one char point." }
+    }
+    override fun toClosedIR() = toIR()
+    override fun toIR(): IR = toIR(str[0].isMeta)
+    override fun toIRInCC(): IR = toIR(str[0].isMetaInCharClass) // TODO NOW: use it where appropriate
 
-// TODO_someday_maybe: Should I do something like: chars: Set<UreChar> ?? some error checking for wrong chars?
-data class UreCharSet internal constructor(val chars: Set<String>, val positive: Boolean = true) : UreCharLike {
-    override fun toClosedIR(): IR = toIR()
-    override fun toIR(): IR = chars.joinToString("", if (positive) "[" else "[^", "]") {
-        if (it in setOf("]", "\\", "-")) "\\$it" else it
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun toIR(justQuote: Boolean): IR = when {
+        justQuote -> "\\$str"
+        str == "\t" -> "\\t" // tab
+        str == "\n" -> "\\n" // newline
+        str == "\r" -> "\\r" // carriage-return
+        str == "\u000C" -> "\\f" // form-feed
+        str == "\u0007" -> "\\a" // alert bell
+        str == "\u001B" -> "\\e" // escape
+        // TODO_someday: what with control characters? \cx
+        str.isSafeExactCharInRegex -> str
+
+        else -> "\\x{${str[0].code.toHexString()}}".also {
+            req(str.length == 1) { "Looks like surrogate pair. Unfortunately not supported yet." }
+            // (waiting for better codepoints support in kotlin common stdlib)
+            // https://youtrack.jetbrains.com/issue/KT-23251/Extend-Unicode-support-in-Kotlin-common
+        }
     }.asIR
+
+    companion object {
+        private val reAnyAtAll = Regex("[\\s\\S]") // for performance, also cannot use chAnyAtAll in initialization
+        private val String.isSingleCharacter get() = reAnyAtAll.matches(this)
+        private val String.isSafeExactCharInRegex get() = length == 1
+        // FIXME This is temporary and very wrong implementation.
+        //   (but at least we use it only when we already know it is single character and not meta char)
+        //   It should accept some multichar points, it shoud actually check if it's save to put in regex as-is.
+        //   (waiting for better codepoints support in kotlin common stdlib)
+        //   https://youtrack.jetbrains.com/issue/KT-23251/Extend-Unicode-support-in-Kotlin-common
+    }
 }
 
-// TODO_later: more complicated combinations of char classes
+private val Char.isMeta get() = this in "\\[].^\$?*+{}|()" // https://www.regular-expressions.info/characters.html
+
+private val Char.isMetaInCharClass get() = this in "\\]^-" // https://www.regular-expressions.info/charclass.html
+
+/**
+ * Also known as shorthand character set
+ * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#predef
+ * https://www.regular-expressions.info/shorthand.html
+ */
+@JvmInline value class UreCharClassPreDef @DelicateApi internal constructor(val name: Char) : UreCharClass {
+    init { req(name.isNameOfPreDefCC) { "Incorrect name of predefined character class: $name" } }
+    override fun toIR(): IR = if (name == '.') "$name".asIR else "\\$name".asIR
+    override fun toClosedIR(): IR = toIR()
+    override fun toIRInCC(): IR = toIR()
+
+    // TODO NOW: use it in external .not, or just move it there.
+    @OptIn(DelicateApi::class) operator fun not() =
+        if (name == '.') bad { "The chAnyInLine can't be negated." }
+        else UreCharClassPreDef(name.oppositecaseChar())
+
+    companion object {
+        private fun Char.oppositecaseChar() = if (isLowerCase()) uppercaseChar() else lowercaseChar()
+        private val Char.isNameOfPreDefCC get() = this in ".dDhHsSvVwW"
+    }
+}
+
+
+// TODO: test complex unions and intersections like [abc[^def]], [abc&&[c-x]], etc
+
+data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
+    init { req(tokens.isNotEmpty()) { "No tokens in UreCharClassUnion." } }
+    override fun toIR(): IR = if (tokens.size == 1 && positive) tokens[0].toIR()
+        else tokens.joinToString("", if (positive) "[" else "[^", "]") { it.toIRInCC().str }.asIR
+    override fun toClosedIR(): IR = toIR()
+    override fun toIRInCC(): IR = toIR()
+        // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
+}
+
 // TODO_later: analyze if some special kotlin progression/range would fit here better
-data class UreCharRange internal constructor(val from: String, val to: String, val positive: Boolean = true) : UreCharLike {
+// TODO NOW: I guess it's more correct/portable if from and to are [UreCharExact]
+//  so create separate public "constructors" and annotate nonportable where neccessary, but first read more and test!!
+data class UreCharClassRange @NotPortableApi constructor(val from: UreCharClass, val to: UreCharClass, val positive: Boolean = true) : UreCharClass {
     private val neg = if (positive) "" else "^"
-    override fun toClosedIR(): IR = toIR()
     override fun toIR(): IR = "[$neg$from-$to]".asIR
-}
-
-data class UreCharProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : UreCharLike {
     override fun toClosedIR(): IR = toIR()
-    override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
+    override fun toIRInCC(): IR = toIR()
+        // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
 }
 
-// TODO_someday_maybe: think what would be better.
-//   Maybe still ask user for string, but validate and transform to the actual UreConcat of UreChar's
-/** Dirty way to inject whole strings fast. */
-@JvmInline value class UreIR @DelicateApi @NotPortableApi internal constructor(val ir: IR) : Ure {
+data class UreCharClassIntersect internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
+    override fun toIR(): IR = tokens.joinToString("&&", if (positive) "[" else "[^", "]") { it.toIRInCC().str }.asIR
+    override fun toClosedIR(): IR = toIR()
+    override fun toIRInCC(): IR = toIR()
+        // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
+}
 
+// TODO_later: make it not portable and opt in when using "constructor" that checks if prop is known and portable.
+data class UreCharClassProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : UreCharClass {
+    override fun toIR(): IR =  "\\${if (positive) "p" else "P"}{$prop}".asIR
+    override fun toClosedIR(): IR = toIR()
+    override fun toIRInCC(): IR = toIR()
+}
+
+/** Dirty way to inject whole regexes fast. Avoid if possible. */
+@JvmInline value class UreIR @DelicateApi @NotPortableApi internal constructor(val ir: IR) : Ure {
     override fun toIR(): IR = ir
     override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
     private val isClosed get() = when {
@@ -319,15 +413,14 @@ data class UreCharProp @NotPortableApi internal constructor(val prop: String, va
     // TODO_someday: analyze more carefully and drop grouping when actually not needed.
 }
 
-@JvmInline value class UreQuote internal constructor(val str: String) : UreAtomic, UreNonCapt {
+@JvmInline value class UreQuote @NotPortableApi internal constructor(val str: String) : UreAtomic, UreNonCapt {
     override fun toClosedIR(): IR = toIR()
     override fun toIR() = "\\Q$str\\E".asIR
 }
 
 @JvmInline value class UreText internal constructor(val str: String) : UreAtomic, UreNonCapt {
     override fun toClosedIR(): IR = this.groupNonCapt().toIR()
-    override fun toIR() = str.map { if (it in special) "\\$it" else "$it" }.joinToString("").asIR
-    private val special get() = "\\[].&^\$?*+{}|():!<>="
+    override fun toIR() = str.map { if (it.isMeta) "\\$it" else "$it" }.joinToString("").asIR
 }
 
 // endregion [Ure Core Classes]
@@ -390,26 +483,27 @@ infix fun Ure.then(that: Ure) = UreConcat(mutableListOf(this, that))
 // It only returns NotPortableApi ure if argument was already NotPortableApi (UreCharProp).
 @OptIn(NotPortableApi::class, SecondaryApi::class, DelicateApi::class)
 operator fun Ure.not(): Ure = when (this) {
-    is UreChar -> when (this) {
-        chWord -> chNonWord
-        chNonWord -> chWord
-        chDigit -> chNonDigit
-        chNonDigit -> chDigit
-        chSpace -> chNonSpace
-        chNonSpace -> chSpace
-        else -> oneCharNotOf(ir.str)
-        // TODO: check if particular ir is appropriate for such wrapping
-        // TODO_later: other special cases?
-    }
+    // FIXME NOW: rewrite whole thing..
+    // is UreCharOld -> when (this) {
+    //     chWord -> chNonWord
+    //     chNonWord -> chWord
+    //     chDigit -> chNonDigit
+    //     chNonDigit -> chDigit
+    //     chSpace -> chNonSpace
+    //     chNonSpace -> chSpace
+    //     else -> oneCharNotOf(ir.str)
+    //     // TODO: check if particular ir is appropriate for such wrapping
+    //     // TODO_later: other special cases?
+    // }
     is UreIR -> when (this) {
         bchWord -> bchWordNot
         bchWordNot -> bchWord
         else -> error("This UreIR can not be negated")
     }
-
-    is UreCharRange -> UreCharRange(from, to, !positive)
-    is UreCharSet -> UreCharSet(chars, !positive)
-    is UreCharProp -> UreCharProp(prop, !positive)
+    is UreCharExact -> bad { "UreCharExact can not be negated" }
+    is UreCharClassRange -> UreCharClassRange(from, to, !positive)
+    is UreCharClassUnion -> UreCharClassUnion(tokens, !positive)
+    is UreCharClassProp -> UreCharClassProp(prop, !positive)
     is UreGroup -> when (this) {
         is UreLookGroup -> UreLookGroup(content, ahead, !positive)
         else -> error("Unsupported UreGroup for negation: ${this::class.simpleName}")
@@ -420,7 +514,7 @@ operator fun Ure.not(): Ure = when (this) {
     is UreQuantif -> error("UreQuantif can not be negated")
     is UreQuote -> error("UreQuote can not be negated")
     is UreAlter -> error("UreAlter can not be negated")
-    else -> error("Unexpected Ure type: ${this::class.simpleName}")
+    else -> error("Unexpected Ure type: ${this::class.simpleName}") // FIXME NOW: comment out
     // had to add "else" branch because Android Studio 2021.2.1 canary 7 complains..
     // TODO_later: Remove "else" when newer AS stops complaining
 }
@@ -431,7 +525,7 @@ operator fun Ure.not(): Ure = when (this) {
 @NotPortableApi @DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
 
 /** Wraps the [text] with \Q...\E, so it's interpreted as exact text to match (no chars treated as special). */
-fun ureQuote(text: String) = UreQuote(text)
+@NotPortableApi fun ureQuote(text: String) = UreQuote(text)
 
 /** Similar to [ureQuote] but quotes each character (which could be treated as special) separately with backslash */
 fun ureText(text: String) = UreText(text)
@@ -441,9 +535,11 @@ fun ureText(text: String) = UreText(text)
 
 // region [Ure Character Related Stuff]
 
-@OptIn(DelicateApi::class) fun ch(ir: IR) = UreChar(ir) // TODO check for the wrong strings in UreChar.init.
-@OptIn(DelicateApi::class) fun ch(str: String) = ch(str.asIR)
+@OptIn(DelicateApi::class) fun ch(str: String) = UreCharExact(str)
+
 fun ch(chr: Char) = ch(chr.toString())
+
+@DelicateApi fun chPreDef(name: Char) = UreCharClassPreDef(name)
 
 
 // Ure constants matching one char (special chars; common categories). All names start with ch.
@@ -451,56 +547,79 @@ fun ch(chr: Char) = ch(chr.toString())
 
 
 // just private shortcuts
-@OptIn(DelicateApi::class) private inline val String.c get() = ch(this)
+@OptIn(DelicateApi::class) private inline val String.ce get() = ch(this)
+@OptIn(DelicateApi::class) private inline val Char.cpd get() = chPreDef(this)
 
-val chBackSlash = "\\\\".c
+val chBackSlash = "\\".ce
 
-fun chUniCode(name: String) = "\\N{$name}".c
+val chTab = "\t".ce
+val chLF = "\n".ce
+val chCR = "\r".ce
+val chFF = "\u000C".ce
+val chAlert = "\u0007".ce
+val chEsc = "\u001B".ce
 
-val chTab = "\\t".c
-val chLF = "\\n".c
-val chCR = "\\r".c
-val chFF = "\\f".c
-val chAlert = "\\a".c
-val chEsc = "\\e".c
+/** [a-z] */
+val chLower = oneCharOf('a'..'z')
+/** [A-Z] */
+val chUpper = oneCharOf('A'..'Z')
+/** [a-zA-Z] */
+val chAlpha = oneCharOf(chLower, chUpper)
 
-val chDotQuoted = "\\.".c
-val chAnyInLine = ".".c
-val chAnyAtAll = oneCharOf("\\s", "\\S") // should work everywhere and should be fast.
-// Note: following impl would not work on JS: "(?s:.)".c
-//   see details: https://www.regular-expressions.info/dot.html
+/** Same as [0-9] */
+val chDigit = 'd'.cpd
 
-val chDigit = "\\d".c
+/** Same as [0-9] */
+val chHexDigit = oneCharOf(chDigit, oneCharOf('a'..'f'), oneCharOf('A'..'F'))
 
-val chSpace = "\\s".c
-val chSpaceInLine = " ".c or chTab
+/** Same as [a-zA-Z0-9] */
+val chAlnum = oneCharOf(chAlpha, chDigit)
 
+val chPunct = oneCharOfExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""")
+
+val chGraph = oneCharOf(chAlnum, chPunct)
+
+val chSpace = " ".ce
+val chWhiteSpace = 's'.cpd
+val chWhiteSpaceInLine = chSpace or chTab
+
+val chPrint = oneCharOf(chGraph, chSpace)
+
+/** Same as [^0-9] */
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chDigit"))
-val chNonDigit = "\\D".c
+val chNonDigit = 'D'.cpd
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chSpace"))
-val chNonSpace = "\\S".c
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWhiteSpace"))
+val chNonWhiteSpace = 'S'.cpd
+
+val chDash = "-".ce
+
+/**
+ * Matches only the actual dot "." character.
+ * Check [chAnyInLine] if you want regex that matches any character in line (represented by "." IR),
+ * Check [chAnyAtAll] if you want regex that matches any character at all.
+ */
+val chDot = ".".ce
+
+val chAnyInLine = '.'.cpd
+
+/** [\s\S] It is a portable and fast way to match any character at all. */
+val chAnyAtAll = oneCharOf(chWhiteSpace, !chWhiteSpace) // should work everywhere and should be fast.
+// Note: following impl would not work on JS: ureIR("(?s:.)")
+//   see details: https://www.regular-expressions.info/dot.html
 
 
 
 /** Same as [a-zA-Z0-9_] */
-val chWord = "\\w".c
+val chWord = 'w'.cpd
 
 /** Same as [^a-zA-Z0-9_] */
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord"))
-val chNonWord = "\\W".c
+val chNonWord = 'W'.cpd
 
-fun chWord(orDot: Boolean = false, orHyphen: Boolean = false) = oneCharOf(
-    "\\w" + if (orDot) "." else "" + if (orHyphen) "\\-" else ""
-)
-
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord(orDot = norDot, orHyphen = norHyphen)"))
-fun chNonWord(norDot: Boolean = false, norHyphen: Boolean = false) = !chWord(orDot = norDot, orHyphen = norHyphen)
-// Let it stay as a hint for user that negation (operator) does the same.
-
-val chWordOrDot = chWord(orHyphen = true)
-val chWordOrHyphen = chWord(orHyphen = true) // also hints (when typing chWo) that chWord doesn't match hyphen.
-val chWordOrDotOrHyphen = chWord(orDot = true, orHyphen = true)
+val chWordOrDot = oneCharOf(chWord, chDot)
+val chWordOrDash = oneCharOf(chWord, chDash) // also hints (when typing chWo) that chWord doesn't match dash.
+val chWordOrDotOrDash = oneCharOf(chWord, chDot, chDash)
 
 // Note: All these different flavors of "word-like" classes seem unnecessary/not-micro-enough,
 //   but let's keep them because I suspect I will reuse them a lot in practice.
@@ -509,17 +628,17 @@ val chWordOrDotOrHyphen = chWord(orDot = true, orHyphen = true)
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDot"))
 val chNonWordNorDot = !chWordOrDot
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrHyphen"))
-val chNonWordNorHyphen = !chWordOrHyphen
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDash"))
+val chNonWordNorDash = !chWordOrDash
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDotOrHyphen"))
-val chNonWordNorDotNorHyphen = !chWordOrDotOrHyphen
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDotOrDash"))
+val chNonWordNorDotNorDash = !chWordOrDotOrDash
 
 
 
-val chaz = oneCharOfRange("a", "z")
-val chAZ = oneCharOfRange("A", "Z")
-val chazAZ = chaz or chAZ
+val chaz = oneCharOf('a'..'z')
+val chAZ = oneCharOf('A'..'Z')
+val chazAZ = oneCharOf(chaz, chAZ)
 
 /**
  * Predefined char set with some property.
@@ -538,86 +657,115 @@ val chazAZ = chaz or chAZ
  *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
  */
 @NotPortableApi("Different platforms support different character properties/classes")
-fun chp(prop: String) = UreCharProp(prop, positive = true)
+fun chProp(prop: String, positive: Boolean = true) = UreCharClassProp(prop, positive)
 
 @NotPortableApi
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chp(prop)"))
-fun chpNot(prop: String) = !chp(prop)
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chProp(prop)"))
+fun chpPropNot(prop: String) = !chProp(prop)
 
 
 // Some of the more popular char props available on (probably) all platforms:
 
 /**
- * Warning: It works differently on JS than on other platforms.
+ * Warning: It works differently on JS than on other platforms. Check [chLower] for a basic portable version.
  * On JS, it is more correct because matches letters like: "ε", "ł", "ź"
  */
-@NotPortableApi("It works differently on JS than on other platforms.")
-val chpLower = chp("Lower")
+@NotPortableApi("It works differently on JS than on other platforms. Check chLower for a basic portable version.")
+val chPLower = chProp("Lower")
 
 /**
- * Warning: It works differently on JS than on other platforms.
+ * Warning: It works differently on JS than on other platforms. Check [chUpper] for a basic portable version.
  * On JS, it is more correct because matches letters like: "Λ", "Ξ", "Ł", "Ź"
  */
-@NotPortableApi("It works differently on JS than on other platforms.")
-val chpUpper = chp("Upper")
+@NotPortableApi("It works differently on JS than on other platforms. Check chUpper for a basic portable version.")
+val chPUpper = chProp("Upper")
 
 /**
- * Warning: It works differently on JS than on other platforms.
+ * Warning: It works differently on JS than on other platforms. Check [chAlpha] for a basic portable version.
  * On JS, it is more correct because matches letters like: "Λ", "Ξ", "Ł", "Ź", "λ", "ξ", "ł", "ź"
  */
-@NotPortableApi("It works differently on JS than on other platforms.")
-val chpAlpha = chp("Alpha")
+@NotPortableApi("It works differently on JS than on other platforms. Check chAlpha for a basic portable version.")
+val chPAlpha = chProp("Alpha")
 
-/** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
-val chpDigit = chp("Digit")
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chDigit] for a basic portable version.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chDigit for a basic portable version.")
+val chPDigit = chProp("Digit")
 
-/** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
-val chpAlnum = chp("Alnum")
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chHexDigit] for a basic portable version.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chHexDigit for a basic portable version.")
+val chPHexDigit = chProp("XDigit") // TODO NOW unit test
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chAlnum] for a basic portable version.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chAlnum for a basic portable version.")
+val chPAlnum = chProp("Alnum")
 
 /**
- * Warning: Currently does NOT compile (Ure.compile) on JS.
+ * Warning: Currently does NOT compile (Ure.compile) on JS. Check [chPunct] for a basic portable version.
  * Warning: On LINUX it also somehow matches numbers, like "2", "3", etc. Why??
  */
-@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
-val chpPunct = chp("Punct")
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chPunct for a basic portable version.")
+val chPPunct = chProp("Punct")
 
-/** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
-val chpBlank = chp("Blank")
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chGraph] for a basic portable version.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chGraph for a basic portable version.")
+val chPGraph = chProp("Graph") // TODO NOW unit test
 
-/** Warning: Currently does NOT compile (Ure.compile) on JS. */
-@NotPortableApi("Currently does NOT compile (Ure.compile) on JS.")
-val chpSpace = chp("Space")
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chPrint] for a basic portable version.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chPrint for a basic portable version.")
+val chPPrint = chProp("Print") // TODO NOW unit test
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chWhiteSpaceInLine] for a basic portable version.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chWhiteSpaceInLine for a basic portable version.")
+val chPBlank = chProp("Blank")
+
+/** Warning: Currently does NOT compile (Ure.compile) on JS. Check [chWhiteSpace] for basic portable verion.*/
+@NotPortableApi("Currently does NOT compile (Ure.compile) on JS. Check chWhiteSpace for basic portable verion.")
+val chPWhiteSpace = chProp("Space")
 
 @OptIn(NotPortableApi::class)
-val chpCurrency = chp("Sc")
+val chPCurrency = chProp("Sc")
 
 /**
  * Warning: Currently it compiles (Ure.compile) only on JS.
  * Note: I guess this one is pretty good class to match actual emojis.
- *   Others like chp("Emoji") or chp("Emoji_Presentation") match/don't match weird characters.
+ *   Others like chProp("Emoji") or chProp("Emoji_Presentation") match/don't match weird characters.
  *   https://unicode.org/reports/tr51/#Emoji_Properties
  */
 @NotPortableApi("Currently it compiles (Ure.compile) only on JS.")
-val chpExtPict = chp("ExtPict")
+val chPExtPict = chProp("ExtPict")
 
 /** Warning: Currently does NOT compile (Ure.compile) on LINUX. */
 @NotPortableApi("Currently does NOT compile (Ure.compile) on LINUX.")
-val chpLatin = chp("sc=Latin")
+val chPLatin = chProp("sc=Latin")
 
 /** Warning: Currently does NOT compile (Ure.compile) on LINUX. */
 @NotPortableApi("Currently does NOT compile (Ure.compile) on LINUX.")
-val chpGreek = chp("sc=Greek")
+val chPGreek = chProp("sc=Greek")
 
-@DelicateApi
-fun control(x: String) = "\\c$x".c // FIXME_later: what exactly is this?? (see std Pattern.java)
+@NotPortableApi @DelicateApi fun chCtrl(letter: Char) = UreIR("\\c$letter".asIR).also { req(letter in 'A'..'Z') }
+    // https://www.regular-expressions.info/nonprint.html
 
-fun oneCharOf(vararg chars: String) = UreCharSet(chars.toSet()) // TODO_maybe: Use UreChar as vararg type
-fun oneCharNotOf(vararg chars: String) = UreCharSet(chars.toSet(), positive = false) // TODO_maybe: as above
-fun oneCharOfRange(from: String, to: String) = UreCharRange(from, to)
-fun oneCharNotOfRange(from: String, to: String) = UreCharRange(from, to, positive = false)
+
+fun oneCharOf(charClasses: List<UreCharClass>) = UreCharClassUnion(charClasses)
+fun oneCharOf(vararg charClasses: UreCharClass?) = oneCharOf(charClasses.toList().filterNotNull())
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(charClasses)"))
+fun oneCharNotOf(vararg charClasses: UreCharClass?) = !oneCharOf(*charClasses)
+
+@OptIn(DelicateApi::class)
+fun oneCharOfExact(exactChars: List<Char>) = oneCharOf(exactChars.map(::ch))
+
+@OptIn(DelicateApi::class)
+fun oneCharOfExact(exactChars: String) = oneCharOfExact(exactChars.toList())
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOfExact(charClasses)"))
+fun oneCharNotOfExact(exactChars: String) = !oneCharOfExact(exactChars)
+
+@OptIn(NotPortableApi::class)
+fun oneCharOf(range: CharRange) = UreCharClassRange(ch(range.start), ch(range.endInclusive))
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(range)"))
+fun oneCharNotOf(range: CharRange) = !oneCharOf(range)
 
 
 // endregion [Ure Character Related Stuff]
