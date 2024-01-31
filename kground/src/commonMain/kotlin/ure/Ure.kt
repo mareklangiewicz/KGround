@@ -340,7 +340,7 @@ private val IR.looksLikeCharacter: Boolean get() = true
 
 private val Char.isMeta get() = this in "\\[].^\$?*+{}|()" // https://www.regular-expressions.info/characters.html
 
-private val Char.isMetaInCharClass get() = this in "\\]^-" // https://www.regular-expressions.info/charclass.html
+private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regular-expressions.info/charclass.html
 
 /**
  * Also known as shorthand character set
@@ -372,8 +372,9 @@ data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>
     override fun toIR(): IR = if (tokens.size == 1 && positive) tokens[0].toIR()
         else tokens.joinToString("", if (positive) "[" else "[^", "]") { it.toIRInCC().str }.asIR
     override fun toClosedIR(): IR = toIR()
-    override fun toIRInCC(): IR = toIR()
-        // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
+    override fun toIRInCC(): IR = tokens.joinToString("", if (positive) "" else "[^", if (positive) "" else "]") { it.toIRInCC().str }.asIR
+        // TODO: I don't wrap in [] here (when positive) to see if it works,
+        //  but make sure to analyze all cases and write unit tests!!
 }
 
 // TODO_later: analyze if some special kotlin progression/range would fit here better
@@ -381,10 +382,10 @@ data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>
 //  so create separate public "constructors" and annotate nonportable where neccessary, but first read more and test!!
 data class UreCharClassRange @NotPortableApi constructor(val from: UreCharClass, val to: UreCharClass, val positive: Boolean = true) : UreCharClass {
     private val neg = if (positive) "" else "^"
-    override fun toIR(): IR = "[$neg$from-$to]".asIR
     override fun toClosedIR(): IR = toIR()
-    override fun toIRInCC(): IR = toIR()
-        // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
+    override fun toIR(): IR = "[${toIRInCC()}]".asIR
+    override fun toIRInCC(): IR = "$neg${from.toIRInCC()}-${to.toIRInCC()}".asIR
+        // TODO: I don't wrap in [] here to see if it works, but make sure to analyze all cases and write unit tests!!
 }
 
 data class UreCharClassIntersect internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
@@ -482,6 +483,8 @@ infix fun Ure.then(that: Ure) = UreConcat(mutableListOf(this, that))
 
 // It only returns NotPortableApi ure if argument was already NotPortableApi (UreCharProp).
 @OptIn(NotPortableApi::class, SecondaryApi::class, DelicateApi::class)
+// FIXME NOW: move it inside Ure (declaration) and implementations to concrete classes
+@Deprecated("FIXME NOW")
 operator fun Ure.not(): Ure = when (this) {
     // FIXME NOW: rewrite whole thing..
     // is UreCharOld -> when (this) {
@@ -501,6 +504,7 @@ operator fun Ure.not(): Ure = when (this) {
         else -> error("This UreIR can not be negated")
     }
     is UreCharExact -> bad { "UreCharExact can not be negated" }
+    is UreCharClassPreDef -> !this
     is UreCharClassRange -> UreCharClassRange(from, to, !positive)
     is UreCharClassUnion -> UreCharClassUnion(tokens, !positive)
     is UreCharClassProp -> UreCharClassProp(prop, !positive)
@@ -564,7 +568,7 @@ val chLower = oneCharOf('a'..'z')
 /** [A-Z] */
 val chUpper = oneCharOf('A'..'Z')
 /** [a-zA-Z] */
-val chAlpha = oneCharOf(chLower, chUpper)
+val chAlpha = oneCharOf(chLower, chUpper) // Note: chLower or chUpper is worse, because UreAlter can't be negated.
 
 /** Same as [0-9] */
 val chDigit = 'd'.cpd
@@ -581,7 +585,7 @@ val chGraph = oneCharOf(chAlnum, chPunct)
 
 val chSpace = " ".ce
 val chWhiteSpace = 's'.cpd
-val chWhiteSpaceInLine = chSpace or chTab
+val chWhiteSpaceInLine = oneCharOf(chSpace, chTab) // Note: chSpace or chTab is worse, because UreAlter can't be negated.
 
 /** Basic printable characters. Only normal space. No emojis, etc. */
 val chPrint = oneCharOf(chGraph, chSpace)

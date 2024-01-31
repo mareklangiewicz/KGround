@@ -6,57 +6,61 @@ import pl.mareklangiewicz.uspek.*
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
 fun testSomeUreCharClasses() {
-    // TODO NOW: add tests for the basic portable version of each of the chP*
-    onUreClass(name = "chPLower", ure = chPLower,
+    onUreClassPair("chLower", "chPLower", chLower, chPLower,
         match = listOf("a", "b", "x"), // on JS (only!) also matches letters like: "λ", "ξ", etc.
         matchNot = listOf("A", "B", "Z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
         // verbose = true,
     )
-    onUreClass(name = "chPUpper", ure = chPUpper,
+    onUreClassPair("chUpper", "chPUpper", chUpper, chPUpper,
         match = listOf("A", "B", "X"), // on JS (only!) also matches letters like: "Λ", "Ξ", "Ż", etc.
         matchNot = listOf("a", "b", "z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
     )
-    onUreClass(name = "chPAlpha", ure = chPAlpha,
+    onUreClassPair("chAlpha", "chPAlpha", chAlpha, chPAlpha,
         match = listOf("A", "B", "X", "c", "d"), // on JS (only!) also matches letters like: "ą", "ć", "Λ", "Ξ", "Ż", etc.
         matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
     )
-    onUreClass(name = "chPDigit", ure = chPDigit,
+    onUreClassPair("chDigit", "chPDigit", chDigit, chPDigit,
         match = listOf("1", "2", "3", "8", "9"),
         matchNot = listOf("A", "b", "c", "@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chPHexDigit", ure = chPHexDigit,
+    onUreClassPair("chHexDigit", "chPHexDigit", chHexDigit, chPHexDigit,
         match = listOf("1", "2", "3", "8", "9", "a", "A", "c", "E", "F"),
         matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chPAlnum", ure = chPAlnum,
+    onUreClassPair("chAlnum", "chPAlnum", chAlnum, chPAlnum,
         match = listOf("A", "B", "X", "c", "d", "1", "2", "8", "9", "0"),
         matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈", "ε", "β", "δ", "Λ", "Ξ", "ξ"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chPPunct", ure = chPPunct,
+    onUreClassPair("chPunct", "chPPunct", chPunct, chPPunct,
         match = listOf(".", ",", ":", "@", "#"), // on LINUX, it also matches numbers like "2", "3", etc. Why??
         matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chPGraph", ure = chPGraph,
+    onUreClassPair("chGraph", "chPGraph", chGraph, chPGraph,
         match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B"),
         matchNot = listOf("¥", "₿", "₤", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
     // TODO_later: chPPrint is broken on LINUX. Doesn't match anything I tried. Report it, but for now it's deprecated.
-    // onUreClass(name = "chPPrint", ure = chPPrint,
+    // onUreClassPair("chPrint", "chPPrint", chPrint, chPPrint,
     //     match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
     //     matchNot = listOf("¥", "₿", "₤", "😈", "\t"),
     //     onPlatforms = listOf("JVM", "LINUX"),
     // )
-    onUreClass(name = "chPBlank", ure = chPBlank,
+    // So let's just test portable version for now.
+    onUreClass("chPrint", chPrint,
+        match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
+        matchNot = listOf("¥", "₿", "₤", "😈", "\t"),
+    )
+    onUreClassPair("chWhiteSpaceInLine", "chPBlank", chWhiteSpaceInLine, chPBlank,
         match = listOf(" ", "\t"),
         matchNot = listOf("\n", "\r", "\u000B", "A", "a", "x", "¥", "₿", "₤", "2", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
     )
-    onUreClass(name = "chPSpace", ure = chPWhiteSpace,
+    onUreClassPair("chSpace", "chPSpace", chWhiteSpace, chPWhiteSpace,
         match = listOf(" ", "\t", "\n", "\r", "\u000B"),
         matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "2", "😈"),
         onPlatforms = listOf("JVM", "LINUX"),
@@ -97,6 +101,23 @@ private fun onUreClass(
             itMatchesCorrectChars(ure, match, matchNot, verbose)
         }
         else itDoesNotCompile(ure)
+    }
+}
+
+// Warning: Sibling calls have to have different names, so USpek tree can differentiate branches.
+private fun onUreClassPair(
+    namePortable: String,
+    namePlatform: String,
+    urePortable: Ure,
+    urePlatform: Ure,
+    match: List<String>,
+    matchNot: List<String>,
+    onPlatforms: List<String> = listOf("JVM", "JS", "LINUX"),
+    verbose: Boolean = false,
+) {
+    "On ure class pair $namePortable and $namePlatform" o {
+        onUreClass(namePortable, urePortable, match, matchNot, verbose = verbose)
+        onUreClass(namePlatform, urePlatform, match, matchNot, onPlatforms, verbose)
     }
 }
 
