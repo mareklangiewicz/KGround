@@ -63,6 +63,14 @@ sealed interface Ure {
 sealed interface UreNonCapt: Ure
 sealed interface UreCapt: Ure
 sealed interface UreNum: UreCapt
+
+/**
+ * Named group is also automatically numbered (in most implementations),
+ * but different regex implementations can number them differently.
+ * So better not to mix [UreNamedGroup] with [UreNumGroup] in one [Ure],
+ * but choose one way of capturing. See "Numbers for Named Capturing Groups" here:
+ * https://www.regular-expressions.info/named.html
+ */
 sealed interface UreNamed: UreNum
 
 /**
@@ -75,7 +83,7 @@ sealed interface UreAtomic: Ure
 sealed interface UreAnchor: UreAtomic, UreNonCapt
 
 /**
- * Also known as character set: https://www.regular-expressions.info/charclass.html
+ * Also known as a character set: https://www.regular-expressions.info/charclass.html
  * Note:
  *   It can sometimes match more than one char technically.
  *   For example, most (all?) emoji "code points" take two "code units" (16b chars).
@@ -99,7 +107,7 @@ value class UreConcat internal constructor(val tokens: MutableList<Ure> = mutabl
     override fun toIR(): IR = when (tokens.size) {
         0 -> "".asIR
         else -> tokens.joinToString("") {
-            if ((it is UreAlter) or debugWithClosedTokens) it.toClosedIR().str else it.toIR().str
+            if ((it is UreAlter) or (it is UreWithRawIR) or debugWithClosedTokens) it.toClosedIR().str else it.toIR().str
         }.asIR
     }
 
@@ -364,8 +372,6 @@ data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>
 }
 
 // TODO_later: analyze if some special kotlin progression/range would fit here better
-// TODO NOW: I guess it's more correct/portable if from and to are [UreCharExact]
-//  so create separate public "constructors" and annotate nonportable where neccessary, but first read more and test!!
 data class UreCharClassRange @NotPortableApi constructor(val from: UreCharClass, val to: UreCharClass, val positive: Boolean = true) : UreCharClass {
     private val neg = if (positive) "" else "^"
     override fun toClosedIR(): IR = toIR()
@@ -395,7 +401,7 @@ data class UreCharClassProp @NotPortableApi internal constructor(val prop: Strin
 }
 
 /** Dirty way to inject whole regexes fast. Avoid if possible. */
-@JvmInline value class UreIR @DelicateApi @NotPortableApi internal constructor(val ir: IR) : Ure {
+@JvmInline value class UreWithRawIR @DelicateApi @NotPortableApi internal constructor(val ir: IR) : Ure {
     override fun toIR(): IR = ir
     override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
     private val isClosed get() = when {
@@ -411,6 +417,7 @@ data class UreCharClassProp @NotPortableApi internal constructor(val prop: Strin
     override fun toIR() = "\\Q$str\\E".asIR
 }
 
+/** Could be implemented as [UreConcat] of each character, but it's better to have a smaller tree. */
 @JvmInline value class UreText internal constructor(val str: String) : UreAtomic, UreNonCapt {
     override fun toClosedIR(): IR = this.groupNonCapt().toIR()
     override fun toIR() = str.map { if (it.isMeta) "\\$it" else "$it" }.joinToString("").asIR
@@ -474,7 +481,7 @@ infix fun Ure.then(that: Ure) = UreConcat(mutableListOf(this, that))
 
 
 operator fun Ure.not(): Ure = when (this) {
-    is UreIR -> when (this) {
+    is UreWithRawIR -> when (this) {
         bchWord -> bchWordNot
         bchWordNot -> bchWord
         else -> error("This UreIR can not be negated")
@@ -500,8 +507,8 @@ operator fun Ure.not(): Ure = when (this) {
 // TODO_someday: experiment more with different operators overloading,
 //  especially indexed access operators and invoke operators.
 
-@NotPortableApi @DelicateApi fun ureIR(ir: IR) = UreIR(ir)
-@NotPortableApi @DelicateApi fun ureIR(str: String) = ureIR(str.asIR)
+@NotPortableApi @DelicateApi fun ureRaw(ir: IR) = UreWithRawIR(ir)
+@NotPortableApi @DelicateApi fun ureRaw(str: String) = ureRaw(str.asIR)
 
 /** Wraps the [text] with \Q...\E, so it's interpreted as exact text to match (no chars treated as special). */
 @NotPortableApi fun ureQuote(text: String) = UreQuote(text)
@@ -725,11 +732,12 @@ val chPLatin = chProp("sc=Latin")
 @NotPortableApi("Currently does NOT compile (Ure.compile) on LINUX.")
 val chPGreek = chProp("sc=Greek")
 
-@NotPortableApi @DelicateApi fun chCtrl(letter: Char) = UreIR("\\c$letter".asIR).also { req(letter in 'A'..'Z') }
+@NotPortableApi @DelicateApi fun chCtrl(letter: Char) = ureRaw("\\c$letter").also { req(letter in 'A'..'Z') }
     // https://www.regular-expressions.info/nonprint.html
 
 
 fun oneCharOf(charClasses: List<UreCharClass>) = UreCharClassUnion(charClasses)
+
 fun oneCharOf(vararg charClasses: UreCharClass?) = oneCharOf(charClasses.toList().filterNotNull())
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(charClasses)"))
@@ -744,8 +752,11 @@ fun oneCharOfExact(exactChars: String) = oneCharOfExact(exactChars.toList())
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOfExact(charClasses)"))
 fun oneCharNotOfExact(exactChars: String) = !oneCharOfExact(exactChars)
 
+@NotPortableApi
+fun oneCharOfRange(from: UreCharClass, to: UreCharClass) = UreCharClassRange(from, to)
+
 @OptIn(NotPortableApi::class)
-fun oneCharOf(range: CharRange) = UreCharClassRange(ch(range.start), ch(range.endInclusive))
+fun oneCharOf(range: CharRange) = oneCharOfRange(ch(range.start), ch(range.endInclusive))
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(range)"))
 fun oneCharNotOf(range: CharRange) = !oneCharOf(range)
@@ -756,7 +767,7 @@ fun oneCharNotOf(range: CharRange) = !oneCharOf(range)
 
 // region [Ure Boundaries Related Stuff]
 
-@OptIn(DelicateApi::class, NotPortableApi::class) private inline val String.r get() = ureIR(this)
+@OptIn(DelicateApi::class, NotPortableApi::class) private inline val String.r get() = ureRaw(this)
 
 val bBOLine = "^".r
 val bEOLine = "$".r

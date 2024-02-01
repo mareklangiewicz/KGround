@@ -37,6 +37,6 @@ private fun USpekTree.assertAllGood() {
 }
 
 fun testUreCmn() {
-    testSomeUreCharClasses()
     testSomeUreBasicStuff()
+    testSomeUreCharClasses()
 }

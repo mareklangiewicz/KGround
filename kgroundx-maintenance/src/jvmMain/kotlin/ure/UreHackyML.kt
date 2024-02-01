@@ -57,10 +57,10 @@ fun Ure.withTagAroundOrJustTagCollapsed(
     withOptSpacesAroundContent: Boolean = true,
     allowJustTagCollapsed: Boolean = true,
 ) = ure {
-    1 of ureSomeTag(name, *expectedAttrs, ureEnd = ureIR("/?>"))
-    val collapsed = ureIR("/>").lookBehind()
+    1 of ureSomeTag(name, *expectedAttrs, ureEnd = ureRaw("/?>"))
+    val collapsed = ureRaw("/>").lookBehind()
     val notCollapsed = ure {
-        1 of ureIR("/>").lookBehind(positive = false)
+        1 of ureRaw("/>").lookBehind(positive = false)
         1 of this@withTagAroundOrJustTagCollapsed
             .withOptSpacesAround(allowBefore = withOptSpacesAroundContent, allowAfter = withOptSpacesAroundContent)
         1 of ureEndTag(name)
