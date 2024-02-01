@@ -34,8 +34,8 @@ fun testUreWithDifferentOptions() {
 
     "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(example1).count() eq example1.length }
 
-    val ureBOLaBcD = bBOLine then ureText("aBcD")
-    val ureBcDeEOL = ureText("BcDe") then bEOLine
+    val ureBOLaBcD = atBOLine then ureText("aBcD")
+    val ureBcDeEOL = ureText("BcDe") then atEOLine
 
     "examples constructed as expected" o {
         ureBOLaBcD.toIR() eq IR("^aBcD")

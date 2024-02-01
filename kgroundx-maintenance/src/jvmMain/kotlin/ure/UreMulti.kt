@@ -18,7 +18,7 @@ fun String.undoCommentOutMultiplatformFun(): String {
     return ureText("/*actual*/").compile().replace(output1) { "actual" }
 }
 
-private val ureKeyword = ure { 1..MAX of chaz }.withWordBoundaries()
+private val ureKeyword = ure { 1..MAX of chLower }.withWordBoundaries()
 
 private val ureTypedef = ure {
     1 of chWord
@@ -68,12 +68,12 @@ private val ureFunDeclaration = ure {
 
 @DelicateApi("Matches correctly only in typical cases.")
 val ureExpectFun = ure {
-    1 of bBOLine
+    1 of atBOLine
     0..1 of { 1 of ureText("@Composable"); 1..MAX of chWhiteSpace }
     0..MAX of { 1 of ureKeyword; 1..MAX of chWhiteSpace }
     1 of ureText("expect ")
     0..1 of ureText("suspend ")
     1 of ureFunDeclaration
     0..MAX of chWhiteSpace
-    1 of bEOLine
+    1 of atEOLine
 }

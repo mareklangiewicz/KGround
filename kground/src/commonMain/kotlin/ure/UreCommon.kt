@@ -5,11 +5,11 @@ import pl.mareklangiewicz.annotations.*
 
 @DelicateApi("Very basic email Ure. It will not match many strange but correct emails. Can also match some incorrect.")
 val ureBasicEmail = ure {
-    + bchWord // so the first user char is not dot nor dash
+    + atWordBoundary // so the first user char is not dot nor dash
     + ure("user") { 1..MAX of chWordOrDotOrDash }
-    + bchWord // so the last user char is not dot nor dash
+    + atWordBoundary // so the last user char is not dot nor dash
     + ch("@")
-    + bchWord // so the first domain char is not dot nor dash
+    + atWordBoundary // so the first domain char is not dot nor dash
     + ure("domain") {
         1..MAX of {
             1..MAX of chWordOrDash
@@ -17,10 +17,10 @@ val ureBasicEmail = ure {
         }
         2..16 of chWordOrDash
     }
-    + bchWord // so the last domain char is not dash
+    + atWordBoundary // so the last domain char is not dash
 }
 
-fun ureIdent(first: Ure = chazAZ, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
+fun ureIdent(first: Ure = chAlpha, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
     + first
     0..MAX of chWord
     if (allowDashesInside) 0..MAX of ure {
@@ -56,13 +56,13 @@ fun ureWhateva(reluctant: Boolean = true, inLine: Boolean = false) =
 fun ureWhatevaInLine(reluctant: Boolean = true) = ureWhateva(reluctant, inLine = true)
 
 fun ureBlankStartOfLine() = ure {
-    1 of bBOLine
+    1 of atBOLine
     0..MAX of chWhiteSpaceInLine
 }
 
 fun ureBlankRestOfLine(withOptLineBreak: Boolean = true) = ure {
     0..MAX of chWhiteSpaceInLine
-    1 of bEOLine
+    1 of atEOLine
     if (withOptLineBreak) x(0..1, possessive = true) of ureLineBreak
 }
 

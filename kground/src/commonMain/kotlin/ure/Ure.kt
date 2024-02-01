@@ -80,6 +80,8 @@ sealed interface UreNamed: UreNum
  * https://www.regular-expressions.info/atomic.html
  */
 sealed interface UreAtomic: Ure
+
+/** https://www.regular-expressions.info/anchors.html */
 sealed interface UreAnchor: UreAtomic, UreNonCapt
 
 /**
@@ -338,6 +340,24 @@ private val Char.isMeta get() = this in "\\[].^\$?*+{}|()" // https://www.regula
 private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regular-expressions.info/charclass.html
 
 /**
+ * https://www.regular-expressions.info/anchors.html
+ * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#bounds
+ */
+@JvmInline value class UreAnchorPreDef @NotPortableApi internal constructor(val name: Char) : UreAnchor {
+    init { req(name.isNameOfAnchorPreDef) { "Incorrect name of predefined anchor: $name" } }
+    override fun toIR(): IR = if (name in "^$") "$name".asIR else "\\$name".asIR
+    override fun toClosedIR(): IR = toIR()
+
+    @OptIn(NotPortableApi::class) operator fun not() =
+        if (name in "bB") UreAnchorPreDef(name.switchCase()) else bad { "The anchor: $name can't be negated." }
+
+    companion object {
+        private val Char.isNameOfAnchorPreDef get() = this in "^\$bBAGZz"
+    }
+}
+
+
+/**
  * Also known as shorthand character set
  * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#predef
  * https://www.regular-expressions.info/shorthand.html
@@ -459,20 +479,17 @@ fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = o
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
 
-/**
- * @param lookInside complicates generated IR by addin lookAhead / lookBehind,
- * but assures found boundaries are "left" and "right". Sth like in vim \<SomeWord\>
- */
-@OptIn(SecondaryApi::class)
-fun Ure.withWordBoundaries(
-    boundaryBefore: Boolean = true,
-    boundaryAfter: Boolean = true,
-    lookInside: Boolean = false,
-) =
-    if (!boundaryBefore && !boundaryAfter) this else ure {
-        if (boundaryBefore) 1 of if (lookInside) bBOWord else bchWord
-        1 of this@withWordBoundaries // it should flatten if this is UreConcat (see UreConcat.toIR()) TODO_later: doublecheck
-        if (boundaryAfter) 1 of if (lookInside) bEOWord else bchWord
+fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
+    withBoundaries(atWordBoundary.takeIf { boundaryBefore }, atWordBoundary.takeIf { boundaryAfter })
+
+@SecondaryApi @NotPortableApi fun Ure.withBOEOWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
+    withBoundaries(atBOWord.takeIf { boundaryBefore }, atEOWord.takeIf { boundaryAfter })
+
+fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) =
+    if (boundaryBefore == null && boundaryAfter == null) this else ure {
+        boundaryBefore?.let { + it }
+        + this@withBoundaries // it should flatten if this is UreConcat (see UreConcat.toIR()) TODO_later: doublecheck
+        boundaryAfter?.let { + it }
     }
 
 infix fun Ure.or(that: Ure) = UreAlter(this, that)
@@ -482,11 +499,11 @@ infix fun Ure.then(that: Ure) = UreConcat(mutableListOf(this, that))
 
 operator fun Ure.not(): Ure = when (this) {
     is UreWithRawIR -> when (this) {
-        bchWord -> bchWordNot
-        bchWordNot -> bchWord
+        // TODO_someday: Can I negate some common raw ures?
         else -> error("This UreWithRawIR can not be negated")
     }
     is UreCharExact -> bad { "UreCharExact can not be negated" }
+    is UreAnchorPreDef -> !this
     is UreCharClassPreDef -> !this
     is UreCharClassRange -> !this
     is UreCharClassUnion -> !this
@@ -623,11 +640,6 @@ val chNonWordNorDash = !chWordOrDash
 val chNonWordNorDotNorDash = !chWordOrDotOrDash
 
 
-
-val chaz = oneCharOf('a'..'z')
-val chAZ = oneCharOf('A'..'Z')
-val chazAZ = oneCharOf(chaz, chAZ)
-
 /**
  * Predefined char set with some property.
  * It uses regex like \p{Latin} or \P{Emoji} etc.
@@ -762,42 +774,54 @@ fun oneCharOf(range: CharRange) = oneCharOfRange(ch(range.start), ch(range.endIn
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(range)"))
 fun oneCharNotOf(range: CharRange) = !oneCharOf(range)
 
-
 // endregion [Ure Character Related Stuff]
 
 
-// region [Ure Boundaries Related Stuff]
+// region [Ure Anchors Related Stuff]
 
-@OptIn(DelicateApi::class, NotPortableApi::class) private inline val String.r get() = ureRaw(this)
+/**
+ * https://www.regular-expressions.info/anchors.html
+ * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#bounds
+ */
+@NotPortableApi fun at(anchorName: Char) = UreAnchorPreDef(anchorName)
 
-val bBOLine = "^".r
-val bEOLine = "$".r
-val bBOInput = "\\A".r
-val bEOInput = "\\z".r
-val bEOPreviousMatch = "\\G".r
+@OptIn(NotPortableApi::class) private inline val Char.at get() = at(this)
 
-val bchWord = "\\b".r
-val bchWordNot = "\\B".r // Calling it "non-word boundary" is wrong. It's a negation of bchWord, so "not (word boundary)"
+val atBOLine = '^'.at
+val atEOLine = '$'.at
 
-@OptIn(NotPortableApi::class, DelicateApi::class)
-@SecondaryApi("Usually just bchWord is also good. And simpler.")
-val bBOWord = bchWord then chWord.lookAhead() // emulating sth like in vim: "\<"
+@NotPortableApi val atBOInput = 'A'.at
+@NotPortableApi val atEOInputWithoutLineBreak = 'Z'.at
+@NotPortableApi val atEOInput = 'z'.at
 
-@OptIn(NotPortableApi::class, DelicateApi::class)
-@SecondaryApi("Usually just bchWord is also good. And simpler.")
-val bEOWord = bchWord then chWord.lookBehind() // emulating sth like in vim: "\>"
+@NotPortableApi val atEOPrevMatch = 'G'.at
 
-val ureLineBreakBasic = "\\r?\\n".r
+val atWordBoundary = 'b'.at
 
-@NotPortableApi("Not supported on JS; Works differently on different platforms or even java versions.")
-val ureLineBreakAdvanced = "\\R".r
+@SecondaryApi("Use !atWordBoundary") val atNotWordBounday = 'B'.at
+    // Calling it "non-word boundary" is wrong. It's a negation of anchWord, so "not (word boundary)"
+
+@SecondaryApi("Usually atWordBoundary is also good, and have simpler construction (no lookAhead).")
+val atBOWord = atWordBoundary then chWord.lookAhead() // emulating sth like in Vim or GNU: "\<"
+
+@OptIn(DelicateApi::class) @NotPortableApi
+@SecondaryApi("Usually just atWordBoundary is also good, and have simpler construction (no lookBehind).")
+val atEOWord = atWordBoundary then chWord.lookBehind() // emulating sth like in Vim or GNU: "\>"
+
+@OptIn(DelicateApi::class, NotPortableApi::class)
+val ureLineBreakBasic = ureRaw("\\r?\\n")
+
+/** On modern JVM it should be equivalent to ureRaw("\u000D\u000A|[\u000A\u000B\u000C\u000D\u0085\u2028\u2029]") */
+@DelicateApi("Can work differently not only on different platforms, but even on different JVM versions.")
+@NotPortableApi("Not supported on JS. Works differently on different platforms or even JVM versions.")
+val ureLineBreakAdvanced = ureRaw("\\R")
 // See also the "Line Breaks" there:
 //   https://www.regular-expressions.info/nonprint.html
 //   https://www.regular-expressions.info/dot.html
 
 val ureLineBreak = ureLineBreakBasic
 
-// endregion [Ure Boundaries Related Stuff]
+// endregion [Ure Anchors Related Stuff]
 
 
 // region [Ure Groups Related Stuff]
