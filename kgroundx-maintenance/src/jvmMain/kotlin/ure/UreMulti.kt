@@ -6,8 +6,8 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 @OptIn(DelicateApi::class) @NotPortableApi
 fun String.commentOutMultiplatformFun(): String {
     val output1 = ureExpectFun.notCommentedOut().compile().replace(this) { "/*\n${it.value}\n*/" }
-    val output2 = ureRaw("actual fun").compile().replace(output1) { "/*actual*/ fun" }
-    return ureRaw("actual suspend fun").compile().replace(output2) { "/*actual*/ suspend fun" }
+    val output2 = ureText("actual fun").compile().replace(output1) { "/*actual*/ fun" }
+    return ureText("actual suspend fun").compile().replace(output2) { "/*actual*/ suspend fun" }
     // FIXME_maybe: merge this two replaces to one using better URE
 }
 
@@ -15,7 +15,7 @@ fun String.commentOutMultiplatformFun(): String {
 fun String.undoCommentOutMultiplatformFun(): String {
     val myFun = ure("myFun") { 1 of ureExpectFun }
     val output1 = myFun.commentedOut().compile().replace(this) { it["myFun"] }
-    return ureRaw("/\\*actual\\*/").compile().replace(output1) { "actual" }
+    return ureText("/*actual*/").compile().replace(output1) { "actual" }
 }
 
 private val ureKeyword = ure { 1..MAX of chaz }.withWordBoundaries()

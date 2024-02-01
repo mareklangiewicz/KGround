@@ -484,7 +484,7 @@ operator fun Ure.not(): Ure = when (this) {
     is UreWithRawIR -> when (this) {
         bchWord -> bchWordNot
         bchWordNot -> bchWord
-        else -> error("This UreIR can not be negated")
+        else -> error("This UreWithRawIR can not be negated")
     }
     is UreCharExact -> bad { "UreCharExact can not be negated" }
     is UreCharClassPreDef -> !this
@@ -536,6 +536,7 @@ fun ch(chr: Char) = ch(chr.toString())
 @OptIn(DelicateApi::class) private inline val String.ce get() = ch(this)
 @OptIn(DelicateApi::class) private inline val Char.cpd get() = chPreDef(this)
 
+val chSlash = "/".ce
 val chBackSlash = "\\".ce
 
 val chTab = "\t".ce

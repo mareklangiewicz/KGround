@@ -17,7 +17,7 @@ fun ureKtKeywordLine(keyword: String, withNamePrefix: String = keyword) =
 
 
 @OptIn(DelicateApi::class, NotPortableApi::class)
-private val ureLicenceMarker = (ureRaw("licence") or ureRaw("copyright")).withOptionsEnabled(IGNORE_CASE)
+private val ureLicenceMarker = (ureText("licence") or ureText("copyright")).withOptionsEnabled(IGNORE_CASE)
 
 fun ureLicenceComment(licenceMarker: Ure = ureLicenceMarker, withName: String = "ktLicenceComment") = ure {
     1 of ureWhateva()

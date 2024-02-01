@@ -38,7 +38,7 @@ fun ureChain(
 ): Ure = when (times.first) {
     0 ->
         @OptIn(DelicateApi::class, NotPortableApi::class)
-        if (times.last <= 0) ureRaw("(?:)") // FIXME later: it should always match 0 chars. can it be totally empty?? be careful
+        if (times.last <= 0) ureRaw("") // It should always match 0 chars. TODO unit tests with unions/quantifiers.
         else ure { x(0..1, reluctant, possessive) of ureChain(element, separator, 1..times.last, reluctant, possessive) }
     else -> ure {
         1 of element
