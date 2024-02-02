@@ -121,17 +121,6 @@ private fun onUreClassPair(
     }
 }
 
-private fun itCompiles(ure: Ure, alsoCheckNegation: Boolean = true) = "it compiles" o {
-    ure.compile() // will throw if the platform doesn't support it
-    if (alsoCheckNegation) ure.not().compile() // will throw if the platform doesn't support it
-}
-
-/**
- * Note: It throws different [Throwable] on different platforms.
- * I encountered [SyntaxError] on JS and [InvalidArgumentException] on JVM and LINUX and [PatternSyntaxException] on LINUX.
- */
-private fun itDoesNotCompile(ure: Ure) = "it does not compile".failsWith<Throwable> { ure.compile() }
-
 private fun itMatchesCorrectChars(
     ure: Ure,
     match: List<String>,

@@ -1,11 +1,9 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.findSingle
 import pl.mareklangiewicz.uspek.*
-import kotlin.text.RegexOption.*
 
-const val example1 = "aBcDe\naBcDe\nABCDE"
+const val exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"
 
 fun testSomeUreBasicStuff() {
 
@@ -25,58 +23,6 @@ fun testUreQuantifAndAtomic() {
     // TODO NOW (which platforms support atomic, which possessive quantifiers, etc)
 }
 
-
-@OptIn(DelicateApi::class, NotPortableApi::class)
-fun testUreWithDifferentOptions() {
-
-    "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(example1).count() eq 2 }
-
-    "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(example1).count() eq example1.length - 2 }
-
-    "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(example1).count() eq example1.length }
-
-    val ureBOLaBcD = atBOLine then ureText("aBcD")
-    val ureBcDeEOL = ureText("BcDe") then atEOLine
-
-    "example ure s constructed as expected" o {
-        ureBOLaBcD.toIR() eq IR("^aBcD")
-        ureBcDeEOL.toIR() eq IR("BcDe\$")
-    }
-
-    "On compile with default options" o {
-        val reBOLaBcD = ureBOLaBcD.compile()
-        val reBcDeEOL = ureBcDeEOL.compile()
-        "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options eq setOf(MULTILINE) }
-        "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options eq setOf(MULTILINE) }
-        "reBOLaBcD matches example1 twice" o { reBOLaBcD.findAll(example1).count() eq 2 }
-        "reBcDeEOL matches example1 twice" o { reBcDeEOL.findAll(example1).count() eq 2 }
-    }
-    "On compile with empty options" o {
-        val reBOLaBcD = ureBOLaBcD.compileWithOptions()
-        val reBcDeEOL = ureBcDeEOL.compileWithOptions()
-        "reBOLaBcD gets compiled with no options" o { reBOLaBcD.options eq setOf() }
-        "reBcDeEOL gets compiled with no options" o { reBcDeEOL.options eq setOf() }
-        "reBOLaBcD matches example1 once at very start" o { reBOLaBcD.findSingle(example1).range eq 0..3 }
-        "reBcDeEOL does NOT match example1 anywhere" o { reBcDeEOL.findAll(example1).count() eq 0 }
-    }
-    "On compile with ignore case" o {
-        val reBOLaBcD = ureBOLaBcD.compileWithOptions(IGNORE_CASE)
-        val reBcDeEOL = ureBcDeEOL.compileWithOptions(IGNORE_CASE)
-        "reBOLaBcD gets compiled with only ignore case option" o { reBOLaBcD.options eq setOf(IGNORE_CASE) }
-        "reBcDeEOL gets compiled with only ignore case option" o { reBcDeEOL.options eq setOf(IGNORE_CASE) }
-        "reBOLaBcD matches example1 once at very start" o { reBOLaBcD.findSingle(example1).range eq 0..3 }
-        "reBcDeEOL matches example1 once at very end" o { reBcDeEOL.findSingle(example1).range eq 13..16 }
-    }
-    "On compile with ignore case and multiline" o {
-        val reBOLaBcD = ureBOLaBcD.compileWithOptions(IGNORE_CASE, MULTILINE)
-        val reBcDeEOL = ureBcDeEOL.compileWithOptions(IGNORE_CASE, MULTILINE)
-        "reBOLaBcD gets compiled with both options" o { reBOLaBcD.options eq setOf(IGNORE_CASE, MULTILINE) }
-        "reBcDeEOL gets compiled with both options" o { reBcDeEOL.options eq setOf(IGNORE_CASE, MULTILINE) }
-        "reBOLaBcD matches example1 three times" o { reBOLaBcD.findAll(example1).count() eq 3 }
-        "reBcDeEOL matches example1 three times" o { reBcDeEOL.findAll(example1).count() eq 3 }
-    }
-
-}
 
 @OptIn(DelicateApi::class)
 fun testUreBasicEmail() {

@@ -185,20 +185,19 @@ value class UreAtomicGroup internal constructor(override val content: Ure) : Ure
     override val typeIR get() = "?>".asIR
 }
 
-data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal constructor(
-    override val content: Ure,
-    val enable: Set<RegexOption> = emptySet(),
-    val disable: Set<RegexOption> = emptySet(),
-) : UreGroup, UreNonCapturing {
-    init {
+sealed class UreChangeOptions @DelicateApi @NotPortableApi protected constructor(
+): UreNonCapturing {
+    abstract val enable: Set<RegexOption>
+    abstract val disable: Set<RegexOption>
+
+    // run it in init of final class
+    protected fun reqCorrectOptions() {
         req((enable intersect disable).isEmpty()) { "Can not enable and disable the same option at the same time" }
         req(enable.isNotEmpty() || disable.isNotEmpty()) { "No options provided" }
     }
 
-    override val typeIR get() = "?${enable.ir}-${disable.ir}:".asIR // TODO_later: check if either set can be empty
-
     @Suppress("GrazieInspection")
-    private val RegexOption.code
+    protected val RegexOption.code
         get() = when (this) {
             // Note: Kotlin stdlib RegexOption will probably evolve, so I'll enable more options here in the future.
             // See also: https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
@@ -213,9 +212,38 @@ data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal construct
             else -> bad { "RegexOption: $this is not supported." }
         }
 
-    private val Set<RegexOption>.ir get() = joinToString("") { it.code }
+    private val oec get() = enable.code
+    private val odc get() = disable.code.let { if (it.isEmpty()) it else "-$it" }
+    private val Set<RegexOption>.code get() = joinToString("") { it.code }
+
+    protected val optionsCode get() = "$oec$odc"
 }
-// TODO_someday: there are also similar "groups" without content (see Pattern.java), add support for it (content nullable?)
+
+data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal constructor(
+    override val content: Ure,
+    override val enable: Set<RegexOption> = emptySet(),
+    override val disable: Set<RegexOption> = emptySet(),
+) : UreChangeOptions(), UreGroup {
+    init { reqCorrectOptions() }
+    override val typeIR get() = "?$optionsCode:".asIR
+}
+
+/**
+ * Changes regex options ([RegexOption]) from this point ahead. Very problematic construct.
+ * It is much safer to use [UreChangeOptionsGroup] instead of [UreChangeOptionsAhead].
+ * Or even safer not to change options at all, so all [Ure]s are interpreted the same way.
+ */
+@DelicateApi("Makes the whole Ure very difficult to analyze.", ReplaceWith("UreChangingOptionsGroup"))
+@SecondaryApi("Use UreChangingOptionsGroup", ReplaceWith("UreChangingOptionsGroup"))
+@NotPortableApi("Does NOT even compile (Ure.compile) on JS.", ReplaceWith("UreChangingOptionsGroup"))
+data class UreChangeOptionsAhead internal constructor(
+    override val enable: Set<RegexOption> = emptySet(),
+    override val disable: Set<RegexOption> = emptySet(),
+) : UreChangeOptions(), UreNonCapturing {
+    init { reqCorrectOptions() }
+    override fun toClosedIR(): IR = toIR()
+    override fun toIR(): IR = "(?$optionsCode)".asIR
+}
 
 
 // Note: For delicate/not portable reasons, see
@@ -481,6 +509,20 @@ fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = o
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
 
+
+/**
+ * Changes regex options ([RegexOption]) from this point ahead. Very problematic construct.
+ * It is much safer to use [withOptions] instead of [ureWithOptionsAhead].
+ * Or even safer not to change options at all, so all [Ure]s are interpreted the same way.
+ */
+@DelicateApi("Makes the whole Ure very difficult to analyze.", ReplaceWith("withOptions"))
+@SecondaryApi("Use Ure.withOptions", ReplaceWith("withOptions"))
+@NotPortableApi("Does NOT even compile (Ure.compile) on JS.", ReplaceWith("withOptions"))
+fun ureWithOptionsAhead(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
+    UreChangeOptionsAhead(enable, disable)
+
+
+
 fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
     withBoundaries(atWordBoundary.takeIf { boundaryBefore }, atWordBoundary.takeIf { boundaryAfter })
 
@@ -522,6 +564,7 @@ operator fun Ure.not(): Ure = when (this) {
     is UreQuote -> error("UreQuote can not be negated")
     is UreText -> error("UreText can not be negated")
     is UreAlternation -> error("UreAlternation can not be negated")
+    is UreChangeOptions -> error("UreChangeOptions can not be negated")
 }
 // TODO_someday: experiment more with different operators overloading,
 //  especially indexed access operators and invoke operators.
