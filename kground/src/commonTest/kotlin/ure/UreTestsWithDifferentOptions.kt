@@ -108,6 +108,22 @@ fun testUreWithDifferentOptions() {
             "reBcDeEOL matches exampleABCDEx3 twice" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 2 }
         }
     }
+    "On inserting weird ureWithOptionsAhead in the middle of UreConcatenation" o {
+        val ure = ure {
+            + ureBcDeEOL // should not ignore case while matching this
+            + ureLineBreak
+            + ureWithOptionsAhead(enable = setOf(IGNORE_CASE))
+            + ureBOLaBcD // should ignore case while matching this
+        }
+        if (platform == "JS") itDoesNotCompile(ure)
+        else "On compile normally" o {
+            val re = ure.compile()
+            "compiled pattern is as expected" o { re.pattern eq """BcDe$(?:\r?\n)(?i)^aBcD""" }
+            "re matches exampleABCDEx3 one time at 1" o { re.findSingle(exampleABCDEx3).range.start eq 1 }
+            "re matches exampleABCDEx3 one time at 7 when starting at 2" o { re.findSingle(exampleABCDEx3, 2).range.start eq 7 }
+
+        }
+    }
 
 }
 
