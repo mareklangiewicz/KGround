@@ -799,7 +799,7 @@ val atEOLine = '$'.at
 val atWordBoundary = 'b'.at
 
 @SecondaryApi("Use !atWordBoundary") val atNotWordBounday = 'B'.at
-    // Calling it "non-word boundary" is wrong. It's a negation of anchWord, so "not (word boundary)"
+    // Calling it "non-word boundary" is wrong. It's the opposite to the word boundary, so "not (word boundary)"
 
 @SecondaryApi("Usually atWordBoundary is also good, and have simpler construction (no lookAhead).")
 val atBOWord = atWordBoundary then chWord.lookAhead() // emulating sth like in Vim or GNU: "\<"
