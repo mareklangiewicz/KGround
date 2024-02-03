@@ -609,31 +609,31 @@ val chAlert = "\u0007".ce
 val chEsc = "\u001B".ce
 
 /** [a-z] */
-val chLower = oneCharOf('a'..'z')
+val chLower = chOf('a'..'z')
 /** [A-Z] */
-val chUpper = oneCharOf('A'..'Z')
+val chUpper = chOf('A'..'Z')
 /** [a-zA-Z] */
-val chAlpha = oneCharOf(chLower, chUpper) // Note: "chLower or chUpper" is worse, because UreAlternation can't be negated.
+val chAlpha = chOfAny(chLower, chUpper) // Note: "chLower or chUpper" is worse, because UreAlternation can't be negated.
 
 /** Same as [0-9] */
 val chDigit = 'd'.cpd
 
-/** Same as [0-9] */
-val chHexDigit = oneCharOf(chDigit, oneCharOf('a'..'f'), oneCharOf('A'..'F'))
+/** Same as [0-9a-fA-F] */
+val chHexDigit = chOfAny(chDigit, chOf('a'..'f'), chOf('A'..'F'))
 
 /** Same as [a-zA-Z0-9] */
-val chAlnum = oneCharOf(chAlpha, chDigit)
+val chAlnum = chOfAny(chAlpha, chDigit)
 
-val chPunct = oneCharOfExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""")
+val chPunct = chOfAnyExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""".toList())
 
-val chGraph = oneCharOf(chAlnum, chPunct)
+val chGraph = chOfAny(chAlnum, chPunct)
 
 val chSpace = " ".ce
 val chWhiteSpace = 's'.cpd
-val chWhiteSpaceInLine = oneCharOf(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
+val chWhiteSpaceInLine = chOfAny(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
 
 /** Basic printable characters. Only normal space. No emojis, etc. */
-val chPrint = oneCharOf(chGraph, chSpace)
+val chPrint = chOfAny(chGraph, chSpace)
 
 /** Same as [^0-9] */
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chDigit"))
@@ -654,7 +654,7 @@ val chDot = ".".ce
 val chAnyInLine = '.'.cpd
 
 /** [\s\S] It is a portable and fast way to match any character at all. */
-val chAnyAtAll = oneCharOf(chWhiteSpace, !chWhiteSpace) // should work everywhere and should be fast.
+val chAnyAtAll = chOfAny(chWhiteSpace, !chWhiteSpace) // should work everywhere and should be fast.
 // Note: following impl would not work on JS: ureIR("(?s:.)")
 //   see details: https://www.regular-expressions.info/dot.html
 
@@ -667,9 +667,9 @@ val chWord = 'w'.cpd
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord"))
 val chNonWord = 'W'.cpd
 
-val chWordOrDot = oneCharOf(chWord, chDot)
-val chWordOrDash = oneCharOf(chWord, chDash) // also hints (when typing chWo) that chWord doesn't match dash.
-val chWordOrDotOrDash = oneCharOf(chWord, chDot, chDash)
+val chWordOrDot = chOfAny(chWord, chDot)
+val chWordOrDash = chOfAny(chWord, chDash) // also hints (when typing chWo) that chWord doesn't match dash.
+val chWordOrDotOrDash = chOfAny(chWord, chDot, chDash)
 
 // Note: All these different flavors of "word-like" classes seem unnecessary/not-micro-enough,
 //   but let's keep them because I suspect I will reuse them a lot in practice.
@@ -794,30 +794,41 @@ val chPGreek = chProp("sc=Greek")
     // https://www.regular-expressions.info/nonprint.html
 
 
-fun oneCharOf(charClasses: List<UreCharClass>) = UreCharClassUnion(charClasses)
+fun chOfAny(charClasses: List<UreCharClass>) = UreCharClassUnion(charClasses)
 
-fun oneCharOf(vararg charClasses: UreCharClass?) = oneCharOf(charClasses.toList().filterNotNull())
+fun chOfAny(vararg charClasses: UreCharClass?) = chOfAny(charClasses.toList().filterNotNull())
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(charClasses)"))
-fun oneCharNotOf(vararg charClasses: UreCharClass?) = !oneCharOf(*charClasses)
-
-@OptIn(DelicateApi::class)
-fun oneCharOfExact(exactChars: List<Char>) = oneCharOf(exactChars.map(::ch))
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAny(charClasses)"))
+fun chOfNotAny(vararg charClasses: UreCharClass?) = !chOfAny(*charClasses)
 
 @OptIn(DelicateApi::class)
-fun oneCharOfExact(exactChars: String) = oneCharOfExact(exactChars.toList())
+fun chOfAnyExact(exactChars: List<Char>) = chOfAny(exactChars.map(::ch))
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOfExact(charClasses)"))
-fun oneCharNotOfExact(exactChars: String) = !oneCharOfExact(exactChars)
+@OptIn(DelicateApi::class)
+fun chOfAnyExact(vararg exactChars: Char?) = chOfAnyExact(exactChars.toList().filterNotNull())
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAnyExact(exactChars)"))
+fun chOfNotAnyExact(exactChars: List<Char>) = !chOfAnyExact(exactChars)
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAnyExact(*exactChars)"))
+fun chOfNotAnyExact(vararg exactChars: Char?) = !chOfAnyExact(*exactChars)
 
 @NotPortableApi
-fun oneCharOfRange(from: UreCharClass, to: UreCharClass) = UreCharClassRange(from, to)
+fun chOfRange(from: UreCharClass, to: UreCharClass) = UreCharClassRange(from, to)
 
 @OptIn(NotPortableApi::class)
-fun oneCharOf(range: CharRange) = oneCharOfRange(ch(range.start), ch(range.endInclusive))
+fun chOf(range: CharRange) = chOfRange(ch(range.start), ch(range.endInclusive))
 
-@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!oneCharOf(range)"))
-fun oneCharNotOf(range: CharRange) = !oneCharOf(range)
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOf(range)"))
+fun chOfNot(range: CharRange) = !chOf(range)
+
+
+fun chOfAll(charClasses: List<UreCharClass>) = UreCharClassIntersect(charClasses)
+
+fun chOfAll(vararg charClasses: UreCharClass?) = chOfAll(charClasses.toList().filterNotNull())
+
+@SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAll(charClasses)"))
+fun chOfNotAll(vararg charClasses: UreCharClass?) = !chOfAll(*charClasses)
 
 // endregion [Ure Character Related Stuff]
 
