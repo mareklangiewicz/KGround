@@ -56,7 +56,7 @@ fun testUreWithDifferentOptions() {
         "reBcDeEOL matches exampleABCDEx3 three times" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 3 }
     }
     "On example ure s wrapped in withOptionsEnabled IGNORE_CASE on $platform" o {
-        if (platform == "JS") itDoesNotCompile(ureBOLaBcD.withOptionsEnabled(IGNORE_CASE))
+        if (platform == "JS") testUreDoesNotCompile(ureBOLaBcD.withOptionsEnabled(IGNORE_CASE))
         else "On compile normally" o {
             val reBOLaBcD = ureBOLaBcD.withOptionsEnabled(IGNORE_CASE).compile()
             val reBcDeEOL = ureBcDeEOL.withOptionsEnabled(IGNORE_CASE).compile()
@@ -67,7 +67,7 @@ fun testUreWithDifferentOptions() {
         }
     }
     "On example ure s wrapped in withOptionsDisabled MULTILINE on $platform" o {
-        if (platform == "JS") itDoesNotCompile(ureBOLaBcD.withOptionsDisabled(MULTILINE))
+        if (platform == "JS") testUreDoesNotCompile(ureBOLaBcD.withOptionsDisabled(MULTILINE))
         else "On compile normally" o {
             val reBOLaBcD = ureBOLaBcD.withOptionsDisabled(MULTILINE).compile()
             val reBcDeEOL = ureBcDeEOL.withOptionsDisabled(MULTILINE).compile()
@@ -78,7 +78,7 @@ fun testUreWithDifferentOptions() {
         }
     }
     "On example ure s prepended with weird ureWithOptionsAhead disable MULTILINE on $platform" o {
-        if (platform == "JS") itDoesNotCompile(ureWithOptionsAhead(disable = setOf(MULTILINE)) then ureBOLaBcD)
+        if (platform == "JS") testUreDoesNotCompile(ureWithOptionsAhead(disable = setOf(MULTILINE)) then ureBOLaBcD)
         else "On compile normally" o {
             val reBOLaBcD = (ureWithOptionsAhead(disable = setOf(MULTILINE)) then ureBOLaBcD).compile()
             val reBcDeEOL = (ureWithOptionsAhead(disable = setOf(MULTILINE)) then ureBcDeEOL).compile()
@@ -93,7 +93,7 @@ fun testUreWithDifferentOptions() {
         }
     }
     "On example ure s appended with weird ureWithOptionsAhead disable MULTILINE on $platform" o {
-        if (platform == "JS") itDoesNotCompile(ureBOLaBcD then ureWithOptionsAhead(disable = setOf(MULTILINE)))
+        if (platform == "JS") testUreDoesNotCompile(ureBOLaBcD then ureWithOptionsAhead(disable = setOf(MULTILINE)))
         else "On compile normally" o {
             val reBOLaBcD = (ureBOLaBcD then ureWithOptionsAhead(disable = setOf(MULTILINE))).compile()
             val reBcDeEOL = (ureBcDeEOL then ureWithOptionsAhead(disable = setOf(MULTILINE))).compile()
@@ -115,7 +115,7 @@ fun testUreWithDifferentOptions() {
             + ureWithOptionsAhead(enable = setOf(IGNORE_CASE))
             + ureBOLaBcD // should ignore case while matching this
         }
-        if (platform == "JS") itDoesNotCompile(ure)
+        if (platform == "JS") testUreDoesNotCompile(ure)
         else "On compile normally" o {
             val re = ure.compile()
             "compiled pattern is as expected" o { re.pattern eq """BcDe$(?:\r?\n)(?i)^aBcD""" }

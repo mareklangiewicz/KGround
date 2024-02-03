@@ -1,7 +1,6 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.chk
 import pl.mareklangiewicz.uspek.*
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
@@ -97,10 +96,10 @@ private fun onUreClass(
 ) {
     "On ure class $name on $platform" o {
         if (platform in onPlatforms) {
-            itCompiles(ure)
-            itMatchesCorrectChars(ure, match, matchNot, verbose)
+            testUreCompiles(ure)
+            testUreMatchesCorrectChars(ure, match, matchNot, verbose)
         }
-        else itDoesNotCompile(ure)
+        else testUreDoesNotCompile(ure)
     }
 }
 
@@ -119,31 +118,5 @@ private fun onUreClassPair(
         onUreClass(namePortable, urePortable, match, matchNot, verbose = verbose)
         onUreClass(namePlatform, urePlatform, match, matchNot, onPlatforms, verbose)
     }
-}
-
-private fun itMatchesCorrectChars(
-    ure: Ure,
-    match: List<String>,
-    matchNot: List<String>,
-    verbose: Boolean = false,
-) = "it matches correct chars" o {
-    testUreMatchesAll(ure, *match.toTypedArray(), verbose = verbose)
-    testUreMatchesNone(ure, *matchNot.toTypedArray(), verbose = verbose)
-    testUreMatchesAll(!ure, *matchNot.toTypedArray(), verbose = verbose)
-    testUreMatchesNone(!ure, *match.toTypedArray(), verbose = verbose)
-}
-
-fun testUreMatchesAll(ure: Ure, vararg examples: String, verbose: Boolean = false) {
-    val re = ure.compile()
-    for (e in examples)
-        if (verbose) "matches $e" o { chk(re.matches(e)) { "$re does not match $e" } }
-        else chk(re.matches(e)) { "$re doesn't match $e" }
-}
-
-fun testUreMatchesNone(ure: Ure, vararg examples: String, verbose: Boolean = false) {
-    val re = ure.compile()
-    for (e in examples)
-        if (verbose) "does not match $e" o { chk(!re.matches(e)) { "$re matches $e" } }
-        else chk(!re.matches(e)) { "$re matches $e" }
 }
 
