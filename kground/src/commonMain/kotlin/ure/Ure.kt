@@ -4,6 +4,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.isAsciiPrintable
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
 import kotlin.text.RegexOption.*
@@ -328,7 +329,7 @@ data class UreQuantifier internal constructor(
 @JvmInline value class UreCharExact @DelicateApi internal constructor(val str: String) : UreCharClass {
     init {
         req(str.isNotEmpty()) { "Empty char point." }
-        req(str.isSingleCharacter) { "Looks like more than one char point." }
+        req(str.isSingleUnicodeCharacter) { "Looks like more than one char point." }
     }
     override fun toClosedIR() = toIR()
     override fun toIR(): IR = toIR(str[0].isMeta)
@@ -336,33 +337,27 @@ data class UreQuantifier internal constructor(
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun toIR(justQuote: Boolean): IR = when {
-        justQuote -> "\\$str"
+        justQuote -> "\\$str" // below, we know it's not meta-like character in this context
         str == "\t" -> "\\t" // tab
         str == "\n" -> "\\n" // newline
         str == "\r" -> "\\r" // carriage-return
         str == "\u000C" -> "\\f" // form-feed
         str == "\u0007" -> "\\a" // alert bell
         str == "\u001B" -> "\\e" // escape
-        // TODO_someday: what with control characters? \cx
-        str.isSafeExactCharInRegex -> str
-
-        else -> "\\x{${str[0].code.toHexString()}}".also {
-            req(str.length == 1) { "Looks like surrogate pair. Unfortunately not supported yet." }
-            // (waiting for better codepoints support in kotlin common stdlib)
-            // https://youtrack.jetbrains.com/issue/KT-23251/Extend-Unicode-support-in-Kotlin-common
+        // Note: other ascii control chars are encoded below as "\\x$hex" which is fine.
+        str.length == 1 && str[0].isAsciiPrintable -> str
+            // TODO_someday: make sure all ascii printable are fine (we already checked it's not meta in this context).
+        else -> {
+            val p = str.toSingleCodePoint()
+            val hex = p.toHexString() // we do not represent any points as octal.
+            when {
+                p < 0x100 -> "\\x$hex" // ascii control chars are also represented this way
+                p < 0x10000 -> "\\u$hex"
+                else -> "\\x{$hex}"
+            }
         }
     }.asIR
 
-    companion object {
-        private val reAnyAtAll = Regex("[\\s\\S]") // for performance, also cannot use chAnyAtAll in initialization
-        private val String.isSingleCharacter get() = reAnyAtAll.matches(this)
-        private val String.isSafeExactCharInRegex get() = length == 1
-        // FIXME This is temporary and very wrong implementation.
-        //   (but at least we use it only when we already know it is single character and not meta char)
-        //   It should accept some multichar points, it shoud actually check if it's save to put in regex as-is.
-        //   (waiting for better codepoints support in kotlin common stdlib)
-        //   https://youtrack.jetbrains.com/issue/KT-23251/Extend-Unicode-support-in-Kotlin-common
-    }
 }
 
 private val Char.isMeta get() = this in "\\[].^\$?*+{}|()" // https://www.regular-expressions.info/characters.html

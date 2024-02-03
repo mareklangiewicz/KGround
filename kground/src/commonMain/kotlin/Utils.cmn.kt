@@ -7,21 +7,6 @@ import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
 
-/** @throws BadArgErr if not found or found more than one */
-fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult {
-    val r1 = find(input, startIndex).reqNN { "this regex: \"$this\" is nowhere in input" }
-    val r2 = find(input, r1.range.last + 1)
-    r2.reqEqNull { "this regex: \"$this\" has been found second time at idx: ${r2!!.range.first}" }
-    return r1
-}
-
-/** @throws BadArgErr if not found or found more than one */
-fun Regex.replaceSingle(input: CharSequence, replacement: CharSequence, startIndex: Int = 0): CharSequence =
-    input.replaceRange(findSingle(input, startIndex).range, replacement)
-
-
-fun Char.switchCase() = if (isLowerCase()) uppercaseChar() else lowercaseChar()
-
 infix fun <T: Any> List<T>.plusIfNN(element: T?) = if (element == null) this else this + element
 infix fun <T: Any> List<T>.prependIfNN(element: T?) = if (element == null) this else listOf(element) + this
 
@@ -29,16 +14,6 @@ infix fun <T: Any> List<T>.prependIfNN(element: T?) = if (element == null) this 
 fun Any.classSimpleWords() = this::class.simpleName!!
     .split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
 
-
-fun String.removeReqPrefix(prefix: CharSequence): String {
-    req(startsWith(prefix)) { "Can not find prefix: $prefix" }
-    return removePrefix(prefix)
-}
-
-fun String.removeReqSuffix(suffix: CharSequence): String {
-    req(endsWith(suffix)) { "Can not find suffix: $suffix" }
-    return removeSuffix(suffix)
-}
 
 
 inline fun <T> Iterator<T>.logEach(logln: (T) -> Unit = ::println) = forEach(logln)
