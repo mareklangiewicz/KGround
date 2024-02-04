@@ -7,11 +7,11 @@ package pl.mareklangiewicz.kground
 // https://youtrack.jetbrains.com/issue/KT-23251/Extend-Unicode-support-in-Kotlin-common
 
 /** also known as leading-surrogate */
-val Char.isHighSurrogate: Boolean get() =
+val Char.isSurrogateHigh: Boolean get() =
     this >= Char.MIN_HIGH_SURROGATE && this < Char.MAX_HIGH_SURROGATE + 1
 
 /** also known as trailing-surrogate */
-val Char.isLowSurrogate: Boolean get() =
+val Char.isSurrogateLow: Boolean get() =
     this >= Char.MIN_LOW_SURROGATE && this < Char.MAX_LOW_SURROGATE + 1
 
 val Char.isSurrogate: Boolean get() =
@@ -27,7 +27,7 @@ fun Char.switchCase() = if (isLowerCase()) uppercaseChar() else lowercaseChar()
 
 // endregion [Char Related Stuff]
 
-val String.isSingleSurrogatePair get() = length == 2 && get(0).isHighSurrogate && get(1).isLowSurrogate
+val String.isSingleSurrogatePair get() = length == 2 && get(0).isSurrogateHigh && get(1).isSurrogateLow
 
 val String.isSingleUnicodeCharacter get() = length == 1 && !get(0).isSurrogate || isSingleSurrogatePair
 
@@ -40,8 +40,8 @@ fun CharSequence.toSingleCodePoint(): Int {
     }
     // length == 2
     val cl = this[1]
-    req(ch.isHighSurrogate) { "Incorrect first part of surrogate pair." }
-    req(cl.isLowSurrogate) { "Incorrect second part of surrogate pair." }
+    req(ch.isSurrogateHigh) { "Incorrect first part of surrogate pair." }
+    req(cl.isSurrogateLow) { "Incorrect second part of surrogate pair." }
     return ((ch - Char.MIN_HIGH_SURROGATE) shl 10) + (cl - Char.MIN_LOW_SURROGATE) + 0x10000
 }
 

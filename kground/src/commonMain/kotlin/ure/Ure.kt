@@ -541,7 +541,7 @@ operator fun Ure.not(): Ure = when (this) {
         // TODO_someday: Can I negate some common raw ures?
         else -> error("This UreWithRawIR can not be negated")
     }
-    is UreCharExact -> bad { "UreCharExact can not be negated" }
+    is UreCharExact -> !chOfAny(this)
     is UreAnchorPreDef -> !this
     is UreCharClassPreDef -> !this
     is UreCharClassRange -> !this
