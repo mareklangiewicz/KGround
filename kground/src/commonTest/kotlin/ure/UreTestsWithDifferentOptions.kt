@@ -83,8 +83,10 @@ fun testUreWithDifferentOptions() {
             val reBOLaBcD = (ureWithOptionsAhead(disable = setOf(MULTILINE)) then ureBOLaBcD).compile()
             val reBcDeEOL = (ureWithOptionsAhead(disable = setOf(MULTILINE)) then ureBcDeEOL).compile()
 
-            // TODO_someday: Investigate if it's a bug in stdlib
+            // TODO_later: Track if it's a bug in stdlib
             // look like they have mutable field that changes during parsing RE and the (?-m) removes MULTILINE from it.
+            // see my bug report: https://youtrack.jetbrains.com/issue/KT-65531/Regex-content-can-change-Regex.options
+            // also see: UreTestsCmd:testStdLibRegexIssue
             "reBOLaBcD INCORRECTLY reports being compiled with no options" o { reBOLaBcD.options eq setOf() }
             "reBcDeEOL INCORRECTLY reports being compiled with no options" o { reBcDeEOL.options eq setOf() }
 

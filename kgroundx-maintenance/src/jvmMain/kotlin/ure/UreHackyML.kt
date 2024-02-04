@@ -40,9 +40,9 @@ fun ureCollapsedTag(name: String, vararg expectedAttrs: Ure) =
     ureSomeTag(name, *expectedAttrs, ureEnd = ureText("/>"))
 
 fun Ure.withTagAround(name: String, vararg expectedAttrs: Ure, withOptSpacesAroundContent: Boolean = true) = ure {
-    1 of ureStartTag(name, *expectedAttrs)
-    1 of this@withTagAround.withOptSpacesAround(allowBefore = withOptSpacesAroundContent, allowAfter = withOptSpacesAroundContent)
-    1 of ureEndTag(name)
+    + ureStartTag(name, *expectedAttrs)
+    + this@withTagAround.withOptSpacesAround(allowBefore = withOptSpacesAroundContent, allowAfter = withOptSpacesAroundContent)
+    + ureEndTag(name)
 }
 
 /**
@@ -57,18 +57,18 @@ fun Ure.withTagAroundOrJustTagCollapsed(
     withOptSpacesAroundContent: Boolean = true,
     allowJustTagCollapsed: Boolean = true,
 ) = ure {
-    1 of ureSomeTag(name, *expectedAttrs, ureEnd = ure { 0..1 of chSlash; +ch(">") })
+    + ureSomeTag(name, *expectedAttrs, ureEnd = ure { 0..1 of chSlash; +ch('>') })
     val collapsed = ureText("/>").lookBehind()
     val notCollapsed = ure {
-        1 of ureText("/>").lookBehind(positive = false)
-        1 of this@withTagAroundOrJustTagCollapsed
+        + ureText("/>").lookBehind(positive = false)
+        + this@withTagAroundOrJustTagCollapsed
             .withOptSpacesAround(allowBefore = withOptSpacesAroundContent, allowAfter = withOptSpacesAroundContent)
-        1 of ureEndTag(name)
+        + ureEndTag(name)
     }
     if (allowJustTagCollapsed)
-        1 of (collapsed or notCollapsed)
+        + (collapsed or notCollapsed)
     else
-        1 of notCollapsed
+        + notCollapsed
 }
 
 fun ureEmptyContentElement(name: String, vararg expectedAttrs: Ure, allowCollapsed: Boolean = false) =
@@ -95,18 +95,18 @@ private val ureOptIgnoredAttrsOptSpaces = ureChain(ureTagAttr(), times = 0..MAX,
 private fun ureSomeTag(
     name: String,
     vararg expectedAttrs: Ure,
-    ureBegin: Ure = ch("<"),
-    ureEnd: Ure = ch(">"),
+    ureBegin: Ure = ch('<'),
+    ureEnd: Ure = ch('>'),
 ) = ure {
-    1 of ureBegin
-    1 of ureText(name).withWordBoundaries().withOptSpacesAround()
+    + ureBegin
+    + ureText(name).withWordBoundaries().withOptSpacesAround()
         // boundaries in case we have no space after (we need to match <tag> but not glued <tagargname>)
-    1 of ureOptIgnoredAttrsOptSpaces
+    + ureOptIgnoredAttrsOptSpaces
     for (expectedAttr in expectedAttrs) {
-        1 of expectedAttr
-        1 of ureOptIgnoredAttrsOptSpaces
+        + expectedAttr
+        + ureOptIgnoredAttrsOptSpaces
     }
-    1 of ureEnd
+    + ureEnd
 }
 
 fun ureExpectAttr(
@@ -122,9 +122,9 @@ fun ureTagAttr(
     valueGroupName: String? = null
 ) = ure {
     // boundaries in case user changed name: Ure to sth that doesn't check it (like default ureIdent() does)
-    1 of name.withWordBoundaries().withOptSpacesAround()
-    1 of ch("=").withOptSpacesAround(allowBefore = false)
-    1 of ch("\"")
-    1 of value.withName(valueGroupName)
-    1 of ch("\"")
+    + name.withWordBoundaries().withOptSpacesAround()
+    + ch('=').withOptSpacesAround(allowBefore = false)
+    + ch('"')
+    + value.withName(valueGroupName)
+    + ch('"')
 }

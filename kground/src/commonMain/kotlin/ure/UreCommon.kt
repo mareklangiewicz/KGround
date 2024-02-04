@@ -8,7 +8,7 @@ val ureBasicEmail = ure {
     + atWordBoundary // so the first user char is not dot nor dash
     + ure("user") { 1..MAX of chWordOrDotOrDash }
     + atWordBoundary // so the last user char is not dot nor dash
-    + ch("@")
+    + ch('@')
     + atWordBoundary // so the first domain char is not dot nor dash
     + ure("domain") {
         1..MAX of {
@@ -41,11 +41,11 @@ fun ureChain(
         if (times.last <= 0) ureRaw("") // It should always match 0 chars. TODO unit tests with unions/quantifiers.
         else ure { x(0..1, reluctant, possessive) of ureChain(element, separator, 1..times.last, reluctant, possessive) }
     else -> ure {
-        1 of element
+        + element
         val last = if (times.last == MAX) MAX else times.last - 1
         x(0..last, reluctant, possessive) of ure {
-            1 of separator
-            1 of element
+            + separator
+            + element
         }
     }
 }
@@ -56,30 +56,30 @@ fun ureWhateva(reluctant: Boolean = true, inLine: Boolean = false) =
 fun ureWhatevaInLine(reluctant: Boolean = true) = ureWhateva(reluctant, inLine = true)
 
 fun ureBlankStartOfLine() = ure {
-    1 of atBOLine
+    + atBOLine
     0..MAX of chWhiteSpaceInLine
 }
 
 fun ureBlankRestOfLine(withOptLineBreak: Boolean = true) = ure {
     0..MAX of chWhiteSpaceInLine
-    1 of atEOLine
+    + atEOLine
     if (withOptLineBreak) x(0..1, possessive = true) of ureLineBreak
 }
 
 fun ureLineWithContent(content: Ure, withOptLineBreak: Boolean = true) = ure {
-    1 of ureBlankStartOfLine()
-    1 of content
-    1 of ureBlankRestOfLine(withOptLineBreak)
+    + ureBlankStartOfLine()
+    + content
+    + ureBlankRestOfLine(withOptLineBreak)
 }
 
 fun ureLineWithContentFragments(vararg contentFragment: Ure, withOptLineBreak: Boolean = true) = ure {
-    1 of ureBlankStartOfLine()
-    1 of ureWhateva(inLine = true)
+    + ureBlankStartOfLine()
+    + ureWhateva(inLine = true)
     for (fragment in contentFragment) {
-        1 of fragment
-        1 of ureWhateva(inLine = true)
+        + fragment
+        + ureWhateva(inLine = true)
     }
-    1 of ureBlankRestOfLine(withOptLineBreak)
+    + ureBlankRestOfLine(withOptLineBreak)
 }
 
 fun ureAnyLine(withOptLineBreak: Boolean = true) = ureLineWithContent(ureWhateva(inLine = true), withOptLineBreak)
@@ -88,7 +88,7 @@ fun Ure.withOptSpacesAround(inLine: Boolean = false, allowBefore: Boolean = true
     if (!allowBefore && !allowAfter) this else ure {
         val s = if (inLine) chWhiteSpaceInLine else chWhiteSpace
         if (allowBefore) 0..MAX of s
-        1 of this@withOptSpacesAround // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
+        + this@withOptSpacesAround // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
         if (allowAfter) 0..MAX of s
     }
 
@@ -101,9 +101,9 @@ fun Ure.withOptWhatevaAround(
     allowBefore: Boolean = true,
     allowAfter: Boolean = true
 ) = if (!allowBefore && !allowAfter) this else ure {
-    if (allowBefore) 1 of ureWhateva(reluctant, inLine)
-    1 of this@withOptWhatevaAround // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
-    if (allowAfter) 1 of ureWhateva(reluctant, inLine)
+    if (allowBefore) + ureWhateva(reluctant, inLine)
+    + this@withOptWhatevaAround // it should flatten if this is UreProduct (see UreProduct.toIR()) TODO_later: doublecheck
+    if (allowAfter) + ureWhateva(reluctant, inLine)
 }
 
 fun Ure.withOptWhatevaAroundInLine(reluctant: Boolean = true, allowBefore: Boolean = true, allowAfter: Boolean = true) =
@@ -112,26 +112,26 @@ fun Ure.withOptWhatevaAroundInLine(reluctant: Boolean = true, allowBefore: Boole
 fun Ure.commentedOut(inLine: Boolean = false, traditional: Boolean = true, kdoc: Boolean = false) = ure {
     require(inLine || traditional) { "Non traditional comments are only single line" }
     require(!kdoc || traditional) { "Non traditional comments can't be used as kdoc" }
-    1 of when {
+    + when {
         kdoc -> ureText("/**")
         traditional -> ureText("/*")
         else -> ureText("//")
     }
-    1 of this@commentedOut.withOptSpacesAround(inLine)
-    if (traditional) 1 of ureText("*/")
+    + this@commentedOut.withOptSpacesAround(inLine)
+    if (traditional) + ureText("*/")
 }
 
 @OptIn(SecondaryApi::class) @DelicateApi @NotPortableApi
 fun Ure.notCommentedOut(traditional: Boolean = true, maxSpacesBehind: Int = 100) = ure {
-    1 of ureLookBehind(positive = false) {
-        1 of if (traditional) ureText("/*") else ureText("//")
+    + ureLookBehind(positive = false) {
+        + if (traditional) ureText("/*") else ureText("//")
         0..maxSpacesBehind of if (traditional) chWhiteSpace else chWhiteSpaceInLine
         // Cannot use MAX - look-behind implementation complains (throws) (JVM)
     }
-    1 of this@notCommentedOut
-    if (traditional) 1 of ureLookAhead(positive = false) {
+    + this@notCommentedOut
+    if (traditional) + ureLookAhead(positive = false) {
         0..MAX of chWhiteSpace
-        1 of ureText("*/")
+        + ureText("*/")
     }
 }
 
@@ -145,17 +145,17 @@ fun ureLineWithEndingComment(comment: Ure) =
 // TODO_someday: support named regions without the exact name repeated at the end
 //   (as an optional flag, but leave unchanged requirement by default!)
 fun ureRegion(content: Ure, regionName: Ure? = null) = ure {
-    1 of ureCommentLine(ureKeywordAndOptArg("region", regionName), traditional = false)
-    1 of content
-    1 of ureCommentLine(ureKeywordAndOptArg("endregion", regionName), traditional = false)
+    + ureCommentLine(ureKeywordAndOptArg("region", regionName), traditional = false)
+    + content
+    + ureCommentLine(ureKeywordAndOptArg("endregion", regionName), traditional = false)
 }
 
 // by "special" we mean region with label wrapped in squared brackets
 // the promise is: all special regions with some label should contain exactly the same content (synced)
 fun ureWithSpecialRegion(regionLabel: String) = ure {
-    1 of ureWhateva().withName("before")
-    1 of ureRegion(ureWhateva(), ureText("[$regionLabel]")).withName("region")
-    1 of ureWhateva(reluctant = false).withName("after")
+    + ureWhateva().withName("before")
+    + ureRegion(ureWhateva(), ureText("[$regionLabel]")).withName("region")
+    + ureWhateva(reluctant = false).withName("after")
 }
 
 
@@ -167,10 +167,10 @@ fun ureKeywordAndOptArg(
     arg: Ure? = null,
     separator: Ure = chWhiteSpaceInLine.timesMin(1),
 ) = ure {
-    1 of keyword
+    + keyword
     arg?.let {
-        1 of separator
-        1 of it
+        + separator
+        + it
     }
 }
 

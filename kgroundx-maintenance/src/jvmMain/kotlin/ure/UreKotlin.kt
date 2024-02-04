@@ -20,16 +20,16 @@ fun ureKtKeywordLine(keyword: String, withNamePrefix: String = keyword) =
 private val ureLicenceMarker = (ureText("licence") or ureText("copyright")).withOptionsEnabled(IGNORE_CASE)
 
 fun ureLicenceComment(licenceMarker: Ure = ureLicenceMarker, withName: String = "ktLicenceComment") = ure {
-    1 of ureWhateva()
-    1 of licenceMarker
-    1 of ureWhateva()
+    + ureWhateva()
+    + licenceMarker
+    + ureWhateva()
 }.commentedOut(traditional = true).withName(withName)
 
 fun ureKtComposeTestOutline() = ure {
-    1 of ureLicenceComment().withOptSpacesAround()
-    1 of ureWhateva(reluctant = false).withName("ktOtherStuffBeforePackageLine")
-    1 of urePackageLine().withOptSpacesAround()
-    1 of ureWhateva(reluctant = false).withName("ktRest")
+    + ureLicenceComment().withOptSpacesAround()
+    + ureWhateva(reluctant = false).withName("ktOtherStuffBeforePackageLine")
+    + urePackageLine().withOptSpacesAround()
+    + ureWhateva(reluctant = false).withName("ktRest")
 }
 
 fun ureKtOutline(withNamePrefix: String = "ktPart") = ure {

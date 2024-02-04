@@ -13,7 +13,7 @@ fun String.commentOutMultiplatformFun(): String {
 
 @OptIn(DelicateApi::class) @NotPortableApi
 fun String.undoCommentOutMultiplatformFun(): String {
-    val myFun = ure("myFun") { 1 of ureExpectFun }
+    val myFun = ure("myFun") { + ureExpectFun }
     val output1 = myFun.commentedOut().compile().replace(this) { it["myFun"] }
     return ureText("/*actual*/").compile().replace(output1) { "actual" }
 }
@@ -21,28 +21,28 @@ fun String.undoCommentOutMultiplatformFun(): String {
 private val ureKeyword = ure { 1..MAX of chLower }.withWordBoundaries()
 
 private val ureTypedef = ure {
-    1 of chWord
+    + chWord
     0..1 of {
         0..1 of chWhiteSpace
-        ch("\\<")
+        + ch('<')
         1..MAX of chAnyInLine
-        ch("\\>")
+        + ch('>')
     }
 }
 
 
 private val ureFunParamsInLine = ure {
-    1 of ch("\\(")
+    + ch('(')
     0..MAX of chAnyInLine
-    1 of ch("\\)")
+    + ch(')')
 }
 
 @DelicateApi("Matches correctly only in typical cases.")
 private val ureFunParamsMultiLine = ure {
-    1 of ch("\\(")
-    1 of ureBlankRestOfLine()
+    + ch('(')
+    + ureBlankRestOfLine()
     x(0..MAX, reluctant = true) of chAnyAtAll
-    1 of ch("\\)")
+    + ch(')')
 }
 
 @DelicateApi("Matches correctly only in typical cases.")
@@ -50,30 +50,30 @@ private val ureFunParams = ureFunParamsInLine or ureFunParamsMultiLine
 
 @DelicateApi("Matches correctly only in typical cases.")
 private val ureFunDeclaration = ure {
-    1 of ureText("fun")
+    + ureText("fun")
     1..MAX of chWhiteSpace
     0..1 of { // receiver
-        1 of ureTypedef
-        1 of chDot
+        + ureTypedef
+        + chDot
     }
     1..MAX of chWord // funname
-    1 of ureFunParams
+    + ureFunParams
     0..1 of { // :Type<..>
         0..1 of chWhiteSpace
-        1 of ch(":")
+        + ch(':')
         0..MAX of chWhiteSpace
-        1 of ureTypedef
+        + ureTypedef
     }
 }
 
 @DelicateApi("Matches correctly only in typical cases.")
 val ureExpectFun = ure {
-    1 of atBOLine
-    0..1 of { 1 of ureText("@Composable"); 1..MAX of chWhiteSpace }
-    0..MAX of { 1 of ureKeyword; 1..MAX of chWhiteSpace }
-    1 of ureText("expect ")
+    + atBOLine
+    0..1 of { + ureText("@Composable"); 1..MAX of chWhiteSpace }
+    0..MAX of { + ureKeyword; 1..MAX of chWhiteSpace }
+    + ureText("expect ")
     0..1 of ureText("suspend ")
-    1 of ureFunDeclaration
+    + ureFunDeclaration
     0..MAX of chWhiteSpace
-    1 of atEOLine
+    + atEOLine
 }

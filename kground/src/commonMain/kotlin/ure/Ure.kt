@@ -324,9 +324,14 @@ data class UreQuantifier internal constructor(
  * @param str can contain more than one jvm char in cases when one codepoint in utf16 takes more than one char,
  * but it does not accept regexes representing special characters, like "\\t", or "\\n" - use single backslash,
  * so kotlin compiler changes "\n" into actual newline character, etc;
- * UreCharExact.toIR() will recreate necessary regex (like \n or \x{h...h}) for weird characters.
+ * UreCharExact.toIR() will recreate necessary regex (like \n or \x{hhhhh}) for weird characters.
+ * Only surrogate pair case is not portable. It compiles to \x{hhhhh} which works only on JVM.
+ * Note: On JS there is \u{hhhhh} syntax instead of \x{hhhhh},
+ * but I really don't want to create different IR for different platforms.
+ * It all should be the same common implementation, except actual regex matching (which is outside Ure).
+ * (usecases like: tool on website creating IR to copy&paste to different places)
  */
-@JvmInline value class UreCharExact @DelicateApi internal constructor(val str: String) : UreCharClass {
+@JvmInline value class UreCharExact @NotPortableApi internal constructor(val str: String) : UreCharClass {
     init {
         req(str.isNotEmpty()) { "Empty char point." }
         req(str.isSingleUnicodeCharacter) { "Looks like more than one char point." }
@@ -349,11 +354,10 @@ data class UreQuantifier internal constructor(
             // TODO_someday: make sure all ascii printable are fine (we already checked it's not meta in this context).
         else -> {
             val p = str.toSingleCodePoint()
-            val hex = p.toHexString() // we do not represent any points as octal.
             when {
-                p < 0x100 -> "\\x$hex" // ascii control chars are also represented this way
-                p < 0x10000 -> "\\u$hex"
-                else -> "\\x{$hex}"
+                p < 0x100 -> "\\x${p.toUByte().toHexString()}" // ascii control chars are also represented this way
+                p < 0x10000 -> "\\u${p.toUShort().toHexString()}"
+                else -> "\\x{${p.toHexString(HexFormat { number { removeLeadingZeros = true } })}}"
             }
         }
     }.asIR
@@ -578,9 +582,11 @@ fun ureText(text: String) = UreText(text)
 
 // region [Ure Character Related Stuff]
 
-@OptIn(DelicateApi::class) fun ch(str: String) = UreCharExact(str)
+@NotPortableApi("Only surrogate pairs compiling is not portable (IR with \\x{hhhhh})", ReplaceWith("ch(chr: Char)"))
+fun ch(str: String) = UreCharExact(str)
 
-fun ch(chr: Char) = ch(chr.toString())
+// this one is portable, because it never ends up being a surrogate pair.
+@OptIn(NotPortableApi::class) fun ch(chr: Char) = ch(chr.toString())
 
 @DelicateApi fun chPreDef(name: Char) = UreCharClassPreDef(name)
 
@@ -590,18 +596,18 @@ fun ch(chr: Char) = ch(chr.toString())
 
 
 // just private shortcuts
-@OptIn(DelicateApi::class) private inline val String.ce get() = ch(this)
+@OptIn(DelicateApi::class) private inline val Char.ce get() = ch(this)
 @OptIn(DelicateApi::class) private inline val Char.cpd get() = chPreDef(this)
 
-val chSlash = "/".ce
-val chBackSlash = "\\".ce
+val chSlash = '/'.ce
+val chBackSlash = '\\'.ce
 
-val chTab = "\t".ce
-val chLF = "\n".ce
-val chCR = "\r".ce
-val chFF = "\u000C".ce
-val chAlert = "\u0007".ce
-val chEsc = "\u001B".ce
+val chTab = '\t'.ce
+val chLF = '\n'.ce
+val chCR = '\r'.ce
+val chFF = '\u000C'.ce
+val chAlert = '\u0007'.ce
+val chEsc = '\u001B'.ce
 
 /** [a-z] */
 val chLower = chOf('a'..'z')
@@ -623,7 +629,7 @@ val chPunct = chOfAnyExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""".toList())
 
 val chGraph = chOfAny(chAlnum, chPunct)
 
-val chSpace = " ".ce
+val chSpace = ' '.ce
 val chWhiteSpace = 's'.cpd
 val chWhiteSpaceInLine = chOfAny(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
 
@@ -637,14 +643,14 @@ val chNonDigit = 'D'.cpd
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWhiteSpace"))
 val chNonWhiteSpace = 'S'.cpd
 
-val chDash = "-".ce
+val chDash = '-'.ce
 
 /**
  * Matches only the actual dot "." character.
  * Check [chAnyInLine] if you want regex that matches any character in line (represented by "." IR),
  * Check [chAnyAtAll] if you want regex that matches any character at all.
  */
-val chDot = ".".ce
+val chDot = '.'.ce
 
 val chAnyInLine = '.'.cpd
 

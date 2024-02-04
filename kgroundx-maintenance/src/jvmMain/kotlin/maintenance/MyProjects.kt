@@ -66,7 +66,7 @@ private fun Ure.withSomeLinesAround(
     if (maxLinesBefore > 2) println("FIXME: this is terribly slow for maxLinesBefore > 2")
         // FIXME investigate if it can be optimized. https://www.regular-expressions.info/catastrophic.html
     0..maxLinesBefore of ureAnyLine()
-    1 of ureLineWithContent(this@withSomeLinesAround)
+    + ureLineWithContent(this@withSomeLinesAround)
     0..maxLinesAfter of ureAnyLine()
 }
 
