@@ -35,7 +35,8 @@ fun CharSequence.toSingleCodePoint(): Int {
     val ch = first() // will throw if it's empty
     req(length < 3) { "Contains more than single code point." }
     if (length == 1) {
-        req(!ch.isSurrogate) { "Contains one part of surrogate pair." }
+        req(!ch.isSurrogateHigh) { "Contains only first (high) part of surrogate pair." }
+        req(!ch.isSurrogateLow) { "Contains only second (low) part of surrogate pair." }
         return ch.code
     }
     // length == 2
