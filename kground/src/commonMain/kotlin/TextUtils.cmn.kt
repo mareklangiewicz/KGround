@@ -61,7 +61,7 @@ fun String.removeReqSuffix(suffix: CharSequence): String {
 fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult {
     val r1 = find(input, startIndex).reqNN { "this regex: \"$this\" is nowhere in input" }
     val r2 = find(input, r1.range.last + 1)
-    r2.reqEqNull { "this regex: \"$this\" has been found second time at idx: ${r2!!.range.first}" }
+    r2.reqNull { "this regex: \"$this\" has been found second time at idx: ${r2!!.range.first}" }
     return r1
 }
 

@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package pl.mareklangiewicz.kground
 
 import kotlin.contracts.ExperimentalContracts
@@ -36,25 +38,40 @@ open class NotEqStateErr(val exp: Any?, val act: Any?, message: String? = null):
 
 open class NotEqArgErr(val exp: Any?, val act: Any?, message: String? = null): BadArgErr(message)
 
-inline fun Any?.chkEq(exp: Any?, lazyMessage: () -> String = { "bad $this != $exp" }) = apply {
-    this == exp || throw NotEqStateErr(exp, this, lazyMessage())
-}
 
-inline fun Any?.reqEq(exp: Any?, lazyMessage: () -> String = { "bad arg $this != $exp" }) = apply {
-    this == exp || throw NotEqArgErr(exp, this, lazyMessage())
-}
+open class NotSameStateErr(val exp: Any?, val act: Any?, message: String? = null): BadStateErr(message)
+
+open class NotSameArgErr(val exp: Any?, val act: Any?, message: String? = null): BadArgErr(message)
+
+inline fun <T> T.chkEq(exp: Any?, lazyMessage: () -> String): T =
+    apply { this == exp || throw NotEqStateErr(exp, this, lazyMessage()) }
+
+inline fun <T> T.reqEq(exp: Any?, lazyMessage: () -> String): T =
+    apply { this == exp || throw NotEqArgErr(exp, this, lazyMessage()) }
+
+inline fun <T> T.chkSame(exp: Any?, lazyMessage: () -> String): T =
+    apply { this === exp || throw NotSameStateErr(exp, this, lazyMessage()) }
+
+inline fun <T> T.reqSame(exp: Any?, lazyMessage: () -> String): T =
+    apply { this === exp || throw NotEqArgErr(exp, this, lazyMessage()) }
+
+inline infix fun <T> T.chkEq(exp: Any?): T = chkEq(exp) { "bad $this != $exp" }
+inline infix fun <T> T.reqEq(exp: Any?): T = reqEq(exp) { "bad arg $this != $exp" }
+
+inline infix fun <T> T.chkSame(exp: Any?): T = chkSame(exp) { "bad $this !== $exp" }
+inline infix fun <T> T.reqSame(exp: Any?): T = reqSame(exp) { "bad arg $this !== $exp" }
 
 @OptIn(ExperimentalContracts::class)
-inline fun Any?.chkEqNull(lazyMessage: () -> String = { "this non-null is bad" }): Nothing? {
-    contract { returns() implies (this@chkEqNull == null) }
-    this == null || throw NotEqStateErr(null, this, lazyMessage())
+inline fun Any?.chkNull(lazyMessage: () -> String = { "this non-null is bad" }): Nothing? {
+    contract { returns() implies (this@chkNull == null) }
+    this == null || throw NotSameStateErr(null, this, lazyMessage())
     return null
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun Any?.reqEqNull(lazyMessage: () -> String = { "this non-null arg is bad" }): Nothing? {
-    contract { returns() implies (this@reqEqNull == null) }
-    this == null || throw NotEqArgErr(null, this, lazyMessage())
+inline fun Any?.reqNull(lazyMessage: () -> String = { "this non-null arg is bad" }): Nothing? {
+    contract { returns() implies (this@reqNull == null) }
+    this == null || throw NotSameArgErr(null, this, lazyMessage())
     return null
 }
 
