@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.chkEq
+import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.uspek.*
 
 const val exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"
@@ -60,8 +60,7 @@ fun testSomeUreWithName() {
                 val found: List<MatchResult> = re1.findAll(exampleABCDEx3).toList()
                 "found twice in correct places" o {
                     found.size chkEq 2
-                    found[0].value chkEq "aBcD"
-                    found[1].value chkEq "aBcD"
+                    found[0].value chkEq found[1].value chkEq "aBcD"
                     found[0].range chkEq 0..3
                     found[1].range chkEq 6..9
                 }
@@ -103,7 +102,7 @@ private fun testUreEmail(ureEmail: Ure) {
 
 private fun testRegexWithEmail(regex: Regex, email: String, expectedUser: String, expectedDomain: String) {
     "for email: $email" o {
-        "it matches" o { regex.matches(email) chkEq true }
+        "it matches" o { regex.matches(email).chkTrue() }
         "for match result" o {
             val result = regex.matchEntire(email)!!
             val groups = result.groups
@@ -115,8 +114,8 @@ private fun testRegexWithEmail(regex: Regex, email: String, expectedUser: String
 
 private fun testRegexWithIncorrectEmail(regex: Regex, email: String) {
     "for incorrect email: $email" o {
-        "it does not match" o { regex.matches(email) chkEq false }
-        "match result is null" o { regex.matchEntire(email) chkEq null }
+        "it does not match" o { regex.matches(email).chkFalse() }
+        "match result is null" o { regex.matchEntire(email).chkNull() }
     }
 }
 

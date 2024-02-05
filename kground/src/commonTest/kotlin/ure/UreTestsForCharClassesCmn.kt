@@ -79,8 +79,8 @@ fun testSomeBasicCharClassIRs() {
             val devil = "\uD83D\uDE08"
             "two ways of encoding in kotlin src result in the same surrogate pair" o {
                 devil.length chkEq 2
-                req(devil[0].isSurrogateHigh)
-                req(devil[1].isSurrogateLow)
+                devil[0].isSurrogateHigh.chkTrue()
+                devil[1].isSurrogateLow.chkTrue()
                 "😈" chkEq devil
             }
             "On ch with The Devil" o {

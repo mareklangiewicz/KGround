@@ -75,6 +75,18 @@ inline fun Any?.reqNull(lazyMessage: () -> String = { "this non-null arg is bad"
     return null
 }
 
+inline fun Boolean?.chkTrue(lazyMessage: () -> String = { "this is not true: $this" }): Boolean =
+    chkSame(true, lazyMessage)!!
+
+inline fun Boolean?.reqTrue(lazyMessage: () -> String = { "this arg is not true: $this" }): Boolean =
+    reqSame(true, lazyMessage)!!
+
+inline fun Boolean?.chkFalse(lazyMessage: () -> String = { "this is not false: $this" }): Boolean =
+    chkSame(false, lazyMessage)!!
+
+inline fun Boolean?.reqFalse(lazyMessage: () -> String = { "this arg is not false: $this" }): Boolean =
+    reqSame(false, lazyMessage)!!
+
 inline fun <T: Collection<*>> T.chkEmpty(lazyMessage: () -> String = { "this not empty is bad" }): T =
     apply { isEmpty() || throw BadStateErr(lazyMessage()) }
 
