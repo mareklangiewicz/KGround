@@ -36,8 +36,28 @@ fun testSomeUreSanity() {
     }
 }
 
+// Note: I will access matched groups in these tests, both by name and by number. This kind of mixed approach is not
+//   recommended because indexing can be inconsistent between regex implementations when named groups are present.
+//   I do it just to test in practice how currently platforms under kotlin mpp are indexing groups in such edge cases.
+//   See "Numbers for Named Capturing Groups" here: https://www.regular-expressions.info/named.html
 @OptIn(DelicateApi::class, NotPortableApi::class)
 fun testSomeUreWithName() {
+
+    "Sanity check for ure without named groups" o {
+        val found = ureBOLaBcD.compile().findAll(exampleABCDEx3).toList()
+
+        "found twice in correct places" o {
+            found.size chkEq 2
+            found[0].value chkEq found[1].value chkEq "aBcD"
+            found[0].range chkEq 0..3
+            found[1].range chkEq 6..9
+        }
+        "result .groups and .named returns the same object on $platform" o {
+            found[0].groups chkSame found[0].named
+            found[1].groups chkSame found[1].named
+        }
+    }
+
     "On wrapping ure s in withName" o {
         val ure1 = ureBOLaBcD.withName("ure1")
         val ure2 = ureBcDeEOL.withName("ure2")
