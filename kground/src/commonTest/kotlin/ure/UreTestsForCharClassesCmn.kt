@@ -35,7 +35,7 @@ fun testSomeBasicCharClassIRs() {
             val copyRight = "\u00a9"
             "two ways of encoding in kotlin src result in the same single utf16 char" o {
                 copyRight.length chkEq 1
-                req(!copyRight[0].isSurrogate)
+                copyRight[0].isSurrogate.chkFalse()
                 "©" chkEq copyRight
             }
             "On ch with copyright" o {
@@ -57,7 +57,7 @@ fun testSomeBasicCharClassIRs() {
             val bitcoin = "\u20bf"
             "two ways of encoding in kotlin src result in the same single utf16 char" o {
                 bitcoin.length chkEq 1
-                req(!bitcoin[0].isSurrogate)
+                bitcoin[0].isSurrogate.chkFalse()
                 "₿" chkEq bitcoin
             }
             "On ch with bitcoin" o {
