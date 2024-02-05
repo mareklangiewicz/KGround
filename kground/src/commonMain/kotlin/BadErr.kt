@@ -75,3 +75,21 @@ inline fun Any?.reqNull(lazyMessage: () -> String = { "this non-null arg is bad"
     return null
 }
 
+inline fun <T: Collection<*>> T.chkEmpty(lazyMessage: () -> String = { "this not empty is bad" }): T =
+    apply { isEmpty() || throw BadStateErr(lazyMessage()) }
+
+inline fun <T: Collection<*>> T.reqEmpty(lazyMessage: () -> String = { "this not empty arg is bad" }): T =
+    apply { isEmpty() || throw BadArgErr(lazyMessage()) }
+
+inline fun <T: Collection<*>> T.chkEmptyVerbose(): T =
+    apply { isEmpty() || throw BadStateErr("this not empty collection is bad: $this") }
+
+inline fun <T: Collection<*>> T.reqEmptyVerbose(): T =
+    apply { isEmpty() || throw BadArgErr("this not empty arg collection is bad: $this") }
+
+inline fun <T: Collection<*>> T.chkNotEmpty(lazyMessage: () -> String = { "this empty is bad" }): T =
+    apply { isNotEmpty() || throw BadStateErr(lazyMessage()) }
+
+inline fun <T: Collection<*>> T.reqNotEmpty(lazyMessage: () -> String = { "this empty arg is bad" }): T =
+    apply { isNotEmpty() || throw BadArgErr(lazyMessage()) }
+

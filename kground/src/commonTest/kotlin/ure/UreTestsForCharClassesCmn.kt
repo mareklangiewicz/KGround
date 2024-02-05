@@ -14,36 +14,36 @@ fun testSomeUreCharClasses() {
 fun testSomeBasicCharClassIRs() {
 
     "On some already created UreCharExact vals" o {
-        "chSlash str is just slash" o { chSlash.str eq "/" }
-        "chSlash IR is just slash" o { chSlash.toIR() eq IR("/") }
-        "chBackSlash str is just backslash" o { chBackSlash.str eq "\\" }
-        "chBackSlash IR is quoted" o { chBackSlash.toIR() eq IR("\\\\") }
-        "chTab str is just actual tab char code 9" o { chTab.str eq "\t" }
-        "chTab IR is special t quoted" o { chTab.toIR() eq IR("\\t") }
-        "chAlert str is just actual alert char code 7" o { chTab.str.single().code eq 9 }
-        "chAlert IR is special a quoted" o { chAlert.toIR() eq IR("\\a") }
+        "chSlash str is just slash" o { chSlash.str chkEq "/" }
+        "chSlash IR is just slash" o { chSlash.toIR() chkEq IR("/") }
+        "chBackSlash str is just backslash" o { chBackSlash.str chkEq "\\" }
+        "chBackSlash IR is quoted" o { chBackSlash.toIR() chkEq IR("\\\\") }
+        "chTab str is just actual tab char code 9" o { chTab.str chkEq "\t" }
+        "chTab IR is special t quoted" o { chTab.toIR() chkEq IR("\\t") }
+        "chAlert str is just actual alert char code 7" o { chTab.str.single().code chkEq 9 }
+        "chAlert IR is special a quoted" o { chAlert.toIR() chkEq IR("\\a") }
     }
 
     "On fun ch constructing UreCharExact" o {
         "fails with more than single unicode character".failsWith<BadArgErr> { ch("ab") }
         "works correctly with single backslash" o {
             val ure = ch("\\") // using the version with string arg to be analogous to next tests with surrogate pairs
-            ure.str eq "\\" // it is remembering just one char - no quoting here yet
-            ure.toIR() eq IR("\\\\") // it is quoting (if necessary) when generating IR
+            ure.str chkEq "\\" // it is remembering just one char - no quoting here yet
+            ure.toIR() chkEq IR("\\\\") // it is quoting (if necessary) when generating IR
         }
         "On copyright character" o {
             val copyRight = "\u00a9"
             "two ways of encoding in kotlin src result in the same single utf16 char" o {
-                copyRight.length eq 1
+                copyRight.length chkEq 1
                 req(!copyRight[0].isSurrogate)
-                "©" eq copyRight
+                "©" chkEq copyRight
             }
             "On ch with copyright" o {
                 val ure = ch(copyRight)
                 val re = ure.toIR()
                 "created correctly" o {
-                    ure.str eq copyRight // it is remembering just the copyright character - no quoting here
-                    re eq IR("\\xa9") // it is using \xhh notation for IR (only two digits)
+                    ure.str chkEq copyRight // it is remembering just the copyright character - no quoting here
+                    re chkEq IR("\\xa9") // it is using \xhh notation for IR (only two digits)
                 }
                 onUreClass(
                     name = "copy right",
@@ -56,16 +56,16 @@ fun testSomeBasicCharClassIRs() {
         "On bitcoin symbol" o {
             val bitcoin = "\u20bf"
             "two ways of encoding in kotlin src result in the same single utf16 char" o {
-                bitcoin.length eq 1
+                bitcoin.length chkEq 1
                 req(!bitcoin[0].isSurrogate)
-                "₿" eq bitcoin
+                "₿" chkEq bitcoin
             }
             "On ch with bitcoin" o {
                 val ure = ch(bitcoin)
                 val re = ure.toIR()
                 "created correctly" o {
-                    ure.str eq bitcoin // it is remembering just the bitcoin character - no quoting here yet
-                    re eq IR("\\u20bf") // it is using \uhhhh notation for IR
+                    ure.str chkEq bitcoin // it is remembering just the bitcoin character - no quoting here yet
+                    re chkEq IR("\\u20bf") // it is using \uhhhh notation for IR
                 }
                 onUreClass(
                     name = "bitcoin",
@@ -78,17 +78,17 @@ fun testSomeBasicCharClassIRs() {
         "On The Devil character surrogate" o {
             val devil = "\uD83D\uDE08"
             "two ways of encoding in kotlin src result in the same surrogate pair" o {
-                devil.length eq 2
+                devil.length chkEq 2
                 req(devil[0].isSurrogateHigh)
                 req(devil[1].isSurrogateLow)
-                "😈" eq devil
+                "😈" chkEq devil
             }
             "On ch with The Devil" o {
                 val ure = ch(devil)
                 val re = ure.toIR()
                 "created correctly" o {
-                    ure.str eq devil // it is remembering just the stop sign character - no quoting here yet
-                    re eq IR("\\x{1f608}") // it is using \x{hhhhh} notation for IR
+                    ure.str chkEq devil // it is remembering just the stop sign character - no quoting here yet
+                    re chkEq IR("\\x{1f608}") // it is using \x{hhhhh} notation for IR
                 }
                 onUreClass(
                     name = "devil",

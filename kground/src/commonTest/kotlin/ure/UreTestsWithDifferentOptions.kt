@@ -12,44 +12,44 @@ fun testUreWithDifferentOptions() {
     "On compile with default options" o {
         val reBOLaBcD = ureBOLaBcD.compile()
         val reBcDeEOL = ureBcDeEOL.compile()
-        "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options eq setOf(MULTILINE) }
-        "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options eq setOf(MULTILINE) }
-        "reBOLaBcD matches exampleABCDEx3 twice" o { reBOLaBcD.findAll(exampleABCDEx3).count() eq 2 }
-        "reBcDeEOL matches exampleABCDEx3 twice" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 2 }
+        "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options chkEq setOf(MULTILINE) }
+        "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options chkEq setOf(MULTILINE) }
+        "reBOLaBcD matches exampleABCDEx3 twice" o { reBOLaBcD.findAll(exampleABCDEx3).count() chkEq 2 }
+        "reBcDeEOL matches exampleABCDEx3 twice" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 2 }
     }
     "On compile with empty options" o {
         val reBOLaBcD = ureBOLaBcD.compileWithOptions()
         val reBcDeEOL = ureBcDeEOL.compileWithOptions()
-        "reBOLaBcD gets compiled with no options" o { reBOLaBcD.options eq setOf() }
-        "reBcDeEOL gets compiled with no options" o { reBcDeEOL.options eq setOf() }
-        "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range eq 0..3 }
-        "reBcDeEOL does NOT match exampleABCDEx3 anywhere" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 0 }
+        "reBOLaBcD gets compiled with no options" o { reBOLaBcD.options.chkEmpty() }
+        "reBcDeEOL gets compiled with no options" o { reBcDeEOL.options.chkEmpty() }
+        "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range chkEq 0..3 }
+        "reBcDeEOL does NOT match exampleABCDEx3 anywhere" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 0 }
     }
     "On compile with ignore case" o {
         val reBOLaBcD = ureBOLaBcD.compileWithOptions(IGNORE_CASE)
         val reBcDeEOL = ureBcDeEOL.compileWithOptions(IGNORE_CASE)
-        "reBOLaBcD gets compiled with only ignore case option" o { reBOLaBcD.options eq setOf(IGNORE_CASE) }
-        "reBcDeEOL gets compiled with only ignore case option" o { reBcDeEOL.options eq setOf(IGNORE_CASE) }
-        "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range eq 0..3 }
-        "reBcDeEOL matches exampleABCDEx3 once at very end" o { reBcDeEOL.findSingle(exampleABCDEx3).range eq 13..16 }
+        "reBOLaBcD gets compiled with only ignore case option" o { reBOLaBcD.options chkEq setOf(IGNORE_CASE) }
+        "reBcDeEOL gets compiled with only ignore case option" o { reBcDeEOL.options chkEq setOf(IGNORE_CASE) }
+        "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range chkEq 0..3 }
+        "reBcDeEOL matches exampleABCDEx3 once at very end" o { reBcDeEOL.findSingle(exampleABCDEx3).range chkEq 13..16 }
     }
     "On compile with ignore case and multiline" o {
         val reBOLaBcD = ureBOLaBcD.compileWithOptions(IGNORE_CASE, MULTILINE)
         val reBcDeEOL = ureBcDeEOL.compileWithOptions(IGNORE_CASE, MULTILINE)
-        "reBOLaBcD gets compiled with both options" o { reBOLaBcD.options eq setOf(IGNORE_CASE, MULTILINE) }
-        "reBcDeEOL gets compiled with both options" o { reBcDeEOL.options eq setOf(IGNORE_CASE, MULTILINE) }
-        "reBOLaBcD matches exampleABCDEx3 three times" o { reBOLaBcD.findAll(exampleABCDEx3).count() eq 3 }
-        "reBcDeEOL matches exampleABCDEx3 three times" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 3 }
+        "reBOLaBcD gets compiled with both options" o { reBOLaBcD.options chkEq setOf(IGNORE_CASE, MULTILINE) }
+        "reBcDeEOL gets compiled with both options" o { reBcDeEOL.options chkEq setOf(IGNORE_CASE, MULTILINE) }
+        "reBOLaBcD matches exampleABCDEx3 three times" o { reBOLaBcD.findAll(exampleABCDEx3).count() chkEq 3 }
+        "reBcDeEOL matches exampleABCDEx3 three times" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 3 }
     }
     "On example ure s wrapped in withOptionsEnabled IGNORE_CASE on $platform" o {
         if (platform == "JS") testUreDoesNotCompile(ureBOLaBcD.withOptionsEnabled(IGNORE_CASE))
         else "On compile normally" o {
             val reBOLaBcD = ureBOLaBcD.withOptionsEnabled(IGNORE_CASE).compile()
             val reBcDeEOL = ureBcDeEOL.withOptionsEnabled(IGNORE_CASE).compile()
-            "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options eq setOf(MULTILINE) }
-            "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options eq setOf(MULTILINE) }
-            "reBOLaBcD matches exampleABCDEx3 three times" o { reBOLaBcD.findAll(exampleABCDEx3).count() eq 3 }
-            "reBcDeEOL matches exampleABCDEx3 three times" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 3 }
+            "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options chkEq setOf(MULTILINE) }
+            "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options chkEq setOf(MULTILINE) }
+            "reBOLaBcD matches exampleABCDEx3 three times" o { reBOLaBcD.findAll(exampleABCDEx3).count() chkEq 3 }
+            "reBcDeEOL matches exampleABCDEx3 three times" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 3 }
         }
     }
     "On example ure s wrapped in withOptionsDisabled MULTILINE on $platform" o {
@@ -57,10 +57,10 @@ fun testUreWithDifferentOptions() {
         else "On compile normally" o {
             val reBOLaBcD = ureBOLaBcD.withOptionsDisabled(MULTILINE).compile()
             val reBcDeEOL = ureBcDeEOL.withOptionsDisabled(MULTILINE).compile()
-            "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options eq setOf(MULTILINE) }
-            "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options eq setOf(MULTILINE) }
-            "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range eq 0..3 }
-            "reBcDeEOL does NOT match exampleABCDEx3 anywhere" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 0 }
+            "reBOLaBcD gets compiled with only multiline option" o { reBOLaBcD.options chkEq setOf(MULTILINE) }
+            "reBcDeEOL gets compiled with only multiline option" o { reBcDeEOL.options chkEq setOf(MULTILINE) }
+            "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range chkEq 0..3 }
+            "reBcDeEOL does NOT match exampleABCDEx3 anywhere" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 0 }
         }
     }
     "On example ure s prepended with weird ureWithOptionsAhead disable MULTILINE on $platform" o {
@@ -73,11 +73,11 @@ fun testUreWithDifferentOptions() {
             // look like they have mutable field that changes during parsing RE and the (?-m) removes MULTILINE from it.
             // see my bug report: https://youtrack.jetbrains.com/issue/KT-65531/Regex-content-can-change-Regex.options
             // also see: UreTestsCmd:testStdLibRegexIssue
-            "reBOLaBcD INCORRECTLY reports being compiled with no options" o { reBOLaBcD.options eq setOf() }
-            "reBcDeEOL INCORRECTLY reports being compiled with no options" o { reBcDeEOL.options eq setOf() }
+            "reBOLaBcD INCORRECTLY reports being compiled with no options" o { reBOLaBcD.options.chkEmpty() }
+            "reBcDeEOL INCORRECTLY reports being compiled with no options" o { reBcDeEOL.options.chkEmpty() }
 
-            "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range eq 0..3 }
-            "reBcDeEOL does NOT match exampleABCDEx3 anywhere" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 0 }
+            "reBOLaBcD matches exampleABCDEx3 once at very start" o { reBOLaBcD.findSingle(exampleABCDEx3).range chkEq 0..3 }
+            "reBcDeEOL does NOT match exampleABCDEx3 anywhere" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 0 }
         }
     }
     "On example ure s appended with weird ureWithOptionsAhead disable MULTILINE on $platform" o {
@@ -88,12 +88,12 @@ fun testUreWithDifferentOptions() {
 
             // TODO_someday: Investigate if it's a bug in stdlib
             // look like they have mutable field that changes during parsing RE and the (?-m) removes MULTILINE from it.
-            "reBOLaBcD INCORRECTLY reports being compiled with no options" o { reBOLaBcD.options eq setOf() }
-            "reBcDeEOL INCORRECTLY reports being compiled with no options" o { reBcDeEOL.options eq setOf() }
+            "reBOLaBcD INCORRECTLY reports being compiled with no options" o { reBOLaBcD.options.chkEmpty() }
+            "reBcDeEOL INCORRECTLY reports being compiled with no options" o { reBcDeEOL.options.chkEmpty() }
 
             // appended (?-m) should not change the behavior at all; it would if it was BEFORE the rest of RE
-            "reBOLaBcD matches exampleABCDEx3 twice" o { reBOLaBcD.findAll(exampleABCDEx3).count() eq 2 }
-            "reBcDeEOL matches exampleABCDEx3 twice" o { reBcDeEOL.findAll(exampleABCDEx3).count() eq 2 }
+            "reBOLaBcD matches exampleABCDEx3 twice" o { reBOLaBcD.findAll(exampleABCDEx3).count() chkEq 2 }
+            "reBcDeEOL matches exampleABCDEx3 twice" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 2 }
         }
     }
     "On inserting weird ureWithOptionsAhead in the middle of UreConcatenation" o {
@@ -106,9 +106,9 @@ fun testUreWithDifferentOptions() {
         if (platform == "JS") testUreDoesNotCompile(ure)
         else "On compile normally" o {
             val re = ure.compile()
-            "compiled pattern is as expected" o { re.pattern eq """BcDe$(?:\r?\n)(?i)^aBcD""" }
-            "re matches exampleABCDEx3 one time at 1" o { re.findSingle(exampleABCDEx3).range.start eq 1 }
-            "re matches exampleABCDEx3 one time at 7 when starting at 2" o { re.findSingle(exampleABCDEx3, 2).range.start eq 7 }
+            "compiled pattern is as expected" o { re.pattern chkEq """BcDe$(?:\r?\n)(?i)^aBcD""" }
+            "re matches exampleABCDEx3 one time at 1" o { re.findSingle(exampleABCDEx3).range.start chkEq 1 }
+            "re matches exampleABCDEx3 one time at 7 when starting at 2" o { re.findSingle(exampleABCDEx3, 2).range.start chkEq 7 }
 
         }
     }
