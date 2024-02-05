@@ -9,20 +9,6 @@ import kotlin.text.RegexOption.*
 @OptIn(DelicateApi::class, NotPortableApi::class, SecondaryApi::class)
 fun testUreWithDifferentOptions() {
 
-    "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(exampleABCDEx3).count() eq 2 }
-
-    "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(exampleABCDEx3).count() eq exampleABCDEx3.length - 2 }
-
-    "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(exampleABCDEx3).count() eq exampleABCDEx3.length }
-
-    val ureBOLaBcD = atBOLine then ureText("aBcD")
-    val ureBcDeEOL = ureText("BcDe") then atEOLine
-
-    "example ure s constructed as expected" o {
-        ureBOLaBcD.toIR() eq IR("^aBcD")
-        ureBcDeEOL.toIR() eq IR("BcDe\$")
-    }
-
     "On compile with default options" o {
         val reBOLaBcD = ureBOLaBcD.compile()
         val reBcDeEOL = ureBcDeEOL.compile()

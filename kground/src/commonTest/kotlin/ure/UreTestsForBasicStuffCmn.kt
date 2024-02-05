@@ -1,22 +1,74 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.kground.chkEq
 import pl.mareklangiewicz.uspek.*
 
 const val exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"
 
+val ureBOLaBcD = atBOLine then ureText("aBcD")
+
+val ureBcDeEOL = ureText("BcDe") then atEOLine
+
+
 fun testSomeUreBasicStuff() {
-
-    // some example very basic sanity tests
-    "chDot compiled pattern is quoted dot" o { chDot.compile().pattern eq "\\." }
-    "chAnyInLine compiled pattern just a dot" o { chAnyInLine.compile().pattern eq "." }
-
+    testSomeUreSanity()
+    testSomeUreWithName()
     testUreWithDifferentOptions()
     testUreQuantifAndAtomic()
     // TODO("Test some quantifiers (is UreQuantif.toClosedIR() correct?)")
     // TODO NOW
 
     testUreBasicEmail()
+}
+
+@OptIn(DelicateApi::class)
+fun testSomeUreSanity() {
+    // some example very basic sanity tests
+    "chDot compiled pattern is quoted dot" o { chDot.compile().pattern eq "\\." }
+    "chAnyInLine compiled pattern just a dot" o { chAnyInLine.compile().pattern eq "." }
+    "ureLineBreak matches line breaks" o { ureLineBreak.compile().findAll(exampleABCDEx3).count() eq 2 }
+    "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(exampleABCDEx3).count() eq exampleABCDEx3.length - 2 }
+    "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(exampleABCDEx3).count() eq exampleABCDEx3.length }
+    "example ure s constructed as expected" o {
+        ureBOLaBcD.toIR() eq IR("^aBcD")
+        ureBcDeEOL.toIR() eq IR("BcDe\$")
+    }
+}
+
+@OptIn(DelicateApi::class, NotPortableApi::class)
+fun testSomeUreWithName() {
+    "On wrapping ure s in withName" o {
+        val ure1 = ureBOLaBcD.withName("ure1")
+        val ure2 = ureBcDeEOL.withName("ure2")
+        val ure3 = ure("ure3") { // convenient way to wrap withName when building concatenation
+            + ure1
+            0..MAX of chAnyAtAll
+            + ure2
+        }
+        "constructed as expected" o {
+            ure1.toIR() eq IR("(?<ure1>^aBcD)")
+            ure2.toIR() eq IR("(?<ure2>BcDe$)")
+            ure3.toIR() eq IR("(?<ure3>(?<ure1>^aBcD)[\\s\\S]*(?<ure2>BcDe$))")
+        }
+        "On compile" o {
+            val re1 = ure1.compile()
+            val re2 = ure2.compile()
+            val re3 = ure3.compile()
+            "On matching re1" o {
+                // reminder: exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"
+                val found: List<MatchResult> = re1.findAll(exampleABCDEx3).toList()
+                "found twice in correct places" o {
+                    found.size eq 2
+                    found[0].value eq "aBcD"
+                    found[1].value eq "aBcD"
+                    found[0].range eq 0..3
+                    found[1].range eq 6..9
+                }
+            }
+        }
+    }
+
 }
 
 fun testUreQuantifAndAtomic() {
