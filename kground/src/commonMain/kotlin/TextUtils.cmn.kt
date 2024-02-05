@@ -69,4 +69,16 @@ fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult {
 fun Regex.replaceSingle(input: CharSequence, replacement: CharSequence, startIndex: Int = 0): CharSequence =
     input.replaceRange(findSingle(input, startIndex).range, replacement)
 
+fun Regex.findAllWithOverlap(input: CharSequence, startIndex: Int = 0): Sequence<MatchResult> {
+    req(startIndex in 0..input.length) { "startIdx: $startIndex is not in bounds: 0..${input.length}" }
+    return generateSequence({ find(input, startIndex) },  { find(input, it.range.first + 1) })
+}
 
+
+fun CharSequence.replace(re: Regex, transform: (MatchResult) -> CharSequence) = re.replace(this, transform)
+fun CharSequence.replace(re: Regex, replacement: String): String = re.replace(this, replacement)
+fun CharSequence.replaceFirst(re: Regex, replacement: String): String = re.replaceFirst(this, replacement)
+fun CharSequence.findAll(re: Regex, startIndex: Int = 0) = re.findAll(this, startIndex)
+fun CharSequence.findAllWithOverlap(re: Regex, startIndex: Int = 0) = re.findAllWithOverlap(this, startIndex)
+fun CharSequence.find(re: Regex, startIndex: Int = 0) = re.find(this, startIndex)
+fun CharSequence.matchEntire(re: Regex) = re.matchEntire(this)

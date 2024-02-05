@@ -46,23 +46,154 @@ fun testSomeUreWithName() {
             0..MAX of chAnyAtAll
             + ure2
         }
+        val ure4 = ure1 or ure2 // no additional name added for whole ure4
         "constructed as expected" o {
             ure1.toIR() chkEq IR("(?<ure1>^aBcD)")
             ure2.toIR() chkEq IR("(?<ure2>BcDe$)")
             ure3.toIR() chkEq IR("(?<ure3>(?<ure1>^aBcD)[\\s\\S]*(?<ure2>BcDe$))")
+            ure4.toIR() chkEq IR("(?<ure1>^aBcD)|(?<ure2>BcDe$)")
         }
         "On compile" o {
             val re1 = ure1.compile()
             val re2 = ure2.compile()
             val re3 = ure3.compile()
+            val re4 = ure4.compile()
             "On matching re1" o {
-                // reminder: exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"
                 val found: List<MatchResult> = re1.findAll(exampleABCDEx3).toList()
                 "found twice in correct places" o {
                     found.size chkEq 2
                     found[0].value chkEq found[1].value chkEq "aBcD"
                     found[0].range chkEq 0..3
                     found[1].range chkEq 6..9
+                }
+                "captured groups by first result as expected" o {
+                    val gs = found[0].named chkSame found[0].groups
+                    gs.size chkEq 2 // note: gs[0] is always an entire match
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"] }
+                    // can't access range, because MatchGroup.range is not available on JS (so not in common)
+                    // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-match-group/range.html
+                }
+                "captured groups by second result as expected" o {
+                    val gs = found[1].named chkSame found[1].groups
+                    gs.size chkEq 2 // note: gs[0] is always an entire match
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"] }
+                }
+            }
+            "On matching re2" o {
+                val found: List<MatchResult> = re2.findAll(exampleABCDEx3).toList()
+                "found twice in correct places" o {
+                    found.size chkEq 2
+                    found[0].value chkEq found[1].value chkEq "BcDe"
+                    found[0].range chkEq 1..4
+                    found[1].range chkEq 7..10
+                }
+                "captured groups by first result as expected" o {
+                    val gs = found[0].named chkSame found[0].groups
+                    gs.size chkEq 2 // note: gs[0] is always an entire match
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure2"] }
+                }
+                "captured groups by second result as expected" o {
+                    val gs = found[1].named chkSame found[1].groups
+                    gs.size chkEq 2 // note: gs[0] is always an entire match
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure2"] }
+                }
+            }
+            "On matching re3" o {
+                val found: List<MatchResult> = re3.findAll(exampleABCDEx3).toList()
+                "found once in correct place" o {
+                    val result = found.single()
+                    result.value chkEq "aBcDe\naBcDe"
+                    result.range chkEq 0..10
+                    "captured groups as expected" o {
+                        val gs = result.named chkEq result.groups
+                        gs.size chkEq 4 // note: gs[0] is always an entire match
+                        "numbered and named groups are correct" o {
+                            gs[0].chkNN() chkEq gs[1] chkEq gs["ure3"]
+                            gs[2].chkNN() chkEq gs["ure1"]
+                            gs[3].chkNN() chkEq gs["ure2"]
+                        }
+                    }
+                }
+            }
+            "On matching re4" o {
+                val found: List<MatchResult> = re4.findAll(exampleABCDEx3).toList()
+                "found twice in correct places" o {
+                    found.size chkEq 2
+                    found[0].value chkEq found[1].value chkEq "aBcD"
+                    found[0].range chkEq 0..3
+                    found[1].range chkEq 6..9
+                }
+                "captured groups by first result as expected" o {
+                    val gs = found[0].named chkSame found[0].groups
+                    gs.size chkEq 3 // note: gs[0] is always an entire match
+                    "numbered and named groups are as expected" o {
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0]!!.value chkEq "aBcD"
+                        gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
+                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                    }
+                }
+                "captured groups by second result as expected" o {
+                    val gs = found[1].named chkSame found[1].groups
+                    gs.size chkEq 3 // note: gs[0] is always an entire match
+                    "numbered and named groups are as expected" o {
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0]!!.value chkEq "aBcD" // this is the second aBcD in the whole exampleABCDEx3
+                        gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
+                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                    }
+                }
+            }
+            "On matching re4 with overlap" o {
+                val found: List<MatchResult> = re4.findAllWithOverlap(exampleABCDEx3).toList()
+                "found 4 times in correct places" o {
+                    found.size chkEq 4
+                    found[0].value chkEq found[2].value chkEq "aBcD"
+                    found[1].value chkEq found[3].value chkEq "BcDe"
+                    found[0].range chkEq 0..3
+                    found[1].range chkEq 1..4
+                    found[2].range chkEq 6..9
+                    found[3].range chkEq 7..10
+                }
+                "captured groups by first result as expected" o {
+                    val gs = found[0].named chkSame found[0].groups
+                    gs.size chkEq 3 // note: gs[0] is always an entire match
+                    "numbered and named groups are as expected" o {
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0]!!.value chkEq "aBcD"
+                        gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
+                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                    }
+                }
+                "captured groups by second result as expected" o {
+                    val gs = found[1].named chkSame found[1].groups
+                    gs.size chkEq 3 // note: gs[0] is always an entire match
+                    "numbered and named groups are as expected" o {
+                        gs[0].chkNN() chkEq gs[2] chkEq gs["ure2"]
+                        gs[0]!!.value chkEq "BcDe"
+                        gs[1].chkNull() // so the group for first alternative is in groups collection, but it is null
+                        gs["ure1"].chkNull() // same when accessing via name (available, but null)
+                    }
+                }
+                "captured groups by third result as expected" o { // just like first
+                    val gs = found[2].named chkSame found[2].groups
+                    gs.size chkEq 3 // note: gs[0] is always an entire match
+                    "numbered and named groups are as expected" o {
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0]!!.value chkEq "aBcD" // this is the second aBcD in the whole exampleABCDEx3
+                        gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
+                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                    }
+                }
+                "captured groups by fourth result as expected" o { // just like second
+                    val gs = found[3].named chkSame found[3].groups
+                    gs.size chkEq 3 // note: gs[0] is always an entire match
+                    "numbered and named groups are as expected" o {
+                        gs[0].chkNN() chkEq gs[2] chkEq gs["ure2"]
+                        gs[0]!!.value chkEq "BcDe"
+                        gs[1].chkNull() // so the group for first alternative is in groups collection, but it is null
+                        gs["ure1"].chkNull() // same when accessing via name (available, but null)
+                    }
                 }
             }
         }

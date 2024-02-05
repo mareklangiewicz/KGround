@@ -954,12 +954,13 @@ fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = 
 
 // region [Ure Match Related Stuff]
 
-fun CharSequence.replace(ure: Ure, transform: (MatchResult) -> CharSequence) = ure.compile().replace(this, transform)
-fun CharSequence.replace(ure: Ure, replacement: String): String = ure.compile().replace(this, replacement)
-fun CharSequence.replaceFirst(ure: Ure, replacement: String): String = ure.compile().replaceFirst(this, replacement)
-fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = ure.compile().findAll(this, startIndex)
-fun CharSequence.find(ure: Ure, startIndex: Int = 0) = ure.compile().find(this, startIndex)
-fun CharSequence.matchEntire(ure: Ure) = ure.compile().matchEntire(this)
+fun CharSequence.replace(ure: Ure, transform: (MatchResult) -> CharSequence) = replace(ure.compile(), transform)
+fun CharSequence.replace(ure: Ure, replacement: String): String = replace(ure.compile(), replacement)
+fun CharSequence.replaceFirst(ure: Ure, replacement: String): String = replaceFirst(ure.compile(), replacement)
+fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = findAll(ure.compile(), startIndex)
+fun CharSequence.findAllWithOverlap(ure: Ure, startIndex: Int = 0) = findAllWithOverlap(ure.compile(), startIndex)
+fun CharSequence.find(ure: Ure, startIndex: Int = 0) = find(ure.compile(), startIndex)
+fun CharSequence.matchEntire(ure: Ure) = matchEntire(ure.compile())
 
 @NotPortableApi("Not all platforms support retreiving groups by name.")
 operator fun MatchResult.get(name: String) = namedValues[name] ?: error("Group named \"$name\" not found in MatchResult.")
