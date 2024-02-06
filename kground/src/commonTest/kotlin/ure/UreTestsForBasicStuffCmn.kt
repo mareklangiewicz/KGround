@@ -59,19 +59,19 @@ fun testSomeUreWithName() {
     }
 
     "On wrapping ure s in withName" o {
-        val ure1 = ureBOLaBcD.withName("ure1")
-        val ure2 = ureBcDeEOL.withName("ure2")
-        val ure3 = ure("ure3") { // convenient way to wrap withName when building concatenation
+        val ure1 = ureBOLaBcD.withName("nm1")
+        val ure2 = ureBcDeEOL.withName("nm2")
+        val ure3 = ure("nm3") { // convenient way to wrap withName when building concatenation
             + ure1
             0..MAX of chAnyAtAll
             + ure2
         }
         val ure4 = ure1 or ure2 // no additional name added for whole ure4
         "constructed as expected" o {
-            ure1.toIR() chkEq IR("(?<ure1>^aBcD)")
-            ure2.toIR() chkEq IR("(?<ure2>BcDe$)")
-            ure3.toIR() chkEq IR("(?<ure3>(?<ure1>^aBcD)[\\s\\S]*(?<ure2>BcDe$))")
-            ure4.toIR() chkEq IR("(?<ure1>^aBcD)|(?<ure2>BcDe$)")
+            ure1.toIR() chkEq IR("(?<nm1>^aBcD)")
+            ure2.toIR() chkEq IR("(?<nm2>BcDe$)")
+            ure3.toIR() chkEq IR("(?<nm3>(?<nm1>^aBcD)[\\s\\S]*(?<nm2>BcDe$))")
+            ure4.toIR() chkEq IR("(?<nm1>^aBcD)|(?<nm2>BcDe$)")
         }
         "On compile" o {
             val re1 = ure1.compile()
@@ -89,14 +89,14 @@ fun testSomeUreWithName() {
                 "captured groups by first result as expected" o {
                     val gs = found[0].named chkSame found[0].groups
                     gs.size chkEq 2 // note: gs[0] is always an entire match
-                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"] }
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"] }
                     // can't access range, because MatchGroup.range is not available on JS (so not in common)
                     // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-match-group/range.html
                 }
                 "captured groups by second result as expected" o {
                     val gs = found[1].named chkSame found[1].groups
                     gs.size chkEq 2 // note: gs[0] is always an entire match
-                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"] }
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"] }
                 }
             }
             "On matching re2" o {
@@ -110,12 +110,12 @@ fun testSomeUreWithName() {
                 "captured groups by first result as expected" o {
                     val gs = found[0].named chkSame found[0].groups
                     gs.size chkEq 2 // note: gs[0] is always an entire match
-                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure2"] }
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm2"] }
                 }
                 "captured groups by second result as expected" o {
                     val gs = found[1].named chkSame found[1].groups
                     gs.size chkEq 2 // note: gs[0] is always an entire match
-                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["ure2"] }
+                    "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm2"] }
                 }
             }
             "On matching re3" o {
@@ -128,9 +128,17 @@ fun testSomeUreWithName() {
                         val gs = result.named chkEq result.groups
                         gs.size chkEq 4 // note: gs[0] is always an entire match
                         "numbered and named groups are correct" o {
-                            gs[0].chkNN() chkEq gs[1] chkEq gs["ure3"]
-                            gs[2].chkNN() chkEq gs["ure1"]
-                            gs[3].chkNN() chkEq gs["ure2"]
+                            gs[0].chkNN() chkEq gs[1] chkEq gs["nm3"]
+                            gs[2].chkNN() chkEq gs["nm1"]
+                            gs[3].chkNN() chkEq gs["nm2"]
+                        }
+                        "access named groups values with property delegations" o {
+                            val nm1 by result
+                            val nm2 by result
+                            val nm3 by result
+                            nm1 chkEq gs["nm1"]!!.value
+                            nm2 chkEq gs["nm2"]!!.value
+                            nm3 chkEq gs["nm3"]!!.value
                         }
                     }
                 }
@@ -147,20 +155,20 @@ fun testSomeUreWithName() {
                     val gs = found[0].named chkSame found[0].groups
                     gs.size chkEq 3 // note: gs[0] is always an entire match
                     "numbered and named groups are as expected" o {
-                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
                         gs[0]!!.value chkEq "aBcD"
                         gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
-                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                        gs["nm2"].chkNull() // same when accessing via name (available, but null)
                     }
                 }
                 "captured groups by second result as expected" o {
                     val gs = found[1].named chkSame found[1].groups
                     gs.size chkEq 3 // note: gs[0] is always an entire match
                     "numbered and named groups are as expected" o {
-                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
                         gs[0]!!.value chkEq "aBcD" // this is the second aBcD in the whole exampleABCDEx3
                         gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
-                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                        gs["nm2"].chkNull() // same when accessing via name (available, but null)
                     }
                 }
             }
@@ -179,40 +187,40 @@ fun testSomeUreWithName() {
                     val gs = found[0].named chkSame found[0].groups
                     gs.size chkEq 3 // note: gs[0] is always an entire match
                     "numbered and named groups are as expected" o {
-                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
                         gs[0]!!.value chkEq "aBcD"
                         gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
-                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                        gs["nm2"].chkNull() // same when accessing via name (available, but null)
                     }
                 }
                 "captured groups by second result as expected" o {
                     val gs = found[1].named chkSame found[1].groups
                     gs.size chkEq 3 // note: gs[0] is always an entire match
                     "numbered and named groups are as expected" o {
-                        gs[0].chkNN() chkEq gs[2] chkEq gs["ure2"]
+                        gs[0].chkNN() chkEq gs[2] chkEq gs["nm2"]
                         gs[0]!!.value chkEq "BcDe"
                         gs[1].chkNull() // so the group for first alternative is in groups collection, but it is null
-                        gs["ure1"].chkNull() // same when accessing via name (available, but null)
+                        gs["nm1"].chkNull() // same when accessing via name (available, but null)
                     }
                 }
                 "captured groups by third result as expected" o { // just like first
                     val gs = found[2].named chkSame found[2].groups
                     gs.size chkEq 3 // note: gs[0] is always an entire match
                     "numbered and named groups are as expected" o {
-                        gs[0].chkNN() chkEq gs[1] chkEq gs["ure1"]
+                        gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
                         gs[0]!!.value chkEq "aBcD" // this is the second aBcD in the whole exampleABCDEx3
                         gs[2].chkNull() // so the group for second alternative is in groups collection, but it is null
-                        gs["ure2"].chkNull() // same when accessing via name (available, but null)
+                        gs["nm2"].chkNull() // same when accessing via name (available, but null)
                     }
                 }
                 "captured groups by fourth result as expected" o { // just like second
                     val gs = found[3].named chkSame found[3].groups
                     gs.size chkEq 3 // note: gs[0] is always an entire match
                     "numbered and named groups are as expected" o {
-                        gs[0].chkNN() chkEq gs[2] chkEq gs["ure2"]
+                        gs[0].chkNN() chkEq gs[2] chkEq gs["nm2"]
                         gs[0]!!.value chkEq "BcDe"
                         gs[1].chkNull() // so the group for first alternative is in groups collection, but it is null
-                        gs["ure1"].chkNull() // same when accessing via name (available, but null)
+                        gs["nm1"].chkNull() // same when accessing via name (available, but null)
                     }
                 }
             }
