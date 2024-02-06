@@ -15,13 +15,13 @@ fun testSomeBasicCharClassIRs() {
 
     "On some already created UreCharExact vals" o {
         "chSlash str is just slash" o { chSlash.str chkEq "/" }
-        "chSlash IR is just slash" o { chSlash.toIR() chkEq IR("/") }
+        "chSlash IR is just slash" o { chSlash.toIR().str chkEq "/" }
         "chBackSlash str is just backslash" o { chBackSlash.str chkEq "\\" }
-        "chBackSlash IR is quoted" o { chBackSlash.toIR() chkEq IR("\\\\") }
+        "chBackSlash IR is quoted" o { chBackSlash.toIR().str chkEq "\\\\" }
         "chTab str is just actual tab char code 9" o { chTab.str chkEq "\t" }
-        "chTab IR is special t quoted" o { chTab.toIR() chkEq IR("\\t") }
+        "chTab IR is special t quoted" o { chTab.toIR().str chkEq "\\t" }
         "chAlert str is just actual alert char code 7" o { chTab.str.single().code chkEq 9 }
-        "chAlert IR is special a quoted" o { chAlert.toIR() chkEq IR("\\a") }
+        "chAlert IR is special a quoted" o { chAlert.toIR().str chkEq "\\a" }
     }
 
     "On fun ch constructing UreCharExact" o {
@@ -29,7 +29,7 @@ fun testSomeBasicCharClassIRs() {
         "works correctly with single backslash" o {
             val ure = ch("\\") // using the version with string arg to be analogous to next tests with surrogate pairs
             ure.str chkEq "\\" // it is remembering just one char - no quoting here yet
-            ure.toIR() chkEq IR("\\\\") // it is quoting (if necessary) when generating IR
+            ure.toIR().str chkEq "\\\\" // it is quoting (if necessary) when generating IR
         }
         "On copyright character" o {
             val copyRight = "\u00a9"

@@ -31,8 +31,8 @@ fun testUreBasicSanity() {
     "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(exampleABCDEx3).count() chkEq exampleABCDEx3.length - 2 }
     "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(exampleABCDEx3).count() chkEq exampleABCDEx3.length }
     "example ure s constructed as expected" o {
-        ureBOLaBcD.toIR() chkEq IR("^aBcD")
-        ureBcDeEOL.toIR() chkEq IR("BcDe\$")
+        ureBOLaBcD.toIR().str chkEq "^aBcD"
+        ureBcDeEOL.toIR().str chkEq "BcDe\$"
     }
 }
 
