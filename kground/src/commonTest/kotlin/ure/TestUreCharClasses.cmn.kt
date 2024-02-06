@@ -6,7 +6,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.uspek.*
 
-fun testSomeUreCharClasses() {
+fun testUreCharClasses() {
     testSomeBasicCharClassIRs()
     testSomeUreCharClassPairsEtc()
 }

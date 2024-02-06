@@ -5,7 +5,7 @@ import pl.mareklangiewicz.uspek.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class UreTestsCmn {
+class TestUreCmn {
 
     init { "INIT ${this::class.simpleName}".teePP }
 
@@ -17,8 +17,8 @@ class UreTestsCmn {
 
 fun testUreCmn() {
     testStdLibRegexIssueJvm()
-    testSomeUreBasicStuff()
-    testSomeUreCharClasses()
+    testUreBasicStuff()
+    testUreCharClasses()
 }
 
 /** https://youtrack.jetbrains.com/issue/KT-65531/Regex-content-can-change-Regex.options */

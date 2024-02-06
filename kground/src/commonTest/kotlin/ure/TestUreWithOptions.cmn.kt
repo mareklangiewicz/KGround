@@ -7,7 +7,7 @@ import kotlin.text.RegexOption.*
 
 
 @OptIn(DelicateApi::class, NotPortableApi::class, SecondaryApi::class)
-fun testUreWithDifferentOptions() {
+fun testUreWithOptions() {
 
     "On compile with default options" o {
         val reBOLaBcD = ureBOLaBcD.compile()
