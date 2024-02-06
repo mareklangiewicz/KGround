@@ -4,6 +4,7 @@ import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.chkTrue
 
 
 var MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
@@ -19,12 +20,12 @@ fun updateKGroundResourcesSymLinks(log: (Any?) -> Unit = ::println) = SYSTEM.run
     // remove all tmpl symlinks (but throw if other unexpected file found)
     listRecursively(resourcesAbsPath).forEach {
         if (metadata(it).isDirectory) return@forEach
-        check(it.isTmplSymlink) { "Unexpected file in resources: $it" }
+        it.isTmplSymlink.chkTrue { "Unexpected file in resources: $it" }
         delete(it)
     }
     // remove all dirs (but throw if non directory still found)
     list(resourcesAbsPath).forEach {
-        check(metadata(it).isDirectory) { "Some non directory left in resources: $it" }
+        metadata(it).isDirectory.chkTrue { "Some non directory left in resources: $it" }
         deleteRecursively(it)
     }
 

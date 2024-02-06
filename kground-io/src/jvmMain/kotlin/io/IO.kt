@@ -4,6 +4,9 @@ import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.FileSystem.Companion.SYSTEM_TEMPORARY_DIRECTORY
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.kground.bad
+import pl.mareklangiewicz.kground.req
+import pl.mareklangiewicz.kground.reqSame
 import kotlin.math.*
 import kotlin.random.*
 
@@ -15,7 +18,7 @@ import kotlin.random.*
 // TODO_later: analyze Okio listRecursively more, before possibly implementing any own version
 // (traversal order, infinite loops with symlinks, etc.).
 fun FileSystem.findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Path> {
-    require(maxDepth >= 0)
+    req(maxDepth >= 0)
     val md = metadata(path)
     return when {
         md.isRegularFile -> sequenceOf(path)
@@ -40,8 +43,8 @@ fun FileSystem.processEachFile(
     outputRoot: Path? = null,
     process: (input: Path, output: Path?, content: String) -> String?,
 ) {
-    require(inputRoot.isAbsolute)
-    require(outputRoot?.isAbsolute ?: true)
+    req(inputRoot.isAbsolute)
+    req(outputRoot?.isAbsolute != false)
     findAllFiles(inputRoot).forEach { inputPath ->
         val outputPath = if (outputRoot == null) null else outputRoot / inputPath.asRelativeTo(inputRoot)
         processFile(inputPath, outputPath) { content -> process(inputPath, outputPath, content) }
@@ -50,12 +53,12 @@ fun FileSystem.processEachFile(
 
 // FIXME: okio has Path.relativeTo - is it the same?
 fun Path.asRelativeTo(path: Path): Path {
-    require(this.isAbsolute)
-    require(path.isAbsolute)
+    req(this.isAbsolute)
+    req(path.isAbsolute)
     return when {
         this == path -> ".".toPath()
         parent == path -> this.name.toPath()
-        parent == null -> error("Can not find $path in $this")
+        parent == null -> bad { "Can not find $path in $this" }
         else -> parent!!.asRelativeTo(path) / name
     }
 }
@@ -109,7 +112,7 @@ fun FileSystem.withTempDir(tempDirPrefix: String, code: FileSystem.(tempDir: Pat
 }
 
 fun FileSystem.createTempDir(tempDirPrefix: String): Path {
-    require(this === SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
+    reqSame(SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
     return createUniqueDir(SYSTEM_TEMPORARY_DIRECTORY, tempDirPrefix)
 }
 
@@ -117,7 +120,7 @@ fun FileSystem.createUniqueDir(parentDir: Path, namePrefix: String = "", nameSuf
     (parentDir / Random.name(namePrefix, nameSuffix)).also { createDirectory(it, mustCreate = true) }
 
 fun FileSystem.openTempFile(namePrefix: String = "", nameSuffix: String = ""): FileHandle {
-    require(this === SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
+    reqSame(SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
     return openUniqueFile(SYSTEM_TEMPORARY_DIRECTORY, namePrefix, nameSuffix)
 }
 

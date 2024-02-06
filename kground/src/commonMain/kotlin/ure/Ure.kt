@@ -261,7 +261,7 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
             true to false -> "?!"
             false to true -> "?<="
             false to false -> "?<!"
-            else -> error("Impossible case")
+            else -> bad { "Impossible case" }
         }.asIR
     @OptIn(DelicateApi::class, NotPortableApi::class)
     operator fun not() = UreLookGroup(content, ahead, !positive)
@@ -270,8 +270,8 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
 
 data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : UreAtomic {
     init {
-        nr == null || name == null || error("Can not reference capturing group by both nr ($nr) and name ($name)")
-        nr == null && name == null && error("Either nr or name has to be provided for the group reference")
+        nr == null || name == null || bad { "Can not reference capturing group by both nr ($nr) and name ($name)" }
+        nr == null && name == null && bad { "Either nr or name has to be provided for the group reference" }
     }
 
     override fun toIR(): IR = if (nr != null) "\\$nr".asIR else "\\k<$name>".asIR
@@ -291,7 +291,7 @@ data class UreQuantifier internal constructor(
     val possessive: Boolean = false,
 ) : UreNonCapturing {
     init {
-        reluctant && possessive && error("UreQuantif can't be reluctant and possessive at the same time")
+        reluctant && possessive && bad { "UreQuantif can't be reluctant and possessive at the same time" }
     }
 
     val greedy get() = !reluctant && !possessive
@@ -543,7 +543,7 @@ infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
 operator fun Ure.not(): Ure = when (this) {
     is UreWithRawIR -> when (this) {
         // TODO_someday: Can I negate some common raw ures?
-        else -> error("This UreWithRawIR can not be negated")
+        else -> bad { "This UreWithRawIR can not be negated" }
     }
     is UreCharExact -> !chOfAny(this)
     is UreAnchorPreDef -> !this
@@ -554,16 +554,16 @@ operator fun Ure.not(): Ure = when (this) {
     is UreCharClassProp -> !this
     is UreGroup -> when (this) {
         is UreLookGroup -> !this
-        else -> error("Unsupported UreGroup for negation: ${this::class.simpleName}")
+        else -> bad { "Unsupported UreGroup for negation: ${this::class.simpleName}" }
     }
 
-    is UreGroupRef -> error("UreGroupRef can not be negated")
-    is UreConcatenation -> error("UreConcatenation can not be negated")
-    is UreQuantifier -> error("UreQuantifier can not be negated")
-    is UreQuote -> error("UreQuote can not be negated")
-    is UreText -> error("UreText can not be negated")
-    is UreAlternation -> error("UreAlternation can not be negated")
-    is UreChangeOptions -> error("UreChangeOptions can not be negated")
+    is UreGroupRef -> bad { "UreGroupRef can not be negated" }
+    is UreConcatenation -> bad { "UreConcatenation can not be negated" }
+    is UreQuantifier -> bad { "UreQuantifier can not be negated" }
+    is UreQuote -> bad { "UreQuote can not be negated" }
+    is UreText -> bad { "UreText can not be negated" }
+    is UreAlternation -> bad { "UreAlternation can not be negated" }
+    is UreChangeOptions -> bad { "UreChangeOptions can not be negated" }
 }
 // TODO_someday: experiment more with different operators overloading,
 //  especially indexed access operators and invoke operators.
@@ -963,7 +963,7 @@ fun CharSequence.find(ure: Ure, startIndex: Int = 0) = find(ure.compile(), start
 fun CharSequence.matchEntire(ure: Ure) = matchEntire(ure.compile())
 
 @NotPortableApi("Not guaranteed to work on all platforms.") // but it is currently working on platforms I unit-test.
-operator fun MatchResult.get(name: String) = namedValues[name] ?: error("Group named \"$name\" not found in MatchResult.")
+operator fun MatchResult.get(name: String) = namedValues[name] ?: bad { "Group named \"$name\" not found in MatchResult." }
 
 @NotPortableApi("Not guaranteed to work on all platforms.") // but it is currently working on platforms I unit-test.
 operator fun MatchResult.getValue(thisObj: Any?, property: KProperty<*>) = get(property.name)
@@ -984,15 +984,15 @@ val MatchResult.namedValues: Map<String, String?> get() = MatchNamedValues(named
 
 @JvmInline
 value class MatchNamedValues internal constructor(private val groups: MatchNamedGroupCollection): Map<String, String?> {
-    override val entries: Set<Map.Entry<String, String?>> get() = error("Operation not implemented.")
-    override val keys: Set<String> get() = error("Operation not implemented.")
+    override val entries: Set<Map.Entry<String, String?>> get() = bad { "Operation not implemented." }
+    override val keys: Set<String> get() = bad { "Operation not implemented." }
     override val size: Int get() = groups.size
     override val values: Collection<String?> get() = groups.map { it?.value }
 
     override fun isEmpty(): Boolean = groups.isEmpty()
     override fun get(key: String): String? = groups[key]?.value
-    override fun containsValue(value: String?): Boolean = error("Operation not implemented.")
-    override fun containsKey(key: String): Boolean = error("Operation not implemented.")
+    override fun containsValue(value: String?): Boolean = bad { "Operation not implemented." }
+    override fun containsKey(key: String): Boolean = bad { "Operation not implemented." }
 }
 
 // endregion [Ure Match Related Stuff]

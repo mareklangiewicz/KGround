@@ -65,13 +65,13 @@ private val regionsInfos = listOf(
     info(labelFullMppApp, pathMppApp),
 )
 
-private operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: error("Unknown region label: $label")
+private operator fun List<RegionInfo>.get(label: String) = find { it.label == label } ?: bad { "Unknown region label: $label" }
 
 @NotPortableApi
 private fun knownRegion(regionLabel: String): String {
     val inputResPath = regionsInfos[regionLabel].pathInRes
     val ureWithRegion = ureWithSpecialRegion(regionLabel)
-    val mr = RESOURCES.readAndMatchUre(inputResPath, ureWithRegion) ?: error("No region [$regionLabel] in $inputResPath")
+    val mr = RESOURCES.readAndMatchUre(inputResPath, ureWithRegion) ?: bad { "No region [$regionLabel] in $inputResPath" }
     return mr["region"]
 }
 
@@ -180,10 +180,10 @@ private fun FileSystem.checkCustomRegion(
     log: (Any?) -> Unit = ::println,
 ) {
     val ureWithRegion = ureWithSpecialRegion(regionLabel)
-    require(ureWithRegion.compile().matches(regionExpected)) { "regionExpected doesn't match region [$regionLabel]" }
+    ureWithRegion.compile().matches(regionExpected).reqTrue { "regionExpected doesn't match region [$regionLabel]" }
     val region by readAndMatchUre(outputPath, ureWithRegion)
-        ?: if (failIfNotFound) error("Region [$regionLabel] not found in $outputPath") else return
-    check(region.trimEnd('\n') == regionExpected.trimEnd('\n')) {
+        ?: if (failIfNotFound) bad { "Region [$regionLabel] not found in $outputPath" } else return
+    region.trimEnd('\n').chkEq(regionExpected.trimEnd('\n')) {
         if (verbose) {
             log("Region: [$regionLabel] in File: $outputPath was modified.")
             verboseCheckFailedHint?.let { log(it) }

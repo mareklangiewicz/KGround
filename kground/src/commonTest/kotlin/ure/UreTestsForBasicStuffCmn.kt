@@ -12,7 +12,7 @@ val ureBcDeEOL = ureText("BcDe") then atEOLine
 
 
 fun testSomeUreBasicStuff() {
-    testSomeUreSanity()
+    testSomeUreBasicSanity()
     testSomeUreWithName()
     testUreWithDifferentOptions()
     testUreQuantifAndAtomic()
@@ -23,7 +23,7 @@ fun testSomeUreBasicStuff() {
 }
 
 @OptIn(DelicateApi::class)
-fun testSomeUreSanity() {
+fun testSomeUreBasicSanity() {
     // some example very basic sanity tests
     "chDot compiled pattern is quoted dot" o { chDot.compile().pattern chkEq "\\." }
     "chAnyInLine compiled pattern just a dot" o { chAnyInLine.compile().pattern chkEq "." }

@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.kground.req
 
 
 @DelicateApi("Very basic email Ure. It will not match many strange but correct emails. Can also match some incorrect.")
@@ -110,8 +111,8 @@ fun Ure.withOptWhatevaAroundInLine(reluctant: Boolean = true, allowBefore: Boole
     withOptWhatevaAround(reluctant, inLine = true, allowBefore, allowAfter)
 
 fun Ure.commentedOut(inLine: Boolean = false, traditional: Boolean = true, kdoc: Boolean = false) = ure {
-    require(inLine || traditional) { "Non traditional comments are only single line" }
-    require(!kdoc || traditional) { "Non traditional comments can't be used as kdoc" }
+    req(inLine || traditional) { "Non traditional comments are only single line" }
+    req(!kdoc || traditional) { "Non traditional comments can't be used as kdoc" }
     + when {
         kdoc -> ureText("/**")
         traditional -> ureText("/*")

@@ -16,6 +16,8 @@ import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.bad
+import pl.mareklangiewicz.kground.chkEq
 
 private val myFork = expr { "${github.repository_owner} == 'langara'" }
 
@@ -128,7 +130,7 @@ fun FileSystem.checkMyDWorkflowsInProject(
             else { if (verbose) log(e.message); continue }
         }
         val contentActual = readUtf8(file)
-        check(contentExpected == contentActual) {
+        contentActual.chkEq(contentExpected) {
             val summary = "Workflow $dname was modified."
             if (verbose) log("ERR project:${projectPath.name}: $summary")
             summary
@@ -170,7 +172,7 @@ fun FileSystem.injectDWorkflowsToProject(
 internal fun defaultWorkflow(dname: String) = when (dname) {
     "dbuild" -> defaultBuildWorkflow()
     "drelease" -> defaultReleaseWorkflow()
-    else -> error("Unknown default workflow dname: $dname")
+    else -> bad { "Unknown default workflow dname: $dname" }
 }
 
 private fun defaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.UbuntuLatest)) =
