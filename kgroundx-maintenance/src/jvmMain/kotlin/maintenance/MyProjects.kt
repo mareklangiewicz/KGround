@@ -55,7 +55,7 @@ private fun FileSystem.readAndFindUreLineContentWithSomeLinesAround(
     ureLineContent.withSomeLinesAround(
         maxLinesBefore = maxLinesAround,
         maxLinesAfter = maxLinesAround
-    ).compile().find(fileContent)
+    ).findFirstOrNull(fileContent)
 }
 
 @DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesBefore < 3.")

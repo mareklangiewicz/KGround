@@ -531,7 +531,7 @@ fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolea
 fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) =
     if (boundaryBefore == null && boundaryAfter == null) this else ure {
         boundaryBefore?.let { + it }
-        + this@withBoundaries // it should flatten if this is UreConcatenation (see UreConcatenation.toIR()) TODO_later: doublecheck
+        + this@withBoundaries // it should flatten if this is UreConcatenation (see UreConcatenation.toIR()) TODO NOW: doublecheck
         boundaryAfter?.let { + it }
     }
 
@@ -957,13 +957,73 @@ fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = 
 
 // region [Ure Match Related Stuff]
 
-fun CharSequence.replace(ure: Ure, transform: (MatchResult) -> CharSequence) = replace(ure.compile(), transform)
-fun CharSequence.replace(ure: Ure, replacement: String): String = replace(ure.compile(), replacement)
-fun CharSequence.replaceFirst(ure: Ure, replacement: String): String = replaceFirst(ure.compile(), replacement)
-fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = findAll(ure.compile(), startIndex)
-fun CharSequence.findAllWithOverlap(ure: Ure, startIndex: Int = 0) = findAllWithOverlap(ure.compile(), startIndex)
-fun CharSequence.find(ure: Ure, startIndex: Int = 0) = find(ure.compile(), startIndex)
-fun CharSequence.matchEntire(ure: Ure) = matchEntire(ure.compile())
+fun Ure.matchEntireOrNull(input: CharSequence) = compile().matchEntireOrNull(input)
+
+fun Ure.matchEntireOrThrow(input: CharSequence) = compile().matchEntireOrThrow(input)
+
+fun Ure.matchAtOrNull(input: CharSequence, index: Int) = compile().matchAtOrNull(input, index)
+
+fun Ure.matchAtOrThrow(input: CharSequence, index: Int) = compile().matchAtOrThrow(input, index)
+
+fun Ure.findFirstOrNull(input: CharSequence, startIndex: Int = 0) = compile().findFirstOrNull(input, startIndex)
+
+fun Ure.findFirst(input: CharSequence, startIndex: Int = 0) = compile().findFirst(input, startIndex)
+
+fun Ure.findSingle(input: CharSequence, startIndex: Int = 0) = compile().findSingle(input, startIndex)
+
+fun Ure.findSingleWithOverlap(input: CharSequence, startIndex: Int = 0) =
+    compile().findSingleWithOverlap(input, startIndex)
+
+fun Ure.findAll(input: CharSequence, startIndex: Int = 0) = compile().findAll(input, startIndex)
+
+fun Ure.findAllWithOverlap(input: CharSequence, startIndex: Int = 0) = compile().findAllWithOverlap(input, startIndex)
+
+fun Ure.replaceFirstOrNone(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
+    compile().replaceFirstOrNone(input, replacement, literalReplacement)
+
+fun Ure.replaceAll(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
+    compile().replaceAll(input, replacement, literalReplacement)
+
+fun Ure.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequence): String =
+    compile().replaceAll(input, transform)
+
+fun Ure.replaceSingle(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
+    compile().replaceSingle(input, replacement, literalReplacement)
+
+
+fun CharSequence.matchEntireOrNull(ure: Ure) = ure.matchEntireOrNull(this)
+
+fun CharSequence.matchEntireOrThrow(ure: Ure) = ure.matchEntireOrThrow(this)
+
+fun CharSequence.matchAtOrNull(ure: Ure, index: Int) = ure.matchAtOrNull(this, index)
+
+fun CharSequence.matchAtOrThrow(ure: Ure, index: Int) = ure.matchAtOrThrow(this, index)
+
+fun CharSequence.findFirstOrNull(ure: Ure, startIndex: Int = 0) = ure.findFirstOrNull(this, startIndex)
+
+fun CharSequence.findFirst(ure: Ure, startIndex: Int = 0) = ure.findFirst(this, startIndex)
+
+fun CharSequence.findSingle(ure: Ure, startIndex: Int = 0) = ure.findSingle(this, startIndex)
+
+fun CharSequence.findSingleWithOverlap(ure: Ure, startIndex: Int = 0) = ure.findSingleWithOverlap(this, startIndex)
+
+fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = ure.findAll(this, startIndex)
+
+fun CharSequence.findAllWithOverlap(ure: Ure, startIndex: Int = 0) = ure.findAllWithOverlap(this, startIndex)
+
+fun CharSequence.replaceFirstOrNone(ure: Ure, replacement: String, literalReplacement: Boolean = false): String =
+    ure.replaceFirstOrNone(this, replacement, literalReplacement)
+
+fun CharSequence.replaceAll(ure: Ure, replacement: String, literalReplacement: Boolean = false): String =
+    ure.replaceAll(this, replacement, literalReplacement)
+
+fun CharSequence.replaceAll(ure: Ure, transform: (MatchResult) -> CharSequence): String =
+    ure.replaceAll(this, transform)
+
+fun CharSequence.replaceSingle(ure: Ure, replacement: String, literalReplacement: Boolean = false): String =
+    ure.replaceSingle(this, replacement, literalReplacement)
+
+
 
 @NotPortableApi("Not guaranteed to work on all platforms.") // but it is currently working on platforms I unit-test.
 operator fun MatchResult.get(name: String) = namedValues[name] ?: bad { "Group named \"$name\" not found in MatchResult." }

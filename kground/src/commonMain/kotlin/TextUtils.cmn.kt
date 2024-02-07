@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kground
 
 import pl.mareklangiewicz.bad.*
+import kotlin.text.Regex.Companion.escapeReplacement
 
 
 // region [Char Related Stuff]
@@ -58,18 +59,41 @@ fun String.removeReqSuffix(suffix: CharSequence): String {
     return removeSuffix(suffix)
 }
 
+/** More explicit name for stdlib [Regex.matchEntire] */
+fun Regex.matchEntireOrNull(input: CharSequence): MatchResult? = matchEntire(input)
 
-/** @throws BadArgErr if not found or found more than one */
-fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult {
-    val r1 = find(input, startIndex).reqNN { "this regex: \"$this\" is nowhere in input" }
-    val r2 = find(input, r1.range.last + 1)
-    r2.reqNull { "this regex: \"$this\" has been found second time at idx: ${r2!!.range.first}" }
-    return r1
-}
+fun Regex.matchEntireOrThrow(input: CharSequence): MatchResult? =
+    matchEntireOrNull(input).reqNN { "this regex: \"$this\" does not match entire input" }
 
-/** @throws BadArgErr if not found or found more than one */
-fun Regex.replaceSingle(input: CharSequence, replacement: CharSequence, startIndex: Int = 0): CharSequence =
-    input.replaceRange(findSingle(input, startIndex).range, replacement)
+/** More explicit name for stdlib [Regex.matchAt] */
+fun Regex.matchAtOrNull(input: CharSequence, index: Int): MatchResult? = matchAt(input, index)
+
+fun Regex.matchAtOrThrow(input: CharSequence, index: Int): MatchResult =
+    matchAtOrNull(input, index).reqNN { "this regex: \"$this\" does not match input at index: $index" }
+
+/** More explicit name for stdlib [Regex.find] */
+fun Regex.findFirstOrNull(input: CharSequence, startIndex: Int = 0): MatchResult? = find(input, startIndex)
+
+/** @throws BadArgErr if not found */
+fun Regex.findFirst(input: CharSequence, startIndex: Int = 0): MatchResult =
+    findFirstOrNull(input, startIndex).reqNN { "this regex: \"$this\" is nowhere in input" }
+
+/**
+ * @throws BadArgErr if not found or found more than one
+ * Does NOT check for overlapping matches.
+ */
+fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult =
+    findFirst(input, startIndex).also {
+        val second = findFirstOrNull(input, it.range.last + 1)
+        second.reqNull { "this regex: \"$this\" has been found second time at idx: ${second!!.range.first}" }
+    }
+
+/** @throws BadArgErr if not found or found more than one. Even if the second one overlaps with the first one. */
+fun Regex.findSingleWithOverlap(input: CharSequence, startIndex: Int = 0): MatchResult =
+    findFirst(input, startIndex).also {
+        val second = findFirstOrNull(input, it.range.first + 1)
+        second.reqNull { "this regex: \"$this\" has been found second time at idx: ${second!!.range.first}" }
+    }
 
 /**
  * Note: Even with this overlapping version, the first match starting at particular position wins,
@@ -82,10 +106,61 @@ fun Regex.findAllWithOverlap(input: CharSequence, startIndex: Int = 0): Sequence
 }
 
 
-fun CharSequence.replace(re: Regex, transform: (MatchResult) -> CharSequence) = re.replace(this, transform)
-fun CharSequence.replace(re: Regex, replacement: String): String = re.replace(this, replacement)
-fun CharSequence.replaceFirst(re: Regex, replacement: String): String = re.replaceFirst(this, replacement)
+/** More explicit name for stdlib [Regex.replaceFirst] with optional escaping for literal replacements. */
+fun Regex.replaceFirstOrNone(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
+    replaceFirst(input, if (literalReplacement) escapeReplacement(replacement) else replacement)
+
+/**
+ * More explicit name for stdlib [Regex.replace] with optional escaping for literal replacements.
+ * No overlapping here - searching with overlap wouldn't have much sense during replacing.
+ */
+fun Regex.replaceAll(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
+    replace(input, if (literalReplacement) escapeReplacement(replacement) else replacement)
+
+/**
+ * More explicit name for stdlib [Regex.replace] with custom [transform] fun.
+ * No [Regex.escapeReplacement] called here. User has to do it manually inside [transform] if needed.
+ * No overlapping here - searching with overlap wouldn't have much sense during replacing.
+ */
+fun Regex.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequence): String =
+    replace(input, transform)
+
+/** @throws BadArgErr if not found or found more than one */
+fun Regex.replaceSingle(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
+    findSingle(input).range.let {
+        if (literalReplacement) input.replaceRange(it, replacement).toString() // faster replacement when literal
+        else replaceFirstOrNone(input, replacement, false) // have to search again even we know we will find one
+    }
+
+
+fun CharSequence.matchEntireOrNull(re: Regex) = re.matchEntireOrNull(this)
+
+fun CharSequence.matchEntireOrThrow(re: Regex) = re.matchEntireOrThrow(this)
+
+fun CharSequence.matchAtOrNull(re: Regex, index: Int) = re.matchAtOrNull(this, index)
+
+fun CharSequence.matchAtOrThrow(re: Regex, index: Int) = re.matchAtOrThrow(this, index)
+
+fun CharSequence.findFirstOrNull(re: Regex, startIndex: Int = 0) = re.findFirstOrNull(this, startIndex)
+
+fun CharSequence.findFirst(re: Regex, startIndex: Int = 0) = re.findFirst(this, startIndex)
+
+fun CharSequence.findSingle(re: Regex, startIndex: Int = 0) = re.findSingle(this, startIndex)
+
+fun CharSequence.findSingleWithOverlap(re: Regex, startIndex: Int = 0) = re.findSingleWithOverlap(this, startIndex)
+
 fun CharSequence.findAll(re: Regex, startIndex: Int = 0) = re.findAll(this, startIndex)
+
 fun CharSequence.findAllWithOverlap(re: Regex, startIndex: Int = 0) = re.findAllWithOverlap(this, startIndex)
-fun CharSequence.find(re: Regex, startIndex: Int = 0) = re.find(this, startIndex)
-fun CharSequence.matchEntire(re: Regex) = re.matchEntire(this)
+
+fun CharSequence.replaceFirstOrNone(re: Regex, replacement: String, literalReplacement: Boolean = false): String =
+    re.replaceFirstOrNone(this, replacement, literalReplacement)
+
+fun CharSequence.replaceAll(re: Regex, replacement: String, literalReplacement: Boolean = false): String =
+    re.replaceAll(this, replacement, literalReplacement)
+
+fun CharSequence.replaceAll(re: Regex, transform: (MatchResult) -> CharSequence): String =
+    re.replaceAll(this, transform)
+
+fun CharSequence.replaceSingle(re: Regex, replacement: String, literalReplacement: Boolean = false): String =
+    re.replaceSingle(this, replacement, literalReplacement)

@@ -7,6 +7,7 @@ import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.replaceSingle
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.find.*
@@ -34,7 +35,7 @@ private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
         .reducedMap {
             // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl
             val regex = Regex("/settings\\.gradle(\\.kts)?\$")
-            map { regex.replace(it, "").toPath() }
+            map { regex.replaceSingle(it, "").toPath() }
         }
         .exec(SYS)
 
