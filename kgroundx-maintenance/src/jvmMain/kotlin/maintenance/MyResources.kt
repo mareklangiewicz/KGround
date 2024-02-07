@@ -4,7 +4,7 @@ import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kground.chkTrue
+import pl.mareklangiewicz.bad.*
 
 
 var MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()

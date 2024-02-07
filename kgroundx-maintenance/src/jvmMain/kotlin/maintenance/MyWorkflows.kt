@@ -16,8 +16,7 @@ import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kground.bad
-import pl.mareklangiewicz.kground.chkEq
+import pl.mareklangiewicz.bad.*
 
 private val myFork = expr { "${github.repository_owner} == 'langara'" }
 

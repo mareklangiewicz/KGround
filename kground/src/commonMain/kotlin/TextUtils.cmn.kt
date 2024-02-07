@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kground
 
+import pl.mareklangiewicz.bad.*
+
 
 // region [Char Related Stuff]
 
@@ -69,6 +71,11 @@ fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult {
 fun Regex.replaceSingle(input: CharSequence, replacement: CharSequence, startIndex: Int = 0): CharSequence =
     input.replaceRange(findSingle(input, startIndex).range, replacement)
 
+/**
+ * Note: Even with this overlapping version, the first match starting at particular position wins,
+ * (no additional results starting from the same place). It's like the whole thing is always "atomic".
+ * Actual atomic/possessive/reluctant constructs matter INSIDE every single matching, not across MatchResults.
+ */
 fun Regex.findAllWithOverlap(input: CharSequence, startIndex: Int = 0): Sequence<MatchResult> {
     req(startIndex in 0..input.length) { "startIdx: $startIndex is not in bounds: 0..${input.length}" }
     return generateSequence({ find(input, startIndex) },  { find(input, it.range.first + 1) })

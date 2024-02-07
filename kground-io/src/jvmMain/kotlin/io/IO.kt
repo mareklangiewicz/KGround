@@ -4,9 +4,7 @@ import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.FileSystem.Companion.SYSTEM_TEMPORARY_DIRECTORY
 import okio.Path.Companion.toPath
-import pl.mareklangiewicz.kground.bad
-import pl.mareklangiewicz.kground.req
-import pl.mareklangiewicz.kground.reqSame
+import pl.mareklangiewicz.bad.*
 import kotlin.math.*
 import kotlin.random.*
 

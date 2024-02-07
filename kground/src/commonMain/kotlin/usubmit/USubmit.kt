@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.kground.usubmit
 
-import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.bad.*
 import kotlin.jvm.*
 
 fun interface USubmit {

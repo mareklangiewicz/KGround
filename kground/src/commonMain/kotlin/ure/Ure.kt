@@ -3,8 +3,8 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kground.isAsciiPrintable
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
 import kotlin.text.RegexOption.*
@@ -939,6 +939,9 @@ fun Ure.timesMin(min: Int, reluctant: Boolean = false, possessive: Boolean = fal
 
 fun Ure.timesMax(max: Int, reluctant: Boolean = false, possessive: Boolean = false) =
     timesMinMax(0, max, reluctant, possessive)
+
+fun Ure.timesAny(reluctant: Boolean = false, possessive: Boolean = false) =
+    times(0..MAX, reluctant, possessive)
 
 
 @Deprecated("Let's try to use .times instead", ReplaceWith("content.times(times, reluctant, possessive)"))

@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package pl.mareklangiewicz.kground
+package pl.mareklangiewicz.bad
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract

@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.ure
 
-import pl.mareklangiewicz.kground.chk
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.uspek.*
 import kotlin.test.assertFailsWith

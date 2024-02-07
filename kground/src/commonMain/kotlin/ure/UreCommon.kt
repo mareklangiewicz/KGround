@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.req
+import pl.mareklangiewicz.bad.*
 
 
 @DelicateApi("Very basic email Ure. It will not match many strange but correct emails. Can also match some incorrect.")
