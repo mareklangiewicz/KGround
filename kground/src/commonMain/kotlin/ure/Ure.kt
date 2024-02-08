@@ -978,17 +978,32 @@ fun Ure.findAll(input: CharSequence, startIndex: Int = 0) = compile().findAll(in
 
 fun Ure.findAllWithOverlap(input: CharSequence, startIndex: Int = 0) = compile().findAllWithOverlap(input, startIndex)
 
-fun Ure.replaceFirstOrNone(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
-    compile().replaceFirstOrNone(input, replacement, literalReplacement)
+fun Ure.replaceFirstOrNone(
+    input: CharSequence,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = compile().replaceFirstOrNone(input, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
-fun Ure.replaceAll(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
-    compile().replaceAll(input, replacement, literalReplacement)
+fun Ure.replaceAll(
+    input: CharSequence,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = compile().replaceAll(input, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
 fun Ure.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequence): String =
     compile().replaceAll(input, transform)
 
-fun Ure.replaceSingle(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
-    compile().replaceSingle(input, replacement, literalReplacement)
+fun Ure.replaceSingle(
+    input: CharSequence,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = compile().replaceSingle(input, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
 
 fun CharSequence.matchEntireOrNull(ure: Ure) = ure.matchEntireOrNull(this)
@@ -1011,17 +1026,32 @@ fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = ure.findAll(this, star
 
 fun CharSequence.findAllWithOverlap(ure: Ure, startIndex: Int = 0) = ure.findAllWithOverlap(this, startIndex)
 
-fun CharSequence.replaceFirstOrNone(ure: Ure, replacement: String, literalReplacement: Boolean = false): String =
-    ure.replaceFirstOrNone(this, replacement, literalReplacement)
+fun CharSequence.replaceFirstOrNone(
+    ure: Ure,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = ure.replaceFirstOrNone(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
-fun CharSequence.replaceAll(ure: Ure, replacement: String, literalReplacement: Boolean = false): String =
-    ure.replaceAll(this, replacement, literalReplacement)
+fun CharSequence.replaceAll(
+    ure: Ure,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = ure.replaceAll(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
 fun CharSequence.replaceAll(ure: Ure, transform: (MatchResult) -> CharSequence): String =
     ure.replaceAll(this, transform)
 
-fun CharSequence.replaceSingle(ure: Ure, replacement: String, literalReplacement: Boolean = false): String =
-    ure.replaceSingle(this, replacement, literalReplacement)
+fun CharSequence.replaceSingle(
+    ure: Ure,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = ure.replaceSingle(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
 
 

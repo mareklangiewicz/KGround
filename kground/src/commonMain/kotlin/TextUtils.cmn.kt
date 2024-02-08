@@ -106,16 +106,57 @@ fun Regex.findAllWithOverlap(input: CharSequence, startIndex: Int = 0): Sequence
 }
 
 
-/** More explicit name for stdlib [Regex.replaceFirst] with optional escaping for literal replacements. */
-fun Regex.replaceFirstOrNone(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
-    replaceFirst(input, if (literalReplacement) escapeReplacement(replacement) else replacement)
+
+private fun String.escapeGroupRefsIf(escapeGroupRefs: Boolean): String =
+    if (escapeGroupRefs) escapeReplacement(this) else this
+
+@Suppress("RegExpRedundantEscape") // not redundant on JS
+private val reGroupRefInReplacement = Regex("\\$(\\d+|\\{\\w+\\})")
+private fun String.reqNoGroupRefsIf(reqNoGroupRefs: Boolean): String {
+    reqNoGroupRefs || return this
+    var idx = 0
+    // it's faster and simpler to go through simple cases manually,
+    // and use regex only when it's possible to be group ref at some idx
+    while (idx < length) {
+        val ch = get(idx)
+        if (ch == '\\') { idx += 2; continue }
+        if (ch != '$') { idx ++; continue }
+        if (idx == length - 1) break // $ as last char is fine
+        matchAtOrNull(reGroupRefInReplacement, idx).reqNull { "Looks like there is a group reference at idx: $idx" }
+        idx ++
+    }
+    return this
+}
+
 
 /**
- * More explicit name for stdlib [Regex.replace] with optional escaping for literal replacements.
- * No overlapping here - searching with overlap wouldn't have much sense during replacing.
+ * Improved and more explicit version of stdlib [Regex.replaceFirst] with optional escaping group references.
+ * By default, it doesn't even allow group references in replacement to avoid hard to debug issues.
+ * @throws [BadArgErr] when [allowGroupRefs] is false and some group reference is found in the replacement.
+ * Note: [escapeGroupRefs] to true makes [allowGroupRefs] irrelevant because it checks already escaped replacement.
  */
-fun Regex.replaceAll(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
-    replace(input, if (literalReplacement) escapeReplacement(replacement) else replacement)
+fun Regex.replaceFirstOrNone(
+    input: CharSequence,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+): String = replaceFirst(input, replacement.escapeGroupRefsIf(escapeGroupRefs).reqNoGroupRefsIf(!allowGroupRefs))
+
+/**
+ * Improved and more explicit version of stdlib [Regex.replace] with optional escaping group references.
+ * By default, it doesn't even allow group references in replacement to avoid hard to debug issues.
+ * @throws [BadArgErr] when [allowGroupRefs] is false and some group reference is found in the replacement.
+ * Note: [escapeGroupRefs] to true makes [allowGroupRefs] irrelevant because it checks already escaped replacement.
+ * Note: No overlapping here - searching with overlap wouldn't have much sense during replacing.
+ */
+fun Regex.replaceAll(
+    input: CharSequence,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+): String = replace(input, replacement.escapeGroupRefsIf(escapeGroupRefs).reqNoGroupRefsIf(!allowGroupRefs))
 
 /**
  * More explicit name for stdlib [Regex.replace] with custom [transform] fun.
@@ -126,11 +167,22 @@ fun Regex.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequen
     replace(input, transform)
 
 /** @throws BadArgErr if not found or found more than one */
-fun Regex.replaceSingle(input: CharSequence, replacement: String, literalReplacement: Boolean = false): String =
-    findSingle(input).range.let {
-        if (literalReplacement) input.replaceRange(it, replacement).toString() // faster replacement when literal
-        else replaceFirstOrNone(input, replacement, false) // have to search again even we know we will find one
+fun Regex.replaceSingle(
+    input: CharSequence,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+): String = findSingle(input).range.let { // already throws when more than one or none
+    when {
+        // Fast literal replacement (ignoring group refs), no need for actual escaping in this case.
+        escapeGroupRefs -> input.replaceRange(it, replacement).toString()
+        // Also fast literal replacement, but after making sure no group refs there.
+        !allowGroupRefs -> input.replaceRange(it, replacement.reqNoGroupRefsIf(true)).toString()
+        // Slower replacement with group references support.
+        else -> replaceFirstOrNone(input, replacement, allowGroupRefs = true)
     }
+}
 
 
 fun CharSequence.matchEntireOrNull(re: Regex) = re.matchEntireOrNull(this)
@@ -153,14 +205,29 @@ fun CharSequence.findAll(re: Regex, startIndex: Int = 0) = re.findAll(this, star
 
 fun CharSequence.findAllWithOverlap(re: Regex, startIndex: Int = 0) = re.findAllWithOverlap(this, startIndex)
 
-fun CharSequence.replaceFirstOrNone(re: Regex, replacement: String, literalReplacement: Boolean = false): String =
-    re.replaceFirstOrNone(this, replacement, literalReplacement)
+fun CharSequence.replaceFirstOrNone(
+    re: Regex,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = re.replaceFirstOrNone(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
-fun CharSequence.replaceAll(re: Regex, replacement: String, literalReplacement: Boolean = false): String =
-    re.replaceAll(this, replacement, literalReplacement)
+fun CharSequence.replaceAll(
+    re: Regex,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = re.replaceAll(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
 fun CharSequence.replaceAll(re: Regex, transform: (MatchResult) -> CharSequence): String =
     re.replaceAll(this, transform)
 
-fun CharSequence.replaceSingle(re: Regex, replacement: String, literalReplacement: Boolean = false): String =
-    re.replaceSingle(this, replacement, literalReplacement)
+fun CharSequence.replaceSingle(
+    re: Regex,
+    replacement: String,
+    vararg useNamedArgs: Unit,
+    escapeGroupRefs: Boolean = false,
+    allowGroupRefs: Boolean = false,
+) = re.replaceSingle(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
