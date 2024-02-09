@@ -1,6 +1,7 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package pl.mareklangiewicz.bad.regex
+package pl.mareklangiewicz.regex.bad
+
 
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.regex.*
@@ -84,5 +85,7 @@ inline fun Regex.reqFindSingleWithOverlap(
 // TODO NOW CharSeq..
 
 // TODO Ure...
+
+
 
 
