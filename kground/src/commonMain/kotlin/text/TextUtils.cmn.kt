@@ -1,7 +1,6 @@
 package pl.mareklangiewicz.text
 
-import pl.mareklangiewicz.bad.*
-import kotlin.text.Regex.Companion.escapeReplacement
+import pl.mareklangiewicz.bad.req
 
 
 // region [Char Related Stuff]

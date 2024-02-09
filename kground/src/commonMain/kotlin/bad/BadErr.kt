@@ -2,6 +2,8 @@
 
 package pl.mareklangiewicz.bad
 
+import kotlin.apply
+import kotlin.collections.isNotEmpty
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
