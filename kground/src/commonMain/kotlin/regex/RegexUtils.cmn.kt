@@ -7,7 +7,7 @@ import kotlin.text.Regex.Companion.escapeReplacement
 /** More explicit name for stdlib [Regex.matchEntire] */
 fun Regex.matchEntireOrNull(input: CharSequence): MatchResult? = matchEntire(input)
 
-fun Regex.matchEntireOrThrow(input: CharSequence): MatchResult? =
+fun Regex.matchEntireOrThrow(input: CharSequence): MatchResult =
     matchEntireOrNull(input).reqNN { "this regex: \"$this\" does not match entire input" }
 
 /** More explicit name for stdlib [Regex.matchAt] */
@@ -28,17 +28,19 @@ fun Regex.findFirst(input: CharSequence, startIndex: Int = 0): MatchResult =
  * Does NOT check for overlapping matches.
  */
 fun Regex.findSingle(input: CharSequence, startIndex: Int = 0): MatchResult =
-    findFirst(input, startIndex).also {
-        val second = findFirstOrNull(input, it.range.last + 1)
-        second.reqNull { "this regex: \"$this\" has been found second time at idx: ${second!!.range.first}" }
-    }
+    findFirst(input, startIndex) // can already throw when not found
+        .also {
+            val second = findFirstOrNull(input, it.range.last + 1)
+            second.reqNull { "this regex: \"$this\" has been found second time at idx: ${second!!.range.first}" }
+        }
 
 /** @throws BadArgErr if not found or found more than one. Even if the second one overlaps with the first one. */
 fun Regex.findSingleWithOverlap(input: CharSequence, startIndex: Int = 0): MatchResult =
-    findFirst(input, startIndex).also {
-        val second = findFirstOrNull(input, it.range.first + 1)
-        second.reqNull { "this regex: \"$this\" has been found second time at idx: ${second!!.range.first}" }
-    }
+    findFirst(input, startIndex) // can already throw if not found
+        .also {
+            val second = findFirstOrNull(input, it.range.first + 1)
+            second.reqNull { "this regex: \"$this\" has been found second time at idx: ${second!!.range.first}" }
+        }
 
 /**
  * Note: Even with this overlapping version, the first match starting at particular position wins,
