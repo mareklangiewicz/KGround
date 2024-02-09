@@ -82,10 +82,77 @@ inline fun Regex.reqFindSingleWithOverlap(
     findFirstOrNull(input, first.range.first + 1).reqNull(lazyMessageIfMultiple)
 }
 
-// TODO NOW CharSeq..
+inline fun CharSequence.chkMatchEntire(
+    re: Regex,
+    lazyMessage: () -> String = { "regex: \"$re\" does not match this entire input" },
+) = apply { matchEntireOrNull(re).chkNN(lazyMessage) }
 
-// TODO Ure...
+inline fun CharSequence.reqMatchEntire(
+    re: Regex,
+    lazyMessage: () -> String = { "regex: \"$re\" does not match this entire input arg" },
+) = apply { matchEntireOrNull(re).reqNN(lazyMessage) }
 
+inline fun CharSequence.chkMatchAt(
+    re: Regex,
+    index: Int,
+    lazyMessage: () -> String = { "regex: \"$re\" does not match this input at: $index" },
+) = apply { matchAtOrNull(re, index).chkNN(lazyMessage) }
 
+inline fun CharSequence.reqMatchAt(
+    re: Regex,
+    index: Int,
+    lazyMessage: () -> String = { "regex: \"$re\" does not match this input arg at: $index" },
+) = apply { matchAtOrNull(re, index).reqNN(lazyMessage) }
 
+inline fun CharSequence.chkFindFirst(
+    re: Regex,
+    startIndex: Int = 0,
+    lazyMessage: () -> String = { "regex: \"$re\" was not found in this input at all" },
+) = apply { findFirstOrNull(re, startIndex).chkNN(lazyMessage) }
+
+inline fun CharSequence.reqFindFirst(
+    re: Regex,
+    startIndex: Int = 0,
+    lazyMessage: () -> String = { "regex: \"$re\" was not found in this input arg at all" },
+) = apply { findFirstOrNull(re, startIndex).reqNN(lazyMessage) }
+
+inline fun CharSequence.chkFindSingle(
+    re: Regex,
+    startIndex: Int = 0,
+    lazyMessageIfNone: () -> String = { "regex: \"$re\" was not found in this input at all" },
+    lazyMessageIfMultiple: () -> String = { "this regex: \"$this\" was found in input more than once" },
+) = apply {
+    val first = findFirstOrNull(re, startIndex).chkNN(lazyMessageIfNone)
+    findFirstOrNull(re, first.range.last + 1).chkNull(lazyMessageIfMultiple)
+}
+
+inline fun CharSequence.reqFindSingle(
+    re: Regex,
+    startIndex: Int = 0,
+    lazyMessageIfNone: () -> String = { "regex: \"$re\" was not found in this input arg at all" },
+    lazyMessageIfMultiple: () -> String = { "regex: \"$re\" was found in this input arg more than once" },
+) = apply {
+    val first = findFirstOrNull(re, startIndex).reqNN(lazyMessageIfNone)
+    findFirstOrNull(re, first.range.last + 1).reqNull(lazyMessageIfMultiple)
+}
+
+inline fun CharSequence.chkFindSingleWithOverlap(
+    re: Regex,
+    startIndex: Int = 0,
+    lazyMessageIfNone: () -> String = { "regex: \"$re\" was not found in this input at all" },
+    lazyMessageIfMultiple: () -> String = { "regex: \"$re\" was found in this input more than once with overlap" },
+) = apply {
+    val first = findFirstOrNull(re, startIndex).chkNN(lazyMessageIfNone)
+    findFirstOrNull(re, first.range.first + 1).chkNull(lazyMessageIfMultiple)
+}
+
+inline fun CharSequence.reqFindSingleWithOverlap(
+    re: Regex,
+    startIndex: Int = 0,
+    lazyMessageIfNone: () -> String = { "regex: \"$re\" was not found in this input arg at all" },
+    lazyMessageIfMultiple: () -> String = { "regex: \"$re\" was found in this input arg more than once with overlap" },
+) = apply {
+    val first = findFirstOrNull(re, startIndex).reqNN(lazyMessageIfNone)
+    findFirstOrNull(re, first.range.first + 1).reqNull(lazyMessageIfMultiple)
+}
 
