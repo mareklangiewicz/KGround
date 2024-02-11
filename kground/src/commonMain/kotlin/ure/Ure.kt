@@ -290,10 +290,11 @@ data class UreQuantifier internal constructor(
     val possessive: Boolean = false,
 ) : UreNonCapturing {
     init {
-        reluctant && possessive && bad { "UreQuantif can't be reluctant and possessive at the same time" }
+        reluctant && possessive && bad { "UreQuantifier can't be reluctant and possessive at the same time" }
     }
 
     val greedy get() = !reluctant && !possessive
+
     override fun toIR(): IR {
         val timesIR = when (times) {
             1..1 -> return content.toIR()
@@ -309,13 +310,12 @@ data class UreQuantifier internal constructor(
         val suffixIR = when {
             reluctant -> "?"
             possessive -> "+"
-            else -> ""
+            greedy -> ""
+            else -> bad { "impossible" }
         }.asIR
         return "${content.toClosedIR()}$timesIR$suffixIR".asIR
     }
-    // override fun toClosedIR(): IR = this.groupNonCapt().toIR()
     override fun toClosedIR() = toIR()
-        // TODO: I think it's correct, but should be analyzed more carefully (and write some tests!).
 }
 
 /**
