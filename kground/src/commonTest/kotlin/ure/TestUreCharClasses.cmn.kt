@@ -26,7 +26,7 @@ fun testSomeBasicCharClassIRs() {
     }
 
     "On fun ch constructing UreCharExact" o {
-        "fails with more than single unicode character".failsWith<BadArgErr> { ch("ab") }
+        "fails with more than single unicode character".oThrows<BadArgErr> { ch("ab") }
         "works correctly with single backslash" o {
             val ure = ch("\\") // using the version with string arg to be analogous to next tests with surrogate pairs
             ure.str chkEq "\\" // it is remembering just one char - no quoting here yet

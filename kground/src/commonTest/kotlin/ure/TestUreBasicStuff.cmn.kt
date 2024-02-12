@@ -38,8 +38,8 @@ fun testUreBasicSanity() {
 @OptIn(DelicateApi::class)
 fun testUreBasicEmail() {
     "On ureBasicEmail" o {
-        "assert IR as expected" o {
-            // This assertion is kinda lame (expecting exact impl/ir / cementing impl),
+        "chk IR as expected" o {
+            // This chk is kinda lame (expecting exact impl/ir / cementing impl),
             // but it's useful for me now as documentation and to track if sth changes.
             ureBasicEmail.toIR().str chkEq """\b(?<user>[\w.\-]+)\b@\b(?<domain>(?:[\w\-]+\.)+[\w\-]{2,16})\b"""
         }

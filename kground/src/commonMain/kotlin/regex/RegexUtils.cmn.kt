@@ -16,8 +16,9 @@ fun Regex.matchAtOrNull(input: CharSequence, index: Int): MatchResult? = matchAt
 fun Regex.matchAtOrThrow(input: CharSequence, index: Int): MatchResult =
     matchAtOrNull(input, index).reqNN { "this regex: \"$this\" does not match input at index: $index" }
 
-/** More explicit name for stdlib [Regex.find] */
-fun Regex.findFirstOrNull(input: CharSequence, startIndex: Int = 0): MatchResult? = find(input, startIndex)
+/** Similar to stdlib [Regex.find], but if startIndex > input length, it just returns null instead of throwing */
+fun Regex.findFirstOrNull(input: CharSequence, startIndex: Int = 0): MatchResult? =
+    if (startIndex > input.length) null else find(input, startIndex)
 
 /** @throws BadArgErr if not found */
 fun Regex.findFirst(input: CharSequence, startIndex: Int = 0): MatchResult =
@@ -49,7 +50,7 @@ fun Regex.findSingleWithOverlap(input: CharSequence, startIndex: Int = 0): Match
  */
 fun Regex.findAllWithOverlap(input: CharSequence, startIndex: Int = 0): Sequence<MatchResult> {
     req(startIndex in 0..input.length) { "startIdx: $startIndex is not in bounds: 0..${input.length}" }
-    return generateSequence({ find(input, startIndex) },  { find(input, it.range.first + 1) })
+    return generateSequence({ findFirstOrNull(input, startIndex) },  { findFirstOrNull(input, it.range.first + 1) })
 }
 
 

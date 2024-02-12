@@ -3,16 +3,16 @@ package pl.mareklangiewicz.ure
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.uspek.*
-import kotlin.test.assertFailsWith
 
 
 internal val platform = getCurrentPlatformKind()
 
 
-// TODO_maybe: Add sth like this to USpek? Or to USpekX?
-inline fun <reified T : Throwable> String.failsWith(crossinline code: () -> Unit) = o {
-    assertFailsWith<T>(block = code)
-}
+// TODO_maybe: Add sth like this to USpekX?
+inline fun <reified T : Throwable> String.oThrows(
+    crossinline expectation: (T) -> Boolean = { true },
+    crossinline code: () -> Unit
+) = o { chkThrows<T>(expectation) { code() } }
 
 
 fun testUreCompiles(ure: Ure, alsoCheckNegation: Boolean = true) = "compiles" o {
@@ -24,8 +24,17 @@ fun testUreCompiles(ure: Ure, alsoCheckNegation: Boolean = true) = "compiles" o 
  * Note: It throws different [Throwable] on different platforms.
  * I encountered [SyntaxError] on JS and [InvalidArgumentException] on JVM and LINUX and [PatternSyntaxException] on LINUX.
  */
-fun testUreDoesNotCompile(ure: Ure) = "does NOT compile".failsWith<Throwable> { ure.compile() }
+fun testUreDoesNotCompile(ure: Ure) = "does NOT compile".oThrows<Throwable>({
+    println("fake debug ulog on $platform: $it")
+    // FIXME_later: use ULog and KGroundCtx, when ready (level: DEBUG)
+    // (throwables here are very interesting and I definitely want to have it logged, but in the right place)
+    true
+}) { ure.compile() }
 
+fun testUreCompilesOnlyOn(ure: Ure, vararg platforms: String, alsoCheckNegation: Boolean = true) {
+    if (platform in platforms) testUreCompiles(ure, alsoCheckNegation)
+    else testUreDoesNotCompile(ure)
+}
 
 
 fun testUreMatchesCorrectChars(

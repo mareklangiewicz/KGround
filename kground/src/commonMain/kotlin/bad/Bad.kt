@@ -89,6 +89,27 @@ inline fun Boolean?.chkFalse(lazyMessage: () -> String = { "this is not false: $
 inline fun Boolean?.reqFalse(lazyMessage: () -> String = { "this arg is not false: $this" }): Boolean =
     reqSame(false, lazyMessage)!!
 
+
+inline fun <reified T: Throwable> chkThrows(
+    expectation: (T) -> Boolean = { true },
+    lazyMessage: () -> String = { "code does not throw expected ${T::class}" },
+    code: () -> Any?,
+): T = try { code(); null } catch (throwable: Throwable) {
+    throwable is T && expectation(throwable) || throw BadStateErr(lazyMessage(), cause = throwable)
+    throwable
+} ?: bad(lazyMessage)
+
+inline fun <reified T: Throwable> reqThrows(
+    expectation: (T) -> Boolean = { true },
+    lazyMessage: () -> String = { "code arg does not throw expected ${T::class}" },
+    code: () -> Any?,
+): T = try { code(); null } catch (throwable: Throwable) {
+    throwable is T && expectation(throwable) || throw BadArgErr(lazyMessage(), cause = throwable)
+    throwable
+} ?: badArg(lazyMessage)
+
+
+
 inline fun <T: Collection<*>> T.chkEmpty(lazyMessage: () -> String = { "this not empty is bad" }): T =
     apply { isEmpty() || throw BadStateErr(lazyMessage()) }
 

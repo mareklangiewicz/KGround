@@ -303,7 +303,7 @@ data class UreQuantifier internal constructor(
             1..MAX -> "+"
             else -> when (times.last) {
                 times.first -> "{${times.first}}"
-                MAX -> "{${times.first},}"
+                MAX -> "{${times.first},}" // Note: skipping min is not implicit 0, it's an incorrect syntax.
                 else -> "{${times.first},${times.last}}"
             }
         }.asIR
@@ -315,7 +315,10 @@ data class UreQuantifier internal constructor(
         }.asIR
         return "${content.toClosedIR()}$timesIR$suffixIR".asIR
     }
-    override fun toClosedIR() = toIR()
+    override fun toClosedIR() = this.groupNonCapt().toIR()
+        // has to be wrapped, because stacking quantifiers doesn't compile in different cases, especially on JS
+        // (see TestUreQuantifiersEtc.kt: "dangling quantifiers", etc.)
+        // TODO_someday: Optimize: carefully multiply min and max when content is also UreQuantifier
 }
 
 /**

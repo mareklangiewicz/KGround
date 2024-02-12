@@ -10,7 +10,38 @@ import pl.mareklangiewicz.uspek.*
 
 
 fun testUreQuantifiersAndAtomicGroups() {
+
     "On quantifiers and atomic groups" o {
+
+        "On basic quantifier syntax" o {
+            "reluctant quantifier compiles everywhere" o {
+                testUreCompiles(ureRaw("a+?"), alsoCheckNegation = false)
+            }
+            "possessive quantifier does not compile on JS" o {
+                testUreCompilesOnlyOn(ureRaw("a++"), "JVM", "LINUX", alsoCheckNegation = false)
+            }
+
+            // This is fine, can always be simplified.
+            "dangling quantifiers compile only on JVM" o {
+                listOf("a{4}{3}", "b*{3}", "c+{3}").forEachIndexed { i, u ->
+                    "ure $i: \"$u\"" o { testUreCompilesOnlyOn(ureRaw(u), "JVM", alsoCheckNegation = false) }
+                }
+            }
+
+            // This is kinda bad, but workaround for JS is: just wrap a{2} in non-capt group.
+            "legitimate quantifier composition does not compile on JS" o {
+                testUreCompilesOnlyOn(ureRaw("a{2}+"), "JVM", "LINUX", alsoCheckNegation = false)
+            }
+
+            "ure quantifiers are safe on all platforms" o {
+                // Currently UreQuantifier.toClosedIR() wraps it in non-capt group to avoid any issues like above.
+                // But someday I might optimize it by carefully multiplying stacked quantifiers min and max values.
+                // Then some additional tests here would be necessary.
+                val ure = ch('a').times(2).timesMin(1)
+                ure.toIR().str chkEq "(?:a{2})+"
+                testUreCompiles(ure, alsoCheckNegation = false)
+            }
+        }
 
         val chAnyBD = chOfAnyExact('B', 'D')
         chAnyBD.toIR().str chkEq "[BD]"
