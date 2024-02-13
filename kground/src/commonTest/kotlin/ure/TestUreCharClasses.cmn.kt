@@ -8,12 +8,34 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.uspek.*
 
 fun testUreCharClasses() {
-    testSomeBasicCharClassIRs()
+    testSomeBasicCharClasses()
     testSomeUreCharClassPairsEtc()
 }
 
-fun testSomeBasicCharClassIRs() {
+fun testSomeBasicCharClasses() {
 
+    "On basic char classes syntax" o {
+
+        // Kotlin/JS Regex uses only unicode ("u") mode, but not the unicodeSets ("v") mode,
+        // That's why intersections, some unions, subtractions, etc. are not supported on JS platform at all.
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicodeSets
+        "class intersection compiles on JVM and LINUX but not on JS" o {
+            testUreCompilesOnlyOn(ureRaw("[a-z&&[^cd]]"), "JVM", "LINUX", alsoCheckNegation = false)
+        }
+        "class with basic union compiles everywhere" o {
+            testUreCompiles(ureRaw("[^a-dx-z]"), alsoCheckNegation = false)
+        }
+        "class with a bit more complex union compiles on JVM and LINUX but not on JS" o {
+            testUreCompilesOnlyOn(ureRaw("[a-d[^x-z]]"), "JVM", "LINUX", alsoCheckNegation = false)
+        }
+        "all ready to use char class unions compile everywhere" o {
+            listOf(
+                chAlpha, chHexDigit, chAlnum, chGraph, chWhiteSpaceInLine, chPrint,
+                chAnyAtAll, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
+            ).forEachIndexed { i, u -> "union nr $i ${u.toIR().str}" o { testUreCompiles(u) } }
+        }
+    }
     "On some already created UreCharExact vals" o {
         "chSlash str is just slash" o { chSlash.str chkEq "/" }
         "chSlash IR is just slash" o { chSlash.toIR().str chkEq "/" }

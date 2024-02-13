@@ -411,7 +411,7 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
 
 // TODO: test complex unions and intersections like [abc[^def]], [abc&&[c-x]], etc
 
-data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
+data class UreCharClassUnion @NotPortableApi internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
     init { req(tokens.isNotEmpty()) { "No tokens in UreCharClassUnion." } }
     override fun toIR(): IR = if (tokens.size == 1 && positive) tokens[0].toIR()
         else tokens.joinToString("", if (positive) "[" else "[^", "]") { it.toIRInCharClass().str }.asIR
@@ -419,6 +419,7 @@ data class UreCharClassUnion internal constructor(val tokens: List<UreCharClass>
     override fun toIRInCharClass(): IR = tokens.joinToString("", if (positive) "" else "[^", if (positive) "" else "]") { it.toIRInCharClass().str }.asIR
         // TODO: I don't wrap in [] here (when positive) to see if it works,
         //  but make sure to analyze all cases and write unit tests!!
+    @OptIn(NotPortableApi::class)
     operator fun not() = UreCharClassUnion(tokens, !positive)
 }
 
@@ -434,11 +435,12 @@ data class UreCharClassRange @NotPortableApi constructor(val from: UreCharClass,
 }
 
 // TODO NOW: test it!
-data class UreCharClassIntersect internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
+data class UreCharClassIntersect @NotPortableApi internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
     override fun toIR(): IR = tokens.joinToString("&&", if (positive) "[" else "[^", "]") { it.toIRInCharClass().str }.asIR
     override fun toClosedIR(): IR = toIR()
     override fun toIRInCharClass(): IR = toIR()
         // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
+    @OptIn(NotPortableApi::class)
     operator fun not() = UreCharClassIntersect(tokens, !positive)
 }
 
@@ -542,6 +544,7 @@ infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
 // Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
 
 
+@OptIn(NotPortableApi::class) // not portable only if the receiver was already not portable.
 operator fun Ure.not(): Ure = when (this) {
     is UreWithRawIR -> when (this) {
         // TODO_someday: Can I negate some common raw ures?
@@ -616,26 +619,32 @@ val chLower = chOf('a'..'z')
 /** [A-Z] */
 val chUpper = chOf('A'..'Z')
 /** [a-zA-Z] */
+@OptIn(NotPortableApi::class)
 val chAlpha = chOfAny(chLower, chUpper) // Note: "chLower or chUpper" is worse, because UreAlternation can't be negated.
 
 /** Same as [0-9] */
 val chDigit = 'd'.cpd
 
 /** Same as [0-9a-fA-F] */
+@OptIn(NotPortableApi::class)
 val chHexDigit = chOfAny(chDigit, chOf('a'..'f'), chOf('A'..'F'))
 
 /** Same as [a-zA-Z0-9] */
+@OptIn(NotPortableApi::class)
 val chAlnum = chOfAny(chAlpha, chDigit)
 
 val chPunct = chOfAnyExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""".toList())
 
+@OptIn(NotPortableApi::class)
 val chGraph = chOfAny(chAlnum, chPunct)
 
 val chSpace = ' '.ce
 val chWhiteSpace = 's'.cpd
+@OptIn(NotPortableApi::class)
 val chWhiteSpaceInLine = chOfAny(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
 
 /** Basic printable characters. Only normal space. No emojis, etc. */
+@OptIn(NotPortableApi::class)
 val chPrint = chOfAny(chGraph, chSpace)
 
 /** Same as [^0-9] */
@@ -657,6 +666,7 @@ val chDot = '.'.ce
 val chAnyInLine = '.'.cpd
 
 /** [\s\S] It is a portable and fast way to match any character at all. */
+@OptIn(NotPortableApi::class)
 val chAnyAtAll = chOfAny(chWhiteSpace, !chWhiteSpace) // should work everywhere and should be fast.
 // Note: following impl would not work on JS: ureIR("(?s:.)")
 //   see details: https://www.regular-expressions.info/dot.html
@@ -670,8 +680,11 @@ val chWord = 'w'.cpd
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord"))
 val chNonWord = 'W'.cpd
 
+@OptIn(NotPortableApi::class)
 val chWordOrDot = chOfAny(chWord, chDot)
+@OptIn(NotPortableApi::class)
 val chWordOrDash = chOfAny(chWord, chDash) // also hints (when typing chWo) that chWord doesn't match dash.
+@OptIn(NotPortableApi::class)
 val chWordOrDotOrDash = chOfAny(chWord, chDot, chDash)
 
 // Note: All these different flavors of "word-like" classes seem unnecessary/not-micro-enough,
@@ -797,14 +810,17 @@ val chPGreek = chProp("sc=Greek")
     // https://www.regular-expressions.info/nonprint.html
 
 
+@NotPortableApi("Some unions do NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAny(charClasses: List<UreCharClass>) = UreCharClassUnion(charClasses)
 
+@NotPortableApi("Some unions do NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAny(vararg charClasses: UreCharClass?) = chOfAny(charClasses.toList().filterNotNull())
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAny(charClasses)"))
+@NotPortableApi("Some unions do NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfNotAny(vararg charClasses: UreCharClass?) = !chOfAny(*charClasses)
 
-@OptIn(DelicateApi::class)
+@OptIn(DelicateApi::class, NotPortableApi::class) // simple union like this works on all platforms.
 fun chOfAnyExact(exactChars: List<Char>) = chOfAny(exactChars.map(::ch))
 
 @OptIn(DelicateApi::class)
@@ -826,11 +842,14 @@ fun chOf(range: CharRange) = chOfRange(ch(range.start), ch(range.endInclusive))
 fun chOfNot(range: CharRange) = !chOf(range)
 
 
+@NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAll(charClasses: List<UreCharClass>) = UreCharClassIntersect(charClasses)
 
+@NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAll(vararg charClasses: UreCharClass?) = chOfAll(charClasses.toList().filterNotNull())
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAll(charClasses)"))
+@NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfNotAll(vararg charClasses: UreCharClass?) = !chOfAll(*charClasses)
 
 // endregion [Ure Character Related Stuff]
