@@ -409,16 +409,12 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
 }
 
 
-// TODO: test complex unions and intersections like [abc[^def]], [abc&&[c-x]], etc
-
 data class UreCharClassUnion @NotPortableApi internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
     init { req(tokens.isNotEmpty()) { "No tokens in UreCharClassUnion." } }
     override fun toIR(): IR = if (tokens.size == 1 && positive) tokens[0].toIR()
         else tokens.joinToString("", if (positive) "[" else "[^", "]") { it.toIRInCharClass().str }.asIR
     override fun toClosedIR(): IR = toIR()
     override fun toIRInCharClass(): IR = tokens.joinToString("", if (positive) "" else "[^", if (positive) "" else "]") { it.toIRInCharClass().str }.asIR
-        // TODO: I don't wrap in [] here (when positive) to see if it works,
-        //  but make sure to analyze all cases and write unit tests!!
     @OptIn(NotPortableApi::class)
     operator fun not() = UreCharClassUnion(tokens, !positive)
 }
@@ -450,7 +446,6 @@ data class UreCharClassIntersect @NotPortableApi @DelicateApi internal construct
     operator fun not() = UreCharClassIntersect(tokens, !positive)
 }
 
-// TODO_later: make it not portable and opt in when using "constructor" that checks if prop is known and portable.
 data class UreCharClassProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) : UreCharClass {
     override fun toIR(): IR = "\\${if (positive) "p" else "P"}{$prop}".asIR
     override fun toClosedIR(): IR = toIR()
