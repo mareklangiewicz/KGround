@@ -18,19 +18,19 @@ fun testUreQuantifiersAndAtomicGroups() {
                 testUreCompiles(ureRaw("a+?"), alsoCheckNegation = false)
             }
             "possessive quantifier does not compile on JS" o {
-                testUreCompilesOnlyOn(ureRaw("a++"), "JVM", "LINUX", alsoCheckNegation = false)
+                testUreCompilesOnlyOn(ureRaw("a++"), listOf("JVM", "LINUX"), alsoCheckNegation = false)
             }
 
             // This is fine, can always be simplified.
             "dangling quantifiers compile only on JVM" o {
                 listOf("a{4}{3}", "b*{3}", "c+{3}").forEachIndexed { i, u ->
-                    "ure $i: \"$u\"" o { testUreCompilesOnlyOn(ureRaw(u), "JVM", alsoCheckNegation = false) }
+                    "ure $i: \"$u\"" o { testUreCompilesOnlyOn(ureRaw(u), listOf("JVM"), alsoCheckNegation = false) }
                 }
             }
 
             // This is kinda bad, but workaround for JS is: just wrap a{2} in non-capt group.
             "legitimate quantifier composition does not compile on JS" o {
-                testUreCompilesOnlyOn(ureRaw("a{2}+"), "JVM", "LINUX", alsoCheckNegation = false)
+                testUreCompilesOnlyOn(ureRaw("a{2}+"), listOf("JVM", "LINUX"), alsoCheckNegation = false)
             }
 
             "ure quantifiers are safe on all platforms" o {

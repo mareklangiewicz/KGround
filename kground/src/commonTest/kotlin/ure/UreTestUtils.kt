@@ -15,9 +15,14 @@ inline fun <reified T : Throwable> String.oThrows(
 ) = o { chkThrows<T>(expectation) { code() } }
 
 
-fun testUreCompiles(ure: Ure, alsoCheckNegation: Boolean = true) = "compiles" o {
+fun testUreCompiles(
+    ure: Ure,
+    vararg useNamedArgs: Unit,
+    alsoCheckNegation: Boolean = true,
+) = "compiles" o {
     ure.compile() // will throw if the platform doesn't support it
-    if (alsoCheckNegation) ure.not().compile() // will throw if the platform doesn't support it
+    if (alsoCheckNegation)
+        ure.not().compile() // will throw if the platform doesn't support it or Ure.not() doesn't support it
 }
 
 /**
@@ -31,8 +36,13 @@ fun testUreDoesNotCompile(ure: Ure) = "does NOT compile".oThrows<Throwable>({
     true
 }) { ure.compile() }
 
-fun testUreCompilesOnlyOn(ure: Ure, vararg platforms: String, alsoCheckNegation: Boolean = true) {
-    if (platform in platforms) testUreCompiles(ure, alsoCheckNegation)
+fun testUreCompilesOnlyOn(
+    ure: Ure,
+    platforms: List<String>,
+    vararg useNamedArgs: Unit,
+    alsoCheckNegation: Boolean = true,
+) {
+    if (platform in platforms) testUreCompiles(ure, alsoCheckNegation = alsoCheckNegation)
     else testUreDoesNotCompile(ure)
 }
 
@@ -41,12 +51,16 @@ fun testUreMatchesCorrectChars(
     ure: Ure,
     match: List<String>,
     matchNot: List<String>,
+    vararg useNamedArgs: Unit,
+    alsoCheckNegation: Boolean = true,
     verbose: Boolean = false,
 ) = "matches correct chars" o {
     testUreMatchesAll(ure, *match.toTypedArray(), verbose = verbose)
     testUreMatchesNone(ure, *matchNot.toTypedArray(), verbose = verbose)
-    testUreMatchesAll(!ure, *matchNot.toTypedArray(), verbose = verbose)
-    testUreMatchesNone(!ure, *match.toTypedArray(), verbose = verbose)
+    if (alsoCheckNegation) {
+        testUreMatchesAll(!ure, *matchNot.toTypedArray(), verbose = verbose)
+        testUreMatchesNone(!ure, *match.toTypedArray(), verbose = verbose)
+    }
 }
 
 fun testUreMatchesAll(ure: Ure, vararg examples: String, verbose: Boolean = false) {

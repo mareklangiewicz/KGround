@@ -425,22 +425,28 @@ data class UreCharClassUnion @NotPortableApi internal constructor(val tokens: Li
 
 // TODO_later: analyze if some special kotlin progression/range would fit here better
 data class UreCharClassRange @NotPortableApi constructor(val from: UreCharClass, val to: UreCharClass, val positive: Boolean = true) : UreCharClass {
-    private val neg = if (positive) "" else "^"
     override fun toClosedIR(): IR = toIR()
-    override fun toIR(): IR = "[${toIRInCharClass()}]".asIR
-    override fun toIRInCharClass(): IR = "$neg${from.toIRInCharClass()}-${to.toIRInCharClass()}".asIR
-        // TODO: I don't wrap in [] here to see if it works, but make sure to analyze all cases and write unit tests!!
+    override fun toIR(): IR = "[$content]".asIR
+    override fun toIRInCharClass(): IR = if (positive) content.asIR else toIR()
+    private val neg get() = if (positive) "" else "^"
+    private val content get() = "$neg${from.toIRInCharClass()}-${to.toIRInCharClass()}"
     @OptIn(NotPortableApi::class)
     operator fun not() = UreCharClassRange(from, to, !positive)
 }
 
-// TODO NOW: test it!
-data class UreCharClassIntersect @NotPortableApi internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
+/**
+ * This class is not only not-portable, but also VERY DELICATE.
+ * Please always write unit tests to make sure it behaves as expected on platforms you're using.
+ * There are weird inconsistencies when regex engines interpret intersections of unions, negated intersections, etc etc.
+ * Some are described here: https://www.regular-expressions.info/charclassintersect.html
+ * Some are reproduced in fun testUreCharClasses in TestUreCharClasses.cmn.kt
+ * Usual workaround for weird behavior is to wrap some parts in additional chOfAny(token).
+ */
+data class UreCharClassIntersect @NotPortableApi @DelicateApi internal constructor(val tokens: List<UreCharClass>, val positive: Boolean = true) : UreCharClass {
     override fun toIR(): IR = tokens.joinToString("&&", if (positive) "[" else "[^", "]") { it.toIRInCharClass().str }.asIR
     override fun toClosedIR(): IR = toIR()
-    override fun toIRInCharClass(): IR = toIR()
-        // FIXME_later: maybe I can sometimes drop [] wrapping, but first analyze all cases and write unit tests.
-    @OptIn(NotPortableApi::class)
+    override fun toIRInCharClass(): IR = toIR() // this class is delicate enough, so let's not try to drop brackets here
+    @NotPortableApi @DelicateApi
     operator fun not() = UreCharClassIntersect(tokens, !positive)
 }
 
@@ -544,7 +550,7 @@ infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
 // Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
 
 
-@OptIn(NotPortableApi::class) // not portable only if the receiver was already not portable.
+@OptIn(NotPortableApi::class, DelicateApi::class) // not portable only if the receiver was already not portable.
 operator fun Ure.not(): Ure = when (this) {
     is UreWithRawIR -> when (this) {
         // TODO_someday: Can I negate some common raw ures?
@@ -842,13 +848,32 @@ fun chOf(range: CharRange) = chOfRange(ch(range.start), ch(range.endInclusive))
 fun chOfNot(range: CharRange) = !chOf(range)
 
 
+/**
+ * This is not only not-portable, but also VERY DELICATE.
+ * Please always write unit tests to make sure it behaves as expected on platforms you're using.
+ * There are weird inconsistencies when regex engines interpret intersections of unions, negated intersections, etc etc.
+ * Some are described here: https://www.regular-expressions.info/charclassintersect.html
+ * Some are reproduced in fun testUreCharClasses in TestUreCharClasses.cmn.kt
+ * Usual workaround for weird behavior is to wrap some parts in additional chOfAny(token).
+ */
+@DelicateApi("Very delicate! Expect inconsistent matching behavior between platforms. Always write unit tests.")
 @NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAll(charClasses: List<UreCharClass>) = UreCharClassIntersect(charClasses)
 
+/**
+ * This is not only not-portable, but also VERY DELICATE.
+ * Please always write unit tests to make sure it behaves as expected on platforms you're using.
+ * There are weird inconsistencies when regex engines interpret intersections of unions, negated intersections, etc etc.
+ * Some are described here: https://www.regular-expressions.info/charclassintersect.html
+ * Some are reproduced in fun testUreCharClasses in TestUreCharClasses.cmn.kt
+ * Usual workaround for weird behavior is to wrap some parts in additional chOfAny(token).
+ */
+@DelicateApi("Very delicate! Expect inconsistent matching behavior between platforms. Always write unit tests.")
 @NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAll(vararg charClasses: UreCharClass?) = chOfAll(charClasses.toList().filterNotNull())
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAll(charClasses)"))
+@DelicateApi("Very delicate! Expect inconsistent matching behavior between platforms. Always write unit tests.")
 @NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfNotAll(vararg charClasses: UreCharClass?) = !chOfAll(*charClasses)
 
