@@ -24,7 +24,7 @@ enum class UAlignmentType(val css: String) {
 @Composable fun UBin(
     type: UBinType,
     mod: Mod = Mod,
-    selected: Boolean = false, // TODO NOW: also mods?
+    selected: Boolean = false, // TODO blaNOW: also mods?
     content: @Composable () -> Unit,
 ) {
     val childrenMod = LocalUChildrenMod.current
