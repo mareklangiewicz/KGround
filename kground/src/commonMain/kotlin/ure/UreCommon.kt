@@ -21,8 +21,8 @@ val ureBasicEmail = ure {
     + atWordBoundary // so the last domain char is not dash
 }
 
-fun ureIdent(first: Ure = chAlpha, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
-    + first
+fun ureIdent(chStart: Ure = chWordStart, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
+    + chStart
     0..MAX of chWord
     if (allowDashesInside) 0..MAX of ure {
         + chDash
@@ -51,9 +51,11 @@ fun ureChain(
     }
 }
 
+/** Warning: Be careful (catastrophic backtracking: https://www.regular-expressions.info/catastrophic.html) */
 fun ureWhateva(reluctant: Boolean = true, inLine: Boolean = false) =
     ure { x(0..MAX, reluctant = reluctant) of if (inLine) chAnyInLine else chAnyAtAll }
 
+/** Warning: Be careful (catastrophic backtracking: https://www.regular-expressions.info/catastrophic.html) */
 fun ureWhatevaInLine(reluctant: Boolean = true) = ureWhateva(reluctant, inLine = true)
 
 fun ureBlankStartOfLine() = ure {

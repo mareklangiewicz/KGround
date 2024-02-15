@@ -3,17 +3,19 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.uspek.*
 
 
 fun testUreCommonStuff() {
 
     "On ureIdent" o {
-        val ure = ureIdent()
-        ure.toIR().str chkEq "\\b[a-zA-Z]\\w*\\b"
-
-        // TODO NOW: continue
+        ureIdent().chkIR("\\b[a-zA-Z_]\\w*\\b").tstMatchCorrectInputs(
+            listOf("bla", "Ble12", "bLu23ZZ", "_1", "__main__", "_", "i"),
+            listOf("1ble", "1_", "+", ""),
+            alsoCheckNegation = false,
+            verbose = true,
+        )
     }
 
     // TODO continue

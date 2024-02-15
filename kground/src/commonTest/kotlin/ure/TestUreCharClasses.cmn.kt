@@ -7,6 +7,7 @@ import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.tuplek.fo
 import pl.mareklangiewicz.tuplek.tre
+import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.uspek.*
 
 fun testUreCharClasses() {
@@ -35,19 +36,21 @@ fun testSomeBasicCharClasses() {
         "all ready to use char class unions compile everywhere" o {
             listOf(
                 chAlpha, chHexDigit, chAlnum, chGraph, chWhiteSpaceInLine, chPrint,
-                chAnyAtAll, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
+                chAnyAtAll, chWordStart, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
             ).forEachIndexed { i, u -> "union nr $i ${u.toIR().str}" o { u.tstCompiles() } }
         }
     }
-    "On some already created UreCharExact vals" o {
+    "On some already created chXXX vals" o {
         "chSlash str is just slash" o { chSlash.str chkEq "/" }
-        "chSlash IR is just slash" o { chSlash.toIR().str chkEq "/" }
+        "chSlash IR is just slash" o { chSlash chkIR "/" }
         "chBackSlash str is just backslash" o { chBackSlash.str chkEq "\\" }
-        "chBackSlash IR is quoted" o { chBackSlash.toIR().str chkEq "\\\\" }
+        "chBackSlash IR is quoted" o { chBackSlash chkIR "\\\\" }
         "chTab str is just actual tab char code 9" o { chTab.str chkEq "\t" }
-        "chTab IR is special t quoted" o { chTab.toIR().str chkEq "\\t" }
+        "chTab IR is special t quoted" o { chTab chkIR "\\t" }
         "chAlert str is just actual alert char code 7" o { chTab.str.single().code chkEq 9 }
-        "chAlert IR is special a quoted" o { chAlert.toIR().str chkEq "\\a" }
+        "chAlert IR is special a quoted" o { chAlert chkIR "\\a" }
+
+        "chWordStart IR is flattened" o { chWordStart chkIR "[a-zA-Z_]" }
     }
 
     "On fun ch constructing UreCharExact" o {
@@ -55,7 +58,7 @@ fun testSomeBasicCharClasses() {
         "works correctly with single backslash" o {
             val ure = ch("\\") // using the version with string arg to be analogous to next tests with surrogate pairs
             ure.str chkEq "\\" // it is remembering just one char - no quoting here yet
-            ure.toIR().str chkEq "\\\\" // it is quoting (if necessary) when generating IR
+            ure chkIR "\\\\" // it is quoting (if necessary) when generating IR
         }
         "On copyright character" o {
             val copyRight = "\u00a9"
@@ -294,7 +297,7 @@ fun testSomeWeirdCharClasses() {
     // Result: It works correctly only on JVM. Different bugs on JS and on LINUX.
     "On potential java inconsistency described in Intersection in Negated Classes" o {
         val ureNegated = !chOfAll(chOfAnyExact('1', '2', '3', '4'), chOfAnyExact('3', '4', '5', '6'))
-        ureNegated.toIR().str chkEq "[^1234&&3456]"
+        ureNegated chkIR "[^1234&&3456]"
         when (platform) {
             // JVM works correctly (eveything except 3 and 4)
             "JVM" -> ureNegated.tstMatchCorrectChars("&aB*01256789", "34")

@@ -4,6 +4,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.uspek.*
 
 const val exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"
@@ -29,8 +30,8 @@ fun testUreBasicSanity() {
     "chAnyInLine does NOT match line breaks" o { chAnyInLine.compile().findAll(exampleABCDEx3).count() chkEq exampleABCDEx3.length - 2 }
     "chAnyAtAll does match every character" o { chAnyAtAll.compile().findAll(exampleABCDEx3).count() chkEq exampleABCDEx3.length }
     "example ure s constructed as expected" o {
-        ureBOLaBcD.toIR().str chkEq "^aBcD"
-        ureBcDeEOL.toIR().str chkEq "BcDe\$"
+        ureBOLaBcD chkIR "^aBcD"
+        ureBcDeEOL chkIR "BcDe\$"
     }
 }
 
@@ -40,7 +41,7 @@ fun testUreBasicEmail() {
         "chk IR as expected" o {
             // This chk is kinda lame (expecting exact impl/ir / cementing impl),
             // but it's useful for me now as documentation and to track if sth changes.
-            ureBasicEmail.toIR().str chkEq """\b(?<user>[\w.\-]+)\b@\b(?<domain>(?:[\w\-]+\.)+[\w\-]{2,16})\b"""
+            ureBasicEmail chkIR """\b(?<user>[\w.\-]+)\b@\b(?<domain>(?:[\w\-]+\.)+[\w\-]{2,16})\b"""
         }
         testUreEmail(ureBasicEmail)
     }

@@ -665,9 +665,17 @@ val chDash = '-'.ce
  */
 val chDot = '.'.ce
 
+/**
+ * Warning: Careful with timesXXX (catastrophic backtracking: https://www.regular-expressions.info/catastrophic.html)
+ * Note: We have [RegexOption.MULTILINE] enabled by default, so the '.' matches only "in line".
+ * See [Ure.compile] kdoc for details.
+ */
 val chAnyInLine = '.'.cpd
 
-/** [\s\S] It is a portable and fast way to match any character at all. */
+/**
+ * [\s\S] It is a portable and fast way to match any character at all.
+ * Warning: Careful with timesXXX (catastrophic backtracking: https://www.regular-expressions.info/catastrophic.html)
+ */
 @OptIn(NotPortableApi::class)
 val chAnyAtAll = chOfAny(chWhiteSpace, !chWhiteSpace) // should work everywhere and should be fast.
 // Note: following impl would not work on JS: ureIR("(?s:.)")
@@ -677,6 +685,10 @@ val chAnyAtAll = chOfAny(chWhiteSpace, !chWhiteSpace) // should work everywhere 
 
 /** Same as [a-zA-Z0-9_] */
 val chWord = 'w'.cpd
+
+/** The first character of a "word" normally can't be a digit, but still can be '_', so: [a-zA-Z_] */
+@OptIn(NotPortableApi::class)
+val chWordStart = chOfAny(chAlpha, ch('_'))
 
 /** Same as [^a-zA-Z0-9_] */
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord"))

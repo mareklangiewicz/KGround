@@ -4,6 +4,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.ure.bad.chkMatchEntire
 import pl.mareklangiewicz.uspek.*
 
@@ -37,14 +38,12 @@ fun testUreQuantifiersAndAtomicGroups() {
                 // Currently UreQuantifier.toClosedIR() wraps it in non-capt group to avoid any issues like above.
                 // But someday I might optimize it by carefully multiplying stacked quantifiers min and max values.
                 // Then some additional tests here would be necessary.
-                val ure = ch('a').times(2).timesMin(1)
-                ure.toIR().str chkEq "(?:a{2})+"
+                val ure = ch('a').times(2).timesMin(1).chkIR("(?:a{2})+")
                 ure.tstCompiles(alsoCheckNegation = false)
             }
         }
 
-        val chAnyBD = chOfAnyExact('B', 'D')
-        chAnyBD.toIR().str chkEq "[BD]"
+        val chAnyBD = chOfAnyExact('B', 'D').chkIR("[BD]")
 
         val ureReluctantAMP = chAnyBD then chAnyAtAll.timesAny(reluctant = true) then chAnyBD
         val ureGreedyAMP = chAnyBD then chAnyAtAll.timesAny() then chAnyBD
@@ -54,12 +53,12 @@ fun testUreQuantifiersAndAtomicGroups() {
         val ureT27RelAMP = chAnyBD then chAnyAtAll.times(2..7, reluctant = true) then chAnyBD
         val ureT27GrAMP = chAnyBD then chAnyAtAll.times(2..7) then chAnyBD
         // TODO_someday_maybe: test sth with other flavors or .timesXXX
-        "ure reluctant any-middle-part ir ok" o { ureReluctantAMP.toIR().str chkEq "[BD][\\s\\S]*?[BD]" }
-        "ure greedy any-middle-part ir ok" o { ureGreedyAMP.toIR().str chkEq "[BD][\\s\\S]*[BD]" }
-        "ure possessive any-middle-part ir ok" o { urePossessiveAMP.toIR().str chkEq "[BD][\\s\\S]*+[BD]" }
-        "ure atomic any-middle-part ir ok" o { ureAtomicAMP.toIR().str chkEq "[BD](?>[\\s\\S]*)[BD]" }
-        "ure t 2..7 reluctant any-middle-part ir ok" o { ureT27RelAMP.toIR().str chkEq "[BD][\\s\\S]{2,7}?[BD]" }
-        "ure t 2..7 greedy any-middle-part ir ok" o { ureT27GrAMP.toIR().str chkEq "[BD][\\s\\S]{2,7}[BD]" }
+        "ure reluctant any-middle-part ir ok" o { ureReluctantAMP chkIR "[BD][\\s\\S]*?[BD]" }
+        "ure greedy any-middle-part ir ok" o { ureGreedyAMP chkIR "[BD][\\s\\S]*[BD]" }
+        "ure possessive any-middle-part ir ok" o { urePossessiveAMP chkIR "[BD][\\s\\S]*+[BD]" }
+        "ure atomic any-middle-part ir ok" o { ureAtomicAMP chkIR "[BD](?>[\\s\\S]*)[BD]" }
+        "ure t 2..7 reluctant any-middle-part ir ok" o { ureT27RelAMP chkIR "[BD][\\s\\S]{2,7}?[BD]" }
+        "ure t 2..7 greedy any-middle-part ir ok" o { ureT27GrAMP chkIR "[BD][\\s\\S]{2,7}[BD]" }
 
         //  expExample list is mostly for sanity check and to align visually with the expected results below
         val expExample = listOf("          aBcDe\\naBcDe\\nABCDE   ",

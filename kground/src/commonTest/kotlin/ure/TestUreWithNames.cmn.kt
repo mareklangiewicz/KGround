@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.uspek.*
 
 
@@ -39,10 +40,10 @@ fun testUreWithNames() {
         }
         val ure4 = ure1 or ure2 // no additional name added for whole ure4
         "constructed as expected" o {
-            ure1.toIR().str chkEq "(?<nm1>^aBcD)"
-            ure2.toIR().str chkEq "(?<nm2>BcDe$)"
-            ure3.toIR().str chkEq "(?<nm3>(?<nm1>^aBcD)[\\s\\S]*(?<nm2>BcDe$))"
-            ure4.toIR().str chkEq "(?<nm1>^aBcD)|(?<nm2>BcDe$)"
+            ure1 chkIR "(?<nm1>^aBcD)"
+            ure2 chkIR "(?<nm2>BcDe$)"
+            ure3 chkIR "(?<nm3>(?<nm1>^aBcD)[\\s\\S]*(?<nm2>BcDe$))"
+            ure4 chkIR "(?<nm1>^aBcD)|(?<nm2>BcDe$)"
         }
         "On compile" o {
             val re1 = ure1.compile()
