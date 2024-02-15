@@ -2,6 +2,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ure.core.Ure
 
 
 @DelicateApi("Very basic email Ure. It will not match many strange but correct emails. Can also match some incorrect.")

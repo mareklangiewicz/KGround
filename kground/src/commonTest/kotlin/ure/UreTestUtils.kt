@@ -4,6 +4,7 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
+import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
 
 

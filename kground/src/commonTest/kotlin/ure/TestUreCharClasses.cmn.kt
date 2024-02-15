@@ -8,6 +8,9 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.tuplek.fo
 import pl.mareklangiewicz.tuplek.tre
 import pl.mareklangiewicz.ure.bad.chkIR
+import pl.mareklangiewicz.ure.core.IR
+import pl.mareklangiewicz.ure.core.Ure
+import pl.mareklangiewicz.ure.core.UreCharClass
 import pl.mareklangiewicz.uspek.*
 
 fun testUreCharClasses() {

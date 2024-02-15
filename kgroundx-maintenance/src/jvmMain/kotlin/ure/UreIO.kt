@@ -3,6 +3,8 @@ package pl.mareklangiewicz.ure
 import okio.*
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.ure.core.Ure
+import pl.mareklangiewicz.ure.core.UreConcatenation
 
 
 fun FileSystem.readAndMatchUre(file: Path, init: UreConcatenation.() -> Unit): MatchResult? =

@@ -2,6 +2,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.ure.core.Ure
 import kotlin.text.RegexOption.*
 
 fun urePackageLine(withNamePrefix: String = "ktPackage") = ureKtKeywordLine("package", withNamePrefix)

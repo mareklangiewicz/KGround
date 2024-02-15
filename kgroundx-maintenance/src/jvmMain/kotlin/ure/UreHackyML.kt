@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.ure.core.Ure
 
 /**
  * Micro regular expressions for XML, HTML, etc.

@@ -4,6 +4,7 @@ package pl.mareklangiewicz.ure.bad
 
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ure.*
+import pl.mareklangiewicz.ure.core.*
 
 inline infix fun Ure.chkIR(ir: IR) = apply { toIR() chkEq ir }
 

@@ -5,6 +5,7 @@ package pl.mareklangiewicz.ure
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ure.bad.chkIR
+import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
 
 const val exampleABCDEx3 = "aBcDe\naBcDe\nABCDE"

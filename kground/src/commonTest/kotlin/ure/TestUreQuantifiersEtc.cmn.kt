@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.ure.bad.chkMatchEntire
+import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
 
 
