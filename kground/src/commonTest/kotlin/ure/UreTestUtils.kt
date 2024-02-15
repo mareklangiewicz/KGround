@@ -44,18 +44,31 @@ fun Ure.tstDoesNotCompile() = "does NOT compile".oThrows<Throwable>({
     true
 }) { compile() }
 
-fun Ure.tstCompilesOnlyOn(platforms: List<String>, vararg useNamedArgs: Unit, alsoCheckNegation: Boolean = true) {
+fun Ure.tstCompilesOnlyOn(vararg platforms: String, alsoCheckNegation: Boolean = true) {
     if (platform in platforms) tstCompiles(alsoCheckNegation = alsoCheckNegation) else tstDoesNotCompile()
 }
 
 
 fun Ure.tstMatchCorrectChars(
+    match: CharSequence,
+    matchNot: CharSequence,
+    vararg useNamedArgs: Unit,
+    alsoCheckNegation: Boolean = true,
+    verbose: Boolean = false,
+) = tstMatchCorrectInputs(
+    match.toList().map { it.toString() },
+    matchNot.toList().map { it.toString() },
+    alsoCheckNegation = alsoCheckNegation,
+    verbose = verbose,
+)
+
+fun Ure.tstMatchCorrectInputs(
     match: List<String>,
     matchNot: List<String>,
     vararg useNamedArgs: Unit,
     alsoCheckNegation: Boolean = true,
     verbose: Boolean = false,
-) = "matches correct chars" o {
+) = "matches correct inputs" o {
     tstMatchAll(*match.toTypedArray(), verbose = verbose)
     tstMatchNone(*matchNot.toTypedArray(), verbose = verbose)
     if (alsoCheckNegation) {
@@ -64,16 +77,16 @@ fun Ure.tstMatchCorrectChars(
     }
 }
 
-fun Ure.tstMatchAll(vararg examples: String, verbose: Boolean = false) {
+fun Ure.tstMatchAll(vararg inputs: String, verbose: Boolean = false) {
     val re = compile()
-    for (e in examples)
+    for (e in inputs)
         if (verbose) "matches $e" o { re.chkMatchEntire(e) }
         else re.chkMatchEntire(e)
 }
 
-fun Ure.tstMatchNone(vararg examples: String, verbose: Boolean = false) {
+fun Ure.tstMatchNone(vararg inputs: String, verbose: Boolean = false) {
     val re = compile()
-    for (e in examples)
+    for (e in inputs)
         if (verbose) "does not match $e" o { re.chkNotMatchEntire(e) }
         else re.chkNotMatchEntire(e)
 }
