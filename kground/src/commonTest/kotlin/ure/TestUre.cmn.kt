@@ -20,6 +20,8 @@ fun testUreCmn() = "On testUreCmn on $platform" o {
     testStdLibRegexIssueJvm()
     testUreBasicStuff()
     testUreCharClasses()
+    testUreQuantifiersAndAtomicGroups()
+    testUreCommonStuff()
 }
 
 /** https://youtrack.jetbrains.com/issue/KT-65531/Regex-content-can-change-Regex.options */
