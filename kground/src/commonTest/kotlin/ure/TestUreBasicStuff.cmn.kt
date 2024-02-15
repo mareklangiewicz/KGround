@@ -19,6 +19,7 @@ fun testUreBasicStuff() {
     testUreWithOptions()
     testUreQuantifiersAndAtomicGroups()
     testUreBasicEmail()
+    testUreCommonStuff()
 }
 
 @OptIn(DelicateApi::class)

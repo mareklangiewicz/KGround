@@ -181,6 +181,7 @@ value class UreNumberedGroup internal constructor(override val content: Ure) : U
 
 /** https://www.regular-expressions.info/atomic.html */
 @JvmInline
+@NotPortableApi("Does NOT even compile (Ure.compile) on JS.")
 value class UreAtomicGroup internal constructor(override val content: Ure) : UreGroup, UreAtomic {
     override val typeIR get() = "?>".asIR
 }
@@ -536,7 +537,7 @@ fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolea
 fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) =
     if (boundaryBefore == null && boundaryAfter == null) this else ure {
         boundaryBefore?.let { + it }
-        + this@withBoundaries // it should flatten if this is UreConcatenation (see UreConcatenation.toIR()) TODO NOW: doublecheck
+        + this@withBoundaries // it will flatten if this is UreConcatenation (see UreConcatenation.toIR())
         boundaryAfter?.let { + it }
     }
 
@@ -936,6 +937,7 @@ fun Ure.group(capture: Boolean = true, name: String? = null) = when {
 fun Ure.groupNonCapt() = UreNonCapturingGroup(this)
 
 /** https://www.regular-expressions.info/atomic.html */
+@NotPortableApi("Does NOT even compile (Ure.compile) on JS.")
 fun Ure.groupAtomic() = UreAtomicGroup(this)
 
 @OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
