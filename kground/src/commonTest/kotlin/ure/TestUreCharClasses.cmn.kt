@@ -24,19 +24,19 @@ fun testSomeBasicCharClasses() {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicodeSets
         "class intersection compiles on JVM and LINUX but not on JS" o {
-            testUreCompilesOnlyOn(ureRaw("[a-z&&[^cd]]"), listOf("JVM", "LINUX"), alsoCheckNegation = false)
+            ureRaw("[a-z&&[^cd]]").tstCompilesOnlyOn(listOf("JVM", "LINUX"), alsoCheckNegation = false)
         }
         "class with basic union compiles everywhere" o {
-            testUreCompiles(ureRaw("[^a-dx-z]"), alsoCheckNegation = false)
+            ureRaw("[^a-dx-z]").tstCompiles(alsoCheckNegation = false)
         }
         "class with a bit more complex union compiles on JVM and LINUX but not on JS" o {
-            testUreCompilesOnlyOn(ureRaw("[a-d[^x-z]]"), listOf("JVM", "LINUX"), alsoCheckNegation = false)
+            ureRaw("[a-d[^x-z]]").tstCompilesOnlyOn(listOf("JVM", "LINUX"), alsoCheckNegation = false)
         }
         "all ready to use char class unions compile everywhere" o {
             listOf(
                 chAlpha, chHexDigit, chAlnum, chGraph, chWhiteSpaceInLine, chPrint,
                 chAnyAtAll, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
-            ).forEachIndexed { i, u -> "union nr $i ${u.toIR().str}" o { testUreCompiles(u) } }
+            ).forEachIndexed { i, u -> "union nr $i ${u.toIR().str}" o { u.tstCompiles() } }
         }
     }
     "On some already created UreCharExact vals" o {
@@ -222,10 +222,10 @@ private fun onUreClass(
 ) {
     "On ure class $name on $platform" o {
         if (platform in onPlatforms) {
-            testUreCompiles(ure, alsoCheckNegation = alsoCheckNegation)
-            testUreMatchesCorrectChars(ure, match, matchNot, alsoCheckNegation = alsoCheckNegation, verbose = verbose)
+            ure.tstCompiles(alsoCheckNegation = alsoCheckNegation)
+            ure.tstMatchCorrectChars(match, matchNot, alsoCheckNegation = alsoCheckNegation, verbose = verbose)
         }
-        else testUreDoesNotCompile(ure)
+        else ure.tstDoesNotCompile()
     }
 }
 
@@ -265,15 +265,13 @@ fun testSomeWeirdCharClasses() {
             alsoCheckNegation = false,
         )
         when (platform) {
-            "JS" -> testUreDoesNotCompile(ureReproducer) // this is as expected
-            "JVM" -> testUreMatchesCorrectChars(
-                ure = ureReproducer,
+            "JS" -> ureReproducer.tstDoesNotCompile() // this is as expected
+            "JVM" -> ureReproducer.tstMatchCorrectChars(
                 match = listOf("1"),
                 matchNot = listOf("a", "B", "*", "0", "3", "4", "7", "9"),
                 alsoCheckNegation = false,
             ) // this is as expected
-            "LINUX" -> testUreMatchesCorrectChars(
-                ure = ureReproducer,
+            "LINUX" -> ureReproducer.tstMatchCorrectChars(
                 match = listOf("1", "a"),
                 matchNot = listOf("B", "*", "0", "3", "4", "7", "9"),
                 alsoCheckNegation = false,
@@ -305,20 +303,17 @@ fun testSomeWeirdCharClasses() {
         ureNegated.toIR().str chkEq "[^1234&&3456]"
         when (platform) {
             // JVM works correctly.
-            "JVM" -> testUreMatchesCorrectChars(
-                ure = ureNegated,
+            "JVM" -> ureNegated.tstMatchCorrectChars(
                 match = listOf("&", "a", "B", "*", "0", "1", "2", "5", "6", "7", "8", "9"), // eveything except 3 and 4
                 matchNot = listOf("3", "4"),
             )
             // JS compiles it but incorrectly! it doesn't really support intersection at all, but treats "&" literally.
-            "JS" -> testUreMatchesCorrectChars(
-                ure = ureNegated,
+            "JS" -> ureNegated.tstMatchCorrectChars(
                 match = listOf("a", "B", "*", "0", "7", "8", "9"),
                 matchNot = listOf("1", "2", "3", "4", "&", "5", "6"),
             )
             // LINUX compiles it incorrectly: as if negation was applied only to first part of intersection.
-            "LINUX" -> testUreMatchesCorrectChars(
-                ure = ureNegated,
+            "LINUX" -> ureNegated.tstMatchCorrectChars(
                 match = listOf("5", "6"),
                 matchNot = listOf("1", "2", "3", "4", "&", "*", "0", "7", "9"),
                 alsoCheckNegation = false,

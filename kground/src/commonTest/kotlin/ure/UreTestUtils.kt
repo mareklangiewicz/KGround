@@ -2,6 +2,8 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
+import pl.mareklangiewicz.regex.bad.chkMatchEntire
+import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
 import pl.mareklangiewicz.uspek.*
 
 
@@ -15,66 +17,65 @@ inline fun <reified T : Throwable> String.oThrows(
 ) = o { chkThrows<T>(expectation) { code() } }
 
 
-fun testUreCompiles(
-    ure: Ure,
+/**
+ * Extension functions with prefix "tst" are similar to "chk", but in test sources,
+ * and they use uspek and add some (usually small) subtree to the current uspek tree.
+ * All functions with "chk" prefix are in main sources and unaware of uspek.
+ * The tst prefixed extensions usually use some chk prefixed checks inside.
+ */
+
+fun Ure.tstCompiles(
     vararg useNamedArgs: Unit,
     alsoCheckNegation: Boolean = true,
 ) = "compiles" o {
-    ure.compile() // will throw if the platform doesn't support it
+    compile() // will throw if the platform doesn't support it
     if (alsoCheckNegation)
-        ure.not().compile() // will throw if the platform doesn't support it or Ure.not() doesn't support it
+        not().compile() // will throw if the platform doesn't support it or Ure.not() doesn't support it
 }
 
 /**
  * Note: It throws different [Throwable] on different platforms.
  * I encountered [SyntaxError] on JS and [InvalidArgumentException] on JVM and LINUX and [PatternSyntaxException] on LINUX.
  */
-fun testUreDoesNotCompile(ure: Ure) = "does NOT compile".oThrows<Throwable>({
+fun Ure.tstDoesNotCompile() = "does NOT compile".oThrows<Throwable>({
     println("fake debug ulog on $platform: $it")
     // FIXME_later: use ULog and KGroundCtx, when ready (level: DEBUG)
     // (throwables here are very interesting and I definitely want to have it logged, but in the right place)
     true
-}) { ure.compile() }
+}) { compile() }
 
-fun testUreCompilesOnlyOn(
-    ure: Ure,
-    platforms: List<String>,
-    vararg useNamedArgs: Unit,
-    alsoCheckNegation: Boolean = true,
-) {
-    if (platform in platforms) testUreCompiles(ure, alsoCheckNegation = alsoCheckNegation)
-    else testUreDoesNotCompile(ure)
+fun Ure.tstCompilesOnlyOn(platforms: List<String>, vararg useNamedArgs: Unit, alsoCheckNegation: Boolean = true) {
+    if (platform in platforms) tstCompiles(alsoCheckNegation = alsoCheckNegation) else tstDoesNotCompile()
 }
 
 
-fun testUreMatchesCorrectChars(
-    ure: Ure,
+fun Ure.tstMatchCorrectChars(
     match: List<String>,
     matchNot: List<String>,
     vararg useNamedArgs: Unit,
     alsoCheckNegation: Boolean = true,
     verbose: Boolean = false,
 ) = "matches correct chars" o {
-    testUreMatchesAll(ure, *match.toTypedArray(), verbose = verbose)
-    testUreMatchesNone(ure, *matchNot.toTypedArray(), verbose = verbose)
+    tstMatchAll(*match.toTypedArray(), verbose = verbose)
+    tstMatchNone(*matchNot.toTypedArray(), verbose = verbose)
     if (alsoCheckNegation) {
-        testUreMatchesAll(!ure, *matchNot.toTypedArray(), verbose = verbose)
-        testUreMatchesNone(!ure, *match.toTypedArray(), verbose = verbose)
+        not().tstMatchAll(*matchNot.toTypedArray(), verbose = verbose)
+        not().tstMatchNone(*match.toTypedArray(), verbose = verbose)
     }
 }
 
-fun testUreMatchesAll(ure: Ure, vararg examples: String, verbose: Boolean = false) {
-    val re = ure.compile()
+fun Ure.tstMatchAll(vararg examples: String, verbose: Boolean = false) {
+    val re = compile()
     for (e in examples)
-        if (verbose) "matches $e" o { chk(re.matches(e)) { "$re does not match $e" } }
-        else chk(re.matches(e)) { "$re doesn't match $e" }
+        if (verbose) "matches $e" o { re.chkMatchEntire(e) }
+        else re.chkMatchEntire(e)
 }
 
-fun testUreMatchesNone(ure: Ure, vararg examples: String, verbose: Boolean = false) {
-    val re = ure.compile()
+fun Ure.tstMatchNone(vararg examples: String, verbose: Boolean = false) {
+    val re = compile()
     for (e in examples)
-        if (verbose) "does not match $e" o { chk(!re.matches(e)) { "$re matches $e" } }
-        else chk(!re.matches(e)) { "$re matches $e" }
+        if (verbose) "does not match $e" o { re.chkNotMatchEntire(e) }
+        else re.chkNotMatchEntire(e)
 }
 
 /**

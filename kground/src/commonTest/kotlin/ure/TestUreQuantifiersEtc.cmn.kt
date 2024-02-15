@@ -15,22 +15,22 @@ fun testUreQuantifiersAndAtomicGroups() {
 
         "On basic quantifier syntax" o {
             "reluctant quantifier compiles everywhere" o {
-                testUreCompiles(ureRaw("a+?"), alsoCheckNegation = false)
+                ureRaw("a+?").tstCompiles(alsoCheckNegation = false)
             }
             "possessive quantifier does not compile on JS" o {
-                testUreCompilesOnlyOn(ureRaw("a++"), listOf("JVM", "LINUX"), alsoCheckNegation = false)
+                ureRaw("a++").tstCompilesOnlyOn(listOf("JVM", "LINUX"), alsoCheckNegation = false)
             }
 
-            // This is fine, can always be simplified.
+            // This is kinda fine these don't compile on some platforms, these can always be simplified.
             "dangling quantifiers compile only on JVM" o {
                 listOf("a{4}{3}", "b*{3}", "c+{3}").forEachIndexed { i, u ->
-                    "ure $i: \"$u\"" o { testUreCompilesOnlyOn(ureRaw(u), listOf("JVM"), alsoCheckNegation = false) }
+                    "ure $i: \"$u\"" o { ureRaw(u).tstCompilesOnlyOn(listOf("JVM"), alsoCheckNegation = false) }
                 }
             }
 
             // This is kinda bad, but workaround for JS is: just wrap a{2} in non-capt group.
             "legitimate quantifier composition does not compile on JS" o {
-                testUreCompilesOnlyOn(ureRaw("a{2}+"), listOf("JVM", "LINUX"), alsoCheckNegation = false)
+                ureRaw("a{2}+").tstCompilesOnlyOn(listOf("JVM", "LINUX"), alsoCheckNegation = false)
             }
 
             "ure quantifiers are safe on all platforms" o {
@@ -39,7 +39,7 @@ fun testUreQuantifiersAndAtomicGroups() {
                 // Then some additional tests here would be necessary.
                 val ure = ch('a').times(2).timesMin(1)
                 ure.toIR().str chkEq "(?:a{2})+"
-                testUreCompiles(ure, alsoCheckNegation = false)
+                ure.tstCompiles(alsoCheckNegation = false)
             }
         }
 
@@ -102,12 +102,12 @@ fun testUreQuantifiersAndAtomicGroups() {
             "find all with overlap" o { ureGreedyAMP.findAllWithOverlap(exampleABCDEx3).chkEachResultRaw(expGreedyAMPFAWO) }
         }
         "On ure with possessive any-middle-part on $platform" o {
-            if (platform == "JS") testUreDoesNotCompile(urePossessiveAMP)
+            if (platform == "JS") urePossessiveAMP.tstDoesNotCompile()
             else "finds none" o { urePossessiveAMP.findAll(exampleABCDEx3).count() chkEq 0 }
             // possessive middle eats all chars and never backtracks so last part never matches
         }
         "On ure with atomic greedy any-middle-part on $platform" o { // atomic makes greedy act like possessive
-            if (platform == "JS") testUreDoesNotCompile(ureAtomicAMP)
+            if (platform == "JS") ureAtomicAMP.tstDoesNotCompile()
             else "finds none" o { ureAtomicAMP.findAll(exampleABCDEx3).count() chkEq 0 }
             // atomic-greedy middle eats all chars and never backtracks so last part never matches
         }
