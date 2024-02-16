@@ -50,11 +50,11 @@ kotlin {
 }
 
 application {
-    mainClass.set("pl.mareklangiewicz.kgroundx.jupyter.playground.KGroundPlaygroundKt")
+    mainClass.set("pl.mareklangiewicz.kgroundx.jupyter.MainKt")
 }
 
 tasks.processJupyterApiResources {
-    libraryProducers = listOf("pl.mareklangiewicz.kgroundx.jupyter.KGroundIntegration")
+    libraryProducers = listOf("pl.mareklangiewicz.kgroundx.jupyter.Integration")
 }
 
 // region [Kotlin Module Build Template]
