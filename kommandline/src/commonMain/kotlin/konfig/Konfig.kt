@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.konfig
 
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.upue.IMutMap

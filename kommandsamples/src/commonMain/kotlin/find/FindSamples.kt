@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.find
 
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 import pl.mareklangiewicz.kommand.find.FindOpt.*

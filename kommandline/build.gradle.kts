@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForBasicMppLib {
-    api("pl.mareklangiewicz:kground:0.0.35")
+    api("pl.mareklangiewicz:kground:0.0.37")
     // FIXME https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 }
 

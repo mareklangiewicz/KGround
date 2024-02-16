@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.github
 
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 
 fun ghHelp(init: GhHelp.() -> Unit = {}) = GhHelp().apply(init)
