@@ -22,7 +22,7 @@ val ureBasicEmail = ure {
     + atWordBoundary // so the last domain char is not dash
 }
 
-fun ureIdent(chStart: Ure = chWordStart, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
+fun ureIdent(chStart: Ure = chWordFirst, withWordBoundaries: Boolean = true, allowDashesInside: Boolean = false) = ure {
     + chStart
     0..MAX of chWord
     if (allowDashesInside) 0..MAX of ure {

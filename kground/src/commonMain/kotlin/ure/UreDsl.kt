@@ -212,7 +212,7 @@ val chWord = 'w'.cpd
 
 /** The first character of a "word" normally can't be a digit, but still can be '_', so: [a-zA-Z_] */
 @OptIn(NotPortableApi::class)
-val chWordStart = chOfAny(chAlpha, ch('_'))
+val chWordFirst = chOfAny(chAlpha, ch('_'))
 
 /** Same as [^a-zA-Z0-9_] */
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWord"))

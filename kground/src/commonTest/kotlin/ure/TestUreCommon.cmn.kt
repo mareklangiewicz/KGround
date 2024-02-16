@@ -11,8 +11,8 @@ fun testUreCommonStuff() {
 
     "On ureIdent" o {
         ureIdent().chkIR("\\b[a-zA-Z_]\\w*\\b").tstMatchCorrectInputs(
-            listOf("bla", "Ble12", "bLu23ZZ", "_1", "__main__", "_", "i"),
-            listOf("1ble", "1_", "+", ""),
+            match = listOf("bla", "Ble12", "bLu23ZZ", "_1", "__main__", "_", "i"),
+            matchNot = listOf("1ble", "1_", "+", ""),
             alsoCheckNegation = false,
             verbose = true,
         )

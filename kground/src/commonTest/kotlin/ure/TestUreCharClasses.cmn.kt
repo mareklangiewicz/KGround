@@ -39,7 +39,7 @@ fun testSomeBasicCharClasses() {
         "all ready to use char class unions compile everywhere" o {
             listOf(
                 chAlpha, chHexDigit, chAlnum, chGraph, chWhiteSpaceInLine, chPrint,
-                chAnyAtAll, chWordStart, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
+                chAnyAtAll, chWordFirst, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
             ).forEachIndexed { i, u -> "union nr $i ${u.toIR().str}" o { u.tstCompiles() } }
         }
     }
@@ -53,7 +53,7 @@ fun testSomeBasicCharClasses() {
         "chAlert str is just actual alert char code 7" o { chTab.str.single().code chkEq 9 }
         "chAlert IR is special a quoted" o { chAlert chkIR "\\a" }
 
-        "chWordStart IR is flattened" o { chWordStart chkIR "[a-zA-Z_]" }
+        "chWordFirst IR is flattened" o { chWordFirst chkIR "[a-zA-Z_]" }
     }
 
     "On fun ch constructing UreCharExact" o {
