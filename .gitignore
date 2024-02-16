@@ -9,5 +9,6 @@
 /kground-io/build
 /kgroundx-io/build
 /kgroundx-jupyter/build
+/kgroundx-jupyter/src/jvmMain/kotlin/gitignored
 /kgroundx-maintenance/build
 my.gradle.log
