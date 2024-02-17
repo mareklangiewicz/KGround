@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
@@ -8,13 +9,13 @@ import pl.mareklangiewicz.kommand.core.TestIfFile.*
 // names here are all like testIf/TestIf instead of just test/Test,
 // mostly to be different from normal test annotations/classes/functions
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testIfFirstFileNewer(file1: String, file2:String) = testIf(file1, "-nt", file2)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testIfFirstFileOlder(file1: String, file2:String) = testIf(file1, "-ot", file2)
 
 /** Can be any kind of file (e.g., directory) */
@@ -59,12 +60,12 @@ enum class TestIfFile(val code: Char) {
     FileHasGrantedExec('x')
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testIf(file: String, testIfFile: TestIfFile) = testIf("-${testIfFile.code}", file)
 
 
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
-@DelicateKommandApi
+@DelicateApi
 fun testIf(vararg tokens: String) = testIf { this.tokens.addAll(tokens) }
     // not collecting streams, because they should be empty anyway, and test needs to be fast.
     .reducedExit {
@@ -76,11 +77,11 @@ fun testIf(vararg tokens: String) = testIf { this.tokens.addAll(tokens) }
         }
     }
 
-@DelicateKommandApi
+@DelicateApi
 fun testIf(init: TestIf.() -> Unit) = TestIf().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/test.1.html) */
-@DelicateKommandApi
+@DelicateApi
 data class TestIf(val tokens: MutableList<String> = mutableListOf()) : Kommand {
     // no --help and --version options by design. (not always supported anyway - can lead to difficult bugs)
     override val name get() = "test"

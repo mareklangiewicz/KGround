@@ -2,22 +2,23 @@
 
 package pl.mareklangiewicz.kommand.ssh
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
 
-@DelicateKommandApi
+@DelicateApi
 fun ssh(destination: String, kommand: Kommand, vararg options: SshOpt) =
     ssh(destination, kommand.line()) { opts.addAll(options) }
 
-@DelicateKommandApi
+@DelicateApi
 fun ssh(destination: String, command: String? = null, vararg options: SshOpt) =
     ssh(destination, command) { opts.addAll(options) }
 
-@DelicateKommandApi
+@DelicateApi
 fun ssh(destination: String, command: String? = null, init: Ssh.() -> Unit = {}) =
     Ssh().apply { +destination; command?.let { +it }; init() }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun sshVersion() = Ssh().apply { -SshOpt.Version }
 
 /**
@@ -26,7 +27,7 @@ fun sshVersion() = Ssh().apply { -SshOpt.Version }
  * [openbsd man ssh](https://man.openbsd.org/ssh)
  * [linux man ssh](https://man7.org/linux/man-pages/man1/ssh.1.html)
  */
-@DelicateKommandApi
+@DelicateApi
 data class Ssh(
     override val opts: MutableList<SshOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
@@ -35,7 +36,7 @@ data class Ssh(
 }
 
 
-@DelicateKommandApi
+@DelicateApi
 interface SshOpt: KOptTypical {
     data object IpV4: KOptS("4"), SshOpt
     data object IpV6: KOptS("6"), SshOpt

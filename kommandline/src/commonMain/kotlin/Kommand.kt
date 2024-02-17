@@ -2,13 +2,21 @@
 
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 
-/** anonymous kommand to use only if no more specific Kommand class defined */
-@DelicateKommandApi
+/**
+ * Anonymous kommand to use only if no more specific Kommand class defined
+ *
+ * General Note: The @DelicateApi annotation in KommandLine usually means that annotated construct is low level
+ * and allows to generate incorrect kommands, which leads to bugs which can be very difficult to find later.
+ * Try to use safer non-delicate wrappers instead, which either do not allow to create incorrect kommand lines,
+ * or at least they try to "fail fast" in runtime instead of running some suspicious kommands on CliPlatform.
+ */
+@DelicateApi
 fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
 
-@DelicateKommandApi
+@DelicateApi
 fun String.toKommand() = split(" ").run {
     kommand(first(), *drop(1).toTypedArray())
 }
@@ -48,7 +56,7 @@ interface Kommand: WithName, WithArgs, ToArgs {
 
 
 /** Anonymous/Arbitrary Kommand implementation to use only if no more specific Kommand class defined */
-@DelicateKommandApi
+@DelicateApi
 data class AKommand(override val name: String, override val args: List<String>) : Kommand
 
 fun Kommand.line() = lineBash()
@@ -62,13 +70,13 @@ fun Kommand.println() = logLineRaw()
 
 fun Kommand.lineRaw(separator: String = " ") = toArgs().joinToString(separator)
 
-@DelicateKommandApi
+@DelicateApi
 fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
 
 /** Kommand option */
 interface KOpt: ToArgs
 
-@DelicateKommandApi
+@DelicateApi
 interface KOptTypical: KOpt, WithName, WithArgs {
     val namePrefix: String
     val nameSeparator: String
@@ -94,7 +102,7 @@ interface KOptTypical: KOpt, WithName, WithArgs {
 //   so they unfortunatelly have to be memorized by user.
 
 /** Short form of an option */
-@DelicateKommandApi
+@DelicateApi
 open class KOptS(
     override val name: String,
     override val args: List<String>,
@@ -112,7 +120,7 @@ open class KOptS(
 }
 
 /** Long form of an option */
-@DelicateKommandApi
+@DelicateApi
 open class KOptL(
     override val name: String,
     override val args: List<String>,
@@ -130,7 +138,7 @@ open class KOptL(
 }
 
 /** Special form of an option, with automatically derrived name as class name lowercase words separated by one hyphen */
-@DelicateKommandApi
+@DelicateApi
 open class KOptLN(
     override val args: List<String>,
     override val namePrefix: String = "--",
@@ -146,7 +154,7 @@ open class KOptLN(
     override val name: String get() = classSimpleWords().joinToString("-")
 }
 
-@DelicateKommandApi
+@DelicateApi
 interface KommandTypical<KOptT: KOptTypical>: Kommand {
     val opts: MutableList<KOptT>
     val nonopts: MutableList<String>
@@ -156,15 +164,15 @@ interface KommandTypical<KOptT: KOptTypical>: Kommand {
 }
 
 /** Anonymus/Arbitrary implementation of KommandTypical to use only if no more specific Kommand class defined */
-@DelicateKommandApi
+@DelicateApi
 data class AKommandTypical(
     override val name: String,
     override val opts: MutableList<KOptTypical> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
     ): KommandTypical<KOptTypical>
 
-@DelicateKommandApi
+@DelicateApi
 fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =
     AKommandTypical(name, opts.toMutableList()).apply(init)
 
-// TODO_later: update implementations to use (where appropriate): KOptTypical, KommandTypical, DelicateKommandApi,
+// TODO_later: update implementations to use (where appropriate): KOptTypical, KommandTypical, DelicateApi,

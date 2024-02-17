@@ -2,13 +2,14 @@
 
 package pl.mareklangiewicz.kommand.ssh
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
 
-@DelicateKommandApi
+@DelicateApi
 fun sshKeygen(vararg options: SshKeygenOpt) = sshKeygen { opts.addAll(options) }
 
-@DelicateKommandApi
+@DelicateApi
 fun sshKeygen(init: SshKeygen.() -> Unit = {}) = SshKeygen().apply(init)
 
 /**
@@ -16,7 +17,7 @@ fun sshKeygen(init: SshKeygen.() -> Unit = {}) = SshKeygen().apply(init)
  * [openssh homepage](https://www.openssh.com/)
  * [openssh manuals](https://www.openssh.com/manual.html)
  */
-@DelicateKommandApi
+@DelicateApi
 data class SshKeygen(
     override val opts: MutableList<SshKeygenOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
@@ -24,7 +25,7 @@ data class SshKeygen(
     override val name get() = "ssh-keygen"
 }
 
-@DelicateKommandApi
+@DelicateApi
 interface SshKeygenOpt: KOptTypical {
 
     /**

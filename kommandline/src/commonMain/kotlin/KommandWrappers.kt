@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 
 /**
  * Separate from Kommand, because I want Kommand to be simple and serializable!
@@ -70,7 +71,7 @@ suspend fun TypedExecProcess<*, *, Flow<String>>.awaitAndChkExit(
  * If unexpected exit, then it will normally throw [BadExitStateErr], but with stderr set to null (meaning: unknown).
  * Usually it's better to capture stderr in some way, so think twice before choosing this extension function.
  */
-@DelicateKommandApi
+@DelicateApi
 suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
     expExit: Int = 0,
     finallyClose: Boolean = true
@@ -132,7 +133,7 @@ fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
 
 
 /** Mostly for tests to try to compare wrapped kommand line to expected line. */
-@DelicateKommandApi
+@DelicateApi
 fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
     is ReducedKommandImpl<*, *, *, *, *> -> typedKommand.kommand.lineRaw()
     is ReducedKommandMap<*, *>  -> reducedKommand.lineRawOrNull()

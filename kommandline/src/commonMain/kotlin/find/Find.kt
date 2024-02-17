@@ -7,6 +7,7 @@ package pl.mareklangiewicz.kommand.find
 // https://savannah.gnu.org/projects/findutils/
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
@@ -26,7 +27,7 @@ typealias FindDetailsDef = Collection<Pair<FindColumnName, FindPrintFormat>>
 // In all shortcut fun here, the first mandatory parameter will always be path.
 // It's better to be explicit and just use ".", when needed, instead of relaying on implicit default behavior.
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findDetailsTable(
     path: String,
     vararg useNamedArgs: Unit,
@@ -71,11 +72,11 @@ private val typicalDetails: FindDetailsDef = listOf(
     "symbolic permissions" to "%M",
 )
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findTypicalDetailsTable(path: String) =
     findDetailsTable(path, details = typicalDetails)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findTypicalDetailsTableToList(path: String) =
     findDetailsTable(path, details = typicalDetails).reducedOutToList()
 
@@ -85,7 +86,7 @@ fun findTypicalDetailsTableToList(path: String) =
  * @param useNamedArgs requires named args if nondefault used; avoids name clash with base / low level find fun.
  * @param whenFoundPrintF null means using ActPrint, non-null means ActPrintF(whenFoundPrintF!!)
  */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun find(
     path: String,
     vararg useNamedArgs: Unit,
@@ -99,19 +100,19 @@ fun find(
     path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit
 )
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findNameFull(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, NameFull(pattern, ignoreCase))
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
     find(path, NameBase(pattern, ignoreCase))
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findRegularNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
     findTypeNameBase(path, "f", pattern, ignoreCase)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findDirNameBase(
     path: String,
     pattern: String,
@@ -121,7 +122,7 @@ fun findDirNameBase(
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeNameBase(path, "d", pattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findTypeNameBase(
     path: String,
     fileType: String,
@@ -145,7 +146,7 @@ fun findTypeNameBase(
         }
     }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findDirRegex(
     path: String,
     nameRegex: String,
@@ -155,7 +156,7 @@ fun findDirRegex(
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeRegex(path, "d", nameRegex, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findTypeRegex(
     path: String,
     fileType: String,
@@ -179,14 +180,14 @@ fun findTypeRegex(
         }
     }
 
-@DelicateKommandApi
+@DelicateApi
 fun find(path: String, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
     +path
     for (e in ex) expr.add(e)
     init()
 }
 
-@DelicateKommandApi
+@DelicateApi
 fun find(init: Find.() -> Unit = {}) = Find().apply(init)
 
 
@@ -195,7 +196,7 @@ fun find(init: Find.() -> Unit = {}) = Find().apply(init)
  * [gnu projects findutils](https://savannah.gnu.org/projects/findutils/)
  * [online findutils docs](https://www.gnu.org/software/findutils/manual/html_mono/find.html)
  */
-@DelicateKommandApi
+@DelicateApi
 data class Find(
     val opts: MutableList<FindOpt> = mutableListOf(),
     val paths: MutableList<String> = mutableListOf(),
@@ -209,7 +210,7 @@ data class Find(
 
 private fun String.iff(condition: Boolean) = if (condition) this else ""
 
-@DelicateKommandApi
+@DelicateApi
 interface FindExpr: KOpt {
 
 // region Find Expression Category: POSITIONAL OPTIONS
@@ -539,7 +540,7 @@ interface FindExpr: KOpt {
 }
 
 
-@DelicateKommandApi
+@DelicateApi
 interface FindOpt: KOpt {
 
     // Note: Help and Version are inside FindExpr (formally these are expressions for find)

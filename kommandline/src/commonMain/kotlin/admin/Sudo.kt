@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.admin
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.admin.SudoOpt.*
 
@@ -19,7 +20,7 @@ import pl.mareklangiewicz.kommand.admin.SudoOpt.*
 // So I guess the correct concurrent implementation would be complicated and require a lot of testing.
 // See fun TypedKommand<...>.reducedOut for more typical concurrent implementation
 // (but without sudo related complications).
-@DelicateKommandApi
+@DelicateApi
 fun sudo(
     k: Kommand,
     vararg useNamedArgs: Unit,
@@ -35,32 +36,32 @@ fun sudo(
     out
 }
 
-@DelicateKommandApi
+@DelicateApi
 fun sudoEdit(file: String, asUser: String? = null) = sudo {
     -Edit; asUser?.let { -User(it) }; +file
 }
 
-@DelicateKommandApi
+@DelicateApi
 fun Kommand.withSudo(vararg options: SudoOpt, init: Sudo.() -> Unit = {}): Sudo = sudo(this, *options, init = init)
 
-@DelicateKommandApi
+@DelicateApi
 fun sudo(k: Kommand, vararg options: SudoOpt, init: Sudo.() -> Unit = {}) = sudo {
     opts.addAll(options); init(); -EOOpt; nonopts.addAll(k.toArgs())
 }
 
-@DelicateKommandApi
+@DelicateApi
 fun sudo(init: Sudo.() -> Unit = {}) = Sudo().apply(init)
 
 /**
  * [home page](https://www.sudo.ws/)
  * [linux man](https://www.sudo.ws/docs/man/sudo.man/) */
-@DelicateKommandApi
+@DelicateApi
 data class Sudo(
     override val opts: MutableList<SudoOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<SudoOpt> { override val name get() = "sudo" }
 
-@DelicateKommandApi
+@DelicateApi
 interface SudoOpt: KOptTypical {
     data object Help : KOptLN(), SudoOpt // there is also short -h but it does NOT always mean help
     data object Version : KOptLN(), SudoOpt

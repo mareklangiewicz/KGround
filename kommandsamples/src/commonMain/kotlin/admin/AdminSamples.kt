@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.admin
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.debian.*
@@ -13,7 +14,7 @@ data object AdminSamples {
     val Sudo = SudoSamples
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object SudoSamples {
     val sudoVersion = sudo { -SudoOpt.Version } s "sudo --version"
     val sudoLsRoot = sudo(lsDefault("/root/")) s "sudo -- ls /root/"

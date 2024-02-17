@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Adb.*
 import pl.mareklangiewicz.kommand.Adb.Command.*
@@ -21,7 +22,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 @Ignore // stuff specific to my laptop fails on CI
 class KommandTest {
     @Test fun testBashQuoteMetaChars() {

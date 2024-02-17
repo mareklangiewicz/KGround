@@ -1,18 +1,19 @@
 package pl.mareklangiewicz.kommand.git
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.git.GitCmd.*
 
 /** @return single line with hash of given revision/commit */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun gitHash(revision: String = "HEAD") = git(RevParse) { +revision }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun gitHelp(commandOrConcept: String? = null) = git(Help) { commandOrConcept?.let { +it } }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs: String) = git(Status) {
     if (short) +"-s"
     if (verbose) +"-v"
@@ -20,7 +21,7 @@ fun gitStatus(short: Boolean = false, verbose: Boolean = false, vararg pathSpecs
     pathSpecs.forEach { +it }
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun git(cmd: GitCmd? = null, init: Git.() -> Unit = {}) = Git().apply {
     init()
     cmd?.let {
@@ -30,13 +31,13 @@ fun git(cmd: GitCmd? = null, init: Git.() -> Unit = {}) = Git().apply {
 }
 
 /** https://git-scm.com/docs/user-manual.html */
-@DelicateKommandApi
+@DelicateApi
 data class Git(
     override val opts: MutableList<GitOpt> = mutableListOf(), // last GitOpt should always be GitCmd
     override val nonopts: MutableList<String> = mutableListOf(), // here is all stuff local for given GitCmd
 ): KommandTypical<GitOpt> { override val name get() = "git" }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 interface GitOpt: KOptTypical {
     data object Help : GitOpt, KOptLN()
     data object Version : GitOpt, KOptLN()
@@ -50,7 +51,7 @@ interface GitOpt: KOptTypical {
     data class Namespace(val path: String) : GitOpt, KOptLN(path)
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 sealed class GitCmd: GitOpt, KOptLN(namePrefix = "") {
     data object Add : GitCmd()
     data object Archive : GitCmd()

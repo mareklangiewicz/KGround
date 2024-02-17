@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import org.junit.jupiter.api.TestFactory
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.konfig.IKonfig
@@ -20,7 +21,7 @@ class KonfigTests {
     }
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun CliPlatform.testTmpKonfig() {
     val konfigNewDir = pathToUserTmp!! + "/tmpKonfigForTests" + Random.nextUInt()
 
@@ -35,6 +36,7 @@ fun CliPlatform.testTmpKonfig() {
     }
 }
 
+@OptIn(DelicateApi::class)
 fun CliPlatform.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
     "is empty" o { konfig.keys.len eq 0 }
     "dir is created" o { testIfFileIsDirectory(dir).execb(this) eq true }

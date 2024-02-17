@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kommand.*
 
 
@@ -10,7 +11,7 @@ class NativePlatform: CliPlatform {
 
     override val isRedirectFileSupported get() = false
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun start(
         kommand: Kommand,
         vararg useNamedArgs: Unit,

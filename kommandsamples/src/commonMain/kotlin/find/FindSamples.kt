@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.find
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.kommand.*
@@ -17,7 +18,7 @@ val myDepsKtPath = "$myKotlinPath/DepsKt"
 val myKGroundPath = "$myKotlinPath/KGround"
 val myKommandLinePath = "$myKotlinPath/KommandLine"
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object FindSamples {
 
     val findAbcIgnoreCase =
@@ -88,7 +89,7 @@ data object FindSamples {
 }
 
 /** Usually to exclude from some indexing. */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findBoringCodeDirs(
     path: String,
     boringCodeDirRegexes: List<String> = listOf("build", "node_modules", "\\.gradle")
@@ -99,7 +100,7 @@ fun findBoringCodeDirs(
     whenFoundPrune = true,
 )
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
     path: String = myKotlinPath,
     indent: String = "      ",
@@ -121,7 +122,7 @@ fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
  *   Exactly(0) will return files modified within last 24h,
  *   LessThan(7) for files modified in last few days.
  */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun findMyKotlinCode(
     kotlinCodePath: String = myKotlinPath,
     vararg useNamedArgs: Unit,
@@ -144,6 +145,7 @@ fun findMyKotlinCode(
     )
 )
 
+@DelicateApi
 private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
     if (grepRE == null) ActPrint
     else OpParent(
@@ -156,6 +158,7 @@ private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
  * (see fixme_comment above Find.kt:operator fun FindExpr.not)
  * @param expr Expression (joined by "and" by default), null elements are ignored
  */
+@DelicateApi
 private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr?) =  OpParent(
     prunedDirsNamed?.let {
         OpParent(
@@ -167,9 +170,11 @@ private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr?
 )
 
 // TODO_later: full grep kommand wrapper class+funs.
+@OptIn(DelicateApi::class)
 private fun grepQuietly(regexp: String, vararg files: String) =
     kommand("grep", "-q", regexp, *files)
 
+@OptIn(DelicateApi::class)
 private fun grepWithDetails(regexp: String, vararg files: String) =
     kommand("grep", "-H", "-n", "-T", "-e", regexp, *files)
 

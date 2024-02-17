@@ -1,6 +1,9 @@
 package pl.mareklangiewicz.kommand.samples
 
 import org.junit.jupiter.api.TestFactory
+import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.bad
+import pl.mareklangiewicz.bad.chk
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.uspek.eq
@@ -38,7 +41,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     }
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testSample(sample: Sample) = "check kommand lineRaw" o {
     val lineRaw = sample.kommand.lineRaw()
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
@@ -46,7 +49,7 @@ fun testSample(sample: Sample) = "check kommand lineRaw" o {
     println("Actual kommand lineRaw is: $lineRaw")
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand lineRaw" o {
     val lineRaw = sample.typedKommand.kommand.lineRaw()
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
@@ -54,7 +57,7 @@ fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand line
     println("Actual typed kommand lineRaw is: $lineRaw")
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun testReducedSample(sample: ReducedSample<*>) = "check reduced kommand lineRaw" o {
     val lineRaw = sample.reducedKommand.lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")

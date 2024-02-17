@@ -2,11 +2,12 @@
 
 package pl.mareklangiewicz.kommand.gnome
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.*
 
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun CliPlatform.startInTermIfUserConfirms(
     kommand: Kommand,
     confirmation: String = "Run ::${kommand.line()}:: in terminal?",

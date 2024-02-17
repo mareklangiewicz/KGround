@@ -1,10 +1,11 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.EchoOpt.*
 import pl.mareklangiewicz.kommand.samples.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object EchoSamples {
     val echoHelp = echo { -Help } s "echo --help"
     val echoVersion = echo { -Version } s "echo --version"

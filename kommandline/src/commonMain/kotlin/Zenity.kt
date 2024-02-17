@@ -3,16 +3,17 @@
 package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.ZenityOpt.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun zenityAskIf(question: String, title: String? = null) = zenity(Type.Question) {
     -Text(question)
     -NoWrap
     title?.let { -Title(it) }
 }.reducedExit { it == 0 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun zenityAskForPassword(question: String = "Enter password", title: String? = null) =
     zenity(Type.Entry) {
         -HideText
@@ -20,7 +21,7 @@ fun zenityAskForPassword(question: String = "Enter password", title: String? = n
         title?.let { -Title(it) }
     }.reducedOut { single() }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun zenityAskForEntry(question: String, title: String? = null, suggested: String? = null) =
     zenity(Type.Entry) {
         -Text(question)
@@ -28,20 +29,20 @@ fun zenityAskForEntry(question: String, title: String? = null, suggested: String
         suggested?.let { -EntryText(it) }
     }.reducedOut { single() }
 
-@DelicateKommandApi
+@DelicateApi
 fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; init() }
 
 /*
 * https://help.gnome.org/users/zenity/stable/index.html.en
 * https://linux.die.net/man/1/zenity
 */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data class Zenity(
     override val opts: MutableList<ZenityOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ): KommandTypical<ZenityOpt> { override val name get() = "zenity" }
 
-@DelicateKommandApi
+@DelicateApi
 interface ZenityOpt : KOptTypical {
 
     sealed class Type: ZenityOpt, KOptLN() {

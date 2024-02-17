@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.term
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
 
@@ -10,7 +11,7 @@ import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
  * [kitty docs](file:///usr/share/doc/kitty/html/overview.html)
  * [kitty man page ubuntu outdated?](https://manpages.ubuntu.com/manpages/focal/man1/kitty.1.html)
  */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun termKitty(
     kommand: Kommand? = null,
     one: Boolean = true,
@@ -18,7 +19,7 @@ fun termKitty(
     hold: Boolean = false
 ) = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold  }
 
-@DelicateKommandApi
+@DelicateApi
 fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
     TermKitty().apply {
         init()
@@ -33,7 +34,7 @@ fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
  * [kitty docs](file:///usr/share/doc/kitty/html/overview.html)
  * [kitty man page ubuntu outdated?](https://manpages.ubuntu.com/manpages/focal/man1/kitty.1.html)
  */
-@DelicateKommandApi
+@DelicateApi
 data class TermKitty(
     override val opts: MutableList<TermKittyOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
@@ -41,7 +42,7 @@ data class TermKitty(
     override val name get() = "kitty"
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 interface TermKittyOpt: KOptTypical {
     data class Title(val title: String) : KOptS("T", title), TermKittyOpt
     data class Config(val file: String) : KOptS("c", file), TermKittyOpt

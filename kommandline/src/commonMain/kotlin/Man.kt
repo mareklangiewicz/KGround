@@ -1,13 +1,15 @@
 package pl.mareklangiewicz.kommand
 
-@OptIn(DelicateKommandApi::class)
+import pl.mareklangiewicz.annotations.DelicateApi
+
+@OptIn(DelicateApi::class)
 fun man(section: ManSection? = null, init: Man.() -> Unit = {}) = man(section?.number, init)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun man(sectionNumber: Int?, init: Man.() -> Unit = {}) =
     Man().apply { sectionNumber?.let { +it.toString() }; init() }
 
-@DelicateKommandApi
+@DelicateApi
 data class Man(
     override val opts: MutableList<ManOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
@@ -36,7 +38,7 @@ enum class ManSection(val number: Int) {
     KernelRoutine(9),
 }
 
-@DelicateKommandApi
+@DelicateApi
 interface ManOpt: KOptTypical {
 
     data object All : KOptS("a"), ManOpt

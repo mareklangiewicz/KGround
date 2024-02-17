@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.debian
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.debian.DpkgAct.*
 import pl.mareklangiewicz.kommand.samples.*
@@ -11,7 +12,7 @@ data object DebianSamples {
     val Dpkg = DpkgSamples
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object WhichSamples {
     val whichDpkg = which("dpkg") s "which dpkg"
     val whichDpkgAndApt = which("dpkg", "apt") s "which dpkg apt"
@@ -21,7 +22,7 @@ data object WhichSamples {
     val isDpkgKommandAvailable = isKommandAvailable(dpkg()) rs "which dpkg"
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object DpkgSamples {
     val dpkgSearchBinWhich = dpkg(Search("*bin*which*")) s "dpkg -S *bin*which*"
     val dpkgStatusDebianUtils = dpkg(Status("debianutils")) s "dpkg -l debianutils"

@@ -1,27 +1,28 @@
 package pl.mareklangiewicz.kommand.core
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun lsRegFiles(dir: String, withHidden: Boolean = false) =
     ls(dir, withHidden = withHidden, style = SLASH).reducedOut { toList().filter { !it.endsWith('/') } }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun lsSubDirs(dir: String, withHidden: Boolean = false) =
     ls(dir, withHidden = withHidden, style = SLASH).reducedOut {
         toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
     }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun ls(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     lsPredictable(*paths, withHidden = withHidden, style = style)
 
 /** lsPredictable is better to get a more predictable output format, especially for parsing. */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
     ls { for (p in paths) +p; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
 
@@ -29,15 +30,15 @@ fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: Indi
  * lsDefault is ls without any options; uses default settings on given CliPlatform.
  * lsPredictable is better to get a more predictable output format, especially for parsing.
  */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun lsDefault(vararg paths: String) = ls { for (path in paths) +path }
 
-@DelicateKommandApi
+@DelicateApi
 fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
 
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data class Ls(
     override val opts: MutableList<LsOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
@@ -45,7 +46,7 @@ data class Ls(
     override val name get() = "ls"
 }
 
-@DelicateKommandApi
+@DelicateApi
 interface LsOpt: KOptTypical {
 
     /** List one file per line.  You can avoid '\n' by adding options: hideControlChars or escape */

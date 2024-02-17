@@ -1,21 +1,22 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
 
-@DelicateKommandApi
+@DelicateApi
 fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)
 /**
  * [gnu coreutils cat](https://www.gnu.org/software/coreutils/manual/html_node/cat-invocation.html)
  * [linux man](https://man7.org/linux/man-pages/man1/cat.1.html)
  */
-@DelicateKommandApi
+@DelicateApi
 data class Cat(
     override val opts: MutableList<CatOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<CatOpt> { override val name get() = "cat" }
 
-@DelicateKommandApi
+@DelicateApi
 interface CatOpt: KOptTypical {
 
     /** Number all output lines, starting with 1. This option is ignored if -b is in effect. */

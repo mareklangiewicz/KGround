@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.gnupg
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
@@ -9,21 +10,21 @@ import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.PinentryMode.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun gpgDecrypt(inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg"), cacheSymKey: Boolean = true) =
     gpg(Decrypt) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun gpgEncryptSym(inFile: String, outFile: String = "$inFile.gpg", cacheSymKey: Boolean = true) =
     gpg(Symmetric) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile }
 
-@DelicateKommandApi
+@DelicateApi
 @Suppress("DEPRECATION")
 @Deprecated("Be careful with password in command line - see man gpg")
 fun gpgDecryptPass(password: String, inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg")) =
     gpg(Decrypt) { -PassPhrase(password); -Batch; Pinentry(LoopBack); -OutputFile(outFile); +inFile }
 
-@DelicateKommandApi
+@DelicateApi
 @Suppress("DEPRECATION")
 @Deprecated("Be careful with password in command line - see man gpg")
 fun gpgEncryptPass(password: String, inFile: String, outFile: String = "$inFile.gpg") =
@@ -32,17 +33,17 @@ fun gpgEncryptPass(password: String, inFile: String, outFile: String = "$inFile.
 private fun String.removeRequiredSuffix(suffix: CharSequence) =
     removeSuffix(suffix).also { req(length == it.length - suffix.length) }
 
-@DelicateKommandApi
+@DelicateApi
 fun gpg(cmd: GpgCmd? = null, init: Gpg.() -> Unit = {}) = Gpg().apply { cmd?.let { -it }; init() }
 
 /** [gnupg manual](https://gnupg.org/documentation/manuals/gnupg/Invoking-GPG.html#Invoking-GPG) */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data class Gpg(
     override val opts: MutableList<GpgOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<GpgOpt> { override val name get() = "gpg" }
 
-@DelicateKommandApi
+@DelicateApi
 open class GpgCmd : GpgOpt, KOptLN() {
 
     /** make a signature */
@@ -73,7 +74,7 @@ open class GpgCmd : GpgOpt, KOptLN() {
     data object DumpOptions : GpgCmd()
 }
 
-@DelicateKommandApi
+@DelicateApi
 interface GpgOpt: KOptTypical {
 
     data object Verbose : GpgOpt, KOptLN()

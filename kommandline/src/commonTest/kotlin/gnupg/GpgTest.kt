@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.gnupg
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
@@ -7,7 +8,7 @@ import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import kotlin.test.*
 import kotlin.test.Test
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 class GpgTest {
     @Test fun testGpgHelp() = gpg { -Help }
         .chkWithUser("gpg --help")

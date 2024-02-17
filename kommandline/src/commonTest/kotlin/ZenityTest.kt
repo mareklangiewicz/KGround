@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.ZenityOpt.*
@@ -8,7 +9,7 @@ import pl.mareklangiewicz.kommand.core.*
 import kotlin.test.Test
 
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 class ZenityTest {
     @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.chkWithUser()
     @Test fun testZenityEntryStart() = ifInteractive { SYS.start(zenity(Entry) { -EntryText("suggested text") }) }

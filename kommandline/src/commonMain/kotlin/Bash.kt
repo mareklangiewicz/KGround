@@ -3,8 +3,9 @@
 package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 
-@DelicateKommandApi
+@DelicateApi
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
     Bash().apply {
         - BashOpt.Command
@@ -12,16 +13,16 @@ fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
         init()
     }
 
-@DelicateKommandApi
+@DelicateApi
 fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
 
-@DelicateKommandApi
+@DelicateApi
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
     // FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
 
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun bashGetExportsMap() =
     bash("export").reducedOut { this
         .toList()
@@ -29,7 +30,7 @@ fun bashGetExportsMap() =
         .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
     }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun bashGetExportsToFile(outFile: String) =
     bash("export > $outFile").reducedOutToUnit()
 
@@ -42,8 +43,8 @@ fun bashGetExportsToFile(outFile: String) =
 //  - bash -c more than one nonopt (is confusing and should be opt in)
 //  - ssh host command separatearg (instead of ssh host "command arg") is delicate
 //    because it always concatenate separatearg with just space and send to remote shell as one script
-//  - generally all direct manipulation of Kommand classes should be marked as @DelicateKommandApi!
-@DelicateKommandApi
+//  - generally all direct manipulation of Kommand classes should be marked as @DelicateApi!
+@DelicateApi
 data class Bash(
     override val opts: MutableList<BashOpt> = mutableListOf(),
     /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
@@ -52,7 +53,7 @@ data class Bash(
     override val name get() = "bash"
 }
 
-@DelicateKommandApi
+@DelicateApi
 interface BashOpt: KOptTypical {
     /**
      * interpret first from nonopts as a command_string to run

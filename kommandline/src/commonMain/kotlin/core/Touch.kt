@@ -1,16 +1,17 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
 /** Update the access and modification times of each file to the current time. Create empty files if necessary. */
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun touch(vararg files: String) = touch { nonopts.addAll(files) }.reducedOutToUnit()
 
-@DelicateKommandApi
+@DelicateApi
 fun touch(init: Touch.() -> Unit) = Touch().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/touch.1.html) */
-@DelicateKommandApi
+@DelicateApi
 data class Touch(
     override val opts: MutableList<TouchOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf()
@@ -18,7 +19,7 @@ data class Touch(
 
 
 
-@DelicateKommandApi
+@DelicateApi
 interface TouchOpt: KOptTypical {
     data object TimeOfAccessOnly : TouchOpt, KOptS("a")
     data object TimeOfChangeOnly : TouchOpt, KOptS("m")

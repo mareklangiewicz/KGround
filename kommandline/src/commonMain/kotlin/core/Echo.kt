@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.EchoOpt.*
 
@@ -10,7 +11,7 @@ import pl.mareklangiewicz.kommand.core.EchoOpt.*
  *   or when we inject echo kommand line into some bash script with pipes, etc.
  */
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun echo(
     line: String,
     vararg useNamedArgs: Unit,
@@ -22,20 +23,20 @@ fun echo(
     +line
 }
 
-@DelicateKommandApi
+@DelicateApi
 fun echo(init: Echo.() -> Unit = {}) = Echo().apply(init)
 
 /**
  * [gnu coreutils echo manual](https://www.gnu.org/software/coreutils/manual/html_node/echo-invocation.html)
  * [linux man](https://man7.org/linux/man-pages/man1/echo.1.html)
  */
-@DelicateKommandApi
+@DelicateApi
 data class Echo(
     override val opts: MutableList<EchoOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf()
 ) : KommandTypical<EchoOpt> { override val name get() = "echo" }
 
-@DelicateKommandApi
+@DelicateApi
 interface EchoOpt: KOptTypical {
     data object NoNewLine : KOptS("n"), EchoOpt
     data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt

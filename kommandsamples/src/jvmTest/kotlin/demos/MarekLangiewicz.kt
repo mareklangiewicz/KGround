@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand.demos
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.api.extension.ExtensionContext
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.konfig.*
@@ -17,7 +18,7 @@ import pl.mareklangiewicz.kommand.term.*
 fun isUserTestClassEnabled(context: ExtensionContext) =
     SYS.isUserFlagEnabled("tests." + context.requiredTestClass.simpleName)
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 @EnabledIf(
     value = "pl.mareklangiewicz.kommand.demos.MarekLangiewiczKt#isUserTestClassEnabled",
     disabledReason = "tests.MarekLangiewicz not enabled in user konfig"

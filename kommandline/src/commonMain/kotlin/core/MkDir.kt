@@ -1,26 +1,27 @@
 package pl.mareklangiewicz.kommand.core
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.MkDirOpt.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun mkdir(dir: String, withParents: Boolean = false) =
     mkdir { if (withParents) -Parents; +dir }.reducedOutToUnit()
 
-@DelicateKommandApi
+@DelicateApi
 fun mkdir(init: MkDir.() -> Unit = {}) = MkDir().apply(init)
 
 /**
  * [linux man](https://man7.org/linux/man-pages/man1/mkdir.1.html)
  * [gnu coreutils mkdir manual](https://www.gnu.org/software/coreutils/manual/html_node/mkdir-invocation.html#mkdir-invocation)
  */
-@DelicateKommandApi
+@DelicateApi
 data class MkDir(
     override val opts: MutableList<MkDirOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<MkDirOpt> { override val name get() = "mkdir" }
 
-@DelicateKommandApi
+@DelicateApi
 interface MkDirOpt: KOptTypical {
 
     /** set file mode (as in chmod), not a=rwx - umask */

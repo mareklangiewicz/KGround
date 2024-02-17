@@ -1,9 +1,10 @@
 package pl.mareklangiewicz.kommand.git
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.samples.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object GitSamples {
     val hash = gitHash() s "git rev-parse HEAD"
     val help = gitHelp() s "git help"

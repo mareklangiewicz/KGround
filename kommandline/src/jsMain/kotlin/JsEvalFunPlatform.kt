@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 
 actual typealias SysPlatform = JsEvalFunPlatform
@@ -13,7 +14,7 @@ class JsEvalFunPlatform: CliPlatform {
 
     private val debug = false
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun start(
         kommand: Kommand,
         vararg useNamedArgs: Unit,
@@ -66,47 +67,47 @@ private class JsEvalFunProcess(code: String): ExecProcess {
         }
     }
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun waitForExit(finallyClose: Boolean): Int =
         try { exit }
         finally { if (finallyClose) close() }
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
 
     override fun kill(forcibly: Boolean) = error("cancel unsupported")
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override fun close() {
         stdinClose()
         stdoutClose()
         stderrClose()
     }
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) = logln(line)
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdinClose() { logln = {} }
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdoutReadLine(): String? = out?.takeIf { it.hasNext() }?.next()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdoutClose() { out = null }
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stderrReadLine(): String? = err?.takeIf { it.hasNext() }?.next()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stderrClose() { err = null }
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override val stdin = defaultStdinCollector(Dispatchers.Default, ::stdinWriteLine, ::stdinClose)
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override val stdout: Flow<String> = defaultStdOutOrErrFlow(Dispatchers.Default, ::stdoutReadLine, ::stdoutClose)
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override val stderr: Flow<String> = defaultStdOutOrErrFlow(Dispatchers.Default, ::stderrReadLine, ::stderrClose)
 }

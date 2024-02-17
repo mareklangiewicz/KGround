@@ -1,7 +1,8 @@
-@file:OptIn(DelicateKommandApi::class)
+@file:OptIn(DelicateApi::class)
 
 package pl.mareklangiewicz.kommand.konfig
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*

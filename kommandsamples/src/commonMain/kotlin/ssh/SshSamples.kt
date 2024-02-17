@@ -2,12 +2,13 @@
 
 package pl.mareklangiewicz.kommand.ssh
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 data object SshSamples {
 
     val version =
@@ -33,7 +34,7 @@ data object SshSamples {
 
 // TODO NOW: Continue, it's first experiment based on:
 // https://www.codejam.info/2021/11/standalone-userland-ssh-server.html
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 suspend fun runSshdStandalone(dir: String = "/tmp/sshd-sdandalone") {
     mkdir(dir, withParents = true).exec(CliPlatform.SYS)
     TODO()

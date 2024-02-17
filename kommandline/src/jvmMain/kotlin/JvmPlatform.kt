@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
@@ -62,7 +63,7 @@ class JvmPlatform : CliPlatform {
     override val pathToUserTmp: String? get() = "$pathToUserHome/tmp" // FIXME_maybe: other paths for specific OSes? sometimes null?
     override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     private val xdgdesktop by lazy {
         bashGetExportsMap().execb(SYS)["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
     }
@@ -91,7 +92,7 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
     private val stdoutReader = process.inputReader()
     private val stderrReader = process.errorReader()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun waitForExit(finallyClose: Boolean) =
         try { process.waitFor() }
         finally { if (finallyClose) close() }
@@ -105,42 +106,42 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
         if (forcibly) process.destroyForcibly() else process.destroy()
     }
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override fun close() {
         stdinContext.tryDispatch { stdinClose() }
         stdoutContext.tryDispatch { stdoutClose() }
         stderrContext.tryDispatch { stderrClose() }
     }
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) = stdinWriter.run {
         write(line)
         if (lineEnd.isNotEmpty()) write(lineEnd)
         if (thenFlush) flush()
     }
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdinClose() = stdinWriter.close()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdoutReadLine(): String? = stdoutReader.readLine()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stdoutClose() = stdoutReader.close()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stderrReadLine(): String? = stderrReader.readLine()
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun stderrClose() = stderrReader.close()
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override val stdin = defaultStdinCollector(stdinContext, ::stdinWriteLine, ::stdinClose)
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override val stdout: Flow<String> = defaultStdOutOrErrFlow(stdoutContext, ::stdoutReadLine, ::stdoutClose)
 
-    @OptIn(DelicateKommandApi::class)
+    @OptIn(DelicateApi::class)
     override val stderr: Flow<String> = defaultStdOutOrErrFlow(stderrContext, ::stderrReadLine, ::stderrClose)
 }
 

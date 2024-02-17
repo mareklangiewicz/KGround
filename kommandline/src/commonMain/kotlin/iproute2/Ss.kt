@@ -1,9 +1,10 @@
 package pl.mareklangiewicz.kommand.iproute2
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.iproute2.SsOpt.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 /**
  * Wrapper for very common invocation ("ss -tulpn")
  * FIXME_someday: better wrappers with flags for more common use-cases and nicer names
@@ -14,16 +15,16 @@ fun ssTulpn() = ss { -Tcp; -Udp; -Listening; -Processes; -Numeric }
 // FIXME_someday: better static types/wrapping for nonopts (FILTER := [ state STATE-FILTER ] [ EXPRESSION ])
 
 /** [ss manpage](https://manpages.ubuntu.com/manpages/bionic/en/man8/ss.8.html) */
-@DelicateKommandApi
+@DelicateApi
 fun ss(init: Ss.() -> Unit = {}) = Ss().apply(init)
 
-@DelicateKommandApi
+@DelicateApi
 data class Ss(
     override val opts: MutableList<SsOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ): KommandTypical<SsOpt> { override val name get() = "ss" }
 
-@DelicateKommandApi
+@DelicateApi
 open class SsOpt(arg: String? = null): KOptLN(arg) {
     data object Help : SsOpt()
     data object Version : SsOpt()

@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
@@ -26,7 +27,7 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 
 // FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
 // Maybe move to kommandsamples or somewhere else??
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
@@ -37,7 +38,7 @@ fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = nu
     ) }
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, platform: CliPlatform = SYS) {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     println(lineRaw)
@@ -98,7 +99,7 @@ inline fun List<String>.chkStdOut(
     lazyMessage: () -> String = { "bad stdout" }
 ) { test(this) || throw BadStdOutStateErr(this, lazyMessage()) }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun Kommand.chkInIdeap(
     expectedLineRaw: String? = null,
     execInDir: String? = null,

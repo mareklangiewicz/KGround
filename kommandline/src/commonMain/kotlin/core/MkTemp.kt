@@ -1,10 +1,11 @@
 package pl.mareklangiewicz.kommand.core
 
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 fun mktemp(
     vararg useNamedArgs: Unit,
     path: String = ".",
@@ -12,19 +13,19 @@ fun mktemp(
     suffix: String = ".tmp",
 ) = mktemp("$path/${prefix}XXXXXX${suffix}").reducedOut { single() }
 
-@DelicateKommandApi
+@DelicateApi
 fun mktemp(template: String, init: MkTemp.() -> Unit = {}) = mktemp { +template; init() }
 
-@DelicateKommandApi
+@DelicateApi
 fun mktemp(init: MkTemp.() -> Unit) = MkTemp().apply(init)
 
-@DelicateKommandApi
+@DelicateApi
 data class MkTemp(
     override val opts: MutableList<MkTempOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
 ): KommandTypical<MkTempOpt> { override val name get() = "mktemp" }
 
-@DelicateKommandApi
+@DelicateApi
 interface MkTempOpt: KOptTypical {
     data object Directory : KOptS("d"), MkTempOpt
     data object DryRun : KOptS("u"), MkTempOpt

@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.gnome
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.NotifySend.Option.*
 import pl.mareklangiewicz.kommand.systemd.*
@@ -8,7 +9,7 @@ import pl.mareklangiewicz.kommand.term.*
 import kotlin.test.Test
 
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 class GnomeTest {
     @Test fun testJournalCtl() = journalctl { -Follow; -Cat; +"/usr/bin/gnome-shell" }
         .chkWithUser("journalctl -f -ocat /usr/bin/gnome-shell")

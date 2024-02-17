@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
 import kotlin.coroutines.*
 
@@ -68,7 +69,7 @@ class FakePlatform(
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
 
-    @DelicateKommandApi
+    @DelicateApi
     override fun start(
         kommand: Kommand,
         vararg useNamedArgs: Unit,
@@ -87,7 +88,7 @@ class FakePlatform(
     }
 }
 
-@DelicateKommandApi
+@DelicateApi
 class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
     override fun waitForExit(finallyClose: Boolean) = 0
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
@@ -171,7 +172,7 @@ suspend fun StdinCollector.collect(
 ) = collect(lineS, lineEnd, flushAfterEachLine, finallyStdinClose)
 
 /**
- * Methods marked DelicateKommandApi are NOT thread safe! Use other ones.
+ * Methods marked DelicateApi are NOT thread safe! Use other ones.
  * Impl notes: Careful with threads. Especially delicate are std streams.
  * Each should use separate thread to avoid strange deadlocks with external process.
  * For example see:
@@ -200,31 +201,31 @@ interface ExecProcess : AutoCloseable {
     // TODO_later: move all delicate methods below to separate interface: (Delicate/Unsafe/LowLevel)ExecProcess
     // maybe access it here as property: val unsafe: UnsafeExecProcess ??
 
-    @DelicateKommandApi
+    @DelicateApi
     fun waitForExit(finallyClose: Boolean = true): Int
 
     /** System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them! */
-    @DelicateKommandApi
+    @DelicateApi
     fun stdinWriteLine(line: String, lineEnd: String = CliPlatform.SYS.lineEnd, thenFlush: Boolean = true)
 
     /** Indepotent. Flushes buffer before closing. */
-    @DelicateKommandApi
+    @DelicateApi
     fun stdinClose()
 
     /** @return null means end of stream */
-    @DelicateKommandApi
+    @DelicateApi
     fun stdoutReadLine(): String?
 
     /** Indepotent. */
-    @DelicateKommandApi
+    @DelicateApi
     fun stdoutClose()
 
     /** @return null means end of stream */
-    @DelicateKommandApi
+    @DelicateApi
     fun stderrReadLine(): String?
 
     /** Indepotent. */
-    @DelicateKommandApi
+    @DelicateApi
     fun stderrClose()
 }
 
@@ -236,40 +237,40 @@ fun Flow<String>.catchStreamClosed() =
  * Can be used only once. It always finally closes input stream.
  * System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them!
  */
-@DelicateKommandApi
+@DelicateApi
 @Deprecated("Use stdin.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useInLines(input: Sequence<String>, flushAfterEachLine: Boolean = true) =
     try { input.forEach { stdinWriteLine(it, thenFlush = flushAfterEachLine) } }
     finally { stdinClose() }
 
 /** Can be used only once. It always finally closes output stream. */
-@DelicateKommandApi
+@DelicateApi
 @Deprecated("Use stout Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useOutLines(block: (output: Sequence<String>) -> Unit) =
     useSomeLines(block, ::stdoutReadLine, ::stdoutClose)
 
 /** Can be used only once. It always finally closes error stream. */
-@DelicateKommandApi
+@DelicateApi
 @Deprecated("Use sterr Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useErrLines(block: (output: Sequence<String>) -> Unit) =
     useSomeLines(block, ::stderrReadLine, ::stderrClose)
 
-@DelicateKommandApi
+@DelicateApi
 private fun useSomeLines(block: (output: Sequence<String>) -> Unit, readLine: () -> String?, close: () -> Unit) =
     try { block(generateSequence(readLine)) }
     finally { close() }
 
-@DelicateKommandApi
+@DelicateApi
 @Deprecated("Use stout Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useOutLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit) =
     useSomeLinesOrEmptyIfClosed(block, ::useOutLines)
 
-@DelicateKommandApi
+@DelicateApi
 @Deprecated("Use sterr Flow.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> Unit) =
     useSomeLinesOrEmptyIfClosed(block, ::useErrLines)
 
-@DelicateKommandApi
+@DelicateApi
 private fun useSomeLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit, useLines: ((Sequence<String>) -> Unit) -> Unit) {
     try { useLines(block) }
     catch (e: Exception) {
@@ -306,7 +307,7 @@ suspend fun ExecProcess.awaitResult(
  * Warning: it sequencially tries to consume input first, then output, then err stream.
  * It's much better to use suspend ExecProcess.awaitResult which uses async flows.
  */
-@DelicateKommandApi
+@DelicateApi
 @Deprecated("Use suspending awaitResult.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.waitForResult(
     inContent: String? = null,

@@ -1,8 +1,10 @@
-@file:OptIn(ExperimentalKommandApi::class)
+@file:OptIn(ExperimentalApi::class)
 
 package pl.mareklangiewicz.kommand.playground
 
 import kotlinx.coroutines.*
+import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
@@ -27,7 +29,7 @@ fun main() {
     }
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 suspend fun playground() = withPrintingBadStreams {
     println("Let's play with kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.x {
@@ -45,7 +47,7 @@ suspend fun playground() = withPrintingBadStreams {
 //    readFileHead("/home/marek/.vimrc").x().logEach()
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
     val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).x()
     writeToFileAndOpenInIdeaP(out)
@@ -57,7 +59,7 @@ suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
 
 
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 suspend fun showMarekLangiewiczRepoMarkdownListInIdeaP() {
     val reposMdContent = GhSamples.mareklangiewiczPublicRepoMarkdownList.reducedKommand.x()
     println(reposMdContent)
@@ -65,7 +67,7 @@ suspend fun showMarekLangiewiczRepoMarkdownListInIdeaP() {
     writeToFileAndOpenInIdeaP(reposMdContent, tmpReposFileMd)
 }
 
-@DelicateKommandApi
+@DelicateApi
 suspend fun writeToFileAndOpenInIdeaP(content: String, filePath: String = SYS.pathToUserTmp + "/tmp.notes") {
     echo(content).x(outFile = filePath)
     ideap(filePath).x()
