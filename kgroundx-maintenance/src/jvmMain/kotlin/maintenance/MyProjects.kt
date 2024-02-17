@@ -6,8 +6,7 @@ import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
-import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
@@ -19,7 +18,7 @@ import pl.mareklangiewicz.ure.core.Ure
 
 // TODO_later: refactor this little experiment fun
 @OptIn(DelicateKommandApi::class, DelicateApi::class)
-internal suspend fun searchKotlinCodeInMyProjects(
+@ExampleApi suspend fun searchKotlinCodeInMyProjects(
     codeInLineUre: Ure,
     onlyPublic: Boolean = false,
     alsoFilterProjectPath: suspend FileSystem.(Path) -> Boolean = { true },
@@ -71,13 +70,13 @@ private fun Ure.withSomeLinesAround(
     0..maxLinesAfter of ureAnyLine()
 }
 
-suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalDWorkflowsProjectsPathS(log = log)
         .collect { SYSTEM.checkMyDWorkflowsInProject(it, verbose = true, log = log) }
 
 
-suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalDWorkflowsProjectsPathS(log = log)
         .collect { SYSTEM.injectDWorkflowsToProject(it, log = log) }
@@ -102,8 +101,7 @@ internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
 
 
 
-@NotPortableApi
-suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalKotlinProjectsPathS()
         .collect {
@@ -111,8 +109,7 @@ suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false, log: (
             SYSTEM.checkAllKnownRegionsInAllFoundFiles(it, verbose = true, log = log)
         }
 
-@NotPortableApi
-suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalKotlinProjectsPathS()
         .collect {
@@ -120,16 +117,16 @@ suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false, log: 
             SYSTEM.injectAllKnownRegionsToAllFoundFiles(it, log = log)
         }
 
-val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
+@ExampleApi val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
 
 @Suppress("IdentifierGrammar")
-suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
+@ExampleApi suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
     ghMarekLangiewiczRepoList(onlyPublic = onlyPublic)
         .outputFields("name")
         .reducedOutToFlow()
         .exec(SYS)
 
 
-suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
+@ExampleApi suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
     fetchMyProjectsNameS(onlyPublic).toList().let { if (sorted) it.sorted() else it }
 

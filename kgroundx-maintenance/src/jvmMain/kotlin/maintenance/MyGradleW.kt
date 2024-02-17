@@ -6,6 +6,7 @@ import okio.*
 import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
@@ -13,10 +14,13 @@ import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.find.*
 
 
-suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
     getMyGradleProjectsPathS(onlyPublic).collect {
         updateGradlewFilesInProject(it, log)
     }
+
+@ExampleApi fun updateGradlewFilesInKotlinProject(projectName: String, log: (Any?) -> Unit = ::println) =
+    updateGradlewFilesInProject(PathToMyKotlinProjects / projectName, log = log)
 
 fun updateGradlewFilesInProject(fullPath: Path, log: (Any?) -> Unit = ::println) =
     gradlewRelPaths.forEach { gradlewRelPath ->
@@ -45,7 +49,7 @@ val gradlewRelPaths =
 
 /** @return Full pathS of my gradle rootProjectS (dirs with settings.gradle[.kts] files) */
 @OptIn(ExperimentalCoroutinesApi::class)
-private suspend fun getMyGradleProjectsPathS(onlyPublic: Boolean = true): Flow<Path> =
+@ExampleApi private suspend fun getMyGradleProjectsPathS(onlyPublic: Boolean = true): Flow<Path> =
     fetchMyProjectsNameS(onlyPublic)
         .mapFilterLocalKotlinProjectsPathS()
         .flatMapConcat(::findGradleRootProjectS)

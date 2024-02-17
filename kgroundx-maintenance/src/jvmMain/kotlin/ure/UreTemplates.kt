@@ -1,16 +1,17 @@
-package pl.mareklangiewicz.ure
+
+package pl.mareklangiewicz.kgroundx.maintenance
 
 import okio.*
 import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
-import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.ure.*
 import kotlin.math.*
 import kotlin.random.*
 
@@ -94,12 +95,12 @@ fun injectAllKnownRegionsInProject(projectPath: Path, log: (Any?) -> Unit = ::pr
 }
 
 // This actually is self-check for templates in KGround, so it should be in some integration test.
-fun checkAllKnownRegionsSynced(verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
+@ExampleApi fun checkAllKnownRegionsSynced(verbose: Boolean = false, log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
         SYSTEM.checkKnownRegion(it.label, it.pathInSrc, *it.syncedPathsArrInSrc, verbose = verbose, log = log)
     }
 
-fun injectAllKnownRegionsToSync(log: (Any?) -> Unit = ::println) =
+@ExampleApi fun injectAllKnownRegionsToSync(log: (Any?) -> Unit = ::println) =
     regionsInfos.forEach {
         SYSTEM.injectKnownRegion(it.label, *it.syncedPathsArrInSrc, addIfNotFound = false, log = log)
     }

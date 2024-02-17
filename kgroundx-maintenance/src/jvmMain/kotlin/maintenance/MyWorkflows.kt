@@ -4,7 +4,7 @@ package pl.mareklangiewicz.kgroundx.maintenance
 
 import io.github.typesafegithub.workflows.actions.actions.*
 import io.github.typesafegithub.workflows.actions.endbug.AddAndCommitV9
-import io.github.typesafegithub.workflows.actions.gradle.GradleBuildActionV2
+import io.github.typesafegithub.workflows.actions.gradle.GradleBuildActionV3
 import io.github.typesafegithub.workflows.domain.JobOutputs
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.triggers.*
@@ -15,6 +15,7 @@ import io.github.typesafegithub.workflows.yaml.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
 
@@ -46,7 +47,8 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
             usesJdk()
             uses(
                 name = "MyExperiments.generateDeps",
-                action = GradleBuildActionV2(
+                action = GradleBuildActionV3(
+                    gradleVersion = "8.6", // FIXME NOW remove this workaround and change action to SetupGradleV3 when available
                     arguments = "--info :refreshVersions:test --tests MyExperiments.generateDeps",
                     buildRootDirectory = "plugins",
                 ),
@@ -64,7 +66,6 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
 }
 
 
-// FIXME NOW: stop using MaintenanceTests
 // FIXME: something less hacky/hardcoded/repetitive
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
     val everyMondayAt8am = Cron(minute = "0", hour = "8", dayWeek = "1")
@@ -83,7 +84,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
             usesJdk()
             uses(
                 name = "updateGeneratedDeps",
-                action = GradleBuildActionV2(
+                action = GradleBuildActionV3(
                     arguments = "updateGeneratedDeps",
                 ),
             )
@@ -138,7 +139,7 @@ fun FileSystem.checkMyDWorkflowsInProject(
     }
 }
 
-fun injectDWorkflowsToKotlinProject(
+@ExampleApi fun injectDWorkflowsToKotlinProject(
     projectName: String,
     log: (Any?) -> Unit = ::println,
 ) = SYSTEM.injectDWorkflowsToProject(PathToMyKotlinProjects / projectName, log = log)
@@ -211,7 +212,7 @@ private fun defaultReleaseWorkflow() =
             usesGradleBuild()
             uses(
                 name = "Publish to Sonatype",
-                action = GradleBuildActionV2(
+                action = GradleBuildActionV3(
                     arguments = "publishToSonatype closeAndReleaseSonatypeStagingRepository",
                 )
             )
@@ -233,5 +234,5 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
     )
 
 private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild() =
-    uses(name = "Build", action = GradleBuildActionV2(arguments = "build"))
+    uses(name = "Build", action = GradleBuildActionV3(arguments = "build"))
 
