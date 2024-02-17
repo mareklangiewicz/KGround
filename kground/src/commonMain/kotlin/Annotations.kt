@@ -33,3 +33,15 @@ annotation class DelicateApi(val message: String = "", val replaceWith: ReplaceW
 @MustBeDocumented
 annotation class SecondaryApi(val message: String = "", val replaceWith: ReplaceWith = ReplaceWith(""))
 
+
+
+
+/** API that will most probably be changed a lot in the future. */
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
+@MustBeDocumented
+annotation class ExperimentalApi(val message: String = "")
+
+/** API that is included mostly as doc/sample/example usage of underlying API. Not so much for general usage. */
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
+@MustBeDocumented
+annotation class ExampleApi(val message: String = "")
