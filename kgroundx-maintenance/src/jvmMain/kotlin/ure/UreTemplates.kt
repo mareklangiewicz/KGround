@@ -234,7 +234,7 @@ fun downloadTmpFile(
     return path
 }
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 private fun CliPlatform.download(url: String, to: Path) {
     // TODO: Add curl to KommandLine library, then use it here
     // -s so no progress bars on error stream; -S to report actual errors on error stream

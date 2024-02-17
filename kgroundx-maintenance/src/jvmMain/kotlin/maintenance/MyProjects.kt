@@ -17,7 +17,7 @@ import pl.mareklangiewicz.ure.core.Ure
 
 
 // TODO_later: refactor this little experiment fun
-@OptIn(DelicateKommandApi::class, DelicateApi::class)
+@OptIn(DelicateApi::class)
 @ExampleApi suspend fun searchKotlinCodeInMyProjects(
     codeInLineUre: Ure,
     onlyPublic: Boolean = false,

@@ -6,6 +6,7 @@ import okio.*
 import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.regex.*
@@ -32,7 +33,7 @@ fun updateGradlewFilesInProject(fullPath: Path, log: (Any?) -> Unit = ::println)
     }
 
 
-@OptIn(DelicateKommandApi::class)
+@OptIn(DelicateApi::class)
 private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
     findTypeRegex(path.toString(), "f", ".*/settings.gradle\\(.kts\\)?")
         .reducedOutToFlow()
