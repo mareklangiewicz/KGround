@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "PackageDirectoryMismatch")
 
 package pl.mareklangiewicz.kgroundx.maintenance
 
@@ -81,7 +81,7 @@ private fun Ure.withSomeLinesAround(
         .mapFilterLocalDWorkflowsProjectsPathS(log = log)
         .collect { SYSTEM.injectDWorkflowsToProject(it, log = log) }
 
-private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS(
+@ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS(
     localSystem: FileSystem = SYSTEM,
     log: (Any?) -> Unit = ::println,
 ) = mapFilterLocalKotlinProjectsPathS(localSystem) {
@@ -92,7 +92,7 @@ private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS(
 }
 
 /** @receiver Flow of projects names. */
-internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
+@ExampleApi internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
     localSystem: FileSystem = SYSTEM,
     alsoFilter: suspend FileSystem.(Path) -> Boolean = { true }
 ) = map { PathToMyKotlinProjects / it }

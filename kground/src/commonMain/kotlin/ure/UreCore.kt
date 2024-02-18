@@ -13,6 +13,9 @@ import kotlin.text.RegexOption.*
 /** IR is the traditional regular expression - no human should read - kind of "intermediate representation" */
 @JvmInline
 value class IR @DelicateApi internal constructor(val str: String) {
+    // TODO: use IntelliJ: Settings -> Editor -> Language Injections to define rules to inject RegExp language
+    //   everywhere when I expect regex string in Ure (IR, ureRaw, ...)
+    //   then save this rule as xml and put into version control
     override fun toString(): String = str
 }
 
