@@ -10,7 +10,7 @@ import pl.mareklangiewicz.ure.*
 
 
 @ExampleApi
-object Examples {
+object MainExamples {
 
     @OptIn(DelicateApi::class)
     suspend fun interplayKommandAndKGround() {
