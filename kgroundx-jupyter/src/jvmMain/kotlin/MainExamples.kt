@@ -13,7 +13,7 @@ import pl.mareklangiewicz.ure.*
 object MainExamples {
 
     @OptIn(DelicateApi::class)
-    suspend fun interplayKommandAndKGround() {
+    suspend fun interplayKGroundAndKommand() {
         println("Let's play with kground and kommand integration...")
         ls { -LsOpt.LongFormat; -LsOpt.All }.x {
             println("out line: $it")
