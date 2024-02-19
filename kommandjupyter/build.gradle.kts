@@ -36,11 +36,11 @@ kotlin {
 }
 
 application {
-    mainClass.set("pl.mareklangiewicz.kommand.playground.KommandPlaygroundKt")
+    mainClass.set("pl.mareklangiewicz.kommand.jupyter.MainKt")
 }
 
 tasks.processJupyterApiResources {
-    libraryProducers = listOf("pl.mareklangiewicz.kommand.KommandIntegration")
+    libraryProducers = listOf("pl.mareklangiewicz.kommand.jupyter.Integration")
 }
 
 // region [Kotlin Module Build Template]

@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.jupyter
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -6,9 +6,10 @@ import kotlin.time.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.bad.*
 
-internal class KommandIntegration: JupyterIntegration() {
+internal class Integration: JupyterIntegration() {
     override fun Builder.onLoaded() {
 //        render<BlaBla> { HTML("<p><b>bla1: </b>${it.bla1}</p><p><b>bla2: </b>${it.bla2}</p>") }
         import("kotlinx.coroutines.*")
