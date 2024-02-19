@@ -1,7 +1,6 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
@@ -100,17 +99,17 @@ inline fun List<String>.chkStdOut(
 ) { test(this) || throw BadStdOutStateErr(this, lazyMessage()) }
 
 @OptIn(DelicateApi::class)
-fun Kommand.chkInIdeap(
+fun Kommand.chkInGVim(
     expectedLineRaw: String? = null,
     execInDir: String? = null,
     platform: CliPlatform = SYS
 ) {
     this.logLineRaw()
-    if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
+    if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
     ifInteractive { platform.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
-        start(this@chkInIdeap, dir = execInDir, outFile = tmpFile).waitForExit()
-        start(ideap { +tmpFile }).waitForExit()
+        start(this@chkInGVim, dir = execInDir, outFile = tmpFile).waitForExit()
+        start(gvim(tmpFile)).waitForExit()
     } }
 }
 

@@ -3,19 +3,13 @@
 
 package pl.mareklangiewicz.kommand.jupyter
 
-import kotlinx.coroutines.*
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.debian.*
 import pl.mareklangiewicz.kommand.find.*
-import pl.mareklangiewicz.kommand.git.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.gnome.*
-import pl.mareklangiewicz.kommand.ssh.*
-import pl.mareklangiewicz.upue.*
 
 @ExampleApi
 object MainExamples {
@@ -33,7 +27,7 @@ object MainExamples {
         // SshSamples.sshPimLsInTermKitty.x()
         // SshSamples.sshPimLsLAH.x(errToOut = true).logEach()
         // prepareMyExcludeFolderInKotlinMultiProject()
-        // showMarekLangiewiczRepoMarkdownListInIdeaP()
+        // showMarekLangiewiczRepoMarkdownListInGVim()
         // readFileHead("/home/marek/non-existent-file-46578563").x() // should print BadExitStateErr.stderr
         // readFileHead("/home/marek/.vimrc").x().logEach()
     }
@@ -41,25 +35,25 @@ object MainExamples {
     @OptIn(DelicateApi::class)
     suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
         val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).x()
-        writeToFileAndOpenInIdeaP(out)
+        writeToFileAndOpenInGVim(out)
 
         // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
-        ideap("/home/marek/code/kotlin/kotlin.iml").x()
-        ideap("/home/marek/code/kotlin/.idea/kotlin.iml").x()
+        gvim("/home/marek/code/kotlin/kotlin.iml").x()
+        gvim("/home/marek/code/kotlin/.idea/kotlin.iml").x()
     }
 
     @OptIn(DelicateApi::class)
-    suspend fun showMarekLangiewiczRepoMarkdownListInIdeaP() {
+    suspend fun showMarekLangiewiczRepoMarkdownListInGVim() {
         val reposMdContent = GhSamples.mareklangiewiczPublicRepoMarkdownList.reducedKommand.x()
         println(reposMdContent)
         val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
-        writeToFileAndOpenInIdeaP(reposMdContent, tmpReposFileMd)
+        writeToFileAndOpenInGVim(reposMdContent, tmpReposFileMd)
     }
 
     @DelicateApi
-    suspend fun writeToFileAndOpenInIdeaP(content: String, filePath: String = SYS.pathToUserTmp + "/tmp.notes") {
+    suspend fun writeToFileAndOpenInGVim(content: String, filePath: String = SYS.pathToUserTmp + "/tmp.notes") {
         echo(content).x(outFile = filePath)
-        ideap(filePath).x()
+        gvim(filePath).x()
     }
 }
 

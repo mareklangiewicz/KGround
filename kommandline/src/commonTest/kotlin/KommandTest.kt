@@ -9,7 +9,6 @@ import pl.mareklangiewicz.kommand.Ide.Cmd.Diff
 import pl.mareklangiewicz.kommand.Ide.Option.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
-import pl.mareklangiewicz.kommand.iproute2.SsOpt.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
@@ -34,8 +33,8 @@ class KommandTest {
     }
     @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -LongFormat; -Sort(TIME); +".."; +"/usr" }
         .chkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
-    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkInIdeap()
-    @Test fun testLs3() = ls { +"/home/marek" }.chkInIdeap()
+    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkInGVim()
+    @Test fun testLs3() = ls { +"/home/marek" }.chkInGVim()
     @Test fun testLsHome() = ls("/home/marek").execb(SYS).logEach()
     @Test fun testLsHomeSubDirs() = lsSubDirs("/home/marek").execb(SYS).logEach()
     @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", withHidden = true).execb(SYS).logEach()
@@ -52,11 +51,11 @@ class KommandTest {
         ls(it).execb(this) == listOf("blaa")
     }.execb(SYS).logEach()
 
-    @Test fun testCat1() = cat { +"/etc/fstab" }.chkInIdeap()
-    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInIdeap()
+    @Test fun testCat1() = cat { +"/etc/fstab" }.chkInGVim()
+    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInGVim()
 
     @Test fun testSs1() = ssTulpn().chkWithUser() // ss -tulpn
-    @Test fun testSs2() = ssTulpn().chkInIdeap() // ss -tulpn
+    @Test fun testSs2() = ssTulpn().chkInGVim() // ss -tulpn
 
     @Test fun testManMan() = man { +"man" }.chkWithUser()
     @Test fun testManVim() = man { +"vim" }.chkWithUser()
