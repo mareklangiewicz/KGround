@@ -12,12 +12,17 @@ defaultBuildTemplateForBasicMppLib {
     api(Langiewicz.abcdk)
     api(Langiewicz.tuplek)
     api(Langiewicz.upue)
-    api(KotlinX.datetime)
+
+    // api(KotlinX.datetime)
+    api(KotlinX.datetime.withVer("0.5.0"))
+    // FIXME: track:assemble fails on native in new 0.6.0-RC.2 version:
+    // KLIB resolver: Could not find "org.jetbrains.kotlinx:kotlinx-datetime-cinterop-date"
+
     api(KotlinX.coroutines_core)
 
-    // FIXME: remove hardcoded atomicfu when bug is fixed.
+    // FIXME: remove hardcoded atomicfu when bug is fixed. Update: Looks like it's working, but wait for youtrack update.
     // https://youtrack.jetbrains.com/issue/KT-64111/kotlinx-coroutines-1.8.0-RC-cant-be-used-Could-not-find-org.jetbrains.kotlinxatomicfu-cinterop-interop
-    api("org.jetbrains.kotlinx:atomicfu:0.23.1")
+    // api("org.jetbrains.kotlinx:atomicfu:0.23.1")
 }
 
 kotlin { js(IR) { nodejs() } }
