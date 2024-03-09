@@ -13,10 +13,10 @@ plugins {
 
 defaultBuildTemplateForAndroLib()
 
-// dependencies {
-//     defaultAndroTestDeps(configuration = "androidTestImplementation", withCompose = true)
-//         // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
-// }
+dependencies {
+    defaultAndroTestDeps(rootExtLibDetails.settings, configuration = "androidTestImplementation")
+        // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
+}
 
 // region [Kotlin Module Build Template]
 

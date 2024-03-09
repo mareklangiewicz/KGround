@@ -14,12 +14,13 @@ defaultBuildTemplateForRootProject(
         name = "TemplateAndro",
         description = "Template for android projects.",
         githubUrl = "https://github.com/mareklangiewicz/KGround",
-        version = Ver(0, 0, 12),
+        version = Ver(0, 0, 13),
         settings = LibSettings(
+            withTestJUnit4 = true,
+            withTestJUnit5 = false,
             compose = LibComposeSettings(
                 // withComposeCompiler = ComposeCompilerJb, // can't use Jb because andro plugin doesn't support it.
                 withComposeCompiler = ComposeCompilerAx,
-                withComposeCompilerAllowWrongKotlinVer = Ver("2.0.0-Beta3"),
             ),
             andro = LibAndroSettings(publishVariant = "debug")
         )
