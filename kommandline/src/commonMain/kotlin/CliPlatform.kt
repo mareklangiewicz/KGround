@@ -9,6 +9,10 @@ import kotlin.coroutines.*
 @Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
 typealias Platform = CliPlatform
 
+interface SysPlatform: CliPlatform
+
+expect fun SysPlatform(): SysPlatform
+
 interface CliPlatform {
 
     /**
@@ -123,36 +127,6 @@ internal fun defaultStdOutOrErrFlow(
 ) = flow { while (true) emit(readLine() ?: break) }
     .onCompletion { close() }
     .flowOn(flowOnContext)
-
-expect class SysPlatform(): CliPlatform {
-    override val isRedirectFileSupported: Boolean
-
-    override fun start(
-        kommand: Kommand,
-        vararg useNamedArgs: Unit,
-        dir: String?,
-        inFile: String?,
-        outFile: String?,
-        outFileAppend: Boolean,
-        errToOut: Boolean,
-        errFile: String?,
-        errFileAppend: Boolean,
-        envModify: (MutableMap<String, String>.() -> Unit)?,
-    ): ExecProcess
-
-
-    override val lineEnd: String
-
-    override val isJvm: Boolean
-    override val isDesktop: Boolean
-    override val isUbuntu: Boolean
-    override val isGnome: Boolean
-
-    override val pathToUserHome: String?
-    override val pathToUserTmp: String?
-    override val pathToSystemTmp: String?
-}
-
 
 fun interface StdinCollector {
     suspend fun collect(

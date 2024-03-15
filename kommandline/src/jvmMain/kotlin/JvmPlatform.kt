@@ -4,16 +4,15 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import java.io.*
 import java.lang.ProcessBuilder.*
 import kotlin.coroutines.*
 
-actual typealias SysPlatform = JvmPlatform
+actual fun SysPlatform(): SysPlatform = JvmPlatform()
 
-class JvmPlatform : CliPlatform {
+class JvmPlatform : SysPlatform {
 
     override val isRedirectFileSupported get() = true
 

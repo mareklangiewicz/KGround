@@ -5,9 +5,9 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kommand.*
 
 
-actual typealias SysPlatform = NativePlatform
+actual fun SysPlatform(): SysPlatform = NativePlatform()
 
-class NativePlatform: CliPlatform {
+class NativePlatform: SysPlatform {
 
     override val isRedirectFileSupported get() = false
 

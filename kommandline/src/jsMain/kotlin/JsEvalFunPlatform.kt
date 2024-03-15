@@ -6,9 +6,9 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 
-actual typealias SysPlatform = JsEvalFunPlatform
+actual fun SysPlatform(): SysPlatform = JsEvalFunPlatform()
 
-class JsEvalFunPlatform: CliPlatform {
+class JsEvalFunPlatform: SysPlatform {
 
     override val isRedirectFileSupported get() = false
 
