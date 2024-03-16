@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.bad.BadStateErr
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkNN
 import pl.mareklangiewicz.kground.*
@@ -12,58 +13,33 @@ import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
-fun ide(path: String, ifNoIdeRunningStart: Type? = null) = ide(null, ifNoIdeRunningStart) { +path }
 
-fun ideDiff(path1: String, path2: String, ifNoIdeRunningStart: Type? = null) =
-    ide(Cmd.Diff, ifNoIdeRunningStart) { +path1; +path2 }
+fun ideOpen(path: String, ifNoIdeRunningStart: Type? = null) = ide(Cmd.Open, ifNoIdeRunningStart) { +path }
+
+fun ideOrGVimOpen(path: String) = ReducedScript<Unit> { platform, dir ->
+    try { ideOpen(path).exec(platform, dir = dir) }
+    catch (e: BadStateErr) { gvim(path).exec(platform, dir = dir) }
+}
+
+/** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
+fun ideDiff(path1: String, path2: String, path3: String? = null, ifNoIdeRunningStart: Type? = null) =
+    ide(Cmd.Diff, ifNoIdeRunningStart) { +path1; +path2; path3?.let { +it } }
+
+/** https://www.jetbrains.com/help/idea/command-line-merge-tool.html */
+fun ideMerge(path1: String, path2: String, output: String, base: String? = null, ifNoIdeRunningStart: Type? = null) =
+    ide(Cmd.Merge, ifNoIdeRunningStart) { +path1; +path2; base?.let { +it }; +output }
 
 // TODO: more wrappers for most common simple usages?
 
-
-@OptIn(NotPortableApi::class, DelicateApi::class)
-fun ide(cmd: Cmd? = null, ifNoIdeRunningStart: Type? = null, init: Ide.() -> Unit = {}) =
+fun ide(cmd: Cmd, ifNoIdeRunningStart: Type? = null, init: Ide.() -> Unit = {}) =
     ReducedScript<Unit> { platform, dir ->
-
-        val ureToolboxApp = ure {
-            +ureText("Toolbox/apps/")
-            +ureIdent(allowDashesInside = true).withName("app")
-        }
-
-        suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().exec(platform)
-            .filter<String> { "Toolbox/apps" in it }
-            .map<String, String> { ureToolboxApp.findFirst(it).namedValues["app"]!! }
-            .toSet<String>()
-
-        suspend fun Type.getRealName(): String {
-            val path = whichFirstOrNull(name).exec(platform).chkNN { "Command $name not found." }
-            kommand("file", path).exec(platform).single().chkFindSingle(ureText("shell script"))
-            for (line in readFileHead(path).exec(platform, dir = dir))
-                return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue
-            bad { "Real name of $this not found in script $path" }
-        }
-
-        suspend fun getFirstRunningIdeType(): Type? {
-            val running = getRunningIdesRealNames()
-            for (i in Type.entries)
-                if (i.getRealName() in running) return i
-            return null
-        }
-
-        val type = getFirstRunningIdeType() ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
-
-        Ide(type, cmd).apply(init).exec(platform, dir = dir)
+        val type = getFirstRunningIdeType(platform) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
+        ide(type, cmd, init).exec(platform, dir = dir)
     }
 
 
-@DelicateApi fun idea(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.idea, cmd).apply(init)
-@DelicateApi fun ideap(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.ideap, cmd).apply(init)
-@DelicateApi fun ideaslim(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.ideaslim, cmd).apply(init)
-@DelicateApi fun studio(cmd: Cmd? = null, init: Ide.() -> Unit = {}) = Ide(Type.studio, cmd).apply(init)
 
-@DelicateApi fun idea(path: String, init: Ide.() -> Unit = {}) = idea { +path; init() }
-@DelicateApi fun ideap(path: String, init: Ide.() -> Unit = {}) = ideap { +path; init() }
-@DelicateApi fun ideaslim(path: String, init: Ide.() -> Unit = {}) = ideaslim { +path; init() }
-@DelicateApi fun studio(path: String, init: Ide.() -> Unit = {}) = studio { +path; init() }
+fun ide(type: Type, cmd: Cmd, init: Ide.() -> Unit = {}) = Ide(type, cmd).apply(init)
 
 /**
  * https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html
@@ -97,14 +73,17 @@ data class Ide(
      */
     enum class Type { idea, ideap, ideaslim, studio }
 
-    sealed class Cmd(val name: String, val arg: String? = null) {
+    // TODO NOW: rewrite Cmd to each contain its local options in right places
+    sealed class Cmd(val name: String?, val arg: String? = null) {
 
-        open val str get() = listOf(name) plusIfNN arg
+        open val str get() = listOfNotNull(name, arg)
 
+        data object Open : Cmd(null)
         data object Diff : Cmd("diff")
         data object Merge : Cmd("merge")
         data object Format : Cmd("format")
         data object Inspect : Cmd("inspect")
+        data object Install : Cmd("installPlugins")
     }
 
     sealed class Option(val name: String, val arg: String? = null) {
@@ -133,3 +112,34 @@ data class Ide(
     operator fun Option.unaryMinus() = options.add(this)
     operator fun String.unaryPlus() = stuff.add(this)
 }
+
+
+@OptIn(NotPortableApi::class, DelicateApi::class)
+private suspend fun getFirstRunningIdeType(platform: CliPlatform): Type? {
+
+    val ureToolboxApp = ure {
+        +ureText("Toolbox/apps/")
+        +ureIdent(allowDashesInside = true).withName("app")
+    }
+
+    suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().exec(platform)
+        .filter<String> { "Toolbox/apps" in it }
+        .map<String, String> { ureToolboxApp.findFirst(it).namedValues["app"]!! }
+        .toSet()
+
+    suspend fun Type.getRealName(): String {
+        val path = whichFirstOrNull(name).exec(platform).chkNN { "Command $name not found." }
+        kommand("file", path).exec(platform).single().chkFindSingle(ureText("shell script"))
+        for (line in readFileHead(path).exec(platform))
+            return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue
+        bad { "Real name of $this not found in script $path" }
+    }
+
+    val running = getRunningIdesRealNames()
+
+    for (i in Type.entries)
+        if (i.getRealName() in running) return i
+    return null
+}
+
+

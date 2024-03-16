@@ -40,17 +40,17 @@ class MarekLangiewicz {
     @Test fun demo_man() = idemo { termKitty(man { +askEntry("manual page for") }).execb(this) }
 
     @Test fun demo_ideap() = idemo {
-        ideap { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.execb(this)
+        ide(Ide.Type.ideap, Ide.Cmd.Open) { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }.execb(this)
     }
 
     @Test fun demo_bash_export() = idemo {
-        bashGetExportsToFile(tmpNotesFile).execb(SYS)
-        ideap { +tmpNotesFile }.execb(this)
+        bashGetExportsToFile(tmpNotesFile).execb(this)
+        ideOpen(tmpNotesFile).execb(this)
     }
 
     @Test fun demo_xclip() = idemo {
         bash("xclip -o > $tmpNotesFile").execb(this) // FIXME_later: do it with kotlin instead of bash script
-        ideap { +tmpNotesFile }.execb(this)
+        ideOpen(tmpNotesFile).execb(this)
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
@@ -82,8 +82,7 @@ class MarekLangiewicz {
     @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().logEachKeyVal()
 
     @Test fun experiment() = idemo {
-        val ideaEnabled = bash("ps aux").execb(this).any { it.lowercase().contains("idea") }
-        if (ideaEnabled) ideap { +tmpNotesFile }.execb(this) else gvim(tmpNotesFile).execb(this)
+        ideOrGVimOpen(tmpNotesFile).execb(this)
     }
 }
 

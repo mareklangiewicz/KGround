@@ -22,7 +22,7 @@ import kotlin.test.Test
 
 
 @OptIn(DelicateApi::class)
-@Ignore // stuff specific to my laptop fails on CI
+// @Ignore // stuff specific to my laptop fails on CI
 class KommandTest {
     @Test fun testBashQuoteMetaChars() {
         val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
@@ -85,6 +85,6 @@ class KommandTest {
     }
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
-    @Test fun testIdeap() = ideap { +"/home/marek/.bashrc"; -Line(2); -Column(13) }.chkWithUser()
-    @Test fun testIdeapDiff() = ideap(Diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
+    @Test fun testIdeapOpen() = ide(Ide.Type.ideap, Ide.Cmd.Open) { +"/home/marek/.bashrc"; -Line(2); -Column(13) }.chkWithUser()
+    @Test fun testIdeapDiff() = ide(Ide.Type.ideap, Ide.Cmd.Diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
 }
