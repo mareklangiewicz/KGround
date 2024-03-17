@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kground.*
 
 /**
@@ -37,7 +38,7 @@ interface WithArgs { val args: List<String> }
  * and then all other arguments. In the case of KOpt, the toArgs() will also return full representation of
  * a particular option, usually with option name as part of the first returned element.
  * As required by parent Kommand containing given KOpt.
- * On the other hand, the WithArgs.args property holds only additional arguments of given structure (Kommand/KOpt, ..)
+ * On the other hand, the WithArgs.args property holds only additional arguments of given structure (Kommand/KOpt, ...)
  * without name etc. (if structure have name and/or some other parts besides .args)
  * So WithArgs.args is more like part of source data to be processed and checked before using it by ToArgs.toArgs(),
  * and ToArgs.toArgs() is always generating kind of target "internal representation"
@@ -85,21 +86,21 @@ interface KOptTypical: KOpt, WithName, WithArgs {
     override fun toArgs() = when {
         args.isEmpty() -> listOf("$namePrefix$name")
         nameSeparator == " " -> listOf("$namePrefix$name") + joinArgs()
-        nameSeparator.any { it.isWhitespace() } -> error("nameSeparator has to be one space or cannot contain any space")
-        argsSeparator == " " && args.size > 1 -> error("argsSeparator can not be space when nameSeparator isn't")
+        nameSeparator.any { it.isWhitespace() } -> bad { "nameSeparator has to be one space or cannot contain any space" }
+        argsSeparator == " " && args.size > 1 -> bad { "argsSeparator can not be space when nameSeparator isn't" }
         else -> listOf("$namePrefix$name$nameSeparator" + joinArgs().single())
     }
 
     private fun joinArgs(): List<String> = when {
         argsSeparator == " " -> args
-        argsSeparator.any { it.isWhitespace() } -> error("argsSeparator has to be one space or cannot contain any space")
+        argsSeparator.any { it.isWhitespace() } -> bad { "argsSeparator has to be one space or cannot contain any space" }
         else -> listOf(args.joinToString(argsSeparator))
     }
 }
 
-// Below there are three KOptTypical subclasses: KOptS, KOptL, KOptLN. These are kinda cryptic, not self explenatory,
-//   but it this case I optimize more for brevity on call side, because they are used is so many places;
-//   so they unfortunatelly have to be memorized by user.
+// Below there are three KOptTypical subclasses: KOptS, KOptL, KOptLN. These are kinda cryptic, not self-explanatory,
+//   but in this case I optimize more for brevity on the call side, because they are used is so many places;
+//   so they unfortunately have to be memorized by user.
 
 /** Short form of an option */
 @DelicateApi
@@ -137,7 +138,7 @@ open class KOptL(
     ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
-/** Special form of an option, with automatically derrived name as class name lowercase words separated by one hyphen */
+/** Special form of an option, with automatically derived name as class name lowercase words separated by one hyphen */
 @DelicateApi
 open class KOptLN(
     override val args: List<String>,
@@ -163,7 +164,7 @@ interface KommandTypical<KOptT: KOptTypical>: Kommand {
     operator fun String.unaryPlus() = nonopts.add(this)
 }
 
-/** Anonymus/Arbitrary implementation of KommandTypical to use only if no more specific Kommand class defined */
+/** Anonymous/Arbitrary implementation of KommandTypical to use only if no more specific Kommand class defined */
 @DelicateApi
 data class AKommandTypical(
     override val name: String,
