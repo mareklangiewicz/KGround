@@ -5,8 +5,6 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Adb.*
 import pl.mareklangiewicz.kommand.Adb.Command.*
 import pl.mareklangiewicz.kommand.Adb.Option.*
-import pl.mareklangiewicz.kommand.Ide.Cmd.Diff
-import pl.mareklangiewicz.kommand.Ide.Option.*
 import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
@@ -83,8 +81,19 @@ class KommandTest {
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
         kommand2.chkWithUser("bash -c vim -g --servername DDDD .")
     }
+    @Ignore // Let's not print all env vars on github actions.
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
-    @Test fun testIdeapOpen() = ide(Ide.Type.ideap, Ide.Cmd.Open) { +"/home/marek/.bashrc"; -Line(2); -Column(13) }.chkWithUser()
-    @Test fun testIdeapDiff() = ide(Ide.Type.ideap, Ide.Cmd.Diff) { +"/home/marek/.bashrc"; +"/home/marek/.profile" }.chkWithUser()
+
+    @Test fun testIdeapOpen() =
+        ide(
+            Ide.Type.ideap,
+            Ide.Cmd.Open().apply {
+                +"/home/marek/.bashrc"
+                -Ide.Cmd.Open.Opt.Line(2)
+                -Ide.Cmd.Open.Opt.Column(13)
+            }
+        ).chkWithUser()
+
+    @Test fun testIdeapDiff() = ide(Ide.Type.ideap, Ide.Cmd.Diff("/home/marek/.bashrc", "/home/marek/.profile")).chkWithUser()
 }
