@@ -6,8 +6,7 @@ import pl.mareklangiewicz.bad.BadStateErr
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkNN
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.Ide.Cmd
-import pl.mareklangiewicz.kommand.Ide.Type
+import pl.mareklangiewicz.kommand.Ide.*
 import pl.mareklangiewicz.kommand.admin.psAllFull
 import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
 import pl.mareklangiewicz.ure.*
@@ -18,7 +17,7 @@ fun ideOpen(path: String, ifNoIdeRunningStart: Type? = null) = ide(Cmd.Open, ifN
 
 fun ideOrGVimOpen(path: String) = ReducedScript<Unit> { platform, dir ->
     try { ideOpen(path).exec(platform, dir = dir) }
-    catch (e: BadStateErr) { gvim(path).exec(platform, dir = dir) }
+    catch (_: BadStateErr) { gvim(path).exec(platform, dir = dir) }
 }
 
 /** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
@@ -74,9 +73,9 @@ data class Ide(
     enum class Type { idea, ideap, ideaslim, studio }
 
     // TODO NOW: rewrite Cmd to each contain its local options in right places
-    sealed class Cmd(val name: String?, val arg: String? = null) {
+    sealed class Cmd(val name: String?) {
 
-        open val str get() = listOfNotNull(name, arg)
+        open val str get() = listOfNotNull(name)
 
         data object Open : Cmd(null)
         data object Diff : Cmd("diff")
@@ -88,13 +87,18 @@ data class Ide(
 
     sealed class Option(val name: String, val arg: String? = null) {
         open val str get() = listOf(name) plusIfNN arg
+
+        // FIXME NOW
+        //   Looks like these options don't work with anything but Cmd.Open...
+        //   So let's assume all options are local for Cmd
+        //   and these are just for Cmd.Open
         data object NoSplash : Option("nosplash")
         data object DontReopenProjects : Option("dontReopenProjects")
         data object DisableNonBundledPlugins : Option("disableNonBundledPlugins")
         data object Wait : Option("--wait")
         data class Line(val l: Int) : Option("--line", l.toString())
-
         data class Column(val c: Int) : Option("--column", c.toString())
+
 
         // options only for Cmd.format:
         data object FormatHelp : Option("-h")
