@@ -20,7 +20,7 @@ import kotlin.test.Test
 
 
 @OptIn(DelicateApi::class)
-// @Ignore // stuff specific to my laptop fails on CI
+@Ignore // Some stuff fails on CI TODO: decide what to run on github (and what about native)
 class KommandTest {
     @Test fun testBashQuoteMetaChars() {
         val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
@@ -85,15 +85,7 @@ class KommandTest {
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
 
-    @Test fun testIdeapOpen() =
-        ide(
-            Ide.Type.ideap,
-            Ide.Cmd.Open().apply {
-                +"/home/marek/.bashrc"
-                -Ide.Cmd.Open.Opt.Line(2)
-                -Ide.Cmd.Open.Opt.Column(13)
-            }
-        ).chkWithUser()
+    @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).execb(SYS)
 
-    @Test fun testIdeapDiff() = ide(Ide.Type.ideap, Ide.Cmd.Diff("/home/marek/.bashrc", "/home/marek/.profile")).chkWithUser()
+    @Test fun testIdeDiff() = ideDiff("/home/marek/.bashrc", "/home/marek/.profile").execb(SYS)
 }

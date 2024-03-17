@@ -13,7 +13,14 @@ import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
 
-fun ideOpen(path: String, ifNoIdeRunningStart: Type? = null) = ide(Cmd.Open().apply { +path }, ifNoIdeRunningStart)
+fun ideOpen(
+    path1: String,
+    path2: String? = null,
+    path3: String? = null,
+    line: Int? = null,
+    column: Int? = null,
+    ifNoIdeRunningStart: Type? = null,
+) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
 fun ideOrGVimOpen(path: String) = ReducedScript<Unit> { platform, dir ->
     try { ideOpen(path).exec(platform, dir = dir) }
@@ -28,9 +35,7 @@ fun ideDiff(path1: String, path2: String, path3: String? = null, ifNoIdeRunningS
 fun ideMerge(path1: String, path2: String, output: String, base: String? = null, ifNoIdeRunningStart: Type? = null) =
     ide(Cmd.Merge(path1, path2, output, base), ifNoIdeRunningStart)
 
-// TODO: more wrappers for most common simple usages?
-
-fun ide(cmd: Cmd, ifNoIdeRunningStart: Type? = null, init: Ide.() -> Unit = {}) =
+fun <CmdT: Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
     ReducedScript<Unit> { platform, dir ->
         val type = getFirstRunningIdeType(platform) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
         ide(type, cmd, init).exec(platform, dir = dir)
@@ -38,7 +43,7 @@ fun ide(cmd: Cmd, ifNoIdeRunningStart: Type? = null, init: Ide.() -> Unit = {}) 
 
 
 
-fun ide(type: Type, cmd: Cmd, init: Ide.() -> Unit = {}) = Ide(type, cmd).apply(init)
+fun <CmdT: Cmd> ide(type: Type, cmd: CmdT, init: CmdT.() -> Unit = {}) = Ide(type, cmd.apply(init))
 
 /**
  * https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html
@@ -74,6 +79,16 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
             val opts: MutableList<Opt> = mutableListOf(),
             val paths: MutableList<String> = mutableListOf(),
         ) : Cmd(null) {
+            constructor(
+                path1: String? = null,
+                path2: String? = null,
+                path3: String? = null,
+                line: Int? = null,
+                column: Int? = null,
+            ): this(
+                listOfNotNull(line?.let(Opt::Line), column?.let(Opt::Column)).toMutableList(),
+                listOfNotNull(path1, path2, path3).toMutableList()
+            )
 
             override fun toArgs() = opts.flatMap { it.toArgs() } + paths
 

@@ -39,8 +39,8 @@ class MarekLangiewicz {
 
     @Test fun demo_man() = idemo { termKitty(man { +askEntry("manual page for") }).execb(this) }
 
-    @Test fun demo_ideap() = idemo {
-        ide(Ide.Type.ideap, Ide.Cmd.Open().apply { +askEntry("open file in ideap", suggested = "/home/marek/.bashrc") }).execb(this)
+    @Test fun demo_ide() = idemo {
+        ide(Ide.Cmd.Open(askEntry("open file in IDE", suggested = "/home/marek/.bashrc"))).execb(this)
     }
 
     @Test fun demo_bash_export() = idemo {
