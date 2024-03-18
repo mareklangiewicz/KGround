@@ -31,7 +31,7 @@ fun CliPlatform.testTmpKonfig() {
             testGivenNewKonfigInDir(konfig, konfigNewDir)
         }
         finally {
-            rmTreeWithForce(konfigNewDir) { pathToUserTmp!! in it && "tmpKonfigForTests" in it }.execb(this)
+            rmTreeWithForce(konfigNewDir) { cli, path -> pathToUserTmp!! in path && "tmpKonfigForTests" in path }.execb(this)
         }
     }
 }

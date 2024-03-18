@@ -22,9 +22,9 @@ fun ideOpen(
     ifNoIdeRunningStart: Type? = null,
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
-fun ideOrGVimOpen(path: String) = ReducedScript<Unit> { platform, dir ->
-    try { ideOpen(path).exec(platform, dir = dir) }
-    catch (_: BadStateErr) { gvim(path).exec(platform, dir = dir) }
+fun ideOrGVimOpen(path: String) = ReducedScript { cli, dir ->
+    try { ideOpen(path).exec(cli, dir = dir) }
+    catch (_: BadStateErr) { gvim(path).exec(cli, dir = dir) }
 }
 
 /** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
@@ -36,9 +36,9 @@ fun ideMerge(path1: String, path2: String, output: String, base: String? = null,
     ide(Cmd.Merge(path1, path2, output, base), ifNoIdeRunningStart)
 
 fun <CmdT: Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
-    ReducedScript<Unit> { platform, dir ->
-        val type = getFirstRunningIdeType(platform) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
-        ide(type, cmd, init).exec(platform, dir = dir)
+    ReducedScript { cli, dir ->
+        val type = getFirstRunningIdeType(cli) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
+        ide(type, cmd, init).exec(cli, dir = dir)
     }
 
 

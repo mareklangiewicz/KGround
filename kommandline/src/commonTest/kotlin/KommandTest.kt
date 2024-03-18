@@ -44,9 +44,9 @@ class KommandTest {
     @Test fun testRm1() = rm { -RmOpt.Dir; +"/tmp/testMkDir1/blaa/blee" }
         .chkWithUser("rm -d /tmp/testMkDir1/blaa/blee")
 
-    @Test fun testRm2() = rmTreeWithForce("/tmp/testMkDir1") {
+    @Test fun testRm2() = rmTreeWithForce("/tmp/testMkDir1") { cli, path ->
         // double check if we are removing what we think we are:
-        ls(it).execb(this) == listOf("blaa")
+        ls(path).execb(cli) == listOf("blaa")
     }.execb(SYS).logEach()
 
     @Test fun testCat1() = cat { +"/etc/fstab" }.chkInGVim()

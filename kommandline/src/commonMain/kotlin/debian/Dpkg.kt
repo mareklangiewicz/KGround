@@ -6,11 +6,10 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
 @OptIn(DelicateApi::class)
-fun searchCommandScript(command: String) =
-    ReducedScript { platform, dir ->
-        val first = whichFirstOrNull(command).exec(platform, dir) ?: return@ReducedScript null
-        dpkg(DpkgAct.Search(first)).exec(platform)
-    }
+fun searchCommandScript(command: String) = ReducedScript { cli, dir ->
+    val first = whichFirstOrNull(command).exec(cli, dir) ?: return@ReducedScript null
+    dpkg(DpkgAct.Search(first)).exec(cli)
+}
 
 /** There has to be exactly one action in each invocation */
 @DelicateApi
