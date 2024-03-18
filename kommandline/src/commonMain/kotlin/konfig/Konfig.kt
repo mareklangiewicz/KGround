@@ -110,7 +110,7 @@ fun IKonfig.withChecks(
 //  even when via ssh or adb or via some strange shell,
 //  so maybe additional encoding of whole file is required for reading/writing over ssh/adb.
 @Deprecated("TODO: implement")
-fun CLI.konfigInFile(file: String): IKonfig = TODO()
+fun konfigInFile(file: String, cli: CLI = CLI.SYS): IKonfig = TODO()
 
 fun IKonfig.logEachKeyVal(logln: (String) -> Unit = ::println) = keys.forEach { logKeyVal(it, logln) }
 
