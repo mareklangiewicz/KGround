@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import kotlin.test.Ignore
 import kotlin.test.Test
 

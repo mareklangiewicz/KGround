@@ -20,7 +20,7 @@ typealias IKonfig = IMutMap<String, String>
 //  (konfig dir in MYKOTLIBS repos - encrypted private key, etc)
 
 
-fun CliPlatform.konfigInUserHomeConfigDir(
+fun CLI.konfigInUserHomeConfigDir(
     isReadOnly: Boolean = false,
     checkForDangerousKeys: Boolean = true,
     checkForDangerousValues: Boolean = true,
@@ -32,7 +32,7 @@ fun CliPlatform.konfigInUserHomeConfigDir(
  * Also, keys are implemented as files, so should be simple names without special chars like for example '/'.
  * I want to be able to use it over ssh and/or adb, so that's another reason to avoid special chars.
  */
-fun CliPlatform.konfigInDir(
+fun CLI.konfigInDir(
     dir: String,
     isReadOnly: Boolean = false,
     isClrAllowed: Boolean = false,
@@ -41,7 +41,7 @@ fun CliPlatform.konfigInDir(
 ) = KonfigInDirUnsafe(dir, this)
     .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
-private class KonfigInDirUnsafe(val dir: String, val cli: CliPlatform = CliPlatform.SYS): IKonfig {
+private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS): IKonfig {
 
     init { mkdir(dir, withParents = true).execb(cli) }
 
@@ -51,8 +51,8 @@ private class KonfigInDirUnsafe(val dir: String, val cli: CliPlatform = CliPlatf
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
         cli.run {
-            if (item == null) rmIfFileExists(file).execb(CliPlatform.SYS)
-            else writeFileWithDD(inLines = listOf(item), outFile = file).execb(CliPlatform.SYS)
+            if (item == null) rmIfFileExists(file).execb(CLI.SYS)
+            else writeFileWithDD(inLines = listOf(item), outFile = file).execb(CLI.SYS)
         }
     }
 
@@ -109,7 +109,7 @@ fun IKonfig.withChecks(
 //  even when via ssh or adb or via some strange shell,
 //  so maybe additional encoding of whole file is required for reading/writing over ssh/adb.
 @Deprecated("TODO: implement")
-fun CliPlatform.konfigInFile(file: String): IKonfig = TODO()
+fun CLI.konfigInFile(file: String): IKonfig = TODO()
 
 fun IKonfig.logEachKeyVal(logln: (String) -> Unit = ::println) = keys.forEach { logKeyVal(it, logln) }
 

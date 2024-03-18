@@ -1,7 +1,6 @@
 package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.RmOpt.*
@@ -14,7 +13,7 @@ fun rmIfFileExists(file: String) = ReducedScript { cli, dir ->
 }
 
 @DelicateApi
-fun rmTreeWithForce(path: String, doubleChk: (cli: CliPlatform, path: String) -> Boolean) =
+fun rmTreeWithForce(path: String, doubleChk: (cli: CLI, path: String) -> Boolean) =
     ReducedScript { cli, dir ->
         chk(doubleChk(cli, path)) { "ERROR: Can not remove whole '$path' tree. Double chk failed." }
         rm(path, recursive = true, force = true).exec(cli, dir = dir)

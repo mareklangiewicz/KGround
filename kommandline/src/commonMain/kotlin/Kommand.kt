@@ -12,7 +12,7 @@ import pl.mareklangiewicz.kground.*
  * General Note: The @DelicateApi annotation in KommandLine usually means that annotated construct is low level
  * and allows to generate incorrect kommands, which leads to bugs which can be very difficult to find later.
  * Try to use safer non-delicate wrappers instead, which either do not allow to create incorrect kommand lines,
- * or at least they try to "fail fast" in runtime instead of running some suspicious kommands on CliPlatform.
+ * or at least they try to "fail fast" in runtime instead of running some suspicious kommands on CLI.
  */
 @DelicateApi
 fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
@@ -34,7 +34,7 @@ interface WithArgs { val args: List<String> }
  * Important:
  * ToArgs.toArgs() is a different and more fundamental concept than WithArgs.args.
  * toArgs() always constructs full List<String> representation of given structure (like Kommand or KOpt)
- * as required by CliPlatform. So in the case of Kommand, the first element of the list will be kommand name,
+ * as required by CLI. So in the case of Kommand, the first element of the list will be kommand name,
  * and then all other arguments. In the case of KOpt, the toArgs() will also return full representation of
  * a particular option, usually with option name as part of the first returned element.
  * As required by parent Kommand containing given KOpt.
@@ -42,7 +42,7 @@ interface WithArgs { val args: List<String> }
  * without name etc. (if structure have name and/or some other parts besides .args)
  * So WithArgs.args is more like part of source data to be processed and checked before using it by ToArgs.toArgs(),
  * and ToArgs.toArgs() is always generating kind of target "internal representation"
- * (full "internal representation" to be used by platform or some parent structure/kommand)
+ * (full "internal representation" to be used by CLI or some parent structure/kommand)
  * Also toArgs() should perform some checking for forbidden/inconsistent chars/data, and fail fast in case of problems.
  * (Structures like Kommand and KOpt, etc. are mutable, because they are used as convenient builders,
  * so they can contain incorrect/inconsistent data during building)

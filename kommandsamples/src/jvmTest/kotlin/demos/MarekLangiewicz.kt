@@ -5,7 +5,7 @@ import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.konfig.*
 import pl.mareklangiewicz.kommand.term.*
 
@@ -84,7 +84,7 @@ class MarekLangiewicz {
     }
 }
 
-private fun idemo(cli: CliPlatform = SYS, block: CliPlatform.() -> Unit) = ifInteractive { cli.block() }
-private fun CliPlatform.askIf(question: String) = zenityAskIf(question).execb(this)
-private fun CliPlatform.askEntry(question: String, suggested: String? = null) =
+private fun idemo(cli: CLI = SYS, block: CLI.() -> Unit) = ifInteractive { cli.block() }
+private fun CLI.askIf(question: String) = zenityAskIf(question).execb(this)
+private fun CLI.askEntry(question: String, suggested: String? = null) =
     zenityAskForEntry(question, suggested = suggested).execb(this)

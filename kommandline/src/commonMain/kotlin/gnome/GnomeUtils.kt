@@ -8,7 +8,7 @@ import pl.mareklangiewicz.kommand.term.*
 
 
 @OptIn(DelicateApi::class)
-fun CliPlatform.startInTermIfUserConfirms(
+fun CLI.startInTermIfUserConfirms(
     kommand: Kommand,
     confirmation: String = "Run ::${kommand.line()}:: in terminal?",
     title: String = kommand.name,

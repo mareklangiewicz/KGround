@@ -9,9 +9,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 /**
  * Separate from Kommand, because I want Kommand to be simple and serializable!
  * TODO_someday_maybe: Use kotlinx-serialization for all Kommands (but not TypedKommands)
- * Note1: TypedKommand assumes no redirections at platform level.
+ * Note1: TypedKommand assumes no redirections at CLI level.
  * Instead, just compose stdin/out/err data types (usually flows) (it will result in better code in most cases).
- * If platform level redirections are really needed, then just use lower level api.
+ * If CLI level redirections are really needed, then just use lower level api.
  * But first, consider if you can just locally save/load flows to/from files using Okio.
  * (Overall goal is to gradually move AWAY from CLI craziness and more towards safe/composable kotlin programming.)
  */
@@ -80,7 +80,7 @@ suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
 /**
  * @param dir working directory for started subprocess - null means inherit from the current process
  */
-fun <K: Kommand, In, Out, Err> CliPlatform.start(
+fun <K: Kommand, In, Out, Err> CLI.start(
     kommand: TypedKommand<K, In, Out, Err>,
     dir: String? = null,
 ) = TypedExecProcess(
@@ -101,13 +101,13 @@ fun <K: Kommand, In, Out, Err> CliPlatform.start(
 //   Then ReducedKommandMap, etc. would also be just a specific form of ReducedScript.
 
 fun interface ReducedScript<ReducedOut> {
-    // TODO_maybe: dir should probably be inside CliPlatform as val currentDir.
-    //   and maybe sth like CliPlatform.withCurrentDir(dir, code:...) (or rather with context receivers)
-    suspend fun exec(cli: CliPlatform, dir: String?): ReducedOut
+    // TODO_maybe: dir should probably be inside CLI as val currentDir.
+    //   and maybe sth like CLI.withCurrentDir(dir, code:...) (or rather with context receivers)
+    suspend fun exec(cli: CLI, dir: String?): ReducedOut
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(cli: CliPlatform) = exec(cli, null)
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(cli: CLI) = exec(cli, null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
@@ -115,14 +115,14 @@ internal class ReducedKommandImpl<K: Kommand, In, Out, Err, ReducedOut>(
     val typedKommand: TypedKommand<K, In, Out, Err>,
     val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> {
-    override suspend fun exec(cli: CliPlatform, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
+    override suspend fun exec(cli: CLI, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
 }
 
 internal class ReducedKommandMap<InnerOut, MappedOut>(
     val reducedKommand: ReducedKommand<InnerOut>,
     val reduceMap: suspend InnerOut.() -> MappedOut,
 ): ReducedKommand<MappedOut> {
-    override suspend fun exec(cli: CliPlatform, dir: String?): MappedOut = reducedKommand.exec(cli, dir).reduceMap()
+    override suspend fun exec(cli: CLI, dir: String?): MappedOut = reducedKommand.exec(cli, dir).reduceMap()
 }
 
 fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(

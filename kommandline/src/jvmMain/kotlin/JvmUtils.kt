@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
 
 @Deprecated("Use suspend fun Kommand.exec(...)")
-fun CliPlatform.execBlocking(
+fun CLI.execBlocking(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
     dir: String? = null,
@@ -17,10 +17,10 @@ fun CliPlatform.execBlocking(
     exec(kommand, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
 }
 
-// TODO_someday: CliPlatform as context receiver
+// TODO_someday: CLI as context receiver
 @Deprecated("Use suspend fun Kommand.exec(...)")
 fun Kommand.execBlocking(
-    cli: CliPlatform,
+    cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,
@@ -38,7 +38,7 @@ fun Kommand.execBlocking(
 // temporary hack
 @Deprecated("Use suspend fun Kommand.exec(...)")
 actual fun Kommand.execb(
-    cli: CliPlatform,
+    cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String?,
     inContent: String?,
@@ -56,7 +56,7 @@ actual fun Kommand.execb(
 
 // also temporary hack
 @Deprecated("Use suspend fun ReducedKommand.exec(...)")
-actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CliPlatform, dir: String?): ReducedOut =
+actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CLI, dir: String?): ReducedOut =
     runBlocking { exec(cli, dir) }
 
 

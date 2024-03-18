@@ -1,13 +1,11 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kommand.*
 
 
-actual fun SysPlatform(): SysPlatform = NativePlatform()
+actual fun provideSysCLI(): CLI = NativeCLI()
 
-class NativePlatform: SysPlatform {
+class NativeCLI: CLI {
 
     override val isRedirectFileSupported get() = false
 
@@ -24,7 +22,7 @@ class NativePlatform: SysPlatform {
         errFileAppend: Boolean,
         envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess {
-        TODO("Native CliPlatform not implemented yet.")
+        TODO("Native CLI not implemented yet.")
         // TODO_someday: implement using posix or sth (watch okio - maybe they will implement some wrapper)
     }
 }

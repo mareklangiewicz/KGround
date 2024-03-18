@@ -72,8 +72,8 @@ fun testIf(vararg tokens: String) = testIf { this.tokens.addAll(tokens) }
         when (it) {
             0 -> true
             1 -> false
-            2 -> bad { "Platform test ended with error (2)." }
-            else -> bad { "Unexpected platform test exit value ($it)." }
+            2 -> bad { "CLI test ended with error (2)." }
+            else -> bad { "Unexpected CLI test exit value ($it)." }
         }
     }
 

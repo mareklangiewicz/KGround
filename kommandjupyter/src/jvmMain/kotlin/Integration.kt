@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.jupyter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlin.time.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
@@ -18,7 +18,7 @@ internal class Integration: JupyterIntegration() {
         //   maybe high-level fun stuff up to pl.mareklangiewicz.kommand package??
         import("pl.mareklangiewicz.kommand.*")
         import("pl.mareklangiewicz.kommand.core.*")
-        import("pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS")
+        import("pl.mareklangiewicz.kommand.CLI.Companion.SYS")
         import("pl.mareklangiewicz.kommand.find.*")
         import("pl.mareklangiewicz.kommand.github.*")
     }
@@ -36,7 +36,7 @@ fun Flow<*>.logb() = logEachWithMillisBlocking()
  * I don't want too many shortcut names inside kommandline itself, but here it's fine.
  */
 suspend fun Kommand.x(
-    cli: CliPlatform = SYS,
+    cli: CLI = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
     inContent: String? = null,
@@ -74,11 +74,11 @@ suspend fun Kommand.x(
         .unwrap(expectedExit, expectedErr)
 }
 
-fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(cli: CliPlatform = SYS, dir: String? = null) =
+fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(cli: CLI = SYS, dir: String? = null) =
     cli.start(this, dir)
 
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CliPlatform = SYS, dir: String? = null): ReducedOut =
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CLI = SYS, dir: String? = null): ReducedOut =
     exec(cli, dir = dir)
 
 
@@ -91,7 +91,7 @@ suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CliPlatform = SYS, dir
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
 fun Kommand.xb(
-    cli: CliPlatform = SYS,
+    cli: CLI = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
     inContent: String? = null,
@@ -125,5 +125,5 @@ fun Kommand.xb(
  * Blocking flavor of fun ReducedKommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <ReducedOut> ReducedKommand<ReducedOut>.xb(cli: CliPlatform = SYS, dir: String? = null): ReducedOut =
+fun <ReducedOut> ReducedKommand<ReducedOut>.xb(cli: CLI = SYS, dir: String? = null): ReducedOut =
     runBlocking { x(cli, dir) }

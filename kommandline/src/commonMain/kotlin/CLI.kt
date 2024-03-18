@@ -3,20 +3,14 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kground.*
 import kotlin.coroutines.*
 
-@Deprecated("Use CliPlatform", ReplaceWith("CliPlatform"))
-typealias Platform = CliPlatform
+expect fun provideSysCLI(): CLI
 
-interface SysPlatform: CliPlatform
-
-expect fun SysPlatform(): SysPlatform
-
-interface CliPlatform {
+interface CLI {
 
     /**
-     * TODO_later: experiment with wrapping some remote (ssh? adb?) platform in sth like bash kommands,
+     * TODO_later: experiment with wrapping some remote (ssh? adb?) CLI in sth like bash kommands,
      * so it supports redirect using remote bash operators like < > << >> or sth like that.
      */
     val isRedirectFileSupported: Boolean
@@ -61,15 +55,15 @@ interface CliPlatform {
     // (but what about platforms running kommands through ssh or adb?)
 
     companion object {
-        val SYS = SysPlatform()
-        val FAKE = FakePlatform()
+        val SYS = provideSysCLI()
+        val FAKE = FakeCLI()
     }
 }
 
-class FakePlatform(
+class FakeCLI(
     private val chkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
         {_, _, _, _, _, _, _, _ -> },
-    private val log: (Any?) -> Unit = ::println): CliPlatform {
+    private val log: (Any?) -> Unit = ::println): CLI {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
 
@@ -140,7 +134,7 @@ fun interface StdinCollector {
 suspend fun StdinCollector.collect(
     lineS: Flow<String>,
     vararg useNamedArgs: Unit,
-    lineEnd: String = CliPlatform.SYS.lineEnd,
+    lineEnd: String = CLI.SYS.lineEnd,
     flushAfterEachLine: Boolean = true,
     finallyStdinClose: Boolean = true,
 ) = collect(lineS, lineEnd, flushAfterEachLine, finallyStdinClose)
@@ -180,7 +174,7 @@ interface ExecProcess : AutoCloseable {
 
     /** System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them! */
     @DelicateApi
-    fun stdinWriteLine(line: String, lineEnd: String = CliPlatform.SYS.lineEnd, thenFlush: Boolean = true)
+    fun stdinWriteLine(line: String, lineEnd: String = CLI.SYS.lineEnd, thenFlush: Boolean = true)
 
     /** Indepotent. Flushes buffer before closing. */
     @DelicateApi

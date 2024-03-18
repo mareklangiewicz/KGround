@@ -5,7 +5,7 @@ package pl.mareklangiewicz.kommand.jupyter
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*

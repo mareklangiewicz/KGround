@@ -2,13 +2,12 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 
-actual fun SysPlatform(): SysPlatform = JsEvalFunPlatform()
+actual fun provideSysCLI() = JsEvalFunCLI()
 
-class JsEvalFunPlatform: SysPlatform {
+class JsEvalFunCLI: CLI {
 
     override val isRedirectFileSupported get() = false
 

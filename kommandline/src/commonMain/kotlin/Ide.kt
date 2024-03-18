@@ -173,7 +173,7 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
 
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
-private suspend fun getFirstRunningIdeType(cli: CliPlatform): Type? {
+private suspend fun getFirstRunningIdeType(cli: CLI): Type? {
 
     val ureToolboxApp = ure {
         +ureText("Toolbox/apps/")

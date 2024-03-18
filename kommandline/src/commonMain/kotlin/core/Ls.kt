@@ -27,7 +27,7 @@ fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: Indi
     ls { for (p in paths) +p; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
 
 /**
- * lsDefault is ls without any options; uses default settings on given CliPlatform.
+ * lsDefault is ls without any options; uses default settings on given CLI.
  * lsPredictable is better to get a more predictable output format, especially for parsing.
  */
 @OptIn(DelicateApi::class)

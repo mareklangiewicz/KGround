@@ -7,7 +7,7 @@ import pl.mareklangiewicz.kommand.core.EchoOpt.*
 /**
  * @param withNewLine adds trailing newline at the end of [line].
  *   Note: normally it doesn't matter because in KommandLine stdout is read line-wise anyway.
- *   But it matters when we redirect output to file, for example with: [CliPlatform.start] start(..., outFile=...),
+ *   But it matters when we redirect output to file, for example with: [CLI.start] start(..., outFile=...),
  *   or when we inject echo kommand line into some bash script with pipes, etc.
  */
 

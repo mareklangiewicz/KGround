@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.bad.*
 
 
-@Deprecated("Use Kommand.exec(CliPlatform, ...)")
-suspend fun CliPlatform.exec(
+@Deprecated("Use Kommand.exec(CLI, ...)")
+suspend fun CLI.exec(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
     dir: String? = null,
@@ -23,10 +23,10 @@ suspend fun CliPlatform.exec(
 }
 
 
-// TODO_someday: CliPlatform as context receiver
-//  for now convention is: first parameter "cli: CliPlatform", because it's the same as kgroundxio:WithCLI interface
+// TODO_someday: CLI as context receiver
+//  for now convention is: first parameter "cli: CLI", because it's the same as kgroundxio:WithCLI interface
 suspend fun Kommand.exec(
-    cli: CliPlatform,
+    cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,
@@ -44,7 +44,7 @@ suspend fun Kommand.exec(
 // temporary hack
 @Deprecated("Use suspend fun Kommand.exec(...)")
 expect fun Kommand.execb(
-    cli: CliPlatform,
+    cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,
@@ -54,10 +54,10 @@ expect fun Kommand.execb(
 ): List<String>
 
 // also temporary hack
-expect fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CliPlatform, dir: String? = null): ReducedOut
+expect fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CLI, dir: String? = null): ReducedOut
 
-@Deprecated("Use ReducedKommand.exec(CliPlatform, ...)")
-suspend fun <ReducedOut> CliPlatform.exec(kommand: ReducedKommand<ReducedOut>, dir: String? = null): ReducedOut =
+@Deprecated("Use ReducedKommand.exec(CLI, ...)")
+suspend fun <ReducedOut> CLI.exec(kommand: ReducedKommand<ReducedOut>, dir: String? = null): ReducedOut =
     kommand.exec(this, dir)
 
 

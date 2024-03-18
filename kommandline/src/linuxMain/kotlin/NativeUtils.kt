@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.*
 // temporary hack
 @Deprecated("Use suspend fun Kommand.exec(...)")
 actual fun Kommand.execb(
-    cli: CliPlatform,
+    cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String?,
     inContent: String?,
@@ -16,5 +16,5 @@ actual fun Kommand.execb(
 
 // also temporary hack
 @Deprecated("Use suspend fun ReducedKommand.exec(...)")
-actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CliPlatform, dir: String?): ReducedOut =
+actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CLI, dir: String?): ReducedOut =
     TODO("Remove this functionality")

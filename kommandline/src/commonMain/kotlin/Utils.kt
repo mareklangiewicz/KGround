@@ -2,21 +2,21 @@ package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.term.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
-fun CliPlatform.isUserFlagEnabled(key: String) = konfigInUserHomeConfigDir()["$key.enabled"]?.trim().toBoolean()
-fun CliPlatform.setUserFlag(key: String, enabled: Boolean) { konfigInUserHomeConfigDir()["$key.enabled"] = enabled.toString() }
+fun CLI.isUserFlagEnabled(key: String) = konfigInUserHomeConfigDir()["$key.enabled"]?.trim().toBoolean()
+fun CLI.setUserFlag(key: String, enabled: Boolean) { konfigInUserHomeConfigDir()["$key.enabled"] = enabled.toString() }
 
 private val interactive by lazy {
     when {
         SYS.isJvm -> SYS.isUserFlagEnabled("code.interactive")
         else -> {
-            println("Interactive stuff is only available on jvm platform (for now).")
+            println("Interactive stuff is only available on JvmCLI (for now).")
             false
         }
     }
@@ -27,7 +27,7 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 // FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
 // Maybe move to kommandsamples or somewhere else??
 @OptIn(DelicateApi::class)
-fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CliPlatform = SYS) {
+fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
     ifInteractive { cli.startInTermIfUserConfirms(
@@ -38,7 +38,7 @@ fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = nu
 }
 
 @OptIn(DelicateApi::class)
-fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CliPlatform = SYS) {
+fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CLI = SYS) {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     println(lineRaw)
     lineRaw.chkEq(expectedLineRaw)
@@ -102,7 +102,7 @@ inline fun List<String>.chkStdOut(
 fun Kommand.chkInGVim(
     expectedLineRaw: String? = null,
     execInDir: String? = null,
-    cli: CliPlatform = SYS
+    cli: CLI = SYS
 ) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw

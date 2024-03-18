@@ -2,7 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.core.LsOpt.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ZenityOpt.*
 import pl.mareklangiewicz.kommand.ZenityOpt.Type.*
 import pl.mareklangiewicz.kommand.core.*

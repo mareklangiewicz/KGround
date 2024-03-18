@@ -23,7 +23,7 @@ class GpgTest {
         .chkWithUser("gpg --list-secret-keys --verbose")
 
     @Suppress("DEPRECATION")
-    @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmPlatform {
+    @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmCLI {
         val inFile = mktemp(prefix = "testGED").execb(this)
         val encFile = "$inFile.enc"
         val decFile = "$inFile.dec"
@@ -38,7 +38,7 @@ class GpgTest {
     }
 }
 
-private fun ifOnNiceJvmPlatform(block: CliPlatform.() -> Unit) = CliPlatform.SYS.run {
-    if (isJvm && isUbuntu) block() else println("Disabled on this platform.")
+private fun ifOnNiceJvmCLI(block: CLI.() -> Unit) = CLI.SYS.run {
+    if (isJvm && isUbuntu) block() else println("Disabled on this CLI.")
 }
 

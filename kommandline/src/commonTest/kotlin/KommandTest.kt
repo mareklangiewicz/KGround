@@ -5,7 +5,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Adb.*
 import pl.mareklangiewicz.kommand.Adb.Command.*
 import pl.mareklangiewicz.kommand.Adb.Option.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
