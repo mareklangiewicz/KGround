@@ -77,7 +77,7 @@ class MarekLangiewicz {
         println("user flag: code.interactive.enabled = $enabled")
     }
 
-    @Test fun print_all_konfig() = SYS.konfigInUserHomeConfigDir().logEachKeyVal()
+    @Test fun print_all_konfig() = konfigInUserHomeConfigDir(SYS).logEachKeyVal()
 
     @Test fun experiment() = idemo {
         ideOrGVimOpen(tmpNotesFile).execb(this)

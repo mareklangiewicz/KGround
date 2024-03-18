@@ -9,8 +9,8 @@ import pl.mareklangiewicz.kommand.term.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
-fun isUserFlagEnabled(cli: CLI, key: String) = cli.konfigInUserHomeConfigDir()["$key.enabled"]?.trim().toBoolean()
-fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { cli.konfigInUserHomeConfigDir()["$key.enabled"] = enabled.toString() }
+fun isUserFlagEnabled(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.enabled"]?.trim().toBoolean()
+fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString() }
 
 private val interactive by lazy {
     when {

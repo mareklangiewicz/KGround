@@ -20,11 +20,13 @@ typealias IKonfig = IMutMap<String, String>
 //  (konfig dir in MYKOTLIBS repos - encrypted private key, etc)
 
 
-fun CLI.konfigInUserHomeConfigDir(
+fun konfigInUserHomeConfigDir(
+    cli: CLI = CLI.SYS,
+    vararg useNamedArgs: Unit,
     isReadOnly: Boolean = false,
     checkForDangerousKeys: Boolean = true,
     checkForDangerousValues: Boolean = true,
-) = konfigInDir(pathToUserHome!! + "/.config/konfig", this, isReadOnly, checkForDangerousKeys, checkForDangerousValues)
+) = konfigInDir(cli.pathToUserHome!! + "/.config/konfig", cli, isReadOnly, checkForDangerousKeys, checkForDangerousValues)
 
 /**
  * Works best when values don't have special characters like new-line etc.
