@@ -30,11 +30,13 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
-    ifInteractive { cli.startInTermIfUserConfirms(
-        kommand = this,
-        execInDir = execInDir,
-        termKommand = { termKitty(it) },
-    ) }
+    ifInteractive {
+        startInTermIfUserConfirms(
+            cli,
+            kommand = this,
+            execInDir = execInDir,
+        ) { termKitty(it) }
+    }
 }
 
 @OptIn(DelicateApi::class)

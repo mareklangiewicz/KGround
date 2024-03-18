@@ -20,7 +20,7 @@ object MainExamples {
         ls { -LsOpt.LongFormat; -LsOpt.All }.x {
             println("out line: $it")
         }
-        SYS.startInTermIfUserConfirms(EchoSamples.echoTwoParagraphsWithEscapes.kommand)
+        startInTermIfUserConfirms(SYS, EchoSamples.echoTwoParagraphsWithEscapes.kommand)
         // gitStatus().x().logEach()
         // searchCommandScript("pip").x()?.logEach()
         // SshSamples.sshPimInTermGnome.x()
