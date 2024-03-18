@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Langara.interactive_code_switch" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Playground.play" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -10,16 +10,17 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":kommanddemos:test" />
-          <option value="--tests" />
-          <option value="&quot;pl.mareklangiewicz.kommand.demos.Langara.interactive_code_switch&quot;" />
+          <option value="run" />
+          <option value="--args" />
+          <option value="play" />
         </list>
       </option>
       <option name="vmOptions" />
     </ExternalSystemSettings>
-    <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
+    <RunAsTest>false</RunAsTest>
     <method v="2" />
   </configuration>
 </component>

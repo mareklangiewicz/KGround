@@ -2,11 +2,8 @@ package pl.mareklangiewicz.kommand.samples
 
 import org.junit.jupiter.api.TestFactory
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.bad.bad
-import pl.mareklangiewicz.bad.chk
-import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.uspek.eq
 import pl.mareklangiewicz.uspek.o
 import pl.mareklangiewicz.uspek.uspekTestFactory
 import kotlin.reflect.KClass
@@ -26,7 +23,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     val objSimpleName = obj::class.simpleName ?: error("Unexpected samples obj without name")
     if (depthLimit < 1) { println("depthLimit < 1. Ignoring obj $objSimpleName"); return }
     chk(objSimpleName.endsWith("Samples")) { "Unexpected obj name in samples: $objSimpleName" }
-    chk(obj::class.objectInstance != null) { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
+    obj::class.objectInstance.chkNN { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
     chk(obj::class.isData) { "Unexpected obj in samples which is NOT data object: $objSimpleName" }
     val props = obj.getNamedPropsValues()
     for ((name, prop) in props) when {
@@ -45,7 +42,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
 fun testSample(sample: Sample) = "check kommand lineRaw" o {
     val lineRaw = sample.kommand.lineRaw()
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
-    else lineRaw eq sample.expectedLineRaw
+    else lineRaw chkEq sample.expectedLineRaw
     println("Actual kommand lineRaw is: $lineRaw")
 }
 
@@ -53,7 +50,7 @@ fun testSample(sample: Sample) = "check kommand lineRaw" o {
 fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand lineRaw" o {
     val lineRaw = sample.typedKommand.kommand.lineRaw()
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
-    else lineRaw eq sample.expectedLineRaw
+    else lineRaw chkEq sample.expectedLineRaw
     println("Actual typed kommand lineRaw is: $lineRaw")
 }
 
@@ -61,7 +58,7 @@ fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand line
 fun testReducedSample(sample: ReducedSample<*>) = "check reduced kommand lineRaw" o {
     val lineRaw = sample.reducedKommand.lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     if (sample.expectedLineRaw == null) println("Expected lineRaw not provided.")
-    else lineRaw eq sample.expectedLineRaw
+    else lineRaw chkEq sample.expectedLineRaw
     println("Actual reduced kommand lineRaw is: $lineRaw")
 }
 
