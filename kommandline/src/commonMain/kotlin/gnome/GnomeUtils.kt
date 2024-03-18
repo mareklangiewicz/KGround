@@ -8,11 +8,10 @@ import pl.mareklangiewicz.kommand.term.*
 
 
 @OptIn(DelicateApi::class)
-fun startInTermIfUserConfirms(
+fun Kommand.startInTermIfUserConfirms(
     cli: CLI,
-    kommand: Kommand,
-    confirmation: String = "Run ::${kommand.line()}:: in terminal?",
-    title: String = kommand.name,
+    confirmation: String = "Run ::${line()}:: in terminal?",
+    title: String = name,
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = insideBash,
     execInDir: String? = null,
@@ -20,9 +19,9 @@ fun startInTermIfUserConfirms(
 ) {
     if (zenityAskIf(confirmation, title).execb(cli)) {
         val k = when {
-            insideBash -> bash(kommand, pauseBeforeExit)
+            insideBash -> bash(this, pauseBeforeExit)
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
-            else -> kommand
+            else -> this
         }
         cli.start(termKommand(k), dir = execInDir)
     }

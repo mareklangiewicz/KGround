@@ -31,11 +31,7 @@ fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = nu
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
     ifInteractive {
-        startInTermIfUserConfirms(
-            cli,
-            kommand = this,
-            execInDir = execInDir,
-        ) { termKitty(it) }
+        startInTermIfUserConfirms(cli, execInDir = execInDir) { termKitty(it) }
     }
 }
 
