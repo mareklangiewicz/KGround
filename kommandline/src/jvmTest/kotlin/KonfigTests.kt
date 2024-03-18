@@ -17,39 +17,40 @@ class KonfigTests {
 
     @TestFactory
     fun uspekTests() = uspekTestFactory {
-        SYS.testTmpKonfig()
+        testTmpKonfig(SYS)
     }
 }
 
 @OptIn(DelicateApi::class)
-fun CLI.testTmpKonfig() {
-    val konfigNewDir = pathToUserTmp!! + "/tmpKonfigForTests" + Random.nextUInt()
+fun testTmpKonfig(cli: CLI) {
+    val konfigNewDir = cli.pathToUserTmp!! + "/tmpKonfigForTests" + Random.nextUInt()
 
     "On konfig in tmp dir" o { // Warning: adding $konfigNewDir to test name would make uspek generate infinite loop!!
         try {
-            val konfig = konfigInDir(konfigNewDir, this)
-            testGivenNewKonfigInDir(konfig, konfigNewDir)
+            val konfig = konfigInDir(konfigNewDir, cli)
+            testGivenNewKonfigInDir(cli, konfig, konfigNewDir)
         }
         finally {
-            rmTreeWithForce(konfigNewDir) { cli, path -> pathToUserTmp!! in path && "tmpKonfigForTests" in path }.execb(this)
+            rmTreeWithForce(konfigNewDir) { cli, path -> cli.pathToUserTmp!! in path && "tmpKonfigForTests" in path }
+                .execb(cli)
         }
     }
 }
 
 @OptIn(DelicateApi::class)
-fun CLI.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
+fun testGivenNewKonfigInDir(cli: CLI, konfig: IKonfig, dir: String) {
     "is empty" o { konfig.keys.len eq 0 }
-    "dir is created" o { testIfFileIsDirectory(dir).execb(this) eq true }
-    "dir is empty" o { ls(dir, withHidden = true).execb(this).size eq 0 }
+    "dir is created" o { testIfFileIsDirectory(dir).execb(cli) eq true }
+    "dir is empty" o { ls(dir, withHidden = true).execb(cli).size eq 0 }
 
     "On setting new key and value" o {
         konfig["somekey1"] = "somevalue1"
 
         "get returns stored value" o { konfig["somekey1"] eq "somevalue1" }
-        "file is created" o { testIfFileIsRegular("$dir/somekey1").execb(this) eq true }
-        "no other files there" o { ls(dir, withHidden = true).execb(this) eq listOf("somekey1") }
+        "file is created" o { testIfFileIsRegular("$dir/somekey1").execb(cli) eq true }
+        "no other files there" o { ls(dir, withHidden = true).execb(cli) eq listOf("somekey1") }
         "file for somekey1 contains correct content" o {
-            val content = readFileWithCat("$dir/somekey1").execb(this).joinToString("\n")
+            val content = readFileWithCat("$dir/somekey1").execb(cli).joinToString("\n")
             content eq "somevalue1"
         }
 
@@ -57,12 +58,12 @@ fun CLI.testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
             konfig["somekey1"] = null
 
             "get returns null" o { konfig["somekey1"] eq null }
-            "file is removed" o { testIfFileExists("$dir/somekey1").execb(this) eq false }
-            "no files in konfig dir" o { ls(dir, withHidden = true).execb(this).size eq 0 }
+            "file is removed" o { testIfFileExists("$dir/somekey1").execb(cli) eq false }
+            "no files in konfig dir" o { ls(dir, withHidden = true).execb(cli).size eq 0 }
 
             "On touch removed file again" o {
-                touch("$dir/somekey1").execb(this)
-                "file is there again" o { testIfFileExists("$dir/somekey1").execb(this) eq true }
+                touch("$dir/somekey1").execb(cli)
+                "file is there again" o { testIfFileExists("$dir/somekey1").execb(cli) eq true }
                 "get returns not null but empty value" o { konfig["somekey1"] eq "" }
             }
         }
