@@ -3,7 +3,6 @@
 package pl.mareklangiewicz.kommand.konfig
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
@@ -42,22 +41,22 @@ fun CliPlatform.konfigInDir(
 ) = KonfigInDirUnsafe(dir, this)
     .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
-private class KonfigInDirUnsafe(val dir: String, val platform: CliPlatform = CliPlatform.SYS): IKonfig {
+private class KonfigInDirUnsafe(val dir: String, val cli: CliPlatform = CliPlatform.SYS): IKonfig {
 
-    init { mkdir(dir, withParents = true).execb(platform) }
+    init { mkdir(dir, withParents = true).execb(cli) }
 
     override fun get(key: String): String? =
-        try { readFileWithCat("$dir/$key").execb(platform).joinToString("\n") } catch (e: RuntimeException) { null }
+        try { readFileWithCat("$dir/$key").execb(cli).joinToString("\n") } catch (e: RuntimeException) { null }
 
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
-        platform.run {
+        cli.run {
             if (item == null) rmIfFileExists(file).execb(CliPlatform.SYS)
             else writeFileWithDD(inLines = listOf(item), outFile = file).execb(CliPlatform.SYS)
         }
     }
 
-    override val keys get() = lsRegFiles(dir).execb(platform).asCol()
+    override val keys get() = lsRegFiles(dir).execb(cli).asCol()
 }
 
 private class KonfigWithChecks(

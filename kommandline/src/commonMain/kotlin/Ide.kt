@@ -173,22 +173,22 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
 
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
-private suspend fun getFirstRunningIdeType(platform: CliPlatform): Type? {
+private suspend fun getFirstRunningIdeType(cli: CliPlatform): Type? {
 
     val ureToolboxApp = ure {
         +ureText("Toolbox/apps/")
         +ureIdent(allowDashesInside = true).withName("app")
     }
 
-    suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().exec(platform)
+    suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().exec(cli)
         .filter<String> { "Toolbox/apps" in it }
         .map<String, String> { ureToolboxApp.findFirst(it).namedValues["app"]!! }
         .toSet()
 
     suspend fun Type.getRealName(): String {
-        val path = whichFirstOrNull(name).exec(platform).chkNN { "Command $name not found." }
-        kommand("file", path).exec(platform).single().chkFindSingle(ureText("shell script"))
-        for (line in readFileHead(path).exec(platform))
+        val path = whichFirstOrNull(name).exec(cli).chkNN { "Command $name not found." }
+        kommand("file", path).exec(cli).single().chkFindSingle(ureText("shell script"))
+        for (line in readFileHead(path).exec(cli))
             return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue
         bad { "Real name of $this not found in script $path" }
     }

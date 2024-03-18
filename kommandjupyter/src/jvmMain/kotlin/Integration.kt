@@ -36,7 +36,7 @@ fun Flow<*>.logb() = logEachWithMillisBlocking()
  * I don't want too many shortcut names inside kommandline itself, but here it's fine.
  */
 suspend fun Kommand.x(
-    platform: CliPlatform = SYS,
+    cli: CliPlatform = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
     inContent: String? = null,
@@ -51,10 +51,10 @@ suspend fun Kommand.x(
     expectedErr: ((List<String>) -> Boolean)? = null,
     outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = coroutineScope {
-    req(platform.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+    req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
     req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
     req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
-    val eprocess = platform.start(this@x,
+    val eprocess = cli.start(this@x,
         dir = dir,
         inFile = inFile,
         outFile = outFile,
@@ -74,14 +74,12 @@ suspend fun Kommand.x(
         .unwrap(expectedExit, expectedErr)
 }
 
-fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(
-    platform: CliPlatform = SYS,
-    dir: String? = null,
-) = platform.start(this, dir)
+fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(cli: CliPlatform = SYS, dir: String? = null) =
+    cli.start(this, dir)
 
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(platform: CliPlatform = SYS, dir: String? = null): ReducedOut =
-    exec(platform, dir = dir)
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CliPlatform = SYS, dir: String? = null): ReducedOut =
+    exec(cli, dir = dir)
 
 
 
@@ -93,7 +91,7 @@ suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(platform: CliPlatform = SYS
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
 fun Kommand.xb(
-    platform: CliPlatform = SYS,
+    cli: CliPlatform = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
     inContent: String? = null,
@@ -108,7 +106,7 @@ fun Kommand.xb(
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
     outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = runBlocking { x(
-    platform,
+    cli,
     dir,
     inContent = inContent,
     inLineS = inLineS,
@@ -127,5 +125,5 @@ fun Kommand.xb(
  * Blocking flavor of fun ReducedKommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <ReducedOut> ReducedKommand<ReducedOut>.xb(platform: CliPlatform = SYS, dir: String? = null): ReducedOut =
-    runBlocking { x(platform, dir) }
+fun <ReducedOut> ReducedKommand<ReducedOut>.xb(cli: CliPlatform = SYS, dir: String? = null): ReducedOut =
+    runBlocking { x(cli, dir) }

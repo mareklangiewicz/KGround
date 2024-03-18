@@ -27,10 +27,10 @@ fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("In
 // FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
 // Maybe move to kommandsamples or somewhere else??
 @OptIn(DelicateApi::class)
-fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, platform: CliPlatform = SYS) {
+fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CliPlatform = SYS) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
-    ifInteractive { platform.startInTermIfUserConfirms(
+    ifInteractive { cli.startInTermIfUserConfirms(
         kommand = this,
         execInDir = execInDir,
         termKommand = { termKitty(it) },
@@ -38,11 +38,11 @@ fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = nu
 }
 
 @OptIn(DelicateApi::class)
-fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, platform: CliPlatform = SYS) {
+fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CliPlatform = SYS) {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     println(lineRaw)
     lineRaw.chkEq(expectedLineRaw)
-    execb(platform, execInDir)
+    execb(cli, execInDir)
 }
 
 /** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */
@@ -102,11 +102,11 @@ inline fun List<String>.chkStdOut(
 fun Kommand.chkInGVim(
     expectedLineRaw: String? = null,
     execInDir: String? = null,
-    platform: CliPlatform = SYS
+    cli: CliPlatform = SYS
 ) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    ifInteractive { platform.run {
+    ifInteractive { cli.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
         start(this@chkInGVim, dir = execInDir, outFile = tmpFile).waitForExit()
         start(gvim(tmpFile)).waitForExit()

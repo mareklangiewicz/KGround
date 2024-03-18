@@ -20,14 +20,14 @@ fun CliPlatform.execBlocking(
 // TODO_someday: CliPlatform as context receiver
 @Deprecated("Use suspend fun Kommand.exec(...)")
 fun Kommand.execBlocking(
-    platform: CliPlatform,
+    cli: CliPlatform,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,
     inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
     inFile: String? = null,
     outFile: String? = null,
-): List<String> = platform.execBlocking(this,
+): List<String> = cli.execBlocking(this,
     dir = dir,
     inContent = inContent,
     inLineS = inLineS,
@@ -38,7 +38,7 @@ fun Kommand.execBlocking(
 // temporary hack
 @Deprecated("Use suspend fun Kommand.exec(...)")
 actual fun Kommand.execb(
-    platform: CliPlatform,
+    cli: CliPlatform,
     vararg useNamedArgs: Unit,
     dir: String?,
     inContent: String?,
@@ -46,7 +46,7 @@ actual fun Kommand.execb(
     inFile: String?,
     outFile: String?,
 ) = execBlocking(
-    platform,
+    cli,
     dir = dir,
     inContent = inContent,
     inLineS = inLineS,
@@ -56,8 +56,8 @@ actual fun Kommand.execb(
 
 // also temporary hack
 @Deprecated("Use suspend fun ReducedKommand.exec(...)")
-actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(platform: CliPlatform, dir: String?): ReducedOut =
-    runBlocking { exec(platform, dir) }
+actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CliPlatform, dir: String?): ReducedOut =
+    runBlocking { exec(cli, dir) }
 
 
 fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }

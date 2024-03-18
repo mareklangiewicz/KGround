@@ -103,11 +103,11 @@ fun <K: Kommand, In, Out, Err> CliPlatform.start(
 fun interface ReducedScript<ReducedOut> {
     // TODO_maybe: dir should probably be inside CliPlatform as val currentDir.
     //   and maybe sth like CliPlatform.withCurrentDir(dir, code:...) (or rather with context receivers)
-    suspend fun exec(platform: CliPlatform, dir: String?): ReducedOut
+    suspend fun exec(cli: CliPlatform, dir: String?): ReducedOut
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(platform: CliPlatform) = exec(platform, null)
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(cli: CliPlatform) = exec(cli, null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
@@ -115,16 +115,14 @@ internal class ReducedKommandImpl<K: Kommand, In, Out, Err, ReducedOut>(
     val typedKommand: TypedKommand<K, In, Out, Err>,
     val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> {
-    override suspend fun exec(platform: CliPlatform, dir: String?): ReducedOut =
-        reduce(platform.start(typedKommand, dir))
+    override suspend fun exec(cli: CliPlatform, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
 }
 
 internal class ReducedKommandMap<InnerOut, MappedOut>(
     val reducedKommand: ReducedKommand<InnerOut>,
     val reduceMap: suspend InnerOut.() -> MappedOut,
 ): ReducedKommand<MappedOut> {
-    override suspend fun exec(platform: CliPlatform, dir: String?): MappedOut =
-        reducedKommand.exec(platform, dir).reduceMap()
+    override suspend fun exec(cli: CliPlatform, dir: String?): MappedOut = reducedKommand.exec(cli, dir).reduceMap()
 }
 
 fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
