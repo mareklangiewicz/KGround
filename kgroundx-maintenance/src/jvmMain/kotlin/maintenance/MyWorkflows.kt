@@ -54,12 +54,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
                 ),
                 env = linkedMapOf("GENERATE_DEPS" to "true"),
             )
-            uses(
-                name = "Commit",
-                action = AddAndCommitV9(
-                    add = "plugins/dependencies/src/test/resources/objects-for-deps.txt",
-                ),
-            )
+            usesAddAndCommitFile("plugins/dependencies/src/test/resources/objects-for-deps.txt")
         }
     }
     workflow.writeToFile(gitRootDir = "/home/marek/code/kotlin/refreshDeps".toPath().toNioPath())
@@ -88,10 +83,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
                     arguments = "updateGeneratedDeps",
                 ),
             )
-            uses(
-                name = "Commit",
-                action = AddAndCommitV9(add = "src/main/kotlin/deps/Deps.kt"),
-            )
+            usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
         }
     }
     workflow.writeToFile(gitRootDir = "/home/marek/code/kotlin/DepsKt".toPath().toNioPath())
@@ -223,16 +215,25 @@ private fun defaultReleaseWorkflow() =
     }
 
 private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
+    name: String? = "Set up JDK",
     version: String? = "21", // fixme_maybe: take from DepsNew.ver...? [Deps Selected]
     distribution: SetupJavaV4.Distribution = SetupJavaV4.Distribution.Zulu, // fixme_later: which dist?
 ) = uses(
-        name = "Set up JDK",
+        name = name,
         action = SetupJavaV4(
             javaVersion = version,
             distribution = distribution
         )
     )
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild() =
-    uses(name = "Build", action = GradleBuildActionV3(arguments = "build"))
+private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(name: String? = "Build") =
+    uses(name = name, action = GradleBuildActionV3(arguments = "build"))
 
+private fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") = uses(
+        name = name,
+        action = AddAndCommitV9(
+            add = filePath,
+            defaultAuthor = AddAndCommitV9.DefaultAuthor.UserInfo,
+                // without it, I get commits authored with my old username: langara
+        ),
+    )
