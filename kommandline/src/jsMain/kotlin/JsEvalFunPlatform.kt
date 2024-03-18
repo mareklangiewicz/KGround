@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 
-actual fun provideSysCLI() = JsEvalFunCLI()
+actual fun provideSysCLI(): CLI = JsEvalFunCLI()
 
 class JsEvalFunCLI: CLI {
 
