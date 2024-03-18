@@ -85,7 +85,7 @@ class KommandTest {
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
 
-    @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).execb(SYS)
+    @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).execb(SYS).unit
 
-    @Test fun testIdeDiff() = ideDiff("/home/marek/.bashrc", "/home/marek/.profile").execb(SYS)
+    @Test fun testIdeDiff() = ideDiff("/home/marek/.bashrc", "/home/marek/.profile").execb(SYS).unit
 }
