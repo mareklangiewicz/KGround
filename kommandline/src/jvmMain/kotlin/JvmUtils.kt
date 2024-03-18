@@ -14,7 +14,7 @@ fun CLI.execBlocking(
     inFile: String? = null,
     outFile: String? = null,
 ): List<String> = runBlocking {
-    exec(kommand, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
+    kommand.exec(this@execBlocking, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
 }
 
 // TODO_someday: CLI as context receiver
