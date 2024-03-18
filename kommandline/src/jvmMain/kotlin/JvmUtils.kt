@@ -4,19 +4,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
 
-@Deprecated("Use suspend fun Kommand.exec(...)")
-fun CLI.execBlocking(
-    kommand: Kommand,
-    vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inContent: String? = null,
-    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
-    inFile: String? = null,
-    outFile: String? = null,
-): List<String> = runBlocking {
-    kommand.exec(this@execBlocking, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
-}
-
 // TODO_someday: CLI as context receiver
 @Deprecated("Use suspend fun Kommand.exec(...)")
 fun Kommand.execBlocking(
@@ -27,13 +14,9 @@ fun Kommand.execBlocking(
     inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
     inFile: String? = null,
     outFile: String? = null,
-): List<String> = cli.execBlocking(this,
-    dir = dir,
-    inContent = inContent,
-    inLineS = inLineS,
-    inFile = inFile,
-    outFile = outFile,
-)
+): List<String> = runBlocking {
+    exec(cli, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
+}
 
 // temporary hack
 @Deprecated("Use suspend fun Kommand.exec(...)")
