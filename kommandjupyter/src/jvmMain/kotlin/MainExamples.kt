@@ -6,10 +6,10 @@ package pl.mareklangiewicz.kommand.jupyter
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.kommand.demo.MyDemoSamples
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
-import pl.mareklangiewicz.kommand.gnome.*
 
 @ExampleApi
 object MainExamples {
@@ -20,7 +20,8 @@ object MainExamples {
         ls { -LsOpt.LongFormat; -LsOpt.All }.x {
             println("out line: $it")
         }
-        EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
+        // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
+        // MyDemoSamples.btopKitty.x()
         // gitStatus().x().logEach()
         // searchCommandScript("pip").x()?.logEach()
         // SshSamples.sshPimInTermGnome.x()

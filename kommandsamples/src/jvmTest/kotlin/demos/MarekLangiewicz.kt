@@ -84,7 +84,7 @@ class MarekLangiewicz {
     }
 }
 
-private fun idemo(cli: CLI = SYS, block: CLI.() -> Unit) = ifInteractive { cli.block() }
+private fun idemo(cli: CLI = SYS, block: CLI.() -> Unit) = ifInteractiveCodeEnabled { cli.block() }
 private fun askIf(question: String, cli: CLI = SYS) = zenityAskIf(question).execb(cli)
 private fun askEntry(question: String, suggested: String? = null, cli: CLI = SYS) =
     zenityAskForEntry(question, suggested = suggested).execb(cli)

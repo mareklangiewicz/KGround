@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.samples
 
+import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kommand.*
 
 data class Sample(
@@ -29,6 +30,7 @@ internal infix fun <ReducedOut> ReducedKommand<ReducedOut>.rs(expectedLineRaw: S
 
 
 data object Samples {
+    @ExampleApi val Demo = pl.mareklangiewicz.kommand.demo.MyDemoSamples
     val Core = pl.mareklangiewicz.kommand.core.CoreSamples
     val Find = pl.mareklangiewicz.kommand.find.FindSamples
     val Ssh = pl.mareklangiewicz.kommand.ssh.SshSamples

@@ -12,7 +12,9 @@ import kotlin.test.Test
 @OptIn(DelicateApi::class)
 class ZenityTest {
     @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.chkWithUser()
-    @Test fun testZenityEntryStart() = ifInteractive { SYS.start(zenity(Entry) { -EntryText("suggested text") }) }
+    @Test fun testZenityEntryStart() = ifInteractiveCodeEnabled {
+        SYS.start(zenity(Entry) { -EntryText("suggested text") })
+    }
 
     @Test fun testZenityCalendar() = zenity(Calendar) { -Title("some title"); -Text("some text") }
         .chkWithUser("zenity --calendar --title=some title --text=some text")
@@ -62,7 +64,7 @@ class ZenityTest {
             +"desc $it"
         }
     }.chkWithUser()
-    @Test fun testZenityListFromLs() = ifInteractive{
+    @Test fun testZenityListFromLs() = ifInteractiveCodeEnabled {
         SYS.run { // TODO_someday: nice parsing for ls output columns etc..
             val lines = ls { -All; -LongFormat; -HumanReadable }.execb(this)
             zenity(List) {

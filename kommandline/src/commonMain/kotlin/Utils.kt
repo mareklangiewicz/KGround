@@ -10,27 +10,22 @@ import pl.mareklangiewicz.kommand.term.*
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
 fun isUserFlagEnabled(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.enabled"]?.trim().toBoolean()
+
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString() }
 
-private val interactive by lazy {
-    when {
-        SYS.isJvm -> isUserFlagEnabled(SYS, "code.interactive")
-        else -> {
-            println("Interactive stuff is only available on JvmCLI (for now).")
-            false
-        }
-    }
+fun ifInteractiveCodeEnabled(block: () -> Unit) = when {
+    !SYS.isJvm -> println("Interactive code is only available on JvmCLI (for now).")
+    !isUserFlagEnabled(SYS, "code.interactive") -> println("Interactive code is disabled.")
+    else -> block()
 }
-
-fun ifInteractive(block: () -> Unit) = if (interactive) block() else println("Interactive code is disabled.")
 
 // FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
 // Maybe move to kommandsamples or somewhere else??
 @OptIn(DelicateApi::class)
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
     this.logLineRaw()
-    if (expectedLineRaw != null) lineRaw().chkEq(expectedLineRaw)
-    ifInteractive {
+    if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
+    ifInteractiveCodeEnabled {
         startInTermIfUserConfirms(cli, execInDir = execInDir) { termKitty(it) }
     }
 }
@@ -104,7 +99,7 @@ fun Kommand.chkInGVim(
 ) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    ifInteractive { cli.run {
+    ifInteractiveCodeEnabled { cli.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
         start(this@chkInGVim, dir = execInDir, outFile = tmpFile).waitForExit()
         start(gvim(tmpFile)).waitForExit()
