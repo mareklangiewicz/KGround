@@ -50,9 +50,9 @@ class BadExitStateErr(exp: Int, act: Int, val stderr: List<String>? = null, mess
 class BadStdErrStateErr(val stderr: List<String>, message: String? = null): BadStateErr(message)
 class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadStateErr(message)
 
-// TODO_someday: figure out nicer approach not to loose full error messages (maybe when we have context receivers in kotlin).
-// But it's nice to have it mostly on caller side. To just throw collected stderr/out on kommand execution side,
-// without logging or any additional complexity there..
+// TODO_someday: figure out a nicer approach not to lose full error messages (maybe when we have context receivers in kotlin).
+// But it's nice to have it mostly on the caller side. To just throw collected stderr/out on kommand execution side,
+// without logging or any additional complexity there.
 inline fun withPrintingBadStreams(
     limitLines: Int? = 40,
     stdoutLinePrefix: String = "STDOUT: ",

@@ -29,8 +29,6 @@ class MarekLangiewicz {
         const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
     }
 
-    @Test fun demo_repl() = idemo { MarekLangiewiczREPL() }
-
     @Test fun demo_htop() = idemo { termKitty(kommand("htop")).execb(this) }
 
     @Test fun demo_btop() = idemo { termKitty(kommand("btop")).execb(this) }
