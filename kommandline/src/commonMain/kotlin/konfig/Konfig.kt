@@ -24,7 +24,7 @@ fun CLI.konfigInUserHomeConfigDir(
     isReadOnly: Boolean = false,
     checkForDangerousKeys: Boolean = true,
     checkForDangerousValues: Boolean = true,
-) = konfigInDir(pathToUserHome!! + "/.config/konfig", isReadOnly, checkForDangerousKeys, checkForDangerousValues)
+) = konfigInDir(pathToUserHome!! + "/.config/konfig", this, isReadOnly, checkForDangerousKeys, checkForDangerousValues)
 
 /**
  * Works best when values don't have special characters like new-line etc.
@@ -32,13 +32,14 @@ fun CLI.konfigInUserHomeConfigDir(
  * Also, keys are implemented as files, so should be simple names without special chars like for example '/'.
  * I want to be able to use it over ssh and/or adb, so that's another reason to avoid special chars.
  */
-fun CLI.konfigInDir(
+fun konfigInDir(
     dir: String,
+    cli: CLI = CLI.SYS,
     isReadOnly: Boolean = false,
     isClrAllowed: Boolean = false,
     checkForDangerousKeys: Boolean = true,
     checkForDangerousValues: Boolean = true,
-) = KonfigInDirUnsafe(dir, this)
+) = KonfigInDirUnsafe(dir, cli)
     .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
 private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS): IKonfig {

@@ -27,7 +27,7 @@ fun CLI.testTmpKonfig() {
 
     "On konfig in tmp dir" o { // Warning: adding $konfigNewDir to test name would make uspek generate infinite loop!!
         try {
-            val konfig = konfigInDir(konfigNewDir)
+            val konfig = konfigInDir(konfigNewDir, this)
             testGivenNewKonfigInDir(konfig, konfigNewDir)
         }
         finally {

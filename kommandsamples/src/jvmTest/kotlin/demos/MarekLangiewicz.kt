@@ -52,7 +52,7 @@ class MarekLangiewicz {
     }
 
     @Test fun demo_set_konfig_examples() = idemo {
-        val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
+        val k = konfigInDir("/home/marek/tmp/konfig_examples", this, checkForDangerousValues = false)
         println("before adding anything:")
         k.logEachKeyVal()
         k["tmpExampleInteger1"] = 111.toString()
