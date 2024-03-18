@@ -9,12 +9,12 @@ import pl.mareklangiewicz.kommand.term.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
-fun CLI.isUserFlagEnabled(key: String) = konfigInUserHomeConfigDir()["$key.enabled"]?.trim().toBoolean()
-fun CLI.setUserFlag(key: String, enabled: Boolean) { konfigInUserHomeConfigDir()["$key.enabled"] = enabled.toString() }
+fun isUserFlagEnabled(cli: CLI, key: String) = cli.konfigInUserHomeConfigDir()["$key.enabled"]?.trim().toBoolean()
+fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { cli.konfigInUserHomeConfigDir()["$key.enabled"] = enabled.toString() }
 
 private val interactive by lazy {
     when {
-        SYS.isJvm -> SYS.isUserFlagEnabled("code.interactive")
+        SYS.isJvm -> isUserFlagEnabled(SYS, "code.interactive")
         else -> {
             println("Interactive stuff is only available on JvmCLI (for now).")
             false
@@ -64,7 +64,7 @@ inline fun withPrintingBadStreams(
     // that's the reason why logSome lambda is "val"
     val logSome: List<String>.(prefix: String) -> Unit = { prefix ->
         // TODO_someday: investigate:
-        // I had strange error where coerceAtMost didn't work. That's why I used explicit "when".
+        // I had a strange error where coerceAtMost didn't work. That's why I used explicit "when".
         // Maybe there is some bigger kotlin bug when defining lambdas inside inline fun.
         val max = when {
             limitLines == null -> size

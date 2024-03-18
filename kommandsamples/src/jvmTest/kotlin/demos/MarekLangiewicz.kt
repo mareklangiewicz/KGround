@@ -16,7 +16,7 @@ import pl.mareklangiewicz.kommand.term.*
 // unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
 // maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
 fun isUserTestClassEnabled(context: ExtensionContext) =
-    SYS.isUserFlagEnabled("tests." + context.requiredTestClass.simpleName)
+    isUserFlagEnabled(SYS, "tests." + context.requiredTestClass.simpleName)
 
 @OptIn(DelicateApi::class)
 @EnabledIf(
@@ -73,7 +73,7 @@ class MarekLangiewicz {
 
     @Test fun code_interactive_switch() = SYS.run {
         val enabled = askIf("Should interactive code be enabled?")
-        setUserFlag("code.interactive", enabled)
+        setUserFlag(this, "code.interactive", enabled)
         println("user flag: code.interactive.enabled = $enabled")
     }
 
