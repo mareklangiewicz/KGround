@@ -70,7 +70,7 @@ private class KonfigWithChecks(
     private val checkForDangerousValues: Boolean = true,
 ): IKonfig {
     override fun clr() = when {
-        isReadOnly -> error("This konfig is read only.")
+        isReadOnly -> bad { "This konfig is read only." }
         isClrAllowed -> konfig.clr()
         else -> error(
             "Forbidden. Do manual 'for (k in keys) this[k] = null' if you really want to delete ALL konfig values."
@@ -83,7 +83,7 @@ private class KonfigWithChecks(
     }
 
     override fun set(key: String, item: String?) {
-        if (isReadOnly) error("This konfig is read only.")
+        if (isReadOnly) bad { "This konfig is read only." }
         if (checkForDangerousKeys) chk(key.all { it.isSafe })
         if (checkForDangerousValues && item != null) chk(item.all { it.isSafe })
         konfig[key] = item

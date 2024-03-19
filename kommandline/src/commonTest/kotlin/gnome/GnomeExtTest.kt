@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.gnome
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.chkWithUser
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.*
@@ -7,6 +8,7 @@ import pl.mareklangiewicz.kommand.gnome.GnomeExt.Option.*
 import kotlin.test.Test
 
 
+@OptIn(DelicateApi::class) // TODO NOW: move to samples or sth
 class GnomeExtTest {
 
     @Test fun testGnomeExtList() = gnomeext(List)

@@ -74,7 +74,7 @@ private class JsEvalFunProcess(code: String): ExecProcess {
     @OptIn(DelicateApi::class)
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
 
-    override fun kill(forcibly: Boolean) = error("cancel unsupported")
+    override fun kill(forcibly: Boolean) = bad { "cancel unsupported" }
 
     @OptIn(DelicateApi::class)
     override fun close() {

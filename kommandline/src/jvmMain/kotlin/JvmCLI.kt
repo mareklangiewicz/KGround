@@ -78,7 +78,7 @@ private fun sequentialContext(name: String): CoroutineContext =
 private fun CoroutineContext.tryDispatch(block: () -> Unit) =
     (this[ContinuationInterceptor] as? CoroutineDispatcher)
         ?.dispatch(this, block)
-        ?: error("No dispatcher in coroutine ${this[CoroutineName]?.name}")
+        ?: bad { "No dispatcher in coroutine ${this[CoroutineName]?.name}" }
 
 private class JvmExecProcess(private val process: Process) : ExecProcess {
 

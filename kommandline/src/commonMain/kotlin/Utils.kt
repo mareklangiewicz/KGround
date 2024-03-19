@@ -3,7 +3,6 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.gnome.startInTermIfUserConfirms
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.term.*
 
@@ -13,10 +12,12 @@ fun isUserFlagEnabled(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$
 
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString() }
 
-fun ifInteractiveCodeEnabled(block: () -> Unit) = when {
+// TODO_someday: logging with ulog from content receiver instead of raw println (which can be hard to find in logs)
+@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
+fun ifInteractiveCodeEnabled(code: () -> Unit) = when {
     !SYS.isJvm -> println("Interactive code is only available on JvmCLI (for now).")
     !isUserFlagEnabled(SYS, "code.interactive") -> println("Interactive code is disabled.")
-    else -> block()
+    else -> code()
 }
 
 @OptIn(DelicateApi::class)
@@ -80,9 +81,7 @@ inline fun List<String>.chkStdOut(
     lazyMessage: () -> String = { "bad stdout" }
 ) { test(this) || throw BadStdOutStateErr(this, lazyMessage()) }
 
-// FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
-// Maybe move to kommandsamples or somewhere else??
-@OptIn(DelicateApi::class)
+@DelicateApi("API for manual interactive experimentation. Requires zenity, conditionally skips")
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw

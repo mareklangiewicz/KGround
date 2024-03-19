@@ -135,7 +135,7 @@ fun findTypeNameBase(
     find(path, NameBase(pattern, ignoreCase), FileType(fileType)) {
         // NameBase is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
         when {
-            whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
+            whenFoundFirstQuit && whenFoundPrune -> bad { "Can't quit and also prune" }
             whenFoundPrintF != null -> expr.add(ActPrintF(whenFoundPrintF))
             whenFoundFirstQuit || whenFoundPrune -> expr.add(ActPrint)
             // or else find will perform default printing
@@ -169,7 +169,7 @@ fun findTypeRegex(
     find(path, NameRegex(nameRegex, ignoreCase), FileType(fileType)) {
         // NameRegex is first, before FileType, as optimisation to avoid having to call stat(2) on every filename
         when {
-            whenFoundFirstQuit && whenFoundPrune -> error("Can't quit and also prune")
+            whenFoundFirstQuit && whenFoundPrune -> bad { "Can't quit and also prune" }
             whenFoundPrintF != null -> expr.add(ActPrintF(whenFoundPrintF))
             whenFoundFirstQuit || whenFoundPrune -> expr.add(ActPrint)
             // or else find will perform default printing

@@ -20,7 +20,7 @@ class SamplesTests {
 }
 
 fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
-    val objSimpleName = obj::class.simpleName ?: error("Unexpected samples obj without name")
+    val objSimpleName = obj::class.simpleName ?: bad { "Unexpected samples obj without name" }
     if (depthLimit < 1) { println("depthLimit < 1. Ignoring obj $objSimpleName"); return }
     chk(objSimpleName.endsWith("Samples")) { "Unexpected obj name in samples: $objSimpleName" }
     obj::class.objectInstance.chkNN { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
@@ -33,7 +33,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
         prop is Sample -> "On sample $name" o { testSample(prop) }
         prop is TypedSample<*, *, *, *> -> "On typed sample $name" o { testTypedSample(prop) }
         prop is ReducedSample<*> -> "On reduced sample $name" o { testReducedSample(prop) }
-        prop == null -> error("prop is null! name: $name")
+        prop == null -> bad { "prop is null! name: $name" }
         else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }
 }
