@@ -2,7 +2,7 @@
 
 package pl.mareklangiewicz.kommand
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.toList
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.ZenityOpt.*
 
@@ -19,7 +19,7 @@ fun zenityAskForPassword(question: String = "Enter password", title: String? = n
         -HideText
         -Text(question)
         title?.let { -Title(it) }
-    }.reducedOut { single() }
+    }.reducedToSingleAnswer()
 
 @OptIn(DelicateApi::class)
 fun zenityAskForEntry(question: String, title: String? = null, suggested: String? = null) =
@@ -27,7 +27,19 @@ fun zenityAskForEntry(question: String, title: String? = null, suggested: String
         -Text(question)
         title?.let { -Title(it) }
         suggested?.let { -EntryText(it) }
-    }.reducedOut { single() }
+    }.reducedToSingleAnswer()
+
+/** @return null means user did not answer at all (pressed esc); it's different from empty answer */
+private fun Zenity.reducedToSingleAnswer(): ReducedKommand<String?> = reducedManually {
+    val err = stderr.toList(); err.chkStdErr()
+    val out = stdout.toList(); out.chkStdOut({ size < 2 })
+    val answer = out.singleOrNull()
+    when (val exit = awaitExit()) {
+        0 -> answer
+        1 -> null // user cancelled
+        else -> throw BadExitStateErr(0, exit, err)
+    }
+}
 
 @DelicateApi
 fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; init() }
