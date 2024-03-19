@@ -14,8 +14,8 @@ fun Kommand.startInTermIfUserConfirms(
     title: String = name,
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = insideBash,
-    execInDir: String? = null,
-    termKommand: (innerKommand: Kommand) -> Kommand = { termGnome(it) }
+    startInDir: String? = null,
+    termKommand: (innerKommand: Kommand) -> Kommand = { termXDefault(it) }
 ) {
     if (zenityAskIf(confirmation, title).execb(cli)) {
         val k = when {
@@ -23,7 +23,7 @@ fun Kommand.startInTermIfUserConfirms(
             pauseBeforeExit -> error("Can not pause before exit if not using bash shell")
             else -> this
         }
-        cli.start(termKommand(k), dir = execInDir)
+        cli.start(termKommand(k), dir = startInDir)
     }
 }
 

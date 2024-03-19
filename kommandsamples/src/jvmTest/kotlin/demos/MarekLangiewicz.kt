@@ -29,10 +29,6 @@ class MarekLangiewicz {
         const val tmpNotesFile = "/home/marek/tmp/tmp.notes"
     }
 
-    @Test fun demo_htop() = idemo { termKitty(kommand("htop")).execb(this) }
-
-    @Test fun demo_btop() = idemo { termKitty(kommand("btop")).execb(this) }
-
     @Test fun demo_ps() = idemo { termKitty(bash("ps -e | grep " + askEntry("find process"), pause = true)).execb(this) }
 
     @Test fun demo_man() = idemo { termKitty(man { +askEntry("manual page for") }).execb(this) }

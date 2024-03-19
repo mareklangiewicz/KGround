@@ -31,8 +31,8 @@ class KommandTest {
     }
     @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -LongFormat; -Sort(TIME); +".."; +"/usr" }
         .chkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
-    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkInGVim()
-    @Test fun testLs3() = ls { +"/home/marek" }.chkInGVim()
+    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkWithUserInGVim()
+    @Test fun testLs3() = ls { +"/home/marek" }.chkWithUserInGVim()
     @Test fun testLsHome() = ls("/home/marek").execb(SYS).logEach()
     @Test fun testLsHomeSubDirs() = lsSubDirs("/home/marek").execb(SYS).logEach()
     @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", withHidden = true).execb(SYS).logEach()
@@ -49,11 +49,11 @@ class KommandTest {
         ls(path).execb(cli) == listOf("blaa")
     }.execb(SYS).logEach()
 
-    @Test fun testCat1() = cat { +"/etc/fstab" }.chkInGVim()
-    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkInGVim()
+    @Test fun testCat1() = cat { +"/etc/fstab" }.chkWithUserInGVim()
+    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkWithUserInGVim()
 
     @Test fun testSs1() = ssTulpn().chkWithUser() // ss -tulpn
-    @Test fun testSs2() = ssTulpn().chkInGVim() // ss -tulpn
+    @Test fun testSs2() = ssTulpn().chkWithUserInGVim() // ss -tulpn
 
     @Test fun testManMan() = man { +"man" }.chkWithUser()
     @Test fun testManVim() = man { +"vim" }.chkWithUser()

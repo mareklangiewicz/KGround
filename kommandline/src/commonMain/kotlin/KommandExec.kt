@@ -36,6 +36,7 @@ expect fun Kommand.execb(
 ): List<String>
 
 // also temporary hack
+@Deprecated("Use suspend fun Kommand.exec(...)")
 expect fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CLI, dir: String? = null): ReducedOut
 
 

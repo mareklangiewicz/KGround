@@ -19,17 +19,6 @@ fun ifInteractiveCodeEnabled(block: () -> Unit) = when {
     else -> block()
 }
 
-// FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
-// Maybe move to kommandsamples or somewhere else??
-@OptIn(DelicateApi::class)
-fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
-    this.logLineRaw()
-    if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    ifInteractiveCodeEnabled {
-        startInTermIfUserConfirms(cli, execInDir = execInDir) { termKitty(it) }
-    }
-}
-
 @OptIn(DelicateApi::class)
 fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CLI = SYS) {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
@@ -91,8 +80,19 @@ inline fun List<String>.chkStdOut(
     lazyMessage: () -> String = { "bad stdout" }
 ) { test(this) || throw BadStdOutStateErr(this, lazyMessage()) }
 
+// FIXME_maybe: stuff like this is a bit too opinionated for kommandline module.
+// Maybe move to kommandsamples or somewhere else??
 @OptIn(DelicateApi::class)
-fun Kommand.chkInGVim(
+fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
+    this.logLineRaw()
+    if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
+    ifInteractiveCodeEnabled {
+        startInTermIfUserConfirms(cli, startInDir = execInDir)
+    }
+}
+
+@OptIn(DelicateApi::class)
+fun Kommand.chkWithUserInGVim(
     expectedLineRaw: String? = null,
     execInDir: String? = null,
     cli: CLI = SYS
@@ -101,7 +101,7 @@ fun Kommand.chkInGVim(
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
     ifInteractiveCodeEnabled { cli.run {
         val tmpFile = "$pathToUserTmp/tmp.notes"
-        start(this@chkInGVim, dir = execInDir, outFile = tmpFile).waitForExit()
+        start(this@chkWithUserInGVim, dir = execInDir, outFile = tmpFile).waitForExit()
         start(gvim(tmpFile)).waitForExit()
     } }
 }
