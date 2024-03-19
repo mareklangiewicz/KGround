@@ -30,8 +30,6 @@ data object DpkgSamples {
     val dpkgVerifyDebianUtils = dpkg(Verify("debianutils")) s "dpkg -V debianutils"
     val dpkgListPackagesDebian = dpkg(ListPackages("*debian*")) s "dpkg -l *debian*"
 
-    // TODO_someday: browser+executor UI for scripts; then add a similar list to other samples
-    val scripts: List<KFunction<ReducedScript<*>>> = listOf(
-        ::searchCommandScript
-    )
+    // TODO_someday: browser+executor UI for scripts (ReducedScript) also!
+    val searchZenity = searchCommand("zenity")
 }

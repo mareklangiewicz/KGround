@@ -8,8 +8,8 @@ import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
 
 /**
  * [kitty homepage](https://sw.kovidgoyal.net/kitty/)
- * [kitty docs](file:///usr/share/doc/kitty/html/overview.html)
- * [kitty man page ubuntu outdated?](https://manpages.ubuntu.com/manpages/focal/man1/kitty.1.html)
+ * [kitty invocation syntax](https://sw.kovidgoyal.net/kitty/invocation/)
+ * [kitty ubuntu man page for older ver](https://manpages.ubuntu.com/manpages/noble/man1/kitty.1.html)
  */
 @OptIn(DelicateApi::class)
 fun termKitty(
@@ -31,8 +31,8 @@ fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
 
 /**
  * [kitty homepage](https://sw.kovidgoyal.net/kitty/)
- * [kitty docs](file:///usr/share/doc/kitty/html/overview.html)
- * [kitty man page ubuntu outdated?](https://manpages.ubuntu.com/manpages/focal/man1/kitty.1.html)
+ * [kitty invocation syntax](https://sw.kovidgoyal.net/kitty/invocation/)
+ * [kitty ubuntu man page for older ver](https://manpages.ubuntu.com/manpages/noble/man1/kitty.1.html)
  */
 @DelicateApi
 data class TermKitty(

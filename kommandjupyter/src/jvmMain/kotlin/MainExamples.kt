@@ -4,10 +4,13 @@
 package pl.mareklangiewicz.kommand.jupyter
 
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.demo.MyDemoSamples
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.debian.DpkgSamples
+import pl.mareklangiewicz.kommand.debian.searchCommand
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 
@@ -22,8 +25,10 @@ object MainExamples {
         }
         // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
         // MyDemoSamples.btopKitty.x()
+        // MyDemoSamples.ps1.x()
         // gitStatus().x().logEach()
-        // searchCommandScript("pip").x()?.logEach()
+        // searchCommand("pip").x()?.logEach()
+        // DpkgSamples.searchZenity.x()?.logEach()
         // SshSamples.sshPimInTermGnome.x()
         // SshSamples.sshPimLsInTermKitty.x()
         // SshSamples.sshPimLsLAH.x(errToOut = true).logEach()

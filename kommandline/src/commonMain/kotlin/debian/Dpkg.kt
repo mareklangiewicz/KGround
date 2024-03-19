@@ -5,8 +5,12 @@ package pl.mareklangiewicz.kommand.debian
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
+/**
+ * @return null means command was not found at all,
+ *  an empty list means dpkg haven't found any package containing command path
+ */
 @OptIn(DelicateApi::class)
-fun searchCommandScript(command: String) = ReducedScript { cli, dir ->
+fun searchCommand(command: String): ReducedScript<List<String>?> = ReducedScript { cli, dir ->
     val first = whichFirstOrNull(command).exec(cli, dir) ?: return@ReducedScript null
     dpkg(DpkgAct.Search(first)).exec(cli)
 }

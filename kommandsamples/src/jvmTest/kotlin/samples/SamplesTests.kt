@@ -27,12 +27,10 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     chk(obj::class.isData) { "Unexpected obj in samples which is NOT data object: $objSimpleName" }
     val props = obj.getNamedPropsValues()
     for ((name, prop) in props) when {
-        name == "execs" -> println("Ignoring execs prop in $objSimpleName")
-            // TODO_someday_maybe: remove whole execs stuff in favor of TypedKommands/TypedSamples
-        name == "scripts" -> println("Ignoring scripts prop in $objSimpleName")
         prop is Sample -> "On sample $name" o { testSample(prop) }
         prop is TypedSample<*, *, *, *> -> "On typed sample $name" o { testTypedSample(prop) }
         prop is ReducedSample<*> -> "On reduced sample $name" o { testReducedSample(prop) }
+        prop is ReducedScript<*> -> println("Ignoring reduced script $name")
         prop == null -> bad { "prop is null! name: $name" }
         else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }
