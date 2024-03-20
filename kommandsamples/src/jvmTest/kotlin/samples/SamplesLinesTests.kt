@@ -11,10 +11,10 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 
-class SamplesTests {
+class SamplesLinesTests {
 
     @TestFactory
-    fun uspekSamplesTestFactory() = uspekTestFactory {
+    fun uspekSamplesLines() = uspekTestFactory {
         testSamplesObject(Samples)
     }
 }
