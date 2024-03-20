@@ -28,8 +28,8 @@ fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: Stri
     execb(cli, execInDir)
 }
 
-/** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */
-class BadExitStateErr(exp: Int, act: Int, val stderr: List<String>? = null, message: String? = null): NotEqStateErr(exp, act, message)
+/** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */
+class BadExitStateErr(val exit: Int, val stderr: List<String>? = null, message: String? = null): BadStateErr(message)
 class BadStdErrStateErr(val stderr: List<String>, message: String? = null): BadStateErr(message)
 class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadStateErr(message)
 
@@ -63,23 +63,23 @@ inline fun withPrintingBadStreams(
     catch (e: BadStdOutStateErr) { e.stdout.logSome(stdoutLinePrefix); throw e }
 }
 
-/** @param stderr null means unknown/not-saved (known empty stderr should be represented by emptyList) */
+/** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */
 inline fun Int.chkExit(
-    exp: Int = 0,
+    test: Int.() -> Boolean = { this == 0 },
     stderr: List<String>? = null,
-    lazyMessage: () -> String = { "bad exit $this != $exp" }
-) { this == exp || throw BadExitStateErr(exp, this, stderr, lazyMessage()) }
+    lazyMessage: () -> String = { "bad exit: $this" }
+): Int { test() || throw BadExitStateErr(this, stderr, lazyMessage()); return this }
 
 
 inline fun List<String>.chkStdErr(
     test: List<String>.() -> Boolean = { isEmpty() },
     lazyMessage: () -> String = { "bad stderr" }
-) { test(this) || throw BadStdErrStateErr(this, lazyMessage()) }
+): List<String> { test(this) || throw BadStdErrStateErr(this, lazyMessage()); return this }
 
 inline fun List<String>.chkStdOut(
     test: List<String>.() -> Boolean = { isEmpty() },
     lazyMessage: () -> String = { "bad stdout" }
-) { test(this) || throw BadStdOutStateErr(this, lazyMessage()) }
+): List<String> { test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this }
 
 @DelicateApi("API for manual interactive experimentation. Requires zenity, conditionally skips")
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {

@@ -31,14 +31,9 @@ fun zenityAskForEntry(question: String, title: String? = null, suggested: String
 
 /** @return null means user did not answer at all (pressed esc); it's different from empty answer */
 private fun Zenity.reducedToSingleAnswer(): ReducedKommand<String?> = reducedManually {
-    val err = stderr.toList(); err.chkStdErr()
-    val out = stdout.toList(); out.chkStdOut({ size < 2 })
-    val answer = out.singleOrNull()
-    when (val exit = awaitExit()) {
-        0 -> answer
-        1 -> null // user cancelled
-        else -> throw BadExitStateErr(0, exit, err)
-    }
+    val answer = stdout.toList().chkStdOut({ size < 2 }).firstOrNull()
+    val exit = awaitAndChkExit(firstCollectErr = true) { this in 0..1 }
+    answer?.takeIf { exit == 0 } // 1 means user canceled
 }
 
 @DelicateApi

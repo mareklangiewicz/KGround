@@ -47,7 +47,7 @@ suspend fun Kommand.x(
     errToOut: Boolean = false,
     errFile: String? = null,
     errFileAppend: Boolean = false,
-    expectedExit: Int? = 0,
+    expectedExit: ((Int) -> Boolean)? = { it == 0 },
     expectedErr: ((List<String>) -> Boolean)? = null,
     outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = coroutineScope {
@@ -102,7 +102,7 @@ fun Kommand.xb(
     errToOut: Boolean = false,
     errFile: String? = null,
     errFileAppend: Boolean = false,
-    expectedExit: Int? = 0,
+    expectedExit: ((Int) -> Boolean)? = { it == 0 },
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
     outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = runBlocking { x(

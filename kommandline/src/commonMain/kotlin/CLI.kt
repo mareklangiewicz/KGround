@@ -312,7 +312,7 @@ data class ExecResult(val exit: Int, val out: List<String>, val err: List<String
  *   and only the exit value actually defines if whole command succeded or not.
  */
 fun ExecResult.unwrap(
-    expectedExit: Int? = 0,
+    expectedExit: ((Int) -> Boolean)? = { it == 0 },
     expectedErr: ((List<String>) -> Boolean)? = null,
 ): List<String> {
     expectedExit?.let { exit.chkExit(it, stderr = err) }
@@ -320,13 +320,13 @@ fun ExecResult.unwrap(
     return out
 }
 
-/** Similar to [unwrap] but also checks stdout, and doesn't return anything. */
-fun ExecResult.chk(
-    expectedExit: Int? = 0,
+fun ExecResult.chkResult(
+    expectedExit: ((Int) -> Boolean)? = { it == 0 },
     expectedErr: ((List<String>) -> Boolean)? = null,
     expectedOut: ((List<String>) -> Boolean)?,
-) {
+): ExecResult {
     unwrap(expectedExit, expectedErr)
     expectedOut?.let { out.chkStdOut(it) }
+    return this
 }
 

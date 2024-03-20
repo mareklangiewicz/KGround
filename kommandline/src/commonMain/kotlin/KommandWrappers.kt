@@ -59,12 +59,12 @@ class TypedExecProcess<In, Out, Err>(
 }
 
 suspend fun TypedExecProcess<*, *, Flow<String>>.awaitAndChkExit(
-    expExit: Int = 0,
     firstCollectErr: Boolean,
-    finallyClose: Boolean = true
-) {
+    finallyClose: Boolean = true,
+    testExit: Int.() -> Boolean = { this == 0 },
+): Int {
     val collectedErr: List<String>? = if (firstCollectErr) stderr.toList() else null
-    awaitExit(finallyClose).chkExit(expExit, collectedErr)
+    return awaitExit(finallyClose).chkExit(testExit, collectedErr)
 }
 
 /**
@@ -73,9 +73,9 @@ suspend fun TypedExecProcess<*, *, Flow<String>>.awaitAndChkExit(
  */
 @DelicateApi
 suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
-    expExit: Int = 0,
-    finallyClose: Boolean = true
-) = awaitExit(finallyClose).chkExit(expExit)
+    finallyClose: Boolean = true,
+    testExit: Int.() -> Boolean = { this == 0 },
+) = awaitExit(finallyClose).chkExit(testExit)
 
 /**
  * @param dir working directory for started subprocess - null means inherit from the current process
