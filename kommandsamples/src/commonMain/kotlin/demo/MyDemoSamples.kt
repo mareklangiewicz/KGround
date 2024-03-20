@@ -74,6 +74,12 @@ data object MyDemoSamples {
         showInfo("user flag: code.interactive.enabled = $enabled")
     }
 
+    val myDemoTestsSwitch = rscript {
+        val enabled = askIf("Should MyDemoTests be enabled?")
+        setUserFlag(SYS, "tests.MyDemoTests", enabled)
+        showInfo("user flag: tests.MyDemoTests.enabled = $enabled")
+    }
+
     val showWholeUserConfig = iscript {
         val konfig = konfigInUserHomeConfigDir(SYS)
         showInfo(konfig.keys.map { konfig.getKeyValStr(it) }.joinToString("\n\n"))
