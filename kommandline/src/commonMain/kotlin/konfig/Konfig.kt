@@ -116,4 +116,5 @@ fun konfigInFile(file: String, cli: CLI = CLI.SYS): IKonfig = TODO()
 
 fun IKonfig.logEachKeyVal(logln: (String) -> Unit = ::println) = keys.forEach { logKeyVal(it, logln) }
 
-fun IKonfig.logKeyVal(key: String, logln: (String) -> Unit = ::println) = logln("konfig[\"$key\"] == \"${this[key]}\"")
+fun IKonfig.logKeyVal(key: String, logln: (String) -> Unit = ::println) = logln(getKeyValStr(key))
+fun IKonfig.getKeyValStr(key: String) = "konfig[\"$key\"] == \"${this[key]}\""

@@ -14,7 +14,7 @@ fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfi
 
 // TODO_someday: logging with ulog from content receiver instead of raw println (which can be hard to find in logs)
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
-fun ifInteractiveCodeEnabled(code: () -> Unit) = when {
+inline fun ifInteractiveCodeEnabled(code: () -> Unit) = when {
     !SYS.isJvm -> println("Interactive code is only available on JvmCLI (for now).")
     !isUserFlagEnabled(SYS, "code.interactive") -> println("Interactive code is disabled.")
     else -> code()
