@@ -41,14 +41,14 @@ fun testTmpKonfig(cli: CLI) {
 fun testGivenNewKonfigInDir(cli: CLI, konfig: IKonfig, dir: String) {
     "is empty" o { konfig.keys.len eq 0 }
     "dir is created" o { testIfFileIsDirectory(dir).execb(cli) eq true }
-    "dir is empty" o { ls(dir, withHidden = true).execb(cli).size eq 0 }
+    "dir is empty" o { ls(dir, wHidden = true).execb(cli).size eq 0 }
 
     "On setting new key and value" o {
         konfig["somekey1"] = "somevalue1"
 
         "get returns stored value" o { konfig["somekey1"] eq "somevalue1" }
         "file is created" o { testIfFileIsRegular("$dir/somekey1").execb(cli) eq true }
-        "no other files there" o { ls(dir, withHidden = true).execb(cli) eq listOf("somekey1") }
+        "no other files there" o { ls(dir, wHidden = true).execb(cli) eq listOf("somekey1") }
         "file for somekey1 contains correct content" o {
             val content = readFileWithCat("$dir/somekey1").execb(cli).joinToString("\n")
             content eq "somevalue1"
@@ -59,7 +59,7 @@ fun testGivenNewKonfigInDir(cli: CLI, konfig: IKonfig, dir: String) {
 
             "get returns null" o { konfig["somekey1"] eq null }
             "file is removed" o { testIfFileExists("$dir/somekey1").execb(cli) eq false }
-            "no files in konfig dir" o { ls(dir, withHidden = true).execb(cli).size eq 0 }
+            "no files in konfig dir" o { ls(dir, wHidden = true).execb(cli).size eq 0 }
 
             "On touch removed file again" o {
                 touch("$dir/somekey1").execb(cli)

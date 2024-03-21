@@ -4,37 +4,38 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
-import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 
-@OptIn(DelicateApi::class)
-fun lsRegFiles(dir: String, withHidden: Boolean = false) =
-    ls(dir, withHidden = withHidden, style = SLASH).reducedOut { toList().filter { !it.endsWith('/') } }
+fun lsRegFiles(dir: String, wHidden: Boolean = false) =
+    ls(dir, wHidden = wHidden, wIndicator = SLASH).reducedOut { toList().filter { !it.endsWith('/') } }
 
-@OptIn(DelicateApi::class)
-fun lsSubDirs(dir: String, withHidden: Boolean = false) =
-    ls(dir, withHidden = withHidden, style = SLASH).reducedOut {
+fun lsSubDirs(dir: String, wHidden: Boolean = false) =
+    ls(dir, wHidden = wHidden, wIndicator = SLASH).reducedOut {
         toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
     }
 
-@OptIn(DelicateApi::class)
-fun ls(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
-    lsPredictable(*paths, withHidden = withHidden, style = style)
-
-/** lsPredictable is better to get a more predictable output format, especially for parsing. */
-@OptIn(DelicateApi::class)
-fun lsPredictable(vararg paths: String, withHidden: Boolean = false, style: IndicatorStyle = NONE) =
-    ls { for (p in paths) +p; -One; -DirsFirst; -Color(NEVER); -Escape; -Indicator(style); if (withHidden) -AlmostAll }
-
 /**
- * lsDefault is ls without any options; uses default settings on given CLI.
- * lsPredictable is better to get a more predictable output format, especially for parsing.
+ * Generally null values mean: default, so it depends on the underlying system (not necessarily "none").
+ * For example, on my machine "man ls" says that default indicator-style is "none",
+ * but when I try it (no alias, output piped to file), it works as if it was "slash".
+ * BTW default color should always be fine (null == default == "auto"),
+ * because it only adds colors when stdout is terminal (not piped to any file or sth)
  */
-@OptIn(DelicateApi::class)
-fun lsDefault(vararg paths: String) = ls { for (path in paths) +path }
-
-@DelicateApi
-fun ls(init: Ls.() -> Unit = {}) = Ls().apply(init)
+fun ls(
+    vararg paths: String,
+    wHidden: Boolean = false,
+    wIndicator: IndicatorStyle? = null,
+    wColor: ColorType? = null,
+    wDirsFirst: Boolean = false,
+    init: Ls.() -> Unit = {},
+) = Ls().apply {
+    for (p in paths) +p
+    if (wHidden) -AlmostAll
+    wIndicator?.let { -Indicator(it) }
+    wColor?.let { -Color(it) }
+    if (wDirsFirst) -DirsFirst
+    init()
+}
 
 
 /** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
@@ -46,11 +47,14 @@ data class Ls(
     override val name get() = "ls"
 }
 
-@DelicateApi
+@OptIn(DelicateApi::class)
 interface LsOpt: KOptTypical {
 
-    /** List one file per line.  You can avoid '\n' by adding options: hideControlChars or escape */
+    /** list one file per line even when stdout is terminal */
     data object One: KOptS("1"), LsOpt
+
+    /** end each output line with NUL, not newline */
+    data object Zero: KOptL("zero"), LsOpt
 
     /** do not ignore entries starting with "." */
     data object All : KOptS("a"), LsOpt

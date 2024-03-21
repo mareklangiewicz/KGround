@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Adb.*
 import pl.mareklangiewicz.kommand.Adb.Command.*
@@ -19,23 +20,26 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 
-@OptIn(DelicateApi::class)
-@Ignore // Some stuff fails on CI TODO: decide what to run on github (and what about native)
-class KommandTest {
+class KommandTests {
+
+    // TODO: use runTestUSpek when more tests
     @Test fun testBashQuoteMetaChars() {
         val str = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
         val out = bashQuoteMetaChars(str)
-        println(str)
-        println(out)
-        assertEquals("abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno", out)
+        out chkEq "abc\\|\\&\\;\\<def\\>\\(ghi\\)\\ 1\\ 2\\ \\ 3\\ \\\"\\\\jkl\\\t\\\nmno"
     }
+}
+
+@OptIn(DelicateApi::class)
+@Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
+class KommandTestOld {
     @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -LongFormat; -Sort(TIME); +".."; +"/usr" }
         .chkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
     @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkWithUserInGVim()
     @Test fun testLs3() = ls { +"/home/marek" }.chkWithUserInGVim()
     @Test fun testLsHome() = ls("/home/marek").execb(SYS).logEach()
     @Test fun testLsHomeSubDirs() = lsSubDirs("/home/marek").execb(SYS).logEach()
-    @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", withHidden = true).execb(SYS).logEach()
+    @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", wHidden = true).execb(SYS).logEach()
     @Test fun testLsHomeRegFiles() = lsRegFiles("/home/marek").execb(SYS).logEach()
 
     @Test fun testMkDir1() = mkdir("/tmp/testMkDir1/blaa/blee", withParents = true)

@@ -4,13 +4,9 @@
 package pl.mareklangiewicz.kommand.jupyter
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.demo.MyDemoSamples
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.debian.DpkgSamples
-import pl.mareklangiewicz.kommand.debian.searchCommand
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 
