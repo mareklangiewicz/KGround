@@ -20,6 +20,12 @@ inline fun ifInteractiveCodeEnabled(code: () -> Unit) = when {
     else -> code()
 }
 
+
+@Suppress("FunctionName")
+@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
+inline fun <ReducedOut> InteractiveScript(crossinline exec: suspend (cli: CLI) -> ReducedOut) =
+    ReducedScript { cli -> ifInteractiveCodeEnabled { exec(cli) } }
+
 @OptIn(DelicateApi::class)
 fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CLI = SYS) {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }

@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.kommand.InteractiveScript
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.ReducedKommand
 import pl.mareklangiewicz.kommand.ReducedScript
@@ -17,7 +18,6 @@ import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.exec
 import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.ideOpen
-import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
@@ -48,7 +48,7 @@ data object MyDemoSamples {
     val ps1 = termKitty(bash("ps -e | grep java", pause = true)) s
             "kitty -1 --detach -- bash -c ps -e | grep java ; echo END.ENTER; read"
 
-    val ps2 = IScript {
+    val ps2 = InteractiveScript {
         val process = getEntry("find process")
         termKitty(bash("ps -e | grep $process", pause = true)).x()
     }
@@ -64,49 +64,49 @@ data object MyDemoSamples {
     val lsALotNicelyInTerm = termKitty(lsALotNicely, hold = true)
 
     // Notice: it will NOT have colors because "ls" is called with file as stdout
-    val lsALotNicelyInGVim = IScript {
+    val lsALotNicelyInGVim = InteractiveScript {
         lsALotNicely.exec(SYS, outFile = tmpNotesFile)
         gvim(tmpNotesFile).x()
     }
 
-    val man1 = IScript {
+    val man1 = InteractiveScript {
         val page = getEntry("manual page for")
         termKitty(man { +page }).x()
     }
-    val ideOpen1 = IScript {
+    val ideOpen1 = InteractiveScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")
         ideOpen(path).x()
     }
 
-    val ideOpenBashExports = IScript {
+    val ideOpenBashExports = InteractiveScript {
         bashGetExportsToFile(tmpNotesFile).x()
         ideOpen(tmpNotesFile).x()
     }
 
-    val ideOpenXClip = IScript {
+    val ideOpenXClip = InteractiveScript {
         bash("xclip -o > $tmpNotesFile").x() // FIXME_later: do it with kotlin instead of bash script
         ideOpen(tmpNotesFile).x()
     }
 
-    // Note: not IScript because I want to be able to enable interactive code when it's disabled.
-    val iCodeSwitch = RScript {
+    // Note: not InteractiveScript because I want to be able to enable interactive code when it's disabled.
+    val iCodeSwitch = ReducedScript {
         val enabled = askIf("Should interactive code be enabled?")
         setUserFlag(SYS, "code.interactive", enabled)
         showInfo("user flag: code.interactive.enabled = $enabled")
     }
 
-    val myDemoTestsSwitch = IScript {
+    val myDemoTestsSwitch = InteractiveScript {
         val enabled = askIf("Should MyDemoTests be enabled?")
         setUserFlag(SYS, "tests.MyDemoTests", enabled)
         showInfo("user flag: tests.MyDemoTests.enabled = $enabled")
     }
 
-    val showWholeUserConfig = IScript {
+    val showWholeUserConfig = InteractiveScript {
         val konfig = konfigInUserHomeConfigDir(SYS)
         showInfo(konfig.keys.map { konfig.getKeyValStr(it) }.joinToString("\n\n"))
     }
 
-    val playWithKonfigExamples = IScript {
+    val playWithKonfigExamples = InteractiveScript {
         val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
         println("before adding anything:")
         k.logEachKeyVal()
@@ -146,12 +146,6 @@ private suspend fun askEntry(question: String, suggested: String? = null) =
 
 private suspend fun getEntry(question: String, suggested: String? = null, errorMsg: String = "User didn't answer.") =
     askEntry(question, suggested) ?: run { showError(errorMsg); bad { errorMsg } }
-
-@OptIn(DelicateApi::class)
-private fun RScript(block: suspend () -> Unit) = ReducedScript { _, _ -> block() }
-
-@OptIn(DelicateApi::class)
-private fun IScript(block: suspend () -> Unit) = RScript { ifInteractiveCodeEnabled { block() } }
 
 private val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
 

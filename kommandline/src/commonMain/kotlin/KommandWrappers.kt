@@ -107,6 +107,10 @@ fun interface ReducedScript<ReducedOut> {
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
 
+// Just to simplify defining scripts when I don't care about dir; will be removed when we have context receivers
+inline fun <ReducedOut> ReducedScript(crossinline exec: suspend (cli: CLI) -> ReducedOut) =
+    ReducedScript<ReducedOut> { cli, dir -> exec(cli) }
+
 suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(cli: CLI) = exec(cli, null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
