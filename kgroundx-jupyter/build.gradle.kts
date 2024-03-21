@@ -11,8 +11,14 @@ plugins {
         plugs.MavenPublish,
         plugs.Signing,
         // plugs.Ktor,
-        plugs.KotlinJupyter,
+        // plugs.KotlinJupyter,
+
     )
+    id("org.jetbrains.kotlin.jupyter.api") version "0.12.0-149"
+    // FIXME: can not resolve ver 152
+    // https://github.com/Kotlin/kotlin-jupyter
+
+
     id("io.ktor.plugin") version "2.3.6"
     /*
     FIXME: ktor 3.0.0-beta-1 from deps .61 gives me error, when syncing, so I have to use ktor 2.3.6
