@@ -88,26 +88,15 @@ inline fun List<String>.chkStdOut(
 ): List<String> { test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this }
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
+@Deprecated("Better to use Samples with interactive scripts")
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
-    this.logLineRaw()
-    if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    ifInteractiveCodeEnabled {
+    toInteractiveCheck(expectedLineRaw, execInDir).execb(cli)
+}
+
+@DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
+fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =
+    InteractiveScript { cli ->
+        this.logLineRaw()
+        if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
         startInTermIfUserConfirms(cli, startInDir = execInDir)
     }
-}
-
-@DelicateApi("API for manual interactive experimentation. Requires GVim, conditionally skips")
-fun Kommand.chkWithUserInGVim(
-    expectedLineRaw: String? = null,
-    execInDir: String? = null,
-    cli: CLI = SYS
-) {
-    this.logLineRaw()
-    if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    ifInteractiveCodeEnabled { cli.run {
-        val tmpFile = "$pathToUserTmp/tmp.notes"
-        start(this@chkWithUserInGVim, dir = execInDir, outFile = tmpFile).waitForExit()
-        start(gvim(tmpFile)).waitForExit()
-    } }
-}
-
