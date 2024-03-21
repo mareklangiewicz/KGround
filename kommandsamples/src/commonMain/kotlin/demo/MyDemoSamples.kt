@@ -53,17 +53,18 @@ data object MyDemoSamples {
         termKitty(bash("ps -e | grep $process", pause = true)).x()
     }
 
-    val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ColorType.ALWAYS) {
+    private val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ColorType.ALWAYS) {
             -LsOpt.Author
             -LsOpt.LongFormat
             -LsOpt.HumanReadable
             -LsOpt.Sort(LsOpt.SortType.TIME)
         }
 
-    // Notice: it should have colors because "ls" is called with terminal as stdout
-    val lsALotNicelyInTerm = termKitty(lsALotNicely, hold = true)
+    // Notice: it should add colors because "ls" is called with terminal as stdout
+    val lsALotNicelyInTerm = termKitty(lsALotNicely, hold = true) s
+            "kitty -1 --detach --hold -- ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 
-    // Notice: it will NOT have colors because "ls" is called with file as stdout
+    // Notice: it will NOT add colors because "ls" is called with file as stdout
     val lsALotNicelyInGVim = InteractiveScript {
         lsALotNicely.exec(SYS, outFile = tmpNotesFile)
         gvim(tmpNotesFile).x()
