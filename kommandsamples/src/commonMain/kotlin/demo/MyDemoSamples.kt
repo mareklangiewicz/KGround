@@ -12,12 +12,9 @@ import pl.mareklangiewicz.kommand.ZenityOpt.*
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
-import pl.mareklangiewicz.kommand.core.LsOpt
-import pl.mareklangiewicz.kommand.core.LsOpt.ColorType
-import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.exec
-import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.ideOpen
+import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
@@ -45,35 +42,19 @@ data object MyDemoSamples {
     val btopKitty = termKitty(btop()) s
             "kitty -1 --detach -- btop"
 
-    val ps1 = termKitty(bash("ps -e | grep java", pause = true)) s
-            "kitty -1 --detach -- bash -c ps -e | grep java ; echo END.ENTER; read"
-
-    val ps2 = InteractiveScript {
-        val process = getEntry("find process")
-        termKitty(bash("ps -e | grep $process", pause = true)).x()
-    }
-
-    private val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ColorType.ALWAYS) {
-            -LsOpt.Author
-            -LsOpt.LongFormat
-            -LsOpt.HumanReadable
-            -LsOpt.Sort(LsOpt.SortType.TIME)
-        }
-
-    // Notice: it should add colors because "ls" is called with terminal as stdout
-    val lsALotNicelyInTerm = termKitty(lsALotNicely, hold = true) s
-            "kitty -1 --detach --hold -- ls -A --color=always --author -l -h --sort=time /home/marek /usr"
-
-    // Notice: it will NOT add colors because "ls" is called with file as stdout
-    val lsALotNicelyInGVim = InteractiveScript {
-        lsALotNicely.exec(SYS, outFile = tmpNotesFile)
-        gvim(tmpNotesFile).x()
-    }
-
     val man1 = InteractiveScript {
         val page = getEntry("manual page for")
         termKitty(man { +page }).x()
     }
+
+    val ps1 = termKitty(bash("ps -e | grep java"), hold = true) s
+            "kitty -1 --detach --hold -- bash -c ps -e | grep java"
+
+    val ps2 = InteractiveScript {
+        val process = getEntry("find process")
+        termKitty(bash("ps -e | grep $process"), hold = true).x()
+    }
+
     val ideOpen1 = InteractiveScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")
         ideOpen(path).x()
@@ -85,7 +66,8 @@ data object MyDemoSamples {
     }
 
     val ideOpenXClip = InteractiveScript {
-        bash("xclip -o > $tmpNotesFile").x() // FIXME_later: do it with kotlin instead of bash script
+        kommand("xclip", "-o").exec(it, outFile = tmpNotesFile)
+        // bash("xclip -o > $tmpNotesFile").x() // equivalent to above
         ideOpen(tmpNotesFile).x()
     }
 
