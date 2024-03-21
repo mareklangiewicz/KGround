@@ -18,7 +18,7 @@ data class TypedSample<K: Kommand, In, Out, Err>(
 data class ReducedSample<ReducedOut>(
     val reducedKommand: ReducedKommand<ReducedOut>,
     val expectedLineRaw: String? = null,
-)
+) : ReducedKommand<ReducedOut> by reducedKommand
 
 internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
 
