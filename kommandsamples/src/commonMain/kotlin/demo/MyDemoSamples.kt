@@ -12,6 +12,7 @@ import pl.mareklangiewicz.kommand.ZenityOpt.*
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
+import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.exec
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.kommand
@@ -39,7 +40,7 @@ data object MyDemoSamples {
     val btop = btop() s
             "btop"
 
-    val btopKitty = termKitty(btop()) s
+    val btopK = termKitty(btop) s
             "kitty -1 --detach -- btop"
 
     val man1 = InteractiveScript {
@@ -54,6 +55,12 @@ data object MyDemoSamples {
         val process = getEntry("find process")
         termKitty(bash("ps -e | grep $process"), hold = true).x()
     }
+
+    val catFstabAndHosts = cat { +"/etc/fstab"; +"/etc/hosts" } s
+            "cat /etc/fstab /etc/hosts"
+
+    val catFstabAndHostsK = termKitty(catFstabAndHosts, hold = true) s
+            "kitty -1 --detach --hold -- cat /etc/fstab /etc/hosts"
 
     val ideOpen1 = InteractiveScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")

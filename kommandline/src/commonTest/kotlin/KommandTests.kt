@@ -33,10 +33,6 @@ class KommandTests {
 @OptIn(DelicateApi::class)
 @Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
 class KommandTestOld {
-    @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkWithUserInGVim()
-    @Test fun testLs3() = ls { +"/home/marek" }.chkWithUserInGVim()
-    @Test fun testLsHome() = ls("/home/marek").execb(SYS).logEach()
-    @Test fun testLsHomeSubDirs() = lsSubDirs("/home/marek").execb(SYS).logEach()
     @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", wHidden = true).execb(SYS).logEach()
     @Test fun testLsHomeRegFiles() = lsRegFiles("/home/marek").execb(SYS).logEach()
 
@@ -51,11 +47,7 @@ class KommandTestOld {
         ls(path).execb(cli) == listOf("blaa")
     }.execb(SYS).logEach()
 
-    @Test fun testCat1() = cat { +"/etc/fstab" }.chkWithUserInGVim()
-    @Test fun testCat2() = cat { +"/etc/fstab"; +"/etc/hosts" }.chkWithUserInGVim()
-
     @Test fun testSs1() = ssTulpn().chkWithUser() // ss -tulpn
-    @Test fun testSs2() = ssTulpn().chkWithUserInGVim() // ss -tulpn
 
     @Test fun testManMan() = man { +"man" }.chkWithUser()
     @Test fun testManVim() = man { +"vim" }.chkWithUser()
