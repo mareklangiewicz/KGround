@@ -32,13 +32,11 @@ fun isUserTestClassEnabled(context: ExtensionContext) =
 )
 class MyDemoTests {
 
-    @Test fun testExperiment1() = runTestUSpek {
-        "On btopKitty" so {
-            MyDemoSamples.btopKitty.exec(SYS)
-        }
-        "On man1" so {
-            MyDemoSamples.man1.exec(SYS)
-        }
-    }
+    @Test fun testExperiment1() = runTestUSpek { MyDemoSamples.run {
+
+        "On btopKitty" so { btopKitty.exec(SYS) }
+
+        "On man1" so { man1.exec(SYS) }
+    } }
 
 }

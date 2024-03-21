@@ -33,8 +33,6 @@ class KommandTests {
 @OptIn(DelicateApi::class)
 @Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
 class KommandTestOld {
-    @Test fun testLs1() = ls { -Color(ALWAYS); -All; -Author; -LongFormat; -Sort(TIME); +".."; +"/usr" }
-        .chkWithUser("ls --color=always -a --author -l --sort=time .. /usr")
     @Test fun testLs2() = ls { -All; -Author; -LongFormat; -HumanReadable; +"/home/marek" }.chkWithUserInGVim()
     @Test fun testLs3() = ls { +"/home/marek" }.chkWithUserInGVim()
     @Test fun testLsHome() = ls("/home/marek").execb(SYS).logEach()

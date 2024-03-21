@@ -11,7 +11,11 @@ import pl.mareklangiewicz.kommand.ZenityOpt.*
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
+import pl.mareklangiewicz.kommand.core.LsOpt
+import pl.mareklangiewicz.kommand.core.LsOpt.ColorType
+import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.exec
+import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
@@ -44,48 +48,65 @@ data object MyDemoSamples {
     val ps1 = termKitty(bash("ps -e | grep java", pause = true)) s
             "kitty -1 --detach -- bash -c ps -e | grep java ; echo END.ENTER; read"
 
-    val ps2 = iscript {
+    val ps2 = IScript {
         val process = getEntry("find process")
         termKitty(bash("ps -e | grep $process", pause = true)).x()
     }
 
-    val man1 = iscript {
+    val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ColorType.ALWAYS) {
+            -LsOpt.Author
+            -LsOpt.LongFormat
+            -LsOpt.HumanReadable
+            -LsOpt.Sort(LsOpt.SortType.TIME)
+        }
+
+    // Notice: it should have colors because "ls" is called with terminal as stdout
+    val lsALotNicelyInTerm = termKitty(lsALotNicely, hold = true)
+
+    // Notice: it will NOT have colors because "ls" is called with file as stdout
+    val lsALotNicelyInGVim = IScript {
+        lsALotNicely.exec(SYS, outFile = tmpNotesFile)
+        gvim(tmpNotesFile).x()
+    }
+
+    val man1 = IScript {
         val page = getEntry("manual page for")
         termKitty(man { +page }).x()
     }
-    val ideOpen1 = iscript {
+    val ideOpen1 = IScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")
         ideOpen(path).x()
     }
 
-    val ideOpenBashExports = iscript {
+    val ideOpenBashExports = IScript {
         bashGetExportsToFile(tmpNotesFile).x()
         ideOpen(tmpNotesFile).x()
     }
 
-    val ideOpenXClip = iscript {
+    val ideOpenXClip = IScript {
         bash("xclip -o > $tmpNotesFile").x() // FIXME_later: do it with kotlin instead of bash script
         ideOpen(tmpNotesFile).x()
     }
 
-    val iCodeSwitch = rscript {
+    // Note: not IScript because I want to be able to enable interactive code when it's disabled.
+    val iCodeSwitch = RScript {
         val enabled = askIf("Should interactive code be enabled?")
         setUserFlag(SYS, "code.interactive", enabled)
         showInfo("user flag: code.interactive.enabled = $enabled")
     }
 
-    val myDemoTestsSwitch = rscript {
+    val myDemoTestsSwitch = IScript {
         val enabled = askIf("Should MyDemoTests be enabled?")
         setUserFlag(SYS, "tests.MyDemoTests", enabled)
         showInfo("user flag: tests.MyDemoTests.enabled = $enabled")
     }
 
-    val showWholeUserConfig = iscript {
+    val showWholeUserConfig = IScript {
         val konfig = konfigInUserHomeConfigDir(SYS)
         showInfo(konfig.keys.map { konfig.getKeyValStr(it) }.joinToString("\n\n"))
     }
 
-    val playWithKonfigExamples = iscript {
+    val playWithKonfigExamples = IScript {
         val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
         println("before adding anything:")
         k.logEachKeyVal()
@@ -127,10 +148,10 @@ private suspend fun getEntry(question: String, suggested: String? = null, errorM
     askEntry(question, suggested) ?: run { showError(errorMsg); bad { errorMsg } }
 
 @OptIn(DelicateApi::class)
-private fun rscript(block: suspend () -> Unit) = ReducedScript { _, _ -> block() }
+private fun RScript(block: suspend () -> Unit) = ReducedScript { _, _ -> block() }
 
 @OptIn(DelicateApi::class)
-private fun iscript(block: suspend () -> Unit) = rscript { ifInteractiveCodeEnabled { block() } }
+private fun IScript(block: suspend () -> Unit) = RScript { ifInteractiveCodeEnabled { block() } }
 
 private val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
 

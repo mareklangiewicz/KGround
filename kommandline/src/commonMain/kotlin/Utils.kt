@@ -81,7 +81,7 @@ inline fun List<String>.chkStdOut(
     lazyMessage: () -> String = { "bad stdout" }
 ): List<String> { test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this }
 
-@DelicateApi("API for manual interactive experimentation. Requires zenity, conditionally skips")
+@DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
     this.logLineRaw()
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
@@ -90,7 +90,7 @@ fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = nu
     }
 }
 
-@OptIn(DelicateApi::class)
+@DelicateApi("API for manual interactive experimentation. Requires GVim, conditionally skips")
 fun Kommand.chkWithUserInGVim(
     expectedLineRaw: String? = null,
     execInDir: String? = null,
