@@ -37,6 +37,14 @@ kotlin {
     jvm {
         withJava() // https://youtrack.jetbrains.com/issue/KT-45038
     }
+
+    sourceSets {
+        val jvmMain by getting {
+            dependencies {
+                implementation(Kotlin.reflect)
+            }
+        }
+    }
 }
 
 application {

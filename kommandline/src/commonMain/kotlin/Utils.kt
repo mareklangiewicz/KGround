@@ -12,19 +12,6 @@ fun isUserFlagEnabled(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$
 
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString() }
 
-// TODO_someday: logging with ulog from content receiver instead of raw println (which can be hard to find in logs)
-@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
-inline fun ifInteractiveCodeEnabled(code: () -> Unit) = when {
-    !SYS.isJvm -> println("Interactive code is only available on JvmCLI (for now).")
-    !isUserFlagEnabled(SYS, "code.interactive") -> println("Interactive code is disabled.")
-    else -> code()
-}
-
-
-@Suppress("FunctionName")
-@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
-inline fun <ReducedOut> InteractiveScript(crossinline exec: suspend (cli: CLI) -> ReducedOut) =
-    ReducedScript { cli -> ifInteractiveCodeEnabled { exec(cli) } }
 
 @OptIn(DelicateApi::class)
 fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CLI = SYS) {
@@ -87,16 +74,3 @@ inline fun List<String>.chkStdOut(
     lazyMessage: () -> String = { "bad stdout" }
 ): List<String> { test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this }
 
-@DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
-@Deprecated("Better to use Samples with interactive scripts")
-fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
-    toInteractiveCheck(expectedLineRaw, execInDir).execb(cli)
-}
-
-@DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
-fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =
-    InteractiveScript { cli ->
-        this.logLineRaw()
-        if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-        startInTermIfUserConfirms(cli, startInDir = execInDir)
-    }
