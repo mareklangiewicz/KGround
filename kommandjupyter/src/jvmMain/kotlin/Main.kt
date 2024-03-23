@@ -11,7 +11,9 @@ import pl.mareklangiewicz.kommand.XClipSelection.Clipboard
 import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.exec
 import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
+import pl.mareklangiewicz.kommand.isUserFlagEnabled
 import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
+import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.ch
@@ -45,6 +47,14 @@ fun main(args: Array<String>) = runBlocking {
             args.size == 1 -> bad { "sample requires sample reference or \"xclip\" keyword" }
             args.size > 2 -> bad { "only one sample reference allowed" }
             else -> tryInteractivelySampleRef(args[1])
+        }
+        "code.interactive" -> when {
+            args.size != 2 -> bad { "Error. format is: code.interactive enable/disable/print" }
+            args[1] == "print" -> println(
+                "code.interactive is " + if(isUserFlagEnabled(SYS, "code.interactive")) "enabled" else "disabled"
+            )
+            args[1] == "enable" -> setUserFlag(SYS, "code.interactive", true)
+            args[1] == "disable" -> setUserFlag(SYS, "code.interactive", false)
         }
     }
 }
