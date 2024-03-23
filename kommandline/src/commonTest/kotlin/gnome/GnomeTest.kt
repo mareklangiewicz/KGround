@@ -12,15 +12,15 @@ import kotlin.test.Test
 @OptIn(DelicateApi::class)
 class GnomeTest {
     @Test fun testJournalCtl() = journalctl { -Follow; -Cat; +"/usr/bin/gnome-shell" }
-        .chkWithUser("journalctl -f -ocat /usr/bin/gnome-shell")
+        .tryInteractivelyCheck("journalctl -f -ocat /usr/bin/gnome-shell")
 
     @Test fun testTermGnome() =
         termGnome(kommand("vim")) { -TermGnomeOpt.Verbose; -TermGnomeOpt.Title("strange terminal title") }
-        .chkWithUser("gnome-terminal -v --title=strange terminal title -- vim")
+        .tryInteractivelyCheck("gnome-terminal -v --title=strange terminal title -- vim")
 
     @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
-        .chkWithUser("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext")
+        .tryInteractivelyCheck("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext")
 
     @Test fun testNotify() = notify("aa", "some longer body") { -Urgency("critical") }
-        .chkWithUser("notify-send --urgency=critical aa some longer body")
+        .tryInteractivelyCheck("notify-send --urgency=critical aa some longer body")
 }

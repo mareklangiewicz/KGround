@@ -12,10 +12,10 @@ import kotlin.test.Test
 class GnomeAppTest {
 
     @Test fun testGnomeAppListApps() = gnomeapp(ListApps)
-        .chkWithUser("gapplication list-apps")
+        .tryInteractivelyCheck("gapplication list-apps")
 
     @Test fun testGnomeAppListGEditActions() = gnomeapp(ListActions("org.gnome.gedit"))
-        .chkWithUser("gapplication list-actions org.gnome.gedit")
+        .tryInteractivelyCheck("gapplication list-actions org.gnome.gedit")
 
     @Ignore // jitpack
     @Test fun testGnomeAppListAllAppActions() = SYS.run {
@@ -27,8 +27,8 @@ class GnomeAppTest {
         }
     }
 
-    @Test fun testGnomeAppHelp() = gnomeapp(Help()).chkWithUser()
-    @Test fun testGnomeAppLaunchGEdit() = gnomeapp(Launch("org.gnome.gedit")).chkWithUser()
-    @Test fun testGnomeAppGEditNewWindow() = gnomeapp(Action("org.gnome.gedit", "new-window")).chkWithUser()
-    @Test fun testGnomeAppGEditNewDocument() = gnomeapp(Action("org.gnome.gedit", "new-document")).chkWithUser()
+    @Test fun testGnomeAppHelp() = gnomeapp(Help()).tryInteractivelyCheck()
+    @Test fun testGnomeAppLaunchGEdit() = gnomeapp(Launch("org.gnome.gedit")).tryInteractivelyCheck()
+    @Test fun testGnomeAppGEditNewWindow() = gnomeapp(Action("org.gnome.gedit", "new-window")).tryInteractivelyCheck()
+    @Test fun testGnomeAppGEditNewDocument() = gnomeapp(Action("org.gnome.gedit", "new-document")).tryInteractivelyCheck()
 }

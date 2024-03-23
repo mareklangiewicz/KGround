@@ -45,8 +45,9 @@ inline fun <ReducedOut> InteractiveScript(crossinline exec: suspend (cli: CLI) -
 //   rethink this
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 @Deprecated("Better to use Samples with InteractiveScript s")
-fun Kommand.chkWithUser(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
-    toInteractiveCheck(expectedLineRaw, execInDir).execb(cli)
+fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
+    if (cli.isJvm) toInteractiveCheck(expectedLineRaw, execInDir).execb(cli)
+    // ifology just to avoid NotImplementedError on nonjvm. this extension fun will be deleted anyway (execb too)
 }
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")

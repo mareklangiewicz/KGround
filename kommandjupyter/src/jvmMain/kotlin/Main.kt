@@ -51,7 +51,7 @@ fun main(args: Array<String>) = runBlocking {
         "code.interactive" -> when {
             args.size != 2 -> bad { "Error. format is: code.interactive enable/disable/print" }
             args[1] == "print" -> println(
-                "code.interactive is " + if(isUserFlagEnabled(SYS, "code.interactive")) "enabled" else "disabled"
+                "code.interactive is " + if(isUserFlagEnabled(SYS, "code.interactive")) "enabled" else "not enabled"
             )
             args[1] == "enable" -> setUserFlag(SYS, "code.interactive", true)
             args[1] == "disable" -> setUserFlag(SYS, "code.interactive", false)

@@ -11,16 +11,16 @@ import kotlin.test.Test
 @OptIn(DelicateApi::class)
 class GpgTest {
     @Test fun testGpgHelp() = gpg { -Help }
-        .chkWithUser("gpg --help")
+        .tryInteractivelyCheck("gpg --help")
 
     @Test fun testGpgListKeys() = gpg(ListPublicKeys)
-        .chkWithUser("gpg --list-public-keys")
+        .tryInteractivelyCheck("gpg --list-public-keys")
 
     @Test fun testGpgListKeysVerbose() = gpg(ListPublicKeys) { -Verbose }
-        .chkWithUser("gpg --list-public-keys --verbose")
+        .tryInteractivelyCheck("gpg --list-public-keys --verbose")
 
     @Test fun testGpgListSecretKeysVerbose() = gpg(ListSecretKeys) { -Verbose }
-        .chkWithUser("gpg --list-secret-keys --verbose")
+        .tryInteractivelyCheck("gpg --list-secret-keys --verbose")
 
     @Suppress("DEPRECATION")
     @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmCLI {

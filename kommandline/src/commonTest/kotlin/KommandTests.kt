@@ -10,10 +10,6 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.core.LsOpt.*
-import pl.mareklangiewicz.kommand.core.LsOpt.All
-import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
-import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
 import pl.mareklangiewicz.kommand.debian.*
 import kotlin.test.*
 import kotlin.test.Ignore
@@ -40,32 +36,32 @@ class KommandTestOld {
         .chkLineRawAndExec("mkdir -p /tmp/testMkDir1/blaa/blee")
 
     @Test fun testRm1() = rm { -RmOpt.Dir; +"/tmp/testMkDir1/blaa/blee" }
-        .chkWithUser("rm -d /tmp/testMkDir1/blaa/blee")
+        .tryInteractivelyCheck("rm -d /tmp/testMkDir1/blaa/blee")
 
     @Test fun testRm2() = rmTreeWithForce("/tmp/testMkDir1") { cli, path ->
         // double check if we are removing what we think we are:
         ls(path).execb(cli) == listOf("blaa")
     }.execb(SYS).logEach()
 
-    @Test fun testSs1() = ssTulpn().chkWithUser() // ss -tulpn
+    @Test fun testSs1() = ssTulpn().tryInteractivelyCheck() // ss -tulpn
 
-    @Test fun testManMan() = man { +"man" }.chkWithUser()
-    @Test fun testManVim() = man { +"vim" }.chkWithUser()
-    @Test fun testManOpenAll() = man { -ManOpt.All; +"open" }.chkWithUser()
-    @Test fun testManOpen2() = man(2) { +"open" }.chkWithUser()
-    @Test fun testManOpenSys() = man(ManSection.SysCall) { +"open" }.chkWithUser()
-    @Test fun testManApropos() = man { -ManOpt.Apropos(); +"package" }.chkWithUser()
-    @Test fun testManWhatIs() = man { -ManOpt.WhatIs; +"which" }.chkWithUser()
+    @Test fun testManMan() = man { +"man" }.tryInteractivelyCheck()
+    @Test fun testManVim() = man { +"vim" }.tryInteractivelyCheck()
+    @Test fun testManOpenAll() = man { -ManOpt.All; +"open" }.tryInteractivelyCheck()
+    @Test fun testManOpen2() = man(2) { +"open" }.tryInteractivelyCheck()
+    @Test fun testManOpenSys() = man(ManSection.SysCall) { +"open" }.tryInteractivelyCheck()
+    @Test fun testManApropos() = man { -ManOpt.Apropos(); +"package" }.tryInteractivelyCheck()
+    @Test fun testManWhatIs() = man { -ManOpt.WhatIs; +"which" }.tryInteractivelyCheck()
 
-    @Test fun testAdbDevices() = adb(Devices) { -Option.All; -Usb }.chkWithUser("adb -a -d devices")
-    @Test fun testAdbShell() = adb(Shell).chkWithUser("adb shell")
+    @Test fun testAdbDevices() = adb(Devices) { -Option.All; -Usb }.tryInteractivelyCheck("adb -a -d devices")
+    @Test fun testAdbShell() = adb(Shell).tryInteractivelyCheck("adb shell")
 
     @Test fun testVim() {
         val kommand = vim(".") { -Gui; -ServerName("DDDD") }
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
-        kommand.chkWithUser("vim -g --servername DDDD .")
+        kommand.tryInteractivelyCheck("vim -g --servername DDDD .")
     }
-    @Test fun testWhich() = which("vim", "ls", all = true).chkWithUser()
+    @Test fun testWhich() = which("vim", "ls", all = true).tryInteractivelyCheck()
 
     @Ignore
     @Test fun testMkTemp() = println(mktemp().execb(SYS))
@@ -73,7 +69,7 @@ class KommandTestOld {
         val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
         val kommand2 = bash(kommand1)
         assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
-        kommand2.chkWithUser("bash -c vim -g --servername DDDD .")
+        kommand2.tryInteractivelyCheck("bash -c vim -g --servername DDDD .")
     }
     @Ignore // Let's not print all env vars on github actions.
     @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)

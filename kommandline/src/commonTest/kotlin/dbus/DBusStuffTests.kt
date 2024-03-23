@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand.dbus
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kommand.chkWithUser
+import pl.mareklangiewicz.kommand.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.dbus.DBusRunSession.Option.Version
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option.Nested
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option.Wayland
@@ -11,6 +11,6 @@ import kotlin.test.Test
 
 @OptIn(DelicateApi::class) // TODO NOW: move to samples or sth
 class DBusStuffTests {
-    @Test fun testDBusRunSession1() = dbusrunsession { -Version }.chkWithUser()
-    @Test fun testDBusRunSession2() = dbusrunsession(gnomeshell(Nested, Wayland)).chkWithUser()
+    @Test fun testDBusRunSession1() = dbusrunsession { -Version }.tryInteractivelyCheck()
+    @Test fun testDBusRunSession2() = dbusrunsession(gnomeshell(Nested, Wayland)).tryInteractivelyCheck()
 }

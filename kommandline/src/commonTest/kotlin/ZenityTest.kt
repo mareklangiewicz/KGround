@@ -11,27 +11,27 @@ import kotlin.test.Test
 
 @OptIn(DelicateApi::class)
 class ZenityTest {
-    @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.chkWithUser()
+    @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.tryInteractivelyCheck()
     @Test fun testZenityEntryStart() = ifInteractiveCodeEnabled {
         SYS.start(zenity(Entry) { -EntryText("suggested text") })
     }
 
     @Test fun testZenityCalendar() = zenity(Calendar) { -Title("some title"); -Text("some text") }
-        .chkWithUser("zenity --calendar --title=some title --text=some text")
+        .tryInteractivelyCheck("zenity --calendar --title=some title --text=some text")
 
-    @Test fun testZenityCalendarFormat() = zenity(Calendar) { -DateFormat("%y-%m-%d") }.chkWithUser()
-    @Test fun testZenityInfo() = zenity(Info) { -Text("Some info (timeout 5s)"); -Timeout(5) }.chkWithUser()
-    @Test fun testZenityWarning() = zenity(Warning) { -Text("Some Warning (timeout 3s)"); -Timeout(3) }.chkWithUser()
-    @Test fun testZenityError() = zenity(Error) { -Text("Some loooooong looong ERROR!"); -NoWrap }.chkWithUser()
-    @Test fun testZenityFileSelection() = zenity(FileSelection) { -Title("Select some file") }.chkWithUser()
-    @Test fun testZenityFileMultiple() = zenity(FileSelection) { -Title("Select some files"); -Multiple }.chkWithUser()
-    @Test fun testZenityFileDirectory() = zenity(FileSelection) { -Title("Select some dir"); -ZenityOpt.Directory }.chkWithUser()
-    @Test fun testZenityFileSave() = zenity(FileSelection) { -Save; -ConfirmOverwrite }.chkWithUser()
-    @Test fun testZenityNotification() = zenity(Notification) { -Text("Some notification") }.chkWithUser()
-    @Test fun testZenityProgress() = zenity(Progress) { -Text("Some progress"); -Pulsate }.chkWithUser()
-    @Test fun testZenityQuestion() = zenity(Question) { -Text("Some wierdddddd question"); NoWrap }.chkWithUser()
-    @Test fun testZenityTextInfo() = zenity(TextInfo) { -FileName("build.gradle.kts") }.chkWithUser()
-    @Test fun testZenityScale() = zenity(Scale) { -InitValue(2); -MinValue(1); -MaxValue(8) }.chkWithUser()
+    @Test fun testZenityCalendarFormat() = zenity(Calendar) { -DateFormat("%y-%m-%d") }.tryInteractivelyCheck()
+    @Test fun testZenityInfo() = zenity(Info) { -Text("Some info (timeout 5s)"); -Timeout(5) }.tryInteractivelyCheck()
+    @Test fun testZenityWarning() = zenity(Warning) { -Text("Some Warning (timeout 3s)"); -Timeout(3) }.tryInteractivelyCheck()
+    @Test fun testZenityError() = zenity(Error) { -Text("Some loooooong looong ERROR!"); -NoWrap }.tryInteractivelyCheck()
+    @Test fun testZenityFileSelection() = zenity(FileSelection) { -Title("Select some file") }.tryInteractivelyCheck()
+    @Test fun testZenityFileMultiple() = zenity(FileSelection) { -Title("Select some files"); -Multiple }.tryInteractivelyCheck()
+    @Test fun testZenityFileDirectory() = zenity(FileSelection) { -Title("Select some dir"); -ZenityOpt.Directory }.tryInteractivelyCheck()
+    @Test fun testZenityFileSave() = zenity(FileSelection) { -Save; -ConfirmOverwrite }.tryInteractivelyCheck()
+    @Test fun testZenityNotification() = zenity(Notification) { -Text("Some notification") }.tryInteractivelyCheck()
+    @Test fun testZenityProgress() = zenity(Progress) { -Text("Some progress"); -Pulsate }.tryInteractivelyCheck()
+    @Test fun testZenityQuestion() = zenity(Question) { -Text("Some wierdddddd question"); NoWrap }.tryInteractivelyCheck()
+    @Test fun testZenityTextInfo() = zenity(TextInfo) { -FileName("build.gradle.kts") }.tryInteractivelyCheck()
+    @Test fun testZenityScale() = zenity(Scale) { -InitValue(2); -MinValue(1); -MaxValue(8) }.tryInteractivelyCheck()
 
     @Test fun testZenityList() = zenity(List) {
         -Text("a list")
@@ -41,7 +41,7 @@ class ZenityTest {
             +"col 1 row $it"
             +"col 2 row $it"
         }
-    }.chkWithUser()
+    }.tryInteractivelyCheck()
     @Test fun testZenityCheckList() = zenity(List) {
         -CheckList
         -Text("a list")
@@ -51,7 +51,7 @@ class ZenityTest {
             +(it % 3 == 0).toString()
             +"label $it"
         }
-    }.chkWithUser()
+    }.tryInteractivelyCheck()
     @Test fun testZenityRadioList() = zenity(List) {
         -RadioList
         -Text("a list")
@@ -63,7 +63,7 @@ class ZenityTest {
             +"label $it"
             +"desc $it"
         }
-    }.chkWithUser()
+    }.tryInteractivelyCheck()
     @Test fun testZenityListFromLs() = ifInteractiveCodeEnabled {
         SYS.run { // TODO_someday: nice parsing for ls output columns etc..
             val lines = ls { -All; -LongFormat; -HumanReadable }.execb(this)
@@ -73,7 +73,7 @@ class ZenityTest {
                 for (l in lines) +"line $l"
                 // some prefix like "line" is needed,
                 // so it doesn't confuse line starting with "-" with zenity option
-            }.chkWithUser()
+            }.tryInteractivelyCheck()
         }
     }
 
