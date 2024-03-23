@@ -23,8 +23,8 @@ fun ideOpen(
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
 fun ideOrGVimOpen(path: String) = ReducedScript { cli, dir ->
-    try { ideOpen(path).exec(cli, dir = dir) }
-    catch (_: BadStateErr) { gvim(path).exec(cli, dir = dir) }
+    try { ideOpen(path).ax(cli, dir = dir) }
+    catch (_: BadStateErr) { gvim(path).ax(cli, dir = dir) }
 }
 
 /** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
@@ -38,7 +38,7 @@ fun ideMerge(path1: String, path2: String, output: String, base: String? = null,
 fun <CmdT: Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
     ReducedScript { cli, dir ->
         val type = getFirstRunningIdeType(cli) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
-        ide(type, cmd, init).exec(cli, dir = dir)
+        ide(type, cmd, init).ax(cli, dir = dir)
     }
 
 
@@ -180,15 +180,15 @@ private suspend fun getFirstRunningIdeType(cli: CLI): Type? {
         +ureIdent(allowDashesInside = true).withName("app")
     }
 
-    suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().exec(cli)
+    suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().ax(cli)
         .filter<String> { "Toolbox/apps" in it }
         .map<String, String> { ureToolboxApp.findFirst(it).namedValues["app"]!! }
         .toSet()
 
     suspend fun Type.getRealName(): String {
-        val path = whichFirstOrNull(name).exec(cli).chkNN { "Command $name not found." }
-        kommand("file", path).exec(cli).single().chkFindSingle(ureText("shell script"))
-        for (line in readFileHead(path).exec(cli))
+        val path = whichFirstOrNull(name).ax(cli).chkNN { "Command $name not found." }
+        kommand("file", path).ax(cli).single().chkFindSingle(ureText("shell script"))
+        for (line in readFileHead(path).ax(cli))
             return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue
         bad { "Real name of $this not found in script $path" }
     }

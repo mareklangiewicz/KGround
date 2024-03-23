@@ -7,8 +7,8 @@ import pl.mareklangiewicz.kommand.core.RmOpt.*
 
 @OptIn(DelicateApi::class)
 fun rmIfFileExists(file: String) = ReducedScript { cli, dir ->
-    val exists = testIfFileExists(file).exec(cli, dir)
-    if (exists) rm(file).exec(cli, dir = dir)
+    val exists = testIfFileExists(file).ax(cli, dir)
+    if (exists) rm(file).ax(cli, dir = dir)
     else listOf("File not found")
 }
 
@@ -16,7 +16,7 @@ fun rmIfFileExists(file: String) = ReducedScript { cli, dir ->
 fun rmTreeWithForce(path: String, doubleChk: (cli: CLI, path: String) -> Boolean) =
     ReducedScript { cli, dir ->
         chk(doubleChk(cli, path)) { "ERROR: Can not remove whole '$path' tree. Double chk failed." }
-        rm(path, recursive = true, force = true).exec(cli, dir = dir)
+        rm(path, recursive = true, force = true).ax(cli, dir = dir)
     }
 
 @DelicateApi

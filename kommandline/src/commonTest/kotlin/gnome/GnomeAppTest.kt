@@ -19,9 +19,9 @@ class GnomeAppTest {
 
     @Ignore // jitpack
     @Test fun testGnomeAppListAllAppActions() = SYS.run {
-        gnomeapp(ListApps).execb(this).forEach {
+        gnomeapp(ListApps).axb(this).forEach {
             println("Application $it:")
-            gnomeapp(ListActions(it)).execb(this).forEach {
+            gnomeapp(ListActions(it)).axb(this).forEach {
                 println("   action: $it")
             }
         }

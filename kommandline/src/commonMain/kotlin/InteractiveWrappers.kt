@@ -25,7 +25,7 @@ fun Kommand.tryInteractivelyStartInTerm(
     startInDir: String? = null,
     termKommand: (innerKommand: Kommand) -> Kommand = { termXDefault(it) }
 ) = ifInteractiveCodeEnabled {
-    if (zenityAskIf(confirmation, title).execb(cli)) {
+    if (zenityAskIf(confirmation, title).axb(cli)) {
         val k = when {
             insideBash -> bash(this, pauseBeforeExit)
             pauseBeforeExit -> bad { "Can not pause before exit if not using bash shell" }
@@ -38,15 +38,15 @@ fun Kommand.tryInteractivelyStartInTerm(
 
 @Suppress("FunctionName")
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
-inline fun <ReducedOut> InteractiveScript(crossinline exec: suspend (cli: CLI) -> ReducedOut) =
-    ReducedScript { cli -> ifInteractiveCodeEnabled { exec(cli) } }
+inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend (cli: CLI) -> ReducedOut) =
+    ReducedScript { cli -> ifInteractiveCodeEnabled { ax(cli) } }
 
 // FIXME NOW: I want more InteractiveScripts in Samples instead of "tests" with weird logic when to skip them
 //   rethink this
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 @Deprecated("Better to use Samples with InteractiveScript s")
 fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execInDir: String? = null, cli: CLI = SYS) {
-    if (cli.isJvm) toInteractiveCheck(expectedLineRaw, execInDir).execb(cli)
+    if (cli.isJvm) toInteractiveCheck(expectedLineRaw, execInDir).axb(cli)
     // ifology just to avoid NotImplementedError on nonjvm. this extension fun will be deleted anyway (execb too)
 }
 

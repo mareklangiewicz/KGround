@@ -34,9 +34,9 @@ class MyDemoTests {
 
     @Test fun testExperiment1() = runTestUSpek { MyDemoSamples.run {
 
-        "On btopKitty" so { btopK.exec(SYS) }
+        "On btopKitty" so { btopK.ax(SYS) }
 
-        "On man1" so { man1.exec(SYS) }
+        "On man1" so { man1.ax(SYS) }
     } }
 
 }

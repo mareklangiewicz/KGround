@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.core
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.InteractiveScript
 import pl.mareklangiewicz.kommand.core.LsOpt.*
-import pl.mareklangiewicz.kommand.exec
+import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
@@ -44,7 +44,7 @@ data object LsSamples {
     // Notice: it will NOT add colors because "ls" is called with file as stdout
     val lsALotNicelyInGVim = InteractiveScript { cli ->
         val tmpNotesFile = cli.pathToUserTmp + "/tmp.notes"
-        lsALotNicely.exec(cli, outFile = tmpNotesFile)
-        gvim(tmpNotesFile).exec(cli)
+        lsALotNicely.ax(cli, outFile = tmpNotesFile)
+        gvim(tmpNotesFile).ax(cli)
     }
 }

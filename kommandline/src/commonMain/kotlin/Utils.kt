@@ -4,7 +4,6 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
-import pl.mareklangiewicz.kommand.term.*
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -18,7 +17,7 @@ fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: Stri
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
     println(lineRaw)
     lineRaw.chkEq(expectedLineRaw)
-    execb(cli, execInDir)
+    axb(cli, execInDir)
 }
 
 /** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */

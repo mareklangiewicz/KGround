@@ -46,20 +46,20 @@ fun konfigInDir(
 
 private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS): IKonfig {
 
-    init { mkdir(dir, withParents = true).execb(cli) }
+    init { mkdir(dir, withParents = true).axb(cli) }
 
     override fun get(key: String): String? =
-        try { readFileWithCat("$dir/$key").execb(cli).joinToString("\n") } catch (e: RuntimeException) { null }
+        try { readFileWithCat("$dir/$key").axb(cli).joinToString("\n") } catch (e: RuntimeException) { null }
 
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
         cli.run {
-            if (item == null) rmIfFileExists(file).execb(CLI.SYS)
-            else writeFileWithDD(inLines = listOf(item), outFile = file).execb(CLI.SYS)
+            if (item == null) rmIfFileExists(file).axb(CLI.SYS)
+            else writeFileWithDD(inLines = listOf(item), outFile = file).axb(CLI.SYS)
         }
     }
 
-    override val keys get() = lsRegFiles(dir).execb(cli).asCol()
+    override val keys get() = lsRegFiles(dir).axb(cli).asCol()
 }
 
 private class KonfigWithChecks(

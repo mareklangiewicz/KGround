@@ -6,10 +6,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.XClipSelection.Clipboard
 import pl.mareklangiewicz.kommand.xclipOut
-import pl.mareklangiewicz.kommand.exec
+import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
 import pl.mareklangiewicz.kommand.isUserFlagEnabled
 import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
@@ -78,7 +77,7 @@ private suspend fun tryInteractivelyClassMember(className: String, memberName: S
     // val getter = { kMember.call(objectOrNull) }
 
     ifInteractiveCodeEnabled {
-        zenityAskIf("Try $className#$memberName ?").exec(SYS) || return
+        zenityAskIf("Try $className#$memberName ?").ax(SYS) || return
         val member: Any? = getter()
         member.tryInteractivelyAnything()
     }
@@ -93,7 +92,7 @@ private suspend fun tryInteractivelySampleRef(reference: String = "xclip") {
 
     println("tryInteractivelySample(\"$reference\")")
 
-    val ref = if (reference == "xclip") xclipOut(Clipboard).exec(SYS).single() else reference
+    val ref = if (reference == "xclip") xclipOut(Clipboard).ax(SYS).single() else reference
     val ure = ure {
         +ure("className") {
             +ureText("pl.mareklangiewicz.kommand.")

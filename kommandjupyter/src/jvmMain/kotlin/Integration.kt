@@ -32,7 +32,7 @@ fun Flow<*>.logb() = logEachWithMillisBlocking()
 
 
 /**
- * Kinda like .exec, but less strict/explicit, because in notebooks we are in more local "experimental" context.
+ * Kinda like .ax, but less strict/explicit, because in notebooks we are in more local "experimental" context.
  * I don't want too many shortcut names inside kommandline itself, but here it's fine.
  */
 suspend fun Kommand.x(
@@ -79,7 +79,7 @@ fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(cli: CLI = S
 
 
 suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CLI = SYS, dir: String? = null): ReducedOut =
-    exec(cli, dir = dir)
+    ax(cli, dir = dir)
 
 
 

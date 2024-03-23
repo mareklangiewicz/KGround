@@ -36,7 +36,7 @@ data object SshSamples {
 // https://www.codejam.info/2021/11/standalone-userland-ssh-server.html
 @OptIn(DelicateApi::class)
 suspend fun runSshdStandalone(dir: String = "/tmp/sshd-sdandalone") {
-    mkdir(dir, withParents = true).exec(CLI.SYS)
+    mkdir(dir, withParents = true).ax(CLI.SYS)
     TODO()
 
 }

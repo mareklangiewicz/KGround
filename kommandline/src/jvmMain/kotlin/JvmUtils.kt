@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.kground.*
 
 // TODO_someday: CLI as context receiver
-@Deprecated("Use suspend fun Kommand.exec(...)")
-fun Kommand.execBlocking(
+@Deprecated("Use suspend fun Kommand.ax(...)")
+fun Kommand.axBlocking(
     cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String? = null,
@@ -15,12 +15,12 @@ fun Kommand.execBlocking(
     inFile: String? = null,
     outFile: String? = null,
 ): List<String> = runBlocking {
-    exec(cli, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
+    ax(cli, dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
 }
 
 // temporary hack
-@Deprecated("Use suspend fun Kommand.exec(...)")
-actual fun Kommand.execb(
+@Deprecated("Use suspend fun Kommand.ax(...)")
+actual fun Kommand.axb(
     cli: CLI,
     vararg useNamedArgs: Unit,
     dir: String?,
@@ -28,7 +28,7 @@ actual fun Kommand.execb(
     inLineS: Flow<String>?,
     inFile: String?,
     outFile: String?,
-) = execBlocking(
+) = axBlocking(
     cli,
     dir = dir,
     inContent = inContent,
@@ -38,9 +38,9 @@ actual fun Kommand.execb(
 )
 
 // also temporary hack
-@Deprecated("Use suspend fun ReducedKommand.exec(...)")
-actual fun <ReducedOut> ReducedScript<ReducedOut>.execb(cli: CLI, dir: String?): ReducedOut =
-    runBlocking { exec(cli, dir) }
+@Deprecated("Use suspend fun ReducedKommand.ax(...)")
+actual fun <ReducedOut> ReducedScript<ReducedOut>.axb(cli: CLI, dir: String?): ReducedOut =
+    runBlocking { ax(cli, dir) }
 
 
 fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }

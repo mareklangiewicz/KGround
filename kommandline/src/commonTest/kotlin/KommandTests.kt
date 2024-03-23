@@ -29,8 +29,8 @@ class KommandTests {
 @OptIn(DelicateApi::class)
 @Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
 class KommandTestOld {
-    @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", wHidden = true).execb(SYS).logEach()
-    @Test fun testLsHomeRegFiles() = lsRegFiles("/home/marek").execb(SYS).logEach()
+    @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", wHidden = true).axb(SYS).logEach()
+    @Test fun testLsHomeRegFiles() = lsRegFiles("/home/marek").axb(SYS).logEach()
 
     @Test fun testMkDir1() = mkdir("/tmp/testMkDir1/blaa/blee", withParents = true)
         .chkLineRawAndExec("mkdir -p /tmp/testMkDir1/blaa/blee")
@@ -40,8 +40,8 @@ class KommandTestOld {
 
     @Test fun testRm2() = rmTreeWithForce("/tmp/testMkDir1") { cli, path ->
         // double check if we are removing what we think we are:
-        ls(path).execb(cli) == listOf("blaa")
-    }.execb(SYS).logEach()
+        ls(path).axb(cli) == listOf("blaa")
+    }.axb(SYS).logEach()
 
     @Test fun testSs1() = ssTulpn().tryInteractivelyCheck() // ss -tulpn
 
@@ -64,7 +64,7 @@ class KommandTestOld {
     @Test fun testWhich() = which("vim", "ls", all = true).tryInteractivelyCheck()
 
     @Ignore
-    @Test fun testMkTemp() = println(mktemp().execb(SYS))
+    @Test fun testMkTemp() = println(mktemp().axb(SYS))
     @Test fun testBash() {
         val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
         val kommand2 = bash(kommand1)
@@ -72,10 +72,10 @@ class KommandTestOld {
         kommand2.tryInteractivelyCheck("bash -c vim -g --servername DDDD .")
     }
     @Ignore // Let's not print all env vars on github actions.
-    @Test fun testBashGetExports() = bashGetExportsMap().execb(SYS)
+    @Test fun testBashGetExports() = bashGetExportsMap().axb(SYS)
         .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
 
-    @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).execb(SYS).unit
+    @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).axb(SYS).unit
 
-    @Test fun testIdeDiff() = ideDiff("/home/marek/.bashrc", "/home/marek/.profile").execb(SYS).unit
+    @Test fun testIdeDiff() = ideDiff("/home/marek/.bashrc", "/home/marek/.profile").axb(SYS).unit
 }

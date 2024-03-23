@@ -10,7 +10,7 @@ import pl.mareklangiewicz.kommand.lineRawOrNull
 import pl.mareklangiewicz.kommand.toInteractiveCheck
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenityAskIf
-import pl.mareklangiewicz.kommand.exec
+import pl.mareklangiewicz.kommand.ax
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun Any?.tryInteractivelyAnything(cli: CLI = SYS) = when (this) {
@@ -23,7 +23,7 @@ suspend fun Any?.tryInteractivelyAnything(cli: CLI = SYS) = when (this) {
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun Sample.tryInteractivelyCheckSample(cli: CLI = SYS) =
-    kommand.toInteractiveCheck(expectedLineRaw).exec(cli)
+    kommand.toInteractiveCheck(expectedLineRaw).ax(cli)
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample(cli: CLI = SYS) {
@@ -35,8 +35,8 @@ suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample(cli: CLI = SYS) 
 suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
     question: String = "Exec ReducedScript ?", cli: CLI = SYS
 ) {
-    zenityAskIf(question).exec(cli) || return
-    val reducedOut = exec(cli)
+    zenityAskIf(question).ax(cli) || return
+    val reducedOut = ax(cli)
     reducedOut.tryOpenDataInIDE("Open ReducedOut in tmp.notes in IDE ?")
 }
 
@@ -46,11 +46,11 @@ suspend fun Any?.tryOpenDataInIDE(question: String = "Open this data in tmp.note
     this is Unit -> println("It is Unit. Nothing to open.")
     this is String && isEmpty() -> println("It is empty string. Nothing to open.")
     this is Collection<*> && isEmpty() -> println("It is empty collection. Nothing to open.")
-    !zenityAskIf(question).exec(cli) -> println("Not opening.")
+    !zenityAskIf(question).ax(cli) -> println("Not opening.")
     else -> {
         val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
-        writeFileWithDD(listOf(toString()), tmpNotesFile).exec(cli)
-        ideOpen(tmpNotesFile).exec(cli)
+        writeFileWithDD(listOf(toString()), tmpNotesFile).ax(cli)
+        ideOpen(tmpNotesFile).ax(cli)
     }
 }
 

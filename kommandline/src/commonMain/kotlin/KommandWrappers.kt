@@ -103,15 +103,15 @@ fun <K: Kommand, In, Out, Err> CLI.start(
 fun interface ReducedScript<ReducedOut> {
     // TODO_maybe: dir should probably be inside CLI as val currentDir.
     //   and maybe sth like CLI.withCurrentDir(dir, code:...) (or rather with context receivers)
-    suspend fun exec(cli: CLI, dir: String?): ReducedOut
+    suspend fun ax(cli: CLI, dir: String?): ReducedOut
     // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
 
 // Just to simplify defining scripts when I don't care about dir; will be removed when we have context receivers
-inline fun <ReducedOut> ReducedScript(crossinline exec: suspend (cli: CLI) -> ReducedOut) =
-    ReducedScript<ReducedOut> { cli, dir -> exec(cli) }
+inline fun <ReducedOut> ReducedScript(crossinline ax: suspend (cli: CLI) -> ReducedOut) =
+    ReducedScript<ReducedOut> { cli, dir -> ax(cli) }
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.exec(cli: CLI) = exec(cli, null)
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI) = ax(cli, null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
@@ -119,14 +119,14 @@ internal class ReducedKommandImpl<K: Kommand, In, Out, Err, ReducedOut>(
     val typedKommand: TypedKommand<K, In, Out, Err>,
     val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> {
-    override suspend fun exec(cli: CLI, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
+    override suspend fun ax(cli: CLI, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
 }
 
 internal class ReducedKommandMap<InnerOut, MappedOut>(
     val reducedKommand: ReducedKommand<InnerOut>,
     val reduceMap: suspend InnerOut.() -> MappedOut,
 ): ReducedKommand<MappedOut> {
-    override suspend fun exec(cli: CLI, dir: String?): MappedOut = reducedKommand.exec(cli, dir).reduceMap()
+    override suspend fun ax(cli: CLI, dir: String?): MappedOut = reducedKommand.ax(cli, dir).reduceMap()
 }
 
 fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(

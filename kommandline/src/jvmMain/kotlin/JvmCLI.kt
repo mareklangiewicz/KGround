@@ -64,7 +64,7 @@ class JvmCLI : CLI {
 
     @OptIn(DelicateApi::class)
     private val xdgdesktop by lazy {
-        bashGetExportsMap().execb(SYS)["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
+        bashGetExportsMap().axb(SYS)["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
     }
 }
 

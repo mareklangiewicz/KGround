@@ -11,8 +11,8 @@ import pl.mareklangiewicz.kommand.*
  */
 @OptIn(DelicateApi::class)
 fun searchCommand(command: String): ReducedScript<List<String>?> = ReducedScript { cli, dir ->
-    val first = whichFirstOrNull(command).exec(cli, dir) ?: return@ReducedScript null
-    dpkg(DpkgAct.Search(first)).exec(cli)
+    val first = whichFirstOrNull(command).ax(cli, dir) ?: return@ReducedScript null
+    dpkg(DpkgAct.Search(first)).ax(cli)
 }
 
 /** There has to be exactly one action in each invocation */

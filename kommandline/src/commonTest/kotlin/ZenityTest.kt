@@ -66,7 +66,7 @@ class ZenityTest {
     }.tryInteractivelyCheck()
     @Test fun testZenityListFromLs() = ifInteractiveCodeEnabled {
         SYS.run { // TODO_someday: nice parsing for ls output columns etc..
-            val lines = ls { -All; -LongFormat; -HumanReadable }.execb(this)
+            val lines = ls { -All; -LongFormat; -HumanReadable }.axb(this)
             zenity(List) {
                 -Text("ls output")
                 -Column("ls output")

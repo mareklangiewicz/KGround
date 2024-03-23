@@ -13,7 +13,7 @@ import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
 import pl.mareklangiewicz.kommand.core.cat
-import pl.mareklangiewicz.kommand.exec
+import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
@@ -30,7 +30,7 @@ import pl.mareklangiewicz.kommand.zenityAskIf
 
 /**
  * A bunch of samples to show on my machine when presenting KommandLine.
- * So it might be not the best idea to actually exec all these kommands on other machines.
+ * So it might be not the best idea to actually ax all these kommands on other machines.
  * (SamplesTests just check generated kommand lines, without executing any kommands)
  */
 @ExampleApi
@@ -73,7 +73,7 @@ data object MyDemoSamples {
     }
 
     val ideOpenXClip = InteractiveScript {
-        kommand("xclip", "-o").exec(it, outFile = tmpNotesFile)
+        kommand("xclip", "-o").ax(it, outFile = tmpNotesFile)
         // bash("xclip -o > $tmpNotesFile").x() // equivalent to above
         ideOpen(tmpNotesFile).x()
     }
@@ -119,9 +119,9 @@ data object MyDemoSamples {
 
 
 
-private suspend fun Kommand.x() = exec(SYS)
-private suspend fun <T> ReducedKommand<T>.x() = exec(SYS)
-private suspend fun <T> ReducedScript<T>.x() = exec(SYS)
+private suspend fun Kommand.x() = ax(SYS)
+private suspend fun <T> ReducedKommand<T>.x() = ax(SYS)
+private suspend fun <T> ReducedScript<T>.x() = ax(SYS)
 
 @OptIn(DelicateApi::class)
 private suspend fun showInfo(info: String) = zenity(Type.Info) { -Text(info) }.x()
