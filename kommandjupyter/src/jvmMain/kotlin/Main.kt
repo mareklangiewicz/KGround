@@ -11,11 +11,7 @@ import pl.mareklangiewicz.kommand.XClipSelection.Clipboard
 import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.exec
 import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
-import pl.mareklangiewicz.kommand.samples.ReducedSample
-import pl.mareklangiewicz.kommand.samples.Sample
-import pl.mareklangiewicz.kommand.samples.tryInteractivelyCheckReducedSample
-import pl.mareklangiewicz.kommand.samples.tryInteractivelyCheckReducedScript
-import pl.mareklangiewicz.kommand.samples.tryInteractivelyCheckSample
+import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.ch
@@ -74,12 +70,7 @@ private suspend fun tryInteractivelyClassMember(className: String, memberName: S
     ifInteractiveCodeEnabled {
         zenityAskIf("Try $className#$memberName ?").exec(SYS) || return
         val member: Any? = getter()
-
-        when(member) {
-            is ReducedScript<*> -> member.tryInteractivelyCheckReducedScript()
-            is Sample -> member.tryInteractivelyCheckSample()
-            is ReducedSample<*> -> member.tryInteractivelyCheckReducedSample()
-        }
+        member.tryInteractivelyAnything()
     }
 }
 
