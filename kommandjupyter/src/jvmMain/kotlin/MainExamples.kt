@@ -16,7 +16,7 @@ object MainExamples {
     @OptIn(DelicateApi::class)
     suspend fun examplesToRefactor() = withPrintingBadStreams {
         println("Let's play with kommand integration...")
-        ls { -LsOpt.LongFormat; -LsOpt.All }.x {
+        ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
             println("out line: $it")
         }
         // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
@@ -36,17 +36,17 @@ object MainExamples {
 
     @OptIn(DelicateApi::class)
     suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
-        val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).x()
+        val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).ax()
         writeToFileAndOpenInGVim(out)
 
         // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
-        gvim("/home/marek/code/kotlin/kotlin.iml").x()
-        gvim("/home/marek/code/kotlin/.idea/kotlin.iml").x()
+        gvim("/home/marek/code/kotlin/kotlin.iml").ax()
+        gvim("/home/marek/code/kotlin/.idea/kotlin.iml").ax()
     }
 
     @OptIn(DelicateApi::class)
     suspend fun showMarekLangiewiczRepoMarkdownListInGVim() {
-        val reposMdContent = GhSamples.mareklangiewiczPublicRepoMarkdownList.reducedKommand.x()
+        val reposMdContent = GhSamples.mareklangiewiczPublicRepoMarkdownList.reducedKommand.ax()
         println(reposMdContent)
         val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
         writeToFileAndOpenInGVim(reposMdContent, tmpReposFileMd)
@@ -54,8 +54,8 @@ object MainExamples {
 
     @DelicateApi
     suspend fun writeToFileAndOpenInGVim(content: String, filePath: String = SYS.pathToUserTmp + "/tmp.notes") {
-        echo(content).x(outFile = filePath)
-        gvim(filePath).x()
+        echo(content).ax(outFile = filePath)
+        gvim(filePath).ax()
     }
 }
 

@@ -45,7 +45,7 @@ data object MyDemoSamples {
 
     val man1 = InteractiveScript {
         val page = getEntry("manual page for")
-        termKitty(man { +page }).x()
+        termKitty(man { +page }).ax()
     }
 
     val ps1 = termKitty(bash("ps -e | grep java"), hold = true) s
@@ -53,7 +53,7 @@ data object MyDemoSamples {
 
     val ps2 = InteractiveScript {
         val process = getEntry("find process")
-        termKitty(bash("ps -e | grep $process"), hold = true).x()
+        termKitty(bash("ps -e | grep $process"), hold = true).ax()
     }
 
     val catFstabAndHosts = cat { +"/etc/fstab"; +"/etc/hosts" } s
@@ -64,18 +64,18 @@ data object MyDemoSamples {
 
     val ideOpen1 = InteractiveScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")
-        ideOpen(path).x()
+        ideOpen(path).ax()
     }
 
     val ideOpenBashExports = InteractiveScript {
-        bashGetExportsToFile(tmpNotesFile).x()
-        ideOpen(tmpNotesFile).x()
+        bashGetExportsToFile(tmpNotesFile).ax()
+        ideOpen(tmpNotesFile).ax()
     }
 
     val ideOpenXClip = InteractiveScript {
         kommand("xclip", "-o").ax(it, outFile = tmpNotesFile)
         // bash("xclip -o > $tmpNotesFile").x() // equivalent to above
-        ideOpen(tmpNotesFile).x()
+        ideOpen(tmpNotesFile).ax()
     }
 
     // Note: not InteractiveScript because I want to be able to enable interactive code when it's disabled.
@@ -119,20 +119,20 @@ data object MyDemoSamples {
 
 
 
-private suspend fun Kommand.x() = ax(SYS)
-private suspend fun <T> ReducedKommand<T>.x() = ax(SYS)
-private suspend fun <T> ReducedScript<T>.x() = ax(SYS)
+private suspend fun Kommand.ax() = ax(SYS)
+private suspend fun <T> ReducedKommand<T>.ax() = ax(SYS)
+private suspend fun <T> ReducedScript<T>.ax() = ax(SYS)
 
 @OptIn(DelicateApi::class)
-private suspend fun showInfo(info: String) = zenity(Type.Info) { -Text(info) }.x()
+private suspend fun showInfo(info: String) = zenity(Type.Info) { -Text(info) }.ax()
 
 @OptIn(DelicateApi::class)
-private suspend fun showError(error: String) = zenity(Type.Error) { -Text(error) }.x()
+private suspend fun showError(error: String) = zenity(Type.Error) { -Text(error) }.ax()
 
-private suspend fun askIf(question: String) = zenityAskIf(question).x()
+private suspend fun askIf(question: String) = zenityAskIf(question).ax()
 
 private suspend fun askEntry(question: String, suggested: String? = null) =
-    zenityAskForEntry(question, suggested = suggested).x()?.takeIf { it.isNotBlank() }
+    zenityAskForEntry(question, suggested = suggested).ax()?.takeIf { it.isNotBlank() }
 
 private suspend fun getEntry(question: String, suggested: String? = null, errorMsg: String = "User didn't answer.") =
     askEntry(question, suggested) ?: run { showError(errorMsg); bad { errorMsg } }

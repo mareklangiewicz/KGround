@@ -32,10 +32,10 @@ fun Flow<*>.logb() = logEachWithMillisBlocking()
 
 
 /**
- * Kinda like .ax, but less strict/explicit, because in notebooks we are in more local "experimental" context.
+ * Less strict/explicit flavor of ax, because in notebooks we are in more local "experimental" context.
  * I don't want too many shortcut names inside kommandline itself, but here it's fine.
  */
-suspend fun Kommand.x(
+suspend fun Kommand.ax(
     cli: CLI = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
@@ -54,7 +54,7 @@ suspend fun Kommand.x(
     req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
     req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
     req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
-    val eprocess = cli.start(this@x,
+    val eprocess = cli.start(this@ax,
         dir = dir,
         inFile = inFile,
         outFile = outFile,
@@ -78,7 +78,7 @@ fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(cli: CLI = S
     cli.start(this, dir)
 
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CLI = SYS, dir: String? = null): ReducedOut =
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = SYS, dir: String? = null): ReducedOut =
     ax(cli, dir = dir)
 
 
@@ -90,7 +90,7 @@ suspend fun <ReducedOut> ReducedScript<ReducedOut>.x(cli: CLI = SYS, dir: String
  * Blocking flavor of fun Kommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun Kommand.xb(
+fun Kommand.axb(
     cli: CLI = SYS,
     dir: String? = null,
     vararg useNamedArgs: Unit,
@@ -105,7 +105,7 @@ fun Kommand.xb(
     expectedExit: ((Int) -> Boolean)? = { it == 0 },
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
     outLinesCollector: FlowCollector<String>? = null,
-): List<String> = runBlocking { x(
+): List<String> = runBlocking { ax(
     cli,
     dir,
     inContent = inContent,
@@ -125,5 +125,5 @@ fun Kommand.xb(
  * Blocking flavor of fun ReducedKommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <ReducedOut> ReducedKommand<ReducedOut>.xb(cli: CLI = SYS, dir: String? = null): ReducedOut =
-    runBlocking { x(cli, dir) }
+fun <ReducedOut> ReducedKommand<ReducedOut>.axb(cli: CLI = SYS, dir: String? = null): ReducedOut =
+    runBlocking { ax(cli, dir) }
