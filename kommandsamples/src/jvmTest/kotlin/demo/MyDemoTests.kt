@@ -36,7 +36,7 @@ class MyDemoTests {
 
         "On btopKitty" so { btopK.ax(SYS) }
 
-        "On man1" so { man1.ax(SYS) }
+        "On manAllMan" so { manAllMan.ax(SYS) }
     } }
 
 }
