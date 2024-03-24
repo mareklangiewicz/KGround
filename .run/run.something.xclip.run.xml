@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run.sample.xclip" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="run.something.xclip" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -12,7 +12,7 @@
         <list>
           <option value="run" />
           <option value="--args" />
-          <option value="&quot;sample xclip&quot;" />
+          <option value="&quot;something xclip&quot;" />
         </list>
       </option>
       <option name="vmOptions" />

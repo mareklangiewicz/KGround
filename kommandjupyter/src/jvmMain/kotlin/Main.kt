@@ -7,26 +7,30 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.XClipSelection.Clipboard
-import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
 import pl.mareklangiewicz.kommand.isUserFlagEnabled
 import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
 import pl.mareklangiewicz.kommand.setUserFlag
+import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.ch
+import pl.mareklangiewicz.ure.chWord
+import pl.mareklangiewicz.ure.chWordFirst
 import pl.mareklangiewicz.ure.chWordOrDot
 import pl.mareklangiewicz.ure.matchEntireOrThrow
 import pl.mareklangiewicz.ure.namedValues
 import pl.mareklangiewicz.ure.ure
 import pl.mareklangiewicz.ure.ureIdent
-import pl.mareklangiewicz.ure.ureText
 import pl.mareklangiewicz.ure.withName
 import java.lang.reflect.Method
+import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import kotlin.reflect.full.callSuspend
 
 /**
+ * TODO NOW: update description
  * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
  * So this file allows invoking code from kommandjupyter/src/jvmMain/kotlin/gitignored/Playground.kt:play(),
  * so that way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
@@ -37,15 +41,11 @@ import kotlin.reflect.KClass
  */
 fun main(args: Array<String>) = runBlocking {
     when(args.firstOrNull()) {
-        null -> println("Provide single arg: 'play', to invoke the Playground.kt:play()")
-        "play" -> when {
-            args.size > 1 -> bad { "play doesn't take additional parameters" }
-            else -> tryInteractivelyClassMember("pl.mareklangiewicz.kommand.jupyter.PlaygroundKt", "play")
-        }
-        "sample" -> when {
-            args.size == 1 -> bad { "sample requires sample reference or \"xclip\" keyword" }
-            args.size > 2 -> bad { "only one sample reference allowed" }
-            else -> tryInteractivelySampleRef(args[1])
+        null -> println("Provide something")
+        "something" -> when {
+            args.size == 1 -> bad { "something requires something reference or \"xclip\" keyword" }
+            args.size > 2 -> bad { "only one something reference allowed" }
+            else -> tryInteractivelySomethingRef(args[1])
         }
         "code.interactive" -> when {
             args.size != 2 -> bad { "Error. format is: code.interactive enable/disable/print" }
@@ -60,28 +60,31 @@ fun main(args: Array<String>) = runBlocking {
 
 @OptIn(DelicateApi::class)
 private suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
-
     println("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
-
-    val jClass: Class<*> = Class.forName(className)
-    val kClass: KClass<*> = jClass.kotlin
-    val objectOrNull: Any? = kClass.objectInstance
-
-    val jMethod: Method = jClass.getDeclaredMethod(memberName)
-    val getter = { jMethod.invoke(objectOrNull) }
-
-    // Notice: more "kotliny" impl would fail with sthName of generated property getters
-    // as represented in jvm (and as copied with intellij action:CopyReference)
-    // (like: MyDemoSamples.getBtop for property MyDemoSamples.btop)
-    // val kMember: KCallable<*> = kClass.members.first { it.name == memberName }
-    // val getter = { kMember.call(objectOrNull) }
-
+    val call = prepareCallFor(className, memberName)
+    // Note: prepareCallFor fails early if member not found,
+    // before we start to interact with the user,
+    // but the code is never called without confirmation.
     ifInteractiveCodeEnabled {
-        zenityAskIf("Try $className#$memberName ?").ax(SYS) || return
-        val member: Any? = getter()
-        // Note: getter() will either already "do the thing" (when a member is just a fun to invoke)
-        //  or it will only get the property (like ReducedScript/Sample etc.) which will be tried below.
+        zenityAskIf("Call $className#$memberName ?").ax(SYS) || return
+        val member: Any? = call()
+        // Note: call() will either already "do the thing" (when the member is just a fun to call)
+        //  or it will only get the property (like ReducedScript/Sample etc.) which will be tried (or not) later.
         member.tryInteractivelyAnything()
+    }
+}
+
+private fun prepareCallFor(className: String, memberName: String): suspend () -> Any? {
+    val kClass: KClass<*> = Class.forName(className).kotlin
+    val objectOrNull: Any? = kClass.objectInstance
+    val kMember: KCallable<*>? = kClass.members.firstOrNull { it.name == memberName }
+    when {
+        kMember == null -> {
+            val jMethod: Method = kClass.java.getDeclaredMethod(memberName)
+            return { jMethod.invoke((objectOrNull)) }
+        }
+        kMember.isSuspend -> return { kMember.callSuspend(objectOrNull) }
+        else -> return { kMember.call(objectOrNull) }
     }
 }
 
@@ -90,16 +93,14 @@ private suspend fun tryInteractivelyClassMember(className: String, memberName: S
  *   For example, "pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop"
  */
 @OptIn(NotPortableApi::class, DelicateApi::class)
-private suspend fun tryInteractivelySampleRef(reference: String = "xclip") {
-
-    println("tryInteractivelySample(\"$reference\")")
-
+private suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
+    println("tryInteractivelySomethingRef(\"$reference\")")
     val ref = if (reference == "xclip") xclipOut(Clipboard).ax(SYS).single() else reference
     val ure = ure {
         +ure("className") {
-            +ureText("pl.mareklangiewicz.kommand.")
+            +chWordFirst
             1..MAX of chWordOrDot
-            +ureText("Samples")
+            +chWord
         }
         +ch('#')
         +ureIdent().withName("methodName")

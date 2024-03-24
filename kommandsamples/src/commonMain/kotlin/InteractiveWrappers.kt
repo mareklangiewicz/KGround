@@ -37,7 +37,7 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 ) {
     zenityAskIf(question).ax(cli) || return
     val reducedOut = ax(cli)
-    reducedOut.tryOpenDataInIDE("Open ReducedOut: $about in tmp.notes in IDE ?")
+    reducedOut.tryOpenDataInIDE("Open ReducedOut: ${reducedOut.about} in tmp.notes in IDE ?")
 }
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
