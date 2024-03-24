@@ -29,8 +29,6 @@ class KommandTests {
 @OptIn(DelicateApi::class)
 @Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
 class KommandTestOld {
-    @Test fun testLsHomeSubDirsWithHidden() = lsSubDirs("/home/marek", wHidden = true).axb(SYS).logEach()
-    @Test fun testLsHomeRegFiles() = lsRegFiles("/home/marek").axb(SYS).logEach()
 
     @Test fun testMkDir1() = mkdir("/tmp/testMkDir1/blaa/blee", withParents = true)
         .chkLineRawAndExec("mkdir -p /tmp/testMkDir1/blaa/blee")
@@ -44,14 +42,6 @@ class KommandTestOld {
     }.axb(SYS).logEach()
 
     @Test fun testSs1() = ssTulpn().tryInteractivelyCheck() // ss -tulpn
-
-    @Test fun testManMan() = man { +"man" }.tryInteractivelyCheck()
-    @Test fun testManVim() = man { +"vim" }.tryInteractivelyCheck()
-    @Test fun testManOpenAll() = man { -ManOpt.All; +"open" }.tryInteractivelyCheck()
-    @Test fun testManOpen2() = man(2) { +"open" }.tryInteractivelyCheck()
-    @Test fun testManOpenSys() = man(ManSection.SysCall) { +"open" }.tryInteractivelyCheck()
-    @Test fun testManApropos() = man { -ManOpt.Apropos(); +"package" }.tryInteractivelyCheck()
-    @Test fun testManWhatIs() = man { -ManOpt.WhatIs; +"which" }.tryInteractivelyCheck()
 
     @Test fun testAdbDevices() = adb(Devices) { -Option.All; -Usb }.tryInteractivelyCheck("adb -a -d devices")
     @Test fun testAdbShell() = adb(Shell).tryInteractivelyCheck("adb shell")

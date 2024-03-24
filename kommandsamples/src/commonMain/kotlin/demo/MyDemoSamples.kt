@@ -6,6 +6,7 @@ import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.InteractiveScript
 import pl.mareklangiewicz.kommand.Kommand
+import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedKommand
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.ZenityOpt.*
@@ -43,15 +44,27 @@ data object MyDemoSamples {
     val btopK = termKitty(btop) s
             "kitty -1 --detach -- btop"
 
-    val man1 = InteractiveScript {
+    val manAllMan = man { -ManOpt.All; +"man" } s "man -a man"
+
+    val manAproposMan = man { -ManOpt.Apropos(); +"man" } s "man -k man"
+
+    val manEntryPage = InteractiveScript {
         val page = getEntry("manual page for")
         termKitty(man { +page }).ax()
     }
 
-    val ps1 = termKitty(bash("ps -e | grep java"), hold = true) s
+    val manEntryAllPages = InteractiveScript {
+        val pages = getEntry("manual pages from all sections for", "open")
+        termKitty(man { -ManOpt.All; +pages }).ax()
+    }
+
+    val psAllGrepJava = bash("ps -e | grep java") s
+            "bash -c ps -e | grep java"
+
+    val psAllGrepJavaK = termKitty(psAllGrepJava, hold = true) s
             "kitty -1 --detach --hold -- bash -c ps -e | grep java"
 
-    val ps2 = InteractiveScript {
+    val psAllGrepEntry = InteractiveScript {
         val process = getEntry("find process")
         termKitty(bash("ps -e | grep $process"), hold = true).ax()
     }

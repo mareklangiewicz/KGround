@@ -63,15 +63,15 @@ interface ManOpt: KOptTypical {
 
     data class Locale(val locale: String) : KOptS("L", locale), ManOpt
 
-    data object Regex : KOptL("--regex"), ManOpt
+    data object Regex : KOptLN(), ManOpt
 
-    data object Wildcard : KOptL("--wildcard"), ManOpt
+    data object Wildcard : KOptLN(), ManOpt
 
-    data object NamesOnly : KOptL("--names-only"), ManOpt
+    data object NamesOnly : KOptLN(), ManOpt
 
-    data object Help : KOptL("--help"), ManOpt
+    data object Help : KOptLN(), ManOpt
 
-    data object Usage : KOptL("--usage"), ManOpt
+    data object Usage : KOptLN(), ManOpt
 
-    data object Version : KOptL("--version"), ManOpt
+    data object Version : KOptLN(), ManOpt
 }
