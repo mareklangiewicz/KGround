@@ -4,6 +4,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.InteractiveScript
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
+import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
+import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
 import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
@@ -23,7 +26,7 @@ data object LsSamples {
     val lsWithHidden = ls(".", wHidden = true) s
             "ls -A ."
 
-    val lsParentWithSlashes = ls("..", wIndicator = IndicatorStyle.SLASH) s
+    val lsParentWithSlashes = ls("..", wIndicator = SLASH) s
             "ls --indicator-style=slash .."
 
     val lsParentSubDirs = lsSubDirs("..") rs
@@ -33,8 +36,8 @@ data object LsSamples {
     val lsParentRegFiles = lsRegFiles("..") rs
             "ls --indicator-style=slash .."
 
-    val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ColorType.ALWAYS) {
-        -Author; -LongFormat; -HumanReadable; -Sort(LsOpt.SortType.TIME) } s
+    val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ALWAYS) {
+        -Author; -LongFormat; -HumanReadable; -Sort(TIME) } s
             "ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 
     // Notice: it should add colors because "ls" is called with terminal as stdout
