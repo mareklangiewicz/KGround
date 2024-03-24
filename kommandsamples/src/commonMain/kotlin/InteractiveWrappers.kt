@@ -37,20 +37,30 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 ) {
     zenityAskIf(question).ax(cli) || return
     val reducedOut = ax(cli)
-    reducedOut.tryOpenDataInIDE("Open ReducedOut in tmp.notes in IDE ?")
+    reducedOut.tryOpenDataInIDE("Open ReducedOut: $about in tmp.notes in IDE ?")
 }
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
-suspend fun Any?.tryOpenDataInIDE(question: String = "Open this data in tmp.notes in IDE ?", cli: CLI = SYS) = when {
+/** @param question null means default question */
+suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = when {
     this == null -> println("It is null. Nothing to open.")
     this is Unit -> println("It is Unit. Nothing to open.")
     this is String && isEmpty() -> println("It is empty string. Nothing to open.")
     this is Collection<*> && isEmpty() -> println("It is empty collection. Nothing to open.")
-    !zenityAskIf(question).ax(cli) -> println("Not opening.")
+    !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> println("Not opening.")
     else -> {
         val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
         writeFileWithDD(listOf(toString()), tmpNotesFile).ax(cli)
         ideOpen(tmpNotesFile).ax(cli)
     }
+}
+
+private val Any?.about: String get() = when (this) {
+    null -> "null"
+    Unit -> "Unit"
+    is Number -> this::class.simpleName + ":$this"
+    is Collection<*> -> this::class.simpleName + "(size:$size)"
+    is CharSequence -> this::class.simpleName + "(length:$length)"
+    else -> this::class.simpleName ?: "???"
 }
 

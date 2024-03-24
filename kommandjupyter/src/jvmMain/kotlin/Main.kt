@@ -79,6 +79,8 @@ private suspend fun tryInteractivelyClassMember(className: String, memberName: S
     ifInteractiveCodeEnabled {
         zenityAskIf("Try $className#$memberName ?").ax(SYS) || return
         val member: Any? = getter()
+        // Note: getter() will either already "do the thing" (when a member is just a fun to invoke)
+        //  or it will only get the property (like ReducedScript/Sample etc.) which will be tried below.
         member.tryInteractivelyAnything()
     }
 }

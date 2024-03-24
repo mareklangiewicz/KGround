@@ -20,18 +20,18 @@ object MainExamples {
             println("out line: $it")
         }
         // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
-        // MyDemoSamples.btopKitty.x()
-        // MyDemoSamples.ps1.x()
-        // gitStatus().x().logEach()
-        // searchCommand("pip").x()?.logEach()
-        // DpkgSamples.searchZenity.x()?.logEach()
-        // SshSamples.sshPimInTermGnome.x()
-        // SshSamples.sshPimLsInTermKitty.x()
-        // SshSamples.sshPimLsLAH.x(errToOut = true).logEach()
+        // MyDemoSamples.btopKitty.ax()
+        // MyDemoSamples.ps1.ax()
+        // gitStatus().ax().logEach()
+        // searchCommand("pip").ax()?.logEach()
+        // DpkgSamples.searchZenity.ax()?.logEach()
+        // SshSamples.sshPimInTermGnome.ax()
+        // SshSamples.sshPimLsInTermKitty.ax()
+        // SshSamples.sshPimLsLAH.ax(errToOut = true).logEach()
         // prepareMyExcludeFolderInKotlinMultiProject()
         // showMarekLangiewiczRepoMarkdownListInGVim()
-        // readFileHead("/home/marek/non-existent-file-46578563").x() // should print BadExitStateErr.stderr
-        // readFileHead("/home/marek/.vimrc").x().logEach()
+        // readFileHead("/home/marek/non-existent-file-46578563").ax() // should print BadExitStateErr.stderr
+        // readFileHead("/home/marek/.vimrc").ax().logEach()
     }
 
     @OptIn(DelicateApi::class)

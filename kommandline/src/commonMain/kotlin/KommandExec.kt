@@ -7,7 +7,8 @@ import pl.mareklangiewicz.bad.*
 
 // TODO_someday: CLI as context receiver
 //  for now convention is: first parameter "cli: CLI", because it's the same as kgroundxio:WithCLI interface
-/** The ax Awaits/eXecutes the kommand. And it's dangerous :)
+/**
+ * The ax Awaits/eXecutes the kommand. And it's dangerous :)
  * It has to be explicitly called for every kommand in the "script" so has to be short "keyword" to memorize.
  * TODO_someday: how to colorize it (can I somehow use @DslMarker ?)
  */

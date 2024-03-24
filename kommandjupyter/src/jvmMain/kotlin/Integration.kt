@@ -32,8 +32,8 @@ fun Flow<*>.logb() = logEachWithMillisBlocking()
 
 
 /**
- * Less strict/explicit flavor of ax, because in notebooks we are in more local "experimental" context.
- * I don't want too many shortcut names inside kommandline itself, but here it's fine.
+ * Less strict flavor of ax, because in notebooks we are in more local "experimental" context.
+ * BTW I don't want too many shortcut names inside kommandline itself, but here in kommandjupyter it's fine.
  */
 suspend fun Kommand.ax(
     cli: CLI = SYS,
@@ -74,7 +74,7 @@ suspend fun Kommand.ax(
         .unwrap(expectedExit, expectedErr)
 }
 
-fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.xstart(cli: CLI = SYS, dir: String? = null) =
+fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI = SYS, dir: String? = null) =
     cli.start(this, dir)
 
 
@@ -87,7 +87,7 @@ suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = SYS, dir: Strin
 
 
 /**
- * Blocking flavor of fun Kommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
+ * Blocking flavor of fun Kommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
 fun Kommand.axb(
@@ -122,7 +122,7 @@ fun Kommand.axb(
 ) }
 
 /**
- * Blocking flavor of fun ReducedKommand.x(...). Will be deprecated when kotlin notebooks support suspending fun.
+ * Blocking flavor of fun ReducedKommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
 fun <ReducedOut> ReducedKommand<ReducedOut>.axb(cli: CLI = SYS, dir: String? = null): ReducedOut =
