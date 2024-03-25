@@ -21,6 +21,7 @@ import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
+import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
@@ -136,6 +137,11 @@ data object MyDemoSamples {
         ulog.i("after nulling other 2 keys:")
         k.logEachKeyVal()
     }
+
+    suspend fun readVimrcHead() = readFileHead("/home/marek/.vimrc").ax()
+
+    // Should fail; if called inside withLogBadStreams -> should log sth like: kl E STDERR: head: cannot open...
+    suspend fun readNonExistentHead() = readFileHead("/home/marek/non-existent-file-46578563").ax()
 }
 
 

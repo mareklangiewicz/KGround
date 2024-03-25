@@ -52,7 +52,8 @@ suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = wh
     !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> ulog.d("Not opening.")
     else -> {
         val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
-        writeFileWithDD(listOf(toString()), tmpNotesFile).ax(cli)
+        val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
+        writeFileWithDD(lines, tmpNotesFile).ax(cli)
         ideOpen(tmpNotesFile).ax(cli)
     }
 }

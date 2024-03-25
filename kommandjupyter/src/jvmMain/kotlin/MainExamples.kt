@@ -16,7 +16,6 @@ object MainExamples {
 
     @OptIn(DelicateApi::class)
     suspend fun examplesToRefactor() {
-        readFileHead("/home/marek/non-existent-file-46578563").ax() // should print BadExitStateErr.stderr
         // ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
         //     ulog.i("out line: $it")
         // }
@@ -31,8 +30,6 @@ object MainExamples {
         // SshSamples.sshPimLsLAH.ax(errToOut = true).logEach()
         // prepareMyExcludeFolderInKotlinMultiProject()
         // showMarekLangiewiczRepoMarkdownListInGVim()
-        // readFileHead("/home/marek/non-existent-file-46578563").ax() // should print BadExitStateErr.stderr
-        // readFileHead("/home/marek/.vimrc").ax().logEach()
     }
 
     @OptIn(DelicateApi::class)
