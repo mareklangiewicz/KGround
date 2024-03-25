@@ -5,6 +5,7 @@ import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.term.termXDefault
+import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.w
 
 
@@ -54,7 +55,7 @@ fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execInDir: St
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =
     InteractiveScript { cli ->
-        this.logLineRaw()
+        ulog.d(lineRaw())
         if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
         tryInteractivelyStartInTerm(cli, startInDir = execInDir)
     }

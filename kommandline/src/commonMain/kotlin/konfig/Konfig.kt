@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 
@@ -114,7 +115,7 @@ fun IKonfig.withChecks(
 @Deprecated("TODO: implement")
 fun konfigInFile(file: String, cli: CLI = CLI.SYS): IKonfig = TODO()
 
-fun IKonfig.logEachKeyVal(logln: (String) -> Unit = ::println) = keys.forEach { logKeyVal(it, logln) }
+fun IKonfig.logEachKeyVal(logln: (String) -> Unit = { ulog.i(it) }) = keys.forEach { logKeyVal(it, logln) }
 
-fun IKonfig.logKeyVal(key: String, logln: (String) -> Unit = ::println) = logln(getKeyValStr(key))
+fun IKonfig.logKeyVal(key: String, logln: (String) -> Unit = { ulog.i(it) }) = logln(getKeyValStr(key))
 fun IKonfig.getKeyValStr(key: String) = "konfig[\"$key\"] == \"${this[key]}\""
