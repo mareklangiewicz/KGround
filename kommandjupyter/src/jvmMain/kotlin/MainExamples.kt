@@ -9,15 +9,16 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
+import pl.mareklangiewicz.ulog.i
 
 @ExampleApi
 object MainExamples {
 
     @OptIn(DelicateApi::class)
-    suspend fun examplesToRefactor() = withPrintingBadStreams {
-        println("Let's play with kommand integration...")
+    suspend fun examplesToRefactor() = withLogBadStreams {
+        readFileHead("/home/marek/non-existent-file-46578563").ax() // should print BadExitStateErr.stderr
         ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
-            println("out line: $it")
+            ulog.i("out line: $it")
         }
         // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
         // MyDemoSamples.btopKitty.ax()
@@ -45,9 +46,8 @@ object MainExamples {
     }
 
     @OptIn(DelicateApi::class)
-    suspend fun showMarekLangiewiczRepoMarkdownListInGVim() {
-        val reposMdContent = GhSamples.mareklangiewiczPublicRepoMarkdownList.reducedKommand.ax()
-        println(reposMdContent)
+    suspend fun showMyRepoMarkdownListInGVim() {
+        val reposMdContent = GhSamples.myPublicRepoMarkdownList.reducedKommand.ax()
         val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
         writeToFileAndOpenInGVim(reposMdContent, tmpReposFileMd)
     }

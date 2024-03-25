@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.ulog.i
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -20,9 +21,9 @@ class GnomeAppTest {
     @Ignore // jitpack
     @Test fun testGnomeAppListAllAppActions() = SYS.run {
         gnomeapp(ListApps).axb(this).forEach {
-            println("Application $it:")
+            ulog.i("Application $it:")
             gnomeapp(ListActions(it)).axb(this).forEach {
-                println("   action: $it")
+                ulog.i("   action: $it")
             }
         }
     }

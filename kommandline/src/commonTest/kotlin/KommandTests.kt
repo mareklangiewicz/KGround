@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.debian.*
+import pl.mareklangiewicz.ulog.i
 import kotlin.test.*
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -54,7 +55,7 @@ class KommandTestOld {
     @Test fun testWhich() = which("vim", "ls", all = true).tryInteractivelyCheck()
 
     @Ignore
-    @Test fun testMkTemp() = println(mktemp().axb(SYS))
+    @Test fun testMkTemp() = ulog.i(mktemp().axb(SYS))
     @Test fun testBash() {
         val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
         val kommand2 = bash(kommand1)
@@ -63,7 +64,7 @@ class KommandTestOld {
     }
     @Ignore // Let's not print all env vars on github actions.
     @Test fun testBashGetExports() = bashGetExportsMap().axb(SYS)
-        .logEachEntry { println("exported env: ${it.key} == \"${it.value}\"") }
+        .logEachEntry { ulog.i("exported env: ${it.key} == \"${it.value}\"") }
 
     @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).axb(SYS).unit
 

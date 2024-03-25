@@ -5,13 +5,14 @@ import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.term.termXDefault
+import pl.mareklangiewicz.ulog.w
 
 
-// TODO_someday: logging with ulog from content receiver instead of raw println (which can be hard to find in logs)
-@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
+// TODO_someday: logging with ulog from context receiver instead of current hacky impl
+@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 inline fun ifInteractiveCodeEnabled(cli: CLI = SYS, code: () -> Unit) = when {
-    !cli.isJvm -> println("Interactive code is only available on JvmCLI (for now).")
-    !getUserFlag(cli, "code.interactive") -> println("Interactive code NOT enabled.")
+    !cli.isJvm -> ulog.w("Interactive code is only available on JvmCLI (for now).")
+    !getUserFlag(cli, "code.interactive") -> ulog.w("Interactive code NOT enabled.")
     else -> code()
 }
 
@@ -37,7 +38,7 @@ fun Kommand.tryInteractivelyStartInTerm(
 
 
 @Suppress("FunctionName")
-@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
+@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend (cli: CLI) -> ReducedOut) =
     ReducedScript { cli -> ifInteractiveCodeEnabled { ax(cli) } }
 

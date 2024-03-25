@@ -6,6 +6,7 @@ import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.ulog.d
 import java.io.*
 import java.lang.ProcessBuilder.*
 import kotlin.coroutines.*
@@ -15,8 +16,6 @@ actual fun provideSysCLI(): CLI = JvmCLI()
 class JvmCLI : CLI {
 
     override val isRedirectFileSupported get() = true
-
-    private val debug = false
 
     override fun start(
         kommand: Kommand,
@@ -33,7 +32,7 @@ class JvmCLI : CLI {
         JvmExecProcess(
             ProcessBuilder()
                 .apply {
-                    if (debug) println(kommand.line())
+                    ulog.d(kommand.line())
                     command(kommand.toArgs())
                     directory(dir?.let(::File))
                     inFile?.let(::File)?.let(::redirectInput)

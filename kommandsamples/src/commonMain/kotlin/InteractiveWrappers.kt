@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.toInteractiveCheck
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.ulog.d
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")

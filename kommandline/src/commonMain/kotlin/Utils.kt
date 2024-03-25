@@ -4,6 +4,15 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.ULogLevel
+import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.e
+
+
+// Hacky ulog impl for kommandline, before we have real ulog in context receivers
+var ulogPrintLevel: ULogLevel = ULogLevel.INFO
+var ulog = ULog { level, data -> if (level >= ulogPrintLevel) println("kl ${level.symbol} $data") }
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -19,7 +28,7 @@ fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserF
 @OptIn(DelicateApi::class)
 fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CLI = SYS) {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
-    println(lineRaw)
+    ulog.d(lineRaw)
     lineRaw.chkEq(expectedLineRaw)
     axb(cli, execInDir)
 }
@@ -32,7 +41,7 @@ class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadS
 // TODO_someday: figure out a nicer approach not to lose full error messages (maybe when we have context receivers in kotlin).
 // But it's nice to have it mostly on the caller side. To just throw collected stderr/out on kommand execution side,
 // without logging or any additional complexity there.
-inline fun withPrintingBadStreams(
+inline fun withLogBadStreams(
     limitLines: Int? = 40,
     stdoutLinePrefix: String = "STDOUT: ",
     stderrLinePrefix: String = "STDERR: ",
@@ -50,8 +59,8 @@ inline fun withPrintingBadStreams(
             limitLines > size -> size
             else -> limitLines
         }
-        for (idx in 0 until max) println(prefix + this[idx])
-        if (max < size) println(prefix + (size - max) + skippedMarkersSuffix)
+        for (idx in 0 until max) ulog.e(prefix + this[idx])
+        if (max < size) ulog.e(prefix + (size - max) + skippedMarkersSuffix)
     }
     try { code() }
     catch (e: BadExitStateErr) { e.stderr?.logSome(stderrLinePrefix); throw e }

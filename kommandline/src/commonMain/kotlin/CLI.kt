@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.ulog.d
 import kotlin.coroutines.*
 
 expect fun provideSysCLI(): CLI
@@ -63,7 +64,7 @@ interface CLI {
 class FakeCLI(
     private val chkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
         {_, _, _, _, _, _, _, _ -> },
-    private val log: (Any?) -> Unit = ::println): CLI {
+    ): CLI {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
 
@@ -80,19 +81,19 @@ class FakeCLI(
         errFileAppend: Boolean,
         envModify: (MutableMap<String, String>.() -> Unit)?
     ): ExecProcess {
-        log("start($kommand, $dir, ...)")
+        ulog.d("start($kommand, $dir, ...)")
         chkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
-        return FakeProcess(log)
+        return FakeProcess()
     }
 }
 
 @DelicateApi
-class FakeProcess(private val log: (Any?) -> Unit = ::println): ExecProcess {
+class FakeProcess(): ExecProcess {
     override fun waitForExit(finallyClose: Boolean) = 0
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
-    override fun kill(forcibly: Boolean) = log("cancel($forcibly)")
+    override fun kill(forcibly: Boolean) = ulog.d("cancel($forcibly)")
     override fun close() = Unit
-    override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean): Unit = log("input line: $line")
+    override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean): Unit = ulog.d("input line: $line")
     override fun stdinClose() = Unit
     override fun stdoutReadLine() = null
     override fun stdoutClose() = Unit

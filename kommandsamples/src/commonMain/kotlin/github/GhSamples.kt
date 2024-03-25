@@ -86,18 +86,18 @@ data object GhSamples {
         ghRepoList { -Json() } s
                 "gh repo list --json"
 
-    val mareklangiewiczPublicRepoListNamesAndUrls =
-        ghMarekLangiewiczRepoList().outputFields("name", "url") s
+    val myPublicRepoListNamesAndUrls =
+        ghMyRepoList().outputFields("name", "url") s
                 "gh repo list mareklangiewicz --limit 1000 --language kotlin --no-archived --source --visibility public --json name,url --jq .[]|.name,.url"
 
 
-    val mareklangiewiczPublicRepoMarkdownList =
-        ghMarekLangiewiczRepoList().reducedToMarkdownList() rs
-                mareklangiewiczPublicRepoListNamesAndUrls.expectedLineRaw
+    val myPublicRepoMarkdownList =
+        ghMyRepoList().reducedToMarkdownList() rs
+                myPublicRepoListNamesAndUrls.expectedLineRaw
 
 }
 
-fun ghMarekLangiewiczRepoList(limit: Int = 1000, language: String? = "kotlin", onlyPublic: Boolean = true) = ghRepoList(
+fun ghMyRepoList(limit: Int = 1000, language: String? = "kotlin", onlyPublic: Boolean = true) = ghRepoList(
     "mareklangiewicz",
     limit = limit,
     onlyLanguage = language,

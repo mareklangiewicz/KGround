@@ -12,8 +12,11 @@ import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
 import pl.mareklangiewicz.kommand.setUserFlag
+import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.ch
 import pl.mareklangiewicz.ure.chWord
@@ -42,15 +45,15 @@ import kotlin.reflect.full.callSuspend
 fun main(args: Array<String>) = runBlocking {
     when {
         args.size == 2 && args[0] == "try-code" -> tryInteractivelySomethingRef(args[1])
-        args.size == 2 && args[0] == "get-user-flag" -> println(getUserFlagFullStr(SYS, args[1]))
-        args.size == 3 && args[0] == "set-user-flag" -> println(setUserFlag(SYS, args[1], args[2].toBoolean()))
+        args.size == 2 && args[0] == "get-user-flag" -> ulog.i(getUserFlagFullStr(SYS, args[1]))
+        args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
         else -> bad { "Incorrect args. See Main.kt:main" }
     }
 }
 
 @OptIn(DelicateApi::class)
 private suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
-    println("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
+    ulog.d("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
     val call = prepareCallFor(className, memberName)
     // Note: prepareCallFor fails early if member not found,
     // before we start to interact with the user,
@@ -84,7 +87,7 @@ private fun prepareCallFor(className: String, memberName: String): suspend () ->
  */
 @OptIn(NotPortableApi::class, DelicateApi::class)
 private suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
-    println("tryInteractivelySomethingRef(\"$reference\")")
+    ulog.d("tryInteractivelySomethingRef(\"$reference\")")
     val ref = if (reference == "xclip")
         xclipOut(Clipboard).ax(SYS).singleOrNull() ?: bad { "Clipboard has to have code reference in single line." }
     else reference

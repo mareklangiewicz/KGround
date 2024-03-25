@@ -4,14 +4,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ulog.d
 
 actual fun provideSysCLI(): CLI = JsEvalFunCLI()
 
 class JsEvalFunCLI: CLI {
 
     override val isRedirectFileSupported get() = false
-
-    private val debug = false
 
     @DelicateApi
     override fun start(
@@ -32,7 +31,7 @@ class JsEvalFunCLI: CLI {
         req(errFile == null) { "errFile unsupported" }
         req(envModify == null) { "envModify unsupported" }
         val code = kommand.lineFun()
-        if (debug) println(code)
+        ulog.d(code)
         return JsEvalFunProcess(code)
     }
 
