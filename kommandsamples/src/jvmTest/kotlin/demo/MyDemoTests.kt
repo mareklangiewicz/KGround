@@ -22,7 +22,7 @@ import kotlin.test.Test
 // unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
 // maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
 fun isUserTestClassEnabled(context: ExtensionContext) =
-    isUserFlagEnabled(SYS, "tests." + context.requiredTestClass.simpleName)
+    getUserFlag(SYS, "tests." + context.requiredTestClass.simpleName)
 
 @ExampleApi
 @OptIn(DelicateApi::class)

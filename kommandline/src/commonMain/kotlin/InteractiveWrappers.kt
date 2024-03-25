@@ -11,7 +11,7 @@ import pl.mareklangiewicz.kommand.term.termXDefault
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only println trace.")
 inline fun ifInteractiveCodeEnabled(cli: CLI = SYS, code: () -> Unit) = when {
     !cli.isJvm -> println("Interactive code is only available on JvmCLI (for now).")
-    !isUserFlagEnabled(cli, "code.interactive") -> println("Interactive code is disabled.")
+    !getUserFlag(cli, "code.interactive") -> println("Interactive code NOT enabled.")
     else -> code()
 }
 

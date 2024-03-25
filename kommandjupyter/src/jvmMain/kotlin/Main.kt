@@ -9,7 +9,7 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.XClipSelection.Clipboard
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ifInteractiveCodeEnabled
-import pl.mareklangiewicz.kommand.isUserFlagEnabled
+import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.xclipOut
@@ -30,31 +30,21 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.callSuspend
 
 /**
- * TODO NOW: update description
  * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
- * So this file allows invoking code from kommandjupyter/src/jvmMain/kotlin/gitignored/Playground.kt:play(),
- * so that way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
+ * So this file allows invoking any code pointed by reference or clipboard (containing reference)
+ * (see also IntelliJ action: CopyReference)
+ * Usually it will be from samples/examples/demos, or from gitignored playground, like:
+ * pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop
+ * pl.mareklangiewicz.kommand.jupyter.PlaygroundKt#play
+ * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
  * The gradle kommandjupyter:run task is set up to run the main fun here.
- * Add "--args play" to intellij run configuration (or to command line),
- * to actually invoke Playground.kt:play() when calling gradle "run" task.
- * UPDATE: Let's also implement another case: running sample given in command line or from xclip
  */
 fun main(args: Array<String>) = runBlocking {
-    when(args.firstOrNull()) {
-        null -> println("Provide something")
-        "something" -> when {
-            args.size == 1 -> bad { "something requires something reference or \"xclip\" keyword" }
-            args.size > 2 -> bad { "only one something reference allowed" }
-            else -> tryInteractivelySomethingRef(args[1])
-        }
-        "code.interactive" -> when {
-            args.size != 2 -> bad { "Error. format is: code.interactive enable/disable/print" }
-            args[1] == "print" -> println(
-                "code.interactive is " + if(isUserFlagEnabled(SYS, "code.interactive")) "enabled" else "not enabled"
-            )
-            args[1] == "enable" -> setUserFlag(SYS, "code.interactive", true)
-            args[1] == "disable" -> setUserFlag(SYS, "code.interactive", false)
-        }
+    when {
+        args.size == 2 && args[0] == "try-code" -> tryInteractivelySomethingRef(args[1])
+        args.size == 2 && args[0] == "get-user-flag" -> println(getUserFlagFullStr(SYS, args[1]))
+        args.size == 3 && args[0] == "set-user-flag" -> println(setUserFlag(SYS, args[1], args[2].toBoolean()))
+        else -> bad { "Incorrect args. See Main.kt:main" }
     }
 }
 
@@ -95,7 +85,9 @@ private fun prepareCallFor(className: String, memberName: String): suspend () ->
 @OptIn(NotPortableApi::class, DelicateApi::class)
 private suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
     println("tryInteractivelySomethingRef(\"$reference\")")
-    val ref = if (reference == "xclip") xclipOut(Clipboard).ax(SYS).single() else reference
+    val ref = if (reference == "xclip")
+        xclipOut(Clipboard).ax(SYS).singleOrNull() ?: bad { "Clipboard has to have code reference in single line." }
+    else reference
     val ure = ure {
         +ure("className") {
             +chWordFirst

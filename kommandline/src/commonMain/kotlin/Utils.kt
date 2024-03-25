@@ -7,9 +7,13 @@ import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
-fun isUserFlagEnabled(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.enabled"]?.trim().toBoolean()
-
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString() }
+
+fun getUserFlag(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.enabled"]?.trim().toBoolean()
+
+fun getUserFlagStr(cli: CLI, key: String) = if (getUserFlag(cli, key)) "enabled" else "NOT enabled"
+
+fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserFlagStr(cli, key) + "."
 
 
 @OptIn(DelicateApi::class)

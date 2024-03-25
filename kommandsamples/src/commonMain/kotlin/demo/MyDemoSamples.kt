@@ -16,6 +16,7 @@ import pl.mareklangiewicz.kommand.bashGetExportsToFile
 import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ideOpen
+import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
@@ -91,8 +92,14 @@ data object MyDemoSamples {
         ideOpen(tmpNotesFile).ax()
     }
 
-    // Note: not InteractiveScript because I want to be able to enable interactive code when it's disabled.
-    val iCodeSwitch = ReducedScript {
+    val interactiveCodeEnable = ReducedScript { setUserFlag(SYS, "code.interactive", true) }
+
+    val interactiveCodeDisable = ReducedScript { setUserFlag(SYS, "code.interactive", false) }
+
+    val interactiveCodePrint = ReducedScript { println(getUserFlagFullStr(SYS, "code.interactive")) }
+
+    // Note: NOT InteractiveScript because I want to be able to switch interactive code even when it's NOT enabled.
+    val interactiveCodeSwitch = ReducedScript {
         val enabled = askIf("Should interactive code be enabled?")
         setUserFlag(SYS, "code.interactive", enabled)
         showInfo("user flag: code.interactive.enabled = $enabled")
