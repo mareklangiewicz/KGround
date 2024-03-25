@@ -9,6 +9,7 @@ import pl.mareklangiewicz.uspek.o
 import pl.mareklangiewicz.uspek.uspekTestFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
+import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -35,6 +36,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
         prop == null -> bad { "prop is null! name: $name" }
         else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }
+    obj.logIgnoredFunctions()
 }
 
 @OptIn(DelicateApi::class)
@@ -69,3 +71,10 @@ private fun <T : Any> T.getNamedPropsValues(): List<Pair<String, Any?>> {
         .filter { it.visibility == KVisibility.PUBLIC }
         .map { it.getter.isAccessible = true; it.name to it(this) }
 }
+
+@Suppress("UNCHECKED_CAST")
+private fun <T : Any> T.logIgnoredFunctions() =
+    (this::class as KClass<T>).declaredMemberFunctions
+        .filter { it.name !in setOf("equals", "hashCode", "toString") }
+        .forEach { ulog.d("Ignoring fun ${it.name}") }
+
