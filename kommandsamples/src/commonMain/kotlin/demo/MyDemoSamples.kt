@@ -92,10 +92,11 @@ data object MyDemoSamples {
         ideOpen(tmpNotesFile).ax()
     }
 
+
+    // Note: interactive code stuff have nicer support in Main.kt:main + Run Configurations (commited to repo)
+
     val interactiveCodeEnable = ReducedScript { setUserFlag(SYS, "code.interactive", true) }
-
     val interactiveCodeDisable = ReducedScript { setUserFlag(SYS, "code.interactive", false) }
-
     val interactiveCodeLog = ReducedScript { ulog.i(getUserFlagFullStr(SYS, "code.interactive")) }
 
     // Note: NOT InteractiveScript because I want to be able to switch interactive code even when it's NOT enabled.
