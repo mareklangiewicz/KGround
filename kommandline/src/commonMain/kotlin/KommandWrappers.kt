@@ -111,7 +111,7 @@ fun interface ReducedScript<ReducedOut> {
 inline fun <ReducedOut> ReducedScript(crossinline ax: suspend (cli: CLI) -> ReducedOut) =
     ReducedScript<ReducedOut> { cli, dir -> ax(cli) }
 
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI) = ax(cli, null)
+suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = CLI.SYS) = ax(cli, null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 

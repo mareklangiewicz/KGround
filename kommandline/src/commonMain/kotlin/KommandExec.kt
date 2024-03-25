@@ -13,7 +13,7 @@ import pl.mareklangiewicz.bad.*
  * TODO_someday: how to colorize it (can I somehow use @DslMarker ?)
  */
 suspend fun Kommand.ax(
-    cli: CLI,
+    cli: CLI = CLI.SYS,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,
@@ -31,7 +31,7 @@ suspend fun Kommand.ax(
 // temporary hack
 @Deprecated("Use suspend fun Kommand.ax(...)")
 expect fun Kommand.axb(
-    cli: CLI,
+    cli: CLI = CLI.SYS,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,
@@ -42,6 +42,6 @@ expect fun Kommand.axb(
 
 // also temporary hack
 @Deprecated("Use suspend fun Kommand.ax(...)")
-expect fun <ReducedOut> ReducedScript<ReducedOut>.axb(cli: CLI, dir: String? = null): ReducedOut
+expect fun <ReducedOut> ReducedScript<ReducedOut>.axb(cli: CLI = CLI.SYS, dir: String? = null): ReducedOut
 
 

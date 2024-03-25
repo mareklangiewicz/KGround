@@ -7,7 +7,7 @@ import pl.mareklangiewicz.kground.*
 // TODO_someday: CLI as context receiver
 @Deprecated("Use suspend fun Kommand.ax(...)")
 fun Kommand.axBlocking(
-    cli: CLI,
+    cli: CLI = CLI.SYS,
     vararg useNamedArgs: Unit,
     dir: String? = null,
     inContent: String? = null,

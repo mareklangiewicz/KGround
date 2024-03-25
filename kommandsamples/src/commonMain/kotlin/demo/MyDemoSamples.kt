@@ -5,9 +5,7 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.InteractiveScript
-import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.ManOpt
-import pl.mareklangiewicz.kommand.ReducedKommand
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.ZenityOpt.*
 import pl.mareklangiewicz.kommand.admin.btop
@@ -137,11 +135,6 @@ data object MyDemoSamples {
     }
 }
 
-
-
-private suspend fun Kommand.ax() = ax(SYS)
-private suspend fun <T> ReducedKommand<T>.ax() = ax(SYS)
-private suspend fun <T> ReducedScript<T>.ax() = ax(SYS)
 
 @OptIn(DelicateApi::class)
 private suspend fun showInfo(info: String) = zenity(Type.Info) { -Text(info) }.ax()
