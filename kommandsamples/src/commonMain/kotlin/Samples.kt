@@ -4,6 +4,14 @@ package pl.mareklangiewicz.kommand.samples
 
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.ULogLevel
+
+
+// Hacky ulog impl for samples, before we have real ulog in context receivers
+var ulogPrintLevel: ULogLevel = ULogLevel.INFO
+var ulog = ULog { level, data -> if (level >= ulogPrintLevel) println("ks ${level.symbol} $data") }
+
 
 data class Sample(
     val kommand: Kommand,

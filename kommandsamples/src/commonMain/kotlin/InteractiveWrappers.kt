@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.toInteractiveCheck
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.ulog.d
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun Any?.tryInteractivelyAnything(cli: CLI = SYS) = when (this) {
@@ -43,11 +44,11 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 /** @param question null means default question */
 suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = when {
-    this == null -> println("It is null. Nothing to open.")
-    this is Unit -> println("It is Unit. Nothing to open.")
-    this is String && isEmpty() -> println("It is empty string. Nothing to open.")
-    this is Collection<*> && isEmpty() -> println("It is empty collection. Nothing to open.")
-    !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> println("Not opening.")
+    this == null -> ulog.d("It is null. Nothing to open.")
+    this is Unit -> ulog.d("It is Unit. Nothing to open.")
+    this is String && isEmpty() -> ulog.d("It is empty string. Nothing to open.")
+    this is Collection<*> && isEmpty() -> ulog.d("It is empty collection. Nothing to open.")
+    !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> ulog.d("Not opening.")
     else -> {
         val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
         writeFileWithDD(listOf(toString()), tmpNotesFile).ax(cli)

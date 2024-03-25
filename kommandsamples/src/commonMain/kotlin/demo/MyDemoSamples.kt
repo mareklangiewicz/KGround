@@ -22,11 +22,13 @@ import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
 import pl.mareklangiewicz.kommand.samples.s
+import pl.mareklangiewicz.kommand.samples.ulog
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.zenity
 import pl.mareklangiewicz.kommand.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.ulog.i
 
 /**
  * A bunch of samples to show on my machine when presenting KommandLine.
@@ -94,7 +96,7 @@ data object MyDemoSamples {
 
     val interactiveCodeDisable = ReducedScript { setUserFlag(SYS, "code.interactive", false) }
 
-    val interactiveCodePrint = ReducedScript { println(getUserFlagFullStr(SYS, "code.interactive")) }
+    val interactiveCodeLog = ReducedScript { ulog.i(getUserFlagFullStr(SYS, "code.interactive")) }
 
     // Note: NOT InteractiveScript because I want to be able to switch interactive code even when it's NOT enabled.
     val interactiveCodeSwitch = ReducedScript {
@@ -116,21 +118,21 @@ data object MyDemoSamples {
 
     val playWithKonfigExamples = InteractiveScript {
         val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
-        println("before adding anything:")
+        ulog.i("before adding anything:")
         k.logEachKeyVal()
         k["tmpExampleInteger1"] = 111.toString()
         k["tmpExampleInteger2"] = 222.toString()
         k["tmpExampleString1"] = "some text 1"
         k["tmpExampleString2"] = "some text 2"
-        println("after adding 4 keys:")
+        ulog.i("after adding 4 keys:")
         k.logEachKeyVal()
         k["tmpExampleInteger2"] = null
         k["tmpExampleString2"] = null
-        println("after nulling 2 keys:")
+        ulog.i("after nulling 2 keys:")
         k.logEachKeyVal()
         k["tmpExampleInteger1"] = null
         k["tmpExampleString1"] = null
-        println("after nulling other 2 keys:")
+        ulog.i("after nulling other 2 keys:")
         k.logEachKeyVal()
     }
 }
