@@ -13,6 +13,7 @@ import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.samples.tryInteractivelyAnything
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.ulog
+import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.ulog.d
@@ -44,7 +45,7 @@ import kotlin.reflect.full.callSuspend
  */
 fun main(args: Array<String>) = runBlocking {
     when {
-        args.size == 2 && args[0] == "try-code" -> tryInteractivelySomethingRef(args[1])
+        args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
         args.size == 2 && args[0] == "get-user-flag" -> ulog.i(getUserFlagFullStr(SYS, args[1]))
         args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
         else -> bad { "Incorrect args. See Main.kt:main" }

@@ -15,11 +15,11 @@ import pl.mareklangiewicz.ulog.i
 object MainExamples {
 
     @OptIn(DelicateApi::class)
-    suspend fun examplesToRefactor() = withLogBadStreams {
+    suspend fun examplesToRefactor() {
         readFileHead("/home/marek/non-existent-file-46578563").ax() // should print BadExitStateErr.stderr
-        ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
-            ulog.i("out line: $it")
-        }
+        // ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
+        //     ulog.i("out line: $it")
+        // }
         // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
         // MyDemoSamples.btopKitty.ax()
         // MyDemoSamples.ps1.ax()
