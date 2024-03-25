@@ -87,7 +87,7 @@ data object MyDemoSamples {
     }
 
     val ideOpenXClip = InteractiveScript {
-        kommand("xclip", "-o").ax(it, outFile = tmpNotesFile)
+        kommand("xclip", "-o").ax(outFile = tmpNotesFile)
         // bash("xclip -o > $tmpNotesFile").ax() // equivalent to above
         ideOpen(tmpNotesFile).ax()
     }
