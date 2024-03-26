@@ -168,10 +168,7 @@ class KommandTestOld {
         assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
         kommand.tryInteractivelyCheck("vim -g --servername DDDD .")
     }
-    @Test fun testWhich() = which("vim", "ls", all = true).tryInteractivelyCheck()
 
-    @Ignore
-    @Test fun testMkTemp() = ulog.i(mktemp().axb(SYS))
     @Test fun testBash() {
         val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
         val kommand2 = bash(kommand1)
@@ -181,10 +178,6 @@ class KommandTestOld {
     @Ignore // Let's not print all env vars on github actions.
     @Test fun testBashGetExports() = bashGetExportsMap().axb(SYS)
         .logEachEntry { ulog.i("exported env: ${it.key} == \"${it.value}\"") }
-
-    @Test fun testIdeOpen() = ideOpen("/home/marek/.bashrc", line = 15, column = 15).axb(SYS).unit
-
-    @Test fun testIdeDiff() = ideDiff("/home/marek/.bashrc", "/home/marek/.profile").axb(SYS).unit
 }
 
 

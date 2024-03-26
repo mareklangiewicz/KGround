@@ -17,6 +17,7 @@ import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
+import pl.mareklangiewicz.kommand.ideDiff
 import pl.mareklangiewicz.kommand.iproute2.ssTulpn
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
@@ -86,9 +87,15 @@ data object MyDemoSamples {
 
     val adbShell = adb(Adb.Command.Shell) s "adb shell"
 
-    val ideOpen1 = InteractiveScript {
+    val ideOpen = InteractiveScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")
         ideOpen(path).ax()
+    }
+
+    val ideDiff = InteractiveScript {
+        val path1 = getEntry("first file to open in IDE Diff", suggested = "/home/marek/.vimrc")
+        val path2 = getEntry("second file to open in IDE Diff", suggested = "/home/marek/.ideavimrc")
+        ideDiff(path1, path2).ax()
     }
 
     val ideOpenBashExports = InteractiveScript {
