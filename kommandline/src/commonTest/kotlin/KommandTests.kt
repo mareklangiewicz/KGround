@@ -52,7 +52,7 @@ class KommandTests {
 
         if (platform == "JVM") "On JVM only" so { // TODO_someday: On Native? On NodeJs?
 
-            "On real file system on tmp dir" so { // random dir name can't be in test name bc uspek would loop inf
+            "On real file system on tmp dir" so {
 
                 "On mktemp kommand" so {
                     var tmpFile = "/tmp/ERROR"
@@ -66,6 +66,7 @@ class KommandTests {
                     finally { rmFileIfExists(tmpFile).ax() }
                 }
 
+                // Note: random dir name can't be in test name bc uspek would loop infinitely finding new "branches"
                 val dir = "testDirTmp" + Random.nextLong().absoluteValue
                 val tmpDir = "/tmp/$dir"
                 val tmpDirBla = "$tmpDir/bla"
