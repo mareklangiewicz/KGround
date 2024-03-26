@@ -68,9 +68,9 @@ class KommandTests {
 
                         "check created dirs with ls" so {
                             lsSubDirs("/tmp").chkLineRaw("ls --indicator-style=slash /tmp")
-                                .ax().chkThat(dir) { it in this }
+                                .ax().chkThis { contains(dir) }
                         }
-                        "ls tmp dir is not file" so { lsRegFiles("/tmp").ax().chkThat(dir) { it !in this } }
+                        "ls tmp dir is not file" so { lsRegFiles("/tmp").ax().chkThis { !contains(dir) } }
 
                         "On rm empty ble" so {
                             rmDirIfEmpty(tmpDirBlaBle).ax()
@@ -83,14 +83,14 @@ class KommandTests {
                             val fullBlu = "$tmpDirBlaBle/$blu"
                             touch(fullBlu).ax()
 
-                            "ls blu is there" so { lsRegFiles(tmpDirBlaBle).ax().chkThat(blu) { it in this } }
+                            "ls blu is there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { contains(blu) } }
 
                             // TODO_someday: test playing with touchy blu file content with some popular kommands
 
                             "On rm blu" so {
                                 rm(fullBlu).ax()
 
-                                "ls blu is NOT there" so { lsRegFiles(tmpDirBlaBle).ax().chkThat(blu) { it !in this } }
+                                "ls blu is NOT there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { !contains(blu) } }
                             }
 
                             "On rm wrong file name" so {
@@ -106,7 +106,7 @@ class KommandTests {
                         "On rmTreeWithForce" so {
                             rmTreeWithForce(tmpDir) { cli, path -> path.startsWith("/tmp/testDirTmp") }.ax()
 
-                            "tmp does not contain our dir" so { lsSubDirs("/tmp").ax().chkThat(dir) { it !in this } }
+                            "tmp does not contain our dir" so { lsSubDirs("/tmp").ax().chkThis { !contains(dir) } }
                         }
 
                     }
@@ -128,12 +128,6 @@ inline fun <T> T.chkThis(lazyMessage: () -> String = { "this is bad" }, thisIsFi
     apply { chk(thisIsFine(), lazyMessage) }
 inline fun <T> T.reqThis(lazyMessage: () -> String = { "this arg is bad" }, thisIsFine: T.() -> Boolean): T =
     apply { req(thisIsFine(), lazyMessage) }
-@ExperimentalApi
-inline fun <T, A> T.chkThat(that: A, lazyMessage: () -> String = { "that is bad" }, thisVsThat: T.(that: A) -> Boolean): T =
-    apply { chk(thisVsThat(that), lazyMessage) }
-@ExperimentalApi
-inline fun <T, A> T.reqThat(that: A, lazyMessage: () -> String = { "that arg is bad" }, thisVsThat: T.(that: A) -> Boolean): T =
-    apply { req(thisVsThat(that), lazyMessage) }
 
 
 // TODO_maybe: Add sth like this to USpekX?
@@ -147,11 +141,6 @@ suspend inline fun <reified T : Throwable> String.soThrows(
 @Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
 class KommandTestOld {
 
-
-    @Test fun testSs1() = ssTulpn().tryInteractivelyCheck() // ss -tulpn
-
-    @Test fun testAdbDevices() = adb(Devices) { -Option.All; -Usb }.tryInteractivelyCheck("adb -a -d devices")
-    @Test fun testAdbShell() = adb(Shell).tryInteractivelyCheck("adb shell")
 
     @Test fun testVim() {
         val kommand = vim(".") { -Gui; -ServerName("DDDD") }

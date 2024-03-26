@@ -3,11 +3,13 @@ package pl.mareklangiewicz.kommand.demo
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.bad
+import pl.mareklangiewicz.kommand.Adb
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.InteractiveScript
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.ZenityOpt.*
+import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
@@ -15,6 +17,7 @@ import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
+import pl.mareklangiewicz.kommand.iproute2.ssTulpn
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
@@ -76,6 +79,12 @@ data object MyDemoSamples {
 
     val catFstabAndHostsK = termKitty(catFstabAndHosts, hold = true) s
             "kitty -1 --detach --hold -- cat /etc/fstab /etc/hosts"
+
+    val ssTulpn = ssTulpn() s "ss --tcp --udp --listening --processes --numeric"
+
+    val adbDevices = adb(Adb.Command.Devices) s "adb devices"
+
+    val adbShell = adb(Adb.Command.Shell) s "adb shell"
 
     val ideOpen1 = InteractiveScript {
         val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc")
