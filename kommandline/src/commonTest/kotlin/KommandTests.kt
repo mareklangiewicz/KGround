@@ -12,14 +12,10 @@ import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.bad.chkThrows
 import pl.mareklangiewicz.bad.req
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.Adb.*
-import pl.mareklangiewicz.kommand.Adb.Command.*
-import pl.mareklangiewicz.kommand.Adb.Option.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.debian.*
-import pl.mareklangiewicz.kommand.iproute2.*
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.uspek.USpekContext
 import pl.mareklangiewicz.uspek.USpekTree
@@ -57,6 +53,19 @@ class KommandTests {
         if (platform == "JVM") "On JVM only" so { // TODO_someday: On Native? On NodeJs?
 
             "On real file system on tmp dir" so { // random dir name can't be in test name bc uspek would loop inf
+
+                "On mktemp kommand" so {
+                    var tmpFile = "/tmp/ERROR"
+                    try {
+                        tmpFile = mktemp(path = "/tmp", prefix = "tmpFile").ax()
+                        "name is fine" so { tmpFile.chkThis { startsWith("/tmp/tmpFile") && endsWith(".tmp") } }
+                        "file is there" so {
+                            lsRegFiles("/tmp").ax().chkThis { any { "/tmp/$it" == tmpFile } }
+                        }
+                    }
+                    finally { rmTreeWithForce(tmpFile) { cli, path -> path.startsWith("/tmp/tmpFile") }.ax() }
+                }
+
                 val dir = "testDirTmp" + Random.nextLong().absoluteValue
                 val tmpDir = "/tmp/$dir"
                 val tmpDirBla = "$tmpDir/bla"
