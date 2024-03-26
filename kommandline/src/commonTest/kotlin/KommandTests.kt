@@ -63,7 +63,7 @@ class KommandTests {
                             lsRegFiles("/tmp").ax().chkThis { any { "/tmp/$it" == tmpFile } }
                         }
                     }
-                    finally { rmTreeWithForce(tmpFile) { cli, path -> path.startsWith("/tmp/tmpFile") }.ax() }
+                    finally { rmFileIfExists(tmpFile).ax() }
                 }
 
                 val dir = "testDirTmp" + Random.nextLong().absoluteValue
