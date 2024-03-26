@@ -26,11 +26,10 @@ fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserF
 
 
 @OptIn(DelicateApi::class)
-fun ReducedKommand<*>.chkLineRawAndExec(expectedLineRaw: String, execInDir: String? = null, cli: CLI = SYS) {
+fun <ReducedOut> ReducedKommand<ReducedOut>.chkLineRaw(expectedLineRaw: String): ReducedKommand<ReducedOut> {
     val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
-    ulog.d(lineRaw)
     lineRaw.chkEq(expectedLineRaw)
-    axb(cli, execInDir)
+    return this
 }
 
 /** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */

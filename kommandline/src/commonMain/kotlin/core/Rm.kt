@@ -6,17 +6,20 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.RmOpt.*
 
 @OptIn(DelicateApi::class)
-fun rmIfFileExists(file: String) = ReducedScript { cli, dir ->
+fun rmFileIfExists(file: String) = ReducedScript { cli, dir ->
     val exists = testIfFileExists(file).ax(cli, dir)
     if (exists) rm(file).ax(cli, dir = dir)
     else listOf("File not found")
 }
 
+@OptIn(DelicateApi::class)
+fun rmDirIfEmpty(dir: String) = rm { -Dir; +dir }
+
 @DelicateApi
-fun rmTreeWithForce(path: String, doubleChk: (cli: CLI, path: String) -> Boolean) =
+fun rmTreeWithForce(rootDir: String, doubleChk: (cli: CLI, path: String) -> Boolean) =
     ReducedScript { cli, dir ->
-        chk(doubleChk(cli, path)) { "ERROR: Can not remove whole '$path' tree. Double chk failed." }
-        rm(path, recursive = true, force = true).ax(cli, dir = dir)
+        doubleChk(cli, rootDir).chkTrue { "ERROR: Can not remove whole '$rootDir' tree. Double chk failed." }
+        rm(rootDir, recursive = true, force = true).ax(cli, dir = dir)
     }
 
 @DelicateApi

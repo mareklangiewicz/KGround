@@ -55,7 +55,7 @@ private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS): IKonfi
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
         cli.run {
-            if (item == null) rmIfFileExists(file).axb(CLI.SYS)
+            if (item == null) rmFileIfExists(file).axb(CLI.SYS)
             else writeFileWithDD(inLines = listOf(item), outFile = file).axb(CLI.SYS)
         }
     }
