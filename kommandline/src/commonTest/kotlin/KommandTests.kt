@@ -95,7 +95,18 @@ class KommandTests {
 
                             "ls blu is there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { contains(blu) } }
 
-                            // TODO_someday: test playing with touchy blu file content with some popular kommands
+                            "On blu file content" so {
+                                "it is empty" so { readFileWithCat(fullBlu).ax().chkEmpty() }
+                                "On write poem" so {
+                                    val poem = listOf("NOTHING IS FAIR IN THIS WORLD OF MADNESS!")
+                                    writeFileWithDD(poem, fullBlu).ax()
+                                    "poem is there" so { readFileWithCat(fullBlu).ax() chkEq poem }
+                                    "On write empty list of lines" so {
+                                        writeFileWithDD(emptyList<String>(), fullBlu).ax()
+                                        "it is empty again" so { readFileWithCat(fullBlu).ax().chkEmpty() }
+                                    }
+                                }
+                            }
 
                             "On rm blu" so {
                                 rm(fullBlu).ax()
