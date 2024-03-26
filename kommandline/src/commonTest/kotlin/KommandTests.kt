@@ -55,7 +55,7 @@ class KommandTests {
             "On real file system on tmp dir" so {
 
                 "On mktemp kommand" so {
-                    var tmpFile = "/tmp/ERROR"
+                    var tmpFile = "/tmp/fake"
                     try {
                         tmpFile = mktemp(path = "/tmp", prefix = "tmpFile").ax()
                         "name is fine" so { tmpFile.chkThis { startsWith("/tmp/tmpFile") && endsWith(".tmp") } }
