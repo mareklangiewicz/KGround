@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.SecondaryApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.EchoOpt.*
 
@@ -40,6 +41,8 @@ data class Echo(
 interface EchoOpt: KOptTypical {
     data object NoNewLine : KOptS("n"), EchoOpt
     data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt
+    @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")
     data object Help : KOptLN(), EchoOpt
+    @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")
     data object Version : KOptLN(), EchoOpt
 }

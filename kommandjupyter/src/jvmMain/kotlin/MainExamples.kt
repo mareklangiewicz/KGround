@@ -28,31 +28,6 @@ object MainExamples {
         // SshSamples.sshPimInTermGnome.ax()
         // SshSamples.sshPimLsInTermKitty.ax()
         // SshSamples.sshPimLsLAH.ax(errToOut = true).logEach()
-        // prepareMyExcludeFolderInKotlinMultiProject()
-        // showMarekLangiewiczRepoMarkdownListInGVim()
-    }
-
-    @OptIn(DelicateApi::class)
-    suspend fun prepareMyExcludeFolderInKotlinMultiProject() {
-        val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).ax()
-        writeToFileAndOpenInGVim(out)
-
-        // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
-        gvim("/home/marek/code/kotlin/kotlin.iml").ax()
-        gvim("/home/marek/code/kotlin/.idea/kotlin.iml").ax()
-    }
-
-    @OptIn(DelicateApi::class)
-    suspend fun showMyRepoMarkdownListInGVim() {
-        val reposMdContent = GhSamples.myPublicRepoMarkdownList.reducedKommand.ax()
-        val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md"
-        writeToFileAndOpenInGVim(reposMdContent, tmpReposFileMd)
-    }
-
-    @DelicateApi
-    suspend fun writeToFileAndOpenInGVim(content: String, filePath: String = SYS.pathToUserTmp + "/tmp.notes") {
-        echo(content).ax(outFile = filePath)
-        gvim(filePath).ax()
     }
 }
 

@@ -2,11 +2,9 @@ package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
-import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.e
 
 
@@ -23,6 +21,13 @@ fun getUserFlag(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.en
 fun getUserFlagStr(cli: CLI, key: String) = if (getUserFlag(cli, key)) "enabled" else "NOT enabled"
 
 fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserFlagStr(cli, key) + "."
+
+
+/**
+ * Just some convention I like; additional "tmp" in name is there to emphasize that
+ * this file content is temporary, and can be easily replaced by some kommand/sample/etc.
+ */
+val CLI.pathToTmpNotes get() = listOfNotNull(pathToUserTmp, pathToSystemTmp, pathToUserHome).first() + "tmp-notes"
 
 
 @OptIn(DelicateApi::class)

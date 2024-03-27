@@ -17,8 +17,11 @@ import pl.mareklangiewicz.kommand.bashGetExportsToFile
 import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.bashGetExportsMap
+import pl.mareklangiewicz.kommand.find.findBoringCodeDirsAndReduceAsExcludedFoldersXml
+import pl.mareklangiewicz.kommand.find.myKotlinPath
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
+import pl.mareklangiewicz.kommand.github.GhSamples
 import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.ideDiff
 import pl.mareklangiewicz.kommand.iproute2.ssTulpn
@@ -33,6 +36,7 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.ulog
+import pl.mareklangiewicz.kommand.writeFileAndStartInGVim
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenity
 import pl.mareklangiewicz.kommand.zenityAskForEntry
@@ -121,6 +125,24 @@ data object MyDemoSamples {
     }
 
     val gvimServerDDDDOpenHomeDir = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
+
+
+    @OptIn(DelicateApi::class)
+    suspend fun showMyRepoMarkdownListInGVim() = InteractiveScript {
+        val reposMdContent = GhSamples.myPublicRepoMarkdownList.ax()
+        val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md" // also to have syntax highlighting
+        writeFileAndStartInGVim(reposMdContent, filePath = tmpReposFileMd).ax()
+    }
+
+    @OptIn(DelicateApi::class)
+    suspend fun prepareMyExcludeFolderInKotlinMultiProject() = InteractiveScript {
+        val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).ax()
+        val boringFileXml = SYS.pathToUserTmp + "/tmp.boring.xml" // also to have syntax highlighting
+        writeFileAndStartInGVim(out, filePath = boringFileXml).ax()
+        // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
+        SYS.start(gvim("/home/marek/code/kotlin/kotlin.iml"))
+        SYS.start(gvim("/home/marek/code/kotlin/.idea/kotlin.iml"))
+    }
 
 
     // Note: interactive code stuff have nicer support in Main.kt:main + Run Configurations (commited to repo)

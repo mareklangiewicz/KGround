@@ -60,3 +60,16 @@ fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: Strin
         tryInteractivelyStartInTerm(cli, startInDir = execInDir)
     }
 
+
+@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
+fun writeFileAndStartInGVim(inLines: List<String>, vararg useNamedArgs: Unit, filePath: String? = null) =
+    InteractiveScript { cli ->
+        val fp = filePath ?: cli.pathToTmpNotes
+        writeFileWithDD(inLines, fp).ax(cli)
+        cli.start(gvim(fp))
+    }
+
+@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
+fun writeFileAndStartInGVim(inContent: String, vararg useNamedArgs: Unit, filePath: String? = null) =
+    writeFileAndStartInGVim(listOf(inContent), filePath = filePath)
+
