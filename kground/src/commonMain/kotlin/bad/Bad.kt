@@ -6,6 +6,7 @@ import kotlin.apply
 import kotlin.collections.isNotEmpty
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import pl.mareklangiewicz.annotations.*
 
 
 /**
@@ -32,6 +33,24 @@ inline fun req(value: Boolean, lazyMessage: () -> String = { "this arg is bad" }
     contract { returns() implies value }
     value || badArg(lazyMessage)
 }
+
+
+inline fun <T> T.chkThis(lazyMessage: () -> String = { "this is bad" }, thisIsFine: T.() -> Boolean): T =
+    apply { chk(thisIsFine(), lazyMessage) }
+
+inline fun <T> T.reqThis(lazyMessage: () -> String = { "this arg is bad" }, thisIsFine: T.() -> Boolean): T =
+    apply { req(thisIsFine(), lazyMessage) }
+
+// Experiment with even more chained checks (confusing at first but maybe useful shortcuts in big dense uspek trees)
+
+@ExperimentalApi("Not sure but probably will remove it if not used enough or confusing too much in practice.")
+inline fun <T, A> T.chkThisWith(that: A, lazyMessage: () -> String = { "this is bad with that" }, fineWith: T.(A) -> Boolean): T =
+    apply { chk(fineWith(that), lazyMessage) }
+@ExperimentalApi("Not sure but probably will remove it if not used enough or confusing too much in practice.")
+inline fun <T, A> T.reqThisWith(that: A, lazyMessage: () -> String = { "this arg is bad with that" }, fineWith: T.(A) -> Boolean): T =
+    apply { req(fineWith(that), lazyMessage) }
+
+
 
 inline fun <T: Any> T?.chkNN(lazyMessage: () -> String = { "this null is bad" }): T = this ?: bad(lazyMessage)
 inline fun <T: Any> T?.reqNN(lazyMessage: () -> String = { "this null arg is bad" }): T = this ?: badArg(lazyMessage)
