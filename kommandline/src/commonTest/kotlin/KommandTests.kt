@@ -12,11 +12,7 @@ import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.bad.chkThrows
 import pl.mareklangiewicz.bad.req
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.debian.*
-import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.uspek.USpekContext
 import pl.mareklangiewicz.uspek.USpekTree
 import pl.mareklangiewicz.uspek.failed
@@ -26,8 +22,6 @@ import pl.mareklangiewicz.uspek.ucontext
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.absoluteValue
 import kotlin.random.Random
-import kotlin.test.*
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -156,23 +150,6 @@ suspend inline fun <reified T : Throwable> String.soThrows(
     crossinline expectation: (T) -> Boolean = { true },
     crossinline code: suspend () -> Unit
 ) = so { chkThrows<T>(expectation) { code() } }
-
-
-@OptIn(DelicateApi::class)
-@Ignore // TODO NOW: move&rewrite it all. some to samples, some above, etc. consider kotlin/native too
-class KommandTestOld {
-
-
-    @Test fun testBash() {
-        val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
-        val kommand2 = bash(kommand1)
-        assertEquals(listOf("-c", "vim -g --servername DDDD ."), kommand2.args)
-        kommand2.tryInteractivelyCheck("bash -c vim -g --servername DDDD .")
-    }
-    @Ignore // Let's not print all env vars on github actions.
-    @Test fun testBashGetExports() = bashGetExportsMap().axb(SYS)
-        .logEachEntry { ulog.i("exported env: ${it.key} == \"${it.value}\"") }
-}
 
 
 internal fun runTestUSpekWithWorkaround(

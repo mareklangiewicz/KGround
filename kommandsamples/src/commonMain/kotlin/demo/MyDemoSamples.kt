@@ -16,6 +16,7 @@ import pl.mareklangiewicz.kommand.bash
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
 import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kommand.bashGetExportsMap
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.gvim
@@ -32,6 +33,7 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.ulog
+import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenity
 import pl.mareklangiewicz.kommand.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenityAskIf
@@ -100,18 +102,25 @@ data object MyDemoSamples {
         ideDiff(path1, path2).ax()
     }
 
-    val ideOpenBashExports = InteractiveScript {
-        bashGetExportsToFile(tmpNotesFile).ax()
-        ideOpen(tmpNotesFile).ax()
-    }
-
     val ideOpenXClip = InteractiveScript {
         kommand("xclip", "-o").ax(outFile = tmpNotesFile)
         // bash("xclip -o > $tmpNotesFile").ax() // equivalent to above
         ideOpen(tmpNotesFile).ax()
     }
 
-    val gvimGuiOpenHomeDir1 = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
+    val ideOpenBashExports = InteractiveScript {
+        bashGetExportsToFile(tmpNotesFile).ax()
+        ideOpen(tmpNotesFile).ax()
+    }
+
+    val gvimShowBashExportsForLC = InteractiveScript {
+        val exports = bashGetExportsMap().ax()
+        val lines = exports.keys.filter { it.startsWith("LC") }.map { "exported env \'$it\' == \'${exports[it]}\'" }
+        writeFileWithDD(lines, tmpNotesFile).ax()
+        gvim(tmpNotesFile).ax()
+    }
+
+    val gvimServerDDDDOpenHomeDir = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
 
 
     // Note: interactive code stuff have nicer support in Main.kt:main + Run Configurations (commited to repo)
