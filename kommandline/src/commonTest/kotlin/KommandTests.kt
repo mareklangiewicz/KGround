@@ -163,12 +163,6 @@ suspend inline fun <reified T : Throwable> String.soThrows(
 class KommandTestOld {
 
 
-    @Test fun testVim() {
-        val kommand = vim(".") { -Gui; -ServerName("DDDD") }
-        assertEquals(listOf("-g", "--servername", "DDDD", "."), kommand.args)
-        kommand.tryInteractivelyCheck("vim -g --servername DDDD .")
-    }
-
     @Test fun testBash() {
         val kommand1 = vim(".") { -Gui; -ServerName("DDDD") }
         val kommand2 = bash(kommand1)

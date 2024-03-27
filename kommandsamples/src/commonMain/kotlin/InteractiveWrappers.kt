@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kommand.CLI
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.lineRawOrNull
@@ -16,6 +17,7 @@ import pl.mareklangiewicz.ulog.d
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun Any?.tryInteractivelyAnything(cli: CLI = SYS) = when (this) {
+    is Kommand -> toInteractiveCheck().ax(cli)
     is Sample -> tryInteractivelyCheckSample(cli)
     is ReducedSample<*> -> tryInteractivelyCheckReducedSample(cli) // Note: ReducedSample is also ReducedScript
     is ReducedScript<*> -> tryInteractivelyCheckReducedScript(cli = cli)

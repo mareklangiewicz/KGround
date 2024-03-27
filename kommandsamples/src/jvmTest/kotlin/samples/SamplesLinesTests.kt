@@ -32,7 +32,8 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
         prop is Sample -> "On sample $name" o { testSample(prop) }
         prop is TypedSample<*, *, *, *> -> "On typed sample $name" o { testTypedSample(prop) }
         prop is ReducedSample<*> -> "On reduced sample $name" o { testReducedSample(prop) }
-        prop is ReducedScript<*> -> ulog.d("Ignoring reduced script $name")
+        prop is ReducedScript<*> -> "Ignoring reduced script $name" o {}
+        prop is Kommand -> "Ignoring kommand $name" o {} // usually better to wrap it: some_kommand s exp_line/null
         prop == null -> bad { "prop is null! name: $name" }
         else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
     }

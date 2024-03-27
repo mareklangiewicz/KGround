@@ -8,6 +8,7 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.InteractiveScript
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
+import pl.mareklangiewicz.kommand.Vim
 import pl.mareklangiewicz.kommand.ZenityOpt.*
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
@@ -17,6 +18,7 @@ import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
+import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.ideDiff
 import pl.mareklangiewicz.kommand.iproute2.ssTulpn
 import pl.mareklangiewicz.kommand.kommand
@@ -108,6 +110,8 @@ data object MyDemoSamples {
         // bash("xclip -o > $tmpNotesFile").ax() // equivalent to above
         ideOpen(tmpNotesFile).ax()
     }
+
+    val gvimGuiOpenHomeDir1 = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
 
 
     // Note: interactive code stuff have nicer support in Main.kt:main + Run Configurations (commited to repo)
