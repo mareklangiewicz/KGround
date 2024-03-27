@@ -27,7 +27,7 @@ fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserF
  * Just some convention I like; additional "tmp" in name is there to emphasize that
  * this file content is temporary, and can be easily replaced by some kommand/sample/etc.
  */
-val CLI.pathToTmpNotes get() = listOfNotNull(pathToUserTmp, pathToSystemTmp, pathToUserHome).first() + "tmp-notes"
+val CLI.pathToTmpNotes get() = listOfNotNull(pathToUserTmp, pathToSystemTmp, pathToUserHome).first() + "/tmp.notes"
 
 
 @OptIn(DelicateApi::class)

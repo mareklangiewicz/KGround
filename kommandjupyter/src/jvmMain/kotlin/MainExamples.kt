@@ -16,9 +16,6 @@ object MainExamples {
 
     @OptIn(DelicateApi::class)
     suspend fun examplesToRefactor() {
-        // ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
-        //     ulog.i("out line: $it")
-        // }
         // EchoSamples.echoTwoParagraphsWithEscapes.kommand.startInTermIfUserConfirms(SYS)
         // MyDemoSamples.btopKitty.ax()
         // MyDemoSamples.ps1.ax()

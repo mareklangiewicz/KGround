@@ -31,6 +31,7 @@ import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
+import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
@@ -107,21 +108,21 @@ data object MyDemoSamples {
     }
 
     val ideOpenXClip = InteractiveScript {
-        kommand("xclip", "-o").ax(outFile = tmpNotesFile)
-        // bash("xclip -o > $tmpNotesFile").ax() // equivalent to above
-        ideOpen(tmpNotesFile).ax()
+        kommand("xclip", "-o").ax(outFile = SYS.pathToTmpNotes)
+        // bash("xclip -o > ${SYS.pathToTmpNotes}").ax() // equivalent to above
+        ideOpen(SYS.pathToTmpNotes).ax()
     }
 
     val ideOpenBashExports = InteractiveScript {
-        bashGetExportsToFile(tmpNotesFile).ax()
-        ideOpen(tmpNotesFile).ax()
+        bashGetExportsToFile(SYS.pathToTmpNotes).ax()
+        ideOpen(SYS.pathToTmpNotes).ax()
     }
 
     val gvimShowBashExportsForLC = InteractiveScript {
         val exports = bashGetExportsMap().ax()
         val lines = exports.keys.filter { it.startsWith("LC") }.map { "exported env \'$it\' == \'${exports[it]}\'" }
-        writeFileWithDD(lines, tmpNotesFile).ax()
-        gvim(tmpNotesFile).ax()
+        writeFileWithDD(lines, SYS.pathToTmpNotes).ax()
+        gvim(SYS.pathToTmpNotes).ax()
     }
 
     val gvimServerDDDDOpenHomeDir = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
@@ -209,6 +210,4 @@ private suspend fun askEntry(question: String, suggested: String? = null) =
 
 private suspend fun getEntry(question: String, suggested: String? = null, errorMsg: String = "User didn't answer.") =
     askEntry(question, suggested) ?: run { showError(errorMsg); bad { errorMsg } }
-
-private val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
 

@@ -12,6 +12,7 @@ import pl.mareklangiewicz.kommand.toInteractiveCheck
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.ulog.d
 
@@ -53,10 +54,9 @@ suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = wh
     this is Collection<*> && isEmpty() -> ulog.d("It is empty collection. Nothing to open.")
     !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> ulog.d("Not opening.")
     else -> {
-        val tmpNotesFile = SYS.pathToUserTmp + "/tmp.notes"
         val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
-        writeFileWithDD(lines, tmpNotesFile).ax(cli)
-        ideOpen(tmpNotesFile).ax(cli)
+        writeFileWithDD(lines, cli.pathToTmpNotes).ax(cli)
+        ideOpen(cli.pathToTmpNotes).ax(cli)
     }
 }
 
