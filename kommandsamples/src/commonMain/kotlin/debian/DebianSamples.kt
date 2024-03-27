@@ -31,5 +31,6 @@ data object DpkgSamples {
     val dpkgListPackagesDebian = dpkg(ListPackages("*debian*")) s "dpkg -l *debian*"
 
     // TODO_someday: browser+executor UI for scripts (ReducedScript) also!
+    val searchPip = searchCommand("pip")
     val searchZenity = searchCommand("zenity")
 }
