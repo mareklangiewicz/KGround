@@ -11,7 +11,7 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.find.*
 
 
@@ -42,7 +42,7 @@ private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
             val regex = Regex("/settings\\.gradle(\\.kts)?\$")
             map { regex.replaceSingle(it, "").toPath() }
         }
-        .exec(SYS)
+        .ax(SYS)
 
 val gradlewRelPaths =
     listOf("", ".bat").map { "gradlew$it".toPath() } +

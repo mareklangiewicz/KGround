@@ -16,9 +16,10 @@ object MainExamples {
     @OptIn(DelicateApi::class)
     suspend fun interplayKGroundAndKommand() {
         println("Let's play with kground and kommand integration...")
-        ls { -LsOpt.LongFormat; -LsOpt.All }.x {
-            println("out line: $it")
-        }
+        // ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
+        //     println("out line: $it")
+        // }
+        // TODO: sth more impressive but still safe as default call in Playground.play()
     }
 
     suspend fun checkMyRegionsAndWorkflows(onlyPublic: Boolean = true) {
@@ -64,7 +65,7 @@ object MainExamples {
 
     private suspend infix fun String.ifYesRun(code: suspend () -> Unit) {
         println("Question: $this")
-        val yes = zenityAskIf(this).x()
+        val yes = zenityAskIf(this).ax()
         println("Answer: " + if (yes) "Yes" else "No")
         if (yes) code()
     }

@@ -10,7 +10,7 @@ import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
 interface WithCLI {
-    val cli: CliPlatform
+    val cli: CLI
 }
 
 interface WithKGroundXIO: WithKGroundIO, WithCLI
@@ -25,15 +25,15 @@ interface WithKGroundXIO: WithKGroundIO, WithCLI
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundXIOCtx(override val cli: CliPlatform, fs: FileSystem, ulog: ULog, usubmit: USubmit): KGroundIOCtx(fs, ulog, usubmit), WithKGroundXIO {
+open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usubmit: USubmit): KGroundIOCtx(fs, ulog, usubmit), WithKGroundXIO {
     companion object Key : AbstractCoroutineContextKey<KGroundIOCtx, KGroundXIOCtx>(KGroundIOCtx, { it as? KGroundXIOCtx })
 }
 
 /**
  * @param name set to non-null to add new [CoroutineName] to context
- * @param cli set to non-null to set specific [CliPlatform] in context,
+ * @param cli set to non-null to set specific [CLI] in context,
  * when null it tries to use one from current(parent) [KGroundXIOCtx],
- * and defaults to [SysPlatform] if no [CliPlatform] found.
+ * and defaults to [CLI.SYS] if no [CLI] found.
  * @param fs set to non-null to set specific [FileSystem] in context,
  * when null it tries to use one from current (parent) [KGroundIOCtx],
  * and defaults to [DefaultOkioFileSystemOrErr] if no [FileSystem] found.
@@ -43,14 +43,14 @@ open class KGroundXIOCtx(override val cli: CliPlatform, fs: FileSystem, ulog: UL
  */
 suspend fun <T> withKGroundXIOCtx(
     name: String? = null,
-    cli: CliPlatform? = null,
+    cli: CLI? = null,
     fs: FileSystem? = null,
     ulog: ULog? = null,
     usubmit: USubmit? = null,
     block: suspend CoroutineScope.() -> T,
 ): T = withContext(
     KGroundXIOCtx(
-        cli ?: coroutineContext[KGroundXIOCtx]?.cli ?: SysPlatform(),
+        cli ?: coroutineContext[KGroundXIOCtx]?.cli ?: CLI.SYS,
         fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
         ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
         usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),

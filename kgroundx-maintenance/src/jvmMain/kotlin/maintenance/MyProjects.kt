@@ -9,7 +9,7 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.ure.*
@@ -29,7 +29,7 @@ import pl.mareklangiewicz.ure.core.Ure
         .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
         .collect { projectPath ->
             log("Searching in project: $projectPath")
-            findMyKotlinCode(projectPath.toString()).exec(SYS).forEach { ktFilePathStr ->
+            findMyKotlinCode(projectPath.toString()).ax(SYS).forEach { ktFilePathStr ->
                 val ktFilePath = ktFilePathStr.toPath()
                 val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
                 val result = SYSTEM.readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
@@ -121,10 +121,10 @@ private fun Ure.withSomeLinesAround(
 
 @Suppress("IdentifierGrammar")
 @ExampleApi suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
-    ghMarekLangiewiczRepoList(onlyPublic = onlyPublic)
+    ghMyRepoList(onlyPublic = onlyPublic)
         .outputFields("name")
         .reducedOutToFlow()
-        .exec(SYS)
+        .ax(SYS)
 
 
 @ExampleApi suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =

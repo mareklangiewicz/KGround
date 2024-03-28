@@ -10,7 +10,7 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CliPlatform.Companion.SYS
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.ure.*
 import kotlin.math.*
 import kotlin.random.*
@@ -235,7 +235,7 @@ fun downloadTmpFile(
 }
 
 @OptIn(DelicateApi::class)
-private fun CliPlatform.download(url: String, to: Path) {
+private fun CLI.download(url: String, to: Path) {
     // TODO: Add curl to KommandLine library, then use it here
     // -s so no progress bars on error stream; -S to report actual errors on error stream
     val k = kommand("curl", "-s", "-S", "-o", to.toString(), url)
