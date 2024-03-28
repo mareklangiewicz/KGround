@@ -9,8 +9,8 @@ plugins {
 }
 
 defaultBuildTemplateForBasicMppLib {
-    findProject(":kground")?.let { api(it) } ?: api("pl.mareklangiewicz:kground:0.0.41")
-    // FIXME https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+    findProject(":kground")?.let { api(it) } ?: api(Langiewicz.kground)
+    // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 }
 
 kotlin { js(IR) { nodejs() } }
