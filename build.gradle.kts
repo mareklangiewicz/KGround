@@ -7,6 +7,11 @@ plugins {
     plug(plugs.KotlinMulti) apply false
 }
 
+val enablePublishing = findProject(":kommandline") == null && findProject(":kommandsamples") == null
+// don't publish to sonatype from my machine, because I include local kommandline and kommandsample
+// modules (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
+// exception: publishToMavenLocal for debugging
+
 defaultBuildTemplateForRootProject(
     langaraLibDetails(
         name = "KGround",
@@ -18,7 +23,7 @@ defaultBuildTemplateForRootProject(
         settings = LibSettings(
             withNativeLinux64 = true,
             compose = null,
-            withSonatypeOssPublishing = true,
+            withSonatypeOssPublishing = enablePublishing
         )
     ),
 )

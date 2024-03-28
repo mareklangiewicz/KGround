@@ -31,3 +31,22 @@ include(":kgroundx-io")
 include(":kgroundx-maintenance")
 include(":kgroundx-jupyter")
 
+
+val kommandlineDir = File("../KommandLine/kommandline")
+val kommandsamplesDir = File("../KommandLine/kommandsamples")
+
+val kommandlineLocal = kommandlineDir.exists()
+val kommandsamplesLocal = kommandsamplesDir.exists()
+// val kommandlineLocal = false
+// val kommandsamplesLocal = false
+
+if (kommandlineLocal) {
+    logger.warn("Adding local kommandline module.")
+    include(":kommandline")
+    project(":kommandline").projectDir = kommandlineDir
+}
+if (kommandsamplesLocal) {
+    logger.warn("Adding local kommandsamples module.")
+    include(":kommandsamples")
+    project(":kommandsamples").projectDir = kommandsamplesDir
+}
