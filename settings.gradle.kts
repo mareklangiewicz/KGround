@@ -30,3 +30,14 @@ rootProject.name = "KommandLine"
 include(":kommandline")
 include(":kommandsamples")
 include(":kommandjupyter")
+
+val kgroundDir = File("../KGround/kground")
+
+val kgroundLocal = kgroundDir.exists()
+// val kgroundLocal = false
+
+if (kgroundLocal) {
+    logger.warn("Adding local kground module.")
+    include(":kground")
+    project(":kground").projectDir = kgroundDir
+}
