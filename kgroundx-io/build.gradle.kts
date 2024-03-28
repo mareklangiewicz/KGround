@@ -11,8 +11,8 @@ plugins {
 defaultBuildTemplateForBasicMppLib {
     api(project(":kgroundx"))
     api(project(":kground-io"))
-    api(Langiewicz.kommandline.withVer("0.0.47")) // FIXME hardcoded ver
-    api(Langiewicz.kommandsamples.withVer("0.0.47")) // FIXME hardcoded ver
+    findProject(":kommandline")?.let { api(it) } ?: api(Langiewicz.kommandline)
+    findProject(":kommandsamples")?.let { api(it) } ?: api(Langiewicz.kommandsamples)
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
 }
 
