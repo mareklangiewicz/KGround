@@ -16,7 +16,7 @@ defaultBuildTemplateForRootProject(
         name = "KommandLine",
         description = "Kotlin DSL for popular CLI commands.",
         githubUrl = "https://github.com/mareklangiewicz/KommandLine",
-        version = Ver(0, 0, 46),
+        version = Ver(0, 0, 47),
         // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
         // https://github.com/mareklangiewicz/KommandLine/releases
         settings = LibSettings(
