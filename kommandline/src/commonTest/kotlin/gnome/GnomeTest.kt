@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.NotifySend.Option.*
 import pl.mareklangiewicz.kommand.systemd.*

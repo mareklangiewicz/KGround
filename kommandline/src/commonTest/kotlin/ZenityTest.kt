@@ -1,6 +1,8 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.interactive.ifInteractiveCodeEnabled
+import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ZenityOpt.*

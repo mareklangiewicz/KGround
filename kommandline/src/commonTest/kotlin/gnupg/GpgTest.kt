@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand.gnupg
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*

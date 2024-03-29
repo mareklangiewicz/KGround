@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kommand.tryInteractivelyCheck
+import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.*
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Option.*

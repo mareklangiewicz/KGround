@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand.dbus
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kommand.tryInteractivelyCheck
+import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.dbus.DBusRunSession.Option.Version
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option.Nested
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option.Wayland

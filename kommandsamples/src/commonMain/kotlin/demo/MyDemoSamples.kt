@@ -5,7 +5,7 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kommand.Adb
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.InteractiveScript
+import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.Vim
@@ -37,7 +37,6 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.ulog
-import pl.mareklangiewicz.kommand.writeFileAndStartInGVim
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenity
 import pl.mareklangiewicz.kommand.zenityAskForEntry

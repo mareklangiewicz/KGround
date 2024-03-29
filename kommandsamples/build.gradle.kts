@@ -10,7 +10,6 @@ plugins {
 
 defaultBuildTemplateForBasicMppLib {
     api(project(":kommandline"))
-    implementation(kotlin("reflect")) // FIXME: Add to DepsNew
 }
 
 kotlin { js(IR) { nodejs() } }
