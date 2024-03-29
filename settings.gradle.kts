@@ -3,11 +3,14 @@
 //gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
 pluginManagement {
-//    includeBuild("../DepsKt")
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
+    }
+    if (File("../DepsKt").exists()) {
+        logger.warn("Including local build ../DepsKt")
+        includeBuild("../DepsKt")
     }
 }
 
