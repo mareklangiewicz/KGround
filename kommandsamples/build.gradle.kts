@@ -10,6 +10,9 @@ plugins {
 
 defaultBuildTemplateForBasicMppLib {
     api(project(":kommandline"))
+
+    // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later
+    implementation(kotlin("reflect"))
 }
 
 kotlin { js(IR) { nodejs() } }
