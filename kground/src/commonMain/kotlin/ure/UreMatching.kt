@@ -112,13 +112,6 @@ operator fun MatchResult.get(name: String) = namedValues[name] ?: bad { "Group n
 @NotPortableApi("Not guaranteed to work on all platforms.") // but it is currently working on platforms I unit-test.
 operator fun MatchResult.getValue(thisObj: Any?, property: KProperty<*>) = get(property.name)
 
-// FIXME_someday: this is hack, but I can't reliably get named groups from MatchResult (at least in multiplatform)
-// TRACK: https://youtrack.jetbrains.com/issue/KT-51908
-// see also:
-//    https://youtrack.jetbrains.com/issue/KT-41890
-//    https://youtrack.jetbrains.com/issue/KT-29241/Unable-to-use-named-Regex-groups-on-JDK-11
-//    https://youtrack.jetbrains.com/issue/KT-20865/Retrieving-groups-by-name-is-not-supported-on-Java-9-even-with-kotlin-stdlib-jre8-in-the-classpath
-//    https://github.com/JetBrains/kotlin/commit/9c4c1ed557a889bf57c754b81f4897a0d8405b0d
 @NotPortableApi("Not guaranteed to work on all platforms.") // but it is currently working on platforms I unit-test.
 val MatchResult.named get() = groups as? MatchNamedGroupCollection
     ?: throw UnsupportedOperationException("Retrieving groups by name is not supported on this platform.")
