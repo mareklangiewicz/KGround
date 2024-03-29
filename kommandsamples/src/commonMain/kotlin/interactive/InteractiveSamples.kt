@@ -58,7 +58,7 @@ suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
     // before we start to interact with the user,
     // but the code is never called without confirmation.
     ifInteractiveCodeEnabled {
-        zenityAskIf("Call $className#$memberName ?").ax(SYS) || return
+        zenityAskIf("Call member $memberName\nfrom class $className?").ax(SYS) || return
         val member: Any? = call()
         // Note: call() will either already "do the thing" (when the member is just a fun to call)
         //  or it will only get the property (like ReducedScript/Sample etc.) which will be tried (or not) later.
