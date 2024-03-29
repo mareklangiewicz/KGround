@@ -6,7 +6,6 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.jupyter.x
 import pl.mareklangiewicz.ure.*
 
 
