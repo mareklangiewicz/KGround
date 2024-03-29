@@ -16,7 +16,6 @@ object MyExamples {
 
     // TODO NOW: refactor it all - moved from kotlinx-jupyter:MainExamples
 
-    @OptIn(DelicateApi::class)
     suspend fun interplayKGroundAndKommand() {
         println("Let's play with kground and kommand integration...")
         ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
