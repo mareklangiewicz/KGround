@@ -1,24 +1,25 @@
-@file:Suppress("unused")
+package pl.mareklangiewicz.kgroundx.maintenance
 
-package pl.mareklangiewicz.kgroundx.jupyter
-
-import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.kgroundx.maintenance.*
+import kotlinx.coroutines.flow.map
+import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.ExampleApi
+import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.core.LsOpt
+import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.ure.*
 
-
 @ExampleApi
-object MainExamples {
+object MyExamples {
+
+    // TODO NOW: refactor it all - moved from kotlinx-jupyter:MainExamples
 
     @OptIn(DelicateApi::class)
     suspend fun interplayKGroundAndKommand() {
         println("Let's play with kground and kommand integration...")
-        // ls { -LsOpt.LongFormat; -LsOpt.All }.ax {
-        //     println("out line: $it")
-        // }
-        // TODO: sth more impressive but still safe as default call in Playground.play()
+        ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
     }
 
     suspend fun checkMyRegionsAndWorkflows(onlyPublic: Boolean = true) {
@@ -27,8 +28,7 @@ object MainExamples {
         "Check all known regions in ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
                 { checkAllKnownRegionsInMyProjects(onlyPublic = onlyPublic) }
         "Check my dworkflows in ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
-                { checkMyDWorkflowsInMyProjects(onlyPublic = onlyPublic)
-        }
+                { checkMyDWorkflowsInMyProjects(onlyPublic = onlyPublic) }
     }
 
     suspend fun dangerousInjectStuffToMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
@@ -60,6 +60,42 @@ object MainExamples {
                 { searchKotlinCodeInMyProjects(ureText(text).withOptWhatevaAroundInLine()) }
         // TODO: ask and put results into intellij
     }
+
+    @OptIn(DelicateApi::class, NotPortableApi::class)
+    suspend fun dirtyFixMyReposOrigins() {
+
+        val kget = kommand("git", "remote", "get-url", "origin")
+        fun kset(url: String) = kommand("git", "remote", "set-url", "origin", url)
+
+        val ureRepoUrl = ure {
+            + ureText("git@github.com:")
+            + ureIdent().withName("user")
+            + ch('/')
+            + ureIdent(allowDashesInside = true).withName("project")
+            + ureText(".git")
+        }
+
+        fetchMyProjectsNameS(onlyPublic = false)
+            .map { PathToMyKotlinProjects / it }
+            .collect { dir ->
+                println(dir)
+                val url = kget.ax(dir = dir.toString()).single()
+                println(url)
+                val result = ureRepoUrl.matchEntireOrThrow(url)
+                val vals = result.namedValues
+                val user = vals["user"]!!
+                val project = vals["project"]!!
+                if (user == "mareklangiewicz") {
+                    println("User is already mareklangiewicz.")
+                    return@collect
+                }
+                user chkEq "langara"
+                val newUrl = "git@github.com:mareklangiewicz/$project.git"
+                println("*** SETTING ORIGIN -> $newUrl ***")
+                kset(newUrl).ax(dir = dir.toString())
+            }
+    }
+
 
 
     private suspend infix fun String.ifYesRun(code: suspend () -> Unit) {
