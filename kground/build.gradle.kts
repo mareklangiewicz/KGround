@@ -19,6 +19,7 @@ defaultBuildTemplateForBasicMppLib {
     // KLIB resolver: Could not find "org.jetbrains.kotlinx:kotlinx-datetime-cinterop-date"
 
     api(KotlinX.coroutines_core)
+    implementation(kotlin("reflect")) // FIXME: Add to Deps
 
     // FIXME: remove hardcoded atomicfu when bug is fixed. Update: Looks like it's working, but wait for youtrack update.
     // https://youtrack.jetbrains.com/issue/KT-64111/kotlinx-coroutines-1.8.0-RC-cant-be-used-Could-not-find-org.jetbrains.kotlinxatomicfu-cinterop-interop
