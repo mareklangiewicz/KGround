@@ -46,7 +46,6 @@ val settings = rootExtLibDetails.settings.copy(
 val details = rootExtLibDetails.copy(settings = settings)
 defaultBuildTemplateForBasicMppLib(details) {
     api(project(":kgroundx-maintenance"))
-    api(Langiewicz.kommandjupyter)
 }
 
 kotlin {
