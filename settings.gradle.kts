@@ -5,7 +5,10 @@ pluginManagement {
         google()
         mavenCentral()
     }
-    // includeBuild("../DepsKt")
+    if (File("../DepsKt").exists()) {
+        logger.warn("Including local build ../DepsKt")
+        includeBuild("../DepsKt")
+    }
 }
 
 plugins {
