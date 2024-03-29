@@ -9,7 +9,7 @@ plugins {
 }
 
 defaultBuildTemplateForBasicMppLib {
-    findProject(":kground")?.let { api(it) } ?: api(Langiewicz.kground)
+    api(findProject(":kground") ?: Langiewicz.kground)
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 }
 
