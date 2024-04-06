@@ -8,9 +8,15 @@ pluginManagement {
         google()
         mavenCentral()
     }
-    if (File("../DepsKt").exists()) {
-        logger.warn("Including local build ../DepsKt")
-        includeBuild("../DepsKt")
+
+    val depsKtDir = File("../DepsKt")
+
+   val depsKtLocal = depsKtDir.exists()
+    // val depsKtLocal = false
+
+    if (depsKtLocal) {
+        logger.warn("Including local build $depsKtDir")
+        includeBuild(depsKtDir)
     }
 }
 
