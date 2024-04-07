@@ -81,7 +81,8 @@ fun TaskCollection<Task>.defaultKotlinCompileOptions(
         // useful, for example, to suppress some errors when accessing internal code from some library, like:
         // @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "EXPOSED_PARAMETER_TYPE", "EXPOSED_PROPERTY_TYPE", "CANNOT_OVERRIDE_INVISIBLE_MEMBER")
         suppressComposeCheckKotlinVer?.ver?.let {
-            freeCompilerArgs = freeCompilerArgs + "-P" + "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it"
+            freeCompilerArgs =
+                freeCompilerArgs + "-P" + "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it"
         }
     }
 }
@@ -169,7 +170,7 @@ fun Project.defaultPublishing(
             defaultPOM(lib)
         }
     }
-    if (withSignErrorWorkaround) tasks.withSignErrorWorkaround() //very much related to comments above too
+    if (withSignErrorWorkaround) tasks.withSignErrorWorkaround() // very much related to comments above too
     if (withPublishingPrintln) tasks.withPublishingPrintln()
 }
 
