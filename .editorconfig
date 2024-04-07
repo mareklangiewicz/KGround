@@ -5,7 +5,7 @@ charset = utf-8
 end_of_line = lf
 indent_size = 4
 indent_style = space
-insert_final_newline = true
+insert_final_newline = false
 max_line_length = 120
 tab_width = 4
 ij_continuation_indent_size = 8
@@ -25,6 +25,7 @@ ij_editorconfig_space_before_comma = false
 ij_editorconfig_spaces_around_assignment_operators = true
 
 [{*.ant,*.fxml,*.jhm,*.jnlp,*.jrxml,*.pom,*.rng,*.tld,*.wadl,*.wsdl,*.xml,*.xsd,*.xsl,*.xslt,*.xul}]
+indent_size = 2
 ij_xml_align_attributes = true
 ij_xml_align_text = false
 ij_xml_attribute_wrap = normal
@@ -40,7 +41,7 @@ ij_xml_keep_whitespaces_inside_cdata = false
 ij_xml_line_comment_at_first_column = true
 ij_xml_space_after_tag_name = false
 ij_xml_space_around_equals_in_attribute = false
-ij_xml_space_inside_empty_tag = false
+ij_xml_space_inside_empty_tag = true
 ij_xml_text_wrap = normal
 
 [{*.bash,*.sh,*.zsh}]
