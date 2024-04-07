@@ -1,5 +1,8 @@
 package pl.mareklangiewicz.kommand
 
+import java.io.*
+import java.lang.ProcessBuilder.*
+import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
@@ -7,9 +10,6 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.ulog.d
-import java.io.*
-import java.lang.ProcessBuilder.*
-import kotlin.coroutines.*
 
 actual fun provideSysCLI(): CLI = JvmCLI()
 

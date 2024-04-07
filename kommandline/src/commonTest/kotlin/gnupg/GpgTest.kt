@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand.gnupg
 
+import kotlin.test.*
+import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.*
@@ -7,8 +9,6 @@ import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import pl.mareklangiewicz.ulog.d
-import kotlin.test.*
-import kotlin.test.Test
 
 @OptIn(DelicateApi::class)
 class GpgTest {

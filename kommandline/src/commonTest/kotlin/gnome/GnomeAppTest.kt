@@ -1,13 +1,13 @@
 package pl.mareklangiewicz.kommand.gnome
 
+import kotlin.test.Ignore
+import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
 import pl.mareklangiewicz.ulog.i
-import kotlin.test.Ignore
-import kotlin.test.Test
 
 
 @OptIn(DelicateApi::class) // TODO NOW: move to samples or sth

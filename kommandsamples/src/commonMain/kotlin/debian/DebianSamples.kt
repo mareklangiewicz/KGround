@@ -1,10 +1,8 @@
 package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.debian.DpkgAct.*
 import pl.mareklangiewicz.kommand.samples.*
-import kotlin.reflect.*
 
 
 data object DebianSamples {

@@ -1,12 +1,12 @@
 package pl.mareklangiewicz.kommand.dbus
 
+import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.dbus.DBusRunSession.Option.Version
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option.Nested
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option.Wayland
 import pl.mareklangiewicz.kommand.gnome.gnomeshell
-import kotlin.test.Test
 
 
 @OptIn(DelicateApi::class) // TODO NOW: move to samples or sth

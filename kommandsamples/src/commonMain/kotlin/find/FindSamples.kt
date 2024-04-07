@@ -5,11 +5,11 @@ package pl.mareklangiewicz.kommand.find
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 import pl.mareklangiewicz.kommand.find.FindOpt.*
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.text.*
 
 val myHomePath = "/home/marek"
 val myTmpPath = "$myHomePath/tmp"

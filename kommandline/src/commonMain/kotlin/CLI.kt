@@ -1,10 +1,10 @@
 package pl.mareklangiewicz.kommand
 
+import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.ulog.d
-import kotlin.coroutines.*
 
 expect fun provideSysCLI(): CLI
 

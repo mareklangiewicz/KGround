@@ -1,8 +1,7 @@
 package pl.mareklangiewicz.kommand
 
-import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.regex.*
 import kotlin.test.*
+import pl.mareklangiewicz.regex.*
 
 class UtilsTest {
   @Test fun findSingleTest() {

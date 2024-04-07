@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.gnome
 
+import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.*
@@ -7,7 +8,6 @@ import pl.mareklangiewicz.kommand.NotifySend.Option.*
 import pl.mareklangiewicz.kommand.systemd.*
 import pl.mareklangiewicz.kommand.systemd.JournalCtl.Option.*
 import pl.mareklangiewicz.kommand.term.*
-import kotlin.test.Test
 
 
 @OptIn(DelicateApi::class)

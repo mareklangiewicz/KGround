@@ -2,8 +2,8 @@ package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.*
-import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*

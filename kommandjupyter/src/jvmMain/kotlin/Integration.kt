@@ -1,13 +1,13 @@
 package pl.mareklangiewicz.kommand.jupyter
 
+import kotlin.time.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlin.time.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 
 internal class Integration : JupyterIntegration() {
   override fun Builder.onLoaded() {

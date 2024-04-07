@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand.demo
 
+import kotlin.test.Test
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.annotations.DelicateApi
@@ -8,7 +9,6 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.uspek.runTestUSpek
 import pl.mareklangiewicz.uspek.so
-import kotlin.test.Test
 
 
 // Yet another way to run some experiments from IDE: via conditionally enabled tests

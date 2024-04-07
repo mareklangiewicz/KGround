@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kommand
 
+import kotlin.random.Random
+import kotlin.random.nextUInt
 import org.junit.jupiter.api.TestFactory
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
@@ -10,8 +12,6 @@ import pl.mareklangiewicz.upue.asEncodedIfAbc16
 import pl.mareklangiewicz.uspek.eq
 import pl.mareklangiewicz.uspek.o
 import pl.mareklangiewicz.uspek.uspekTestFactory
-import kotlin.random.Random
-import kotlin.random.nextUInt
 
 class KonfigTests {
 

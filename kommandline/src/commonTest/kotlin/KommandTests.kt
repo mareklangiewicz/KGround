@@ -2,6 +2,12 @@
 
 package pl.mareklangiewicz.kommand
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.math.absoluteValue
+import kotlin.random.Random
+import kotlin.test.Test
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import pl.mareklangiewicz.annotations.DelicateApi
@@ -19,12 +25,6 @@ import pl.mareklangiewicz.uspek.failed
 import pl.mareklangiewicz.uspek.so
 import pl.mareklangiewicz.uspek.suspek
 import pl.mareklangiewicz.uspek.ucontext
-import kotlin.coroutines.CoroutineContext
-import kotlin.math.absoluteValue
-import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 
 @OptIn(DelicateApi::class)

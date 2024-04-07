@@ -4,8 +4,6 @@ package pl.mareklangiewicz.kommand.samples
 
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.ulog.ULog
-import pl.mareklangiewicz.ulog.ULogLevel
 
 
 data class Sample(
