@@ -3,8 +3,8 @@ import pl.mareklangiewicz.uspek.*
 
 class HelloTestJvm {
 
-    @TestFactory
-    fun testHelloJvm() = uspekTestFactory {
-        OnHelloStuff()
-    }
+  @TestFactory
+  fun testHelloJvm() = uspekTestFactory {
+    OnHelloStuff()
+  }
 }

@@ -8,26 +8,27 @@ import pl.mareklangiewicz.ure.core.UreConcatenation
 
 
 fun FileSystem.readAndMatchUre(file: Path, init: UreConcatenation.() -> Unit): MatchResult? =
-    readAndMatchUre(file, ure(init = init))
+  readAndMatchUre(file, ure(init = init))
 
-fun FileSystem.readAndMatchUre(file: Path, ure: Ure): MatchResult? = readUtf8(file).let { ure.compile().matchEntire(it) }
+fun FileSystem.readAndMatchUre(file: Path, ure: Ure): MatchResult? =
+  readUtf8(file).let { ure.compile().matchEntire(it) }
 
 @NotPortableApi
 fun FileSystem.commentOutMultiplatformFunInFile(file: Path) {
-    println("\ncommenting: $file") // FIXME:remove/ulog
-    processFile(file, file, String::commentOutMultiplatformFun)
+  println("\ncommenting: $file") // FIXME:remove/ulog
+  processFile(file, file, String::commentOutMultiplatformFun)
 }
 
 @NotPortableApi
 fun FileSystem.undoCommentOutMultiplatformFunInFile(file: Path) {
-    println("\nundo comments: $file") // FIXME:remove/ulog
-    processFile(file, file, String::undoCommentOutMultiplatformFun)
+  println("\nundo comments: $file") // FIXME:remove/ulog
+  processFile(file, file, String::undoCommentOutMultiplatformFun)
 }
 
 @NotPortableApi
 fun FileSystem.commentOutMultiplatformFunInEachKtFile(root: Path) =
-    findAllFiles(root).filterExt("kt").forEach { commentOutMultiplatformFunInFile(it) }
+  findAllFiles(root).filterExt("kt").forEach { commentOutMultiplatformFunInFile(it) }
 
 @NotPortableApi
 fun FileSystem.undoCommentOutMultiplatformFunInEachKtFile(root: Path) =
-    findAllFiles(root).filterExt("kt").forEach { undoCommentOutMultiplatformFunInFile(it) }
+  findAllFiles(root).filterExt("kt").forEach { undoCommentOutMultiplatformFunInFile(it) }

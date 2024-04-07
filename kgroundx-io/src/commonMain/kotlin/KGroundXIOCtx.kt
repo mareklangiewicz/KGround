@@ -10,10 +10,10 @@ import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
 interface WithCLI {
-    val cli: CLI
+  val cli: CLI
 }
 
-interface WithKGroundXIO: WithKGroundIO, WithCLI
+interface WithKGroundXIO : WithKGroundIO, WithCLI
 
 /**
  * Sth like this be used as a context receiver when Kotlin supports it.
@@ -25,8 +25,10 @@ interface WithKGroundXIO: WithKGroundIO, WithCLI
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usubmit: USubmit): KGroundIOCtx(fs, ulog, usubmit), WithKGroundXIO {
-    companion object Key : AbstractCoroutineContextKey<KGroundIOCtx, KGroundXIOCtx>(KGroundIOCtx, { it as? KGroundXIOCtx })
+open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usubmit: USubmit) :
+  KGroundIOCtx(fs, ulog, usubmit), WithKGroundXIO {
+  companion object Key :
+    AbstractCoroutineContextKey<KGroundIOCtx, KGroundXIOCtx>(KGroundIOCtx, { it as? KGroundXIOCtx })
 }
 
 /**
@@ -42,18 +44,18 @@ open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usub
  * and defaults to [ULogPrintLn] if no [ULog] found.
  */
 suspend fun <T> withKGroundXIOCtx(
-    name: String? = null,
-    cli: CLI? = null,
-    fs: FileSystem? = null,
-    ulog: ULog? = null,
-    usubmit: USubmit? = null,
-    block: suspend CoroutineScope.() -> T,
+  name: String? = null,
+  cli: CLI? = null,
+  fs: FileSystem? = null,
+  ulog: ULog? = null,
+  usubmit: USubmit? = null,
+  block: suspend CoroutineScope.() -> T,
 ): T = withContext(
-    KGroundXIOCtx(
-        cli ?: coroutineContext[KGroundXIOCtx]?.cli ?: CLI.SYS,
-        fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
-        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
-        usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
-    ) plusIfNN name?.let(::CoroutineName),
-    block
+  KGroundXIOCtx(
+    cli ?: coroutineContext[KGroundXIOCtx]?.cli ?: CLI.SYS,
+    fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+    usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
+  ) plusIfNN name?.let(::CoroutineName),
+  block,
 )

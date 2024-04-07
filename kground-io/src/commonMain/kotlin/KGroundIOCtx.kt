@@ -7,9 +7,11 @@ import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
-interface WithFS { val fs: FileSystem }
+interface WithFS {
+  val fs: FileSystem
+}
 
-interface WithKGroundIO: WithKGround, WithFS
+interface WithKGroundIO : WithKGround, WithFS
 
 /**
  * Sth like this be used as a context receiver when Kotlin supports it.
@@ -21,8 +23,9 @@ interface WithKGroundIO: WithKGround, WithFS
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmit): KGroundCtx(ulog, usubmit), WithKGroundIO {
-    companion object Key : AbstractCoroutineContextKey<KGroundCtx, KGroundIOCtx>(KGroundCtx, { it as? KGroundIOCtx })
+open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmit) : KGroundCtx(ulog, usubmit),
+  WithKGroundIO {
+  companion object Key : AbstractCoroutineContextKey<KGroundCtx, KGroundIOCtx>(KGroundCtx, { it as? KGroundIOCtx })
 }
 
 /**
@@ -35,16 +38,16 @@ open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmi
  * and defaults to [ULogPrintLn] if no [ULog] found.
  */
 suspend fun <T> withKGroundIOCtx(
-    name: String? = null,
-    fs: FileSystem? = null,
-    ulog: ULog? = null,
-    usubmit: USubmit? = null,
-    block: suspend CoroutineScope.() -> T,
+  name: String? = null,
+  fs: FileSystem? = null,
+  ulog: ULog? = null,
+  usubmit: USubmit? = null,
+  block: suspend CoroutineScope.() -> T,
 ): T = withContext(
-    KGroundIOCtx(
-        fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
-        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
-        usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
-    ) plusIfNN name?.let(::CoroutineName),
-    block
+  KGroundIOCtx(
+    fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+    usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
+  ) plusIfNN name?.let(::CoroutineName),
+  block,
 )

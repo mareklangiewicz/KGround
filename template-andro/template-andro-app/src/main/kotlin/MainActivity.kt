@@ -12,26 +12,26 @@ import pl.mareklangiewicz.templateandrolib.*
 import androidx.compose.ui.Modifier as Mod
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            TemplateAndroTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Mod.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    HelloStuff("Android")
-                }
-            }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+      TemplateAndroTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+          modifier = Mod.fillMaxSize(),
+          color = MaterialTheme.colorScheme.background,
+        ) {
+          HelloStuff("Android")
         }
+      }
     }
+  }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    TemplateAndroTheme {
-        HelloStuff("Android")
-    }
+  TemplateAndroTheme {
+    HelloStuff("Android")
+  }
 }

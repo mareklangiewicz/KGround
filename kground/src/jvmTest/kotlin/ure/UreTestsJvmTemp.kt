@@ -10,7 +10,10 @@ import pl.mareklangiewicz.uspek.*
  * But I plan to implement my own mpp "runner" with better reporting, so someday this file will be deleted.
  */
 class UreTestsJvmTemp {
-    init { "INIT ${this::class.simpleName}".teePP }
-    @TestFactory fun testUreStuffJvmFactory() = uspekTestFactory { testUreCmn() }
+  init {
+    "INIT ${this::class.simpleName}".teePP
+  }
+
+  @TestFactory fun testUreStuffJvmFactory() = uspekTestFactory { testUreCmn() }
 }
 

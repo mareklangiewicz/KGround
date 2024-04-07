@@ -4,10 +4,12 @@ import pl.mareklangiewicz.bad.*
 import kotlin.jvm.*
 
 fun interface USubmit {
-    suspend operator fun invoke(data: Any?): Any?
+  suspend operator fun invoke(data: Any?): Any?
 }
 
-interface WithUSubmit { val usubmit: USubmit }
+interface WithUSubmit {
+  val usubmit: USubmit
+}
 
 /**
  * Let's call the entity that calls [USubmit.invoke] the worker, and the one that reacts: the manager.
@@ -33,6 +35,6 @@ value class UTask(val name: String)
 @JvmInline
 value class UIssue(val name: String)
 
-class USubmitNotSupportedErr: USubmit {
-    override suspend fun invoke(data: Any?): Nothing = bad { "USubmit is not supported in this context." }
+class USubmitNotSupportedErr : USubmit {
+  override suspend fun invoke(data: Any?): Nothing = bad { "USubmit is not supported in this context." }
 }

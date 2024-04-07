@@ -14,10 +14,10 @@ import pl.mareklangiewicz.uwidgets.UBinType.*
 enum class UBinType { UBOX, UROW, UCOLUMN }
 
 enum class UAlignmentType(val css: String) {
-    USTART("start"), UEND("end"), UCENTER("center"), USTRETCH("stretch");
+  USTART("start"), UEND("end"), UCENTER("center"), USTRETCH("stretch");
 
-    companion object {
-        fun css(css: String) = UAlignmentType.values().first { it.css == css }
-    }
+  companion object {
+    fun css(css: String) = UAlignmentType.values().first { it.css == css }
+  }
 }
 

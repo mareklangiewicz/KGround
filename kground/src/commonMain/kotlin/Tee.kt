@@ -14,26 +14,26 @@ This implementation is temporary.
 The final implementation will use context receivers (when they are multiplatform)
 and will be correctly composable with the rest of ULog.
 
-*/
+ */
 
 
 val Any?.unit get() = Unit
 
 fun <T> T.tee(
-    into: ULog = TeeDefaultLog,
-    withCurrentThread: Boolean = true,
-    withCurrentTime: Boolean = true,
-    withCurrentPlatform: Boolean = false,
-    withCurrentPath: Boolean = false,
-    withValue: Boolean = true,
+  into: ULog = TeeDefaultLog,
+  withCurrentThread: Boolean = true,
+  withCurrentTime: Boolean = true,
+  withCurrentPlatform: Boolean = false,
+  withCurrentPath: Boolean = false,
+  withValue: Boolean = true,
 ): T {
-    val p1 = if (withCurrentThread) " [${getCurrentThreadName().padEnd(40).substring(0, 40)}]" else ""
-    val p2 = if (withCurrentTime) " [${getCurrentTimeStr()}]" else ""
-    val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().padEnd(40).substring(0, 40)}]" else ""
-    val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
-    val p5 = if (withValue) " $this" else ""
-    into.i("$p1$p2$p3$p4$p5")
-    return this
+  val p1 = if (withCurrentThread) " [${getCurrentThreadName().padEnd(40).substring(0, 40)}]" else ""
+  val p2 = if (withCurrentTime) " [${getCurrentTimeStr()}]" else ""
+  val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().padEnd(40).substring(0, 40)}]" else ""
+  val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
+  val p5 = if (withValue) " $this" else ""
+  into.i("$p1$p2$p3$p4$p5")
+  return this
 }
 
 val String.tee: String get() = tee()

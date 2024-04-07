@@ -12,13 +12,13 @@ import pl.mareklangiewicz.ure.core.*
 const val MAX = Int.MAX_VALUE
 
 fun ure(name: String? = null, init: UreConcatenation.() -> Unit) =
-    UreConcatenation().apply(init).withName(name) // when name is null, the withName doesn't wrap ure at all.
+  UreConcatenation().apply(init).withName(name) // when name is null, the withName doesn't wrap ure at all.
 
 @DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 @SecondaryApi("Use Ure.withOptions", ReplaceWith("content.withOptions(enable, disable)"))
 fun ureWithOptions(content: Ure, enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
-    UreChangeOptionsGroup(content, enable, disable)
+  UreChangeOptionsGroup(content, enable, disable)
 
 @SecondaryApi("Use Ure.withName", ReplaceWith("content.withName(name"))
 fun ureWithName(name: String, content: Ure) = UreNamedGroup(content, name)
@@ -28,7 +28,7 @@ fun Ure.withName(name: String?) = if (name == null) this else UreNamedGroup(this
 @DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptions(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
-    UreChangeOptionsGroup(this, enable, disable)
+  UreChangeOptionsGroup(this, enable, disable)
 
 @DelicateApi("Usually code using Ure assumes default options, so changing options can create hard to find issues.")
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
@@ -48,22 +48,24 @@ fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable =
 @SecondaryApi("Use Ure.withOptions", ReplaceWith("withOptions"))
 @NotPortableApi("Does NOT even compile (Ure.compile) on JS.", ReplaceWith("withOptions"))
 fun ureWithOptionsAhead(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
-    UreChangeOptionsAhead(enable, disable)
-
+  UreChangeOptionsAhead(enable, disable)
 
 
 fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
-    withBoundaries(atWordBoundary.takeIf { boundaryBefore }, atWordBoundary.takeIf { boundaryAfter })
+  withBoundaries(atWordBoundary.takeIf { boundaryBefore }, atWordBoundary.takeIf { boundaryAfter })
 
-@SecondaryApi @NotPortableApi fun Ure.withBOEOWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
-    withBoundaries(atBOWord.takeIf { boundaryBefore }, atEOWord.takeIf { boundaryAfter })
+@SecondaryApi @NotPortableApi fun Ure.withBOEOWordBoundaries(
+  boundaryBefore: Boolean = true,
+  boundaryAfter: Boolean = true,
+) =
+  withBoundaries(atBOWord.takeIf { boundaryBefore }, atEOWord.takeIf { boundaryAfter })
 
 fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) =
-    if (boundaryBefore == null && boundaryAfter == null) this else ure {
-        boundaryBefore?.let { + it }
-        + this@withBoundaries // it will flatten if this is UreConcatenation (see UreConcatenation.toIR())
-        boundaryAfter?.let { + it }
-    }
+  if (boundaryBefore == null && boundaryAfter == null) this else ure {
+    boundaryBefore?.let { +it }
+    +this@withBoundaries // it will flatten if this is UreConcatenation (see UreConcatenation.toIR())
+    boundaryAfter?.let { +it }
+  }
 
 infix fun Ure.or(that: Ure) = UreAlternation(this, that)
 infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
@@ -72,29 +74,29 @@ infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
 
 @OptIn(NotPortableApi::class, DelicateApi::class) // not portable only if the receiver was already not portable.
 operator fun Ure.not(): Ure = when (this) {
-    is UreWithRawIR -> when (this) {
-        // TODO_someday: Can I negate some common raw ures?
-        else -> bad { "This UreWithRawIR can not be negated" }
-    }
-    is UreCharExact -> !chOfAny(this)
-    is UreAnchorPreDef -> !this
-    is UreCharClassPreDef -> !this
-    is UreCharClassRange -> !this
-    is UreCharClassUnion -> !this
-    is UreCharClassIntersect -> !this
-    is UreCharClassProp -> !this
-    is UreGroup -> when (this) {
-        is UreLookGroup -> !this
-        else -> bad { "Unsupported UreGroup for negation: ${this::class.simpleName}" }
-    }
+  is UreWithRawIR -> when (this) {
+    // TODO_someday: Can I negate some common raw ures?
+    else -> bad { "This UreWithRawIR can not be negated" }
+  }
+  is UreCharExact -> !chOfAny(this)
+  is UreAnchorPreDef -> !this
+  is UreCharClassPreDef -> !this
+  is UreCharClassRange -> !this
+  is UreCharClassUnion -> !this
+  is UreCharClassIntersect -> !this
+  is UreCharClassProp -> !this
+  is UreGroup -> when (this) {
+    is UreLookGroup -> !this
+    else -> bad { "Unsupported UreGroup for negation: ${this::class.simpleName}" }
+  }
 
-    is UreGroupRef -> bad { "UreGroupRef can not be negated" }
-    is UreConcatenation -> bad { "UreConcatenation can not be negated" }
-    is UreQuantifier -> bad { "UreQuantifier can not be negated" }
-    is UreQuote -> bad { "UreQuote can not be negated" }
-    is UreText -> bad { "UreText can not be negated" }
-    is UreAlternation -> bad { "UreAlternation can not be negated" }
-    is UreChangeOptions -> bad { "UreChangeOptions can not be negated" }
+  is UreGroupRef -> bad { "UreGroupRef can not be negated" }
+  is UreConcatenation -> bad { "UreConcatenation can not be negated" }
+  is UreQuantifier -> bad { "UreQuantifier can not be negated" }
+  is UreQuote -> bad { "UreQuote can not be negated" }
+  is UreText -> bad { "UreText can not be negated" }
+  is UreAlternation -> bad { "UreAlternation can not be negated" }
+  is UreChangeOptions -> bad { "UreChangeOptions can not be negated" }
 }
 // TODO_someday: experiment more with different operators overloading,
 //  especially indexed access operators and invoke operators.
@@ -167,7 +169,8 @@ val chGraph = chOfAny(chAlnum, chPunct)
 val chSpace = ' '.ce
 val chWhiteSpace = 's'.cpd
 @OptIn(NotPortableApi::class)
-val chWhiteSpaceInLine = chOfAny(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
+val chWhiteSpaceInLine =
+  chOfAny(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
 
 /** Basic printable characters. Only normal space. No emojis, etc. */
 @OptIn(NotPortableApi::class)
@@ -345,7 +348,7 @@ val chPLatin = chProp("sc=Latin")
 val chPGreek = chProp("sc=Greek")
 
 @NotPortableApi @DelicateApi fun chCtrl(letter: Char) = ureRaw("\\c$letter").also { req(letter in 'A'..'Z') }
-    // https://www.regular-expressions.info/nonprint.html
+// https://www.regular-expressions.info/nonprint.html
 
 
 @NotPortableApi("Some unions do NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
@@ -434,7 +437,7 @@ val atEOLine = '$'.at
 val atWordBoundary = 'b'.at
 
 @SecondaryApi("Use !atWordBoundary") val atNotWordBounday = 'B'.at
-    // Calling it "non-word boundary" is wrong. It's the opposite to the word boundary, so "not (word boundary)"
+// Calling it "non-word boundary" is wrong. It's the opposite to the word boundary, so "not (word boundary)"
 
 @SecondaryApi("Usually atWordBoundary is also good, and have simpler construction (no lookAhead).")
 val atBOWord = atWordBoundary then chWord.lookAhead() // emulating sth like in Vim or GNU: "\<"
@@ -462,12 +465,12 @@ val ureLineBreak = ureLineBreakBasic
 // region [Ure Groups Related Stuff]
 
 fun Ure.group(capture: Boolean = true, name: String? = null) = when {
-    name != null -> {
-        req(capture) { "Named group is always capturing." }
-        withName(name)
-    }
-    capture -> UreNumberedGroup(this)
-    else -> groupNonCapt()
+  name != null -> {
+    req(capture) { "Named group is always capturing." }
+    withName(name)
+  }
+  capture -> UreNumberedGroup(this)
+  else -> groupNonCapt()
 }
 
 fun Ure.groupNonCapt() = UreNonCapturingGroup(this)
@@ -508,28 +511,33 @@ fun Ure.times(exactly: Int) = UreQuantifier(this, exactly..exactly)
  * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as [UreAtomicGroup]
  */
 fun Ure.times(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
-    if (times.start == 1 && times.endInclusive == 1) this else UreQuantifier(this, times, reluctant, possessive)
+  if (times.start == 1 && times.endInclusive == 1) this else UreQuantifier(this, times, reluctant, possessive)
 
 fun Ure.timesMinMax(min: Int, max: Int, reluctant: Boolean = false, possessive: Boolean = false) =
-    times(min..max, reluctant, possessive)
+  times(min..max, reluctant, possessive)
 
 fun Ure.timesMin(min: Int, reluctant: Boolean = false, possessive: Boolean = false) =
-    timesMinMax(min, MAX, reluctant, possessive)
+  timesMinMax(min, MAX, reluctant, possessive)
 
 fun Ure.timesMax(max: Int, reluctant: Boolean = false, possessive: Boolean = false) =
-    timesMinMax(0, max, reluctant, possessive)
+  timesMinMax(0, max, reluctant, possessive)
 
 fun Ure.timesAny(reluctant: Boolean = false, possessive: Boolean = false) =
-    times(0..MAX, reluctant, possessive)
+  times(0..MAX, reluctant, possessive)
 
 
 @Deprecated("Let's try to use .times instead", ReplaceWith("content.times(times, reluctant, possessive)"))
 fun quantify(content: Ure, times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
-    content.times(times, reluctant, possessive)
+  content.times(times, reluctant, possessive)
 
 @Deprecated("Let's try to use .times instead", ReplaceWith("ure(init = init).times(times, reluctant, possessive)"))
-fun quantify(times: IntRange, reluctant: Boolean = false, possessive: Boolean = false, init: UreConcatenation.() -> Unit) =
-    ure(init = init).times(times, reluctant, possessive)
+fun quantify(
+  times: IntRange,
+  reluctant: Boolean = false,
+  possessive: Boolean = false,
+  init: UreConcatenation.() -> Unit,
+) =
+  ure(init = init).times(times, reluctant, possessive)
 
 // endregion [Ure Quantifiers Related Stuff]
 

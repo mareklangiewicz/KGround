@@ -13,16 +13,16 @@ import androidx.compose.ui.Modifier as Mod
 
 @Composable
 fun RotatedBox(degrees: Float = 10f) {
-    Box(
-        Mod
-            .padding(8.dp)
-            .border(1.dp, Color.Red)
-            .padding(32.dp)
-            .rotate(degrees)
-            .border(1.dp, Color.Blue)
-            .size(200.dp, 200.dp)
-            .padding(8.dp)
-    ) {
-        Text("rotated text")
-    }
+  Box(
+    Mod
+      .padding(8.dp)
+      .border(1.dp, Color.Red)
+      .padding(32.dp)
+      .rotate(degrees)
+      .border(1.dp, Color.Blue)
+      .size(200.dp, 200.dp)
+      .padding(8.dp),
+  ) {
+    Text("rotated text")
+  }
 }

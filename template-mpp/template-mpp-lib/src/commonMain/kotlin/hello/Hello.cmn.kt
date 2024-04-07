@@ -18,32 +18,32 @@ expect fun helloPlatform(): String
 fun helloEveryOneWithSomeHtml() = helloCommon() + "\n\n" + helloPlatform() + "\n\n" + helloSomeHtml()
 
 fun helloSomeHtml(): String =
-    buildString {
-        appendHTML().html {
-            body {
-                h1 { +"Some H1 in Template MPP App" }
-                p { +"Some paragraph" }
-                p { +"Some other paragraph" }
-                p { +helloCommon() }
-                p { +helloPlatform() }
-            }
-        }
+  buildString {
+    appendHTML().html {
+      body {
+        h1 { +"Some H1 in Template MPP App" }
+        p { +"Some paragraph" }
+        p { +"Some other paragraph" }
+        p { +helloCommon() }
+        p { +helloPlatform() }
+      }
     }
-        .also { println(it) }
+  }
+    .also { println(it) }
 
 /** Wrapped with full screen surface as background (so it obeys the theme color) */
 @Composable fun HelloComposableFull(name: String) =
-    Surface(Mod.fillMaxSize()) { HelloComposable(name) }
+  Surface(Mod.fillMaxSize()) { HelloComposable(name) }
 
 @Composable fun HelloComposable(name: String) {
-    Column(Mod.padding(16.dp)) {
-        var rotation by remember { mutableStateOf(80f) }
-        Text(text = "Hello $name! rotation:$rotation")
-        RotatedBox(rotation)
-        Button(onClick = { rotation += 5f }) {
-            Text("Rotate more")
-        }
-        Text(helloEveryOneWithSomeHtml())
+  Column(Mod.padding(16.dp)) {
+    var rotation by remember { mutableStateOf(80f) }
+    Text(text = "Hello $name! rotation:$rotation")
+    RotatedBox(rotation)
+    Button(onClick = { rotation += 5f }) {
+      Text("Rotate more")
     }
+    Text(helloEveryOneWithSomeHtml())
+  }
 }
 

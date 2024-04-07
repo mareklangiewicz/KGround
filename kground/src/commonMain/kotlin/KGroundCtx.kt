@@ -6,7 +6,7 @@ import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
 // TODO NOW: experiment and test it! (maybe incorporate ulogging everywhere first?)
-interface WithKGround: WithULog, WithUSubmit
+interface WithKGround : WithULog, WithUSubmit
 
 /**
  * Sth like this be used as a context receiver when Kotlin supports it.
@@ -18,14 +18,17 @@ interface WithKGround: WithULog, WithUSubmit
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
-open class KGroundCtx(override val ulog: ULog, override val usubmit: USubmit): WithKGround, CoroutineContext.Element {
-    companion object Key : CoroutineContext.Key<KGroundCtx>
-    override val key: CoroutineContext.Key<*> get() = Key
-    override fun <E : CoroutineContext.Element> get(key: CoroutineContext.Key<E>): E? = getPolymorphicElement(key)
-    override fun minusKey(key: CoroutineContext.Key<*>): CoroutineContext = minusPolymorphicKey(key)
+open class KGroundCtx(override val ulog: ULog, override val usubmit: USubmit) : WithKGround, CoroutineContext.Element {
+  companion object Key : CoroutineContext.Key<KGroundCtx>
+
+  override val key: CoroutineContext.Key<*> get() = Key
+  override fun <E : CoroutineContext.Element> get(key: CoroutineContext.Key<E>): E? = getPolymorphicElement(key)
+  override fun minusKey(key: CoroutineContext.Key<*>): CoroutineContext = minusPolymorphicKey(key)
 }
 
-infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) { null -> this; else -> this + c }
+infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) {
+  null -> this; else -> this + c
+}
 
 /**
  * @param name set to non-null to add new [CoroutineName] to context
@@ -34,14 +37,14 @@ infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) { null -> t
  * and defaults to [ULogPrintLn] if no [ULog] found.
  */
 suspend fun <T> withKGroundCtx(
-    name: String? = null,
-    ulog: ULog? = null,
-    usubmit: USubmit? = null,
-    block: suspend CoroutineScope.() -> T,
+  name: String? = null,
+  ulog: ULog? = null,
+  usubmit: USubmit? = null,
+  block: suspend CoroutineScope.() -> T,
 ): T = withContext(
-    KGroundCtx(
-        ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
-        usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
-    ) plusIfNN name?.let(::CoroutineName),
-    block
+  KGroundCtx(
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+    usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
+  ) plusIfNN name?.let(::CoroutineName),
+  block,
 )

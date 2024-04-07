@@ -9,6 +9,6 @@ expect val DefaultDispatcherForIO: CoroutineDispatcher
 expect val DefaultOkioFileSystemOrErr: FileSystem
 
 suspend fun <T> withIO(
-    dispatcherForIO: CoroutineDispatcher = DefaultDispatcherForIO,
-    block: suspend CoroutineScope.() -> T,
+  dispatcherForIO: CoroutineDispatcher = DefaultDispatcherForIO,
+  block: suspend CoroutineScope.() -> T,
 ) = withContext(dispatcherForIO, block)

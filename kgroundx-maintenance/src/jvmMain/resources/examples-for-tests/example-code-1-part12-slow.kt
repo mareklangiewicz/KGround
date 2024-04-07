@@ -14,22 +14,22 @@ import pl.mareklangiewicz.uwidgets.UBinType.*
 enum class UBinType { UBOX, UROW, UCOLUMN }
 
 enum class UAlignmentType(val css: String) {
-    USTART("start"), UEND("end"), UCENTER("center"), USTRETCH("stretch");
+  USTART("start"), UEND("end"), UCENTER("center"), USTRETCH("stretch");
 
-    companion object {
-        fun css(css: String) = UAlignmentType.values().first { it.css == css }
-    }
+  companion object {
+    fun css(css: String) = UAlignmentType.values().first { it.css == css }
+  }
 }
 
 @Composable fun UBin(
-    type: UBinType,
-    mod: Mod = Mod,
-    selected: Boolean = false, // TODO blaNOW: also mods?
-    content: @Composable () -> Unit,
+  type: UBinType,
+  mod: Mod = Mod,
+  selected: Boolean = false, // TODO blaNOW: also mods?
+  content: @Composable () -> Unit,
 ) {
-    val childrenMod = LocalUChildrenMod.current
-    @Suppress("RemoveRedundantQualifierName") // IDE issue
-    UCoreBin(type, if (childrenMod == null) mod else Mod.childrenMod().then(mod)) {
-        UDepth { CompositionLocalProvider(LocalUChildrenMod provides null, content = content) }
-    }
+  val childrenMod = LocalUChildrenMod.current
+  @Suppress("RemoveRedundantQualifierName") // IDE issue
+  UCoreBin(type, if (childrenMod == null) mod else Mod.childrenMod().then(mod)) {
+    UDepth { CompositionLocalProvider(LocalUChildrenMod provides null, content = content) }
+  }
 }
