@@ -8,8 +8,8 @@ fun gvim(vararg files: String, init: Vim.() -> Unit = {}) = vim(*files) { -Gui; 
 
 data class Vim(
     val files: MutableList<String> = mutableListOf(),
-    val options: MutableList<Option> = mutableListOf()
-): Kommand {
+    val options: MutableList<Option> = mutableListOf(),
+) : Kommand {
     override val name get() = "vim"
     override val args get() = options.flatMap { it.str } + files
 
@@ -39,5 +39,6 @@ data class Vim(
         data class StartupTime(val file: String) : Option("--startuptime", file)
         data object Version : Option("--version")
     }
+
     operator fun Option.unaryMinus() = options.add(this)
 }

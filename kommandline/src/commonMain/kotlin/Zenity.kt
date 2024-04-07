@@ -47,12 +47,14 @@ fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; i
 data class Zenity(
     override val opts: MutableList<ZenityOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-): KommandTypical<ZenityOpt> { override val name get() = "zenity" }
+) : KommandTypical<ZenityOpt> {
+    override val name get() = "zenity"
+}
 
 @DelicateApi
 interface ZenityOpt : KOptTypical {
 
-    sealed class Type: ZenityOpt, KOptLN() {
+    sealed class Type : ZenityOpt, KOptLN() {
         data object Calendar : Type()
         data object Entry : Type()
         data object Error : Type()
@@ -70,39 +72,39 @@ interface ZenityOpt : KOptTypical {
     data object Help : ZenityOpt, KOptLN()
     data object Version : ZenityOpt, KOptLN()
     data object About : ZenityOpt, KOptLN()
-    data class Title(val t: String): ZenityOpt, KOptLN(t)
+    data class Title(val t: String) : ZenityOpt, KOptLN(t)
     /** icon path or one of keywords: info, warning, question, error */
-    data class Icon(val icon: String): ZenityOpt, KOptL("window-icon", icon)
-    data class Timeout(val seconds: Int): ZenityOpt, KOptLN(seconds.toString())
-    data class Text(val t: String): ZenityOpt, KOptLN(t)
-    data class Day(val d: Int): ZenityOpt, KOptLN(d.toString())
-    data class Month(val m: Int): ZenityOpt, KOptLN(m.toString())
-    data class Year(val y: Int): ZenityOpt, KOptLN(y.toString())
-    data class DateFormat(val format: String): ZenityOpt, KOptLN(format)
-    data class EntryText(val t: String): ZenityOpt, KOptLN(t)
+    data class Icon(val icon: String) : ZenityOpt, KOptL("window-icon", icon)
+    data class Timeout(val seconds: Int) : ZenityOpt, KOptLN(seconds.toString())
+    data class Text(val t: String) : ZenityOpt, KOptLN(t)
+    data class Day(val d: Int) : ZenityOpt, KOptLN(d.toString())
+    data class Month(val m: Int) : ZenityOpt, KOptLN(m.toString())
+    data class Year(val y: Int) : ZenityOpt, KOptLN(y.toString())
+    data class DateFormat(val format: String) : ZenityOpt, KOptLN(format)
+    data class EntryText(val t: String) : ZenityOpt, KOptLN(t)
     data object HideText : ZenityOpt, KOptLN()
     data object NoWrap : ZenityOpt, KOptLN()
-    data class FileName(val fn: String): ZenityOpt, KOptL("filename", fn)
+    data class FileName(val fn: String) : ZenityOpt, KOptL("filename", fn)
     data object Multiple : ZenityOpt, KOptLN()
     data object Directory : ZenityOpt, KOptLN()
     data object Save : ZenityOpt, KOptLN()
-    data class Separator(val s: String): ZenityOpt, KOptLN(s)
+    data class Separator(val s: String) : ZenityOpt, KOptLN(s)
     data object ConfirmOverwrite : ZenityOpt, KOptLN()
-    data class Column(val header: String): ZenityOpt, KOptLN(header)
+    data class Column(val header: String) : ZenityOpt, KOptLN(header)
     data object CheckList : ZenityOpt, KOptL("checklist")
     data object RadioList : ZenityOpt, KOptL("radiolist")
     data object Editable : ZenityOpt, KOptLN()
-    data class PrintColumn(val c: String): ZenityOpt, KOptLN(c)
-    data class HideColumn(val c: Int): ZenityOpt, KOptLN(c.toString())
+    data class PrintColumn(val c: String) : ZenityOpt, KOptLN(c)
+    data class HideColumn(val c: Int) : ZenityOpt, KOptLN(c.toString())
     data object Listen : ZenityOpt, KOptLN()
-    data class Percentage(val p: Int): ZenityOpt, KOptLN(p.toString())
+    data class Percentage(val p: Int) : ZenityOpt, KOptLN(p.toString())
     data object AutoClose : ZenityOpt, KOptLN()
     data object AutoKill : ZenityOpt, KOptLN()
     data object Pulsate : ZenityOpt, KOptLN()
-    data class InitValue(val v: Int): ZenityOpt, KOptL("value", v.toString())
-    data class MinValue(val v: Int): ZenityOpt, KOptLN(v.toString())
-    data class MaxValue(val v: Int): ZenityOpt, KOptLN(v.toString())
-    data class Step(val v: Int): ZenityOpt, KOptLN(v.toString())
+    data class InitValue(val v: Int) : ZenityOpt, KOptL("value", v.toString())
+    data class MinValue(val v: Int) : ZenityOpt, KOptLN(v.toString())
+    data class MaxValue(val v: Int) : ZenityOpt, KOptLN(v.toString())
+    data class Step(val v: Int) : ZenityOpt, KOptLN(v.toString())
     data object PrintPartial : ZenityOpt, KOptLN()
 }
 

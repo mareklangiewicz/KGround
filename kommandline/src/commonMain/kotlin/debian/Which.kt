@@ -23,11 +23,13 @@ fun which(init: Which.() -> Unit) = Which().apply(init)
 @DelicateApi
 data class Which(
     override val opts: MutableList<WhichOpt> = mutableListOf(),
-    override val nonopts: MutableList<String> = mutableListOf()
-) : KommandTypical<WhichOpt> { override val name get() = "which" }
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<WhichOpt> {
+    override val name get() = "which"
+}
 
 @DelicateApi
-interface WhichOpt: KOptTypical {
+interface WhichOpt : KOptTypical {
     /** print all matching path names of each argument */
     data object All : KOptS("a"), WhichOpt
 }

@@ -32,7 +32,8 @@ import pl.mareklangiewicz.ureflect.getReflectCallOrNull
 suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
     ulog.d("tryInteractivelySomethingRef(\"$reference\")")
     val ref = if (reference == "xclip")
-        xclipOut(XClipSelection.Clipboard).ax(SYS).singleOrNull() ?: bad { "Clipboard has to have code reference in single line." }
+        xclipOut(XClipSelection.Clipboard).ax(SYS).singleOrNull()
+            ?: bad { "Clipboard has to have code reference in single line." }
     else reference
     val ure = ure {
         +ure("className") {
@@ -89,7 +90,7 @@ suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample(cli: CLI = SYS) 
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
-    question: String = "Exec ReducedScript ?", cli: CLI = SYS
+    question: String = "Exec ReducedScript ?", cli: CLI = SYS,
 ) {
     zenityAskIf(question).ax(cli) || return
     val reducedOut = ax(cli)
@@ -111,12 +112,13 @@ suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = wh
     }
 }
 
-private val Any?.about: String get() = when (this) {
-    null -> "null"
-    Unit -> "Unit"
-    is Number -> this::class.simpleName + ":$this"
-    is Collection<*> -> this::class.simpleName + "(size:$size)"
-    is CharSequence -> this::class.simpleName + "(length:$length)"
-    else -> this::class.simpleName ?: "???"
-}
+private val Any?.about: String
+    get() = when (this) {
+        null -> "null"
+        Unit -> "Unit"
+        is Number -> this::class.simpleName + ":$this"
+        is Collection<*> -> this::class.simpleName + "(size:$size)"
+        is CharSequence -> this::class.simpleName + "(length:$length)"
+        else -> this::class.simpleName ?: "???"
+    }
 

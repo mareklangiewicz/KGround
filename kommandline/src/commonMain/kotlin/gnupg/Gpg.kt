@@ -41,29 +41,31 @@ fun gpg(cmd: GpgCmd? = null, init: Gpg.() -> Unit = {}) = Gpg().apply { cmd?.let
 data class Gpg(
     override val opts: MutableList<GpgOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<GpgOpt> { override val name get() = "gpg" }
+) : KommandTypical<GpgOpt> {
+    override val name get() = "gpg"
+}
 
 @DelicateApi
 open class GpgCmd : GpgOpt, KOptLN() {
 
     /** make a signature */
-    data object Sign: GpgCmd()
+    data object Sign : GpgCmd()
     /** make a clear text signature */
-    data object ClearSign: GpgCmd()
+    data object ClearSign : GpgCmd()
     /** make a detached signature */
-    data object DetachSign: GpgCmd()
+    data object DetachSign : GpgCmd()
     /** encrypt data */
-    data object Encrypt: GpgCmd()
+    data object Encrypt : GpgCmd()
     /** encryption only with symmetric cipher */
-    data object Symmetric: GpgCmd()
+    data object Symmetric : GpgCmd()
     /** decrypt data */
-    data object Decrypt: GpgCmd()
+    data object Decrypt : GpgCmd()
     /** verify a signature */
-    data object Verify: GpgCmd()
+    data object Verify : GpgCmd()
     /** list public keys */
-    data object ListPublicKeys: GpgCmd()
+    data object ListPublicKeys : GpgCmd()
     /** list secret keys */
-    data object ListSecretKeys: GpgCmd()
+    data object ListSecretKeys : GpgCmd()
 
     data object Help : GpgCmd()
 
@@ -75,7 +77,7 @@ open class GpgCmd : GpgOpt, KOptLN() {
 }
 
 @DelicateApi
-interface GpgOpt: KOptTypical {
+interface GpgOpt : KOptTypical {
 
     data object Verbose : GpgOpt, KOptLN()
 

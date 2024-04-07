@@ -10,15 +10,17 @@ fun dconfedit(vararg options: Option, init: DConfEditor.() -> Unit = {}) =
 data class DConfEditor(
     val options: MutableList<Option> = mutableListOf(),
     val nonopts: MutableList<String> = mutableListOf(),
-): Kommand {
+) : Kommand {
     override val name get() = "dconf-editor"
     override val args get() = options.map { it.str } + nonopts
+
     sealed class Option(val str: String) {
         data object Help : Option("--help")
         data object Version : Option("--version")
         data object RelocatableSchemas : Option("--list-relocatable-schemas")
         data object SkipWarning : Option("--I-understand-that-changing-options-can-break-applications")
     }
+
     operator fun Option.unaryMinus() = options.add(this)
     operator fun String.unaryPlus() = nonopts.add(this)
 }

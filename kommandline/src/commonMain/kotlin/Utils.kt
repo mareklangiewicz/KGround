@@ -14,7 +14,9 @@ var ulog = ULog { level, data -> if (level >= ulogPrintLevel) println("kl ${leve
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
-fun setUserFlag(cli: CLI, key: String, enabled: Boolean) { konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString() }
+fun setUserFlag(cli: CLI, key: String, enabled: Boolean) {
+    konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString()
+}
 
 fun getUserFlag(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.enabled"]?.trim().toBoolean()
 
@@ -38,9 +40,9 @@ fun <ReducedOut> ReducedKommand<ReducedOut>.chkLineRaw(expectedLineRaw: String):
 }
 
 /** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */
-class BadExitStateErr(val exit: Int, val stderr: List<String>? = null, message: String? = null): BadStateErr(message)
-class BadStdErrStateErr(val stderr: List<String>, message: String? = null): BadStateErr(message)
-class BadStdOutStateErr(val stdout: List<String>, message: String? = null): BadStateErr(message)
+class BadExitStateErr(val exit: Int, val stderr: List<String>? = null, message: String? = null) : BadStateErr(message)
+class BadStdErrStateErr(val stderr: List<String>, message: String? = null) : BadStateErr(message)
+class BadStdOutStateErr(val stdout: List<String>, message: String? = null) : BadStateErr(message)
 
 // TODO_someday: figure out a nicer approach not to lose full error messages (maybe when we have context receivers in kotlin).
 // But it's nice to have it mostly on the caller side. To just throw collected stderr/out on kommand execution side,
@@ -50,7 +52,7 @@ inline fun withLogBadStreams(
     stdoutLinePrefix: String = "STDOUT: ",
     stderrLinePrefix: String = "STDERR: ",
     skippedMarkersSuffix: String = " lines skipped",
-    code: () -> Unit
+    code: () -> Unit,
 ) {
     // Kotlin doesn't support local fun inside inline fun, or even private fun below in the same file,
     // that's the reason why logSome lambda is "val"
@@ -66,27 +68,38 @@ inline fun withLogBadStreams(
         for (idx in 0 until max) ulog.e(prefix + this[idx])
         if (max < size) ulog.e(prefix + (size - max) + skippedMarkersSuffix)
     }
-    try { code() }
-    catch (e: BadExitStateErr) { e.stderr?.logSome(stderrLinePrefix); throw e }
-    catch (e: BadStdErrStateErr) { e.stderr.logSome(stderrLinePrefix); throw e }
-    catch (e: BadStdOutStateErr) { e.stdout.logSome(stdoutLinePrefix); throw e }
+    try {
+        code()
+    } catch (e: BadExitStateErr) {
+        e.stderr?.logSome(stderrLinePrefix); throw e
+    } catch (e: BadStdErrStateErr) {
+        e.stderr.logSome(stderrLinePrefix); throw e
+    } catch (e: BadStdOutStateErr) {
+        e.stdout.logSome(stdoutLinePrefix); throw e
+    }
 }
 
 /** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */
 inline fun Int.chkExit(
     test: Int.() -> Boolean = { this == 0 },
     stderr: List<String>? = null,
-    lazyMessage: () -> String = { "bad exit: $this" }
-): Int { test() || throw BadExitStateErr(this, stderr, lazyMessage()); return this }
+    lazyMessage: () -> String = { "bad exit: $this" },
+): Int {
+    test() || throw BadExitStateErr(this, stderr, lazyMessage()); return this
+}
 
 
 inline fun List<String>.chkStdErr(
     test: List<String>.() -> Boolean = { isEmpty() },
-    lazyMessage: () -> String = { "bad stderr" }
-): List<String> { test(this) || throw BadStdErrStateErr(this, lazyMessage()); return this }
+    lazyMessage: () -> String = { "bad stderr" },
+): List<String> {
+    test(this) || throw BadStdErrStateErr(this, lazyMessage()); return this
+}
 
 inline fun List<String>.chkStdOut(
     test: List<String>.() -> Boolean = { isEmpty() },
-    lazyMessage: () -> String = { "bad stdout" }
-): List<String> { test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this }
+    lazyMessage: () -> String = { "bad stdout" },
+): List<String> {
+    test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this
+}
 

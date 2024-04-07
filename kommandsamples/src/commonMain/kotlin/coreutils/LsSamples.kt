@@ -38,7 +38,8 @@ data object LsSamples {
             "ls --indicator-style=slash .."
 
     val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ALWAYS) {
-        -Author; -LongFormat; -HumanReadable; -Sort(TIME) } s
+        -Author; -LongFormat; -HumanReadable; -Sort(TIME)
+    } s
             "ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 
     // Notice: it should add colors because "ls" is called with terminal as stdout

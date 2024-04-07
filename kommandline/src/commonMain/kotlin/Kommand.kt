@@ -25,10 +25,14 @@ fun String.toKommand() = split(" ").run {
 // TODO_someday_maybe: full documentation in kdoc (all commands, options, etc.)
 //  (check in practice to make sure it's optimal for IDE users)
 
-interface WithName { val name: String }
+interface WithName {
+    val name: String
+}
 
 /** @param args as provided to some program */
-interface WithArgs { val args: List<String> }
+interface WithArgs {
+    val args: List<String>
+}
 
 /**
  * Important:
@@ -47,11 +51,13 @@ interface WithArgs { val args: List<String> }
  * (Structures like Kommand and KOpt, etc. are mutable, because they are used as convenient builders,
  * so they can contain incorrect/inconsistent data during building)
  */
-interface ToArgs { fun toArgs(): List<String> }
+interface ToArgs {
+    fun toArgs(): List<String>
+}
 
-fun Iterable<ToArgs>.toArgsFlat() = flatMap {  it.toArgs() }
+fun Iterable<ToArgs>.toArgsFlat() = flatMap { it.toArgs() }
 
-interface Kommand: WithName, WithArgs, ToArgs {
+interface Kommand : WithName, WithArgs, ToArgs {
     override fun toArgs() = listOf(name) + args
 }
 
@@ -70,10 +76,10 @@ fun Kommand.lineRaw(separator: String = " ") = toArgs().joinToString(separator)
 fun Kommand.lineFun() = args.joinToString(separator = ", ", prefix = "$name(", postfix = ")")
 
 /** Kommand option */
-interface KOpt: ToArgs
+interface KOpt : ToArgs
 
 @DelicateApi
-interface KOptTypical: KOpt, WithName, WithArgs {
+interface KOptTypical : KOpt, WithName, WithArgs {
     val namePrefix: String
     val nameSeparator: String
     val argsSeparator: String
@@ -112,7 +118,7 @@ open class KOptS(
         namePrefix: String = "-",
         nameSeparator: String = " ",
         argsSeparator: String = " ",
-    ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+    ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Long form of an option */
@@ -130,7 +136,7 @@ open class KOptL(
         namePrefix: String = "--",
         nameSeparator: String = "=",
         argsSeparator: String = ",",
-    ): this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+    ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Special form of an option, with automatically derived name as class name lowercase words separated by one hyphen */
@@ -146,12 +152,13 @@ open class KOptLN(
         namePrefix: String = "--",
         nameSeparator: String = "=",
         argsSeparator: String = ",",
-    ): this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+    ) : this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+
     override val name: String get() = classSimpleWords().joinToString("-")
 }
 
 @DelicateApi
-interface KommandTypical<KOptT: KOptTypical>: Kommand {
+interface KommandTypical<KOptT : KOptTypical> : Kommand {
     val opts: MutableList<KOptT>
     val nonopts: MutableList<String>
     override val args get() = opts.toArgsFlat() + nonopts
@@ -165,7 +172,7 @@ data class AKommandTypical(
     override val name: String,
     override val opts: MutableList<KOptTypical> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-    ): KommandTypical<KOptTypical>
+) : KommandTypical<KOptTypical>
 
 @DelicateApi
 fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =

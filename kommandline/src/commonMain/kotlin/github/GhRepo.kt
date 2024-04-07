@@ -14,7 +14,7 @@ fun ghRepoView(
     repoPath: String? = null,
     branch: String? = null,
     web: Boolean = false,
-    init: GhRepoView.() -> Unit = {}
+    init: GhRepoView.() -> Unit = {},
 ) =
     GhRepoView().apply { repoPath?.let { +it }; branch?.let { -Branch(it) }; web && -Web; init() }
 
@@ -31,7 +31,7 @@ fun ghRepoList(
     onlyPublic: Boolean = false,
     onlyPrivate: Boolean = false,
     onlyInternal: Boolean = false,
-    init: GhRepoList.() -> Unit = {}
+    init: GhRepoList.() -> Unit = {},
 ) =
     GhRepoList().apply {
         owner?.let { +it }
@@ -63,10 +63,11 @@ fun GhRepoList.outputFields(vararg fields: String) = apply {
  * Note: the "1. " Will give the numbered list with actual numbers when rendered (but not when just printed to console).
  */
 fun GhRepoList.reducedToMarkdownList(listItemPrefix: String = "- ", sorted: Boolean = true) =
-    outputFields("name", "url").reducedOut { this
-        .toList()
-        .windowed(2, 2) { (name, url) -> "[$name]($url)" }
-        .let { if (sorted) it.sorted() else it }
-        .joinToString("\n") { "$listItemPrefix$it" }
+    outputFields("name", "url").reducedOut {
+        this
+            .toList()
+            .windowed(2, 2) { (name, url) -> "[$name]($url)" }
+            .let { if (sorted) it.sorted() else it }
+            .joinToString("\n") { "$listItemPrefix$it" }
     }
 

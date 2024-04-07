@@ -11,7 +11,7 @@ fun gnomeshell(vararg options: Option, init: GnomeShell.() -> Unit = {}) =
 
 /**[gnome-shell ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-shell.1.html) */
 data class GnomeShell(
-    val options: MutableList<Option> = mutableListOf()
+    val options: MutableList<Option> = mutableListOf(),
 ) : Kommand {
     override val name get() = "gnome-shell"
     override val args get() = options.map { it.str }

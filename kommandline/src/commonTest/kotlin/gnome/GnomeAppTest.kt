@@ -32,5 +32,6 @@ class GnomeAppTest {
     @Test fun testGnomeAppHelp() = gnomeapp(Help()).tryInteractivelyCheck()
     @Test fun testGnomeAppLaunchGEdit() = gnomeapp(Launch("org.gnome.gedit")).tryInteractivelyCheck()
     @Test fun testGnomeAppGEditNewWindow() = gnomeapp(Action("org.gnome.gedit", "new-window")).tryInteractivelyCheck()
-    @Test fun testGnomeAppGEditNewDocument() = gnomeapp(Action("org.gnome.gedit", "new-document")).tryInteractivelyCheck()
+    @Test fun testGnomeAppGEditNewDocument() =
+        gnomeapp(Action("org.gnome.gedit", "new-document")).tryInteractivelyCheck()
 }

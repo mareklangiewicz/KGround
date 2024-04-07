@@ -31,28 +31,28 @@ fun sshVersion() = Ssh().apply { -SshOpt.Version }
 data class Ssh(
     override val opts: MutableList<SshOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-): KommandTypical<SshOpt> {
+) : KommandTypical<SshOpt> {
     override val name get() = "ssh"
 }
 
 
 @DelicateApi
-interface SshOpt: KOptTypical {
-    data object IpV4: KOptS("4"), SshOpt
-    data object IpV6: KOptS("6"), SshOpt
-    data class AuthAgentForwarding(val enable: Boolean): KOptS(if (enable) "A" else "a"), SshOpt
+interface SshOpt : KOptTypical {
+    data object IpV4 : KOptS("4"), SshOpt
+    data object IpV6 : KOptS("6"), SshOpt
+    data class AuthAgentForwarding(val enable: Boolean) : KOptS(if (enable) "A" else "a"), SshOpt
 
     /**
      * Bind to the address of bind_interface before attempting to connect to the destination host.
      * This is only useful on systems with more than one address.
      */
-    data class BindIface(val iface: String): KOptS("B", iface), SshOpt
+    data class BindIface(val iface: String) : KOptS("B", iface), SshOpt
 
     /**
      * Use bind_address on the local machine as the source address of the connection.
      * Only useful on systems with more than one address.
      */
-    data class BindAddr(val addr: String): KOptS("b", addr), SshOpt
+    data class BindAddr(val addr: String) : KOptS("b", addr), SshOpt
 
     /**
      * Requests compression of all data
@@ -63,14 +63,14 @@ interface SshOpt: KOptTypical {
      * The default value can be set on a host-by-host basis in the configuration files;
      * see the Compression option in ssh_config(5).
      */
-    data object Compress: KOptS("C"), SshOpt
+    data object Compress : KOptS("C"), SshOpt
 
     /**
      * Selects the cipher specification for encrypting the session.
      * @property spec is a comma-separated list of ciphers listed in order of preference.
      * See the Ciphers keyword in ssh_config(5) for more information.
      */
-    data class Cipher(val spec: String): KOptS("c", spec), SshOpt
+    data class Cipher(val spec: String) : KOptS("c", spec), SshOpt
 
     /**
      * Specifies a local "dynamic" application-level port forwarding.
@@ -82,11 +82,11 @@ interface SshOpt: KOptTypical {
      * Only root can forward privileged ports.
      * Dynamic port forwardings can also be specified in the configuration file.
      */
-    data class DynamicForward(val localBindAddr: String? = null, val localPort: Int):
+    data class DynamicForward(val localBindAddr: String? = null, val localPort: Int) :
         KOptS("D", localBindAddr col localPort), SshOpt
 
     /** Append debug logs to log_file instead of standard error. */
-    data class LogDebugTo(val file: String): KOptS("E", file), SshOpt
+    data class LogDebugTo(val file: String) : KOptS("E", file), SshOpt
 
     /**
      * Sets the escape character for sessions with a pty (default: '~').
@@ -96,7 +96,7 @@ interface SshOpt: KOptTypical {
      * and followed by itself sends the escape character once.
      * Setting the character to "none" disables any escapes and makes the session fully transparent.
      */
-    data class Escape(val character: String = "~"): KOptS("e", character), SshOpt
+    data class Escape(val character: String = "~") : KOptS("e", character), SshOpt
 
     /**
      * Specifies an alternative per-user configuration file.
@@ -106,7 +106,7 @@ interface SshOpt: KOptTypical {
      * If set to "none", no configuration files will be read.
      * @see <a href="https://man.openbsd.org/ssh_config.5">man ssh_config</a>
      */
-    data class Config(val file: String?): KOptS("F", file ?: "none"), SshOpt
+    data class Config(val file: String?) : KOptS("F", file ?: "none"), SshOpt
 
     /**
      * Requests ssh to go to background just before command execution.
@@ -119,16 +119,16 @@ interface SshOpt: KOptTypical {
      * to be successfully established before placing itself in the background.
      * Refer to the description of ForkAfterAuthentication in ssh_config(5) for details.
      */
-    data object RunInBackground: KOptS("f"), SshOpt
+    data object RunInBackground : KOptS("f"), SshOpt
 
     /** Causes ssh to print its configuration after evaluating Host and Match blocks and exit. */
-    data object PrintConfig: KOptS("G"), SshOpt
+    data object PrintConfig : KOptS("G"), SshOpt
 
     /**
      * Allows remote hosts to connect to local forwarded ports.
      * If used on a multiplexed connection, then this option must be specified on the master process.
      */
-    data object AllowRemoteToLocalForwardedPorts: KOptS("g"), SshOpt
+    data object AllowRemoteToLocalForwardedPorts : KOptS("g"), SshOpt
 
     /**
      * Selects a file from which the identity (private key) for public key authentication is read.
@@ -142,7 +142,7 @@ interface SshOpt: KOptTypical {
      * ssh will also try to load certificate information from the filename
      * obtained by appending -cert.pub to identity filenames.
      */
-    data class IdentityFile(val file: String): KOptS("i", file), SshOpt
+    data class IdentityFile(val file: String) : KOptS("i", file), SshOpt
 
     /**
      * Connect to the target host by first making an ssh connection to the jump host described by destination,
@@ -153,7 +153,7 @@ interface SshOpt: KOptTypical {
      * generally apply to the destination host and not any specified jump hosts.
      * Use ~/.ssh/config to specify configuration for jump hosts.
      */
-    data class ProxyJump(val destination: String): KOptS("J", destination), SshOpt
+    data class ProxyJump(val destination: String) : KOptS("J", destination), SshOpt
 
 
     /**
@@ -173,7 +173,7 @@ interface SshOpt: KOptTypical {
      * The bind_address of "localhost" indicates that the listening port be bound for local use only,
      * while an empty address or '*' indicates that the port should be available from all interfaces.
      */
-    data class LocalForward(val specFromLocalToRemote: String): KOptS("L", specFromLocalToRemote) {
+    data class LocalForward(val specFromLocalToRemote: String) : KOptS("L", specFromLocalToRemote) {
 
         constructor(
             vararg useNamedArgs: Unit,
@@ -181,27 +181,27 @@ interface SshOpt: KOptTypical {
             localPort: Int,
             remoteHost: String,
             remotePort: Int,
-        ): this(localBindAddr col localPort col remoteHost col remotePort)
+        ) : this(localBindAddr col localPort col remoteHost col remotePort)
 
         constructor(
             vararg useNamedArgs: Unit,
             localBindAddr: String? = null,
             localPort: Int,
             remoteSocket: String,
-        ): this(localBindAddr col localPort col remoteSocket)
+        ) : this(localBindAddr col localPort col remoteSocket)
 
         constructor(
             vararg useNamedArgs: Unit,
             localSocket: String,
             remoteHost: String,
             remotePort: Int,
-        ): this(localSocket col remoteHost col remotePort)
+        ) : this(localSocket col remoteHost col remotePort)
 
         constructor(
             vararg useNamedArgs: Unit,
             localSocket: String,
             remoteSocket: String,
-        ): this(localSocket col remoteSocket)
+        ) : this(localSocket col remoteSocket)
     }
 
 
@@ -232,7 +232,7 @@ interface SshOpt: KOptTypical {
      * and reported to the client at run time. When used together with -O forward,
      * the allocated port will be printed to the standard output.
      */
-    data class RemoteForward(val specFromRemoteToLocal: String): KOptS("R", specFromRemoteToLocal) {
+    data class RemoteForward(val specFromRemoteToLocal: String) : KOptS("R", specFromRemoteToLocal) {
 
         constructor(
             vararg useNamedArgs: Unit,
@@ -240,40 +240,40 @@ interface SshOpt: KOptTypical {
             remotePort: Int,
             localHost: String,
             localPort: Int,
-        ): this(remoteBindAddr col remotePort col localHost col localPort)
+        ) : this(remoteBindAddr col remotePort col localHost col localPort)
 
         constructor(
             vararg useNamedArgs: Unit,
             remoteBindAddr: String? = null,
             remotePort: Int,
             localSocket: String,
-        ): this(remoteBindAddr col remotePort col localSocket)
+        ) : this(remoteBindAddr col remotePort col localSocket)
 
         constructor(
             vararg useNamedArgs: Unit,
             remoteBindAddr: String? = null,
             remotePort: Int,
-        ): this(remoteBindAddr col remotePort)
+        ) : this(remoteBindAddr col remotePort)
 
         constructor(
             vararg useNamedArgs: Unit,
             remoteSocket: String,
             localHost: String,
             localPort: Int,
-        ): this(remoteSocket col localHost col localPort)
+        ) : this(remoteSocket col localHost col localPort)
 
         constructor(
             vararg useNamedArgs: Unit,
             remoteSocket: String,
             localSocket: String,
-        ): this(remoteSocket col localSocket)
+        ) : this(remoteSocket col localSocket)
     }
 
     /**
      * Specifies the user to log in as on the remote machine.
      * This also may be specified on a per-host basis in the configuration file.
      */
-    data class LoginName(val user: String): KOptS("l", user), SshOpt
+    data class LoginName(val user: String) : KOptS("l", user), SshOpt
 
     /**
      * Places the ssh client into "master" mode for connection sharing.
@@ -282,19 +282,19 @@ interface SshOpt: KOptTypical {
      * before each operation that changes the multiplexing state (e.g. opening a new session).
      * Refer to the description of ControlMaster in ssh_config(5) for details.
      */
-    data object MasterMode: KOptS("M"), SshOpt
+    data object MasterMode : KOptS("M"), SshOpt
 
     /**
      * A comma-separated list of MAC (message authentication code) algorithms, specified in order of preference.
      * See the MACs keyword in ssh_config(5) for more information.
      */
-    data class MACs(val macSpec: String): KOptS("m", macSpec), SshOpt
+    data class MACs(val macSpec: String) : KOptS("m", macSpec), SshOpt
 
     /**
      * Do not execute a remote command. This is useful for just forwarding ports.
      * Refer to the description of SessionType in ssh_config(5) for details.
      */
-    data object SessionTypeNone: KOptS("N"), SshOpt
+    data object SessionTypeNone : KOptS("N"), SshOpt
 
     /**
      * May be used to request invocation of a subsystem on the remote system.
@@ -302,7 +302,7 @@ interface SshOpt: KOptTypical {
      * The subsystem is specified as the remote command.
      * Refer to the description of SessionType in ssh_config(5) for details.
      */
-    data object SessionTypeSubSystem: KOptS("s"), SshOpt
+    data object SessionTypeSubSystem : KOptS("s"), SshOpt
 
     /**
      * Redirects stdin from /dev/null (actually, prevents reading from stdin).
@@ -314,7 +314,7 @@ interface SshOpt: KOptTypical {
      * (This does not work if ssh needs to ask for a password or passphrase; see also the -f option.)
      * Refer to the description of StdinNull in ssh_config(5) for details.
      */
-    data object StdinNull: KOptS("n"), SshOpt
+    data object StdinNull : KOptS("n"), SshOpt
 
     /**
      * Control an active connection multiplexing master process.
@@ -324,29 +324,29 @@ interface SshOpt: KOptTypical {
      * "cancel" (cancel forwardings), "exit" (request the master to exit),
      * and "stop" (request the master to stop accepting further multiplexing requests).
      */
-    data class MasterCtlCmd(val ctlCmd: String): KOptS("O", ctlCmd), SshOpt
+    data class MasterCtlCmd(val ctlCmd: String) : KOptS("O", ctlCmd), SshOpt
 
     /**
      * Can be used to give options in the format used in the configuration file.
      * This is useful for specifying options for which there is no separate command-line flag.
      * For full details of the options, and their possible values, see ssh_config(5).
      */
-    data class ConfigOption(val option: String): KOptS("o", option), SshOpt
+    data class ConfigOption(val option: String) : KOptS("o", option), SshOpt
 
     /**
      * Specify a tag name that may be used to select configuration in ssh_config(5).
      * Refer to the Tag and Match keywords in ssh_config(5) for more information.
      */
-    data class Tag(val tag: String): KOptS("P", tag), SshOpt
+    data class Tag(val tag: String) : KOptS("P", tag), SshOpt
 
     /**
      * Port to connect to on the remote host.
      * This can be specified on a per-host basis in the configuration file.
      */
-    data class Port(val port: Int): KOptS("p", port.toString()), SshOpt
+    data class Port(val port: Int) : KOptS("p", port.toString()), SshOpt
 
     /** Quiet mode. Causes most warning and diagnostic messages to be suppressed. */
-    data object Quiet: KOptS("q"), SshOpt
+    data object Quiet : KOptS("q"), SshOpt
 
     /**
      * Disable or enable(force) PTY allocation.
@@ -358,24 +358,24 @@ interface SshOpt: KOptTypical {
      *     which can be very useful, e.g. when implementing menu services.
      *     Multiple -t options force tty allocation, even if ssh has no local tty.
      */
-    data class PTY(val enable: Boolean): KOptS(if (enable) "t" else "T"), SshOpt
+    data class PTY(val enable: Boolean) : KOptS(if (enable) "t" else "T"), SshOpt
 
 
     /** Display the version number and exit. */
-    data object Version: KOptS("V"), SshOpt
+    data object Version : KOptS("V"), SshOpt
 
     /**
      * Verbose mode. Causes ssh to print debugging messages about its progress.
      * This is helpful in debugging connection, authentication, and configuration problems.
      * Multiple -v options increase the verbosity. The maximum is 3.
      */
-    data object Verbose: KOptS("v"), SshOpt
+    data object Verbose : KOptS("v"), SshOpt
 
     /**
      * Send log information using the syslog(3) system module.
      * By default this information is sent to stderr.
      */
-    data object SysLog: KOptS("y"), SshOpt
+    data object SysLog : KOptS("y"), SshOpt
 
     // TODO_someday: All other options from: https://man.openbsd.org/ssh
     // TODO_maybe: rename most options here to match corresponding keywords in: https://man.openbsd.org/ssh_config.5

@@ -34,11 +34,13 @@ fun echo(init: Echo.() -> Unit = {}) = Echo().apply(init)
 @DelicateApi
 data class Echo(
     override val opts: MutableList<EchoOpt> = mutableListOf(),
-    override val nonopts: MutableList<String> = mutableListOf()
-) : KommandTypical<EchoOpt> { override val name get() = "echo" }
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<EchoOpt> {
+    override val name get() = "echo"
+}
 
 @DelicateApi
-interface EchoOpt: KOptTypical {
+interface EchoOpt : KOptTypical {
     data object NoNewLine : KOptS("n"), EchoOpt
     data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt
     @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")

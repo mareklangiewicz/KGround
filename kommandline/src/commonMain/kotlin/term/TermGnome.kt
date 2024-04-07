@@ -24,7 +24,7 @@ data class TermGnome(
 }
 
 @OptIn(DelicateApi::class)
-interface TermGnomeOpt: KOptTypical {
+interface TermGnomeOpt : KOptTypical {
     data class Title(val title: String) : KOptL("title", title), TermGnomeOpt
     data object Help : KOptS("h"), TermGnomeOpt
     data object Verbose : KOptS("v"), TermGnomeOpt

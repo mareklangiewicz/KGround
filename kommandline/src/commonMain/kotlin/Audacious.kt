@@ -4,8 +4,8 @@ fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious
 
 data class Audacious(
     val files: MutableList<String> = mutableListOf(),
-    val options: MutableList<Option> = mutableListOf()
-): Kommand {
+    val options: MutableList<Option> = mutableListOf(),
+) : Kommand {
     override val name get() = "audacious"
     override val args get() = options.map { it.str } + files
 
@@ -20,5 +20,6 @@ data class Audacious(
         data object Version : Option("--version")
         data object Verbose : Option("--verbose")
     }
+
     operator fun Option.unaryMinus() = options.add(this)
 }

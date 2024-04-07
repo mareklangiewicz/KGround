@@ -13,7 +13,7 @@ fun gnomeapp(cmd: Cmd, init: GnomeApp.() -> Unit = {}) = GnomeApp(cmd).apply(ini
 /** [gapplication ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gapplication.1.html) */
 data class GnomeApp(
     var cmd: Cmd = Help(),
-    val addons: MutableList<String> = mutableListOf()
+    val addons: MutableList<String> = mutableListOf(),
 ) : Kommand {
     override val name get() = "gapplication"
     override val args get() = cmd.str + addons

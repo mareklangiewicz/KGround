@@ -59,10 +59,12 @@ fun sudo(init: Sudo.() -> Unit = {}) = Sudo().apply(init)
 data class Sudo(
     override val opts: MutableList<SudoOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<SudoOpt> { override val name get() = "sudo" }
+) : KommandTypical<SudoOpt> {
+    override val name get() = "sudo"
+}
 
 @DelicateApi
-interface SudoOpt: KOptTypical {
+interface SudoOpt : KOptTypical {
     data object Help : KOptLN(), SudoOpt // there is also short -h but it does NOT always mean help
     data object Version : KOptLN(), SudoOpt
     data object SetHome : KOptLN(), SudoOpt

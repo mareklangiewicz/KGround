@@ -16,17 +16,17 @@ fun termKitty(
     kommand: Kommand? = null,
     one: Boolean = true,
     detach: Boolean = true,
-    hold: Boolean = false
-) = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold  }
+    hold: Boolean = false,
+) = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold }
 
 @DelicateApi
 fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
     TermKitty().apply {
         init()
         kommand?.let { -EOOpt; nonopts.addAll(kommand.toArgs()) }
-            // I added the "--" (EOOpt) separator even though docs don't say anything about it, but it works,
-            // and it clearly separates options from command (and it's options) to run,
-            // and it's consistent with other kommands like termGnome.
+        // I added the "--" (EOOpt) separator even though docs don't say anything about it, but it works,
+        // and it clearly separates options from command (and it's options) to run,
+        // and it's consistent with other kommands like termGnome.
     }
 
 /**
@@ -43,7 +43,7 @@ data class TermKitty(
 }
 
 @OptIn(DelicateApi::class)
-interface TermKittyOpt: KOptTypical {
+interface TermKittyOpt : KOptTypical {
     data class Title(val title: String) : KOptS("T", title), TermKittyOpt
     data class Config(val file: String) : KOptS("c", file), TermKittyOpt
     data class Directory(val directory: String) : KOptS("d", directory), TermKittyOpt

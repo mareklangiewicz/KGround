@@ -13,7 +13,7 @@ fun man(sectionNumber: Int?, init: Man.() -> Unit = {}) =
 data class Man(
     override val opts: MutableList<ManOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-): KommandTypical<ManOpt> {
+) : KommandTypical<ManOpt> {
     override val name get() = "man"
 }
 
@@ -39,7 +39,7 @@ enum class ManSection(val number: Int) {
 }
 
 @DelicateApi
-interface ManOpt: KOptTypical {
+interface ManOpt : KOptTypical {
 
     data object All : KOptS("a"), ManOpt
 

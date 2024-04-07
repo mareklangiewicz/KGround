@@ -13,7 +13,7 @@ fun gnomeext(cmd: Cmd, init: GnomeExt.() -> Unit = {}) = GnomeExt(cmd).apply(ini
 /** [gnome-extensions ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-extensions.1.html) */
 data class GnomeExt(
     var cmd: Cmd = Help(),
-    val options: MutableList<Option> = mutableListOf()
+    val options: MutableList<Option> = mutableListOf(),
 ) : Kommand {
     override val name get() = "gnome-extensions"
     override val args get() = cmd.str + options.map { it.str } plusIfNN (cmd as? Install)?.pack
@@ -22,11 +22,11 @@ data class GnomeExt(
         open val str get() = listOf(name) plusIfNN uuid
 
         /** Displays a short synopsis of the available commands or provides detailed help on a specific command. */
-        data class Help(val cmdname: String? = null): Cmd("help") {
+        data class Help(val cmdname: String? = null) : Cmd("help") {
             override val str get() = listOf(name) plusIfNN cmdname
         }
         /** Prints the program version. */
-        data object Version: Cmd("version")
+        data object Version : Cmd("version")
 
         /**
          * Enables the extension identified by UUID.
@@ -34,26 +34,26 @@ data class GnomeExt(
          * use the info command to confirm that the extension state is ENABLED.
          * If the extension is already enabled, the command will do nothing.
          */
-        data class Enable(override val uuid: String): Cmd("enable", uuid)
+        data class Enable(override val uuid: String) : Cmd("enable", uuid)
         /** Disables the extension identified by UUID. If the extension is not enabled, the command will do nothing. */
-        data class Disable(override val uuid: String): Cmd("disable", uuid)
+        data class Disable(override val uuid: String) : Cmd("disable", uuid)
 
         /**
          * Reset the extension identified by UUID.
          * The extension will be disabled in GNOME, but may be enabled by other sessions like GNOME Classic.
          */
-        data class Reset(override val uuid: String): Cmd("reset", uuid)
+        data class Reset(override val uuid: String) : Cmd("reset", uuid)
 
         /** Show details of the extension identified by UUID, including name, description and state. */
-        data class Info(override val uuid: String): Cmd("info", uuid)
+        data class Info(override val uuid: String) : Cmd("info", uuid)
         /** Synonym of info. */
-        data class Show(override val uuid: String): Cmd("show", uuid)
+        data class Show(override val uuid: String) : Cmd("show", uuid)
         /** Displays a list of installed extensions. */
-        data object List: Cmd("list")
+        data object List : Cmd("list")
         /** Open the preference dialog of the extension identified by UUID. */
-        data class Prefs(override val uuid: String): Cmd("prefs", uuid)
+        data class Prefs(override val uuid: String) : Cmd("prefs", uuid)
         /** Creates a new extension from a template. */
-        data object Create: Cmd("create")
+        data object Create : Cmd("create")
 
         /**
          * Creates an extension bundle that is suitable for publishing.
@@ -68,7 +68,7 @@ data class GnomeExt(
          * if not.
          * All files are searched in SOURCE-DIRECTORY if specified, or the current directory otherwise.
          */
-        data object Pack: Cmd("pack")
+        data object Pack : Cmd("pack")
 
         /**
          * Installs an extension from the bundle PACK.
@@ -78,9 +78,9 @@ data class GnomeExt(
          * extensions have privileged access to the user’s session, it is advised to never load extensions from
          * untrusted sources without carefully reviewing their content.
          */
-        data class Install(val pack: String): Cmd("install")
+        data class Install(val pack: String) : Cmd("install")
         /** Uninstalls the extension identified by UUID. */
-        data class Uninstall(override val uuid: String): Cmd("uninstall", uuid)
+        data class Uninstall(override val uuid: String) : Cmd("uninstall", uuid)
     }
 
     sealed class Option(val name: String, val arg: String? = null) {
@@ -114,5 +114,6 @@ data class GnomeExt(
         data class Outdir(val d: String) : Option("--out-dir", d)
         data object Force : Option("--force") // also for install cmd
     }
+
     operator fun Option.unaryMinus() = options.add(this)
 }

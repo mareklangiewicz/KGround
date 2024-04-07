@@ -28,7 +28,7 @@ fun rm(
     vararg useNamedArgs: Unit,
     recursive: Boolean = false,
     force: Boolean = false,
-    verbose: Boolean = false
+    verbose: Boolean = false,
 ) = rm { if (recursive) -Recursive; if (force) -Force; if (verbose) -Verbose; +path }
 
 @DelicateApi
@@ -38,11 +38,13 @@ fun rm(init: Rm.() -> Unit) = Rm().apply(init)
 @DelicateApi
 data class Rm(
     override val opts: MutableList<RmOpt> = mutableListOf(),
-    override val nonopts: MutableList<String> = mutableListOf()
-) : KommandTypical<RmOpt> { override val name get() = "rm" }
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<RmOpt> {
+    override val name get() = "rm"
+}
 
 @DelicateApi
-interface RmOpt: KOptTypical {
+interface RmOpt : KOptTypical {
 
     /** ignore nonexistent files and arguments, never prompt */
     data object Force : RmOpt, KOptS("f")

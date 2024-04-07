@@ -23,10 +23,12 @@ fun mktemp(init: MkTemp.() -> Unit) = MkTemp().apply(init)
 data class MkTemp(
     override val opts: MutableList<MkTempOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-): KommandTypical<MkTempOpt> { override val name get() = "mktemp" }
+) : KommandTypical<MkTempOpt> {
+    override val name get() = "mktemp"
+}
 
 @DelicateApi
-interface MkTempOpt: KOptTypical {
+interface MkTempOpt : KOptTypical {
     data object Directory : KOptS("d"), MkTempOpt
     data object DryRun : KOptS("u"), MkTempOpt
     data object Quiet : KOptS("q"), MkTempOpt

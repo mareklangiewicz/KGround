@@ -30,24 +30,24 @@ class JvmCLI : CLI {
         envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess =
         JvmExecProcess(
-            ProcessBuilder()
-                .apply {
-                    ulog.d(kommand.line())
-                    command(kommand.toArgs())
-                    directory(dir?.let(::File))
-                    inFile?.let(::File)?.let(::redirectInput)
-                    outFile ?: chk(!outFileAppend) { "No output file to append to" }
-                    outFile?.let(::File)?.let {
-                        redirectOutput(if (outFileAppend) Redirect.appendTo(it) else Redirect.to(it))
-                    }
-                    redirectErrorStream(errToOut)
-                    errFile ?: chk(!errFileAppend) { "No error file to append to" }
-                    errFile?.let(::File)?.let {
-                        redirectError(if (errFileAppend) Redirect.appendTo(it) else Redirect.to(it))
-                    }
-                    envModify?.let { environment().it() }
-                }
-                .start()
+          ProcessBuilder()
+            .apply {
+              ulog.d(kommand.line())
+              command(kommand.toArgs())
+              directory(dir?.let(::File))
+              inFile?.let(::File)?.let(::redirectInput)
+              outFile ?: chk(!outFileAppend) { "No output file to append to" }
+              outFile?.let(::File)?.let {
+                redirectOutput(if (outFileAppend) Redirect.appendTo(it) else Redirect.to(it))
+              }
+              redirectErrorStream(errToOut)
+              errFile ?: chk(!errFileAppend) { "No error file to append to" }
+              errFile?.let(::File)?.let {
+                redirectError(if (errFileAppend) Redirect.appendTo(it) else Redirect.to(it))
+              }
+              envModify?.let { environment().it() }
+            }
+            .start(),
         )
 
     override val lineEnd: String = System.lineSeparator() ?: "\n"
@@ -69,8 +69,8 @@ class JvmCLI : CLI {
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 private fun sequentialContext(name: String): CoroutineContext =
-    // TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
-    // UPDATE: I convinced myself it is safe. There is always happens-before guarantee and only one thread at a time is used.
+// TODO_someday: analyze CAREFULLY if instead of newSingleThreadContext it's safe to use Dispatchers.IO.limitedParallelism(1)
+// UPDATE: I convinced myself it is safe. There is always happens-before guarantee and only one thread at a time is used.
 //    newSingleThreadContext(name)
     Dispatchers.IO.limitedParallelism(1) + CoroutineName(name)
 
@@ -92,12 +92,18 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
 
     @DelicateApi
     override fun waitForExit(finallyClose: Boolean) =
-        try { process.waitFor() }
-        finally { if (finallyClose) close() }
+        try {
+            process.waitFor()
+        } finally {
+            if (finallyClose) close()
+        }
 
     override suspend fun awaitExit(finallyClose: Boolean): Int = withContext(processContext) {
-        try { process.onExit().await().exitValue() }
-        finally { if (finallyClose) close() }
+        try {
+            process.onExit().await().exitValue()
+        } finally {
+            if (finallyClose) close()
+        }
     }
 
     override fun kill(forcibly: Boolean) = processContext.tryDispatch {

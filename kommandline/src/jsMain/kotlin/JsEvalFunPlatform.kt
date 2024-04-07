@@ -8,7 +8,7 @@ import pl.mareklangiewicz.ulog.d
 
 actual fun provideSysCLI(): CLI = JsEvalFunCLI()
 
-class JsEvalFunCLI: CLI {
+class JsEvalFunCLI : CLI {
 
     override val isRedirectFileSupported get() = false
 
@@ -36,14 +36,19 @@ class JsEvalFunCLI: CLI {
     }
 
     companion object {
-        fun enableDangerousJsEvalFun() { isEvalEnabled = true }
-        fun disableDangerousJsEvalFun() { isEvalEnabled = false }
+        fun enableDangerousJsEvalFun() {
+            isEvalEnabled = true
+        }
+
+        fun disableDangerousJsEvalFun() {
+            isEvalEnabled = false
+        }
     }
 }
 
 private var isEvalEnabled = false
 
-private class JsEvalFunProcess(code: String): ExecProcess {
+private class JsEvalFunProcess(code: String) : ExecProcess {
 
     private var exit: Int
     private var out: Iterator<String>?
@@ -52,13 +57,12 @@ private class JsEvalFunProcess(code: String): ExecProcess {
     var logln: (line: String) -> Unit = { console.log(it) }
 
     init {
-        chk(isEvalEnabled) { "eval is disabled"}
+        chk(isEvalEnabled) { "eval is disabled" }
         try {
             exit = 0
             out = eval(code).toString().lines().iterator()
             err = null
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             exit = e::class.hashCode().mod(120) + 4 // positive number dependent on exception class
             out = null
             err = e.toString().lines().iterator()
@@ -67,8 +71,11 @@ private class JsEvalFunProcess(code: String): ExecProcess {
 
     @DelicateApi
     override fun waitForExit(finallyClose: Boolean): Int =
-        try { exit }
-        finally { if (finallyClose) close() }
+        try {
+            exit
+        } finally {
+            if (finallyClose) close()
+        }
 
     @OptIn(DelicateApi::class)
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
@@ -86,19 +93,25 @@ private class JsEvalFunProcess(code: String): ExecProcess {
     override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) = logln(line)
 
     @DelicateApi
-    override fun stdinClose() { logln = {} }
+    override fun stdinClose() {
+        logln = {}
+    }
 
     @DelicateApi
     override fun stdoutReadLine(): String? = out?.takeIf { it.hasNext() }?.next()
 
     @DelicateApi
-    override fun stdoutClose() { out = null }
+    override fun stdoutClose() {
+        out = null
+    }
 
     @DelicateApi
     override fun stderrReadLine(): String? = err?.takeIf { it.hasNext() }?.next()
 
     @DelicateApi
-    override fun stderrClose() { err = null }
+    override fun stderrClose() {
+        err = null
+    }
 
     @OptIn(DelicateApi::class)
     override val stdin = defaultStdinCollector(Dispatchers.Default, ::stdinWriteLine, ::stdinClose)

@@ -10,13 +10,13 @@ import pl.mareklangiewicz.kommand.core.TestIfFile.*
 // mostly to be different from normal test annotations/classes/functions
 
 @OptIn(DelicateApi::class)
-fun testIfSameFiles(file1: String, file2:String) = testIf(file1, "-ef", file2)
+fun testIfSameFiles(file1: String, file2: String) = testIf(file1, "-ef", file2)
 
 @OptIn(DelicateApi::class)
-fun testIfFirstFileNewer(file1: String, file2:String) = testIf(file1, "-nt", file2)
+fun testIfFirstFileNewer(file1: String, file2: String) = testIf(file1, "-nt", file2)
 
 @OptIn(DelicateApi::class)
-fun testIfFirstFileOlder(file1: String, file2:String) = testIf(file1, "-ot", file2)
+fun testIfFirstFileOlder(file1: String, file2: String) = testIf(file1, "-ot", file2)
 
 /** Can be any kind of file (e.g., directory) */
 fun testIfFileExists(file: String) = testIf(file, FileExists)

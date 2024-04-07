@@ -27,7 +27,7 @@ fun Kommand.tryInteractivelyStartInTerm(
     insideBash: Boolean = true,
     pauseBeforeExit: Boolean = insideBash,
     startInDir: String? = null,
-    termKommand: (innerKommand: Kommand) -> Kommand = { termXDefault(it) }
+    termKommand: (innerKommand: Kommand) -> Kommand = { termXDefault(it) },
 ) = ifInteractiveCodeEnabled {
     if (zenityAskIf(confirmation, title).axb(cli)) {
         val k = when {

@@ -27,16 +27,18 @@ fun isUserTestClassEnabled(context: ExtensionContext) =
 @ExampleApi
 @OptIn(DelicateApi::class)
 @EnabledIf(
-    value = "pl.mareklangiewicz.kommand.demo.MyDemoTestsKt#isUserTestClassEnabled",
-    disabledReason = "tests.MyDemoTests not enabled in user konfig"
+  value = "pl.mareklangiewicz.kommand.demo.MyDemoTestsKt#isUserTestClassEnabled",
+  disabledReason = "tests.MyDemoTests not enabled in user konfig",
 )
 class MyDemoTests {
 
-    @Test fun testExperiment1() = runTestUSpek { MyDemoSamples.run {
+    @Test fun testExperiment1() = runTestUSpek {
+        MyDemoSamples.run {
 
-        "On btopKitty" so { btopK.ax(SYS) }
+            "On btopKitty" so { btopK.ax(SYS) }
 
-        "On manAllMan" so { manAllMan.ax(SYS) }
-    } }
+            "On manAllMan" so { manAllMan.ax(SYS) }
+        }
+    }
 
 }

@@ -23,15 +23,25 @@ class ZenityTest {
 
     @Test fun testZenityCalendarFormat() = zenity(Calendar) { -DateFormat("%y-%m-%d") }.tryInteractivelyCheck()
     @Test fun testZenityInfo() = zenity(Info) { -Text("Some info (timeout 5s)"); -Timeout(5) }.tryInteractivelyCheck()
-    @Test fun testZenityWarning() = zenity(Warning) { -Text("Some Warning (timeout 3s)"); -Timeout(3) }.tryInteractivelyCheck()
-    @Test fun testZenityError() = zenity(Error) { -Text("Some loooooong looong ERROR!"); -NoWrap }.tryInteractivelyCheck()
+    @Test fun testZenityWarning() =
+        zenity(Warning) { -Text("Some Warning (timeout 3s)"); -Timeout(3) }.tryInteractivelyCheck()
+
+    @Test fun testZenityError() =
+        zenity(Error) { -Text("Some loooooong looong ERROR!"); -NoWrap }.tryInteractivelyCheck()
+
     @Test fun testZenityFileSelection() = zenity(FileSelection) { -Title("Select some file") }.tryInteractivelyCheck()
-    @Test fun testZenityFileMultiple() = zenity(FileSelection) { -Title("Select some files"); -Multiple }.tryInteractivelyCheck()
-    @Test fun testZenityFileDirectory() = zenity(FileSelection) { -Title("Select some dir"); -ZenityOpt.Directory }.tryInteractivelyCheck()
+    @Test fun testZenityFileMultiple() =
+        zenity(FileSelection) { -Title("Select some files"); -Multiple }.tryInteractivelyCheck()
+
+    @Test fun testZenityFileDirectory() =
+        zenity(FileSelection) { -Title("Select some dir"); -ZenityOpt.Directory }.tryInteractivelyCheck()
+
     @Test fun testZenityFileSave() = zenity(FileSelection) { -Save; -ConfirmOverwrite }.tryInteractivelyCheck()
     @Test fun testZenityNotification() = zenity(Notification) { -Text("Some notification") }.tryInteractivelyCheck()
     @Test fun testZenityProgress() = zenity(Progress) { -Text("Some progress"); -Pulsate }.tryInteractivelyCheck()
-    @Test fun testZenityQuestion() = zenity(Question) { -Text("Some wierdddddd question"); NoWrap }.tryInteractivelyCheck()
+    @Test fun testZenityQuestion() =
+        zenity(Question) { -Text("Some wierdddddd question"); NoWrap }.tryInteractivelyCheck()
+
     @Test fun testZenityTextInfo() = zenity(TextInfo) { -FileName("build.gradle.kts") }.tryInteractivelyCheck()
     @Test fun testZenityScale() = zenity(Scale) { -InitValue(2); -MinValue(1); -MaxValue(8) }.tryInteractivelyCheck()
 
@@ -44,6 +54,7 @@ class ZenityTest {
             +"col 2 row $it"
         }
     }.tryInteractivelyCheck()
+
     @Test fun testZenityCheckList() = zenity(List) {
         -CheckList
         -Text("a list")
@@ -54,6 +65,7 @@ class ZenityTest {
             +"label $it"
         }
     }.tryInteractivelyCheck()
+
     @Test fun testZenityRadioList() = zenity(List) {
         -RadioList
         -Text("a list")
@@ -66,6 +78,7 @@ class ZenityTest {
             +"desc $it"
         }
     }.tryInteractivelyCheck()
+
     @Test fun testZenityListFromLs() = ifInteractiveCodeEnabled {
         SYS.run { // TODO_someday: nice parsing for ls output columns etc..
             val lines = ls { -All; -LongFormat; -HumanReadable }.axb(this)
@@ -80,5 +93,5 @@ class ZenityTest {
     }
 
     // TODO_someday bash (& nobash) pipes (both typesafe!). Best if I can compose in kotlin (without bash) sth like:
-    //find . -name '*.h' | zenity --list --title "Search Results" --text "Finding all header files.." --column "Files"
+    // find . -name '*.h' | zenity --list --title "Search Results" --text "Finding all header files.." --column "Files"
 }

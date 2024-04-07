@@ -55,11 +55,19 @@ data object GhSamples {
                 "gh secret set FAKE_SECRET --repo mareklangiewicz/AbcdK"
 
     val secretSetConcreteFakeSecret66InAbcdK =
-        ghSecretSet(secretName = "FAKE_SECRET_66", secretValue = "concretevalue66", repoPath = "mareklangiewicz/AbcdK") rs
+        ghSecretSet(
+          secretName = "FAKE_SECRET_66",
+          secretValue = "concretevalue66",
+          repoPath = "mareklangiewicz/AbcdK",
+        ) rs
                 "gh secret set FAKE_SECRET_66 --repo mareklangiewicz/AbcdK"
 
     val secretSetConcreteFakeSecret67InAbcdK =
-        ghSecretSet(secretName = "FAKE_SECRET_67", secretValue = "concretevalue67", repoPath = "mareklangiewicz/AbcdK") rs
+        ghSecretSet(
+          secretName = "FAKE_SECRET_67",
+          secretValue = "concretevalue67",
+          repoPath = "mareklangiewicz/AbcdK",
+        ) rs
                 "gh secret set FAKE_SECRET_67 --repo mareklangiewicz/AbcdK"
 
     val secretDeleteFakeSecretInAbcdK =
@@ -74,15 +82,15 @@ data object GhSamples {
         ghRepoView("Kotlin/kotlinx.coroutines", branch = "develop", web = true) s
                 "gh repo view Kotlin/kotlinx.coroutines --branch develop --web"
 
-    val repoList=
+    val repoList =
         ghRepoList() s
                 "gh repo list"
 
-    val repoListRomanElizarov=
+    val repoListRomanElizarov =
         ghRepoList("elizarov") s
                 "gh repo list elizarov"
 
-    val repoListAvailableJsonFields=
+    val repoListAvailableJsonFields =
         ghRepoList { -Json() } s
                 "gh repo list --json"
 

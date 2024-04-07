@@ -23,8 +23,11 @@ fun ideOpen(
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
 fun ideOrGVimOpen(path: String) = ReducedScript { cli, dir ->
-    try { ideOpen(path).ax(cli, dir = dir) }
-    catch (_: BadStateErr) { gvim(path).ax(cli, dir = dir) }
+    try {
+        ideOpen(path).ax(cli, dir = dir)
+    } catch (_: BadStateErr) {
+        gvim(path).ax(cli, dir = dir)
+    }
 }
 
 /** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
@@ -35,15 +38,14 @@ fun ideDiff(path1: String, path2: String, path3: String? = null, ifNoIdeRunningS
 fun ideMerge(path1: String, path2: String, output: String, base: String? = null, ifNoIdeRunningStart: Type? = null) =
     ide(Cmd.Merge(path1, path2, output, base), ifNoIdeRunningStart)
 
-fun <CmdT: Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
+fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
     ReducedScript { cli, dir ->
         val type = getFirstRunningIdeType(cli) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
         ide(type, cmd, init).ax(cli, dir = dir)
     }
 
 
-
-fun <CmdT: Cmd> ide(type: Type, cmd: CmdT, init: CmdT.() -> Unit = {}) = Ide(type, cmd.apply(init))
+fun <CmdT : Cmd> ide(type: Type, cmd: CmdT, init: CmdT.() -> Unit = {}) = Ide(type, cmd.apply(init))
 
 /**
  * https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html
@@ -61,7 +63,7 @@ fun <CmdT: Cmd> ide(type: Type, cmd: CmdT, init: CmdT.() -> Unit = {}) = Ide(typ
  * If you open a directory that is not a part of a project,
  * IntelliJ IDEA adds the .idea directory to it, making it a project.
  */
-data class Ide(var type: Type, var cmd: Cmd): Kommand {
+data class Ide(var type: Type, var cmd: Cmd) : Kommand {
     override val name get() = type.name
     override val args get() = cmd.toArgs()
 
@@ -73,7 +75,7 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
     @Suppress("EnumEntryName")
     enum class Type { idea, ideap, ideaslim, studio }
 
-    sealed class Cmd(val name: String?): ToArgs {
+    sealed class Cmd(val name: String?) : ToArgs {
 
         data class Open(
             val opts: MutableList<Opt> = mutableListOf(),
@@ -85,15 +87,16 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
                 path3: String? = null,
                 line: Int? = null,
                 column: Int? = null,
-            ): this(
+            ) : this(
                 listOfNotNull(line?.let(Opt::Line), column?.let(Opt::Column)).toMutableList(),
-                listOfNotNull(path1, path2, path3).toMutableList()
+                listOfNotNull(path1, path2, path3).toMutableList(),
             )
 
             override fun toArgs() = opts.flatMap { it.toArgs() } + paths
 
-            sealed class Opt(val name: String, val arg: String? = null): KOpt {
+            sealed class Opt(val name: String, val arg: String? = null) : KOpt {
                 override fun toArgs() = listOf(name) plusIfNN arg
+
                 data object NoSplash : Opt("nosplash")
                 data object NoProjects : Opt("dontReopenProjects")
                 data object NoPlugins : Opt("disableNonBundledPlugins")
@@ -101,13 +104,17 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
                 data class Line(val l: Int) : Opt("--line", l.toString())
                 data class Column(val c: Int) : Opt("--column", c.toString())
             }
+
             operator fun Opt.unaryMinus() = opts.add(this)
             operator fun String.unaryPlus() = paths.add(this)
         }
+
         data class Diff(var path1: String, var path2: String, var path3: String? = null) : Cmd("diff") {
             override fun toArgs() = listOfNotNull(name, path1, path2, path3)
         }
-        data class Merge(var path1: String, var path2: String, var pathOut: String, var pathBase: String? = null) : Cmd("merge") {
+
+        data class Merge(var path1: String, var path2: String, var pathOut: String, var pathBase: String? = null) :
+            Cmd("merge") {
             override fun toArgs() = listOfNotNull(name, path1, path2, pathBase, pathOut)
         }
 
@@ -123,7 +130,7 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
             override fun toArgs() = listOf(name!!) + opts.flatMap { it.toArgs() } + paths
 
             @OptIn(DelicateApi::class)
-            sealed class Opt(name: String, args: List<String> = emptyList()): KOptS(name, args, argsSeparator = ",") {
+            sealed class Opt(name: String, args: List<String> = emptyList()) : KOptS(name, args, argsSeparator = ",") {
                 data object Help : Opt("h")
                 data object Dry : Opt("d")
                 data object Recursive : Opt("r")
@@ -132,6 +139,7 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
                 class Settings(path: String) : Opt("s", listOf(path))
                 class Charset(charset: String) : Opt("charset", listOf(charset))
             }
+
             operator fun Opt.unaryMinus() = opts.add(this)
             operator fun String.unaryPlus() = paths.add(this)
         }
@@ -150,7 +158,7 @@ data class Ide(var type: Type, var cmd: Cmd): Kommand {
             override fun toArgs() = listOf(name!!, project, profile, output) + opts.flatMap { it.toArgs() }
 
             @OptIn(DelicateApi::class)
-            sealed class Opt(name: String, arg: String? = null): KOptS(name, arg) {
+            sealed class Opt(name: String, arg: String? = null) : KOptS(name, arg) {
                 data object Changes : Opt("changes")
                 class Dir(dir: String) : Opt("d", dir)
                 /** "xml" (default) or "json" or "plain" */

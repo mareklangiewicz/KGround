@@ -29,8 +29,7 @@ fun testTmpKonfig(cli: CLI) {
         try {
             val konfig = konfigInDir(konfigNewDir, cli)
             testGivenNewKonfigInDir(cli, konfig, konfigNewDir)
-        }
-        finally {
+        } finally {
             rmTreeWithForce(konfigNewDir) { cli, path -> cli.pathToUserTmp!! in path && "tmpKonfigForTests" in path }
                 .axb(cli)
         }

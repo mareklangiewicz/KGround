@@ -43,7 +43,7 @@ data object FindSamples {
 
     val findSymLinksToKtsFilesInKGround =
         find(myKGroundPath, SymLinkTo("*.kts")) s
-            "find $myKGroundPath -lname *.kts"
+                "find $myKGroundPath -lname *.kts"
 
     val findDepthMax2FilesInDepsKtAndRunFileOnEach =
         find(myDepsKtPath, DepthMax(2), ActExec(kommand("file", "{}"))) s
@@ -59,7 +59,7 @@ data object FindSamples {
             myKotlinPath,
             OpParent(NameBase("build"), FileType("d"), ActPrune, AlwaysFalse),
             OpOr,
-            OpParent(NameBase("*.kt"), ModifTime24h(NumArg.Exactly(0)), ActPrint)
+            OpParent(NameBase("*.kt"), ModifTime24h(NumArg.Exactly(0)), ActPrint),
         ) s
                 "find $myKotlinPath ( -name build -type d -prune -false ) -o ( -name *.kt -mtime 0 -print )"
 
@@ -83,8 +83,8 @@ data object FindSamples {
         findTypicalDetailsTable("..") ts
                 """find .. -name * -type f -printf """ +
                 """%A+\0\0%C+\0\0%T+\0\0%B+\0\0%d\0\0%s\0\0%h\0\0%f\0\0%p\0\0%g\0\0%u\0\0%m\0\0%M\0\n"""
-                    // Note: this expected lineRaw was just copied and pasted from actual result (somewhat bad practice),
-                    // but the point is to have it here as kinda "screenshot" and to be noticed when sth changes.
+    // Note: this expected lineRaw was just copied and pasted from actual result (somewhat bad practice),
+    // but the point is to have it here as kinda "screenshot" and to be noticed when sth changes.
 
 }
 
@@ -92,10 +92,11 @@ data object FindSamples {
 @OptIn(DelicateApi::class)
 fun findBoringCodeDirs(
     path: String,
-    boringCodeDirRegexes: List<String> = listOf("build", "node_modules", "\\.gradle")
-        // order is important build before node_modules, because usually node_modules are inside build,
-        // so no need to search for it it as it will be marked as boring anyway (whole build pruned) in such case
-) = findDirRegex(path,
+    boringCodeDirRegexes: List<String> = listOf("build", "node_modules", "\\.gradle"),
+    // order is important build before node_modules, because usually node_modules are inside build,
+    // so no need to search for it it as it will be marked as boring anyway (whole build pruned) in such case
+) = findDirRegex(
+    path,
     nameRegex = boringCodeDirRegexes.joinToString("\\|", prefix = ".*/\\(", postfix = "\\)"),
     whenFoundPrune = true,
 )
@@ -107,13 +108,14 @@ fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
     urlPrefix: String = "file://\$MODULE_DIR\$",
     withOnEachLog: Boolean = false,
 ) =
-    findBoringCodeDirs(path).reducedOut { this
-        .map { it.removeReqPrefix(path) }
-        .map { "$indent<excludeFolder url=\"$urlPrefix$it\" />" }
-        .let { if (withOnEachLog) it.onEachLog() else it }
-        .toList()
-        .sorted()
-        .joinToString("\n")
+    findBoringCodeDirs(path).reducedOut {
+        this
+            .map { it.removeReqPrefix(path) }
+            .map { "$indent<excludeFolder url=\"$urlPrefix$it\" />" }
+            .let { if (withOnEachLog) it.onEachLog() else it }
+            .toList()
+            .sorted()
+            .joinToString("\n")
     }
 
 /**
@@ -142,14 +144,14 @@ fun findMyKotlinCode(
         FileType("f"),
         withModifTime24h?.let(::ModifTime24h),
         fexprActExecGrepPrintIfMatched(withGrepRE),
-    )
+    ),
 )
 
 @DelicateApi
 private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
     if (grepRE == null) ActPrint
     else OpParent(
-        ActExec(grepQuietly(grepRE, "{}")), ActPrint
+        ActExec(grepQuietly(grepRE, "{}")), ActPrint,
     )
 
 /**
@@ -159,11 +161,11 @@ private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
  * @param expr Expression (joined by "and" by default), null elements are ignored
  */
 @DelicateApi
-private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr?) =  OpParent(
+private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr?) = OpParent(
     prunedDirsNamed?.let {
         OpParent(
             NameBase(it), FileType("d"),
-            ActPrune, AlwaysFalse
+            ActPrune, AlwaysFalse,
         )
     } ?: AlwaysFalse,
     OpOr, OpParent(expr.filterNotNull()),

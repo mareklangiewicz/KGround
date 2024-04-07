@@ -38,7 +38,7 @@ fun findDetailsTable(
     path = path,
     baseNamePattern = baseNamePattern,
     ignoreCase = ignoreCase,
-    whenFoundPrintF = details.detailsPrintFormat()
+    whenFoundPrintF = details.detailsPrintFormat(),
 ).typed {
     map { details.detailsParseLine(it) }
 }
@@ -97,7 +97,7 @@ fun find(
     whenFoundPrune: Boolean = false,
     whenFoundFirstQuit: Boolean = false,
 ) = findTypeNameBase(
-    path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit
+    path, fileType, baseNamePattern, ignoreCase, whenFoundPrintF, whenFoundPrune, whenFoundFirstQuit,
 )
 
 @OptIn(DelicateApi::class)
@@ -211,7 +211,7 @@ data class Find(
 private fun String.iff(condition: Boolean) = if (condition) this else ""
 
 @DelicateApi
-interface FindExpr: KOpt {
+interface FindExpr : KOpt {
 
 // region Find Expression Category: POSITIONAL OPTIONS
 
@@ -219,28 +219,28 @@ interface FindExpr: KOpt {
      * Measure times (for -amin, -atime, -cmin, -ctime, -mmin, and -mtime) from
      * the beginning of today rather than from 24 hours ago.
      */
-    data object DayStart: KOptS("daystart"), FindExpr
+    data object DayStart : KOptS("daystart"), FindExpr
 
     /**
      * Deprecated; use the -L option instead.  Dereference symbolic links.  Implies -noleaf.
      * The -follow option affects only those tests which appear after it on the command line.
      */
     @Deprecated("Use SymLinkFollowAlways")
-    data object Follow: KOptS("follow"), FindExpr
+    data object Follow : KOptS("follow"), FindExpr
 
     /**
      * Changes the regular expression syntax understood by "-regex" and "-iregex" tests
      * which occur later on the command line.
      * To see which regular expression types are known, use RegexType("help").
      */
-    data class RegexType(val type: String): KOptS("regextype"), FindExpr
+    data class RegexType(val type: String) : KOptS("regextype"), FindExpr
 
     /**
      * Turn warning messages on or off.  These warnings apply only to the command line usage,
      * not to any conditions that find might encounter when it searches directories.
      * The default behavior corresponds to "-warn" if standard input is a tty, and to "-nowarn" otherwise.
      */
-    data class Warn(val enabled: Boolean = true): KOptS("no".iff(!enabled) + "warn"), FindExpr
+    data class Warn(val enabled: Boolean = true) : KOptS("no".iff(!enabled) + "warn"), FindExpr
 
 
 // endregion Find Expression Category: POSITIONAL OPTIONS
@@ -256,15 +256,15 @@ interface FindExpr: KOpt {
      * I use the "-depth" form by default because it's recommended on my system (man find) and POSIX compliant,
      * but "-d" should also do the same and additionally is supported on FreeBSD, NetBSD, Mac OS X and OpenBSD.
      */
-    data class DepthFirst(val posix: Boolean = true): KOptS("d" + "epth".iff(posix)), FindExpr
+    data class DepthFirst(val posix: Boolean = true) : KOptS("d" + "epth".iff(posix)), FindExpr
 
-    data class DepthMax(val levels: Int): KOptS("maxdepth", levels.toString()), FindExpr
-    data class DepthMin(val levels: Int): KOptS("mindepth", levels.toString()), FindExpr
+    data class DepthMax(val levels: Int) : KOptS("maxdepth", levels.toString()), FindExpr
+    data class DepthMin(val levels: Int) : KOptS("mindepth", levels.toString()), FindExpr
 
     /**
      * @param file default "-" is stdin
      */
-    data class Paths0From(val file: String = "-"): KOptS("files0-from"), FindExpr
+    data class Paths0From(val file: String = "-") : KOptS("files0-from"), FindExpr
 
     /**
      * Normally, find will emit an error message when it fails to stat a file.
@@ -273,7 +273,7 @@ interface FindExpr: KOpt {
      * and the time it tries to stat the file,
      * then no error message will be issued.
      */
-    data class ReadDirRace(val ignore: Boolean = false):
+    data class ReadDirRace(val ignore: Boolean = false) :
         KOptS("no".iff(!ignore) + "ignore_readdir_race"), FindExpr
 
     /**
@@ -282,10 +282,10 @@ interface FindExpr: KOpt {
      * that do not follow the Unix directory link convention,
      * such as CD-ROM or MS-DOS filesystems or AFS volume mount points.
      */
-    data object NoLeaf: KOptS("noleaf"), FindExpr
+    data object NoLeaf : KOptS("noleaf"), FindExpr
 
     /** Don't descend directories on other filesystems. */
-    data object XDev: KOptS("mount"), FindExpr
+    data object XDev : KOptS("mount"), FindExpr
     // I use "-mount" instead of "-xdev" because it's more portable (it does the same thing)
 
 // endregion Find Expression Category: GLOBAL OPTIONS
@@ -293,40 +293,51 @@ interface FindExpr: KOpt {
 // region Find Expression Category: TESTS
 
     sealed class NumArg(val n: Int) {
-        init { chk(n >= 0) }
+        init {
+            chk(n >= 0)
+        }
+
         abstract val arg: String
         override fun toString() = arg
-        class Exactly(n: Int): NumArg(n) { override val arg get() = "$n" }
-        class LessThan(n: Int): NumArg(n) { override val arg get() = "-$n" }
-        class MoreThan(n: Int): NumArg(n) { override val arg get() = "+$n" }
+        class Exactly(n: Int) : NumArg(n) {
+            override val arg get() = "$n"
+        }
+
+        class LessThan(n: Int) : NumArg(n) {
+            override val arg get() = "-$n"
+        }
+
+        class MoreThan(n: Int) : NumArg(n) {
+            override val arg get() = "+$n"
+        }
     }
 
     /** The file was last accessed less than, more than or exactly n minutes ago. */
-    data class AccessMinutes(val minutes: NumArg): KOptS("amin", minutes.arg), FindExpr
+    data class AccessMinutes(val minutes: NumArg) : KOptS("amin", minutes.arg), FindExpr
 
-    data class AccessNewerThanModifOf(val referenceFile: String):
+    data class AccessNewerThanModifOf(val referenceFile: String) :
         KOptS("anewer", referenceFile), FindExpr
 
     /** The file was last accessed less than, more than or exactly n*24 hours ago. */
-    data class AccessTime24h(val time24h: NumArg): KOptS("atime", time24h.arg), FindExpr
+    data class AccessTime24h(val time24h: NumArg) : KOptS("atime", time24h.arg), FindExpr
 
     /** The file status was last changed less than, more than or exactly n minutes ago. */
-    data class ChangeMinutes(val minutes: NumArg): KOptS("cmin", minutes.arg), FindExpr
+    data class ChangeMinutes(val minutes: NumArg) : KOptS("cmin", minutes.arg), FindExpr
 
-    data class ChangeNewerThanModifOf(val referenceFile: String):
+    data class ChangeNewerThanModifOf(val referenceFile: String) :
         KOptS("cnewer", referenceFile), FindExpr
 
     /** The file status was changed less than, more than or exactly n*24 hours ago. */
-    data class ChangeTime24h(val time24h: NumArg): KOptS("ctime", time24h.arg), FindExpr
+    data class ChangeTime24h(val time24h: NumArg) : KOptS("ctime", time24h.arg), FindExpr
 
     /** The file data was last modified less than, more than or exactly n minutes ago. */
-    data class ModifMinutes(val minutes: NumArg): KOptS("mmin", minutes.arg), FindExpr
+    data class ModifMinutes(val minutes: NumArg) : KOptS("mmin", minutes.arg), FindExpr
 
-    data class ModifNewerThanModifOf(val referenceFile: String):
+    data class ModifNewerThanModifOf(val referenceFile: String) :
         KOptS("newer", referenceFile), FindExpr
 
     /** The file data was last modified less than, more than or exactly n*24 hours ago. */
-    data class ModifTime24h(val time24h: NumArg): KOptS("mtime", time24h.arg), FindExpr
+    data class ModifTime24h(val time24h: NumArg) : KOptS("mtime", time24h.arg), FindExpr
 
     /**
      * Succeeds if timestamp X of the file being considered is newer than timestamp Y
@@ -337,7 +348,7 @@ interface FindExpr: KOpt {
      * m - The modification time of the file reference
      * t - reference is interpreted directly as a time
      */
-    data class TimeXNewerThanYOf(val xy: String, val referenceFile: String):
+    data class TimeXNewerThanYOf(val xy: String, val referenceFile: String) :
         KOptS("newer$xy", referenceFile), FindExpr
     // TODO_someday: better typed structure for -newerXY;
     // and generally more structured data classes for all time related tests
@@ -345,42 +356,42 @@ interface FindExpr: KOpt {
 
 
     /** The file is empty and is either a regular file or a directory. */
-    data object IsEmpty: KOptS("empty"), FindExpr
+    data object IsEmpty : KOptS("empty"), FindExpr
 
     /**
      * Matches files which are executable and directories which are searchable
      * (in a file name resolution sense) by the current user.
      */
-    data object IsExecutable: KOptS("executable"), FindExpr
+    data object IsExecutable : KOptS("executable"), FindExpr
 
-    data object AlwaysFalse: KOptS("false"), FindExpr
-    data object AlwaysTrue: KOptS("true"), FindExpr
+    data object AlwaysFalse : KOptS("false"), FindExpr
+    data object AlwaysTrue : KOptS("true"), FindExpr
 
-    data class OnFileSystemType(val type: String): KOptS("fstype", type), FindExpr
+    data class OnFileSystemType(val type: String) : KOptS("fstype", type), FindExpr
 
     /** File's numeric group ID is less than, more than or exactly n. */
-    data class GroupID(val n: NumArg): KOptS("gid", n.arg), FindExpr
+    data class GroupID(val n: NumArg) : KOptS("gid", n.arg), FindExpr
 
     /** The file belongs to group gname (numeric group ID allowed). */
-    data class GroupName(val gname: String): KOptS("group", gname), FindExpr
+    data class GroupName(val gname: String) : KOptS("group", gname), FindExpr
 
     /**
      * The file has inode number smaller than, greater than or exactly n.
      * It is normally easier to use the -samefile test instead.
      */
-    data class INodeNum(val num: NumArg): KOptS("inum", num.arg), FindExpr
+    data class INodeNum(val num: NumArg) : KOptS("inum", num.arg), FindExpr
 
     /** The file has less than, more than or exactly n hard links. */
-    data class HardLinksNum(val num: NumArg): KOptS("links", num.arg), FindExpr
+    data class HardLinksNum(val num: NumArg) : KOptS("links", num.arg), FindExpr
 
 
 
     /** The file is a symbolic link whose contents match a given shell pattern. */
-    data class SymLinkTo(val pattern: String, val ignoreCase: Boolean = false):
+    data class SymLinkTo(val pattern: String, val ignoreCase: Boolean = false) :
         KOptS("i".iff(ignoreCase) + "lname", pattern), FindExpr
 
     /** Base of file name (leading directories removed) matches the given shell pattern */
-    data class NameBase(val pattern: String, val ignoreCase: Boolean = false):
+    data class NameBase(val pattern: String, val ignoreCase: Boolean = false) :
         KOptS("i".iff(ignoreCase) + "name", pattern), FindExpr
 
     /**
@@ -388,9 +399,9 @@ interface FindExpr: KOpt {
      * Note that the pattern match test applies to the whole file name,
      * starting from one of the start points named on the command line.
      */
-    data class NameFull(val pattern: String, val ignoreCase: Boolean = false):
+    data class NameFull(val pattern: String, val ignoreCase: Boolean = false) :
         KOptS("i".iff(ignoreCase) + "path", pattern), FindExpr
-        // I use the "-path" notation which is more portable than "-wholename", but does the same thing.
+    // I use the "-path" notation which is more portable than "-wholename", but does the same thing.
 
     /**
      * The file name matches a regular expression pattern.
@@ -399,25 +410,25 @@ interface FindExpr: KOpt {
      * (And also to be different from stdlib "Regex" class)
      * It does NOT mean a name OF some regex.
      */
-    data class NameRegex(val regex: String, val ignoreCase: Boolean = false):
+    data class NameRegex(val regex: String, val ignoreCase: Boolean = false) :
         KOptS("i".iff(ignoreCase) + "regex", regex), FindExpr
 
     /** No group corresponds to file's numeric group ID. */
-    data object NoGroup: KOptS("nogroup"), FindExpr
+    data object NoGroup : KOptS("nogroup"), FindExpr
 
     /** No user corresponds to file's numeric user ID. */
-    data object NoUser: KOptS("nouser"), FindExpr
+    data object NoUser : KOptS("nouser"), FindExpr
 
 
-    data class PermAllOf(val mode: String): KOptS("perm", "-$mode"), FindExpr
-    data class PermAnyOf(val mode: String): KOptS("perm", "/$mode"), FindExpr
-    data class PermExactly(val mode: String): KOptS("perm", mode), FindExpr
+    data class PermAllOf(val mode: String) : KOptS("perm", "-$mode"), FindExpr
+    data class PermAnyOf(val mode: String) : KOptS("perm", "/$mode"), FindExpr
+    data class PermExactly(val mode: String) : KOptS("perm", mode), FindExpr
 
     /** Matches files which are readable by the current user. */
-    data object Readable: KOptS("readable"), FindExpr
+    data object Readable : KOptS("readable"), FindExpr
 
     /** The file refers to the same inode as name. */
-    data class SameFileAs(val referenceFile: String): KOptS("samefile", referenceFile), FindExpr
+    data class SameFileAs(val referenceFile: String) : KOptS("samefile", referenceFile), FindExpr
 
     /**
      * The file uses less than, more than or exactly n units of space, rounding up.
@@ -429,7 +440,7 @@ interface FindExpr: KOpt {
      * M - for mebibytes (MiB, units of 1024 * 1024 = 1048576 bytes)
      * G - for gibibytes (GiB, units of 1024 * 1024 * 1024 = 1073741824 bytes)
      */
-    data class FileSize(val n: NumArg, val unit: Char): KOptS("size", "${n.arg}$unit"), FindExpr
+    data class FileSize(val n: NumArg, val unit: Char) : KOptS("size", "${n.arg}$unit"), FindExpr
 
     /**
      * Matches files of a specified type.
@@ -451,10 +462,10 @@ interface FindExpr: KOpt {
      * @param x When true: Change to alternative symbolic links matching strategy.
      * See "man find" for some crazy details.
      */
-    data class FileType(val type: String, val x: Boolean = false): KOptS("x".iff(x) + "type", type), FindExpr
+    data class FileType(val type: String, val x: Boolean = false) : KOptS("x".iff(x) + "type", type), FindExpr
 
     /** (SELinux only) Security context of the file matches the glob pattern. */
-    data class SEContext(val pattern: String): KOptS("context", pattern), FindExpr
+    data class SEContext(val pattern: String) : KOptS("context", pattern), FindExpr
 
 // endregion Find Expression Category: TESTS
 
@@ -476,7 +487,7 @@ interface FindExpr: KOpt {
      * it will not output an error diagnostic, not change the exit code to nonzero,
      * and the return code of the ActDelete will be true.
      */
-    data object ActDelete: KOptS("delete"), FindExpr
+    data object ActDelete : KOptS("delete"), FindExpr
 
     /**
      * Execute kommand; true if 0 status is returned. Special arg ";" is used after all kommand args,
@@ -492,7 +503,7 @@ interface FindExpr: KOpt {
         val kommand: Kommand,
         val inContainingDir: Boolean = true,
         val askUserFirst: Boolean = false,
-    ): KOptS(name = (if (askUserFirst)"ok" else "exec") + "dir".iff(inContainingDir)), FindExpr {
+    ) : KOptS(name = (if (askUserFirst) "ok" else "exec") + "dir".iff(inContainingDir)), FindExpr {
         override fun toArgs(): List<String> {
             val kta = kommand.toArgs()
             chk(!kta.any { it.startsWith(";") }) {
@@ -502,30 +513,36 @@ interface FindExpr: KOpt {
         }
     }
 
-    data object ActPrint: KOptS("print"), FindExpr
+    data object ActPrint : KOptS("print"), FindExpr
 
-    data class ActPrintF(val format: FindPrintFormat): KOptS("printf", format), FindExpr
+    data class ActPrintF(val format: FindPrintFormat) : KOptS("printf", format), FindExpr
     // TODO_someday:
     //  One ActPrint with flags deciding which version of -(f)print(0/f) to use and optional format and/or file
     //  Also ActLs for -(f)ls
 
-    data object ActPrune: KOptS("prune"), FindExpr
+    data object ActPrune : KOptS("prune"), FindExpr
 
-    data object ActQuit: KOptS("quit"), FindExpr
+    data object ActQuit : KOptS("quit"), FindExpr
 
 // endregion Find Expression Category: ACTIONS
 
 // region Find Expression Category: OPERATORS
 
-    data class OpParent(val children: List<FindExpr>): FindExpr {
-        constructor(vararg ex: FindExpr): this(ex.toList())
+    data class OpParent(val children: List<FindExpr>) : FindExpr {
+        constructor(vararg ex: FindExpr) : this(ex.toList())
+
         override fun toArgs(): List<String> = listOf("(") + children.flatMap { it.toArgs() } + ")"
     }
 
-    data object OpAnd: KOptS("a"), FindExpr
-    data object OpOr: KOptS("o"), FindExpr
-    data object OpNot: FindExpr { override fun toArgs() = listOf("!") }
-    data object OpComma: FindExpr { override fun toArgs() = listOf(",") }
+    data object OpAnd : KOptS("a"), FindExpr
+    data object OpOr : KOptS("o"), FindExpr
+    data object OpNot : FindExpr {
+        override fun toArgs() = listOf("!")
+    }
+
+    data object OpComma : FindExpr {
+        override fun toArgs() = listOf(",")
+    }
 
     // FIXME_someday: rethink all grouping expressions and precedence,
     // so I don't need so many OpParent to make it always correct.
@@ -541,7 +558,7 @@ interface FindExpr: KOpt {
 
 
 @DelicateApi
-interface FindOpt: KOpt {
+interface FindOpt : KOpt {
 
     // Note: Help and Version are inside FindExpr (formally these are expressions for find)
 
@@ -552,12 +569,17 @@ interface FindOpt: KOpt {
     /** Do not follow symbolic links, except while processing the command line arguments. */
     data object SymLinkFollowCmdArg : KOptS("H"), FindOpt
 
-    data class Debug(val dopts: List<String>): KOptS("D", dopts.joinToString(",")), FindOpt {
-        constructor(vararg o: String): this(o.toList())
-        init { chk(dopts.all { it.all { it.isLetter() } }) }
+    data class Debug(val dopts: List<String>) : KOptS("D", dopts.joinToString(",")), FindOpt {
+        constructor(vararg o: String) : this(o.toList())
+
+        init {
+            chk(dopts.all { it.all { it.isLetter() } })
+        }
     }
 
-    data class Optimisation(val level: Int): KOptS("O", level.toString(), nameSeparator = ""), FindOpt {
-        init { chk(level in 0..3) }
+    data class Optimisation(val level: Int) : KOptS("O", level.toString(), nameSeparator = ""), FindOpt {
+        init {
+            chk(level in 0..3)
+        }
     }
 }

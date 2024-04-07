@@ -14,17 +14,19 @@ fun touch(init: Touch.() -> Unit) = Touch().apply(init)
 @DelicateApi
 data class Touch(
     override val opts: MutableList<TouchOpt> = mutableListOf(),
-    override val nonopts: MutableList<String> = mutableListOf()
-) : KommandTypical<TouchOpt> { override val name get() = "touch" }
+    override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<TouchOpt> {
+    override val name get() = "touch"
+}
 
 
 
 @DelicateApi
-interface TouchOpt: KOptTypical {
+interface TouchOpt : KOptTypical {
     data object TimeOfAccessOnly : TouchOpt, KOptS("a")
     data object TimeOfChangeOnly : TouchOpt, KOptS("m")
     data object DisableCreation : TouchOpt, KOptS("c")
-    data class Date(val date: String): TouchOpt, KOptLN(date)
+    data class Date(val date: String) : TouchOpt, KOptLN(date)
     data object Help : TouchOpt, KOptLN()
     data object Version : TouchOpt, KOptLN()
 }

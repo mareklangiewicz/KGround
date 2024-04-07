@@ -89,7 +89,7 @@ interface DpkgAct : DpkgOpt {
 }
 
 @DelicateApi
-interface DpkgOpt: KOpt {
+interface DpkgOpt : KOpt {
     data object Recursive : KOptS("R"), DpkgOpt
     data object Pending : KOptLN(), DpkgOpt
     data object DryRun : KOptLN(), DpkgOpt

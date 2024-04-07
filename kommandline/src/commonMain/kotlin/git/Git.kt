@@ -35,16 +35,18 @@ fun git(cmd: GitCmd? = null, init: Git.() -> Unit = {}) = Git().apply {
 data class Git(
     override val opts: MutableList<GitOpt> = mutableListOf(), // last GitOpt should always be GitCmd
     override val nonopts: MutableList<String> = mutableListOf(), // here is all stuff local for given GitCmd
-): KommandTypical<GitOpt> { override val name get() = "git" }
+) : KommandTypical<GitOpt> {
+    override val name get() = "git"
+}
 
 @OptIn(DelicateApi::class)
-interface GitOpt: KOptTypical {
+interface GitOpt : KOptTypical {
     data object Help : GitOpt, KOptLN()
     data object Version : GitOpt, KOptLN()
     data object Paginate : GitOpt, KOptLN()
     data object Bare : GitOpt, KOptLN()
 
-    data class InPath(val path: String): GitOpt, KOptS("C", path)
+    data class InPath(val path: String) : GitOpt, KOptS("C", path)
 
     data class GitDir(val dir: String) : GitOpt, KOptLN(dir)
     data class WorkTree(val path: String) : GitOpt, KOptLN(path)
@@ -52,7 +54,7 @@ interface GitOpt: KOptTypical {
 }
 
 @OptIn(DelicateApi::class)
-sealed class GitCmd: GitOpt, KOptLN(namePrefix = "") {
+sealed class GitCmd : GitOpt, KOptLN(namePrefix = "") {
     data object Add : GitCmd()
     data object Archive : GitCmd()
     data object Bisect : GitCmd()

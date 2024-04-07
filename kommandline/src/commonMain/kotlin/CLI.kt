@@ -48,9 +48,9 @@ interface CLI {
     val isUbuntu: Boolean get() = false
     val isGnome: Boolean get() = false
 
-    val pathToUserHome get (): String? = null
-    val pathToUserTmp get (): String? = null
-    val pathToSystemTmp get (): String? = null
+    val pathToUserHome get(): String? = null
+    val pathToUserTmp get(): String? = null
+    val pathToSystemTmp get(): String? = null
 
     // TODO_someday: access to input/output streams wrapped in okio Source/Sink
     // (but what about platforms running kommands through ssh or adb?)
@@ -63,8 +63,8 @@ interface CLI {
 
 class FakeCLI(
     private val chkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
-        {_, _, _, _, _, _, _, _ -> },
-    ): CLI {
+        { _, _, _, _, _, _, _, _ -> },
+) : CLI {
 
     override val isRedirectFileSupported get() = true // not really, but it's all fake
 
@@ -79,7 +79,7 @@ class FakeCLI(
         errToOut: Boolean,
         errFile: String?,
         errFileAppend: Boolean,
-        envModify: (MutableMap<String, String>.() -> Unit)?
+        envModify: (MutableMap<String, String>.() -> Unit)?,
     ): ExecProcess {
         ulog.d("start($kommand, $dir, ...)")
         chkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
@@ -88,7 +88,7 @@ class FakeCLI(
 }
 
 @DelicateApi
-class FakeProcess(): ExecProcess {
+class FakeProcess() : ExecProcess {
     override fun waitForExit(finallyClose: Boolean) = 0
     override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
     override fun kill(forcibly: Boolean) = ulog.d("cancel($forcibly)")
@@ -107,18 +107,21 @@ class FakeProcess(): ExecProcess {
 internal fun defaultStdinCollector(
     stdinContext: CoroutineContext,
     writeLine: (line: String, lineEnd: String, thenFlush: Boolean) -> Unit,
-    close: () -> Unit
+    close: () -> Unit,
 ) = StdinCollector { lineS, lineEnd, flushAfterEachLine, finallyStdinClose ->
     withContext(stdinContext) {
-        try { lineS.collect { writeLine(it, lineEnd, flushAfterEachLine) } }
-        finally { if (finallyStdinClose) close() }
+        try {
+            lineS.collect { writeLine(it, lineEnd, flushAfterEachLine) }
+        } finally {
+            if (finallyStdinClose) close()
+        }
     }
 }
 
 internal fun defaultStdOutOrErrFlow(
     flowOnContext: CoroutineContext,
     readLine: () -> String?,
-    close: () -> Unit
+    close: () -> Unit,
 ) = flow { while (true) emit(readLine() ?: break) }
     .onCompletion { close() }
     .flowOn(flowOnContext)
@@ -209,8 +212,11 @@ fun Flow<String>.catchStreamClosed() =
 @DelicateApi
 @Deprecated("Use stdin.") // do not remove it - it's here as kinda "educational" example
 fun ExecProcess.useInLines(input: Sequence<String>, flushAfterEachLine: Boolean = true) =
-    try { input.forEach { stdinWriteLine(it, thenFlush = flushAfterEachLine) } }
-    finally { stdinClose() }
+    try {
+        input.forEach { stdinWriteLine(it, thenFlush = flushAfterEachLine) }
+    } finally {
+        stdinClose()
+    }
 
 /** Can be used only once. It always finally closes output stream. */
 @DelicateApi
@@ -226,8 +232,11 @@ fun ExecProcess.useErrLines(block: (output: Sequence<String>) -> Unit) =
 
 @DelicateApi
 private fun useSomeLines(block: (output: Sequence<String>) -> Unit, readLine: () -> String?, close: () -> Unit) =
-    try { block(generateSequence(readLine)) }
-    finally { close() }
+    try {
+        block(generateSequence(readLine))
+    } finally {
+        close()
+    }
 
 @DelicateApi
 @Deprecated("Use stout Flow.") // do not remove it - it's here as kinda "educational" example
@@ -240,9 +249,13 @@ fun ExecProcess.useErrLinesOrEmptyIfClosed(block: (error: Sequence<String>) -> U
     useSomeLinesOrEmptyIfClosed(block, ::useErrLines)
 
 @DelicateApi
-private fun useSomeLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Unit, useLines: ((Sequence<String>) -> Unit) -> Unit) {
-    try { useLines(block) }
-    catch (e: Exception) {
+private fun useSomeLinesOrEmptyIfClosed(
+    block: (output: Sequence<String>) -> Unit,
+    useLines: ((Sequence<String>) -> Unit) -> Unit,
+) {
+    try {
+        useLines(block)
+    } catch (e: Exception) {
         if (e.message == "Stream closed") block(emptySequence())
         else throw e
     }
@@ -255,7 +268,7 @@ private fun useSomeLinesOrEmptyIfClosed(block: (output: Sequence<String>) -> Uni
  */
 suspend fun ExecProcess.awaitResult(
     inContent: String? = null,
-    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow()
+    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
 ): ExecResult = coroutineScope {
     val inJob = inLineS?.let { launch { stdin.collect(it) } }
     // Note: Have to start pushing to stdin before collecting stdout,

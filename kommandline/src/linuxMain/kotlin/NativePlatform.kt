@@ -5,7 +5,7 @@ import pl.mareklangiewicz.annotations.*
 
 actual fun provideSysCLI(): CLI = NativeCLI()
 
-class NativeCLI: CLI {
+class NativeCLI : CLI {
 
     override val isRedirectFileSupported get() = false
 

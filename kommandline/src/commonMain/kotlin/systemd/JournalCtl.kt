@@ -8,7 +8,7 @@ fun journalctl(init: JournalCtl.() -> Unit = {}) = JournalCtl().apply(init)
 /** [journalctl linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 data class JournalCtl(
     val options: MutableList<Option> = mutableListOf(),
-    val matches: MutableList<String> = mutableListOf()
+    val matches: MutableList<String> = mutableListOf(),
 ) : Kommand {
     override val name get() = "journalctl"
     override val args get() = options.map { it.str } + matches
@@ -28,6 +28,7 @@ data class JournalCtl(
         data object Help : Option("--help")
         data object Version : Option("--version")
     }
+
     operator fun String.unaryPlus() = matches.add(this)
     operator fun Option.unaryMinus() = options.add(this)
 }

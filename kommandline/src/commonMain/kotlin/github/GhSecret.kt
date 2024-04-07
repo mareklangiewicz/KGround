@@ -13,7 +13,7 @@ fun ghSecretSet(
     vararg useNamedArgs: Unit,
     secretName: String,
     secretValue: String,
-    repoPath: String? = null
+    repoPath: String? = null,
 ) =
     ghSecretSet(secretName, repoPath = repoPath).reducedManually {
         stdin.collect(flowOf(secretValue), lineEnd = "", finallyStdinClose = true)
@@ -48,6 +48,6 @@ fun ghSecretSet(
 fun ghSecretDelete(
     secretName: String,
     vararg useNamedArgs: Unit,
-    repoPath: String? = null
+    repoPath: String? = null,
 ) =
     GhSecretDelete().apply { +secretName; repoPath?.let { -Repo(it) } }

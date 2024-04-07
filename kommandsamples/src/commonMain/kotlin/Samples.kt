@@ -8,13 +8,12 @@ import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
 
 
-
 data class Sample(
     val kommand: Kommand,
     val expectedLineRaw: String? = null,
 ) : Kommand by kommand
 
-data class TypedSample<K: Kommand, In, Out, Err>(
+data class TypedSample<K : Kommand, In, Out, Err>(
     val typedKommand: TypedKommand<K, In, Out, Err>,
     val expectedLineRaw: String? = null,
 )
@@ -26,7 +25,7 @@ data class ReducedSample<ReducedOut>(
 
 internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
 
-internal infix fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.ts(expectedLineRaw: String?) =
+internal infix fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.ts(expectedLineRaw: String?) =
     TypedSample(this, expectedLineRaw = expectedLineRaw)
 
 internal infix fun <ReducedOut> ReducedKommand<ReducedOut>.rs(expectedLineRaw: String?) =

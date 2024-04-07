@@ -19,13 +19,15 @@ fun mkdir(init: MkDir.() -> Unit = {}) = MkDir().apply(init)
 data class MkDir(
     override val opts: MutableList<MkDirOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<MkDirOpt> { override val name get() = "mkdir" }
+) : KommandTypical<MkDirOpt> {
+    override val name get() = "mkdir"
+}
 
 @DelicateApi
-interface MkDirOpt: KOptTypical {
+interface MkDirOpt : KOptTypical {
 
     /** set file mode (as in chmod), not a=rwx - umask */
-    data class Mode(val mode: String): KOptS("m", mode), MkDirOpt
+    data class Mode(val mode: String) : KOptS("m", mode), MkDirOpt
 
     /**
      * no error if existing, make parent directories as needed,

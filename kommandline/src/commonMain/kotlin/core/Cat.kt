@@ -14,10 +14,12 @@ fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)
 data class Cat(
     override val opts: MutableList<CatOpt> = mutableListOf(),
     override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<CatOpt> { override val name get() = "cat" }
+) : KommandTypical<CatOpt> {
+    override val name get() = "cat"
+}
 
 @DelicateApi
-interface CatOpt: KOptTypical {
+interface CatOpt : KOptTypical {
 
     /** Number all output lines, starting with 1. This option is ignored if -b is in effect. */
     data object NumberAll : KOptS("n"), CatOpt

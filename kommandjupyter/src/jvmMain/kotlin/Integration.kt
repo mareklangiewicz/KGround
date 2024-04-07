@@ -9,7 +9,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.bad.*
 
-internal class Integration: JupyterIntegration() {
+internal class Integration : JupyterIntegration() {
     override fun Builder.onLoaded() {
 //        render<BlaBla> { HTML("<p><b>bla1: </b>${it.bla1}</p><p><b>bla2: </b>${it.bla2}</p>") }
         import("kotlinx.coroutines.*")
@@ -54,7 +54,8 @@ suspend fun Kommand.ax(
     req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
     req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
     req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
-    val eprocess = cli.start(this@ax,
+    val eprocess = cli.start(
+        this@ax,
         dir = dir,
         inFile = inFile,
         outFile = outFile,
@@ -63,7 +64,7 @@ suspend fun Kommand.ax(
         errFile = errFile,
         errFileAppend = errFileAppend,
     )
-    val inJob = inLineS?.let { launch { eprocess.stdin.collect(it) }}
+    val inJob = inLineS?.let { launch { eprocess.stdin.collect(it) } }
     // Note, Have to start pushing to stdin before collecting stdout,
     // because many commands wait for stdin before outputting data.
     val outJob = outLinesCollector?.let { eprocess.stdout.onEach(it::emit).launchIn(this) }
@@ -74,15 +75,12 @@ suspend fun Kommand.ax(
         .unwrap(expectedExit, expectedErr)
 }
 
-fun <K: Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI = SYS, dir: String? = null) =
+fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI = SYS, dir: String? = null) =
     cli.start(this, dir)
 
 
 suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = SYS, dir: String? = null): ReducedOut =
     ax(cli, dir = dir)
-
-
-
 
 
 
@@ -105,21 +103,23 @@ fun Kommand.axb(
     expectedExit: ((Int) -> Boolean)? = { it == 0 },
     expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
     outLinesCollector: FlowCollector<String>? = null,
-): List<String> = runBlocking { ax(
-    cli,
-    dir,
-    inContent = inContent,
-    inLineS = inLineS,
-    inFile = inFile,
-    outFile = outFile,
-    outFileAppend = outFileAppend,
-    errToOut = errToOut,
-    errFile = errFile,
-    errFileAppend = errFileAppend,
-    expectedExit = expectedExit,
-    expectedErr = expectedErr,
-    outLinesCollector = outLinesCollector,
-) }
+): List<String> = runBlocking {
+    ax(
+        cli,
+        dir,
+        inContent = inContent,
+        inLineS = inLineS,
+        inFile = inFile,
+        outFile = outFile,
+        outFileAppend = outFileAppend,
+        errToOut = errToOut,
+        errFile = errFile,
+        errFileAppend = errFileAppend,
+        expectedExit = expectedExit,
+        expectedErr = expectedErr,
+        outLinesCollector = outLinesCollector,
+    )
+}
 
 /**
  * Blocking flavor of fun ReducedKommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.

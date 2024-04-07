@@ -8,8 +8,8 @@ import pl.mareklangiewicz.annotations.DelicateApi
 @DelicateApi
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
     Bash().apply {
-        - BashOpt.Command
-        + if (pause) "$script ; echo END.ENTER; read" else script
+        -BashOpt.Command
+        +if (pause) "$script ; echo END.ENTER; read" else script
         init()
     }
 
@@ -18,16 +18,17 @@ fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(
 
 @DelicateApi
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
-    // FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
+// FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
 
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
 @OptIn(DelicateApi::class)
 fun bashGetExportsMap() =
-    bash("export").reducedOut { this
-        .toList()
-        .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
-        .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
+    bash("export").reducedOut {
+        this
+            .toList()
+            .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
+            .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
     }
 
 @OptIn(DelicateApi::class)
@@ -49,12 +50,12 @@ data class Bash(
     override val opts: MutableList<BashOpt> = mutableListOf(),
     /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
     override val nonopts: MutableList<String> = mutableListOf(),
-): KommandTypical<BashOpt> {
+) : KommandTypical<BashOpt> {
     override val name get() = "bash"
 }
 
 @DelicateApi
-interface BashOpt: KOptTypical {
+interface BashOpt : KOptTypical {
     /**
      * interpret first from nonopts as a command_string to run
      * If more nonopts present, they are used to override env variables $0 $1 $2...

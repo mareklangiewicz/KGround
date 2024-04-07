@@ -17,7 +17,7 @@ class GnomeTest {
 
     @Test fun testTermGnome() =
         termGnome(kommand("vim")) { -TermGnomeOpt.Verbose; -TermGnomeOpt.Title("strange terminal title") }
-        .tryInteractivelyCheck("gnome-terminal -v --title=strange terminal title -- vim")
+            .tryInteractivelyCheck("gnome-terminal -v --title=strange terminal title -- vim")
 
     @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
         .tryInteractivelyCheck("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext")

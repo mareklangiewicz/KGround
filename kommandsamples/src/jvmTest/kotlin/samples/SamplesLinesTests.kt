@@ -23,7 +23,9 @@ class SamplesLinesTests {
 
 fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     val objSimpleName = obj::class.simpleName ?: bad { "Unexpected samples obj without name" }
-    if (depthLimit < 1) { ulog.d("depthLimit < 1. Ignoring obj $objSimpleName"); return }
+    if (depthLimit < 1) {
+        ulog.d("depthLimit < 1. Ignoring obj $objSimpleName"); return
+    }
     chk(objSimpleName.endsWith("Samples")) { "Unexpected obj name in samples: $objSimpleName" }
     obj::class.objectInstance.chkNN { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
     chk(obj::class.isData) { "Unexpected obj in samples which is NOT data object: $objSimpleName" }

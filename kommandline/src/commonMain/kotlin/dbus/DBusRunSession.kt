@@ -10,7 +10,7 @@ fun dbusrunsession(program: Kommand? = null, init: DBusRunSession.() -> Unit = {
 /** [dbus-run-session freedesktop man](https://dbus.freedesktop.org/doc/dbus-run-session.1.html) */
 data class DBusRunSession(
     var kommand: Kommand? = null,
-    val options: MutableList<Option> = mutableListOf()
+    val options: MutableList<Option> = mutableListOf(),
 ) : Kommand {
     override val name get() = "dbus-run-session"
     override val args get() = options.map { it.str } + kommand?.let { listOf("--", it.name) + it.args }.orEmpty()

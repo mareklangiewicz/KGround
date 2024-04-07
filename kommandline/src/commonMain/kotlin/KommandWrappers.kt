@@ -15,7 +15,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
  * But first, consider if you can just locally save/load flows to/from files using Okio.
  * (Overall goal is to gradually move AWAY from CLI craziness and more towards safe/composable kotlin programming.)
  */
-data class TypedKommand<out K: Kommand, In, Out, Err>(
+data class TypedKommand<out K : Kommand, In, Out, Err>(
     val kommand: K,
     val stdinRetype: StdinCollector.() -> In,
     val stderrRetype: Flow<String>.() -> Err,
@@ -23,7 +23,7 @@ data class TypedKommand<out K: Kommand, In, Out, Err>(
     val stdoutRetype: Flow<String>.() -> Out,
 )
 
-fun <K: Kommand, In, Out, Err> K.typed(
+fun <K : Kommand, In, Out, Err> K.typed(
     stdinRetype: StdinCollector.() -> In,
     stderrRetype: Flow<String>.() -> Err,
     stderrToOut: Boolean = false,
@@ -34,15 +34,15 @@ fun <K: Kommand, In, Out, Err> K.typed(
 internal val defaultInRetypeToItSelf: StdinCollector.() -> StdinCollector = { this }
 internal val defaultOutRetypeToItSelf: Flow<String>.() -> Flow<String> = { this }
 
-fun <K: Kommand, Out> K.typed(
+fun <K : Kommand, Out> K.typed(
     stderrToOut: Boolean = false,
     stdoutRetype: Flow<String>.() -> Out,
 ): TypedKommand<K, StdinCollector, Out, Flow<String>> =
     typed(
-        stdinRetype = defaultInRetypeToItSelf,
-        stderrRetype = defaultOutRetypeToItSelf,
-        stderrToOut = stderrToOut,
-        stdoutRetype = stdoutRetype
+      stdinRetype = defaultInRetypeToItSelf,
+      stderrRetype = defaultOutRetypeToItSelf,
+      stderrToOut = stderrToOut,
+      stdoutRetype = stdoutRetype,
     )
 
 class TypedExecProcess<In, Out, Err>(
@@ -80,14 +80,14 @@ suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
 /**
  * @param dir working directory for started subprocess - null means inherit from the current process
  */
-fun <K: Kommand, In, Out, Err> CLI.start(
+fun <K : Kommand, In, Out, Err> CLI.start(
     kommand: TypedKommand<K, In, Out, Err>,
     dir: String? = null,
 ) = TypedExecProcess(
-    eprocess = start(kommand = kommand.kommand, dir = dir, errToOut = kommand.stderrToOut),
-    stdinRetype = kommand.stdinRetype,
-    stderrRetype = kommand.stderrRetype,
-    stdoutRetype = kommand.stdoutRetype
+  eprocess = start(kommand = kommand.kommand, dir = dir, errToOut = kommand.stderrToOut),
+  stdinRetype = kommand.stdinRetype,
+  stderrRetype = kommand.stderrRetype,
+  stdoutRetype = kommand.stdoutRetype,
 )
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
@@ -115,17 +115,17 @@ suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = CLI.SYS) = ax(c
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
-internal class ReducedKommandImpl<K: Kommand, In, Out, Err, ReducedOut>(
+internal class ReducedKommandImpl<K : Kommand, In, Out, Err, ReducedOut>(
     val typedKommand: TypedKommand<K, In, Out, Err>,
     val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
-): ReducedKommand<ReducedOut> {
+) : ReducedKommand<ReducedOut> {
     override suspend fun ax(cli: CLI, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
 }
 
 internal class ReducedKommandMap<InnerOut, MappedOut>(
     val reducedKommand: ReducedKommand<InnerOut>,
     val reduceMap: suspend InnerOut.() -> MappedOut,
-): ReducedKommand<MappedOut> {
+) : ReducedKommand<MappedOut> {
     override suspend fun ax(cli: CLI, dir: String?): MappedOut = reducedKommand.ax(cli, dir).reduceMap()
 }
 
@@ -138,18 +138,18 @@ fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
 @DelicateApi
 fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
     is ReducedKommandImpl<*, *, *, *, *> -> typedKommand.kommand.lineRaw()
-    is ReducedKommandMap<*, *>  -> reducedKommand.lineRawOrNull()
+    is ReducedKommandMap<*, *> -> reducedKommand.lineRawOrNull()
     else -> null
 }
 
 
 /** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
-fun <K: Kommand, In, Out, Err, ReducedOut> TypedKommand<K, In, Out, Err>.reducedManually(
+fun <K : Kommand, In, Out, Err, ReducedOut> TypedKommand<K, In, Out, Err>.reducedManually(
     reduceManually: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this, reduceManually)
 
 /** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
-fun <K: Kommand, ReducedOut> K.reducedManually(
+fun <K : Kommand, ReducedOut> K.reducedManually(
     reduceManually: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = typed(stdoutRetype = defaultOutRetypeToItSelf)
     .reducedManually(reduceManually)
@@ -158,7 +158,7 @@ fun <K: Kommand, ReducedOut> K.reducedManually(
  * Note: reduceOut means: user is responsible only for reducing stdout;
  * stderr and exit will be handled in the default way; stdin will not be used at all.
  */
-fun <K: Kommand, In, Out, ReducedOut> TypedKommand<K, In, Out, Flow<String>>.reducedOut(
+fun <K : Kommand, In, Out, ReducedOut> TypedKommand<K, In, Out, Flow<String>>.reducedOut(
     reduceOut: suspend Out.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this) {
     coroutineScope {
@@ -170,13 +170,13 @@ fun <K: Kommand, In, Out, ReducedOut> TypedKommand<K, In, Out, Flow<String>>.red
     }
 }
 
-fun <K: Kommand, ReducedOut> K.reducedOut(
+fun <K : Kommand, ReducedOut> K.reducedOut(
     reduceOut: suspend Flow<String>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = this
     .typed(stdoutRetype = defaultOutRetypeToItSelf)
     .reducedOut(reduceOut)
 
-fun <K: Kommand, ReducedExit> K.reducedExit(
+fun <K : Kommand, ReducedExit> K.reducedExit(
     reduceExit: suspend (Int) -> ReducedExit,
 ): ReducedKommand<ReducedExit> = this
     .typed(stdoutRetype = defaultOutRetypeToItSelf)
@@ -185,9 +185,9 @@ fun <K: Kommand, ReducedExit> K.reducedExit(
 
 // These four below look unnecessary, but I like how they explicitly suggest common correct thing to do in the IDE.
 
-fun <K: Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = reducedOut {}
-fun <K: Kommand> K.reducedOutToList(): ReducedKommand<List<String>> = reducedOut { toList() }
-fun <K: Kommand> K.reducedOutToFlow(): ReducedKommand<Flow<String>> =
+fun <K : Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = reducedOut {}
+fun <K : Kommand> K.reducedOutToList(): ReducedKommand<List<String>> = reducedOut { toList() }
+fun <K : Kommand> K.reducedOutToFlow(): ReducedKommand<Flow<String>> =
     reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
 
 fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToList(): ReducedKommand<List<OutItem>> =

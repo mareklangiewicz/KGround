@@ -29,12 +29,12 @@ actual fun Kommand.axb(
     inFile: String?,
     outFile: String?,
 ) = axBlocking(
-    cli,
-    dir = dir,
-    inContent = inContent,
-    inLineS = inLineS,
-    inFile = inFile,
-    outFile = outFile
+  cli,
+  dir = dir,
+  inContent = inContent,
+  inLineS = inLineS,
+  inFile = inFile,
+  outFile = outFile,
 )
 
 // also temporary hack

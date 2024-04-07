@@ -27,7 +27,13 @@ fun konfigInUserHomeConfigDir(
     isReadOnly: Boolean = false,
     checkForDangerousKeys: Boolean = true,
     checkForDangerousValues: Boolean = true,
-) = konfigInDir(cli.pathToUserHome!! + "/.config/konfig", cli, isReadOnly, checkForDangerousKeys, checkForDangerousValues)
+) = konfigInDir(
+  cli.pathToUserHome!! + "/.config/konfig",
+  cli,
+  isReadOnly,
+  checkForDangerousKeys,
+  checkForDangerousValues,
+)
 
 /**
  * Works best when values don't have special characters like new-line etc.
@@ -45,12 +51,18 @@ fun konfigInDir(
 ) = KonfigInDirUnsafe(dir, cli)
     .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
-private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS): IKonfig {
+private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS) : IKonfig {
 
-    init { mkdir(dir, withParents = true).axb(cli) }
+    init {
+        mkdir(dir, withParents = true).axb(cli)
+    }
 
     override fun get(key: String): String? =
-        try { readFileWithCat("$dir/$key").axb(cli).joinToString("\n") } catch (e: RuntimeException) { null }
+        try {
+            readFileWithCat("$dir/$key").axb(cli).joinToString("\n")
+        } catch (e: RuntimeException) {
+            null
+        }
 
     override fun set(key: String, item: String?) {
         val file = "$dir/$key"
@@ -69,12 +81,12 @@ private class KonfigWithChecks(
     private val isClrAllowed: Boolean = false,
     private val checkForDangerousKeys: Boolean = true,
     private val checkForDangerousValues: Boolean = true,
-): IKonfig {
+) : IKonfig {
     override fun clr() = when {
         isReadOnly -> bad { "This konfig is read only." }
         isClrAllowed -> konfig.clr()
         else -> error(
-            "Forbidden. Do manual 'for (k in keys) this[k] = null' if you really want to delete ALL konfig values."
+          "Forbidden. Do manual 'for (k in keys) this[k] = null' if you really want to delete ALL konfig values.",
         )
     }
 
@@ -93,9 +105,9 @@ private class KonfigWithChecks(
     override val keys get() = konfig.keys
 
     private val Char.isSafe get() = isLetterOrDigit() || this == '_' || this == '.'
-        // It's important to allow dots (especially in keys),
-        // because it will be common to use file extensions as value types
-        // (also dots are pretty safe - shells treat it as normal characters)
+    // It's important to allow dots (especially in keys),
+    // because it will be common to use file extensions as value types
+    // (also dots are pretty safe - shells treat it as normal characters)
 }
 
 fun IKonfig.withChecks(

@@ -30,7 +30,9 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(DelicateApi::class)
 class KommandTests {
 
-    init { "INIT ${this::class.simpleName}".teePP }
+    init {
+        "INIT ${this::class.simpleName}".teePP
+    }
 
     val platform = getCurrentPlatformKind()
 
@@ -56,8 +58,9 @@ class KommandTests {
                         "file is there" so {
                             lsRegFiles("/tmp").ax().chkThis { any { "/tmp/$it" == tmpFile } }
                         }
+                    } finally {
+                        rmFileIfExists(tmpFile).ax()
                     }
-                    finally { rmFileIfExists(tmpFile).ax() }
                 }
 
                 // Note: random dir name can't be in test name bc uspek would loop infinitely finding new "branches"
@@ -124,8 +127,7 @@ class KommandTests {
                             "tmp does not contain our dir" so { lsSubDirs("/tmp").ax().chkThis { !contains(dir) } }
                         }
 
-                    }
-                    finally {
+                    } finally {
                         // Clean up. Notice: The "On rmTreeWithForce" above is only for specific test branch,
                         // but here we always make sure we clean up in all uspek cases.
                         rmTreeWithForce(tmpDir) { cli, path -> path.startsWith("/tmp/testDirTmp") }.ax()
@@ -141,6 +143,7 @@ class KommandTests {
 // FIXME: Use impl from new KGround instead
 inline fun <T> T.chkThis(lazyMessage: () -> String = { "this is bad" }, thisIsFine: T.() -> Boolean): T =
     apply { chk(thisIsFine(), lazyMessage) }
+
 inline fun <T> T.reqThis(lazyMessage: () -> String = { "this arg is bad" }, thisIsFine: T.() -> Boolean): T =
     apply { req(thisIsFine(), lazyMessage) }
 
@@ -148,7 +151,7 @@ inline fun <T> T.reqThis(lazyMessage: () -> String = { "this arg is bad" }, this
 // TODO_maybe: Add sth like this to USpekX?
 suspend inline fun <reified T : Throwable> String.soThrows(
     crossinline expectation: (T) -> Boolean = { true },
-    crossinline code: suspend () -> Unit
+    crossinline code: suspend () -> Unit,
 ) = so { chkThrows<T>(expectation) { code() } }
 
 
