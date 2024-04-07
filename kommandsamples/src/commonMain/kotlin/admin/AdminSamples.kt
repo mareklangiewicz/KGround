@@ -9,14 +9,14 @@ import pl.mareklangiewicz.kommand.samples.*
 
 
 data object AdminSamples {
-    val Sudo = SudoSamples
+  val Sudo = SudoSamples
 }
 
 @OptIn(DelicateApi::class)
 data object SudoSamples {
-    val sudoVersion = sudo { -SudoOpt.Version } s "sudo --version"
-    val sudoLsRoot = sudo(ls("/root/")) s "sudo -- ls /root/"
-    val sudoEditHosts = sudoEdit("/etc/hosts") s "sudo --edit /etc/hosts"
-    private val debFile = "discord-0.0.24.deb"
-    val sudoDpkgInstallDiscord = dpkg(DpkgAct.Install(debFile)).withSudo() s "sudo -- dpkg -i $debFile"
+  val sudoVersion = sudo { -SudoOpt.Version } s "sudo --version"
+  val sudoLsRoot = sudo(ls("/root/")) s "sudo -- ls /root/"
+  val sudoEditHosts = sudoEdit("/etc/hosts") s "sudo --edit /etc/hosts"
+  private val debFile = "discord-0.0.24.deb"
+  val sudoDpkgInstallDiscord = dpkg(DpkgAct.Install(debFile)).withSudo() s "sudo -- dpkg -i $debFile"
 }

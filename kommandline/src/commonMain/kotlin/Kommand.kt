@@ -19,19 +19,19 @@ fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.to
 
 @DelicateApi
 fun String.toKommand() = split(" ").run {
-    kommand(first(), *drop(1).toTypedArray())
+  kommand(first(), *drop(1).toTypedArray())
 }
 
 // TODO_someday_maybe: full documentation in kdoc (all commands, options, etc.)
 //  (check in practice to make sure it's optimal for IDE users)
 
 interface WithName {
-    val name: String
+  val name: String
 }
 
 /** @param args as provided to some program */
 interface WithArgs {
-    val args: List<String>
+  val args: List<String>
 }
 
 /**
@@ -52,13 +52,13 @@ interface WithArgs {
  * so they can contain incorrect/inconsistent data during building)
  */
 interface ToArgs {
-    fun toArgs(): List<String>
+  fun toArgs(): List<String>
 }
 
 fun Iterable<ToArgs>.toArgsFlat() = flatMap { it.toArgs() }
 
 interface Kommand : WithName, WithArgs, ToArgs {
-    override fun toArgs() = listOf(name) + args
+  override fun toArgs() = listOf(name) + args
 }
 
 
@@ -80,23 +80,23 @@ interface KOpt : ToArgs
 
 @DelicateApi
 interface KOptTypical : KOpt, WithName, WithArgs {
-    val namePrefix: String
-    val nameSeparator: String
-    val argsSeparator: String
+  val namePrefix: String
+  val nameSeparator: String
+  val argsSeparator: String
 
-    override fun toArgs() = when {
-        args.isEmpty() -> listOf("$namePrefix$name")
-        nameSeparator == " " -> listOf("$namePrefix$name") + joinArgs()
-        nameSeparator.any { it.isWhitespace() } -> bad { "nameSeparator has to be one space or cannot contain any space" }
-        argsSeparator == " " && args.size > 1 -> bad { "argsSeparator can not be space when nameSeparator isn't" }
-        else -> listOf("$namePrefix$name$nameSeparator" + joinArgs().single())
-    }
+  override fun toArgs() = when {
+    args.isEmpty() -> listOf("$namePrefix$name")
+    nameSeparator == " " -> listOf("$namePrefix$name") + joinArgs()
+    nameSeparator.any { it.isWhitespace() } -> bad { "nameSeparator has to be one space or cannot contain any space" }
+    argsSeparator == " " && args.size > 1 -> bad { "argsSeparator can not be space when nameSeparator isn't" }
+    else -> listOf("$namePrefix$name$nameSeparator" + joinArgs().single())
+  }
 
-    private fun joinArgs(): List<String> = when {
-        argsSeparator == " " -> args
-        argsSeparator.any { it.isWhitespace() } -> bad { "argsSeparator has to be one space or cannot contain any space" }
-        else -> listOf(args.joinToString(argsSeparator))
-    }
+  private fun joinArgs(): List<String> = when {
+    argsSeparator == " " -> args
+    argsSeparator.any { it.isWhitespace() } -> bad { "argsSeparator has to be one space or cannot contain any space" }
+    else -> listOf(args.joinToString(argsSeparator))
+  }
 }
 
 // Below there are three KOptTypical subclasses: KOptS, KOptL, KOptLN. These are kinda cryptic, not self-explanatory,
@@ -106,76 +106,76 @@ interface KOptTypical : KOpt, WithName, WithArgs {
 /** Short form of an option */
 @DelicateApi
 open class KOptS(
-    override val name: String,
-    override val args: List<String>,
-    override val namePrefix: String = "-",
-    override val nameSeparator: String = " ",
-    override val argsSeparator: String = " ",
+  override val name: String,
+  override val args: List<String>,
+  override val namePrefix: String = "-",
+  override val nameSeparator: String = " ",
+  override val argsSeparator: String = " ",
 ) : KOptTypical {
-    constructor(
-        name: String,
-        arg: String? = null,
-        namePrefix: String = "-",
-        nameSeparator: String = " ",
-        argsSeparator: String = " ",
-    ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+  constructor(
+    name: String,
+    arg: String? = null,
+    namePrefix: String = "-",
+    nameSeparator: String = " ",
+    argsSeparator: String = " ",
+  ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Long form of an option */
 @DelicateApi
 open class KOptL(
-    override val name: String,
-    override val args: List<String>,
-    override val namePrefix: String = "--",
-    override val nameSeparator: String = "=",
-    override val argsSeparator: String = ",",
+  override val name: String,
+  override val args: List<String>,
+  override val namePrefix: String = "--",
+  override val nameSeparator: String = "=",
+  override val argsSeparator: String = ",",
 ) : KOptTypical {
-    constructor(
-        name: String,
-        arg: String? = null,
-        namePrefix: String = "--",
-        nameSeparator: String = "=",
-        argsSeparator: String = ",",
-    ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+  constructor(
+    name: String,
+    arg: String? = null,
+    namePrefix: String = "--",
+    nameSeparator: String = "=",
+    argsSeparator: String = ",",
+  ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Special form of an option, with automatically derived name as class name lowercase words separated by one hyphen */
 @DelicateApi
 open class KOptLN(
-    override val args: List<String>,
-    override val namePrefix: String = "--",
-    override val nameSeparator: String = "=",
-    override val argsSeparator: String = ",",
+  override val args: List<String>,
+  override val namePrefix: String = "--",
+  override val nameSeparator: String = "=",
+  override val argsSeparator: String = ",",
 ) : KOptTypical {
-    constructor(
-        arg: String? = null,
-        namePrefix: String = "--",
-        nameSeparator: String = "=",
-        argsSeparator: String = ",",
-    ) : this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+  constructor(
+    arg: String? = null,
+    namePrefix: String = "--",
+    nameSeparator: String = "=",
+    argsSeparator: String = ",",
+  ) : this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 
-    override val name: String get() = classSimpleWords().joinToString("-")
+  override val name: String get() = classSimpleWords().joinToString("-")
 }
 
 @DelicateApi
 interface KommandTypical<KOptT : KOptTypical> : Kommand {
-    val opts: MutableList<KOptT>
-    val nonopts: MutableList<String>
-    override val args get() = opts.toArgsFlat() + nonopts
-    operator fun KOptT.unaryMinus() = opts.add(this)
-    operator fun String.unaryPlus() = nonopts.add(this)
+  val opts: MutableList<KOptT>
+  val nonopts: MutableList<String>
+  override val args get() = opts.toArgsFlat() + nonopts
+  operator fun KOptT.unaryMinus() = opts.add(this)
+  operator fun String.unaryPlus() = nonopts.add(this)
 }
 
 /** Anonymous/Arbitrary implementation of KommandTypical to use only if no more specific Kommand class defined */
 @DelicateApi
 data class AKommandTypical(
-    override val name: String,
-    override val opts: MutableList<KOptTypical> = mutableListOf(),
-    override val nonopts: MutableList<String> = mutableListOf(),
+  override val name: String,
+  override val opts: MutableList<KOptTypical> = mutableListOf(),
+  override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<KOptTypical>
 
 @DelicateApi
 fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =
-    AKommandTypical(name, opts.toMutableList()).apply(init)
+  AKommandTypical(name, opts.toMutableList()).apply(init)
 
 // TODO_later: update implementations to use (where appropriate): KOptTypical, KommandTypical, DelicateApi,

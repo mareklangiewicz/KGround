@@ -11,51 +11,51 @@ import pl.mareklangiewicz.kommand.*
  * @param web True means open repo in browser instead of printing info to stdout.
  */
 fun ghRepoView(
-    repoPath: String? = null,
-    branch: String? = null,
-    web: Boolean = false,
-    init: GhRepoView.() -> Unit = {},
+  repoPath: String? = null,
+  branch: String? = null,
+  web: Boolean = false,
+  init: GhRepoView.() -> Unit = {},
 ) =
-    GhRepoView().apply { repoPath?.let { +it }; branch?.let { -Branch(it) }; web && -Web; init() }
+  GhRepoView().apply { repoPath?.let { +it }; branch?.let { -Branch(it) }; web && -Web; init() }
 
 fun ghRepoList(
-    owner: String? = null,
-    vararg useNamedArgs: Unit,
-    limit: Int? = null,
-    onlyLanguage: String? = null,
-    onlyTopic: String? = null,
-    onlyArchived: Boolean = false,
-    onlyNotArchived: Boolean = false,
-    onlyForks: Boolean = false,
-    onlyNotForks: Boolean = false,
-    onlyPublic: Boolean = false,
-    onlyPrivate: Boolean = false,
-    onlyInternal: Boolean = false,
-    init: GhRepoList.() -> Unit = {},
+  owner: String? = null,
+  vararg useNamedArgs: Unit,
+  limit: Int? = null,
+  onlyLanguage: String? = null,
+  onlyTopic: String? = null,
+  onlyArchived: Boolean = false,
+  onlyNotArchived: Boolean = false,
+  onlyForks: Boolean = false,
+  onlyNotForks: Boolean = false,
+  onlyPublic: Boolean = false,
+  onlyPrivate: Boolean = false,
+  onlyInternal: Boolean = false,
+  init: GhRepoList.() -> Unit = {},
 ) =
-    GhRepoList().apply {
-        owner?.let { +it }
-        limit?.let { -Limit(it) }
-        onlyLanguage?.let { -Language(it) }
-        onlyTopic?.let { -Topic(it) }
-        onlyArchived && -Archived
-        onlyNotArchived && -NoArchived
-        onlyForks && -Fork
-        onlyNotForks && -Source
-        onlyPublic && -Visibility("public")
-        onlyPrivate && -Visibility("private")
-        onlyInternal && -Visibility("internal")
-        init()
-    }
+  GhRepoList().apply {
+    owner?.let { +it }
+    limit?.let { -Limit(it) }
+    onlyLanguage?.let { -Language(it) }
+    onlyTopic?.let { -Topic(it) }
+    onlyArchived && -Archived
+    onlyNotArchived && -NoArchived
+    onlyForks && -Fork
+    onlyNotForks && -Source
+    onlyPublic && -Visibility("public")
+    onlyPrivate && -Visibility("private")
+    onlyInternal && -Visibility("internal")
+    init()
+  }
 
 /**
  * For each repo, each output field is returned in separate line.
  * If no fields are provided, just output available fields. No actual data.
  */
 fun GhRepoList.outputFields(vararg fields: String) = apply {
-    -Json(*fields)
-    fields.isEmpty() && return@apply
-    -Jq(fields.joinToString(",", prefix = ".[]|") { ".$it" })
+  -Json(*fields)
+  fields.isEmpty() && return@apply
+  -Jq(fields.joinToString(",", prefix = ".[]|") { ".$it" })
 }
 
 /**
@@ -63,11 +63,11 @@ fun GhRepoList.outputFields(vararg fields: String) = apply {
  * Note: the "1. " Will give the numbered list with actual numbers when rendered (but not when just printed to console).
  */
 fun GhRepoList.reducedToMarkdownList(listItemPrefix: String = "- ", sorted: Boolean = true) =
-    outputFields("name", "url").reducedOut {
-        this
-            .toList()
-            .windowed(2, 2) { (name, url) -> "[$name]($url)" }
-            .let { if (sorted) it.sorted() else it }
-            .joinToString("\n") { "$listItemPrefix$it" }
-    }
+  outputFields("name", "url").reducedOut {
+    this
+      .toList()
+      .windowed(2, 2) { (name, url) -> "[$name]($url)" }
+      .let { if (sorted) it.sorted() else it }
+      .joinToString("\n") { "$listItemPrefix$it" }
+  }
 

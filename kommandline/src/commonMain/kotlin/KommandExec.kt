@@ -13,31 +13,31 @@ import pl.mareklangiewicz.bad.*
  * TODO_someday: how to colorize it (can I somehow use @DslMarker ?)
  */
 suspend fun Kommand.ax(
-    cli: CLI = CLI.SYS,
-    vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inContent: String? = null,
-    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
-    inFile: String? = null,
-    outFile: String? = null,
+  cli: CLI = CLI.SYS,
+  vararg useNamedArgs: Unit,
+  dir: String? = null,
+  inContent: String? = null,
+  inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+  inFile: String? = null,
+  outFile: String? = null,
 ): List<String> = coroutineScope {
-    req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
-    req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
-    cli.start(this@ax, dir = dir, inFile = inFile, outFile = outFile)
-        .awaitResult(inLineS = inLineS)
-        .unwrap()
+  req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
+  req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
+  cli.start(this@ax, dir = dir, inFile = inFile, outFile = outFile)
+    .awaitResult(inLineS = inLineS)
+    .unwrap()
 }
 
 // temporary hack
 @Deprecated("Use suspend fun Kommand.ax(...)")
 expect fun Kommand.axb(
-    cli: CLI = CLI.SYS,
-    vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inContent: String? = null,
-    inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
-    inFile: String? = null,
-    outFile: String? = null,
+  cli: CLI = CLI.SYS,
+  vararg useNamedArgs: Unit,
+  dir: String? = null,
+  inContent: String? = null,
+  inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+  inFile: String? = null,
+  outFile: String? = null,
 ): List<String>
 
 // also temporary hack

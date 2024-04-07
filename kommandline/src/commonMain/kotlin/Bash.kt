@@ -7,11 +7,11 @@ import pl.mareklangiewicz.annotations.DelicateApi
 
 @DelicateApi
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
-    Bash().apply {
-        -BashOpt.Command
-        +if (pause) "$script ; echo END.ENTER; read" else script
-        init()
-    }
+  Bash().apply {
+    -BashOpt.Command
+    +if (pause) "$script ; echo END.ENTER; read" else script
+    init()
+  }
 
 @DelicateApi
 fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
@@ -24,16 +24,16 @@ fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\
 
 @OptIn(DelicateApi::class)
 fun bashGetExportsMap() =
-    bash("export").reducedOut {
-        this
-            .toList()
-            .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
-            .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
-    }
+  bash("export").reducedOut {
+    this
+      .toList()
+      .mapNotNull { line -> Regex("declare -x (\\w+)=\"(.*)\"").matchEntire(line) }
+      .associate { match -> match.groups[1]!!.value to match.groups[2]!!.value }
+  }
 
 @OptIn(DelicateApi::class)
 fun bashGetExportsToFile(outFile: String) =
-    bash("export > $outFile").reducedOutToUnit()
+  bash("export > $outFile").reducedOutToUnit()
 
 
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash
@@ -47,39 +47,39 @@ fun bashGetExportsToFile(outFile: String) =
 //  - generally all direct manipulation of Kommand classes should be marked as @DelicateApi!
 @DelicateApi
 data class Bash(
-    override val opts: MutableList<BashOpt> = mutableListOf(),
-    /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
-    override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<BashOpt> = mutableListOf(),
+  /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
+  override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<BashOpt> {
-    override val name get() = "bash"
+  override val name get() = "bash"
 }
 
 @DelicateApi
 interface BashOpt : KOptTypical {
-    /**
-     * interpret first from nonopts as a command_string to run
-     * If more nonopts present, they are used to override env variables $0 $1 $2...
-     */
-    data object Command : BashOpt, KOptS("c")
-    data object Interactive : BashOpt, KOptS("i")
-    data object Login : BashOpt, KOptS("l")
-    data object Restricted : BashOpt, KOptS("r")
+  /**
+   * interpret first from nonopts as a command_string to run
+   * If more nonopts present, they are used to override env variables $0 $1 $2...
+   */
+  data object Command : BashOpt, KOptS("c")
+  data object Interactive : BashOpt, KOptS("i")
+  data object Login : BashOpt, KOptS("l")
+  data object Restricted : BashOpt, KOptS("r")
 
-    /**
-     * if the -s option is present, or if no arguments remain after option processing,
-     * then commands are read from the standard input.
-     * This option allows the positional parameters to be set
-     * when invoking an interactiveshell or when reading input through a pipe.
-     */
-    data object Stdin : BashOpt, KOptS("s")
-    data object Posix : BashOpt, KOptL("posix")
-    data object Help : BashOpt, KOptL("help")
-    data object Version : BashOpt, KOptL("version")
+  /**
+   * if the -s option is present, or if no arguments remain after option processing,
+   * then commands are read from the standard input.
+   * This option allows the positional parameters to be set
+   * when invoking an interactiveshell or when reading input through a pipe.
+   */
+  data object Stdin : BashOpt, KOptS("s")
+  data object Posix : BashOpt, KOptL("posix")
+  data object Help : BashOpt, KOptL("help")
+  data object Version : BashOpt, KOptL("version")
 
-    /** Print shell input lines as they are read. */
-    data object PrintInput : BashOpt, KOptS("v")
+  /** Print shell input lines as they are read. */
+  data object PrintInput : BashOpt, KOptS("v")
 
-    /** Print commands and their arguments as they are executed. */
-    data object PrintExecs : BashOpt, KOptS("x")
+  /** Print commands and their arguments as they are executed. */
+  data object PrintExecs : BashOpt, KOptS("x")
 }
 

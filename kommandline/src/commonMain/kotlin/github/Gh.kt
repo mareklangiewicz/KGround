@@ -13,16 +13,16 @@ fun ghStatus(init: GhStatus.() -> Unit = {}) = GhStatus().apply(init)
 /** [gh manual](https://cli.github.com/manual/index) */
 abstract class GhKommand<KOptGhT : KOptGh> : Kommand {
 
-    val ghKommandNameWords get() = classSimpleWords().also { it.first().chkEq("gh") }
+  val ghKommandNameWords get() = classSimpleWords().also { it.first().chkEq("gh") }
 
-    val nonopts: MutableList<String> = mutableListOf()
-    val opts: MutableList<KOptGhT> = mutableListOf()
+  val nonopts: MutableList<String> = mutableListOf()
+  val opts: MutableList<KOptGhT> = mutableListOf()
 
-    override val name get() = ghKommandNameWords.first()
-    override val args get() = ghKommandNameWords.drop(1) + nonopts + opts.toArgsFlat()
+  override val name get() = ghKommandNameWords.first()
+  override val args get() = ghKommandNameWords.drop(1) + nonopts + opts.toArgsFlat()
 
-    operator fun String.unaryPlus() = nonopts.add(this)
-    operator fun KOptGhT.unaryMinus() = opts.add(this)
+  operator fun String.unaryPlus() = nonopts.add(this)
+  operator fun KOptGhT.unaryMinus() = opts.add(this)
 }
 
 class GhHelp : GhKommand<KOptGhCommon>()
@@ -35,7 +35,7 @@ class GhRepoView : GhKommand<KOptGhRepoView>()
 class GhRepoList : GhKommand<KOptGhRepoList>()
 
 abstract class GhOpt(val arg: String? = null) : KOptGh {
-    override fun toArgs(): List<String> = listOf("--" + classSimpleWords().joinToString("-")) plusIfNN arg
+  override fun toArgs(): List<String> = listOf("--" + classSimpleWords().joinToString("-")) plusIfNN arg
 }
 
 
@@ -79,7 +79,7 @@ data class Visibility(val vis: String) : GhOpt(vis), KOptGhSecretSet, KOptGhRepo
 
 /** @param repos list of repos to exclude in owner/name format */
 data class Exclude(val repos: List<String>) : GhOpt(repos.joinToString(",")), KOptGhStatus {
-    constructor(vararg repos: String) : this(repos.toList())
+  constructor(vararg repos: String) : this(repos.toList())
 }
 
 data object Web : GhOpt(), KOptGhRepoView
@@ -101,7 +101,7 @@ data class Topic(val name: String) : GhOpt(name), KOptGhRepoList
  * [gh help formatting](https://cli.github.com/manual/gh_help_formatting)
  * @param fields JSON fields separated by comma. null just prints available fields, no actual data */
 data class Json(val fields: String? = null) : GhOpt(fields), KOptGhRepo {
-    constructor(vararg fields: String) : this(fields.joinToString(",").takeIf { it.isNotEmpty() })
+  constructor(vararg fields: String) : this(fields.joinToString(",").takeIf { it.isNotEmpty() })
 }
 
 /** [jq lang manual](https://jqlang.github.io/jq/manual/v1.6/) */

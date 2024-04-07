@@ -16,18 +16,18 @@ import pl.mareklangiewicz.annotations.DelicateApi
  * (Overall goal is to gradually move AWAY from CLI craziness and more towards safe/composable kotlin programming.)
  */
 data class TypedKommand<out K : Kommand, In, Out, Err>(
-    val kommand: K,
-    val stdinRetype: StdinCollector.() -> In,
-    val stderrRetype: Flow<String>.() -> Err,
-    val stderrToOut: Boolean,
-    val stdoutRetype: Flow<String>.() -> Out,
+  val kommand: K,
+  val stdinRetype: StdinCollector.() -> In,
+  val stderrRetype: Flow<String>.() -> Err,
+  val stderrToOut: Boolean,
+  val stdoutRetype: Flow<String>.() -> Out,
 )
 
 fun <K : Kommand, In, Out, Err> K.typed(
-    stdinRetype: StdinCollector.() -> In,
-    stderrRetype: Flow<String>.() -> Err,
-    stderrToOut: Boolean = false,
-    stdoutRetype: Flow<String>.() -> Out,
+  stdinRetype: StdinCollector.() -> In,
+  stderrRetype: Flow<String>.() -> Err,
+  stderrToOut: Boolean = false,
+  stdoutRetype: Flow<String>.() -> Out,
 ) = TypedKommand(this, stdinRetype, stderrRetype, stderrToOut, stdoutRetype)
 
 // these default retype algorithms/vals are defined here mostly for me to be able to compare when debugging/testing
@@ -35,36 +35,36 @@ internal val defaultInRetypeToItSelf: StdinCollector.() -> StdinCollector = { th
 internal val defaultOutRetypeToItSelf: Flow<String>.() -> Flow<String> = { this }
 
 fun <K : Kommand, Out> K.typed(
-    stderrToOut: Boolean = false,
-    stdoutRetype: Flow<String>.() -> Out,
+  stderrToOut: Boolean = false,
+  stdoutRetype: Flow<String>.() -> Out,
 ): TypedKommand<K, StdinCollector, Out, Flow<String>> =
-    typed(
-      stdinRetype = defaultInRetypeToItSelf,
-      stderrRetype = defaultOutRetypeToItSelf,
-      stderrToOut = stderrToOut,
-      stdoutRetype = stdoutRetype,
-    )
+  typed(
+    stdinRetype = defaultInRetypeToItSelf,
+    stderrRetype = defaultOutRetypeToItSelf,
+    stderrToOut = stderrToOut,
+    stdoutRetype = stdoutRetype,
+  )
 
 class TypedExecProcess<In, Out, Err>(
-    private val eprocess: ExecProcess,
-    stdinRetype: StdinCollector.() -> In,
-    stderrRetype: Flow<String>.() -> Err,
-    stdoutRetype: Flow<String>.() -> Out,
+  private val eprocess: ExecProcess,
+  stdinRetype: StdinCollector.() -> In,
+  stderrRetype: Flow<String>.() -> Err,
+  stdoutRetype: Flow<String>.() -> Out,
 ) {
-    fun kill(forcibly: Boolean = false) = eprocess.kill(forcibly)
-    suspend fun awaitExit(finallyClose: Boolean = true) = eprocess.awaitExit(finallyClose)
-    val stdin: In = eprocess.stdin.stdinRetype()
-    val stdout: Out = eprocess.stdout.stdoutRetype()
-    val stderr: Err = eprocess.stderr.stderrRetype()
+  fun kill(forcibly: Boolean = false) = eprocess.kill(forcibly)
+  suspend fun awaitExit(finallyClose: Boolean = true) = eprocess.awaitExit(finallyClose)
+  val stdin: In = eprocess.stdin.stdinRetype()
+  val stdout: Out = eprocess.stdout.stdoutRetype()
+  val stderr: Err = eprocess.stderr.stderrRetype()
 }
 
 suspend fun TypedExecProcess<*, *, Flow<String>>.awaitAndChkExit(
-    firstCollectErr: Boolean,
-    finallyClose: Boolean = true,
-    testExit: Int.() -> Boolean = { this == 0 },
+  firstCollectErr: Boolean,
+  finallyClose: Boolean = true,
+  testExit: Int.() -> Boolean = { this == 0 },
 ): Int {
-    val collectedErr: List<String>? = if (firstCollectErr) stderr.toList() else null
-    return awaitExit(finallyClose).chkExit(testExit, collectedErr)
+  val collectedErr: List<String>? = if (firstCollectErr) stderr.toList() else null
+  return awaitExit(finallyClose).chkExit(testExit, collectedErr)
 }
 
 /**
@@ -73,16 +73,16 @@ suspend fun TypedExecProcess<*, *, Flow<String>>.awaitAndChkExit(
  */
 @DelicateApi
 suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
-    finallyClose: Boolean = true,
-    testExit: Int.() -> Boolean = { this == 0 },
+  finallyClose: Boolean = true,
+  testExit: Int.() -> Boolean = { this == 0 },
 ) = awaitExit(finallyClose).chkExit(testExit)
 
 /**
  * @param dir working directory for started subprocess - null means inherit from the current process
  */
 fun <K : Kommand, In, Out, Err> CLI.start(
-    kommand: TypedKommand<K, In, Out, Err>,
-    dir: String? = null,
+  kommand: TypedKommand<K, In, Out, Err>,
+  dir: String? = null,
 ) = TypedExecProcess(
   eprocess = start(kommand = kommand.kommand, dir = dir, errToOut = kommand.stderrToOut),
   stdinRetype = kommand.stdinRetype,
@@ -101,86 +101,86 @@ fun <K : Kommand, In, Out, Err> CLI.start(
 //   Then ReducedKommandMap, etc. would also be just a specific form of ReducedScript.
 
 fun interface ReducedScript<ReducedOut> {
-    // TODO_maybe: dir should probably be inside CLI as val currentDir.
-    //   and maybe sth like CLI.withCurrentDir(dir, code:...) (or rather with context receivers)
-    suspend fun ax(cli: CLI, dir: String?): ReducedOut
-    // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
+  // TODO_maybe: dir should probably be inside CLI as val currentDir.
+  //   and maybe sth like CLI.withCurrentDir(dir, code:...) (or rather with context receivers)
+  suspend fun ax(cli: CLI, dir: String?): ReducedOut
+  // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
 
 // Just to simplify defining scripts when I don't care about dir; will be removed when we have context receivers
 inline fun <ReducedOut> ReducedScript(crossinline ax: suspend (cli: CLI) -> ReducedOut) =
-    ReducedScript<ReducedOut> { cli, dir -> ax(cli) }
+  ReducedScript<ReducedOut> { cli, dir -> ax(cli) }
 
 suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = CLI.SYS) = ax(cli, null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
 internal class ReducedKommandImpl<K : Kommand, In, Out, Err, ReducedOut>(
-    val typedKommand: TypedKommand<K, In, Out, Err>,
-    val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+  val typedKommand: TypedKommand<K, In, Out, Err>,
+  val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ) : ReducedKommand<ReducedOut> {
-    override suspend fun ax(cli: CLI, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
+  override suspend fun ax(cli: CLI, dir: String?): ReducedOut = reduce(cli.start(typedKommand, dir))
 }
 
 internal class ReducedKommandMap<InnerOut, MappedOut>(
-    val reducedKommand: ReducedKommand<InnerOut>,
-    val reduceMap: suspend InnerOut.() -> MappedOut,
+  val reducedKommand: ReducedKommand<InnerOut>,
+  val reduceMap: suspend InnerOut.() -> MappedOut,
 ) : ReducedKommand<MappedOut> {
-    override suspend fun ax(cli: CLI, dir: String?): MappedOut = reducedKommand.ax(cli, dir).reduceMap()
+  override suspend fun ax(cli: CLI, dir: String?): MappedOut = reducedKommand.ax(cli, dir).reduceMap()
 }
 
 fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
-    reduceMap: suspend InnerOut.() -> MappedOut,
+  reduceMap: suspend InnerOut.() -> MappedOut,
 ): ReducedKommand<MappedOut> = ReducedKommandMap(this, reduceMap)
 
 
 /** Mostly for tests to try to compare wrapped kommand line to expected line. */
 @DelicateApi
 fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
-    is ReducedKommandImpl<*, *, *, *, *> -> typedKommand.kommand.lineRaw()
-    is ReducedKommandMap<*, *> -> reducedKommand.lineRawOrNull()
-    else -> null
+  is ReducedKommandImpl<*, *, *, *, *> -> typedKommand.kommand.lineRaw()
+  is ReducedKommandMap<*, *> -> reducedKommand.lineRawOrNull()
+  else -> null
 }
 
 
 /** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
 fun <K : Kommand, In, Out, Err, ReducedOut> TypedKommand<K, In, Out, Err>.reducedManually(
-    reduceManually: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+  reduceManually: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this, reduceManually)
 
 /** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */
 fun <K : Kommand, ReducedOut> K.reducedManually(
-    reduceManually: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
+  reduceManually: suspend TypedExecProcess<StdinCollector, Flow<String>, Flow<String>>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = typed(stdoutRetype = defaultOutRetypeToItSelf)
-    .reducedManually(reduceManually)
+  .reducedManually(reduceManually)
 
 /**
  * Note: reduceOut means: user is responsible only for reducing stdout;
  * stderr and exit will be handled in the default way; stdin will not be used at all.
  */
 fun <K : Kommand, In, Out, ReducedOut> TypedKommand<K, In, Out, Flow<String>>.reducedOut(
-    reduceOut: suspend Out.() -> ReducedOut,
+  reduceOut: suspend Out.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = ReducedKommandImpl(this) {
-    coroutineScope {
-        val deferredErr = async { stderr.toList() }
-        val reducedOut = stdout.reduceOut()
-        val collectedErr = deferredErr.await()
-        awaitExit().chkExit(stderr = collectedErr)
-        reducedOut
-    }
+  coroutineScope {
+    val deferredErr = async { stderr.toList() }
+    val reducedOut = stdout.reduceOut()
+    val collectedErr = deferredErr.await()
+    awaitExit().chkExit(stderr = collectedErr)
+    reducedOut
+  }
 }
 
 fun <K : Kommand, ReducedOut> K.reducedOut(
-    reduceOut: suspend Flow<String>.() -> ReducedOut,
+  reduceOut: suspend Flow<String>.() -> ReducedOut,
 ): ReducedKommand<ReducedOut> = this
-    .typed(stdoutRetype = defaultOutRetypeToItSelf)
-    .reducedOut(reduceOut)
+  .typed(stdoutRetype = defaultOutRetypeToItSelf)
+  .reducedOut(reduceOut)
 
 fun <K : Kommand, ReducedExit> K.reducedExit(
-    reduceExit: suspend (Int) -> ReducedExit,
+  reduceExit: suspend (Int) -> ReducedExit,
 ): ReducedKommand<ReducedExit> = this
-    .typed(stdoutRetype = defaultOutRetypeToItSelf)
-    .reducedManually { reduceExit(awaitExit()) }
+  .typed(stdoutRetype = defaultOutRetypeToItSelf)
+  .reducedManually { reduceExit(awaitExit()) }
 
 
 // These four below look unnecessary, but I like how they explicitly suggest common correct thing to do in the IDE.
@@ -188,14 +188,14 @@ fun <K : Kommand, ReducedExit> K.reducedExit(
 fun <K : Kommand> K.reducedOutToUnit(): ReducedKommand<Unit> = reducedOut {}
 fun <K : Kommand> K.reducedOutToList(): ReducedKommand<List<String>> = reducedOut { toList() }
 fun <K : Kommand> K.reducedOutToFlow(): ReducedKommand<Flow<String>> =
-    reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
+  reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
 
 fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToList(): ReducedKommand<List<OutItem>> =
-    reducedOut { toList() }
+  reducedOut { toList() }
 
 fun <In, Out> TypedKommand<*, In, Out, Flow<String>>.reducedOutToUnit(): ReducedKommand<Unit> =
-    reducedOut {}
+  reducedOut {}
 
 fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToFlow(): ReducedKommand<Flow<OutItem>> =
-    reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
+  reducedManually { stdout.onCompletion { awaitAndChkExit(firstCollectErr = false) } }
 

@@ -8,19 +8,19 @@ import pl.mareklangiewicz.kommand.core.*
 
 @OptIn(DelicateApi::class)
 fun readFileHead(inFile: String, lines: Int = 10) =
-    kommandTypical("head", KOptS("n", "$lines")) { +inFile }.reducedOutToList()
+  kommandTypical("head", KOptS("n", "$lines")) { +inFile }.reducedOutToList()
 
 @OptIn(DelicateApi::class)
 fun readFileTail(inFile: String, lines: Int = 10) =
-    kommandTypical("tail", KOptS("n", "$lines")) { +inFile }.reducedOutToList()
+  kommandTypical("tail", KOptS("n", "$lines")) { +inFile }.reducedOutToList()
 
 @OptIn(DelicateApi::class)
 fun readFileFirstLine(inFile: String) =
-    readFileHead(inFile, 1).reducedMap { single() }
+  readFileHead(inFile, 1).reducedMap { single() }
 
 @OptIn(DelicateApi::class)
 fun readFileLastLine(inFile: String) =
-    readFileTail(inFile, 1).reducedMap { single() }
+  readFileTail(inFile, 1).reducedMap { single() }
 
 
 @OptIn(DelicateApi::class)
@@ -30,10 +30,10 @@ fun readFileWithCat(inFile: String) = cat { +inFile }.reducedOutToList()
 
 @OptIn(DelicateApi::class)
 fun writeFileWithDD(inLineS: Flow<String>, outFile: String) =
-    kommandTypical("dd") { +"of=$outFile" }.reducedManually {
-        stdin.collect(inLineS)
-        awaitAndChkExit(firstCollectErr = true)
-    }
+  kommandTypical("dd") { +"of=$outFile" }.reducedManually {
+    stdin.collect(inLineS)
+    awaitAndChkExit(firstCollectErr = true)
+  }
 
 fun writeFileWithDD(inLines: List<String>, outFile: String) =
-    writeFileWithDD(inLines.asFlow(), outFile)
+  writeFileWithDD(inLines.asFlow(), outFile)

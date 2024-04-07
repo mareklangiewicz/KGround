@@ -13,25 +13,25 @@ import kotlin.test.Test
 @OptIn(DelicateApi::class) // TODO NOW: move to samples or sth
 class GnomeAppTest {
 
-    @Test fun testGnomeAppListApps() = gnomeapp(ListApps)
-        .tryInteractivelyCheck("gapplication list-apps")
+  @Test fun testGnomeAppListApps() = gnomeapp(ListApps)
+    .tryInteractivelyCheck("gapplication list-apps")
 
-    @Test fun testGnomeAppListGEditActions() = gnomeapp(ListActions("org.gnome.gedit"))
-        .tryInteractivelyCheck("gapplication list-actions org.gnome.gedit")
+  @Test fun testGnomeAppListGEditActions() = gnomeapp(ListActions("org.gnome.gedit"))
+    .tryInteractivelyCheck("gapplication list-actions org.gnome.gedit")
 
-    @Ignore // jitpack
-    @Test fun testGnomeAppListAllAppActions() = SYS.run {
-        gnomeapp(ListApps).axb(this).forEach {
-            ulog.i("Application $it:")
-            gnomeapp(ListActions(it)).axb(this).forEach {
-                ulog.i("   action: $it")
-            }
-        }
+  @Ignore // jitpack
+  @Test fun testGnomeAppListAllAppActions() = SYS.run {
+    gnomeapp(ListApps).axb(this).forEach {
+      ulog.i("Application $it:")
+      gnomeapp(ListActions(it)).axb(this).forEach {
+        ulog.i("   action: $it")
+      }
     }
+  }
 
-    @Test fun testGnomeAppHelp() = gnomeapp(Help()).tryInteractivelyCheck()
-    @Test fun testGnomeAppLaunchGEdit() = gnomeapp(Launch("org.gnome.gedit")).tryInteractivelyCheck()
-    @Test fun testGnomeAppGEditNewWindow() = gnomeapp(Action("org.gnome.gedit", "new-window")).tryInteractivelyCheck()
-    @Test fun testGnomeAppGEditNewDocument() =
-        gnomeapp(Action("org.gnome.gedit", "new-document")).tryInteractivelyCheck()
+  @Test fun testGnomeAppHelp() = gnomeapp(Help()).tryInteractivelyCheck()
+  @Test fun testGnomeAppLaunchGEdit() = gnomeapp(Launch("org.gnome.gedit")).tryInteractivelyCheck()
+  @Test fun testGnomeAppGEditNewWindow() = gnomeapp(Action("org.gnome.gedit", "new-window")).tryInteractivelyCheck()
+  @Test fun testGnomeAppGEditNewDocument() =
+    gnomeapp(Action("org.gnome.gedit", "new-document")).tryInteractivelyCheck()
 }

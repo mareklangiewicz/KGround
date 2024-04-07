@@ -11,6 +11,6 @@ import kotlin.test.Test
 
 @OptIn(DelicateApi::class) // TODO NOW: move to samples or sth
 class DBusStuffTests {
-    @Test fun testDBusRunSession1() = dbusrunsession { -Version }.tryInteractivelyCheck()
-    @Test fun testDBusRunSession2() = dbusrunsession(gnomeshell(Nested, Wayland)).tryInteractivelyCheck()
+  @Test fun testDBusRunSession1() = dbusrunsession { -Version }.tryInteractivelyCheck()
+  @Test fun testDBusRunSession2() = dbusrunsession(gnomeshell(Nested, Wayland)).tryInteractivelyCheck()
 }

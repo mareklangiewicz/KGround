@@ -6,7 +6,7 @@ import pl.mareklangiewicz.kommand.core.MkDirOpt.*
 
 @OptIn(DelicateApi::class)
 fun mkdir(dir: String, withParents: Boolean = false) =
-    mkdir { if (withParents) -Parents; +dir }.reducedOutToUnit()
+  mkdir { if (withParents) -Parents; +dir }.reducedOutToUnit()
 
 @DelicateApi
 fun mkdir(init: MkDir.() -> Unit = {}) = MkDir().apply(init)
@@ -17,28 +17,28 @@ fun mkdir(init: MkDir.() -> Unit = {}) = MkDir().apply(init)
  */
 @DelicateApi
 data class MkDir(
-    override val opts: MutableList<MkDirOpt> = mutableListOf(),
-    override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<MkDirOpt> = mutableListOf(),
+  override val nonopts: MutableList<String> = mutableListOf(),
 ) : KommandTypical<MkDirOpt> {
-    override val name get() = "mkdir"
+  override val name get() = "mkdir"
 }
 
 @DelicateApi
 interface MkDirOpt : KOptTypical {
 
-    /** set file mode (as in chmod), not a=rwx - umask */
-    data class Mode(val mode: String) : KOptS("m", mode), MkDirOpt
+  /** set file mode (as in chmod), not a=rwx - umask */
+  data class Mode(val mode: String) : KOptS("m", mode), MkDirOpt
 
-    /**
-     * no error if existing, make parent directories as needed,
-     * with their file modes unaffected by any -m option.
-     */
-    data object Parents : KOptS("p"), MkDirOpt
+  /**
+   * no error if existing, make parent directories as needed,
+   * with their file modes unaffected by any -m option.
+   */
+  data object Parents : KOptS("p"), MkDirOpt
 
-    /** print a message for each created directory */
-    data object Verbose : KOptS("v"), MkDirOpt
+  /** print a message for each created directory */
+  data object Verbose : KOptS("v"), MkDirOpt
 
-    data object Help : KOptL("help"), MkDirOpt
+  data object Help : KOptL("help"), MkDirOpt
 
-    data object Version : KOptL("version"), MkDirOpt
+  data object Version : KOptL("version"), MkDirOpt
 }

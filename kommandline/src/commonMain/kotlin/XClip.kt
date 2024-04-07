@@ -9,10 +9,10 @@ enum class XClipSelection { Primary, Secondary, Clipboard }
 
 @OptIn(DelicateApi::class)
 fun xclipOut(selection: XClipSelection = XClipSelection.Primary) =
-    kommand("xclip", "-o", "-selection", selection.name.lowercase())
-        .reducedOutToList()
+  kommand("xclip", "-o", "-selection", selection.name.lowercase())
+    .reducedOutToList()
 
 @OptIn(DelicateApi::class)
 fun xclipIn(selection: XClipSelection = XClipSelection.Primary, vararg inFiles: String) =
-    kommand("xclip", "-i", "-selection", selection.name.lowercase(), *inFiles)
-        .reducedOutToList()
+  kommand("xclip", "-i", "-selection", selection.name.lowercase(), *inFiles)
+    .reducedOutToList()
