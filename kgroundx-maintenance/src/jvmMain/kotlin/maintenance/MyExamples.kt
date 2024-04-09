@@ -27,10 +27,6 @@ object MyExamples {
   }
 
   suspend fun dangerousInjectStuffToMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
-    "DANGEROUS! Inject all known regions to sync?" ifYesRun
-      { injectAllKnownRegionsToSync() }
-    "DANGEROUS! Inject all known regions to ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
-      { injectAllKnownRegionsToMyProjects() }
     "DANGEROUS! Inject DWorkflows to $exampleProjName project?" ifYesRun
       { injectDWorkflowsToKotlinProject(exampleProjName) }
     "DANGEROUS! Inject my DWorkflows to ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
@@ -103,14 +99,18 @@ object MyExamples {
 @ExampleApi
 object MyKnownRegionsExamples {
 
-  suspend fun checkAllSynced() = checkAllKnownRegionsSynced(verbose = true)
+  suspend fun checkAllMKRSynced() = checkAllKnownRegionsSynced(verbose = true)
 
-  suspend fun checkAllInMyProjects() = checkAllKnownRegionsInMyProjects(onlyPublic = false)
+  suspend fun injectAllMKRToSync() = injectAllKnownRegionsToSync()
+
+  suspend fun checkAllMKRInMyProjects() = checkAllKnownRegionsInMyProjects(onlyPublic = false)
+
+  suspend fun injectAllMKRInMyProjects() = injectAllKnownRegionsToMyProjects(onlyPublic = false)
 }
 
 @ExampleApi
 object MyWorkflowsExamples {
 
-  suspend fun checkAllMyDWorkflows() = checkMyDWorkflowsInMyProjects(onlyPublic = false)
+  suspend fun checkAllMDW() = checkMyDWorkflowsInMyProjects(onlyPublic = false)
 
 }

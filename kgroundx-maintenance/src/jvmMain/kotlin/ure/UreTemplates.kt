@@ -240,7 +240,13 @@ fun FileSystem.injectCustomRegion(
       val before by outputMR
       val after by outputMR
       val newAfter = if (after.isNotEmpty() && region.last() != '\n') "\n" + after else after
-      val newRegion = if (newAfter.isEmpty()) region.trimEnd() else region
+
+      // val newRegion = if (newAfter.isEmpty()) region.trimEnd() else region
+      val newRegion = region
+      // FIXME_later: not sure why region was trimmed when at the end,
+      // but I now have .editorconfig:insert_final_new_line, so I don't want that.
+      // later analyze it more and refactor to clean and correct implementation of these injects
+
       val newOutput = before + newRegion + newAfter
       val summary =
         if (newOutput == output) "No changes." else "Changes detected (len ${output.length}->${newOutput.length})"
