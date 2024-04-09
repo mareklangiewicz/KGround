@@ -11,6 +11,9 @@ import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.core.ls
+import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
 
 @ExampleApi
@@ -19,9 +22,9 @@ object MyExamples {
     // TODO NOW: refactor it all - moved from kotlinx-jupyter:MainExamples
 
   suspend fun interplayKGroundAndKommand() {
-    println("Let's play with kground and kommand integration...")
+    ulog.w("Let's play with kground and kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
-    println("Let's try some ideDiff...")
+    ulog.w("Let's try some ideDiff...")
     ideDiff(
       "/home/marek/code/kotlin/KGround/template-mpp/build.gradle.kts",
       "/home/marek/code/kotlin/AbcdK/build.gradle.kts"
@@ -49,29 +52,29 @@ object MyExamples {
     fetchMyProjectsNameS(onlyPublic = false)
       .map { PathToMyKotlinProjects / it }
       .collect { dir ->
-        println(dir)
+        ulog.i(dir)
         val url = kget.ax(dir = dir.toString()).single()
-        println(url)
+        ulog.i(url)
         val result = ureRepoUrl.matchEntireOrThrow(url)
         val vals = result.namedValues
         val user = vals["user"]!!
         val project = vals["project"]!!
         if (user == "mareklangiewicz") {
-          println("User is already mareklangiewicz.")
+          ulog.i("User is already mareklangiewicz.")
           return@collect
         }
         user chkEq "langara"
         val newUrl = "git@github.com:mareklangiewicz/$project.git"
-        println("*** SETTING ORIGIN -> $newUrl ***")
+        ulog.i("*** SETTING ORIGIN -> $newUrl ***")
         kset(newUrl).ax(dir = dir.toString())
       }
   }
 
 
   private suspend infix fun String.ifYesRun(code: suspend () -> Unit) {
-    println("Question: $this")
+    ulog.i("Question: $this")
     val yes = zenityAskIf(this).ax()
-    println("Answer: " + if (yes) "Yes" else "No")
+    ulog.i("Answer: " + if (yes) "Yes" else "No")
     if (yes) code()
   }
 }

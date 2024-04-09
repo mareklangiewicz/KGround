@@ -3,6 +3,8 @@ package pl.mareklangiewicz.ure
 import okio.*
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.ure.core.UreConcatenation
 
@@ -15,13 +17,13 @@ fun FileSystem.readAndMatchUre(file: Path, ure: Ure): MatchResult? =
 
 @NotPortableApi
 fun FileSystem.commentOutMultiplatformFunInFile(file: Path) {
-  println("\ncommenting: $file") // FIXME:remove/ulog
+  ulog.d("\ncommenting: $file")
   processFile(file, file, String::commentOutMultiplatformFun)
 }
 
 @NotPortableApi
 fun FileSystem.undoCommentOutMultiplatformFunInFile(file: Path) {
-  println("\nundo comments: $file") // FIXME:remove/ulog
+  ulog.d("\nundo comments: $file")
   processFile(file, file, String::undoCommentOutMultiplatformFun)
 }
 

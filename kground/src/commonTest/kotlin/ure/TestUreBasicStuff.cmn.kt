@@ -4,6 +4,8 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
@@ -55,9 +57,9 @@ fun testUreBasicEmail() {
 private fun testUreEmail(ureEmail: Ure) {
   val ureEmailIR = ureEmail.toIR()
   val ureEmailRegex = ureEmail.compile()
-  // println("ure:\n$ureEmail")
-  // println("ureIR:\n$ureEmailIR")
-  // println("regex:\n$ureEmailRegex")
+  ulog.d("ure:\n$ureEmail")
+  ulog.d("ureIR:\n$ureEmailIR")
+  ulog.d("regex:\n$ureEmailRegex")
   testRegexWithEmail(ureEmailRegex, "marek.langiewicz@gmail.com", "marek.langiewicz", "gmail.com")
   testRegexWithEmail(ureEmailRegex, "langara@wp.pl", "langara", "wp.pl")
   testRegexWithEmail(ureEmailRegex, "a.b.c@d.e.f.hhh", "a.b.c", "d.e.f.hhh")

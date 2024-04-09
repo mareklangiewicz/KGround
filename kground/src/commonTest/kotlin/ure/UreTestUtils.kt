@@ -4,6 +4,8 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
+import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
 
@@ -40,9 +42,7 @@ fun Ure.tstCompiles(
  */
 fun Ure.tstDoesNotCompile() = "does NOT compile".oThrows<Throwable>(
   {
-    println("fake debug ulog on $platform: $it")
-    // FIXME_later: use ULog and KGroundCtx, when ready (level: DEBUG)
-    // (throwables here are very interesting and I definitely want to have it logged, but in the right place)
+    ulog.d(it) // throwables here are very interesting and I definitely want to have it logged somewhere (debug)
     true
   },
 ) { compile() }

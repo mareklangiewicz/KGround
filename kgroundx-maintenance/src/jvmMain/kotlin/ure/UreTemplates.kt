@@ -263,8 +263,8 @@ private fun CLI.download(url: String, to: Path) {
   val result = start(k).waitForResult()
   result.unwrap { err ->
     if (err.isNotEmpty()) {
-      println("FAIL: Error stream was not empty:")
-      err.logEach()
+      ulog.e("FAIL: Error stream was not empty:")
+      err.logEach { ulog.e(it) }
       false
     } else true
   }

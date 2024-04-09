@@ -7,6 +7,8 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.bad.*
 import kotlin.math.*
 import kotlin.random.*
+import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 
 // FIXME NOW: this file is moved from DepsKt as is temporarily.
 //   analyze this code and move stuff to more common code and/or other KGround modules
@@ -87,12 +89,12 @@ fun FileSystem.processFile(inputPath: Path, outputPath: Path? = null, process: (
   val output = process(input)
 
   if (outputPath == null) {
-    if (output != null) println("Warning: ignoring non-null output because outputPath is null")
+    if (output != null) ulog.d("Ignoring non-null output because outputPath is null")
     return
   }
 
   if (output == null) {
-    println("Ignoring outputPath because output to write is null")
+    ulog.d("Ignoring outputPath because output to write is null")
     return
   }
 
