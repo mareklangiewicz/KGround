@@ -28,10 +28,8 @@ object MyExamples {
     ).ax()
   }
 
-  suspend fun searchTextInKotlinCodeInMyProjects(text: String) {
-    "Search for text: \"$text\" in kotlin code in ALL my projects?" ifYesRun
-      { searchKotlinCodeInMyProjects(ureText(text).withOptWhatevaAroundInLine()) }
-    // TODO: ask and put results into intellij
+  suspend fun searchAllMyKotlinCode() {
+    searchKotlinCodeInMyProjects(ureText("UReports"))
   }
 
   @OptIn(DelicateApi::class, NotPortableApi::class)

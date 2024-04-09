@@ -38,8 +38,7 @@ import pl.mareklangiewicz.ure.core.Ure
         result?.value?.let {
           foundCount++
           ulog.i("found in file ($foundCount): $ktFilePathStr")
-          ulog.i("found code:")
-          ulog.i(it)
+          ulog.i("found code:\n$it")
         }
       }
     }
