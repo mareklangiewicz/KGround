@@ -27,14 +27,6 @@ object MyExamples {
   }
 
   suspend fun dangerousInjectStuffToMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
-    "DANGEROUS! Inject DWorkflows to $exampleProjName project?" ifYesRun
-      { injectDWorkflowsToKotlinProject(exampleProjName) }
-    "DANGEROUS! Inject my DWorkflows to ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
-      { injectMyDWorkflowsToMyProjects(onlyPublic = onlyPublic) }
-    "DANGEROUS! Inject hacky Generate Deps workflow to refreshDeps repo?" ifYesRun
-      { injectHackyGenerateDepsWorkflowToRefreshDepsRepo() }
-    "DANGEROUS! Inject Update Generated Deps workflow to DepsKt repo?" ifYesRun
-      { injectUpdateGeneratedDepsWorkflowToDepsKtRepo() }
   }
 
   suspend fun dangerousUpdateStuffInMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
@@ -105,7 +97,7 @@ object MyKnownRegionsExamples {
 
   suspend fun checkAllMKRInMyProjects() = checkAllKnownRegionsInMyProjects(onlyPublic = false)
 
-  suspend fun injectAllMKRInMyProjects() = injectAllKnownRegionsToMyProjects(onlyPublic = false)
+  suspend fun injectAllMKRToMyProjects() = injectAllKnownRegionsToMyProjects(onlyPublic = false)
 }
 
 @ExampleApi
@@ -113,4 +105,11 @@ object MyWorkflowsExamples {
 
   suspend fun checkAllMDW() = checkMyDWorkflowsInMyProjects(onlyPublic = false)
 
+  suspend fun injectMDWToMyProjects() = injectMyDWorkflowsToMyProjects(onlyPublic = false)
+
+  suspend fun injectDWToProject() = injectDWorkflowsToKotlinProject(projectName = "AbcdK")
+
+  suspend fun injectGenerateDepsWToRefreshDepsRepo() = injectHackyGenerateDepsWorkflowToRefreshDepsRepo()
+
+  suspend fun injectUpdateGeneratedDepsToDepsKtRepo() = injectUpdateGeneratedDepsWorkflowToDepsKtRepo()
 }
