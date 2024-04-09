@@ -13,6 +13,8 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.ure.*
 import kotlin.math.*
 import kotlin.random.*
+import kotlinx.coroutines.runBlocking
+import pl.mareklangiewicz.interactive.*
 
 // FIXME NOW: I should not need to hardcode all these labels. Dynamically collect all special regions instead.
 const val labelRoot = "Root Build Template"
@@ -151,23 +153,39 @@ fun FileSystem.injectKnownRegionToAllFoundFiles(
   injectKnownRegion(regionLabel, *outputPaths, addIfNotFound = addIfNotFound, log = log)
 }
 
+@OptIn(DelicateApi::class)
 fun FileSystem.checkKnownRegion(
   regionLabel: String,
   vararg outputPaths: Path,
   failIfNotFound: Boolean = true,
   verbose: Boolean = false,
+  interactive: Boolean = isInteractiveCodeEnabled(),
   log: (Any?) -> Unit = ::println,
-) = outputPaths.forEach { path ->
-  val hint = "Try sth like: ideap diff ${knownRegionFullTemplatePath(regionLabel)} ${canonicalize(path)}"
-  checkCustomRegion(
-    regionLabel,
-    knownRegion(regionLabel),
-    path,
-    failIfNotFound,
-    verbose,
-    hint.takeIf { verbose },
-    log = log,
-  )
+) = outputPaths.forEach { outputPath ->
+  val canonPath1 = knownRegionFullTemplatePath(regionLabel).toString()
+  val canonPath2 = canonicalize(outputPath).toString()
+  val hint = "Maybe try running in CLI sth like:\ndiff $canonPath1 $canonPath2"
+  try {
+    checkCustomRegion(
+      regionLabel,
+      knownRegion(regionLabel),
+      outputPath,
+      failIfNotFound,
+      verbose,
+      hint.takeIf { verbose },
+      log = log,
+    )
+  }
+  catch (e: NotEqStateErr) {
+    interactive || throw e
+    runBlocking { // FIXME_someday: all this check... functions (and other) should be correctly io suspendable.
+      val msgDiff = "ideDiff(\n  \"$canonPath1\",\n  \"$canonPath2\"\n)"
+      val question = "Incorrect region [$regionLabel] detected.\nTry opening diff in IDE?\n$msgDiff"
+      val answer = zenityAskIf(question).ax()
+      if (answer) ideDiff(canonPath1, canonPath2).ax()
+      zenityAskIf("Continue checking? (No -> abort/fail/rethrow)").ax() || throw e
+    }
+  }
 }
 
 @OptIn(NotPortableApi::class) // it's jvmMain anyway

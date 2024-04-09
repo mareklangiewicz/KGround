@@ -19,7 +19,7 @@ import pl.mareklangiewicz.ulog.i
  * Usually it will be from samples/examples/demos, or from gitignored playground, like:
  * pl.mareklangiewicz.kgroundx.maintenance.MyExamples#checkMyRegionsAndWorkflows
  * pl.mareklangiewicz.kgroundx.jupyter.PlaygroundKt#play
- * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
+ * So that way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
  * The gradle kgroundx-jupyter:run task is set up to run the main fun here.
  */
 @OptIn(DelicateApi::class, NotPortableApi::class)

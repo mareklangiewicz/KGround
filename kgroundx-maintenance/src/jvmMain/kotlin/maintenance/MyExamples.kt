@@ -19,13 +19,14 @@ object MyExamples {
   suspend fun interplayKGroundAndKommand() {
     println("Let's play with kground and kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
+    println("Let's try some ideDiff...")
+    ideDiff(
+      "/home/marek/code/kotlin/KGround/template-mpp/build.gradle.kts",
+      "/home/marek/code/kotlin/AbcdK/build.gradle.kts"
+    ).ax()
   }
 
-  suspend fun checkMyRegionsAndWorkflows(onlyPublic: Boolean = true) {
-    "Check all known regions synced?" ifYesRun
-      { checkAllKnownRegionsSynced(verbose = true) }
-    "Check all known regions in ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
-      { checkAllKnownRegionsInMyProjects(onlyPublic = onlyPublic) }
+  suspend fun checkMyWorkflows(onlyPublic: Boolean = true) {
     "Check my dworkflows in ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
       { checkMyDWorkflowsInMyProjects(onlyPublic = onlyPublic) }
   }
@@ -102,4 +103,12 @@ object MyExamples {
     println("Answer: " + if (yes) "Yes" else "No")
     if (yes) code()
   }
+}
+
+@ExampleApi
+object MyKnownRegionsExamples {
+
+  suspend fun checkAllSynced() = checkAllKnownRegionsSynced(verbose = true)
+
+  suspend fun checkAllInMyProjects() = checkAllKnownRegionsInMyProjects(onlyPublic = false)
 }
