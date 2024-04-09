@@ -12,11 +12,17 @@ import pl.mareklangiewicz.ulog.w
 
 
 // TODO_someday: logging with ulog from context receiver instead of current hacky impl
+@DelicateApi("API for manual interactive experimentation.")
+fun isInteractiveCodeEnabled(cli: CLI = SYS) = when {
+  !cli.isJvm -> false.also { ulog.w("Interactive code is only available on JvmCLI (for now).") }
+  !getUserFlag(cli, "code.interactive") -> false.also { ulog.w("Interactive code NOT enabled.") }
+  else -> true
+}
+
+// TODO_someday: logging with ulog from context receiver instead of current hacky impl
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-inline fun ifInteractiveCodeEnabled(cli: CLI = SYS, code: () -> Unit) = when {
-  !cli.isJvm -> ulog.w("Interactive code is only available on JvmCLI (for now).")
-  !getUserFlag(cli, "code.interactive") -> ulog.w("Interactive code NOT enabled.")
-  else -> code()
+inline fun ifInteractiveCodeEnabled(cli: CLI = SYS, code: () -> Unit) {
+  if (isInteractiveCodeEnabled(cli)) code()
 }
 
 @DelicateApi("API for manual interactive experimentation; requires zenity; can ignore the this kommand.")
