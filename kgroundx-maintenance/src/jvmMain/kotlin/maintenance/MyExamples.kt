@@ -26,18 +26,6 @@ object MyExamples {
     ).ax()
   }
 
-  suspend fun dangerousInjectStuffToMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
-  }
-
-  suspend fun dangerousUpdateStuffInMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
-    "DANGEROUS! Update KGround resources symlinks?" ifYesRun
-      { updateKGroundResourcesSymLinks() }
-    "DANGEROUS! Update GradleW files in $exampleProjName project?" ifYesRun
-      { updateGradlewFilesInKotlinProject(exampleProjName) }
-    "DANGEROUS! Update GradleW files in ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
-      { updateGradlewFilesInMyProjects(onlyPublic = onlyPublic) }
-  }
-
   suspend fun searchTextInKotlinCodeInMyProjects(text: String) {
     "Search for text: \"$text\" in kotlin code in ALL my projects?" ifYesRun
       { searchKotlinCodeInMyProjects(ureText(text).withOptWhatevaAroundInLine()) }
@@ -107,9 +95,15 @@ object MyWorkflowsExamples {
 
   suspend fun injectMDWToMyProjects() = injectMyDWorkflowsToMyProjects(onlyPublic = false)
 
-  suspend fun injectDWToProject() = injectDWorkflowsToKotlinProject(projectName = "AbcdK")
+  suspend fun injectDWToExampleProject() = injectDWorkflowsToKotlinProject(projectName = "AbcdK")
 
   suspend fun injectGenerateDepsWToRefreshDepsRepo() = injectHackyGenerateDepsWorkflowToRefreshDepsRepo()
 
   suspend fun injectUpdateGeneratedDepsToDepsKtRepo() = injectUpdateGeneratedDepsWorkflowToDepsKtRepo()
+
+  suspend fun updateKGroundResSLinks() = updateKGroundResourcesSymLinks()
+
+  suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")
+
+  suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false)
 }
