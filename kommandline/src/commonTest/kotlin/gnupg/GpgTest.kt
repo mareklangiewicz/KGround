@@ -9,6 +9,7 @@ import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 
 @OptIn(DelicateApi::class)
 class GpgTest {

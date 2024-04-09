@@ -3,14 +3,8 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
-import pl.mareklangiewicz.ulog.ULog
-import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.e
-
-
-// Hacky ulog impl for kommandline, before we have real ulog in context receivers
-var ulogPrintLevel: ULogLevel = ULogLevel.INFO
-var ulog = ULog { level, data -> if (level >= ulogPrintLevel) println("kl ${level.symbol} $data") }
+import pl.mareklangiewicz.ulog.hack.ulog
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"

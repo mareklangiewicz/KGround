@@ -36,11 +36,11 @@ import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
-import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenity
 import pl.mareklangiewicz.kommand.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
 /**

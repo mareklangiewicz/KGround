@@ -10,6 +10,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 
 actual fun provideSysCLI(): CLI = JvmCLI()
 

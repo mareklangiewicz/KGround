@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol

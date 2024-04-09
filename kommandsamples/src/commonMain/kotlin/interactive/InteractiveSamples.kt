@@ -14,11 +14,11 @@ import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.lineRawOrNull
 import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ureflect.getReflectCallOrNull
 

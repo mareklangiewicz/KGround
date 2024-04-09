@@ -8,8 +8,8 @@ import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.setUserFlag
-import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.kommand.withLogBadStreams
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
 /**

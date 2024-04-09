@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 
 actual fun provideSysCLI(): CLI = JsEvalFunCLI()
 

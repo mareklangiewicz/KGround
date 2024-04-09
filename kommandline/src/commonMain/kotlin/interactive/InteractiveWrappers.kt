@@ -6,8 +6,8 @@ import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.term.termXDefault
-import pl.mareklangiewicz.kommand.ulog
 import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.w
 
 

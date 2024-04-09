@@ -7,6 +7,7 @@ import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
 

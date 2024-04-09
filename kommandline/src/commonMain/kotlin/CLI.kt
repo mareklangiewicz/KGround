@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.ulog.d
+import pl.mareklangiewicz.ulog.hack.ulog
 
 expect fun provideSysCLI(): CLI
 
