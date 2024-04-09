@@ -5,6 +5,8 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.i
 
 
 var MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
@@ -15,7 +17,7 @@ private val resourcesAbsPath = MyKGroundRootPath / resourcesRelPath
 private val Path.isTmplSymlink
   get() = name.endsWith(".tmpl") && SYSTEM.metadata(this).symlinkTarget != null
 
-fun updateKGroundResourcesSymLinks(log: (Any?) -> Unit = ::println) = SYSTEM.run {
+fun updateKGroundResourcesSymLinks() = SYSTEM.run {
 
   // remove all tmpl symlinks (but throw if other unexpected file found)
   listRecursively(resourcesAbsPath).forEach {
@@ -45,7 +47,7 @@ fun updateKGroundResourcesSymLinks(log: (Any?) -> Unit = ::println) = SYSTEM.run
     val linkAbs = MyKGroundRootPath / linkRel
     val targetDots = linkRel.parent!!.segments.joinToString("/") { ".." }
     val target = targetDots.toPath() / srcRel
-    log("symlink $linkAbs -> $target")
+    ulog.i("symlink $linkAbs -> $target")
     createDirectories(linkAbs.parent!!)
     createSymlink(linkAbs, target)
   }

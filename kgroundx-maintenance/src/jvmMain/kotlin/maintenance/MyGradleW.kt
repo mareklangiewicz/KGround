@@ -6,6 +6,8 @@ import okio.*
 import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
+import pl.mareklangiewicz.ulog.*
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.io.*
@@ -15,20 +17,20 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.find.*
 
 
-@ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean) =
   getMyGradleProjectsPathS(onlyPublic).collect {
-    updateGradlewFilesInProject(it, log)
+    updateGradlewFilesInProject(it)
   }
 
-@ExampleApi fun updateGradlewFilesInKotlinProject(projectName: String, log: (Any?) -> Unit = ::println) =
-  updateGradlewFilesInProject(PathToMyKotlinProjects / projectName, log = log)
+@ExampleApi fun updateGradlewFilesInKotlinProject(projectName: String) =
+  updateGradlewFilesInProject(PathToMyKotlinProjects / projectName)
 
-fun updateGradlewFilesInProject(fullPath: Path, log: (Any?) -> Unit = ::println) =
+fun updateGradlewFilesInProject(fullPath: Path) =
   gradlewRelPaths.forEach { gradlewRelPath ->
     val targetPath = fullPath / gradlewRelPath
     val content = RESOURCES.readByteString(gradlewRelPath.withName { "$it.tmpl" })
     val action = if (SYSTEM.exists(targetPath)) "Updating" else "Creating new"
-    log("$action gradlew file: $targetPath")
+    ulog.i("$action gradlew file: $targetPath")
     SYSTEM.writeByteString(targetPath, content)
   }
 

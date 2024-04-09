@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.flow.map
@@ -79,7 +81,7 @@ object MyExamples {
 @ExampleApi
 object MyKnownRegionsExamples {
 
-  suspend fun checkAllMKRSynced() = checkAllKnownRegionsSynced(verbose = true)
+  suspend fun checkAllMKRSynced() = checkAllKnownRegionsSynced()
 
   suspend fun injectAllMKRToSync() = injectAllKnownRegionsToSync()
 

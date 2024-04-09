@@ -8,10 +8,13 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.ulog.*
+import pl.mareklangiewicz.ulog.hack.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
+import pl.mareklangiewicz.kommand.reducedOutToFlow
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.core.Ure
 
@@ -22,26 +25,25 @@ import pl.mareklangiewicz.ure.core.Ure
   codeInLineUre: Ure,
   onlyPublic: Boolean = false,
   alsoFilterProjectPath: suspend FileSystem.(Path) -> Boolean = { true },
-  log: (Any?) -> Unit = ::println,
 ) {
   var foundCount = 0
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
     .collect { projectPath ->
-      log("Searching in project: $projectPath")
+      ulog.i("Searching in project: $projectPath")
       findMyKotlinCode(projectPath.toString()).ax(SYS).forEach { ktFilePathStr ->
         val ktFilePath = ktFilePathStr.toPath()
         val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
         val result = SYSTEM.readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
         result?.value?.let {
           foundCount++
-          log("found in file ($foundCount): $ktFilePathStr")
-          log("found code:")
-          log(it)
+          ulog.i("found in file ($foundCount): $ktFilePathStr")
+          ulog.i("found code:")
+          ulog.i(it)
         }
       }
     }
-  log("Total found files: $foundCount")
+  ulog.i("Total found files: $foundCount")
 }
 
 
@@ -70,23 +72,22 @@ private fun Ure.withSomeLinesAround(
   0..maxLinesAfter of ureAnyLine()
 }
 
-@ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean) =
   fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalDWorkflowsProjectsPathS(log = log)
-    .collect { SYSTEM.checkMyDWorkflowsInProject(it, verbose = true, log = log) }
+    .mapFilterLocalDWorkflowsProjectsPathS()
+    .collect { SYSTEM.checkMyDWorkflowsInProject(it) }
 
 
-@ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean) =
   fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalDWorkflowsProjectsPathS(log = log)
-    .collect { SYSTEM.injectDWorkflowsToProject(it, log = log) }
+    .mapFilterLocalDWorkflowsProjectsPathS()
+    .collect { SYSTEM.injectDWorkflowsToProject(it) }
 
 @ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS(
   localSystem: FileSystem = SYSTEM,
-  log: (Any?) -> Unit = ::println,
 ) = mapFilterLocalKotlinProjectsPathS(localSystem) {
   val isGradleRootProject = exists(it / "settings.gradle.kts") || exists(it / "settings.gradle")
-  if (!isGradleRootProject) log("Ignoring dworkflows in non-gradle project: $it")
+  if (!isGradleRootProject) ulog.w("Ignoring dworkflows in non-gradle project: $it")
   // FIXME_maybe: Change when I have dworkflows for non-gradle projects
   isGradleRootProject
 }
@@ -100,23 +101,20 @@ private fun Ure.withSomeLinesAround(
   .filter { localSystem.alsoFilter(it) }
 
 
-@ExampleApi suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false, log: (Any?) -> Unit = ::println) =
+@ExampleApi suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false) =
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
     .collect {
-      log("Check all known regions in project: $it")
-      SYSTEM.checkAllKnownRegionsInAllFoundFiles(it, verbose = true, log = log)
+      ulog.i("Check all known regions in project: $it")
+      SYSTEM.checkAllKnownRegionsInAllFoundFiles(it)
     }
 
-@ExampleApi suspend fun injectAllKnownRegionsToMyProjects(
-  onlyPublic: Boolean = false,
-  log: (Any?) -> Unit = ::println,
-) =
+@ExampleApi suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false) =
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
     .collect {
-      log("Inject all known regions to project: $it")
-      SYSTEM.injectAllKnownRegionsToAllFoundFiles(it, log = log)
+      ulog.i("Inject all known regions to project: $it")
+      SYSTEM.injectAllKnownRegionsToAllFoundFiles(it)
     }
 
 @ExampleApi val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
