@@ -26,11 +26,6 @@ object MyExamples {
     ).ax()
   }
 
-  suspend fun checkMyWorkflows(onlyPublic: Boolean = true) {
-    "Check my dworkflows in ALL my projects? (onlyPublic = $onlyPublic)" ifYesRun
-      { checkMyDWorkflowsInMyProjects(onlyPublic = onlyPublic) }
-  }
-
   suspend fun dangerousInjectStuffToMyProjects(onlyPublic: Boolean = true, exampleProjName: String = "AbcdK") {
     "DANGEROUS! Inject all known regions to sync?" ifYesRun
       { injectAllKnownRegionsToSync() }
@@ -111,4 +106,11 @@ object MyKnownRegionsExamples {
   suspend fun checkAllSynced() = checkAllKnownRegionsSynced(verbose = true)
 
   suspend fun checkAllInMyProjects() = checkAllKnownRegionsInMyProjects(onlyPublic = false)
+}
+
+@ExampleApi
+object MyWorkflowsExamples {
+
+  suspend fun checkAllMyDWorkflows() = checkMyDWorkflowsInMyProjects(onlyPublic = false)
+
 }
