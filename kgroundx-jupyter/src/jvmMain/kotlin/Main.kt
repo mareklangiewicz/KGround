@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.isInteractiveCodeEnabled
 import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
+import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
@@ -15,9 +16,12 @@ import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.hack.ulogCache
 import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.w
 
 /**
  * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
@@ -32,8 +36,13 @@ import pl.mareklangiewicz.ulog.i
 @OptIn(DelicateApi::class, NotPortableApi::class) fun main(args: Array<String>) = runBlocking {
   when {
     args.size == 2 && args[0] == "try-code" -> try {
+      ulog.w("try-code ${args[1]} started")
       withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
-    } finally {
+      ulog.w("try-code ${args[1]} finished")
+      tryInteractivelyOpenLogCacheInIde()
+    } catch (e: Exception) {
+      ulog.e("try-code ${args[1]} failed")
+      ulog.exWithTrace(e)
       tryInteractivelyOpenLogCacheInIde()
     }
     args.size == 2 && args[0] == "get-user-flag" -> ulog.i(getUserFlagFullStr(SYS, args[1]))
@@ -47,4 +56,20 @@ import pl.mareklangiewicz.ulog.i
   isInteractiveCodeEnabled() && zenityAskIf("Try to open log cache in IDE (in tmp.notes)?").ax() || return
   writeFileWithDD(lines, SYS.pathToTmpNotes).ax()
   ideOpen(SYS.pathToTmpNotes).ax()
+}
+
+// FIXME: common "UStr" utils with different MPP parametrized exception conversions / string representations.
+//   (start with moving some of what is in UWidgets to KGround) (see comments in UHackyLog)
+@Deprecated("This is temporary fast&dirty impl")
+private fun ULog.exWithTrace(e: Throwable) {
+  ulog.e(e.toString())
+  e.stackTrace?.let {
+    ulog.e("STACK TRACE:")
+    it.toList().logEach { ulog.e(it) }
+    // each line have to be logged separately: don't use it.joinToString("\n"), because truncation in logger
+  }
+  e.cause?.let {
+    ulog.e("CAUSE:")
+    ulog.exWithTrace(it)
+  }
 }

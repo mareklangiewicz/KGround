@@ -21,11 +21,13 @@ class UHackySharedFlowLog(
   val minLevel: ULogLevel = ULogLevel.INFO,
   val replayCacheSize: Int = 16384,
   val alsoPrintLn: Boolean = true,
-  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "kg ${level.symbol} ${data.toString().take(64)}" },
-  // FIXME_later: Move UStr functions from UWidgets to KGround,
-  // make sure string truncation/limit sets "..." at the end
-  // (when actually truncated; truncated version together with "..." should always have 64 chars!);
-  // then use it here instead of simple .toString().take(64)
+  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "kg ${level.symbol} ${data.toString().take(256)}" },
+  // FIXME: Move UStr functions from UWidgets to KGround,
+  //   make sure string truncation/limit sets "..." at the end
+  //   (when actually truncated; truncated version together with "..." should always have 64 chars!);
+  //   then use it here instead of simple .toString().take(64)
+  //   UPDATE: I need longer limit here (256) (f.e. when logging code),
+  //   so UStr utils have to be parametrized and used with limit 256 here.
 ) : ULog {
 
   /** TODO_later: analyze thread-safety */
