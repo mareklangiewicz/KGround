@@ -11,7 +11,7 @@ import pl.mareklangiewicz.ulog.ULogLevel
  *
  * TODO: track: https://github.com/Kotlin/KEEP/issues/367
  *
- * logging is thread-safe (uses thread-safe [tryEmit])
+ * logging should be thread-safe (uses thread-safe [tryEmit]), but.. toLogLine, ulogCache, etc.. redesign later
  *
  * TODO_later: add some cool universal logger like this to ULog.kt, but rethink carefully.
  * BTW This dirty impl is only fast solution for my current limited needs:
@@ -28,6 +28,7 @@ class UHackySharedFlowLog(
   // then use it here instead of simple .toString().take(64)
 ) : ULog {
 
+  /** TODO_later: analyze thread-safety */
   val flow = MutableSharedFlow<String>(replayCacheSize, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
   override operator fun invoke(level: ULogLevel, data: Any?) {
@@ -39,6 +40,8 @@ class UHackySharedFlowLog(
   }
 }
 
+/** This global var is especially hacky and will be removed when we have context parameters */
 var ulog: ULog = UHackySharedFlowLog()
 
+/** TODO_later: make sure getting snapshot from replayCache is thread-safe */
 val ulogCache: List<String>? get() = (ulog as? UHackySharedFlowLog)?.flow?.replayCache
