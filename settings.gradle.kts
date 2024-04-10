@@ -9,14 +9,13 @@ pluginManagement {
     mavenCentral()
   }
 
-  val depsKtDir = File("../DepsKt")
-
-  val depsKtLocal = depsKtDir.exists()
-  // val depsKtLocal = false
-
-  if (depsKtLocal) {
-    logger.warn("Including local build $depsKtDir")
-    includeBuild(depsKtDir)
+  val depsDir = File("../DepsKt")
+  val depsInclude =
+    depsDir.exists()
+    // false
+  if (depsInclude) {
+    logger.warn("Including local build $depsDir")
+    includeBuild(depsDir)
   }
 }
 
@@ -29,8 +28,13 @@ gradleEnterprise {
   buildScan {
     termsOfServiceUrl = "https://gradle.com/terms-of-service"
     termsOfServiceAgree = "yes"
-    publishAlwaysIf(System.getenv("GITHUB_ACTIONS") == "true")
-    publishOnFailure()
+
+    val scanPublishEnabled: Boolean =
+      System.getenv("GITHUB_ACTIONS") == "true"
+      // true // careful with publishing fails especially from my machine (privacy)
+
+    publishOnFailureIf(scanPublishEnabled)
+    // publishAlwaysIf(scanPublishEnabled)
   }
 }
 
@@ -41,11 +45,10 @@ include(":kommandsamples")
 include(":kommandjupyter")
 
 val kgroundDir = File("../KGround/kground")
-
-val kgroundLocal = kgroundDir.exists()
-// val kgroundLocal = false
-
-if (kgroundLocal) {
+val kgroundInclude =
+  kgroundDir.exists()
+  // false
+if (kgroundInclude) {
   logger.warn("Adding local kground module.")
   include(":kground")
   project(":kground").projectDir = kgroundDir
