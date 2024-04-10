@@ -3,9 +3,11 @@
 package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.flow.map
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.*
@@ -71,6 +73,22 @@ object MyWorkflowsExamples {
 
 @ExampleApi
 object MyWeirdExamples {
+
+  suspend fun tryToDiffSomeOfMyProjectsFiles() {
+    val pathLeft = PathToMyKotlinProjects / "KGround" / "settings.gradle.kts"
+    fetchMyProjectsNameS(onlyPublic = false)
+      .mapFilterLocalKotlinProjectsPathS()
+      .collect {
+        val pathRight = it / "settings.gradle.kts"
+        val msgDiff = "ideDiff(\n  \"$pathLeft\",\n  \"$pathRight\"\n)"
+        ulog.i(msgDiff)
+        val question = "Try opening diff in IDE?\n$msgDiff"
+        val answer = zenityAskIf(question).ax()
+        if (answer) ideDiff(pathLeft.toString(), pathRight.toString()).ax()
+        zenityAskIf("Continue diffing? (No -> cancel/abort/throw)").ax() || bad { "User cancelled" }
+      }
+  }
+
   /**
    * Example how I updated my repos origins after changing username on GitHub
    * Now it does nothing, because all repos have already set remote url to:
@@ -78,17 +96,13 @@ object MyWeirdExamples {
    * but let's leave it here as an example.
    */
   @OptIn(DelicateApi::class, NotPortableApi::class)
-  suspend fun tryToUpdateMyReposOrigins() {
-
-
+  suspend fun tryToUpdateMyReposOrigins() =
     fetchMyProjectsNameS(onlyPublic = false)
       .map { PathToMyKotlinProjects / it }
-      .collect { dir ->
-      }
-  }
+      .collect { tryToUpdateMyRepoOrigin(it) }
 
   @OptIn(DelicateApi::class, NotPortableApi::class)
-  private suspend fun tryToUpdateMyRepoOrigin(dir: String) {
+  private suspend fun tryToUpdateMyRepoOrigin(dir: Path) {
     val ureRepoUrl = ure {
       +ureText("git@github.com:")
       +ureIdent().withName("user")
@@ -114,6 +128,5 @@ object MyWeirdExamples {
     val newUrl = "git@github.com:mareklangiewicz/$project.git"
     ulog.w("setting origin -> $newUrl")
     kset(newUrl).ax(dir = dir.toString())
-
   }
 }
