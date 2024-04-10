@@ -17,7 +17,7 @@ import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
 
 @ExampleApi
-object MyExamples {
+object MyTypicalExamples {
 
     // TODO NOW: refactor it all - moved from kotlinx-jupyter:MainExamples
 
@@ -35,8 +35,14 @@ object MyExamples {
     searchKotlinCodeInMyProjects(ureText("UReports"))
   }
 
+  /**
+   * Example how I updated my repos origins after changing username on GitHub
+   * Now it does nothing, because all repos have already set remote url to:
+   * git@github.com:mareklangiewicz/<project>.git instead of one with "langara"
+   * but let's leave it here as an example.
+   */
   @OptIn(DelicateApi::class, NotPortableApi::class)
-  suspend fun dirtyFixMyReposOrigins() {
+  suspend fun tryToUpdateMyReposOrigins() {
 
     val kget = kommand("git", "remote", "get-url", "origin")
     fun kset(url: String) = kommand("git", "remote", "set-url", "origin", url)
@@ -65,19 +71,12 @@ object MyExamples {
         }
         user chkEq "langara"
         val newUrl = "git@github.com:mareklangiewicz/$project.git"
-        ulog.i("*** SETTING ORIGIN -> $newUrl ***")
+        ulog.w("setting origin -> $newUrl")
         kset(newUrl).ax(dir = dir.toString())
       }
   }
-
-
-  private suspend infix fun String.ifYesRun(code: suspend () -> Unit) {
-    ulog.i("Question: $this")
-    val yes = zenityAskIf(this).ax()
-    ulog.i("Answer: " + if (yes) "Yes" else "No")
-    if (yes) code()
-  }
 }
+
 
 @ExampleApi
 object MyKnownRegionsExamples {
