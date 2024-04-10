@@ -4,13 +4,14 @@ pluginManagement {
     google()
     mavenCentral()
   }
-  val includeLocalDepsKtBuild =
-    File("../DepsKt").exists()
-    // false
 
-  if (includeLocalDepsKtBuild) {
-    logger.warn("Including local build ../DepsKt")
-    includeBuild("../DepsKt")
+  val depsDir = File("../DepsKt")
+  val depsInclude =
+    depsDir.exists()
+    // false
+  if (depsInclude) {
+    logger.warn("Including local build $depsDir")
+    includeBuild(depsDir)
   }
 }
 
@@ -44,22 +45,20 @@ include(":kgroundx-jupyter")
 
 
 val kommandlineDir = File("../KommandLine/kommandline")
-val kommandsamplesDir = File("../KommandLine/kommandsamples")
-
-val kommandlineLocal =
+val kommandlineInclude =
   kommandlineDir.exists()
   // false
-
-val kommandsamplesLocal =
-  kommandsamplesDir.exists()
-  // false
-
-if (kommandlineLocal) {
+if (kommandlineInclude) {
   logger.warn("Adding local kommandline module.")
   include(":kommandline")
   project(":kommandline").projectDir = kommandlineDir
 }
-if (kommandsamplesLocal) {
+
+val kommandsamplesDir = File("../KommandLine/kommandsamples")
+val kommandsamplesInclude =
+  kommandsamplesDir.exists()
+// false
+if (kommandsamplesInclude) {
   logger.warn("Adding local kommandsamples module.")
   include(":kommandsamples")
   project(":kommandsamples").projectDir = kommandsamplesDir
