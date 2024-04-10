@@ -7,6 +7,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 import org.junit.jupiter.api.TestFactory
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.ulog.d
