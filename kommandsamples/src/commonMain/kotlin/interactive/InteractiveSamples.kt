@@ -19,6 +19,7 @@ import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.zenityAskIf
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ureflect.getReflectCallOrNull
 
@@ -30,7 +31,7 @@ import pl.mareklangiewicz.ureflect.getReflectCallOrNull
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
-  ulog.d("tryInteractivelySomethingRef(\"$reference\")")
+  ulog.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
     xclipOut(XClipSelection.Clipboard).ax(SYS).singleOrNull()
       ?: bad { "Clipboard has to have code reference in single line." }
@@ -53,7 +54,7 @@ suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
-  ulog.d("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
+  ulog.i("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
   val call = getReflectCallOrNull(className, memberName) ?: return
   // Note: prepareCallFor fails early if member not found,
   // before we start to interact with the user,
