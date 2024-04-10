@@ -4,7 +4,11 @@ pluginManagement {
     google()
     mavenCentral()
   }
-  if (File("../DepsKt").exists()) {
+  val includeLocalDepsKtBuild =
+    File("../DepsKt").exists()
+    // false
+
+  if (includeLocalDepsKtBuild) {
     logger.warn("Including local build ../DepsKt")
     includeBuild("../DepsKt")
   }
@@ -19,8 +23,13 @@ gradleEnterprise {
   buildScan {
     termsOfServiceUrl = "https://gradle.com/terms-of-service"
     termsOfServiceAgree = "yes"
-    publishAlwaysIf(System.getenv("GITHUB_ACTIONS") == "true")
-    publishOnFailure()
+
+    val scanPublishEnabled: Boolean =
+      System.getenv("GITHUB_ACTIONS") == "true"
+      // true // careful with publishing fails especially from my machine (privacy)
+
+    publishOnFailureIf(scanPublishEnabled)
+    // publishAlwaysIf(scanPublishEnabled)
   }
 }
 
@@ -37,10 +46,13 @@ include(":kgroundx-jupyter")
 val kommandlineDir = File("../KommandLine/kommandline")
 val kommandsamplesDir = File("../KommandLine/kommandsamples")
 
-val kommandlineLocal = kommandlineDir.exists()
-val kommandsamplesLocal = kommandsamplesDir.exists()
-// val kommandlineLocal = false
-// val kommandsamplesLocal = false
+val kommandlineLocal =
+  kommandlineDir.exists()
+  // false
+
+val kommandsamplesLocal =
+  kommandsamplesDir.exists()
+  // false
 
 if (kommandlineLocal) {
   logger.warn("Adding local kommandline module.")
