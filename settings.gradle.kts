@@ -1,3 +1,6 @@
+
+rootProject.name = "KGround"
+
 pluginManagement {
   repositories {
     gradlePluginPortal()
@@ -35,8 +38,6 @@ develocity {
     }
   }
 }
-
-rootProject.name = "KGround"
 
 include(":kground")
 include(":kgroundx")

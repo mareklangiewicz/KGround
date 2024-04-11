@@ -18,6 +18,15 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
 }
 
+// FIXME: remove hardcoded versions
+configurations.all {
+  resolutionStrategy.dependencySubstitution {
+    substitute(module("pl.mareklangiewicz:uspek")).using(module("pl.mareklangiewicz:uspek:0.0.33"))
+    substitute(module("pl.mareklangiewicz:uspekx-junit5")).using(module("pl.mareklangiewicz:uspekx-junit5:0.0.33"))
+    substitute(module("pl.mareklangiewicz:tuplek")).using(module("pl.mareklangiewicz:tuplek:0.0.14"))
+  }
+}
+
 
 // region [Kotlin Module Build Template]
 
