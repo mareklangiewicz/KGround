@@ -57,6 +57,11 @@ fun TaskCollection<Task>.defaultKotlinCompileOptions(
       freeCompilerArgs =
         freeCompilerArgs + "-P" + "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it"
     }
+
+    // FIXME NOW: remove this temporary workaround for issue on github:
+    // > Task :kgroundx-maintenance:compileKotlinJvm
+    // e: Pre-release classes were found in dependencies. Remove them from the classpath, recompile with a release compiler or use '-Xskip-prerelease-check' to suppress errors
+    freeCompilerArgs = freeCompilerArgs + "-Xskip-prerelease-check"
   }
 }
 
