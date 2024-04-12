@@ -60,7 +60,7 @@ if (kommandlineInclude) {
 val kommandsamplesDir = File("../KommandLine/kommandsamples")
 val kommandsamplesInclude =
   kommandsamplesDir.exists()
-// false
+  // false
 if (kommandsamplesInclude) {
   logger.warn("Adding local kommandsamples module.")
   include(":kommandsamples")

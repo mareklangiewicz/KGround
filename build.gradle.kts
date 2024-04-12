@@ -17,7 +17,7 @@ defaultBuildTemplateForRootProject(
     name = "KGround",
     description = "Kotlin Common Ground.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 45),
+    version = Ver(0, 0, 47),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
     // https://github.com/mareklangiewicz/KGround/releases
     settings = LibSettings(

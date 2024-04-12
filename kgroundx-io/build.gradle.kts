@@ -11,9 +11,20 @@ plugins {
 defaultBuildTemplateForBasicMppLib {
   api(project(":kgroundx"))
   api(project(":kground-io"))
-  api(findProject(":kommandline") ?: Langiewicz.kommandline.withVer("0.0.51"))
-  api(findProject(":kommandsamples") ?: Langiewicz.kommandsamples.withVer("0.0.51"))
-  // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
+  api(findProject(":kommandline") ?: Langiewicz.kommandline)
+  api(findProject(":kommandsamples") ?: Langiewicz.kommandsamples)
+}
+
+
+// FIXME: remove hardcoded versions
+// https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
+configurations.all {
+  resolutionStrategy.dependencySubstitution {
+    substitute(module("pl.mareklangiewicz:kommandline")).using(module("pl.mareklangiewicz:kommandline:0.0.53"))
+    substitute(module("pl.mareklangiewicz:kommandsamples")).using(module("pl.mareklangiewicz:kommandsamples:0.0.53"))
+    // substitute(module("pl.mareklangiewicz:uspekx-junit5")).using(module("pl.mareklangiewicz:uspekx-junit5:0.0.33"))
+    // substitute(module("pl.mareklangiewicz:tuplek")).using(module("pl.mareklangiewicz:tuplek:0.0.14"))
+  }
 }
 
 // kotlin { js(IR) { nodejs() } }
