@@ -18,15 +18,6 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
 }
 
-// FIXME: remove hardcoded versions
-configurations.all {
-  resolutionStrategy.dependencySubstitution {
-    substitute(module("pl.mareklangiewicz:uspek")).using(module("pl.mareklangiewicz:uspek:0.0.33"))
-    substitute(module("pl.mareklangiewicz:uspekx-junit5")).using(module("pl.mareklangiewicz:uspekx-junit5:0.0.33"))
-    substitute(module("pl.mareklangiewicz:tuplek")).using(module("pl.mareklangiewicz:tuplek:0.0.14"))
-  }
-}
-
 
 // region [Kotlin Module Build Template]
 
@@ -57,11 +48,6 @@ fun TaskCollection<Task>.defaultKotlinCompileOptions(
       freeCompilerArgs =
         freeCompilerArgs + "-P" + "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it"
     }
-
-    // FIXME NOW: remove this temporary workaround for issue on github:
-    // > Task :kgroundx-maintenance:compileKotlinJvm
-    // e: Pre-release classes were found in dependencies. Remove them from the classpath, recompile with a release compiler or use '-Xskip-prerelease-check' to suppress errors
-    freeCompilerArgs = freeCompilerArgs + "-Xskip-prerelease-check"
   }
 }
 

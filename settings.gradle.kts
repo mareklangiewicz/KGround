@@ -10,8 +10,8 @@ pluginManagement {
 
   val depsDir = File("../DepsKt")
   val depsInclude =
-    depsDir.exists()
-    // false
+    // depsDir.exists()
+    false
   if (depsInclude) {
     logger.warn("Including local build $depsDir")
     includeBuild(depsDir)
@@ -19,7 +19,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.2.97" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.2.98" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "3.17.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
@@ -49,8 +49,8 @@ include(":kgroundx-jupyter")
 
 val kommandlineDir = File("../KommandLine/kommandline")
 val kommandlineInclude =
-  kommandlineDir.exists()
-  // false
+  // kommandlineDir.exists()
+  false
 if (kommandlineInclude) {
   logger.warn("Adding local kommandline module.")
   include(":kommandline")
@@ -59,8 +59,8 @@ if (kommandlineInclude) {
 
 val kommandsamplesDir = File("../KommandLine/kommandsamples")
 val kommandsamplesInclude =
-  kommandsamplesDir.exists()
-  // false
+  // kommandsamplesDir.exists()
+  false
 if (kommandsamplesInclude) {
   logger.warn("Adding local kommandsamples module.")
   include(":kommandsamples")
