@@ -60,3 +60,6 @@ fun String.removeReqSuffix(suffix: CharSequence): String {
   req(endsWith(suffix)) { "Can not find suffix: $suffix" }
   return removeSuffix(suffix)
 }
+
+
+fun CharSequence.containsAny(vararg substrings: CharSequence) = substrings.any { it in this }

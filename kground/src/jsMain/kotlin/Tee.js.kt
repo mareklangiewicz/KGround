@@ -21,4 +21,7 @@ actual fun getCurrentPlatformName(): String =
 actual fun getCurrentAbsolutePath(): String =
   windowOrNull?.document?.location?.toString() ?: js("process.cwd()")
 
+
+actual inline fun <R> synchronizedMaybe(lock: Any, block: () -> R): R = block()
+
 val windowOrNull: Window? get() = if (js("typeof window !== 'undefined'")) window else null

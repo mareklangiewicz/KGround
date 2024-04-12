@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.kground
 
+import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.*
 
 /**
@@ -17,8 +19,6 @@ and will be correctly composable with the rest of ULog.
  */
 
 
-val Any?.unit get() = Unit
-
 fun <T> T.tee(
   into: ULog = TeeDefaultLog,
   withCurrentThread: Boolean = true,
@@ -27,9 +27,9 @@ fun <T> T.tee(
   withCurrentPath: Boolean = false,
   withValue: Boolean = true,
 ): T {
-  val p1 = if (withCurrentThread) " [${getCurrentThreadName().padEnd(40).substring(0, 40)}]" else ""
+  val p1 = if (withCurrentThread) " [${getCurrentThreadName().str(40).padEnd(40)}]" else ""
   val p2 = if (withCurrentTime) " [${getCurrentTimeStr()}]" else ""
-  val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().padEnd(40).substring(0, 40)}]" else ""
+  val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().str(40).padEnd(40)}]" else ""
   val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
   val p5 = if (withValue) " $this" else ""
   into.i("$p1$p2$p3$p4$p5")
@@ -57,3 +57,5 @@ expect fun getCurrentAbsolutePath(): String
 fun getCurrentPlatformKind(): String = getCurrentPlatformName().takeWhile { it.isLetter() }.uppercase()
 
 
+@DelicateApi
+expect inline fun <R> synchronizedMaybe(lock: Any, block: () -> R): R
