@@ -2,8 +2,12 @@
 
 package pl.mareklangiewicz.udata
 
-actual inline fun Float.str(maxLength: Int, maxIndicator: String, precision: Int): String =
-  "%.${precision}f".format(this).str(maxLength, maxIndicator)
-
-actual inline fun Double.str(maxLength: Int, maxIndicator: String, precision: Int): String =
-  "%.${precision}f".format(this).str(maxLength, maxIndicator)
+actual inline fun Number.str(
+  vararg useNamedArgs: Unit,
+  maxLength: Int,
+  maxIndicator: String,
+  precision: Int,
+): String = when {
+  this is Float || this is Double -> "%.${precision}f".format(this)
+  else -> toString()
+}.str(maxLength = maxLength, maxIndicator = maxIndicator)

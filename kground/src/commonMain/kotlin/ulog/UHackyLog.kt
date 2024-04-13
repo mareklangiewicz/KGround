@@ -2,6 +2,8 @@ package pl.mareklangiewicz.ulog.hack
 
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import pl.mareklangiewicz.kground.getCurrentTimeStr
+import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
 
@@ -21,13 +23,7 @@ class UHackySharedFlowLog(
   val minLevel: ULogLevel = ULogLevel.INFO,
   val replayCacheSize: Int = 16384,
   val alsoPrintLn: Boolean = true,
-  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "kg ${level.symbol} ${data.toString().take(256)}" },
-  // FIXME: Move UStr functions from UWidgets to KGround,
-  //   make sure string truncation/limit sets "..." at the end
-  //   (when actually truncated; truncated version together with "..." should always have 64 chars!);
-  //   then use it here instead of simple .toString().take(64)
-  //   UPDATE: I need longer limit here (256) (f.e. when logging code),
-  //   so UStr utils have to be parametrized and used with limit 256 here.
+  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "kg ${level.symbol} ${data.str()}" },
 ) : ULog {
 
   /** TODO_later: analyze thread-safety */
@@ -43,7 +39,10 @@ class UHackySharedFlowLog(
 }
 
 /** This global var is especially hacky and will be removed when we have context parameters */
-var ulog: ULog = UHackySharedFlowLog()
+var ulog: ULog =
+  UHackySharedFlowLog { level, data -> "kg ${level.symbol} ${data.str(maxLength = 128)}" }
+  // UHackySharedFlowLog { level, data -> "kg ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
+  // Note: getting current time makes it a bit slower, so it shouldn't be the default.
 
 /** TODO_later: make sure getting snapshot from replayCache is thread-safe */
 val ulogCache: List<String>? get() = (ulog as? UHackySharedFlowLog)?.flow?.replayCache

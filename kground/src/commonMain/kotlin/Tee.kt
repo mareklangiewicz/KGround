@@ -27,9 +27,9 @@ fun <T> T.tee(
   withCurrentPath: Boolean = false,
   withValue: Boolean = true,
 ): T {
-  val p1 = if (withCurrentThread) " [${getCurrentThreadName().str(40).padEnd(40)}]" else ""
+  val p1 = if (withCurrentThread) " [${getCurrentThreadName().str().padEnd(32)}]" else ""
   val p2 = if (withCurrentTime) " [${getCurrentTimeStr()}]" else ""
-  val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().str(40).padEnd(40)}]" else ""
+  val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().str().padEnd(32)}]" else ""
   val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
   val p5 = if (withValue) " $this" else ""
   into.i("$p1$p2$p3$p4$p5")

@@ -2,8 +2,9 @@
 
 package pl.mareklangiewicz.udata
 
-actual inline fun Float.str(maxLength: Int, maxIndicator: String, precision: Int): String =
-  asDynamic().toFixed(precision) as String
-
-actual inline fun Double.str(maxLength: Int, maxIndicator: String, precision: Int): String =
-  asDynamic().toFixed(precision) as String
+actual inline fun Number.str(
+  vararg useNamedArgs: Unit,
+  maxLength: Int,
+  maxIndicator: String,
+  precision: Int,
+): String = (asDynamic().toFixed(precision) as String).str(maxLength = maxLength, maxIndicator = maxIndicator)
