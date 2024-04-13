@@ -8,7 +8,9 @@ plugins {
   plugAll(plugs.KotlinMulti, plugs.MavenPublish, plugs.Signing)
 }
 
-defaultBuildTemplateForBasicMppLib {
+defaultBuildTemplateForBasicMppLib(
+  ignoreCompose = true, // necessary because I sometimes include this module locally from UWidgets project
+) {
   api(Langiewicz.abcdk)
   api(Langiewicz.tuplek)
   api(Langiewicz.upue)
