@@ -8,6 +8,7 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.hack.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
@@ -38,7 +39,8 @@ import pl.mareklangiewicz.ure.core.Ure
         result?.value?.let {
           foundCount++
           ulog.i("found in file ($foundCount): $ktFilePathStr")
-          ulog.i("found code:\n$it")
+          ulog.i("found code:")
+          it.lines().logEach { ulog.i(it) }
         }
       }
     }
