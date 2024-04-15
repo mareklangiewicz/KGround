@@ -9,12 +9,13 @@ plugins {
 }
 
 defaultBuildTemplateForBasicMppLib {
-  api(findProject(":kground") ?: Langiewicz.kground.withVer("0.0.46"))
-  // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+  api(findProject(":kground") ?: Langiewicz.kground)
 }
 // FIXME: remove hardcoded versions
 configurations.all {
   resolutionStrategy.dependencySubstitution {
+  // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+    substitute(module("pl.mareklangiewicz:kground")).using(module("pl.mareklangiewicz:kground:0.0.49"))
     substitute(module("pl.mareklangiewicz:uspek")).using(module("pl.mareklangiewicz:uspek:0.0.33"))
     substitute(module("pl.mareklangiewicz:uspekx-junit5")).using(module("pl.mareklangiewicz:uspekx-junit5:0.0.33"))
     substitute(module("pl.mareklangiewicz:tuplek")).using(module("pl.mareklangiewicz:tuplek:0.0.14"))
