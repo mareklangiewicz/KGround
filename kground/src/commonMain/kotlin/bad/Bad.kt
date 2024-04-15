@@ -22,6 +22,9 @@ open class BadStateErr(override val message: String? = null, override val cause:
 open class BadArgErr(override val message: String? = null, override val cause: Throwable? = null) :
   IllegalArgumentException(), BadErr
 
+// TODO_someday: When we have context parameters:
+//   think if maybe I should define all these default lazy messages as context parameters??
+
 inline fun bad(lazyMessage: () -> String = { "this is bad" }): Nothing = throw BadStateErr(lazyMessage())
 inline fun badArg(lazyMessage: () -> String = { "this arg is bad" }): Nothing = throw BadArgErr(lazyMessage())
 
@@ -142,21 +145,45 @@ inline fun <reified T : Throwable> reqThrows(
 } ?: badArg(lazyMessage)
 
 
+
+inline fun <T : Comparable<T>> T.chkIn(
+  min: T? = null, max: T? = null,
+  lazyMessageMin: () -> String = { "this bad $this is less than min $min" },
+  lazyMessageMax: () -> String = { "this bad $this is more than max $max" },
+): T = apply {
+  min?.let { chk(this >= it, lazyMessageMin) }
+  max?.let { chk(this <= it, lazyMessageMax) }
+}
+
+inline fun <T : Comparable<T>> T.reqIn(
+  min: T? = null, max: T? = null,
+  lazyMessageMin: () -> String = { "this bad arg $this is less than min $min" },
+  lazyMessageMax: () -> String = { "this bad arg $this is more than max $max" },
+): T = apply {
+  min?.let { req(this >= it, lazyMessageMin) }
+  max?.let { req(this <= it, lazyMessageMax) }
+}
+
+inline fun <T : Collection<*>> T.chkSize(
+  min: Int? = null, max: Int? = null,
+  lazyMessageMin: () -> String = { "this bad size $size is less than min $min" },
+  lazyMessageMax: () -> String = { "this bad size $size is more than max $max" },
+): T = apply { size.chkIn(min, max, lazyMessageMin, lazyMessageMax) }
+
+inline fun <T : Collection<*>> T.reqSize(
+  min: Int? = null, max: Int? = null,
+  lazyMessageMin: () -> String = { "this bad arg size $size is less than min $min" },
+  lazyMessageMax: () -> String = { "this bad arg size $size is more than max $max" },
+): T = apply { size.reqIn(min, max, lazyMessageMin, lazyMessageMax) }
+
 inline fun <T : Collection<*>> T.chkEmpty(lazyMessage: () -> String = { "this not empty is bad" }): T =
-  apply { isEmpty() || throw BadStateErr(lazyMessage()) }
+  chkSize(max = 0, lazyMessageMax = lazyMessage)
 
 inline fun <T : Collection<*>> T.reqEmpty(lazyMessage: () -> String = { "this not empty arg is bad" }): T =
-  apply { isEmpty() || throw BadArgErr(lazyMessage()) }
-
-inline fun <T : Collection<*>> T.chkEmptyVerbose(): T =
-  apply { isEmpty() || throw BadStateErr("this not empty collection is bad: $this") }
-
-inline fun <T : Collection<*>> T.reqEmptyVerbose(): T =
-  apply { isEmpty() || throw BadArgErr("this not empty arg collection is bad: $this") }
+  reqSize(max = 0, lazyMessageMax = lazyMessage)
 
 inline fun <T : Collection<*>> T.chkNotEmpty(lazyMessage: () -> String = { "this empty is bad" }): T =
-  apply { isNotEmpty() || throw BadStateErr(lazyMessage()) }
+  chkSize(min = 1, lazyMessageMin = lazyMessage)
 
 inline fun <T : Collection<*>> T.reqNotEmpty(lazyMessage: () -> String = { "this empty arg is bad" }): T =
-  apply { isNotEmpty() || throw BadArgErr(lazyMessage()) }
-
+  reqSize(min = 1, lazyMessageMin = lazyMessage)

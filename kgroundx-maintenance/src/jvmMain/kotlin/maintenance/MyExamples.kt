@@ -31,7 +31,7 @@ object MyBasicExamples {
     ulog.w("Let's try some ideDiff...")
     ideDiff(
       "/home/marek/code/kotlin/KGround/template-mpp/build.gradle.kts",
-      "/home/marek/code/kotlin/AbcdK/build.gradle.kts"
+      "/home/marek/code/kotlin/AbcdK/build.gradle.kts",
     ).ax()
   }
 
