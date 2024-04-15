@@ -2,7 +2,6 @@ package pl.mareklangiewicz.ulog.hack
 
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import pl.mareklangiewicz.kground.getCurrentTimeStr
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
@@ -23,7 +22,7 @@ class UHackySharedFlowLog(
   val minLevel: ULogLevel = ULogLevel.INFO,
   val replayCacheSize: Int = 16384,
   val alsoPrintLn: Boolean = true,
-  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "kg ${level.symbol} ${data.str()}" },
+  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "ulog ${level.symbol} ${data.str()}" },
 ) : ULog {
 
   /** TODO_later: analyze thread-safety */
@@ -31,17 +30,17 @@ class UHackySharedFlowLog(
 
   override operator fun invoke(level: ULogLevel, data: Any?) {
     if (level >= minLevel) {
-      val str = toLogLine(level, data)
-      flow.tryEmit(str)
-      if (alsoPrintLn) println(str)
+      val line = toLogLine(level, data)
+      flow.tryEmit(line)
+      if (alsoPrintLn) println(line)
     }
   }
 }
 
 /** This global var is especially hacky and will be removed when we have context parameters */
 var ulog: ULog =
-  UHackySharedFlowLog { level, data -> "kg ${level.symbol} ${data.str(maxLength = 128)}" }
-  // UHackySharedFlowLog { level, data -> "kg ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
+  UHackySharedFlowLog { level, data -> "ulog ${level.symbol} ${data.str(maxLength = 128)}" }
+  // UHackySharedFlowLog { level, data -> "ulog ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
   // Note: getting current time makes it a bit slower, so it shouldn't be the default.
 
 /** TODO_later: make sure getting snapshot from replayCache is thread-safe */

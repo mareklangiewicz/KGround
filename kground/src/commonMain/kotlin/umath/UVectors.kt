@@ -5,9 +5,13 @@ package pl.mareklangiewicz.umath
 import pl.mareklangiewicz.udata.*
 
 
-fun lerp(start: Int, stop: Int, fraction: Float = 0.5f) = lerp(start.flt, stop.flt, fraction).int
-fun lerp(start: Float, stop: Float, fraction: Float = 0.5f) = (start * (1 - fraction) + stop * fraction)
-fun lerp(start: Double, stop: Double, fraction: Double = 0.5) = (start * (1 - fraction) + stop * fraction)
+fun lerp(min: Int, max: Int, fraction: Float = 0.5f) = lerp(min.flt, max.flt, fraction).int
+fun lerp(min: Float, max: Float, fraction: Float = 0.5f) = min * (1 - fraction) + max * fraction
+fun lerp(min: Double, max: Double, fraction: Double = 0.5) = min * (1 - fraction) + max * fraction
+
+fun lerpInv(min: Int, max: Int, position: Int) = (position - min) / (max - min)
+fun lerpInv(min: Float, max: Float, position: Float) = (position - min) / (max - min)
+fun lerpInv(min: Double, max: Double, position: Double) = (position - min) / (max - min)
 
 
 data class XY(val x: Double = 0.0, val y: Double = 0.0) {

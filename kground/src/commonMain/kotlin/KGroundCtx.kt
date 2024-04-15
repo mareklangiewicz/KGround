@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kground
 import kotlinx.coroutines.*
 import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.ulog.*
+import pl.mareklangiewicz.ulog.hack.ulog as hackyulog
 import kotlin.coroutines.*
 
 // TODO NOW: experiment and test it! (maybe incorporate ulogging everywhere first?)
@@ -43,7 +44,7 @@ suspend fun <T> withKGroundCtx(
   block: suspend CoroutineScope.() -> T,
 ): T = withContext(
   KGroundCtx(
-    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: hackyulog,
     usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
   ) plusIfNN name?.let(::CoroutineName),
   block,

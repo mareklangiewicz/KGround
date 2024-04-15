@@ -2,6 +2,7 @@ package pl.mareklangiewicz.ulog
 
 import pl.mareklangiewicz.ulog.ULogLevel.*
 import kotlin.coroutines.*
+import pl.mareklangiewicz.annotations.DelicateApi
 
 /**
  * NONE should always be ignored (not logged)
@@ -28,18 +29,28 @@ interface WithULog {
   val ulog: ULog
 }
 
+
 fun ULog.d(data: Any?) = this(DEBUG, data)
 fun ULog.i(data: Any?) = this(INFO, data)
 fun ULog.w(data: Any?) = this(WARN, data)
 fun ULog.e(data: Any?) = this(ERROR, data)
-// No convenience methods for other levels on purpose.
-// Those levels are only for special cases and shouldn't be overused.
+
+@DelicateApi fun ULog.none(data: Any?) = this(NONE, data)
+@DelicateApi fun ULog.quiet(data: Any?) = this(QUIET, data)
+@DelicateApi fun ULog.verbose(data: Any?) = this(VERBOSE, data)
+@DelicateApi fun ULog.assert(data: Any?) = this(ASSERT, data)
+
+// DelicateApi annotations are for levels are only for special cases and shouldn't be overused.
 // I don't want any tags and/or exceptions here in API, any tags/keys/etc can be passed inside data.
 // I want MINIMALISTIC API here, and to promote single arg functions that compose better with UPue.
 
-class ULogPrintLn(private val prefix: String = "ulog", private val separator: String = " ") : ULog {
+class ULogPrintLn(
+  val minLevel: ULogLevel = VERBOSE,
+  val prefix: String = "ulog",
+  val separator: String = " ",
+) : ULog {
   override operator fun invoke(level: ULogLevel, data: Any?) {
-    if (level.ordinal > 1) println("$prefix$separator${level.symbol}$separator$data")
+    if (level >= minLevel) println("$prefix$separator${level.symbol}$separator$data")
   }
 }
 
