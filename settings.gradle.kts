@@ -8,7 +8,7 @@ pluginManagement {
     mavenCentral()
   }
 
-  val depsDir = File("../DepsKt")
+  val depsDir = File(rootDir, "../DepsKt").normalize()
   val depsInclude =
     // depsDir.exists()
     false
@@ -47,20 +47,20 @@ include(":kgroundx-maintenance")
 include(":kgroundx-jupyter")
 
 
-val kommandlineDir = File("../KommandLine/kommandline")
+val kommandlineDir = File(rootDir, "../KommandLine/kommandline").normalize()
 val kommandlineInclude =
-  // kommandlineDir.exists()
-  false
+  kommandlineDir.exists()
+  // false
 if (kommandlineInclude) {
   logger.warn("Adding local kommandline module.")
   include(":kommandline")
   project(":kommandline").projectDir = kommandlineDir
 }
 
-val kommandsamplesDir = File("../KommandLine/kommandsamples")
+val kommandsamplesDir = File(rootDir, "../KommandLine/kommandsamples").normalize()
 val kommandsamplesInclude =
-  // kommandsamplesDir.exists()
-  false
+  kommandsamplesDir.exists()
+  // false
 if (kommandsamplesInclude) {
   logger.warn("Adding local kommandsamples module.")
   include(":kommandsamples")
