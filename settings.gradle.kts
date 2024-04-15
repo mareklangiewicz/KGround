@@ -9,7 +9,7 @@ pluginManagement {
     mavenCentral()
   }
 
-  val depsDir = File("../DepsKt")
+  val depsDir = File(rootDir, "../DepsKt").normalize()
   val depsInclude =
     depsDir.exists()
     // false
@@ -20,7 +20,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.2.97" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.2.98" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.enterprise") version "3.17.1" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
@@ -46,7 +46,7 @@ include(":kommandline")
 include(":kommandsamples")
 include(":kommandjupyter")
 
-val kgroundDir = File("../KGround/kground")
+val kgroundDir = File(rootDir, "../KGround/kground").normalize()
 val kgroundInclude =
   kgroundDir.exists()
   // false
