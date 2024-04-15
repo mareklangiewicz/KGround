@@ -77,6 +77,8 @@ interface ZenityOpt : KOptTypical {
   data class Icon(val icon: String) : ZenityOpt, KOptL("window-icon", icon)
   data class Timeout(val seconds: Int) : ZenityOpt, KOptLN(seconds.toString())
   data class Text(val t: String) : ZenityOpt, KOptLN(t)
+  data class OkLabel(val label: String) : ZenityOpt, KOptLN(label)
+  data class CancelLabel(val label: String) : ZenityOpt, KOptLN(label)
   data class Day(val d: Int) : ZenityOpt, KOptLN(d.toString())
   data class Month(val m: Int) : ZenityOpt, KOptLN(m.toString())
   data class Year(val y: Int) : ZenityOpt, KOptLN(y.toString())
