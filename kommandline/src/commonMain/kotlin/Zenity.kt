@@ -4,8 +4,49 @@ package pl.mareklangiewicz.kommand.zenity
 
 import kotlinx.coroutines.flow.toList
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.chkThis
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
+
+@OptIn(DelicateApi::class) fun zenityShowError(
+  error: String,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  withWrapping: Boolean = false,
+  withTimeoutSec: Int? = null,
+) = zenityShowText(Type.Error, error, title, labelOk, withWrapping, withTimeoutSec)
+
+@OptIn(DelicateApi::class) fun zenityShowWarning(
+  warning: String,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  withWrapping: Boolean = false,
+  withTimeoutSec: Int? = null,
+) = zenityShowText(Type.Warning, warning, title, labelOk, withWrapping, withTimeoutSec)
+
+@OptIn(DelicateApi::class) fun zenityShowInfo(
+  info: String,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  withWrapping: Boolean = false,
+  withTimeoutSec: Int? = null,
+) = zenityShowText(Type.Info, info, title, labelOk, withWrapping, withTimeoutSec)
+
+@DelicateApi
+fun zenityShowText(
+  type: Type, // only Info or Warning or Error
+  text: String,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  withWrapping: Boolean = false,
+  withTimeoutSec: Int? = null,
+) = zenity(type.chkThis { this in setOf(Type.Info, Type.Warning, Type.Error)}) {
+  -Text(text)
+  title?.let { -Title(it) }
+  labelOk?.let { -OkLabel(it) }
+  if (!withWrapping) -NoWrap
+  withTimeoutSec?.let { -Timeout(it) }
+}.reducedExit { it == 0 }
 
 @OptIn(DelicateApi::class)
 fun zenityAskIf(
@@ -72,13 +113,14 @@ fun zenityAskForEntry(
     if (withHiddenEntry) -HideText
   }.reducedToSingleAnswer()
 
-/** @return null means user did not answer at all (pressed esc or timeout); it's different from empty answer */
+/** @return null means user did not answer at all (pressed esc or timeout);
+ * it's different from empty answer, which means user answered ok with some empty selection/entry/whateva */
 @DelicateApi
 fun Zenity.reducedToSingleAnswer(): ReducedKommand<String?> = reducedManually {
-  val answer = stdout.toList().chkStdOut({ size < 2 }).firstOrNull()
+  val answer = stdout.toList().chkStdOut({ size < 2 }).firstOrNull() ?: ""
   val exit = awaitAndChkExit(firstCollectErr = true) { this in setOf(0, 1, 5) }
   // 1 is user cancelled, 5 is timeout
-  answer?.takeIf { exit == 0 }
+  answer.takeIf { exit == 0 }
 }
 
 @DelicateApi

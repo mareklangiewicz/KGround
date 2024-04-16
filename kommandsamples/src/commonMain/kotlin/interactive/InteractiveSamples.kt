@@ -101,11 +101,11 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 /** @param question null means default question */
 suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = when {
-  this == null -> ulog.d("It is null. Nothing to open.")
-  this is Unit -> ulog.d("It is Unit. Nothing to open.")
-  this is String && isEmpty() -> ulog.d("It is empty string. Nothing to open.")
-  this is Collection<*> && isEmpty() -> ulog.d("It is empty collection. Nothing to open.")
-  !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> ulog.d("Not opening.")
+  this == null -> ulog.i("It is null. Nothing to open.")
+  this is Unit -> ulog.i("It is Unit. Nothing to open.")
+  this is String && isEmpty() -> ulog.i("It is empty string. Nothing to open.")
+  this is Collection<*> && isEmpty() -> ulog.i("It is empty collection. Nothing to open.")
+  !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> ulog.i("Not opening.")
   else -> {
     val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
     writeFileWithDD(lines, cli.pathToTmpNotes).ax(cli)
@@ -119,7 +119,9 @@ private val Any?.about: String
     Unit -> "Unit"
     is Number -> this::class.simpleName + ":$this"
     is Collection<*> -> this::class.simpleName + "(size:$size)"
-    is CharSequence -> this::class.simpleName + "(length:$length)"
+    is CharSequence ->
+      if (length < 20) this::class.simpleName + ": \"$this\""
+      else this::class.simpleName + "(length:$length)"
     else -> this::class.simpleName ?: "???"
   }
 
