@@ -5,10 +5,11 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.ifInteractiveCodeEnabled
 import pl.mareklangiewicz.interactive.tryInteractivelyCheck
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.ZenityOpt.*
-import pl.mareklangiewicz.kommand.ZenityOpt.Type.*
+import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
+import pl.mareklangiewicz.kommand.zenity.ZenityOpt.Type.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
+import pl.mareklangiewicz.kommand.zenity.*
 
 
 @OptIn(DelicateApi::class)

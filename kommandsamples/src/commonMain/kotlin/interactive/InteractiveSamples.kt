@@ -16,7 +16,7 @@ import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.xclipOut
-import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i

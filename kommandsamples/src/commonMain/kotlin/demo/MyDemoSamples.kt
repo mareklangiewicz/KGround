@@ -9,7 +9,7 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.Vim
-import pl.mareklangiewicz.kommand.ZenityOpt.*
+import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.ax
@@ -37,9 +37,9 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.writeFileWithDD
-import pl.mareklangiewicz.kommand.zenity
-import pl.mareklangiewicz.kommand.zenityAskForEntry
-import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.kommand.zenity.zenity
+import pl.mareklangiewicz.kommand.zenity.zenityAskForEntry
+import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
@@ -205,7 +205,7 @@ private suspend fun showError(error: String) = zenity(Type.Error) { -Text(error)
 private suspend fun askIf(question: String) = zenityAskIf(question).ax()
 
 private suspend fun askEntry(question: String, suggested: String? = null) =
-  zenityAskForEntry(question, suggested = suggested).ax()?.takeIf { it.isNotBlank() }
+  zenityAskForEntry(question, withSuggestedEntry = suggested).ax()?.takeIf { it.isNotBlank() }
 
 private suspend fun getEntry(question: String, suggested: String? = null, errorMsg: String = "User didn't answer.") =
   askEntry(question, suggested) ?: run { showError(errorMsg); bad { errorMsg } }

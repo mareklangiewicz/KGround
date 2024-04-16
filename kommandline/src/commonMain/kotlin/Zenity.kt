@@ -1,39 +1,84 @@
 @file:Suppress("unused")
 
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.zenity
 
 import kotlinx.coroutines.flow.toList
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kommand.ZenityOpt.*
+import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 
 @OptIn(DelicateApi::class)
-fun zenityAskIf(question: String, title: String? = null) = zenity(Type.Question) {
+fun zenityAskIf(
+  question: String,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Yes" (probably localized)
+  labelCancel: String? = null, // default should be sth like "No" (probably localized)
+  withWrapping: Boolean = false,
+  withTimeoutSec: Int? = null,
+) = zenity(Type.Question) {
   -Text(question)
-  -NoWrap
   title?.let { -Title(it) }
+  labelOk?.let { -OkLabel(it) }
+  labelCancel?.let { -CancelLabel(it) }
+  if (!withWrapping) -NoWrap
+  withTimeoutSec?.let { -Timeout(it) }
 }.reducedExit { it == 0 }
 
 @OptIn(DelicateApi::class)
-fun zenityAskForPassword(question: String = "Enter password", title: String? = null) =
-  zenity(Type.Entry) {
-    -HideText
-    -Text(question)
-    title?.let { -Title(it) }
-  }.reducedToSingleAnswer()
+fun zenityAskForOneOf(
+  vararg answers: String,
+  prompt: String? = null,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Yes" (probably localized)
+  labelCancel: String? = null, // default should be sth like "No" (probably localized)
+  labelColumn: String = "Answer",
+  withTimeoutSec: Int? = null,
+) = zenity(Type.List) {
+  prompt?.let { -Text(it) }
+  title?.let { -Title(it) }
+  labelOk?.let { -OkLabel(it) }
+  labelCancel?.let { -CancelLabel(it) }
+  -Column(labelColumn)
+  withTimeoutSec?.let { -Timeout(it) }
+  for (a in answers) +a
+}.reducedToSingleAnswer()
 
 @OptIn(DelicateApi::class)
-fun zenityAskForEntry(question: String, title: String? = null, suggested: String? = null) =
+fun zenityAskForPassword(
+  prompt: String = "Enter password",
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelCancel: String? = null, // default should be sth like "Cancel" (probably localized)
+  withTimeoutSec: Int? = null,
+) = zenityAskForEntry(prompt, title, labelOk, labelCancel, withTimeoutSec, withHiddenEntry = true)
+
+@OptIn(DelicateApi::class)
+fun zenityAskForEntry(
+  prompt: String,
+  title: String? = null,
+  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelCancel: String? = null, // default should be sth like "Cancel" (probably localized)
+  withTimeoutSec: Int? = null,
+  withSuggestedEntry: String? = null,
+  withHiddenEntry: Boolean = false,
+) =
   zenity(Type.Entry) {
-    -Text(question)
+    -Text(prompt)
     title?.let { -Title(it) }
-    suggested?.let { -EntryText(it) }
+    labelOk?.let { -OkLabel(it) }
+    labelCancel?.let { -CancelLabel(it) }
+    withTimeoutSec?.let { -Timeout(it) }
+    withSuggestedEntry?.let { -EntryText(it) }
+    if (withHiddenEntry) -HideText
   }.reducedToSingleAnswer()
 
-/** @return null means user did not answer at all (pressed esc); it's different from empty answer */
-private fun Zenity.reducedToSingleAnswer(): ReducedKommand<String?> = reducedManually {
+/** @return null means user did not answer at all (pressed esc or timeout); it's different from empty answer */
+@DelicateApi
+fun Zenity.reducedToSingleAnswer(): ReducedKommand<String?> = reducedManually {
   val answer = stdout.toList().chkStdOut({ size < 2 }).firstOrNull()
-  val exit = awaitAndChkExit(firstCollectErr = true) { this in 0..1 }
-  answer?.takeIf { exit == 0 } // 1 means user canceled
+  val exit = awaitAndChkExit(firstCollectErr = true) { this in setOf(0, 1, 5) }
+  // 1 is user cancelled, 5 is timeout
+  answer?.takeIf { exit == 0 }
 }
 
 @DelicateApi
