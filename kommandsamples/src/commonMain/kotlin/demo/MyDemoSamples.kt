@@ -37,9 +37,10 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.writeFileWithDD
-import pl.mareklangiewicz.kommand.zenity.zenity
 import pl.mareklangiewicz.kommand.zenity.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
+import pl.mareklangiewicz.kommand.zenity.zenityShowError
+import pl.mareklangiewicz.kommand.zenity.zenityShowInfo
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
@@ -153,20 +154,20 @@ data object MyDemoSamples {
 
   // Note: NOT InteractiveScript because I want to be able to switch interactive code even when it's NOT enabled.
   val interactiveCodeSwitch = ReducedScript {
-    val enabled = askIf("Should interactive code be enabled?")
+    val enabled = zenityAskIf("Should interactive code be enabled?").ax()
     setUserFlag(SYS, "code.interactive", enabled)
-    showInfo("user flag: code.interactive.enabled = $enabled")
+    zenityShowInfo("user flag: code.interactive.enabled = $enabled").ax()
   }
 
   val myDemoTestsSwitch = InteractiveScript {
-    val enabled = askIf("Should MyDemoTests be enabled?")
+    val enabled = zenityAskIf("Should MyDemoTests be enabled?").ax()
     setUserFlag(SYS, "tests.MyDemoTests", enabled)
-    showInfo("user flag: tests.MyDemoTests.enabled = $enabled")
+    zenityShowInfo("user flag: tests.MyDemoTests.enabled = $enabled").ax()
   }
 
   val showWholeUserConfig = InteractiveScript {
     val konfig = konfigInUserHomeConfigDir(SYS)
-    showInfo(konfig.keys.map { konfig.getKeyValStr(it) }.joinToString("\n\n"))
+    zenityShowInfo(konfig.keys.map { konfig.getKeyValStr(it) }.joinToString("\n\n")).ax()
   }
 
   val playWithKonfigExamples = InteractiveScript {
@@ -195,18 +196,9 @@ data object MyDemoSamples {
   suspend fun readNonExistentHead() = readFileHead("/home/marek/non-existent-file-46578563").ax()
 }
 
-
-@OptIn(DelicateApi::class)
-private suspend fun showInfo(info: String) = zenity(Type.Info) { -Text(info) }.ax()
-
-@OptIn(DelicateApi::class)
-private suspend fun showError(error: String) = zenity(Type.Error) { -Text(error) }.ax()
-
-private suspend fun askIf(question: String) = zenityAskIf(question).ax()
-
 private suspend fun askEntry(question: String, suggested: String? = null) =
   zenityAskForEntry(question, withSuggestedEntry = suggested).ax()?.takeIf { it.isNotBlank() }
 
 private suspend fun getEntry(question: String, suggested: String? = null, errorMsg: String = "User didn't answer.") =
-  askEntry(question, suggested) ?: run { showError(errorMsg); bad { errorMsg } }
+  askEntry(question, suggested) ?: run { zenityShowError(errorMsg); bad { errorMsg } }
 
