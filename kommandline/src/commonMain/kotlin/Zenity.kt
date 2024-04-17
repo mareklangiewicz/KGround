@@ -11,7 +11,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 @OptIn(DelicateApi::class) fun zenityShowError(
   error: String,
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
 ) = zenityShowText(Type.Error, error, title, labelOk, withWrapping, withTimeoutSec)
@@ -19,7 +19,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 @OptIn(DelicateApi::class) fun zenityShowWarning(
   warning: String,
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
 ) = zenityShowText(Type.Warning, warning, title, labelOk, withWrapping, withTimeoutSec)
@@ -27,7 +27,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 @OptIn(DelicateApi::class) fun zenityShowInfo(
   info: String,
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
 ) = zenityShowText(Type.Info, info, title, labelOk, withWrapping, withTimeoutSec)
@@ -37,7 +37,7 @@ fun zenityShowText(
   type: Type, // only Info or Warning or Error
   text: String,
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
 ) = zenity(type.chkThis { this in setOf(Type.Info, Type.Warning, Type.Error)}) {
@@ -70,8 +70,8 @@ fun zenityAskForOneOf(
   vararg answers: String,
   prompt: String? = null,
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Yes" (probably localized)
-  labelCancel: String? = null, // default should be sth like "No" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
+  labelCancel: String? = null, // default should be sth like "Cancel" (probably localized)
   labelColumn: String = "Answer",
   withTimeoutSec: Int? = null,
 ) = zenity(Type.List) {
@@ -88,7 +88,7 @@ fun zenityAskForOneOf(
 fun zenityAskForPassword(
   prompt: String = "Enter password",
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
   labelCancel: String? = null, // default should be sth like "Cancel" (probably localized)
   withTimeoutSec: Int? = null,
 ) = zenityAskForEntry(prompt, title, labelOk, labelCancel, withTimeoutSec, withHiddenEntry = true)
@@ -97,7 +97,7 @@ fun zenityAskForPassword(
 fun zenityAskForEntry(
   prompt: String,
   title: String? = null,
-  labelOk: String? = null, // default should be sth like "Ok" (probably localized)
+  labelOk: String? = null, // default should be sth like "OK" (probably localized)
   labelCancel: String? = null, // default should be sth like "Cancel" (probably localized)
   withTimeoutSec: Int? = null,
   withSuggestedEntry: String? = null,
