@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.transform
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.kommand.ZenityOpt.*
-import pl.mareklangiewicz.kommand.ZenityOpt.Type.*
+import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
+import pl.mareklangiewicz.kommand.zenity.ZenityOpt.Type.*
 import pl.mareklangiewicz.kommand.ax
-import pl.mareklangiewicz.kommand.zenity
+import pl.mareklangiewicz.kommand.zenity.*
 
 
 // TODO: probably most of examples here should rather be in KommandLine/kommandsamples
@@ -24,7 +24,13 @@ import pl.mareklangiewicz.kommand.zenity
 object MyZenityExamples {
 
   // https://help.gnome.org/users/zenity/stable/message.html.en
-  suspend fun showSomeWarning() = zenity(Warning) { -Text("Some warning"); -OkLabel("Dupa") }.ax().logEach()
+  suspend fun showSomeWarningWithTimeout3s() = zenityShowWarning("Warning", labelOk = "OOK", withTimeoutSec = 3).ax()
+
+  // https://help.gnome.org/users/zenity/stable/entry.html.en
+  suspend fun askForEntryWithTimeout3s() = zenityAskForEntry("Enter something", withTimeoutSec = 3).ax()
+
+  // https://help.gnome.org/users/zenity/stable/entry.html.en
+  suspend fun askForPassword() = zenityAskForPassword("Enter super secret code").ax()
 
   // https://help.gnome.org/users/zenity/stable/progress.html.en
   suspend fun showSomeProgress1() = zenity(Progress) { -Text("Some progress"); -Pulsate }.ax().logEach()
@@ -76,6 +82,13 @@ object MyZenityExamples {
     +"BLA"
     +"BLE"
   }.ax().logEach()
+
+  suspend fun showSomeSimpleList2() = zenityAskForOneOf(
+    "a", "bb", "ccc", "dddd", "eeeee", "ffffff",
+    prompt = "jo, select sth",
+    labelOk = "M'key...",
+    labelCancel = "Noooo!",
+  ).ax()
 
   // https://help.gnome.org/users/zenity/stable/list.html.en
   suspend fun showSomeRadioList() = zenity(List) {

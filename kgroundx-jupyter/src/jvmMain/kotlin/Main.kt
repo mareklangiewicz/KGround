@@ -15,7 +15,7 @@ import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.kommand.writeFileWithDD
-import pl.mareklangiewicz.kommand.zenityAskIf
+import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.hack.ulog

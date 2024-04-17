@@ -1,4 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE")
+@file:OptIn(ExperimentalContracts::class)
 
 package pl.mareklangiewicz.bad
 
@@ -16,6 +17,9 @@ import pl.mareklangiewicz.annotations.*
  */
 interface BadErr
 
+// TODO NOW: declare all kept contracts (callsInPlace, etc..) (also in other similar "bad" files like for regex/Ure)
+//   (they should work great in practice with this kind of chained checking style where chk/req returns this)
+
 open class BadStateErr(override val message: String? = null, override val cause: Throwable? = null) :
   IllegalStateException(), BadErr
 
@@ -28,13 +32,11 @@ open class BadArgErr(override val message: String? = null, override val cause: T
 inline fun bad(lazyMessage: () -> String = { "this is bad" }): Nothing = throw BadStateErr(lazyMessage())
 inline fun badArg(lazyMessage: () -> String = { "this arg is bad" }): Nothing = throw BadArgErr(lazyMessage())
 
-@OptIn(ExperimentalContracts::class)
 inline fun chk(value: Boolean, lazyMessage: () -> String = { "this is bad" }) {
   contract { returns() implies value }
   value || bad(lazyMessage)
 }
 
-@OptIn(ExperimentalContracts::class)
 inline fun req(value: Boolean, lazyMessage: () -> String = { "this arg is bad" }) {
   contract { returns() implies value }
   value || badArg(lazyMessage)
@@ -65,8 +67,14 @@ inline fun <T, A> T.reqThisWith(
   apply { req(fineWith(that), lazyMessage) }
 
 
-inline fun <T : Any> T?.chkNN(lazyMessage: () -> String = { "this null is bad" }): T = this ?: bad(lazyMessage)
-inline fun <T : Any> T?.reqNN(lazyMessage: () -> String = { "this null arg is bad" }): T = this ?: badArg(lazyMessage)
+inline fun <T : Any> T?.chkNN(lazyMessage: () -> String = { "this null is bad" }): T {
+  contract { returns() implies (this@chkNN != null) }
+  return this ?: bad(lazyMessage)
+}
+inline fun <T : Any> T?.reqNN(lazyMessage: () -> String = { "this null arg is bad" }): T {
+  contract { returns() implies (this@reqNN != null) }
+  return this ?: badArg(lazyMessage)
+}
 
 open class NotEqStateErr(val exp: Any?, val act: Any?, message: String? = null) : BadStateErr(message)
 
@@ -95,14 +103,12 @@ inline infix fun <T> T.reqEq(exp: Any?): T = reqEq(exp) { "bad arg $this != $exp
 inline infix fun <T> T.chkSame(exp: Any?): T = chkSame(exp) { "bad $this !== $exp" }
 inline infix fun <T> T.reqSame(exp: Any?): T = reqSame(exp) { "bad arg $this !== $exp" }
 
-@OptIn(ExperimentalContracts::class)
 inline fun Any?.chkNull(lazyMessage: () -> String = { "this non-null is bad" }): Nothing? {
   contract { returns() implies (this@chkNull == null) }
   this == null || throw NotSameStateErr(null, this, lazyMessage())
   return null
 }
 
-@OptIn(ExperimentalContracts::class)
 inline fun Any?.reqNull(lazyMessage: () -> String = { "this non-null arg is bad" }): Nothing? {
   contract { returns() implies (this@reqNull == null) }
   this == null || throw NotSameArgErr(null, this, lazyMessage())

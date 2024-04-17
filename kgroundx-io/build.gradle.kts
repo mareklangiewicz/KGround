@@ -15,6 +15,14 @@ defaultBuildTemplateForBasicMppLib {
   api(findProject(":kommandsamples") ?: Langiewicz.kommandsamples)
 }
 
+// FIXME: remove hardcoded versions
+configurations.all {
+  resolutionStrategy.dependencySubstitution {
+    substitute(module("pl.mareklangiewicz:kommandline")).using(module("pl.mareklangiewicz:kommandline:0.0.55"))
+    substitute(module("pl.mareklangiewicz:kommandsamples")).using(module("pl.mareklangiewicz:kommandsamples:0.0.55"))
+  }
+}
+
 // kotlin { js(IR) { nodejs() } }
 
 

@@ -39,11 +39,6 @@ interface USubmitItem
  * Let's call the entity that calls [USubmit.invoke] the worker, and the one that reacts: the manager.
  * The worker can provide a list of [UTask] as his current "abilities" as [USubmit.invoke] parameter,
  * so the manager can choose one and return it from [USubmit.invoke] and the worker will actually do the chosen task.
- * It's normal for a manager to save tasks for later and show it to the user,
- * while letting the worker move on with his main job.
- * Then (if user selects some task in between submits), at the next submit, the manager should check again,
- * if the worker still has "ability" to do this task, and only if so:
- * manager can return the selected task from [USubmit.invoke], so worker can do it now.
  * Manager always can pause the worker by suspending [USubmit.invoke] call for long time;
  * Manager always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from [USubmit.invoke].
  * Also [UIssue] can be included by worker to show sth to the user (but normally [UTask] is returned back).
@@ -61,6 +56,11 @@ data class UTask(val name: String) : USubmitItem
  * I consider it bad to allow user to "Yes for all" for all the same issues FOREVER.
  * The "Yes for all" should be easily monitored (how many times it's automatically answered),
  * and easily turned off by user (when he sees manager is accepting too much)
+ * BTW: for behavior like "Yes to all" to work, not only issue with the same id have to be provided
+ * again, but also same [UTask] have to be provided, representing some specific answer, f.e. "Yes".
+ * TODO_someday: think about serializable ids (and serializable everything here)
+ *   so we can have remote managers easily (with kotlinx.serialization)
+ *   (cancellation/exceptions won't be easily serializable, but we can probably do it similarly to rsocket-kotlin)
  */
 data class UIssue(val name: String, val type: UIssueType, val id: Any? = null) : USubmitItem
 enum class UIssueType { Info, Warning, Error, Question }
@@ -132,3 +132,34 @@ fun Any?.getAllUSubmitItems(
 
 @ExperimentalApi
 suspend operator fun USubmit.invoke(vararg items: USubmitItem?) = invoke(items.toList())
+
+
+@ExperimentalApi fun USubmitItems.chkItems(maxTasks: Int = 16) = apply {
+  with (tasks) {
+    chkSize(max = maxTasks) { "Too many tasks to select from: $size > $maxTasks" }
+    count { it.isAccepting }.chkIn(max = 1)
+    count { it.isDeclining }.chkIn(max = 1)
+  }
+}
+
+val UTask.isAccepting: Boolean get() =
+  name.lowercase() in setOf("accept", "yes", "yeah", "confirm", "ok", "fine", "enter", "go", "start", "begin")
+
+val UTask.isDeclining: Boolean get() =
+  name.lowercase() in setOf("decline", "no", "nope", "cancel", "abort", "esc", "escape", "nah", "stop", "end")
+
+val UTask.isCustom: Boolean get() = !isAccepting && !isDeclining
+
+@OptIn(ExperimentalApi::class)
+suspend fun WithUSubmit.askIf(question: String, labelYes: String = "Yes", labelNo: String = "No"): Boolean {
+  val taskYes = UTask(labelYes).reqThis { isAccepting }
+  val taskNo = UTask(labelNo).reqThis { isDeclining }
+  return usubmit(UIssue(question, UIssueType.Question), taskYes, taskNo) == taskYes
+  // BTW it's fine if we get another instance of task with matching label (we use "==" on data classes)
+}
+
+@OptIn(ExperimentalApi::class)
+suspend fun WithUSubmit.askForOneOf(question: String, vararg answers: String): String? {
+  val tasks = answers.map(::UTask).toTypedArray()
+  return (usubmit(UIssue(question, UIssueType.Question), *tasks) as? UTask)?.name
+}
