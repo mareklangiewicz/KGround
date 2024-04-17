@@ -14,7 +14,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
   labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
-) = zenityShowText(Type.Error, error, title, labelOk, withWrapping, withTimeoutSec)
+): ReducedKommand<Boolean> = zenityShowText(Type.Error, error, title, labelOk, withWrapping, withTimeoutSec)
 
 @OptIn(DelicateApi::class) fun zenityShowWarning(
   warning: String,
@@ -22,7 +22,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
   labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
-) = zenityShowText(Type.Warning, warning, title, labelOk, withWrapping, withTimeoutSec)
+): ReducedKommand<Boolean> = zenityShowText(Type.Warning, warning, title, labelOk, withWrapping, withTimeoutSec)
 
 @OptIn(DelicateApi::class) fun zenityShowInfo(
   info: String,
@@ -30,7 +30,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
   labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
-) = zenityShowText(Type.Info, info, title, labelOk, withWrapping, withTimeoutSec)
+): ReducedKommand<Boolean> = zenityShowText(Type.Info, info, title, labelOk, withWrapping, withTimeoutSec)
 
 @DelicateApi
 fun zenityShowText(
@@ -40,13 +40,13 @@ fun zenityShowText(
   labelOk: String? = null, // default should be sth like "OK" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
-) = zenity(type.chkThis { this in setOf(Type.Info, Type.Warning, Type.Error)}) {
+): ReducedKommand<Boolean> = zenity(type.chkThis { this in setOf(Type.Info, Type.Warning, Type.Error)}) {
   -Text(text)
   title?.let { -Title(it) }
   labelOk?.let { -OkLabel(it) }
   if (!withWrapping) -NoWrap
   withTimeoutSec?.let { -Timeout(it) }
-}.reducedExit { it == 0 }
+}.reducedToIfAccepted()
 
 @OptIn(DelicateApi::class)
 fun zenityAskIf(
@@ -56,14 +56,14 @@ fun zenityAskIf(
   labelCancel: String? = null, // default should be sth like "No" (probably localized)
   withWrapping: Boolean = false,
   withTimeoutSec: Int? = null,
-) = zenity(Type.Question) {
+): ReducedKommand<Boolean> = zenity(Type.Question) {
   -Text(question)
   title?.let { -Title(it) }
   labelOk?.let { -OkLabel(it) }
   labelCancel?.let { -CancelLabel(it) }
   if (!withWrapping) -NoWrap
   withTimeoutSec?.let { -Timeout(it) }
-}.reducedExit { it == 0 }
+}.reducedToIfAccepted()
 
 @OptIn(DelicateApi::class)
 fun zenityAskForOneOf(
@@ -122,6 +122,13 @@ fun Zenity.reducedToSingleAnswer(): ReducedKommand<String?> = reducedManually {
   // 1 is user cancelled, 5 is timeout
   answer.takeIf { exit == 0 }
 }
+
+/**
+ * @return true means user pressed sth like "OK"/"Yes"/... button.
+ * otherwise false (timeout, pressing cancel/no/closing with "x", ...)
+ */
+@DelicateApi
+fun Zenity.reducedToIfAccepted(): ReducedKommand<Boolean> = reducedToSingleAnswer().reducedMap { this != null }
 
 @DelicateApi
 fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; init() }
