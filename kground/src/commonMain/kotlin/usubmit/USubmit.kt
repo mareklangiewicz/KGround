@@ -143,7 +143,7 @@ suspend operator fun USubmit.invoke(vararg items: USubmitItem?) = invoke(items.t
 }
 
 val UTask.isAccepting: Boolean get() =
-  name.lowercase() in setOf("accept", "yes", "yeah", "confirm", "ok", "fine", "enter", "go", "start", "begin")
+  name.lowercase() in setOf("accept", "yes", "yeah", "confirm", "ok", "fine", "enter", "go", "start", "begin", "select")
 
 val UTask.isDeclining: Boolean get() =
   name.lowercase() in setOf("decline", "no", "nope", "cancel", "abort", "esc", "escape", "nah", "stop", "end")
