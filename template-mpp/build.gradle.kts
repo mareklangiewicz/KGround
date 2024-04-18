@@ -15,10 +15,10 @@ val enableNative = false
 val enableAndro = true
 
 defaultBuildTemplateForRootProject(
-  langaraLibDetails(
+  myLibDetails(
     name = "TemplateMPP",
     description = "Template for multi platform projects.",
-    githubUrl = "https://github.com/langara/KGround/tree/main/template-mpp",
+    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-mpp",
     version = Ver(0, 0, 24),
     settings = LibSettings(
       withJs = enableJs,

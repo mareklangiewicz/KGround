@@ -10,11 +10,11 @@ plugins {
 }
 
 defaultBuildTemplateForRootProject(
-  langaraLibDetails(
+  myLibDetails(
     name = "TemplateAndro",
     description = "Template for android projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 13),
+    version = Ver(0, 0, 14),
     settings = LibSettings(
       withTestJUnit4 = true,
       withTestJUnit5 = false,

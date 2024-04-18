@@ -13,7 +13,7 @@ val enablePublishing = findProject(":kommandline") == null && findProject(":komm
 // exception: publishToMavenLocal for debugging
 
 defaultBuildTemplateForRootProject(
-  langaraLibDetails(
+  myLibDetails(
     name = "KGround",
     description = "Kotlin Common Ground.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
