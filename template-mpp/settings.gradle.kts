@@ -10,7 +10,15 @@ pluginManagement {
     gradlePluginPortal()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
-  // includeBuild("../../DepsKt")
+
+  val depsDir = File(rootDir, "../../DepsKt").normalize()
+  val depsInclude =
+    depsDir.exists()
+  // false
+  if (depsInclude) {
+    logger.warn("Including local build $depsDir")
+    includeBuild(depsDir)
+  }
 }
 
 plugins {
