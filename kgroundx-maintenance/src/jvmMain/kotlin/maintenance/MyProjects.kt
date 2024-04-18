@@ -25,6 +25,7 @@ import pl.mareklangiewicz.ure.core.Ure
 @ExampleApi suspend fun searchKotlinCodeInMyProjects(
   codeInLineUre: Ure,
   onlyPublic: Boolean = false,
+  alsoGradleKts: Boolean = true,
   alsoFilterProjectPath: suspend FileSystem.(Path) -> Boolean = { true },
 ) {
   var foundCount = 0
@@ -32,7 +33,16 @@ import pl.mareklangiewicz.ure.core.Ure
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
     .collect { projectPath ->
       ulog.i("Searching in project: $projectPath")
-      findMyKotlinCode(projectPath.toString()).ax(SYS).forEach { ktFilePathStr ->
+      val listKt = findMyKotlinCode(projectPath.toString()).ax(SYS)
+      val listKts =
+        if (alsoGradleKts)
+          findMyKotlinCode(
+            projectPath.toString(),
+            withNameBase = "*.gradle.kts",
+            withNameFull = null,
+          ).ax(SYS)
+        else emptyList()
+      (listKt + listKts).forEach { ktFilePathStr ->
         val ktFilePath = ktFilePathStr.toPath()
         val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
         val result = SYSTEM.readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)

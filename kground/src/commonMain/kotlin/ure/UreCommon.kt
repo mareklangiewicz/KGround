@@ -86,6 +86,9 @@ fun ureLineWithContentFragments(vararg contentFragment: Ure, withOptLineBreak: B
   +ureBlankRestOfLine(withOptLineBreak)
 }
 
+fun ureLineWithTexts(vararg textFragment: String, withOptLineBreak: Boolean = true) =
+  ureLineWithContentFragments(*textFragment.map { ureText(it) }.toTypedArray(), withOptLineBreak = withOptLineBreak)
+
 fun ureAnyLine(withOptLineBreak: Boolean = true) = ureLineWithContent(ureWhateva(inLine = true), withOptLineBreak)
 
 fun Ure.withOptSpacesAround(inLine: Boolean = false, allowBefore: Boolean = true, allowAfter: Boolean = true) =

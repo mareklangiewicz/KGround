@@ -22,7 +22,7 @@ import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
-private val myFork = expr { "${github.repository_owner} == 'langara'" }
+private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 
 private val mySecretsEnv = listOf(
   "signing_keyId", "signing_password", "signing_key",

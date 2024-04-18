@@ -1,6 +1,19 @@
 
 rootProject.name = "KGround"
 
+// Careful with auto publishing fails/stack traces
+val buildScanPublishingAllowed =
+  System.getenv("GITHUB_ACTIONS") == "true"
+  // true
+  // false
+
+val kommandlineLocalAllowed = true
+
+val kommandsamplesLocalAllowed = true
+
+// UreRA|>".*/Deps\.kt"~~>"../DepsKt"<| TODO NOW: support ure replacements glued to special regions
+// region [My Settings Stuff]
+
 pluginManagement {
   repositories {
     gradlePluginPortal()
@@ -27,17 +40,11 @@ develocity {
   buildScan {
     termsOfUseUrl = "https://gradle.com/terms-of-service"
     termsOfUseAgree = "yes"
-    publishing.onlyIf { // careful with publishing fails especially from my machine (privacy)
-      true &&
-        it.buildResult.failures.isNotEmpty() &&
-        // it.buildResult.failures.isEmpty() &&
-        System.getenv("GITHUB_ACTIONS") == "true" &&
-        // System.getenv("GITHUB_ACTIONS") != "true" &&
-        true
-        // false
-    }
+    publishing.onlyIf { buildScanPublishingAllowed && it.buildResult.failures.isNotEmpty() }
   }
 }
+
+// endregion [My Settings Stuff]
 
 include(":kground")
 include(":kgroundx")
@@ -48,20 +55,14 @@ include(":kgroundx-jupyter")
 
 
 val kommandlineDir = File(rootDir, "../KommandLine/kommandline").normalize()
-val kommandlineInclude =
-  kommandlineDir.exists()
-  // false
-if (kommandlineInclude) {
+if (kommandlineLocalAllowed && kommandlineDir.exists()) {
   logger.warn("Adding local kommandline module.")
   include(":kommandline")
   project(":kommandline").projectDir = kommandlineDir
 }
 
 val kommandsamplesDir = File(rootDir, "../KommandLine/kommandsamples").normalize()
-val kommandsamplesInclude =
-  kommandsamplesDir.exists()
-  // false
-if (kommandsamplesInclude) {
+if (kommandsamplesLocalAllowed && kommandsamplesDir.exists()) {
   logger.warn("Adding local kommandsamples module.")
   include(":kommandsamples")
   project(":kommandsamples").projectDir = kommandsamplesDir

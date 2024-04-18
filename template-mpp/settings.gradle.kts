@@ -2,19 +2,27 @@
 
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
+// Careful with auto publishing fails/stack traces
+val buildScanPublishingAllowed = true &&
+  System.getenv("GITHUB_ACTIONS") == "true" &&
+  // System.getenv("GITHUB_ACTIONS") != "true" &&
+  true
+// false
+
+// UreRA|>".*/Deps\.kt"~~>"../../DepsKt"<| BTW here it changes nothing, but it's an example how to adjust regions.
+// region [My Settings Stuff]
+
 pluginManagement {
   repositories {
-    mavenLocal()
-    mavenCentral()
-    google()
     gradlePluginPortal()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    google()
+    mavenCentral()
   }
 
   val depsDir = File(rootDir, "../../DepsKt").normalize()
   val depsInclude =
     depsDir.exists()
-  // false
+    // false
   if (depsInclude) {
     logger.warn("Including local build $depsDir")
     includeBuild(depsDir)
@@ -23,25 +31,18 @@ pluginManagement {
 
 plugins {
   id("pl.mareklangiewicz.deps.settings") version "0.2.99" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.enterprise") version "3.17.2" // https://docs.gradle.com/enterprise/gradle-plugin/
+  id("com.gradle.develocity") version "3.17.2" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
 develocity {
   buildScan {
     termsOfUseUrl = "https://gradle.com/terms-of-service"
     termsOfUseAgree = "yes"
-    publishing.onlyIf { // careful with publishing fails especially from my machine (privacy)
-      @Suppress("SimplifyBooleanWithConstants")
-      true &&
-        it.buildResult.failures.isNotEmpty() &&
-        // it.buildResult.failures.isEmpty() &&
-        System.getenv("GITHUB_ACTIONS") == "true" &&
-        // System.getenv("GITHUB_ACTIONS") != "true" &&
-        true
-        // false
-    }
+    publishing.onlyIf { buildScanPublishingAllowed && it.buildResult.failures.isNotEmpty() }
   }
 }
+
+// endregion [My Settings Stuff]
 
 rootProject.name = "template-mpp"
 
