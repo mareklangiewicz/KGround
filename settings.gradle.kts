@@ -1,6 +1,19 @@
 @file:Suppress("UnstableApiUsage")
 
+rootProject.name = "KommandLine"
+
+
+// Careful with auto publishing fails/stack traces
+val buildScanPublishingAllowed =
+  System.getenv("GITHUB_ACTIONS") == "true"
+  // true
+  // false
+
+
 // gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
+
+// UreRA|>".*/Deps\.kt"~~>"../DepsKt"<|
+// region [My Settings Stuff]
 
 pluginManagement {
   repositories {
@@ -28,19 +41,11 @@ develocity {
   buildScan {
     termsOfUseUrl = "https://gradle.com/terms-of-service"
     termsOfUseAgree = "yes"
-    publishing.onlyIf { // careful with publishing fails especially from my machine (privacy)
-      true &&
-        it.buildResult.failures.isNotEmpty() &&
-        // it.buildResult.failures.isEmpty() &&
-        System.getenv("GITHUB_ACTIONS") == "true" &&
-        // System.getenv("GITHUB_ACTIONS") != "true" &&
-        true
-        // false
-    }
+    publishing.onlyIf { buildScanPublishingAllowed && it.buildResult.failures.isNotEmpty() }
   }
 }
 
-rootProject.name = "KommandLine"
+// endregion [My Settings Stuff]
 
 include(":kommandline")
 include(":kommandsamples")
