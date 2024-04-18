@@ -14,18 +14,41 @@ defaultBuildTemplateForBasicMppLib {
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later
   implementation(kotlin("reflect"))
 }
-// FIXME: remove hardcoded versions
-configurations.all {
-  resolutionStrategy.dependencySubstitution {
-    substitute(module("pl.mareklangiewicz:uspek")).using(module("pl.mareklangiewicz:uspek:0.0.33"))
-    substitute(module("pl.mareklangiewicz:uspekx-junit5")).using(module("pl.mareklangiewicz:uspekx-junit5:0.0.33"))
-    substitute(module("pl.mareklangiewicz:tuplek")).using(module("pl.mareklangiewicz:tuplek:0.0.14"))
-  }
-}
+
+setMyWeirdSubstitutions(
+  "uspek" to "0.0.33", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
+  "uspek-junit5" to "0.0.33",
+  "tuplek" to "0.0.14", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
+)
+
 
 kotlin { js(IR) { nodejs() } }
 
 // region [Kotlin Module Build Template]
+
+// Kind of experimental/temporary.. not sure how it will evolve yet,
+// but currently I need these kind of substitutions/locals often enough
+// especially when updating kground <-> kommandline (trans deps issues)
+fun Project.setMyWeirdSubstitutions(
+  vararg rules: Pair<String, String>,
+  myProjectsGroup: String = "pl.mareklangiewicz",
+  tryToUseLocalProjects: Boolean = true,
+) {
+  val foundLocalProjects: Map<String, Project?> =
+    if (tryToUseLocalProjects) rules.associate { it.first to findProject(":${it.first}") }
+    else emptyMap()
+  configurations.all {
+    resolutionStrategy.dependencySubstitution {
+      for ((projName, projVer) in rules)
+        substitute(module("$myProjectsGroup:$projName"))
+          .using(
+            // Note: there are different fun in gradle: Project.project; DependencySubstitution.project
+            if (foundLocalProjects[projName] != null) project(":$projName")
+            else module("$myProjectsGroup:$projName:$projVer")
+          )
+    }
+  }
+}
 
 fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withMavenLocal) mavenLocal()
@@ -40,19 +63,25 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withJitpack) maven(repos.jitpack)
 }
 
+// FIXME: doc says it could be now also applied globally instead for each task (and it works for andro too)
+// https://kotlinlang.org/docs/gradle-compiler-options.html#target-the-jvm
+//   But it's only for jvm+andro, so probably this is better:
+//   https://kotlinlang.org/docs/gradle-compiler-options.html#for-all-kotlin-compilation-tasks
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-  jvmTargetVer: String? = vers.JvmDefaultVer,
+  jvmTargetVer: String? = vers.JvmDefaultVer, // FIXME_later: use JvmTarget.JVM_XX enum
   renderInternalDiagnosticNames: Boolean = false,
   suppressComposeCheckKotlinVer: Ver? = null,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-  kotlinOptions {
-    jvmTargetVer?.let { jvmTarget = it }
-    if (renderInternalDiagnosticNames) freeCompilerArgs = freeCompilerArgs + "-Xrender-internal-diagnostic-names"
+  compilerOptions {
+    apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0) // FIXME_later: add param.
+    jvmTargetVer?.let { jvmTarget = JvmTarget.fromTarget(it) }
+    if (renderInternalDiagnosticNames) freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
     // useful, for example, to suppress some errors when accessing internal code from some library, like:
     // @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "EXPOSED_PARAMETER_TYPE", "EXPOSED_PROPERTY_TYPE", "CANNOT_OVERRIDE_INVISIBLE_MEMBER")
     suppressComposeCheckKotlinVer?.ver?.let {
-      freeCompilerArgs =
-        freeCompilerArgs + "-P" + "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it"
+      freeCompilerArgs.add(
+        "-Pplugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=$it",
+      )
     }
   }
 }
@@ -197,7 +226,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
-  require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForMppLib can not configure compose stuff" }
+  require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicMppLib can not configure compose stuff" }
   details.settings.andro?.let {
     require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
     require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }

@@ -11,8 +11,8 @@ pluginManagement {
 
   val depsDir = File(rootDir, "../DepsKt").normalize()
   val depsInclude =
-    depsDir.exists()
-    // false
+    // depsDir.exists()
+    false
   if (depsInclude) {
     logger.warn("Including local build $depsDir")
     includeBuild(depsDir)
@@ -21,7 +21,7 @@ pluginManagement {
 
 plugins {
   id("pl.mareklangiewicz.deps.settings") version "0.2.98" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.enterprise") version "3.17.1" // https://docs.gradle.com/enterprise/gradle-plugin/
+  id("com.gradle.develocity") version "3.17.2" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
 develocity {
