@@ -16,7 +16,7 @@ val enablePublishing = findProject(":kground") == null
 // exception: publishToMavenLocal for debugging
 
 defaultBuildTemplateForRootProject(
-  langaraLibDetails(
+  myLibDetails(
     name = "KommandLine",
     description = "Kotlin DSL for popular CLI commands.",
     githubUrl = "https://github.com/mareklangiewicz/KommandLine",
