@@ -19,7 +19,37 @@ defaultBuildTemplateForBasicMppLib(details) {
 }
 
 
+setMyWeirdSubstitutions(
+  "kommandline" to "0.0.55",
+  "kommandsamples" to "0.0.55",
+  "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
+)
+
 // region [Kotlin Module Build Template]
+
+// Kind of experimental/temporary.. not sure how it will evolve yet,
+// but currently I need these kind of substitutions/locals often enough
+// especially when updating kground <-> kommandline (trans deps issues)
+fun Project.setMyWeirdSubstitutions(
+  vararg rules: Pair<String, String>,
+  myProjectsGroup: String = "pl.mareklangiewicz",
+  tryToUseLocalProjects: Boolean = true,
+) {
+  val foundLocalProjects: Map<String, Project?> =
+    if (tryToUseLocalProjects) rules.associate { it.first to findProject(":${it.first}") }
+    else emptyMap()
+  configurations.all {
+    resolutionStrategy.dependencySubstitution {
+      for ((projName, projVer) in rules)
+        substitute(module("$myProjectsGroup:$projName"))
+          .using(
+            // Note: there are different fun in gradle: Project.project; DependencySubstitution.project
+            if (foundLocalProjects[projName] != null) project(":$projName")
+            else module("$myProjectsGroup:$projName:$projVer")
+          )
+    }
+  }
+}
 
 fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withMavenLocal) mavenLocal()

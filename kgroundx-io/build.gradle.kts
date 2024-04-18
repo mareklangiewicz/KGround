@@ -11,22 +11,44 @@ plugins {
 defaultBuildTemplateForBasicMppLib {
   api(project(":kgroundx"))
   api(project(":kground-io"))
-  api(findProject(":kommandline") ?: Langiewicz.kommandline)
-  api(findProject(":kommandsamples") ?: Langiewicz.kommandsamples)
+  api(Langiewicz.kommandline)
+  api(Langiewicz.kommandsamples)
 }
 
-// FIXME: remove hardcoded versions
-configurations.all {
-  resolutionStrategy.dependencySubstitution {
-    substitute(module("pl.mareklangiewicz:kommandline")).using(module("pl.mareklangiewicz:kommandline:0.0.55"))
-    substitute(module("pl.mareklangiewicz:kommandsamples")).using(module("pl.mareklangiewicz:kommandsamples:0.0.55"))
-  }
-}
+setMyWeirdSubstitutions(
+  "kommandline" to "0.0.55",
+  "kommandsamples" to "0.0.55",
+  "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
+)
 
 // kotlin { js(IR) { nodejs() } }
 
 
 // region [Kotlin Module Build Template]
+
+// Kind of experimental/temporary.. not sure how it will evolve yet,
+// but currently I need these kind of substitutions/locals often enough
+// especially when updating kground <-> kommandline (trans deps issues)
+fun Project.setMyWeirdSubstitutions(
+  vararg rules: Pair<String, String>,
+  myProjectsGroup: String = "pl.mareklangiewicz",
+  tryToUseLocalProjects: Boolean = true,
+) {
+  val foundLocalProjects: Map<String, Project?> =
+    if (tryToUseLocalProjects) rules.associate { it.first to findProject(":${it.first}") }
+    else emptyMap()
+  configurations.all {
+    resolutionStrategy.dependencySubstitution {
+      for ((projName, projVer) in rules)
+        substitute(module("$myProjectsGroup:$projName"))
+          .using(
+            // Note: there are different fun in gradle: Project.project; DependencySubstitution.project
+            if (foundLocalProjects[projName] != null) project(":$projName")
+            else module("$myProjectsGroup:$projName:$projVer")
+          )
+    }
+  }
+}
 
 fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withMavenLocal) mavenLocal()

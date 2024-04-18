@@ -16,6 +16,7 @@ import kotlin.math.*
 import kotlin.random.*
 import kotlinx.coroutines.runBlocking
 import pl.mareklangiewicz.interactive.*
+import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.w
