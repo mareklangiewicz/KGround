@@ -65,7 +65,7 @@ object MyWorkflowsExamples {
 
   suspend fun injectUpdateGeneratedDepsToDepsKtRepo() = injectUpdateGeneratedDepsWorkflowToDepsKtRepo()
 
-  suspend fun updateKGroundResSLinks() = updateKGroundResourcesSymLinks()
+  suspend fun updateKGroundTmplSymLinks() = updateKGroundTemplatesSymLinks()
 
   suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")
 
