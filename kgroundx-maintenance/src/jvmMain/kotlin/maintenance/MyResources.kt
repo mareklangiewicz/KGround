@@ -12,22 +12,24 @@ import pl.mareklangiewicz.ulog.i
 var MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
 
 private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".toPath()
+private val templatesRelPath = resourcesRelPath / "templates"
 private val resourcesAbsPath = MyKGroundRootPath / resourcesRelPath
+private val templatesAbsPath = MyKGroundRootPath / templatesRelPath
 
 private val Path.isTmplSymlink
   get() = name.endsWith(".tmpl") && SYSTEM.metadata(this).symlinkTarget != null
 
-fun updateKGroundResourcesSymLinks() = SYSTEM.run {
+fun updateKGroundTemplatesSymLinks() = SYSTEM.run {
 
   // remove all tmpl symlinks (but throw if other unexpected file found)
-  listRecursively(resourcesAbsPath).forEach {
+  listRecursively(templatesAbsPath).forEach {
     if (metadata(it).isDirectory) return@forEach
-    it.isTmplSymlink.chkTrue { "Unexpected file in resources: $it" }
+    it.isTmplSymlink.chkTrue { "Unexpected file in templates: $it" }
     delete(it)
   }
   // remove all dirs (but throw if non directory still found)
-  list(resourcesAbsPath).forEach {
-    metadata(it).isDirectory.chkTrue { "Some non directory left in resources: $it" }
+  list(templatesAbsPath).forEach {
+    metadata(it).isDirectory.chkTrue { "Some non directory left in templates: $it" }
     deleteRecursively(it)
   }
 
@@ -40,10 +42,10 @@ fun updateKGroundResourcesSymLinks() = SYSTEM.run {
   // prepare the list of gradlew files
   val gradlewFiles = gradlewRelPaths.map { MyKGroundRootPath / it }
 
-  // generate .tmpl symlinks in resources (relative to MyKGroundRootPath)
+  // generate .tmpl symlinks in resources/templates (relative to MyKGroundRootPath)
   (buildFiles + gradlewFiles).forEach { srcAbs ->
     val srcRel = srcAbs.asRelativeTo(MyKGroundRootPath)
-    val linkRel = resourcesRelPath / srcRel.withName { "$it.tmpl" }
+    val linkRel = templatesRelPath / srcRel.withName { "$it.tmpl" }
     val linkAbs = MyKGroundRootPath / linkRel
     val targetDots = linkRel.parent!!.segments.joinToString("/") { ".." }
     val target = targetDots.toPath() / srcRel

@@ -44,7 +44,8 @@ private const val pathAndroApp = "template-andro/template-andro-app"
 
 private data class RegionInfo(val label: String, val path: Path, val syncedPaths: List<Path>)
 
-private val RegionInfo.pathInRes get() = path / "build.gradle.kts.tmpl" // TODO_maybe: special regions in settings.gradle.kts??
+private val RegionInfo.pathInRes get() = "templates".toPath() / path / "build.gradle.kts.tmpl"
+// TODO_maybe: special regions in settings.gradle.kts??
 // pathInRes has to have different suffix from "build.gradle.kts" otherwise gradle sometimes tries to run it…
 // (even just .kts extension sometimes confuses at least IDE)
 

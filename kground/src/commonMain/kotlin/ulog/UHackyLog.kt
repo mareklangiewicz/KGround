@@ -39,7 +39,7 @@ class UHackySharedFlowLog(
 
 /** This global var is especially hacky and will be removed when we have context parameters */
 var ulog: ULog =
-  UHackySharedFlowLog { level, data -> "ulog ${level.symbol} ${data.str(maxLength = 128)}" }
+  UHackySharedFlowLog { level, data -> "ulog ${level.symbol} ${data.str(maxLength = 512)}" }
   // UHackySharedFlowLog { level, data -> "ulog ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
   // Note: getting current time makes it a bit slower, so it shouldn't be the default.
 
