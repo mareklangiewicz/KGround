@@ -11,7 +11,9 @@ val kommandlineLocalAllowed = true
 
 val kommandsamplesLocalAllowed = true
 
-// UreRA|>".*/Deps\.kt"~~>"../DepsKt"<| TODO NOW: support ure replacements glued to special regions
+// region [My Settings Stuff <~~]
+// ~~>".*/Deps\.kt"~~>"../DepsKt"<~~ TODO NOW: support ure replacements defined in very special arrows regions
+// endregion [My Settings Stuff <~~]
 // region [My Settings Stuff]
 
 pluginManagement {

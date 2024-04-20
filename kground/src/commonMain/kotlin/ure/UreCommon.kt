@@ -148,20 +148,49 @@ fun ureCommentLine(content: Ure = ureWhateva(inLine = true), traditional: Boolea
 fun ureLineWithEndingComment(comment: Ure) =
   ureLineWithContent(ureWhateva(inLine = true) then comment.commentedOut(inLine = true, traditional = false))
 
-
-// TODO_someday: support named regions without the exact name repeated at the end
-//   (as an optional flag, but leave unchanged requirement by default!)
-fun ureRegion(content: Ure, regionName: Ure? = null) = ure {
-  +ureCommentLine(ureKeywordAndOptArg("region", regionName), traditional = false)
-  +content
-  +ureCommentLine(ureKeywordAndOptArg("endregion", regionName), traditional = false)
+@DelicateApi("Can match region with different labels at the beginning and at the end (even if given the same ure)")
+fun ureRegion(
+  content: Ure,
+  vararg useNamedArgs: Unit,
+  contentName: String? = null,
+  regionLabel: Ure? = null,
+  regionLabelName: String? = null,
+  endregionLabel: Ure? = regionLabel,
+  endregionLabelName: String? = null,
+) = ure {
+  +ureCommentLine(ureKeywordAndOptArg("region", regionLabel?.withName(regionLabelName)), traditional = false)
+  +content.withName(contentName)
+  +ureCommentLine(ureKeywordAndOptArg("endregion", endregionLabel?.withName(endregionLabelName)), traditional = false)
 }
 
-// by "special" we mean region with label wrapped in squared brackets
-// the promise is: all special regions with some label should contain exactly the same content (synced)
-fun ureWithSpecialRegion(regionLabel: String) = ure {
+@OptIn(DelicateApi::class) // regionLabel is ureText, so it's guaranteed to be the same label at the end.
+fun ureRegion(content: Ure, regionLabel: String) = ureRegion(content, regionLabel = ureText(regionLabel))
+
+// by "special" we mean region with label wrapped in squared brackets, and the promise is:
+// all special regions with some label should contain the same content (synced)
+// modulo optional postprocessing with very special arrows region [[$regionLabel <~~]]
+fun ureSpecialRegion(content: Ure, regionLabel: String) = ureRegion(content, "[$regionLabel]")
+// TODO: Make special regions use double squared brackets [[..]] like wiki links
+
+@OptIn(DelicateApi::class)
+fun ureAnySpecialRegion(
+  vararg useNamedArgs: Unit,
+  contentName: String? = null,
+  labelName: String? = null,
+  labelAllowTildes: Boolean = true,
+) = ureRegion(
+  content = ureWhateva().withName(contentName),
+  regionLabel = ch('[') then ureAnyLabel(labelAllowTildes).withName(labelName) then ch(']'),
+  endregionLabel = ureAnyLabel(labelAllowTildes)
+)
+
+private fun ureAnyLabel(allowTildes: Boolean = true) = ure {
+  x(0..MAX, reluctant = true) of if (allowTildes) chAnyInLine else !chOfAnyExact('\r', '\n', '~')
+}
+
+fun ureWithSpecialRegion(specialRegionLabel: String) = ure {
   +ureWhateva().withName("before")
-  +ureRegion(ureWhateva(), ureText("[$regionLabel]")).withName("region")
+  +ureSpecialRegion(ureWhateva(), specialRegionLabel).withName("region")
   +ureWhateva(reluctant = false).withName("after")
 }
 

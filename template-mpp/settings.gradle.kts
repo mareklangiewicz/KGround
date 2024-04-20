@@ -9,7 +9,9 @@ val buildScanPublishingAllowed = true &&
   true
 // false
 
-// UreRA|>".*/Deps\.kt"~~>"../../DepsKt"<| BTW here it changes nothing, but it's an example how to adjust regions.
+// region [My Settings Stuff <~~]
+// ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
+// endregion [My Settings Stuff <~~]
 // region [My Settings Stuff]
 
 pluginManagement {
