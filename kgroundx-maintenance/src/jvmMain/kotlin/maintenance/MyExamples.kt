@@ -76,16 +76,20 @@ object MyWorkflowsExamples {
 object MyWeirdExamples {
 
   suspend fun tryToDiffSomeOfMyProjectsFiles() {
+  suspend fun tryToDiffMySettingsKtsFiles() {
     val pathLeft = PathToMyKotlinProjects / "KGround" / "settings.gradle.kts"
     fetchMyProjectsNameS(onlyPublic = false)
       .mapFilterLocalKotlinProjectsPathS()
       .collect {
         val pathRight = it / "settings.gradle.kts"
-        val msgDiff = "ideDiff(\n  \"$pathLeft\",\n  \"$pathRight\"\n)"
-        ulog.i(msgDiff)
-        val question = "Try opening diff in IDE?\n$msgDiff"
-        val answer = zenityAskIf(question).ax()
-        if (answer) ideDiff(pathLeft.toString(), pathRight.toString()).ax()
+        if (SYSTEM.exists(pathRight)) {
+          val msgDiff = "ideDiff(\n  \"$pathLeft\",\n  \"$pathRight\"\n)"
+          ulog.i(msgDiff)
+          val question = "Try opening diff in IDE?\n$msgDiff"
+          val answer = zenityAskIf(question).ax()
+          if (answer) ideDiff(pathLeft.toString(), pathRight.toString()).ax()
+        }
+        else zenityShowWarning("No settings file: $pathRight").ax()
         zenityAskIf("Continue diffing? (No -> cancel/abort/throw)").ax() || bad { "User cancelled" }
       }
   }
