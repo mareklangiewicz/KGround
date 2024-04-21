@@ -117,24 +117,6 @@ private fun Ure.withSomeLinesAround(
   .filter { localSystem.alsoFilter(it) }
 
 
-@Deprecated("")
-@ExampleApi suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false) =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalKotlinProjectsPathS()
-    .collect {
-      ulog.i("Check all known regions in project: $it")
-      SYSTEM.checkAllKnownRegionsInAllFoundFiles(it)
-    }
-
-@Deprecated("")
-@ExampleApi suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false) =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalKotlinProjectsPathS()
-    .collect {
-      ulog.i("Inject all known regions to project: $it")
-      SYSTEM.injectAllKnownRegionsToAllFoundFiles(it)
-    }
-
 @ExampleApi suspend fun tryToInjectMyTemplatesToAllMyProjects(
   onlyPublic: Boolean = false,
   askInteractively: Boolean = true,
