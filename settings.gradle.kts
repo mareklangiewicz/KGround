@@ -12,7 +12,9 @@ val buildScanPublishingAllowed =
 
 // gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
-// UreRA|>".*/Deps\.kt"~~>"../DepsKt"<|
+// region [My Settings Stuff <~~]
+// ~~>".*/Deps\.kt"~~>"../DepsKt"<~~
+// endregion [My Settings Stuff <~~]
 // region [My Settings Stuff]
 
 pluginManagement {
