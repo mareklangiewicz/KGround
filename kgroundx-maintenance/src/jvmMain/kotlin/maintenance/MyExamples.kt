@@ -89,7 +89,19 @@ object MyWorkflowsExamples {
 @ExampleApi
 object MyWeirdExamples {
 
-  suspend fun tryToDiffSomeOfMyProjectsFiles() {
+  suspend fun tryToUseMyZenityManager() {
+    val manager = MyZenityManager()
+    withKGroundCtx(usubmit = manager) {
+      withMyZenityManager()
+    }
+  }
+
+  private suspend fun withMyZenityManager() {
+    val kg = coroutineContext[KGroundCtx] ?: bad { "No KGroundCtx available" }
+    val answer = kg.askForOneOf("How do you feel?", "Fine", "Bad")
+    kg.ulog.w(answer)
+  }
+
   suspend fun tryToDiffMySettingsKtsFiles() {
     val pathLeft = PathToKotlinProjects / "KGround" / "settings.gradle.kts"
     fetchMyProjectsNameS(onlyPublic = false)

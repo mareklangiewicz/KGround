@@ -32,6 +32,7 @@ open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usub
 }
 
 /**
+ * FIXME NOW: update this whole kdoc
  * @param name set to non-null to add new [CoroutineName] to context
  * @param cli set to non-null to set specific [CLI] in context,
  * when null it tries to use one from current(parent) [KGroundXIOCtx],
@@ -41,7 +42,7 @@ open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usub
  * and defaults to [DefaultOkioFileSystemOrErr] if no [FileSystem] found.
  * @param ulog set to non-null to change the [ULog],
  * when null it tries to use one from current (parent) [KGroundCtx],
- * and defaults to [ULogPrintLn] if no [ULog] found.
+ * and defaults to [pl.mareklangiewicz.ulog.hack.ulog] if no [ULog] found.
  */
 suspend fun <T> withKGroundXIOCtx(
   name: String? = null,
@@ -54,7 +55,7 @@ suspend fun <T> withKGroundXIOCtx(
   KGroundXIOCtx(
     cli ?: coroutineContext[KGroundXIOCtx]?.cli ?: CLI.SYS,
     fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
-    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: pl.mareklangiewicz.ulog.hack.ulog,
     usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
   ) plusIfNN name?.let(::CoroutineName),
   block,

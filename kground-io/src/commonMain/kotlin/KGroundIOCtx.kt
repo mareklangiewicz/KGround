@@ -31,11 +31,8 @@ open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmi
 /**
  * @param name set to non-null to add new [CoroutineName] to context
  * @param fs set to non-null to set specific [FileSystem] in context,
- * when null it tries to use one from current (parent) [KGroundIOCtx],
- * and defaults to [DefaultOkioFileSystemOrErr] if no [FileSystem] found.
- * @param ulog set to non-null to change the [ULog],
- * when null it tries to use one from current (parent) [KGroundCtx],
- * and defaults to [ULogPrintLn] if no [ULog] found.
+ * @param ulog set to non-null to set specific [ULog] in context,
+ * @param usubmit set to non-null to set specific [USubmit] in context,
  */
 suspend fun <T> withKGroundIOCtx(
   name: String? = null,
@@ -46,7 +43,7 @@ suspend fun <T> withKGroundIOCtx(
 ): T = withContext(
   KGroundIOCtx(
     fs ?: coroutineContext[KGroundIOCtx]?.fs ?: DefaultOkioFileSystemOrErr,
-    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: pl.mareklangiewicz.ulog.hack.ulog,
     usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
   ) plusIfNN name?.let(::CoroutineName),
   block,

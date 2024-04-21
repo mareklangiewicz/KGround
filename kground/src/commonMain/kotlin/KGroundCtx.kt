@@ -3,14 +3,13 @@ package pl.mareklangiewicz.kground
 import kotlinx.coroutines.*
 import pl.mareklangiewicz.kground.usubmit.*
 import pl.mareklangiewicz.ulog.*
-import pl.mareklangiewicz.ulog.hack.ulog as hackyulog
 import kotlin.coroutines.*
 
 // TODO NOW: experiment and test it! (maybe incorporate ulogging everywhere first?)
 interface WithKGround : WithULog, WithUSubmit
 
 /**
- * Sth like this be used as a context receiver when Kotlin supports it.
+ * Sth like this be used as a context receiver/parameter? when Kotlin supports it.
  *
  * For now just pass it inside [coroutineContext] when in coroutine.
  * or as "kg" parameter - when in blocking world,
@@ -34,8 +33,10 @@ infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) {
 /**
  * @param name set to non-null to add new [CoroutineName] to context
  * @param ulog set to non-null to change the [ULog],
- * when null it tries to use one from current (parent) [KGroundCtx],
- * and defaults to [ULogPrintLn] if no [ULog] found.
+ * @param usubmit set to non-null to change the [USubmit],
+ * when null [ulog]/[usubmit], it tries to use [ULog]/[USubmit] from current (parent) [KGroundCtx],
+ * If no [ULog] at all, it defaults to [pl.mareklangiewicz.ulog.hack.ulog] (temporary default impl).
+ * If no [USubmit] at all, it defaults to failing [USubmitNotSupportedErr]
  */
 suspend fun <T> withKGroundCtx(
   name: String? = null,
@@ -44,7 +45,7 @@ suspend fun <T> withKGroundCtx(
   block: suspend CoroutineScope.() -> T,
 ): T = withContext(
   KGroundCtx(
-    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: hackyulog,
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: pl.mareklangiewicz.ulog.hack.ulog,
     usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
   ) plusIfNN name?.let(::CoroutineName),
   block,
