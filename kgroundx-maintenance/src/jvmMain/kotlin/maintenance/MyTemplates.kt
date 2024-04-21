@@ -38,7 +38,7 @@ suspend fun tryInjectMyTemplatesToProject(
       }
       fun inject() {
         ulog.i("Injecting   template [$label] to $path:")
-        SYSTEM.injectSpecialRegion(label, templateRegion, path, addIfNotFound = false)
+        path.injectSpecialRegion(label, templateRegion, addIfNotFound = false)
       }
       when {
         !askInteractively -> inject()

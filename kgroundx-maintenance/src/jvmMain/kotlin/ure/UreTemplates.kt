@@ -17,19 +17,18 @@ import pl.mareklangiewicz.ure.*
 
 // FIXME NOW separate it from Ure and move Ure common code to better places (later to separate lib)
 
-// TODO_later: I'm using it in new MyTemplates, but it will be rewritten too. At least receiver should be Sequence<Path>.
 @OptIn(NotPortableApi::class)
-fun FileSystem.injectSpecialRegion(
+fun Path.injectSpecialRegion(
   regionLabel: String,
   region: String,
-  vararg outputPaths: Path,
+  fs: FileSystem = SYSTEM,
   addIfNotFound: Boolean = true,
-) = outputPaths.forEach { outputPath ->
+) {
   val regex = ureWithSpecialRegion(regionLabel).compile()
-  processFile(outputPath, outputPath) { output ->
+  fs.processFile(this, this) { output ->
     val outputMR = regex.matchEntire(output)
     if (outputMR == null) {
-      ulog.i("Inject [$regionLabel] to $outputPath - No match.")
+      ulog.i("Inject [$regionLabel] to $this - No match.")
       if (addIfNotFound) {
         ulog.i("Adding new region at the end.")
         output + "\n\n" + region.trimEnd()
@@ -48,7 +47,7 @@ fun FileSystem.injectSpecialRegion(
       val newOutput = before + newRegion + newAfter
       val summary =
         if (newOutput == output) "No changes." else "Changes detected (len ${output.length}->${newOutput.length})"
-      ulog.i("Inject [$regionLabel] to $outputPath - $summary")
+      ulog.i("Inject [$regionLabel] to $this - $summary")
       newOutput
     }
   }
@@ -90,6 +89,6 @@ fun downloadAndInjectFileToSpecialRegion(
   val markBefore = "// region [$outFileRegionLabel]\n"
   val markAfter = "// endregion [$outFileRegionLabel]\n"
   val region = "$markBefore\n$regionContent\n$markAfter"
-  SYSTEM.injectSpecialRegion(outFileRegionLabel, region, outFilePath)
+  outFilePath.injectSpecialRegion(outFileRegionLabel, region)
   SYSTEM.delete(inFilePath)
 }
