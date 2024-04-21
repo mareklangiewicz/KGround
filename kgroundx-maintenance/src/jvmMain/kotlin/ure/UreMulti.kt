@@ -20,6 +20,7 @@ fun String.undoCommentOutMultiplatformFun(): String {
 
 private val ureKeyword = ure { 1..MAX of chLower }.withWordBoundaries()
 
+// TODO_later: Test utils in this file too: there were unnoticed bugs in ureTypedef (see log/history)
 private val ureTypedef = ure {
   +chWord
   0..1 of {
