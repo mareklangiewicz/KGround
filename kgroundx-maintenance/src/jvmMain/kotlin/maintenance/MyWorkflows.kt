@@ -136,7 +136,7 @@ fun FileSystem.checkMyDWorkflowsInProject(
 }
 
 @ExampleApi fun injectDWorkflowsToKotlinProject(projectName: String) =
-  SYSTEM.injectDWorkflowsToProject(PathToMyKotlinProjects / projectName)
+  SYSTEM.injectDWorkflowsToProject(PathToKotlinProjects / projectName)
 
 fun FileSystem.injectDWorkflowsToProject(
   projectPath: Path,

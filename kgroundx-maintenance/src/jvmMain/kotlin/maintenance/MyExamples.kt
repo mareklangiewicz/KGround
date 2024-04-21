@@ -2,18 +2,24 @@
 
 package pl.mareklangiewicz.kgroundx.maintenance
 
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.flow.map
+import okio.FileSystem.Companion.SYSTEM
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.kground.KGroundCtx
 import pl.mareklangiewicz.kground.logEach
+import pl.mareklangiewicz.kground.usubmit.askForOneOf
+import pl.mareklangiewicz.kground.withKGroundCtx
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
+import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.w
@@ -40,16 +46,24 @@ object MyBasicExamples {
 }
 
 
+@OptIn(DelicateApi::class)
 @ExampleApi
-object MyKnownRegionsExamples {
+object MyTemplatesExamples {
 
-  suspend fun checkAllMKRSynced() = checkAllKnownRegionsSynced()
+  suspend fun tryDiffMyTemplates() {
+    // ulogHackyMinLevel = ULogLevel.DEBUG
+    tryDiffMyConflictingTemplatesSrc()
+  }
 
-  suspend fun injectAllMKRToSync() = injectAllKnownRegionsToSync()
+  suspend fun tryInjectOneProject() {
+    // ulogHackyMinLevel = ULogLevel.DEBUG
+    tryInjectMyTemplatesToProject(PathToKotlinProjects / "AbcdK")
+  }
 
-  suspend fun checkAllMKRInMyProjects() = checkAllKnownRegionsInMyProjects(onlyPublic = false)
-
-  suspend fun injectAllMKRToMyProjects() = injectAllKnownRegionsToMyProjects(onlyPublic = false)
+  suspend fun tryInjectAllMyProjects() {
+    // ulogHackyMinLevel = ULogLevel.DEBUG
+    tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = true)
+  }
 }
 
 @ExampleApi
@@ -77,7 +91,7 @@ object MyWeirdExamples {
 
   suspend fun tryToDiffSomeOfMyProjectsFiles() {
   suspend fun tryToDiffMySettingsKtsFiles() {
-    val pathLeft = PathToMyKotlinProjects / "KGround" / "settings.gradle.kts"
+    val pathLeft = PathToKotlinProjects / "KGround" / "settings.gradle.kts"
     fetchMyProjectsNameS(onlyPublic = false)
       .mapFilterLocalKotlinProjectsPathS()
       .collect {
@@ -103,7 +117,7 @@ object MyWeirdExamples {
   @OptIn(DelicateApi::class, NotPortableApi::class)
   suspend fun tryToUpdateMyReposOrigins() =
     fetchMyProjectsNameS(onlyPublic = false)
-      .map { PathToMyKotlinProjects / it }
+      .map { PathToKotlinProjects / it }
       .collect { tryToUpdateMyRepoOrigin(it) }
 
   @OptIn(DelicateApi::class, NotPortableApi::class)

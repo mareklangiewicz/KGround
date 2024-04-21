@@ -16,9 +16,14 @@ import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.reducedOutToFlow
+import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.core.Ure
 
+
+var PathToKotlinProjects = "/home/marek/code/kotlin".toPath()
+
+var PathToKGroundProject = PathToKotlinProjects / "KGround"
 
 // TODO_later: refactor this little experiment fun
 @OptIn(DelicateApi::class)
@@ -107,11 +112,12 @@ private fun Ure.withSomeLinesAround(
 @ExampleApi internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
   localSystem: FileSystem = SYSTEM,
   alsoFilter: suspend FileSystem.(Path) -> Boolean = { true },
-) = map { PathToMyKotlinProjects / it }
+) = map { PathToKotlinProjects / it }
   .filter { localSystem.exists(it) }
   .filter { localSystem.alsoFilter(it) }
 
 
+@Deprecated("")
 @ExampleApi suspend fun checkAllKnownRegionsInMyProjects(onlyPublic: Boolean = false) =
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
@@ -120,6 +126,7 @@ private fun Ure.withSomeLinesAround(
       SYSTEM.checkAllKnownRegionsInAllFoundFiles(it)
     }
 
+@Deprecated("")
 @ExampleApi suspend fun injectAllKnownRegionsToMyProjects(onlyPublic: Boolean = false) =
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
@@ -128,7 +135,22 @@ private fun Ure.withSomeLinesAround(
       SYSTEM.injectAllKnownRegionsToAllFoundFiles(it)
     }
 
-@ExampleApi val PathToMyKotlinProjects = "/home/marek/code/kotlin".toPath()
+@ExampleApi suspend fun tryToInjectMyTemplatesToAllMyProjects(
+  onlyPublic: Boolean = false,
+  askInteractively: Boolean = true,
+) {
+  val templates = collectMyTemplates()
+  fetchMyProjectsNameS(onlyPublic)
+    .mapFilterLocalKotlinProjectsPathS()
+    .collect { path ->
+      suspend fun inject() {
+        ulog.i("Injecting my templates to project: $path")
+        tryInjectMyTemplatesToProject(path, templates, askInteractively)
+      }
+      !askInteractively || zenityAskIf("Try to inject my templates to project: $path ?").ax() || return@collect
+      inject()
+    }
+}
 
 @Suppress("IdentifierGrammar")
 @ExampleApi suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =

@@ -26,6 +26,8 @@ inline val Double.intr get() = roundToInt()
 inline val Double.lngr get() = roundToLong()
 
 inline val Any?.unt get() = Unit
+inline val Any?.tru get() = true
+inline val Any?.fls get() = false
 
 
 inline val Number.numIsReal get() = when (this) {

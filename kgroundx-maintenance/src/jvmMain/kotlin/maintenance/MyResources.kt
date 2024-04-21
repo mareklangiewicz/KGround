@@ -9,12 +9,10 @@ import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
 
-var MyKGroundRootPath = "/home/marek/code/kotlin/KGround".toPath()
-
 private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".toPath()
 private val templatesRelPath = resourcesRelPath / "templates"
-private val resourcesAbsPath = MyKGroundRootPath / resourcesRelPath
-private val templatesAbsPath = MyKGroundRootPath / templatesRelPath
+private val resourcesAbsPath = PathToKGroundProject / resourcesRelPath
+private val templatesAbsPath = PathToKGroundProject / templatesRelPath
 
 private val Path.isTmplSymlink
   get() = name.endsWith(".tmpl") && SYSTEM.metadata(this).symlinkTarget != null
@@ -34,19 +32,19 @@ fun updateKGroundTemplatesSymLinks() = SYSTEM.run {
   }
 
   // prepare the list of buildfiles (*.gradle.kts)
-  val buildFiles = findAllFiles(MyKGroundRootPath, maxDepth = 10)
+  val buildFiles = findAllFiles(PathToKGroundProject, maxDepth = 10)
     .filter { it.segments.any { it.startsWith("template-") } }
     .filterExt("gradle.kts")
     .toList()
 
   // prepare the list of gradlew files
-  val gradlewFiles = gradlewRelPaths.map { MyKGroundRootPath / it }
+  val gradlewFiles = gradlewRelPaths.map { PathToKGroundProject / it }
 
-  // generate .tmpl symlinks in resources/templates (relative to MyKGroundRootPath)
+  // generate .tmpl symlinks in resources/templates (relative to PathToKGroundProject)
   (buildFiles + gradlewFiles).forEach { srcAbs ->
-    val srcRel = srcAbs.asRelativeTo(MyKGroundRootPath)
+    val srcRel = srcAbs.asRelativeTo(PathToKGroundProject)
     val linkRel = templatesRelPath / srcRel.withName { "$it.tmpl" }
-    val linkAbs = MyKGroundRootPath / linkRel
+    val linkAbs = PathToKGroundProject / linkRel
     val targetDots = linkRel.parent!!.segments.joinToString("/") { ".." }
     val target = targetDots.toPath() / srcRel
     ulog.i("symlink $linkAbs -> $target")

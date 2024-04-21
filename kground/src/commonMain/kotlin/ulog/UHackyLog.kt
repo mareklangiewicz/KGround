@@ -2,6 +2,7 @@ package pl.mareklangiewicz.ulog.hack
 
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import pl.mareklangiewicz.bad.reqNN
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
@@ -19,7 +20,7 @@ import pl.mareklangiewicz.ulog.ULogLevel
  * no saved timestamps, loglevels, immediate .toString, ...
  */
 class UHackySharedFlowLog(
-  val minLevel: ULogLevel = ULogLevel.INFO,
+  var minLevel: ULogLevel = ULogLevel.INFO,
   val replayCacheSize: Int = 16384,
   val alsoPrintLn: Boolean = true,
   val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "ulog ${level.symbol} ${data.str()}" },
@@ -45,3 +46,7 @@ var ulog: ULog =
 
 /** TODO_later: make sure getting snapshot from replayCache is thread-safe */
 val ulogCache: List<String>? get() = (ulog as? UHackySharedFlowLog)?.flow?.replayCache
+
+var ulogHackyMinLevel: ULogLevel?
+  get() = (ulog as? UHackySharedFlowLog)?.minLevel
+  set(value) { (ulog as? UHackySharedFlowLog)?.minLevel = value.reqNN() }

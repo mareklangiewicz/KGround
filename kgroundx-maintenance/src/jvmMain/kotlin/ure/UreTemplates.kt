@@ -34,7 +34,7 @@ const val labelAndroApp = "Andro App Build Template"
 const val labelFullMppLib = "Full MPP Lib Build Template"
 const val labelFullMppApp = "Full MPP App Build Template"
 
-// paths to templates dirs with build files, relative to MyKGroundRootPath
+// paths to templates dirs with build files, relative to PathToKGroundProject
 private const val pathMppRoot = "template-mpp"
 private const val pathMppLib = "template-mpp/template-mpp-lib"
 private const val pathMppApp = "template-mpp/template-mpp-app"
@@ -51,10 +51,10 @@ private val RegionInfo.pathInRes get() = "templates".toPath() / path / "build.gr
 
 // FIXME NOW separate it from Ure and move Ure common code to better places (later to separate lib)
 
-private val RegionInfo.pathInSrc get() = MyKGroundRootPath / path / "build.gradle.kts"
+private val RegionInfo.pathInSrc get() = PathToKGroundProject / path / "build.gradle.kts"
 
 private val RegionInfo.syncedPathsArrInSrc
-  get() = syncedPaths.map { MyKGroundRootPath / it / "build.gradle.kts" }.toTypedArray()
+  get() = syncedPaths.map { PathToKGroundProject / it / "build.gradle.kts" }.toTypedArray()
 
 private fun info(label: String, dir: String, vararg syncedDirs: String) =
   RegionInfo(label, dir.toPath(), syncedDirs.toList().map { it.toPath() })
@@ -77,6 +77,7 @@ private val regionsInfos = listOf(
 private operator fun List<RegionInfo>.get(label: String) =
   find { it.label == label } ?: bad { "Unknown region label: $label" }
 
+@Deprecated("")
 @OptIn(NotPortableApi::class) // it's jvmMain anyway
 private fun knownRegion(regionLabel: String): String {
   val inputResPath = regionsInfos[regionLabel].pathInRes
@@ -85,9 +86,11 @@ private fun knownRegion(regionLabel: String): String {
   return mr["region"]
 }
 
+@Deprecated("")
 private fun knownRegionFullTemplatePath(regionLabel: String) =
   SYSTEM.canonicalize(regionsInfos[regionLabel].pathInSrc)
 
+@Deprecated("")
 fun checkAllKnownRegionsInProject(projectPath: Path) = try {
   ulog.i("BEGIN: Check all known regions in project:")
   SYSTEM.checkAllKnownRegionsInAllFoundFiles(projectPath)
@@ -96,6 +99,7 @@ fun checkAllKnownRegionsInProject(projectPath: Path) = try {
   ulog.e("ERROR: ${e.message}")
 }
 
+@Deprecated("")
 fun injectAllKnownRegionsInProject(projectPath: Path) {
   ulog.i("BEGIN: Inject all known regions in project:")
   SYSTEM.injectAllKnownRegionsToAllFoundFiles(projectPath)
@@ -103,16 +107,19 @@ fun injectAllKnownRegionsInProject(projectPath: Path) {
 }
 
 // This actually is self-check for templates in KGround, so it should be in some integration test.
+@Deprecated("")
 @ExampleApi fun checkAllKnownRegionsSynced() =
   regionsInfos.forEach {
     SYSTEM.checkKnownRegion(it.label, it.pathInSrc, *it.syncedPathsArrInSrc)
   }
 
+@Deprecated("")
 @ExampleApi fun injectAllKnownRegionsToSync() =
   regionsInfos.forEach {
     SYSTEM.injectKnownRegion(it.label, *it.syncedPathsArrInSrc, addIfNotFound = false)
   }
 
+@Deprecated("")
 fun FileSystem.checkAllKnownRegionsInAllFoundFiles(
   outputTreePath: Path,
   outputFileExt: String = "gradle.kts",
@@ -123,6 +130,7 @@ fun FileSystem.checkAllKnownRegionsInAllFoundFiles(
     checkKnownRegion(label, *outputPaths, failIfNotFound = failIfNotFound)
 }
 
+@Deprecated("")
 fun FileSystem.checkKnownRegionInAllFoundFiles(
   regionLabel: String,
   outputTreePath: Path,
@@ -133,6 +141,7 @@ fun FileSystem.checkKnownRegionInAllFoundFiles(
   checkKnownRegion(regionLabel, *outputPaths, failIfNotFound = failIfNotFound)
 }
 
+@Deprecated("")
 fun FileSystem.injectAllKnownRegionsToAllFoundFiles(
   outputTreePath: Path,
   outputFileExt: String = "gradle.kts",
@@ -143,6 +152,7 @@ fun FileSystem.injectAllKnownRegionsToAllFoundFiles(
     injectKnownRegion(label, *outputPaths, addIfNotFound = addIfNotFound)
 }
 
+@Deprecated("")
 fun FileSystem.injectKnownRegionToAllFoundFiles(
   regionLabel: String,
   outputTreePath: Path,
@@ -154,6 +164,7 @@ fun FileSystem.injectKnownRegionToAllFoundFiles(
 }
 
 @OptIn(DelicateApi::class)
+@Deprecated("")
 fun FileSystem.checkKnownRegion(
   regionLabel: String,
   vararg outputPaths: Path,
@@ -184,6 +195,7 @@ fun FileSystem.checkKnownRegion(
   }
 }
 
+@Deprecated("")
 @OptIn(NotPortableApi::class) // it's jvmMain anyway
 private fun FileSystem.checkCustomRegion(
   regionLabel: String,
@@ -204,14 +216,16 @@ private fun FileSystem.checkCustomRegion(
   ulog.i("OK [$regionLabel] in $outputPath")
 }
 
+@Deprecated("")
 fun FileSystem.injectKnownRegion(
   regionLabel: String,
   vararg outputPaths: Path,
   addIfNotFound: Boolean = true,
-) = injectCustomRegion(regionLabel, knownRegion(regionLabel), *outputPaths, addIfNotFound = addIfNotFound)
+) = injectSpecialRegion(regionLabel, knownRegion(regionLabel), *outputPaths, addIfNotFound = addIfNotFound)
 
+// TODO_later: I'm using it in new MyTemplates, but it will be rewritten too. At least receiver should be Sequence<Path>.
 @OptIn(NotPortableApi::class)
-fun FileSystem.injectCustomRegion(
+fun FileSystem.injectSpecialRegion(
   regionLabel: String,
   region: String,
   vararg outputPaths: Path,
@@ -282,6 +296,6 @@ fun downloadAndInjectFileToSpecialRegion(
   val markBefore = "// region [$outFileRegionLabel]\n"
   val markAfter = "// endregion [$outFileRegionLabel]\n"
   val region = "$markBefore\n$regionContent\n$markAfter"
-  SYSTEM.injectCustomRegion(outFileRegionLabel, region, outFilePath)
+  SYSTEM.injectSpecialRegion(outFileRegionLabel, region, outFilePath)
   SYSTEM.delete(inFilePath)
 }

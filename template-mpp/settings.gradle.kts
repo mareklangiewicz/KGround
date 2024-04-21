@@ -21,10 +21,10 @@ pluginManagement {
     mavenCentral()
   }
 
-  val depsDir = File(rootDir, "../../DepsKt").normalize()
+  val depsDir = File(rootDir, "../DepsKt").normalize()
   val depsInclude =
-    depsDir.exists()
-    // false
+    // depsDir.exists()
+    false
   if (depsInclude) {
     logger.warn("Including local build $depsDir")
     includeBuild(depsDir)

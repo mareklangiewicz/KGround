@@ -23,7 +23,7 @@ import pl.mareklangiewicz.kommand.find.*
   }
 
 @ExampleApi fun updateGradlewFilesInKotlinProject(projectName: String) =
-  updateGradlewFilesInProject(PathToMyKotlinProjects / projectName)
+  updateGradlewFilesInProject(PathToKotlinProjects / projectName)
 
 fun updateGradlewFilesInProject(fullPath: Path) =
   gradlewRelPaths.forEach { gradlewRelPath ->
