@@ -47,9 +47,9 @@ import pl.mareklangiewicz.ulog.w
         withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
         log.w("try-code ${args[1]} finished")
         tryInteractivelyOpenLogCacheInIde()
-      } catch (e: Exception) {
+      } catch (ex: Exception) {
         log.e("try-code ${args[1]} failed")
-        log.exWithTrace(e)
+        log.exWithTrace(ex)
         tryInteractivelyOpenLogCacheInIde()
       }
       args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(SYS, args[1]))
@@ -69,15 +69,15 @@ import pl.mareklangiewicz.ulog.w
 // FIXME: common "UStr" utils with different MPP parametrized exception conversions / string representations.
 //   (start with moving some of what is in UWidgets to KGround) (see comments in UHackyLog)
 @Deprecated("This is temporary fast&dirty impl")
-private fun ULog.exWithTrace(e: Throwable) {
-  ulog.e(e.toString())
-  e.stackTrace?.let {
-    ulog.e("STACK TRACE:")
-    it.toList().logEach { ulog.e(it) }
+private fun ULog.exWithTrace(ex: Throwable) {
+  e(ex.toString())
+  ex.stackTrace?.let {
+    e("STACK TRACE:")
+    it.toList().logEach { e(it) }
     // each line have to be logged separately: don't use it.joinToString("\n"), because truncation in logger
   }
-  e.cause?.let {
-    ulog.e("CAUSE:")
-    ulog.exWithTrace(it)
+  ex.cause?.let {
+    e("CAUSE:")
+    exWithTrace(it)
   }
 }
