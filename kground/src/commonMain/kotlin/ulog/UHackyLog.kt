@@ -23,7 +23,7 @@ class UHackySharedFlowLog(
   var minLevel: ULogLevel = ULogLevel.INFO,
   val replayCacheSize: Int = 16384,
   val alsoPrintLn: Boolean = true,
-  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "ulog ${level.symbol} ${data.str()}" },
+  val toLogLine: (ULogLevel, Any?) -> String = { level, data -> "L ${level.symbol} ${data.str()}" },
 ) : ULog {
 
   /** TODO_later: analyze thread-safety */
@@ -41,13 +41,15 @@ class UHackySharedFlowLog(
 /** This global var is especially hacky and will be removed when we have context parameters */
 @Deprecated("Use val log = implictx<ULog>()")
 var ulog: ULog =
-  UHackySharedFlowLog { level, data -> "deprecated ulog ${level.symbol} ${data.str(maxLength = 512)}" }
-  // UHackySharedFlowLog { level, data -> "ulog ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
+  UHackySharedFlowLog { level, data -> "Deprecated L ${level.symbol} ${data.str(maxLength = 512)}" }
+  // UHackySharedFlowLog { level, data -> "L ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
   // Note: getting current time makes it a bit slower, so it shouldn't be the default.
 
 /** TODO_later: make sure getting snapshot from replayCache is thread-safe */
+@Deprecated("Use val log = implictx<UHackySharedFlowLog>()")
 val ulogCache: List<String>? get() = (ulog as? UHackySharedFlowLog)?.flow?.replayCache
 
+@Deprecated("Use val log = implictx<UHackySharedFlowLog>()")
 var ulogHackyMinLevel: ULogLevel?
   get() = (ulog as? UHackySharedFlowLog)?.minLevel
   set(value) { (ulog as? UHackySharedFlowLog)?.minLevel = value.reqNN() }

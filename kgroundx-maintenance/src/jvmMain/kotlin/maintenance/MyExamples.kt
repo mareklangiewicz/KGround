@@ -10,6 +10,7 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.usubmit.USubmit
 import pl.mareklangiewicz.usubmit.askForOneOf
@@ -92,18 +93,21 @@ object MyWorkflowsExamples {
 @ExampleApi
 object MyWeirdExamples {
 
-  suspend fun tryToUseMyZenityManager() {
-    uctx(MyZenityManager(), UHackySharedFlowLog()) {
-      withMyZenityManager()
-    }
-  }
-
-  private suspend fun withMyZenityManager() {
+  suspend fun tryToUseImplicitUSubmitAndULog() {
     val log = implictx<ULog>()
     val submit = implictx<USubmit>()
     val answer = submit.askForOneOf("How do you feel?", "Fine", "Bad")
     log.w(answer)
   }
+
+  suspend fun tryToUseAnotherUSubmitAndULog() {
+    val log = UHackySharedFlowLog { level, data -> "ANOTHER L ${level.symbol} ${data.str(maxLength = 512)}" }
+    val manager = MyZenityManager(promptPrefix = "ANOTHER ZENITY")
+    uctx(manager, log) {
+      tryToUseImplicitUSubmitAndULog()
+    }
+  }
+
 
   suspend fun tryToDiffMySettingsKtsFiles() {
     val pathLeft = PathToKotlinProjects / "KGround" / "settings.gradle.kts"

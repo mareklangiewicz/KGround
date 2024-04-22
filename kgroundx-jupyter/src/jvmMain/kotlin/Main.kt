@@ -6,7 +6,9 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.isInteractiveCodeEnabled
 import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
+import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.kground.logEach
+import pl.mareklangiewicz.kgroundx.maintenance.MyZenityManager
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
@@ -16,11 +18,13 @@ import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
+import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.hack.ulog
-import pl.mareklangiewicz.ulog.hack.ulogCache
 import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.implictxOrNull
 import pl.mareklangiewicz.ulog.w
 
 /**
@@ -34,25 +38,29 @@ import pl.mareklangiewicz.ulog.w
  * The gradle kgroundx-jupyter:run task is set up to run the main fun here.
  */
 @OptIn(DelicateApi::class, NotPortableApi::class) fun main(args: Array<String>) = runBlocking {
-  when {
-    args.size == 2 && args[0] == "try-code" -> try {
-      ulog.w("try-code ${args[1]} started")
-      withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
-      ulog.w("try-code ${args[1]} finished")
-      tryInteractivelyOpenLogCacheInIde()
-    } catch (e: Exception) {
-      ulog.e("try-code ${args[1]} failed")
-      ulog.exWithTrace(e)
-      tryInteractivelyOpenLogCacheInIde()
+  val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
+  val submit = MyZenityManager()
+  uctx(log, submit) {
+    when {
+      args.size == 2 && args[0] == "try-code" -> try {
+        log.w("try-code ${args[1]} started")
+        withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
+        log.w("try-code ${args[1]} finished")
+        tryInteractivelyOpenLogCacheInIde()
+      } catch (e: Exception) {
+        log.e("try-code ${args[1]} failed")
+        log.exWithTrace(e)
+        tryInteractivelyOpenLogCacheInIde()
+      }
+      args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(SYS, args[1]))
+      args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
+      else -> bad { "Incorrect args. See Main.kt:main" }
     }
-    args.size == 2 && args[0] == "get-user-flag" -> ulog.i(getUserFlagFullStr(SYS, args[1]))
-    args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
-    else -> bad { "Incorrect args. See Main.kt:main" }
   }
 }
 
 @OptIn(DelicateApi::class) suspend fun tryInteractivelyOpenLogCacheInIde() {
-  val lines = ulogCache ?: return
+  val lines = implictxOrNull<UHackySharedFlowLog>()?.flow?.replayCache ?: return
   isInteractiveCodeEnabled() && zenityAskIf("Try to open log cache in IDE (in tmp.notes)?").ax() || return
   writeFileWithDD(lines, SYS.pathToTmpNotes).ax()
   ideOpen(SYS.pathToTmpNotes).ax()

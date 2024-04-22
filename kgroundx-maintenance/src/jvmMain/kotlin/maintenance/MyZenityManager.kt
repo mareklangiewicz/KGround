@@ -23,7 +23,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 // TODO_later: probably refactor, rename and move it to kommandline
 //   But keep usubmit communication/protocol/invariants simple, not specific to zenity or any style of UI.
 //   (think also of other UI styles like neovim+fzf.vim)
-class MyZenityManager: USubmit {
+class MyZenityManager(val promptPrefix: String? = null): USubmit {
 
   private val mutex = Mutex()
 
@@ -33,7 +33,7 @@ class MyZenityManager: USubmit {
     val items = data.getAllUSubmitItems().chkItems()
     val taskOk = items.tasks.singleOrNull { it.isAccepting }
     val taskCancel = items.tasks.singleOrNull { it.isDeclining }
-    val prompt = joinLinesNN(items.issue?.name, items.progress?.str)
+    val prompt = joinLinesNN(promptPrefix, items.issue?.name, items.progress?.str)
     val title = coroutineName ?: items.issue?.type?.name
     val timeoutSec = items.timeout?.duration?.inWholeSeconds?.toInt()?.let { it + 1 }
     return when {
