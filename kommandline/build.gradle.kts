@@ -12,6 +12,7 @@ defaultBuildTemplateForBasicMppLib {
   api(Langiewicz.kground)
 }
 
+// Note: kground substitution also needed for KGround project, so kommandline module finds local kground module
 setMyWeirdSubstitutions(
   "kground" to "0.0.49", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
   "uspek" to "0.0.33", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/

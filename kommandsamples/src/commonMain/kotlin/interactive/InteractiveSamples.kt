@@ -17,9 +17,9 @@ import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.xclipOut
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
-import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ureflect.getReflectCallOrNull
 
@@ -31,7 +31,8 @@ import pl.mareklangiewicz.ureflect.getReflectCallOrNull
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
-  ulog.i("tryInteractivelySomethingRef(\"$reference\")")
+  val log = implictx<ULog>()
+  log.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
     xclipOut(XClipSelection.Clipboard).ax(SYS).singleOrNull()
       ?: bad { "Clipboard has to have code reference in single line." }
@@ -54,7 +55,8 @@ suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
-  ulog.i("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
+  val log = implictx<ULog>()
+  log.i("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
   val call = getReflectCallOrNull(className, memberName) ?: return
   // Note: prepareCallFor fails early if member not found,
   // before we start to interact with the user,
@@ -100,16 +102,19 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 /** @param question null means default question */
-suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS) = when {
-  this == null -> ulog.i("It is null. Nothing to open.")
-  this is Unit -> ulog.i("It is Unit. Nothing to open.")
-  this is String && isEmpty() -> ulog.i("It is empty string. Nothing to open.")
-  this is Collection<*> && isEmpty() -> ulog.i("It is empty collection. Nothing to open.")
-  !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> ulog.i("Not opening.")
-  else -> {
-    val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
-    writeFileWithDD(lines, cli.pathToTmpNotes).ax(cli)
-    ideOpen(cli.pathToTmpNotes).ax(cli)
+suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS): Any {
+  val log = implictx<ULog>()
+  return when {
+    this == null -> log.i("It is null. Nothing to open.")
+    this is Unit -> log.i("It is Unit. Nothing to open.")
+    this is String && isEmpty() -> log.i("It is empty string. Nothing to open.")
+    this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
+    !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> log.i("Not opening.")
+    else -> {
+      val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
+      writeFileWithDD(lines, cli.pathToTmpNotes).ax(cli)
+      ideOpen(cli.pathToTmpNotes).ax(cli)
+    }
   }
 }
 
