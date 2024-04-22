@@ -22,7 +22,6 @@ import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
-import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.implictxOrNull
 import pl.mareklangiewicz.ulog.w
