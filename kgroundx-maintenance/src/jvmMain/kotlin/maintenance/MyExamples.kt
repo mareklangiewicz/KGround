@@ -2,7 +2,6 @@
 
 package pl.mareklangiewicz.kgroundx.maintenance
 
-import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.flow.map
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path
@@ -11,15 +10,19 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kground.KGroundCtx
 import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.kground.usubmit.askForOneOf
-import pl.mareklangiewicz.kground.withKGroundCtx
+import pl.mareklangiewicz.usubmit.USubmit
+import pl.mareklangiewicz.usubmit.askForOneOf
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
+import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.usubmit.implictx
+import pl.mareklangiewicz.uctx.uctx
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.w
@@ -90,16 +93,16 @@ object MyWorkflowsExamples {
 object MyWeirdExamples {
 
   suspend fun tryToUseMyZenityManager() {
-    val manager = MyZenityManager()
-    withKGroundCtx(usubmit = manager) {
+    uctx(MyZenityManager(), UHackySharedFlowLog()) {
       withMyZenityManager()
     }
   }
 
   private suspend fun withMyZenityManager() {
-    val kg = coroutineContext[KGroundCtx] ?: bad { "No KGroundCtx available" }
-    val answer = kg.askForOneOf("How do you feel?", "Fine", "Bad")
-    kg.ulog.w(answer)
+    val log = implictx<ULog>()
+    val submit = implictx<USubmit>()
+    val answer = submit.askForOneOf("How do you feel?", "Fine", "Bad")
+    log.w(answer)
   }
 
   suspend fun tryToDiffMySettingsKtsFiles() {

@@ -1,8 +1,10 @@
 package pl.mareklangiewicz.ulog
 
-import pl.mareklangiewicz.ulog.ULogLevel.*
 import kotlin.coroutines.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.bad
+import pl.mareklangiewicz.uctx.UCtx
+import pl.mareklangiewicz.ulog.ULogLevel.*
 
 /**
  * NONE should always be ignored (not logged)
@@ -21,10 +23,15 @@ enum class ULogLevel(val symbol: Char) {
   ASSERT('A'),
 }
 
-fun interface ULog {
+fun interface ULog: UCtx {
   operator fun invoke(level: ULogLevel, data: Any?)
+  companion object Key : CoroutineContext.Key<ULog>
+  override val key: CoroutineContext.Key<*> get() = Key
 }
+suspend inline fun <reified T: ULog> implictx(): T =
+  coroutineContext[ULog] as? T ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
 
+@Deprecated("")
 interface WithULog {
   val ulog: ULog
 }

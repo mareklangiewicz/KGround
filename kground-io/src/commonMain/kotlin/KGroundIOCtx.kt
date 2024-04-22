@@ -1,16 +1,18 @@
 package pl.mareklangiewicz.kground.io
 
+import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import okio.FileSystem
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kground.usubmit.*
+import pl.mareklangiewicz.usubmit.*
 import pl.mareklangiewicz.ulog.*
-import kotlin.coroutines.*
 
+@Deprecated("")
 interface WithFS {
   val fs: FileSystem
 }
 
+@Deprecated("")
 interface WithKGroundIO : WithKGround, WithFS
 
 /**
@@ -23,6 +25,7 @@ interface WithKGroundIO : WithKGround, WithFS
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("")
 open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmit) : KGroundCtx(ulog, usubmit),
   WithKGroundIO {
   companion object Key : AbstractCoroutineContextKey<KGroundCtx, KGroundIOCtx>(KGroundCtx, { it as? KGroundIOCtx })
@@ -34,6 +37,7 @@ open class KGroundIOCtx(override val fs: FileSystem, ulog: ULog, usubmit: USubmi
  * @param ulog set to non-null to set specific [ULog] in context,
  * @param usubmit set to non-null to set specific [USubmit] in context,
  */
+@Deprecated("")
 suspend fun <T> withKGroundIOCtx(
   name: String? = null,
   fs: FileSystem? = null,

@@ -4,15 +4,27 @@ import kotlinx.coroutines.*
 import okio.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kground.io.*
-import pl.mareklangiewicz.kground.usubmit.*
+import pl.mareklangiewicz.usubmit.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
+import pl.mareklangiewicz.bad.bad
+import pl.mareklangiewicz.uctx.UCtx
 
+
+open class USys(val fs: FileSystem, val cli: CLI) : UCtx {
+  companion object Key : CoroutineContext.Key<USys>
+  override val key: CoroutineContext.Key<*> get() = Key
+}
+suspend inline fun <reified T: USys> implictx(): T =
+  coroutineContext[USys] as? T ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+
+@Deprecated("")
 interface WithCLI {
   val cli: CLI
 }
 
+@Deprecated("")
 interface WithKGroundXIO : WithKGroundIO, WithCLI
 
 /**
@@ -25,6 +37,7 @@ interface WithKGroundXIO : WithKGroundIO, WithCLI
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("")
 open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usubmit: USubmit) :
   KGroundIOCtx(fs, ulog, usubmit), WithKGroundXIO {
   companion object Key :
@@ -44,6 +57,7 @@ open class KGroundXIOCtx(override val cli: CLI, fs: FileSystem, ulog: ULog, usub
  * when null it tries to use one from current (parent) [KGroundCtx],
  * and defaults to [pl.mareklangiewicz.ulog.hack.ulog] if no [ULog] found.
  */
+@Deprecated("")
 suspend fun <T> withKGroundXIOCtx(
   name: String? = null,
   cli: CLI? = null,

@@ -1,23 +1,32 @@
 @file:Suppress("unused")
 
-package pl.mareklangiewicz.kground.usubmit
+package pl.mareklangiewicz.usubmit
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 import pl.mareklangiewicz.bad.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import pl.mareklangiewicz.annotations.ExperimentalApi
+import pl.mareklangiewicz.uctx.UCtx
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.umath.lerpInv
 
-fun interface USubmit {
+fun interface USubmit : UCtx {
   suspend operator fun invoke(data: Any?): Any?
+  companion object Key : CoroutineContext.Key<USubmit>
+  override val key: CoroutineContext.Key<*> get() = Key
 }
+suspend inline fun <reified T: USubmit> implictx(): T =
+  coroutineContext[USubmit] as? T ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
 
+@Deprecated("")
 interface WithUSubmit {
   val usubmit: USubmit
 }
 
+@Deprecated("")
 class USubmitNotSupportedErr : USubmit {
   override suspend fun invoke(data: Any?): Nothing = bad { "USubmit is not supported in this context." }
 }
@@ -151,15 +160,15 @@ val UTask.isDeclining: Boolean get() =
 val UTask.isCustom: Boolean get() = !isAccepting && !isDeclining
 
 @OptIn(ExperimentalApi::class)
-suspend fun WithUSubmit.askIf(question: String, labelYes: String = "Yes", labelNo: String = "No"): Boolean {
+suspend fun USubmit.askIf(question: String, labelYes: String = "Yes", labelNo: String = "No"): Boolean {
   val taskYes = UTask(labelYes).reqThis { isAccepting }
   val taskNo = UTask(labelNo).reqThis { isDeclining }
-  return usubmit(UIssue(question, UIssueType.Question), taskYes, taskNo) == taskYes
+  return this(UIssue(question, UIssueType.Question), taskYes, taskNo) == taskYes
   // BTW it's fine if we get another instance of task with matching label (we use "==" on data classes)
 }
 
 @OptIn(ExperimentalApi::class)
-suspend fun WithUSubmit.askForOneOf(question: String, vararg answers: String): String? {
+suspend fun USubmit.askForOneOf(question: String, vararg answers: String): String? {
   val tasks = answers.map(::UTask).toTypedArray()
-  return (usubmit(UIssue(question, UIssueType.Question), *tasks) as? UTask)?.name
+  return (this(UIssue(question, UIssueType.Question), *tasks) as? UTask)?.name
 }

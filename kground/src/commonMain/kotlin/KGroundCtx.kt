@@ -1,11 +1,11 @@
 package pl.mareklangiewicz.kground
 
 import kotlinx.coroutines.*
-import pl.mareklangiewicz.kground.usubmit.*
+import pl.mareklangiewicz.usubmit.*
 import pl.mareklangiewicz.ulog.*
 import kotlin.coroutines.*
 
-// TODO NOW: experiment and test it! (maybe incorporate ulogging everywhere first?)
+@Deprecated("")
 interface WithKGround : WithULog, WithUSubmit
 
 /**
@@ -18,6 +18,7 @@ interface WithKGround : WithULog, WithUSubmit
  * Warning: Make sure all derived classes also follow this experimental API rules correctly.
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("")
 open class KGroundCtx(override val ulog: ULog, override val usubmit: USubmit) : WithKGround, CoroutineContext.Element {
   companion object Key : CoroutineContext.Key<KGroundCtx>
 
@@ -38,6 +39,7 @@ infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) {
  * If no [ULog] at all, it defaults to [pl.mareklangiewicz.ulog.hack.ulog] (temporary default impl).
  * If no [USubmit] at all, it defaults to failing [USubmitNotSupportedErr]
  */
+@Deprecated("")
 suspend fun <T> withKGroundCtx(
   name: String? = null,
   ulog: ULog? = null,
