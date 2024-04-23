@@ -43,4 +43,4 @@ actual fun <ReducedOut> ReducedScript<ReducedOut>.axb(cli: CLI, dir: String?): R
   runBlocking { ax(cli, dir) }
 
 
-fun Flow<*>.logEachWithMillisBlocking() = runBlocking { logEachWithMillis() }
+fun Flow<*>.logEachBlocking() = runBlocking { logEach() }
