@@ -55,7 +55,7 @@ var PathToKGroundProject = PathToKotlinProjects / "KGround"
           foundCount++
           ulog.i("found in file ($foundCount): $ktFilePathStr")
           ulog.i("found code:")
-          it.lines().logEach { ulog.i(it) }
+          it.lines().logEach(ulog)
         }
       }
     }

@@ -10,6 +10,8 @@ import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
@@ -65,15 +67,15 @@ fun downloadTmpFile(
 }
 
 @OptIn(DelicateApi::class)
-private fun CLI.download(url: String, to: Path) {
+private fun CLI.download(url: String, to: Path, log: ULog = ulog) {
   // TODO: Add curl to KommandLine library, then use it here
   // -s so no progress bars on error stream; -S to report actual errors on error stream
   val k = kommand("curl", "-s", "-S", "-o", to.toString(), url)
   val result = start(k).waitForResult()
   result.unwrap { err ->
     if (err.isNotEmpty()) {
-      ulog.e("FAIL: Error stream was not empty:")
-      err.logEach { ulog.e(it) }
+      log.e("FAIL: Error stream was not empty:")
+      err.logEach(log, ULogLevel.ERROR)
       false
     } else true
   }

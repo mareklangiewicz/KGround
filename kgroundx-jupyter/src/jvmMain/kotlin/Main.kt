@@ -20,6 +20,7 @@ import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
@@ -72,7 +73,7 @@ private fun ULog.exWithTrace(ex: Throwable) {
   e(ex.toString())
   ex.stackTrace?.let {
     e("STACK TRACE:")
-    it.toList().logEach { e(it) }
+    it.toList().logEach(this, ULogLevel.ERROR)
     // each line have to be logged separately: don't use it.joinToString("\n"), because truncation in logger
   }
   ex.cause?.let {
