@@ -17,7 +17,7 @@ defaultBuildTemplateForBasicMppLib {
 
 // Note: kground substitution also needed for KGround project, so kommandsamples module finds local kground module
 setMyWeirdSubstitutions(
-  "kground" to "0.0.49", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+  "kground" to "0.0.50", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
   "uspek" to "0.0.33", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
   "uspek-junit5" to "0.0.33",
   "tuplek" to "0.0.14", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
