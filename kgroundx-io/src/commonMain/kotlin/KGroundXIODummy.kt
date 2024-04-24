@@ -1,6 +1,6 @@
-package pl.mareklangiewicz.kgroundx
+package pl.mareklangiewicz.kgroundx.io
 
-import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.tee
 
 // TODO_later:
 // Some dummy code is needed in kotlinx module, so we don't have issues with maven publications.
@@ -9,4 +9,4 @@ import pl.mareklangiewicz.kground.*
 // And maybe someday remove this code when fixed.
 // UPDATE: Or maybe remove this whole module??
 
-fun dummyKGroundXTee() = "dummy kgroundx".tee
+fun dummyKGroundXIOTee() = "dummy kgroundx".tee

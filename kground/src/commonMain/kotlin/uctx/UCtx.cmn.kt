@@ -2,6 +2,7 @@ package pl.mareklangiewicz.uctx
 
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
 
@@ -23,6 +24,8 @@ import kotlinx.coroutines.withContext
  */
 interface UCtx : CoroutineContext.Element
 
-suspend inline fun <R> uctx(vararg elems: UCtx, noinline block: suspend CoroutineScope.() -> R) =
-  withContext(elems.fold<UCtx, CoroutineContext>(EmptyCoroutineContext) { a, b -> a + b }, block)
-
+suspend inline fun <R> uctx(vararg elems: UCtx, name: String? = null, noinline block: suspend CoroutineScope.() -> R) =
+  withContext(
+    elems.fold<UCtx, CoroutineContext>(name?.let(::CoroutineName) ?: EmptyCoroutineContext) { a, b -> a + b },
+    block
+  )

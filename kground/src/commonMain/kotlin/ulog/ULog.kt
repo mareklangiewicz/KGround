@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.ulog
 
 import kotlin.coroutines.*
-import kotlin.time.TimeMark
+import kotlin.time.ComparableTimeMark
 import kotlin.time.TimeSource
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.bad
@@ -56,8 +56,8 @@ fun ULog.e(data: Any?) = this(ERROR, data)
 // I want MINIMALISTIC API here, and to promote single arg functions that compose better with UPue.
 
 class ULogPrintLn(
-  val minLevel: ULogLevel = VERBOSE,
-  val prefix: String = "ulog",
+  val minLevel: ULogLevel = DEBUG,
+  val prefix: String = "L",
   val separator: String = " ",
 ) : ULog {
   override operator fun invoke(level: ULogLevel, data: Any?) {
@@ -65,7 +65,7 @@ class ULogPrintLn(
   }
 }
 
-class ULogEntry(val data: Any?, val context: CoroutineContext? = null, val time: TimeMark? = null)
+class ULogEntry(val data: Any?, val context: CoroutineContext? = null, val time: ComparableTimeMark? = null)
 
 /**
  * full log - receiving side can check the job hierarchy, coroutine name, time mark, etc.
@@ -76,7 +76,7 @@ class ULogEntry(val data: Any?, val context: CoroutineContext? = null, val time:
  * Generally we support marking time on both sides. Here when ULog user want to make sure time is logged/saved;
  * but also some specific ULog impl can decide to capture current time even if log messages don't carry time.
  */
-suspend fun ULog.full(level: ULogLevel, data: Any?, time: TimeMark = TimeSource.Monotonic.markNow()) =
+suspend fun ULog.full(level: ULogLevel, data: Any?, time: ComparableTimeMark = TimeSource.Monotonic.markNow()) =
   this(level, ULogEntry(data, coroutineContext, time))
 suspend fun ULog.fd(data: Any?) = full(DEBUG, data)
 suspend fun ULog.fi(data: Any?) = full(INFO, data)
@@ -84,7 +84,7 @@ suspend fun ULog.fw(data: Any?) = full(WARN, data)
 suspend fun ULog.fe(data: Any?) = full(ERROR, data)
 
 
-fun ULog.timed(level: ULogLevel, data: Any?, time: TimeMark = TimeSource.Monotonic.markNow()) =
+fun ULog.timed(level: ULogLevel, data: Any?, time: ComparableTimeMark = TimeSource.Monotonic.markNow()) =
   this(level, ULogEntry(data, null, time))
 fun ULog.td(data: Any?) = timed(DEBUG, data)
 fun ULog.ti(data: Any?) = timed(INFO, data)

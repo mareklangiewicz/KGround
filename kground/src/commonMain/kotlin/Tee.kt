@@ -47,6 +47,7 @@ private val TeeDefaultLog = ULogPrintLn(prefix = "tee")
 
 // FIXME: move it all to better places (but still in kground repo); refactor/redesign
 //   (I need it all in kground right now, so this is temporary implementation)
+//   UPDATE: Think what should be in kground-io/USys (and what flags can be removed from kommandline/CLI)
 expect fun getCurrentTimeMs(): Long
 expect fun getCurrentTimeStr(): String
 expect fun getCurrentThreadName(): String

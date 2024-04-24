@@ -2,6 +2,11 @@
 
 package pl.mareklangiewicz.udata
 
+import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlinx.coroutines.CoroutineName
+import pl.mareklangiewicz.ulog.ULogEntry
+
 /*
  * Micro string representations of common data types.
  * Doesn't have to be unique, doesn't have to be maximally precise.
@@ -51,6 +56,20 @@ inline fun Boolean?.str(
   null -> strNull
 }
 
+fun ULogEntry.str(
+  startTime: ComparableTimeMark? = null,
+  vararg useNamedArgs: Unit,
+  maxLength: Int = STR_DEFAULT_MAX_LENGTH,
+  maxIndicator: String = STR_DEFAULT_MAX_INDICATOR,
+): String {
+  // FIXME: this is fast temporary implementation. implement something more versatile/parametrized
+  //   maybe even optional logging of job hierarchy?? nah...
+  val name = context?.get(CoroutineName)?.name
+  val elapsed: Duration? = if (startTime == null || time == null) null else time - startTime
+  return listOf(elapsed, name, data.str(maxLength = maxLength, maxIndicator = maxIndicator))
+    .filterNotNull().joinToString(" ") // FIXME_later: joined str can be longer than maxLength
+}
+
 
 inline fun Any?.str(
   vararg useNamedArgs: Unit,
@@ -64,6 +83,7 @@ inline fun Any?.str(
   is CharSequence -> str(maxLength = maxLength, maxIndicator = maxIndicator)
   is Number -> str(maxLength = maxLength, maxIndicator = maxIndicator, precision = precision)
   is Boolean? -> str(strTrue = strTrue, strFalse = strFalse, strNull = strNull)
+  is ULogEntry -> str(maxLength = maxLength, maxIndicator = maxIndicator)
   else -> toString().str(maxLength = maxLength, maxIndicator = maxIndicator)
 }
 
