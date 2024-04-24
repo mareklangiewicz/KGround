@@ -9,7 +9,6 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.Vim
-import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.ax
@@ -41,8 +40,9 @@ import pl.mareklangiewicz.kommand.zenity.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowError
 import pl.mareklangiewicz.kommand.zenity.zenityShowInfo
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.implictx
 
 /**
  * A bunch of samples to show on my machine when presenting KommandLine.
@@ -150,7 +150,7 @@ data object MyDemoSamples {
 
   val interactiveCodeEnable = ReducedScript { setUserFlag(SYS, "code.interactive", true) }
   val interactiveCodeDisable = ReducedScript { setUserFlag(SYS, "code.interactive", false) }
-  val interactiveCodeLog = ReducedScript { ulog.i(getUserFlagFullStr(SYS, "code.interactive")) }
+  val interactiveCodeLog = ReducedScript { implictx<ULog>().i(getUserFlagFullStr(SYS, "code.interactive")) }
 
   // Note: NOT InteractiveScript because I want to be able to switch interactive code even when it's NOT enabled.
   val interactiveCodeSwitch = ReducedScript {
@@ -171,22 +171,23 @@ data object MyDemoSamples {
   }
 
   val playWithKonfigExamples = InteractiveScript {
+    val log = implictx<ULog>()
     val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
-    ulog.i("before adding anything:")
+    log.i("before adding anything:")
     k.logEachKeyVal()
     k["tmpExampleInteger1"] = 111.toString()
     k["tmpExampleInteger2"] = 222.toString()
     k["tmpExampleString1"] = "some text 1"
     k["tmpExampleString2"] = "some text 2"
-    ulog.i("after adding 4 keys:")
+    log.i("after adding 4 keys:")
     k.logEachKeyVal()
     k["tmpExampleInteger2"] = null
     k["tmpExampleString2"] = null
-    ulog.i("after nulling 2 keys:")
+    log.i("after nulling 2 keys:")
     k.logEachKeyVal()
     k["tmpExampleInteger1"] = null
     k["tmpExampleString1"] = null
-    ulog.i("after nulling other 2 keys:")
+    log.i("after nulling other 2 keys:")
     k.logEachKeyVal()
   }
 

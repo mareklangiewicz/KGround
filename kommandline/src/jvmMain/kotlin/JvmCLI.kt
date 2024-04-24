@@ -9,8 +9,6 @@ import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
 
 actual fun provideSysCLI(): CLI = JvmCLI()
 
@@ -33,7 +31,6 @@ class JvmCLI : CLI {
     JvmExecProcess(
       ProcessBuilder()
         .apply {
-          ulog.d(kommand.line())
           command(kommand.toArgs())
           directory(dir?.let(::File))
           inFile?.let(::File)?.let(::redirectInput)

@@ -4,12 +4,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.*
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
 actual fun provideSysCLI(): CLI = JsEvalFunCLI()
 
-class JsEvalFunCLI : CLI {
+class JsEvalFunCLI(val log: ULog = UHackySharedFlowLog()) : CLI {
 
   override val isRedirectFileSupported get() = false
 
@@ -32,8 +32,8 @@ class JsEvalFunCLI : CLI {
     req(errFile == null) { "errFile unsupported" }
     req(envModify == null) { "envModify unsupported" }
     val code = kommand.lineFun()
-    ulog.d(code)
-    return JsEvalFunProcess(code)
+    log.d(code)
+    return JsEvalFunProcess(code, log)
   }
 
   companion object {
@@ -49,13 +49,11 @@ class JsEvalFunCLI : CLI {
 
 private var isEvalEnabled = false
 
-private class JsEvalFunProcess(code: String) : ExecProcess {
+private class JsEvalFunProcess(code: String, var log: ULog? = null) : ExecProcess {
 
   private var exit: Int
   private var out: Iterator<String>?
   private var err: Iterator<String>?
-
-  var logln: (line: String) -> Unit = { console.log(it) }
 
   init {
     chk(isEvalEnabled) { "eval is disabled" }
@@ -90,29 +88,17 @@ private class JsEvalFunProcess(code: String) : ExecProcess {
     stderrClose()
   }
 
-  @DelicateApi
-  override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) = logln(line)
+  @DelicateApi override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean) { log?.i(line) }
 
-  @DelicateApi
-  override fun stdinClose() {
-    logln = {}
-  }
+  @DelicateApi override fun stdinClose() { log = null }
 
-  @DelicateApi
-  override fun stdoutReadLine(): String? = out?.takeIf { it.hasNext() }?.next()
+  @DelicateApi override fun stdoutReadLine(): String? = out?.takeIf { it.hasNext() }?.next()
 
-  @DelicateApi
-  override fun stdoutClose() {
-    out = null
-  }
+  @DelicateApi override fun stdoutClose() { out = null }
 
-  @DelicateApi
-  override fun stderrReadLine(): String? = err?.takeIf { it.hasNext() }?.next()
+  @DelicateApi override fun stderrReadLine(): String? = err?.takeIf { it.hasNext() }?.next()
 
-  @DelicateApi
-  override fun stderrClose() {
-    err = null
-  }
+  @DelicateApi override fun stderrClose() { err = null }
 
   @OptIn(DelicateApi::class)
   override val stdin = defaultStdinCollector(Dispatchers.Default, ::stdinWriteLine, ::stdinClose)

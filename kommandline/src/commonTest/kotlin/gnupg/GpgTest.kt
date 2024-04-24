@@ -8,8 +8,9 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
-import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
+
+
+// FIXME NOW: refactor as samples
 
 @OptIn(DelicateApi::class)
 class GpgTest {
@@ -42,6 +43,6 @@ class GpgTest {
 }
 
 private fun ifOnNiceJvmCLI(block: CLI.() -> Unit) = CLI.SYS.run {
-  if (isJvm && isUbuntu) block() else ulog.d("Disabled on this CLI.")
+  if (isJvm && isUbuntu) block() else println("Disabled on this CLI.")
 }
 

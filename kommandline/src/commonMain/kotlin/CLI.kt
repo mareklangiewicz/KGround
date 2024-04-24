@@ -4,8 +4,9 @@ import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
 expect fun provideSysCLI(): CLI
 
@@ -58,11 +59,11 @@ interface CLI {
 
   companion object {
     val SYS = provideSysCLI()
-    val FAKE = FakeCLI()
   }
 }
 
 class FakeCLI(
+  val log: ULog = UHackySharedFlowLog(),
   private val chkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
     { _, _, _, _, _, _, _, _ -> },
 ) : CLI {
@@ -82,19 +83,19 @@ class FakeCLI(
     errFileAppend: Boolean,
     envModify: (MutableMap<String, String>.() -> Unit)?,
   ): ExecProcess {
-    ulog.d("start($kommand, $dir, ...)")
+    log.d("start($kommand, $dir, ...)")
     chkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
-    return FakeProcess()
+    return FakeProcess(log)
   }
 }
 
 @DelicateApi
-class FakeProcess() : ExecProcess {
+class FakeProcess(val log: ULog) : ExecProcess {
   override fun waitForExit(finallyClose: Boolean) = 0
   override suspend fun awaitExit(finallyClose: Boolean): Int = waitForExit(finallyClose)
-  override fun kill(forcibly: Boolean) = ulog.d("cancel($forcibly)")
+  override fun kill(forcibly: Boolean) = log.d("cancel($forcibly)")
   override fun close() = Unit
-  override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean): Unit = ulog.d("input line: $line")
+  override fun stdinWriteLine(line: String, lineEnd: String, thenFlush: Boolean): Unit = log.d("input line: $line")
   override fun stdinClose() = Unit
   override fun stdoutReadLine() = null
   override fun stdoutClose() = Unit

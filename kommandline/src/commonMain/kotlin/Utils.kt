@@ -3,8 +3,9 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
+import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.implictx
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -41,13 +42,14 @@ class BadStdOutStateErr(val stdout: List<String>, message: String? = null) : Bad
 // TODO_someday: figure out a nicer approach not to lose full error messages (maybe when we have context receivers in kotlin).
 // But it's nice to have it mostly on the caller side. To just throw collected stderr/out on kommand execution side,
 // without logging or any additional complexity there.
-inline fun withLogBadStreams(
+suspend inline fun withLogBadStreams(
   limitLines: Int? = 40,
   stdoutLinePrefix: String = "STDOUT: ",
   stderrLinePrefix: String = "STDERR: ",
   skippedMarkersSuffix: String = " lines skipped",
   code: () -> Unit,
 ) {
+  val log = implictx<ULog>()
   // Kotlin doesn't support local fun inside inline fun, or even private fun below in the same file,
   // that's the reason why logSome lambda is "val"
   val logSome: List<String>.(prefix: String) -> Unit = { prefix ->
@@ -59,8 +61,8 @@ inline fun withLogBadStreams(
       limitLines > size -> size
       else -> limitLines
     }
-    for (idx in 0 until max) ulog.e(prefix + this[idx])
-    if (max < size) ulog.e(prefix + (size - max) + skippedMarkersSuffix)
+    for (idx in 0 until max) log.e(prefix + this[idx])
+    if (max < size) log.e(prefix + (size - max) + skippedMarkersSuffix)
   }
   try {
     code()

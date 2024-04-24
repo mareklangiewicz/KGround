@@ -7,20 +7,21 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.term.termXDefault
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
+import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.w
 
+// TODO: Make these interactive wrappers suspendable (or delete if when needed at all) and use: implictx<ULog>()
+private val log: ULog = UHackySharedFlowLog()
 
-// TODO_someday: logging with ulog from context receiver instead of current hacky impl
 @DelicateApi("API for manual interactive experimentation.")
 fun isInteractiveCodeEnabled(cli: CLI = SYS) = when {
-  !cli.isJvm -> false.also { ulog.w("Interactive code is only available on JvmCLI (for now).") }
-  !getUserFlag(cli, "code.interactive") -> false.also { ulog.w("Interactive code NOT enabled.") }
+  !cli.isJvm -> false.also { log.w("Interactive code is only available on JvmCLI (for now).") }
+  !getUserFlag(cli, "code.interactive") -> false.also { log.w("Interactive code NOT enabled.") }
   else -> true
 }
 
-// TODO_someday: logging with ulog from context receiver instead of current hacky impl
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 inline fun ifInteractiveCodeEnabled(cli: CLI = SYS, code: () -> Unit) {
   if (isInteractiveCodeEnabled(cli)) code()
@@ -64,7 +65,7 @@ fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execInDir: St
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =
   InteractiveScript { cli ->
-    ulog.d(lineRaw())
+    log.d(lineRaw())
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
     tryInteractivelyStartInTerm(cli, startInDir = execInDir)
   }

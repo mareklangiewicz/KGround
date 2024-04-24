@@ -6,8 +6,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.ulog.hack.ulog
-import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.ULogLevel
+import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 
@@ -128,7 +129,11 @@ fun IKonfig.withChecks(
 @Deprecated("TODO: implement")
 fun konfigInFile(file: String, cli: CLI = CLI.SYS): IKonfig = TODO()
 
-fun IKonfig.logEachKeyVal(logln: (String) -> Unit = { ulog.i(it) }) = keys.forEach { logKeyVal(it, logln) }
+suspend fun IKonfig.logEachKeyVal(level: ULogLevel = ULogLevel.INFO) {
+  val log = implictx<ULog>()
+  keys.forEach { logKeyVal(log, level, it) }
+}
 
-fun IKonfig.logKeyVal(key: String, logln: (String) -> Unit = { ulog.i(it) }) = logln(getKeyValStr(key))
+fun IKonfig.logKeyVal(log: ULog, level: ULogLevel, key: String) = log(level, getKeyValStr(key))
+
 fun IKonfig.getKeyValStr(key: String) = "konfig[\"$key\"] == \"${this[key]}\""
