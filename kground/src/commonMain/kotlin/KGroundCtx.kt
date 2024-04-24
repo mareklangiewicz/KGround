@@ -36,7 +36,7 @@ infix fun CoroutineContext.plusIfNN(c: CoroutineContext?) = when (c) {
  * @param ulog set to non-null to change the [ULog],
  * @param usubmit set to non-null to change the [USubmit],
  * when null [ulog]/[usubmit], it tries to use [ULog]/[USubmit] from current (parent) [KGroundCtx],
- * If no [ULog] at all, it defaults to [pl.mareklangiewicz.ulog.hack.ulog] (temporary default impl).
+ * If no [ULog] at all, it defaults to [ULogPrintLn]
  * If no [USubmit] at all, it defaults to failing [USubmitNotSupportedErr]
  */
 @Deprecated("")
@@ -47,7 +47,7 @@ suspend fun <T> withKGroundCtx(
   block: suspend CoroutineScope.() -> T,
 ): T = withContext(
   KGroundCtx(
-    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: pl.mareklangiewicz.ulog.hack.ulog,
+    ulog ?: coroutineContext[KGroundCtx]?.ulog ?: ULogPrintLn(),
     usubmit ?: coroutineContext[KGroundCtx]?.usubmit ?: USubmitNotSupportedErr(),
   ) plusIfNN name?.let(::CoroutineName),
   block,

@@ -15,8 +15,6 @@ import kotlinx.cinterop.convert
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.ulog.hack.ulog
-import pl.mareklangiewicz.ulog.*
 import platform.posix.getcwd
 import platform.posix.size_t
 import platform.posix.uint8_tVar
@@ -38,7 +36,7 @@ actual fun getCurrentAbsolutePath(): String = getCurrentDirectoryFromGPTAdvice()
 
 @DelicateApi
 actual inline fun <R> synchronizedMaybe(lock: Any, block: () -> R): R {
-  ulog.e("No actual synchronization on K/N implemented yet.") // FIXME
+  println("No actual synchronization on K/N implemented yet.") // FIXME
   return block()
 }
 

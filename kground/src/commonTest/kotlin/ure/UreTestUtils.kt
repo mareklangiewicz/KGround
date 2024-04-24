@@ -5,7 +5,6 @@ import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
 import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
 
@@ -42,7 +41,7 @@ fun Ure.tstCompiles(
  */
 fun Ure.tstDoesNotCompile() = "does NOT compile".oThrows<Throwable>(
   {
-    ulog.d(it) // throwables here are very interesting and I definitely want to have it logged somewhere (debug)
+    log.d(it) // throwables here are very interesting and I definitely want to have it logged somewhere (debug)
     true
   },
 ) { compile() }

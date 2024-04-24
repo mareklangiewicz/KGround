@@ -9,8 +9,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.uctx.UCtx
-import pl.mareklangiewicz.ulog.hack.ulog
-import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.umath.lerpInv
 
 fun interface USubmit : UCtx {
@@ -118,7 +116,7 @@ data class USubmitItems(
   private inline fun <reified T> oneOrNull(vararg objs: T?, failOnDuplicates: Boolean = true): T? {
     val nn = objs.filterNotNull()
     if (failOnDuplicates) nn.chkSize(max = 1)
-    else if (nn.size > 1) ulog.w("Ignoring ${T::class} duplicates")
+    else if (nn.size > 1) println("Ignoring ${T::class} duplicates")
     return nn.firstOrNull()
   }
 }
@@ -136,7 +134,7 @@ fun Any?.getAllUSubmitItems(
   is Collection<*> -> fold(USubmitItems()) { acc, next -> acc.mergeWith(next.getAllUSubmitItems(), failOnDuplicates) }
   else ->
     if (failOnUnexpected) bad { "Unexpected usubmit data: $this" }
-    else USubmitItems().also { ulog.w("Ignoring unexpected usubmit data: $this") }
+    else USubmitItems().also { println("Ignoring unexpected usubmit data: $this") }
 }
 
 @ExperimentalApi

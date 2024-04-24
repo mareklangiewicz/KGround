@@ -5,12 +5,18 @@ import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kground.teePP
 import pl.mareklangiewicz.uspek.*
 import kotlin.test.Test
+import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
+
+// TODO_someday: all my tests should be suspendable, and log should be injected to context and received by implictx
+internal var log: ULog = UHackySharedFlowLog()
 
 class TestUreCmn {
 
   init {
     "INIT ${this::class.simpleName}".teePP
   }
+
 
   @Test fun t() {
     uspek { testUreCmn() }

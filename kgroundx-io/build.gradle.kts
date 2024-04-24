@@ -16,8 +16,8 @@ defaultBuildTemplateForBasicMppLib {
 }
 
 setMyWeirdSubstitutions(
-  "kommandline" to "0.0.55",
-  "kommandsamples" to "0.0.55",
+  "kommandline" to "0.0.57",
+  "kommandsamples" to "0.0.57",
   "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
 )
 
