@@ -9,6 +9,9 @@ import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
+import pl.mareklangiewicz.udata.str
+import pl.mareklangiewicz.uctx.uctx
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
@@ -24,11 +27,15 @@ import pl.mareklangiewicz.ulog.i
  */
 @OptIn(DelicateApi::class, NotPortableApi::class)
 fun main(args: Array<String>) = runBlocking {
-  when {
-    args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
-    args.size == 2 && args[0] == "get-user-flag" -> ulog.i(getUserFlagFullStr(SYS, args[1]))
-    args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
-    else -> bad { "Incorrect args. See Main.kt:main" }
+  val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
+  // val submit = MyZenityManager() // FIXME NOW move MyZenityManager to kommandline
+  uctx(log/*, submit*/) {
+    when {
+      args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
+      args.size == 2 && args[0] == "get-user-flag" -> ulog.i(getUserFlagFullStr(SYS, args[1]))
+      args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
+      else -> bad { "Incorrect args. See Main.kt:main" }
+    }
   }
 }
 

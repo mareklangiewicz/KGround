@@ -39,5 +39,6 @@ data object Samples {
   val Debian = pl.mareklangiewicz.kommand.debian.DebianSamples
   val Git = pl.mareklangiewicz.kommand.git.GitSamples
   val GitHub = pl.mareklangiewicz.kommand.github.GhSamples
+  val Gnome = pl.mareklangiewicz.kommand.gnome.GnomeSamples
 }
 

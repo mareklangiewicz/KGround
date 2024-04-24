@@ -25,9 +25,6 @@ internal class Integration : JupyterIntegration() {
 }
 
 
-@OptIn(ExperimentalTime::class)
-suspend fun Flow<*>.logm() = logEachWithMillis()
-
 fun Flow<*>.logb() = logEachBlocking()
 
 
