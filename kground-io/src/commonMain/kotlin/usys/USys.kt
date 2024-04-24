@@ -2,12 +2,18 @@ package pl.mareklangiewicz.kground.io.usys
 
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import okio.FileSystem
 import pl.mareklangiewicz.bad.bad
+import pl.mareklangiewicz.kground.io.DefaultDispatcherForIO
+import pl.mareklangiewicz.kground.io.DefaultOkioFileSystemOrErr
 import pl.mareklangiewicz.uctx.UCtx
 
 
-open class USys(val fs: FileSystem) : UCtx {
+open class USys(
+  val fs: FileSystem = DefaultOkioFileSystemOrErr,
+  val dispatcher: CoroutineDispatcher = DefaultDispatcherForIO,
+) : UCtx {
   companion object Key : CoroutineContext.Key<USys>
   override val key: CoroutineContext.Key<*> get() = Key
 
