@@ -102,8 +102,8 @@ object MyWeirdExamples {
 
   suspend fun tryToUseAnotherUSubmitAndULog() {
     val log = UHackySharedFlowLog { level, data -> "ANOTHER L ${level.symbol} ${data.str(maxLength = 512)}" }
-    val manager = MyZenityManager(promptPrefix = "ANOTHER ZENITY")
-    uctx(manager, log) {
+    val submit = ZenitySupervisor(promptPrefix = "ANOTHER ZENITY")
+    uctx(submit, log) {
       tryToUseImplicitUSubmitAndULog()
     }
   }

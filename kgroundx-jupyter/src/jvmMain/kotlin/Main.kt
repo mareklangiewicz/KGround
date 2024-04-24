@@ -8,7 +8,7 @@ import pl.mareklangiewicz.interactive.isInteractiveCodeEnabled
 import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.kgroundx.maintenance.MyZenityManager
+import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
@@ -39,7 +39,7 @@ import pl.mareklangiewicz.ulog.w
  */
 @OptIn(DelicateApi::class, NotPortableApi::class) fun main(args: Array<String>) = runBlocking {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
-  val submit = MyZenityManager()
+  val submit = ZenitySupervisor()
   uctx(log, submit) {
     when {
       args.size == 2 && args[0] == "try-code" -> try {

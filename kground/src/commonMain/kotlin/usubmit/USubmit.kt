@@ -36,57 +36,57 @@ class USubmitNotSupportedErr : USubmit {
  * The idea is to distill some quite useful, small, simple conventions for what data to put through USubmit and back.
  * But I still want to keep stable basic code above using Any?: "USubmit.invoke(data: Any?): Any?".
  * It's a "hole" in type system for good reasons. I don't want to force any conventions/types globally.
- * Code below is only proposed way to communicate between "worker"/"submitter" and "manager"/"user"/"decision maker".
+ * Code below is only proposed way to communicate between "worker"/"submitter" and "supervisor"/"user".
  * But basic general "contract" is always: Anything "Any?" can be potentially submitted and "Any?" can be returned.
  * But often (in specific project) both sides at runtime will agree what is accepted and what means what.
- * Maybe acceptable practice will be for client/worker code to first chk(usubmit is FamiliarManagerInterface)...
- * But I want typical client code to be developed independently of potential manager setup by the user.
+ * Maybe acceptable practice will be for client/worker code to first chk(usubmit is FamiliarSupervisorInterface)...
+ * But I want typical client code to be developed independently of potential supervisor setup by the user.
  */
 interface USubmitItem
 
 /**
- * Let's call the entity that calls [USubmit.invoke] the worker, and the one that reacts: the manager.
+ * Let's call the entity that calls [USubmit.invoke] the worker, and the one that reacts: the supervisor.
  * The worker can provide a list of [UTask] as his current "abilities" as [USubmit.invoke] parameter,
- * so the manager can choose one and return it from [USubmit.invoke] and the worker will actually do the chosen task.
- * Manager always can pause the worker by suspending [USubmit.invoke] call for long time;
- * Manager always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from [USubmit.invoke].
+ * so the supervisor can choose one and return it from [USubmit.invoke] and the worker will actually do the chosen task.
+ * Supervisor always can pause the worker by suspending [USubmit.invoke] call for long time;
+ * Supervisor always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from [USubmit.invoke].
  * Also [UIssue] can be included by worker to show sth to the user (but normally [UTask] is returned back).
  */
 data class UTask(val name: String) : USubmitItem
 
 /**
- * The worker can provide [UIssue] to [USubmit.invoke] to inform the manager/user about some issue.
+ * The worker can provide [UIssue] to [USubmit.invoke] to inform the supervisor/user about some issue.
  * These issues are meant to be "recoverable", so worker should be able to continue
- * if the manager returns normally from [USubmit.invoke].
+ * if the supervisor returns normally from [USubmit.invoke].
  * More critical worker issues/errors should be thrown as exceptions (as usual).
- * @param id identifies issue, so Manager+user can decide to sth like "Yes for all":
+ * @param id identifies issue, so Supervisor+user can decide to sth like "Yes for all":
  * automatically react the same way on future issues with the same [id]
  * for next... 100 same issues, or next... 5 minutes, etc.
  * I consider it bad to allow user to "Yes for all" for all the same issues FOREVER.
  * The "Yes for all" should be easily monitored (how many times it's automatically answered),
- * and easily turned off by user (when he sees manager is accepting too much)
+ * and easily turned off by user (when he sees supervisor is accepting too much)
  * BTW: for behavior like "Yes to all" to work, not only issue with the same id have to be provided
  * again, but also same [UTask] have to be provided, representing some specific answer, f.e. "Yes".
  * TODO_someday: think about serializable ids (and serializable everything here)
- *   so we can have remote managers easily (with kotlinx.serialization)
+ *   so we can have remote supervisor easily (with kotlinx.serialization)
  *   (cancellation/exceptions won't be easily serializable, but we can probably do it similarly to rsocket-kotlin)
  */
 data class UIssue(val name: String, val type: UIssueType, val id: Any? = null) : USubmitItem
 enum class UIssueType { Info, Warning, Error, Question }
 
 /**
- * A hint from worker to manager not to wait to long for user and return the same [UTimeout] object back after duration.
- * But manager can ignore it, obviously, or wait a bit longer when busy etc. (zenity support timeout only in seconds).
+ * A hint from worker to supervisor not to wait too long for user and return the same [UTimeout] object back after duration.
+ * But supervisor can ignore it, obviously, or wait a bit longer when busy etc. (zenity support timeout only in seconds).
  */
 data class UTimeout(val duration: Duration = 10.seconds) : USubmitItem
 
 /**
  * A way for worker to report current progress.
- * Usually manager will show it to the user continuously and update it,
+ * Usually supervisor will show it to the user continuously and update it,
  * when new [UProgress] (in the same coroutine/Job) is received.
  * Sometimes [max] (or even [min]) can also be updated during the Job,
  * for example when searching through big file tree and discovering new subtrees.
- * @param highlight Just a hint for manager to highlight current progress more. Usually with bold font.
+ * @param highlight Just a hint for supervisor to highlight current progress more. Usually with bold font.
  */
 data class UProgress(
   val pos: Float? = null,
