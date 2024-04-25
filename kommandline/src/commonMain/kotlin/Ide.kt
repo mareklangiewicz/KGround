@@ -22,11 +22,11 @@ fun ideOpen(
   ifNoIdeRunningStart: Type? = null,
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
-fun ideOrGVimOpen(path: String) = ReducedScript { cli, dir ->
+fun ideOrGVimOpen(path: String) = ReducedScript { dir ->
   try {
-    ideOpen(path).ax(cli, dir = dir)
+    ideOpen(path).ax(dir = dir)
   } catch (_: BadStateErr) {
-    gvim(path).ax(cli, dir = dir)
+    gvim(path).ax(dir = dir)
   }
 }
 
@@ -39,9 +39,9 @@ fun ideMerge(path1: String, path2: String, output: String, base: String? = null,
   ide(Cmd.Merge(path1, path2, output, base), ifNoIdeRunningStart)
 
 fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
-  ReducedScript { cli, dir ->
-    val type = getFirstRunningIdeType(cli) ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
-    ide(type, cmd, init).ax(cli, dir = dir)
+  ReducedScript { dir ->
+    val type = getFirstRunningIdeType() ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
+    ide(type, cmd, init).ax(dir = dir)
   }
 
 
@@ -181,22 +181,22 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
 
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
-private suspend fun getFirstRunningIdeType(cli: CLI): Type? {
+private suspend fun getFirstRunningIdeType(): Type? {
 
   val ureToolboxApp = ure {
     +ureText("Toolbox/apps/")
     +ureIdent(allowDashesInside = true).withName("app")
   }
 
-  suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().ax(cli)
+  suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().ax()
     .filter<String> { "Toolbox/apps" in it }
     .map<String, String> { ureToolboxApp.findFirst(it).namedValues["app"]!! }
     .toSet()
 
   suspend fun Type.getRealName(): String {
-    val path = whichFirstOrNull(name).ax(cli).chkNN { "Command $name not found." }
-    kommand("file", path).ax(cli).single().chkFindSingle(ureText("shell script"))
-    for (line in readFileHead(path).ax(cli))
+    val path = whichFirstOrNull(name).ax().chkNN { "Command $name not found." }
+    kommand("file", path).ax().single().chkFindSingle(ureText("shell script"))
+    for (line in readFileHead(path).ax())
       return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue
     bad { "Real name of $this not found in script $path" }
   }

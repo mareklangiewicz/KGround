@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.konfig
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
@@ -24,7 +25,7 @@ typealias IKonfig = IMutMap<String, String>
 
 
 fun konfigInUserHomeConfigDir(
-  cli: CLI = CLI.SYS,
+  cli: CLI = provideSysCLI(),
   vararg useNamedArgs: Unit,
   isReadOnly: Boolean = false,
   checkForDangerousKeys: Boolean = true,
@@ -45,7 +46,7 @@ fun konfigInUserHomeConfigDir(
  */
 fun konfigInDir(
   dir: String,
-  cli: CLI = CLI.SYS,
+  cli: CLI = provideSysCLI(),
   isReadOnly: Boolean = false,
   isClrAllowed: Boolean = false,
   checkForDangerousKeys: Boolean = true,
@@ -53,28 +54,27 @@ fun konfigInDir(
 ) = KonfigInDirUnsafe(dir, cli)
   .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
-private class KonfigInDirUnsafe(val dir: String, val cli: CLI = CLI.SYS) : IKonfig {
+@OptIn(NotPortableApi::class)
+private class KonfigInDirUnsafe(val dir: String, val cli: CLI = provideSysCLI()) : IKonfig {
 
   init {
-    mkdir(dir, withParents = true).axb(cli)
+    mkdir(dir, withParents = true).axBlockingOrErr(cli)
   }
 
   override fun get(key: String): String? =
     try {
-      readFileWithCat("$dir/$key").axb(cli).joinToString("\n")
+      readFileWithCat("$dir/$key").axBlockingOrErr(cli).joinToString("\n")
     } catch (e: RuntimeException) {
       null
     }
 
   override fun set(key: String, item: String?) {
     val file = "$dir/$key"
-    cli.run {
-      if (item == null) rmFileIfExists(file).axb(CLI.SYS)
-      else writeFileWithDD(inLines = listOf(item), outFile = file).axb(CLI.SYS)
-    }
+    if (item == null) rmFileIfExists(file).axBlockingOrErr(cli)
+    else writeFileWithDD(inLines = listOf(item), outFile = file).axBlockingOrErr(cli)
   }
 
-  override val keys get() = lsRegFiles(dir).axb(cli).asCol()
+  override val keys get() = lsRegFiles(dir).axBlockingOrErr(cli).asCol()
 }
 
 private class KonfigWithChecks(
@@ -127,7 +127,7 @@ fun IKonfig.withChecks(
 //  even when via ssh or adb or via some strange shell,
 //  so maybe additional encoding of whole file is required for reading/writing over ssh/adb.
 @Deprecated("TODO: implement")
-fun konfigInFile(file: String, cli: CLI = CLI.SYS): IKonfig = TODO()
+fun konfigInFile(file: String, cli: CLI = provideSysCLI()): IKonfig = TODO()
 
 suspend fun IKonfig.logEachKeyVal(level: ULogLevel = ULogLevel.INFO) {
   val log = implictx<ULog>()

@@ -35,7 +35,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.2.99" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.3.01" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "3.17.2" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
@@ -54,11 +54,20 @@ include(":kommandsamples")
 include(":kommandjupyter")
 
 val kgroundDir = File(rootDir, "../KGround/kground").normalize()
+val kgroundIoDir = File(rootDir, "../KGround/kground-io").normalize()
 val kgroundInclude =
   kgroundDir.exists()
   // false
+val kgroundIoInclude =
+  kgroundIoDir.exists()
+// false
 if (kgroundInclude) {
   logger.warn("Adding local kground module.")
   include(":kground")
   project(":kground").projectDir = kgroundDir
+}
+if (kgroundIoInclude) {
+  logger.warn("Adding local kground-io module.")
+  include(":kground-io")
+  project(":kground-io").projectDir = kgroundIoDir
 }

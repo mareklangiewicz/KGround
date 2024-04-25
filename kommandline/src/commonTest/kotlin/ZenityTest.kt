@@ -1,10 +1,13 @@
+@file:OptIn(NotPortableApi::class)
+
 package pl.mareklangiewicz.kommand
 
 import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.interactive.ifInteractiveCodeEnabled
+import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.interactive.ifInteractiveCodeEnabledBlockingOrErr
 import pl.mareklangiewicz.interactive.tryInteractivelyCheck
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.interactive.tryInteractivelyCheckBlockingOrErr
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.Type.*
 import pl.mareklangiewicz.kommand.core.*
@@ -14,37 +17,38 @@ import pl.mareklangiewicz.kommand.zenity.*
 
 @OptIn(DelicateApi::class)
 class ZenityTest {
-  @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.tryInteractivelyCheck()
-  @Test fun testZenityEntryStart() = ifInteractiveCodeEnabled {
-    SYS.start(zenity(Entry) { -EntryText("suggested text") })
+  @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.tryInteractivelyCheckBlockingOrErr()
+  @Test fun testZenityEntryStart() = ifInteractiveCodeEnabledBlockingOrErr {
+    val cli = implictx<CLI>()
+    cli.start(zenity(Entry) { -EntryText("suggested text") })
   }
 
   @Test fun testZenityCalendar() = zenity(Calendar) { -Title("some title"); -Text("some text") }
-    .tryInteractivelyCheck("zenity --calendar --title=some title --text=some text")
+    .tryInteractivelyCheckBlockingOrErr("zenity --calendar --title=some title --text=some text")
 
-  @Test fun testZenityCalendarFormat() = zenity(Calendar) { -DateFormat("%y-%m-%d") }.tryInteractivelyCheck()
-  @Test fun testZenityInfo() = zenity(Info) { -Text("Some info (timeout 5s)"); -Timeout(5) }.tryInteractivelyCheck()
+  @Test fun testZenityCalendarFormat() = zenity(Calendar) { -DateFormat("%y-%m-%d") }.tryInteractivelyCheckBlockingOrErr()
+  @Test fun testZenityInfo() = zenity(Info) { -Text("Some info (timeout 5s)"); -Timeout(5) }.tryInteractivelyCheckBlockingOrErr()
   @Test fun testZenityWarning() =
-    zenity(Warning) { -Text("Some Warning (timeout 3s)"); -Timeout(3) }.tryInteractivelyCheck()
+    zenity(Warning) { -Text("Some Warning (timeout 3s)"); -Timeout(3) }.tryInteractivelyCheckBlockingOrErr()
 
   @Test fun testZenityError() =
-    zenity(Error) { -Text("Some loooooong looong ERROR!"); -NoWrap }.tryInteractivelyCheck()
+    zenity(Error) { -Text("Some loooooong looong ERROR!"); -NoWrap }.tryInteractivelyCheckBlockingOrErr()
 
-  @Test fun testZenityFileSelection() = zenity(FileSelection) { -Title("Select some file") }.tryInteractivelyCheck()
+  @Test fun testZenityFileSelection() = zenity(FileSelection) { -Title("Select some file") }.tryInteractivelyCheckBlockingOrErr()
   @Test fun testZenityFileMultiple() =
-    zenity(FileSelection) { -Title("Select some files"); -Multiple }.tryInteractivelyCheck()
+    zenity(FileSelection) { -Title("Select some files"); -Multiple }.tryInteractivelyCheckBlockingOrErr()
 
   @Test fun testZenityFileDirectory() =
-    zenity(FileSelection) { -Title("Select some dir"); -ZenityOpt.Directory }.tryInteractivelyCheck()
+    zenity(FileSelection) { -Title("Select some dir"); -ZenityOpt.Directory }.tryInteractivelyCheckBlockingOrErr()
 
-  @Test fun testZenityFileSave() = zenity(FileSelection) { -Save; -ConfirmOverwrite }.tryInteractivelyCheck()
-  @Test fun testZenityNotification() = zenity(Notification) { -Text("Some notification") }.tryInteractivelyCheck()
-  @Test fun testZenityProgress() = zenity(Progress) { -Text("Some progress"); -Pulsate }.tryInteractivelyCheck()
+  @Test fun testZenityFileSave() = zenity(FileSelection) { -Save; -ConfirmOverwrite }.tryInteractivelyCheckBlockingOrErr()
+  @Test fun testZenityNotification() = zenity(Notification) { -Text("Some notification") }.tryInteractivelyCheckBlockingOrErr()
+  @Test fun testZenityProgress() = zenity(Progress) { -Text("Some progress"); -Pulsate }.tryInteractivelyCheckBlockingOrErr()
   @Test fun testZenityQuestion() =
-    zenity(Question) { -Text("Some wierdddddd question"); NoWrap }.tryInteractivelyCheck()
+    zenity(Question) { -Text("Some wierdddddd question"); NoWrap }.tryInteractivelyCheckBlockingOrErr()
 
-  @Test fun testZenityTextInfo() = zenity(TextInfo) { -FileName("build.gradle.kts") }.tryInteractivelyCheck()
-  @Test fun testZenityScale() = zenity(Scale) { -InitValue(2); -MinValue(1); -MaxValue(8) }.tryInteractivelyCheck()
+  @Test fun testZenityTextInfo() = zenity(TextInfo) { -FileName("build.gradle.kts") }.tryInteractivelyCheckBlockingOrErr()
+  @Test fun testZenityScale() = zenity(Scale) { -InitValue(2); -MinValue(1); -MaxValue(8) }.tryInteractivelyCheckBlockingOrErr()
 
   @Test fun testZenityList() = zenity(List) {
     -Text("a list")
@@ -54,7 +58,7 @@ class ZenityTest {
       +"col 1 row $it"
       +"col 2 row $it"
     }
-  }.tryInteractivelyCheck()
+  }.tryInteractivelyCheckBlockingOrErr()
 
   @Test fun testZenityCheckList() = zenity(List) {
     -CheckList
@@ -65,7 +69,7 @@ class ZenityTest {
       +(it % 3 == 0).toString()
       +"label $it"
     }
-  }.tryInteractivelyCheck()
+  }.tryInteractivelyCheckBlockingOrErr()
 
   @Test fun testZenityRadioList() = zenity(List) {
     -RadioList
@@ -78,19 +82,17 @@ class ZenityTest {
       +"label $it"
       +"desc $it"
     }
-  }.tryInteractivelyCheck()
+  }.tryInteractivelyCheckBlockingOrErr()
 
-  @Test fun testZenityListFromLs() = ifInteractiveCodeEnabled {
-    SYS.run { // TODO_someday: nice parsing for ls output columns etc..
-      val lines = ls { -All; -LongFormat; -HumanReadable }.axb(this)
-      zenity(List) {
-        -Text("ls output")
-        -Column("ls output")
-        for (l in lines) +"line $l"
-        // some prefix like "line" is needed,
-        // so it doesn't confuse line starting with "-" with zenity option
-      }.tryInteractivelyCheck()
-    }
+  @Test fun testZenityListFromLs() = ifInteractiveCodeEnabledBlockingOrErr {
+    val lines = ls { -All; -LongFormat; -HumanReadable }.ax()
+    zenity(List) {
+      -Text("ls output")
+      -Column("ls output")
+      for (l in lines) +"line $l"
+      // some prefix like "line" is needed,
+      // so it doesn't confuse line starting with "-" with zenity option
+    }.tryInteractivelyCheck()
   }
 
   // TODO_someday bash (& nobash) pipes (both typesafe!). Best if I can compose in kotlin (without bash) sth like:

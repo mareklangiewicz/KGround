@@ -122,7 +122,7 @@ class KommandTests {
             }
 
             "On rmTreeWithForce" so {
-              rmTreeWithForce(tmpDir) { cli, path -> path.startsWith("/tmp/testDirTmp") }.ax()
+              rmTreeWithForce(tmpDir) { path -> path.startsWith("/tmp/testDirTmp") }.ax()
 
               "tmp does not contain our dir" so { lsSubDirs("/tmp").ax().chkThis { !contains(dir) } }
             }
@@ -130,7 +130,7 @@ class KommandTests {
           } finally {
             // Clean up. Notice: The "On rmTreeWithForce" above is only for specific test branch,
             // but here we always make sure we clean up in all uspek cases.
-            rmTreeWithForce(tmpDir) { cli, path -> path.startsWith("/tmp/testDirTmp") }.ax()
+            rmTreeWithForce(tmpDir) { path -> path.startsWith("/tmp/testDirTmp") }.ax()
           }
         }
       }

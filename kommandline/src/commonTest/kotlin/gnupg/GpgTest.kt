@@ -3,46 +3,53 @@ package pl.mareklangiewicz.kommand.gnupg
 import kotlin.test.*
 import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.interactive.tryInteractivelyCheck
+import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.interactive.tryInteractivelyCheckBlockingOrErr
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
+import pl.mareklangiewicz.uctx.uctx
 
 
 // FIXME NOW: refactor as samples
 
-@OptIn(DelicateApi::class)
+@OptIn(DelicateApi::class, NotPortableApi::class)
 class GpgTest {
   @Test fun testGpgHelp() = gpg { -Help }
-    .tryInteractivelyCheck("gpg --help")
+    .tryInteractivelyCheckBlockingOrErr("gpg --help")
 
   @Test fun testGpgListKeys() = gpg(ListPublicKeys)
-    .tryInteractivelyCheck("gpg --list-public-keys")
+    .tryInteractivelyCheckBlockingOrErr("gpg --list-public-keys")
 
   @Test fun testGpgListKeysVerbose() = gpg(ListPublicKeys) { -Verbose }
-    .tryInteractivelyCheck("gpg --list-public-keys --verbose")
+    .tryInteractivelyCheckBlockingOrErr("gpg --list-public-keys --verbose")
 
   @Test fun testGpgListSecretKeysVerbose() = gpg(ListSecretKeys) { -Verbose }
-    .tryInteractivelyCheck("gpg --list-secret-keys --verbose")
+    .tryInteractivelyCheckBlockingOrErr("gpg --list-secret-keys --verbose")
 
   @Suppress("DEPRECATION")
-  @Test fun testGpgEncryptDecrypt() = ifOnNiceJvmCLI {
-    val inFile = mktemp(prefix = "testGED").axb(this)
-    val encFile = "$inFile.enc"
-    val decFile = "$inFile.dec"
-    writeFileWithDD(inLines = listOf("some plain text 667"), outFile = inFile).axb(this)
-    gpgEncryptPass("correct pass", inFile, encFile).axb(this)
-    gpgDecryptPass("correct pass", encFile, decFile).axb(this)
-    val decrypted = readFileWithCat(decFile).axb(this).single()
-    assertEquals("some plain text 667", decrypted)
-    val errCode = start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
-    assertEquals(2, errCode)
-    rm { +inFile; +encFile; +decFile }.axb(this)
+  @Test fun testGpgEncryptDecrypt() {
+    runBlockingOrErr {
+      val cli = provideSysCLI()
+      if (!cli.isJvm || !cli.isUbuntu) {
+        println("Disabled on this CLI.")
+        return@runBlockingOrErr
+      }
+      uctx(cli) {
+        val inFile = mktemp(prefix = "testGED").ax()
+        val encFile = "$inFile.enc"
+        val decFile = "$inFile.dec"
+        writeFileWithDD(inLines = listOf("some plain text 667"), outFile = inFile).ax()
+        gpgEncryptPass("correct pass", inFile, encFile).ax()
+        gpgDecryptPass("correct pass", encFile, decFile).ax()
+        val decrypted = readFileWithCat(decFile).ax().single()
+        assertEquals("some plain text 667", decrypted)
+        val errCode = implictx<CLI>().start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
+        assertEquals(2, errCode)
+        rm { +inFile; +encFile; +decFile }.ax()
+      }
+    }
   }
-}
-
-private fun ifOnNiceJvmCLI(block: CLI.() -> Unit) = CLI.SYS.run {
-  if (isJvm && isUbuntu) block() else println("Disabled on this CLI.")
 }
 

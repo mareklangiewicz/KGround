@@ -5,7 +5,7 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kommand.CLI
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.kommand.implictx
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.XClipSelection
@@ -34,7 +34,7 @@ suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
   val log = implictx<ULog>()
   log.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
-    xclipOut(XClipSelection.Clipboard).ax(SYS).singleOrNull()
+    xclipOut(XClipSelection.Clipboard).ax().singleOrNull()
       ?: bad { "Clipboard has to have code reference in single line." }
   else reference
   val ure = ure {
@@ -62,7 +62,7 @@ suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
   // before we start to interact with the user,
   // but the code is never called without confirmation.
   ifInteractiveCodeEnabled {
-    zenityAskIf("Call member $memberName\nfrom class $className?").ax(SYS) || return
+    zenityAskIf("Call member $memberName\nfrom class $className?").ax() || return
     val member: Any? = call()
     // Note: call() will either already "do the thing" (when the member is just a fun to call)
     //  or it will only get the property (like ReducedScript/Sample etc.) which will be tried (or not) later.
@@ -72,48 +72,49 @@ suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
 
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
-suspend fun Any?.tryInteractivelyAnything(cli: CLI = SYS) = when (this) {
-  is Sample -> tryInteractivelyCheckSample(cli)
-  is Kommand -> toInteractiveCheck().ax(cli)
-  is ReducedSample<*> -> tryInteractivelyCheckReducedSample(cli) // Note: ReducedSample is also ReducedScript
-  is ReducedScript<*> -> tryInteractivelyCheckReducedScript(cli = cli)
-  else -> tryOpenDataInIDE(cli = cli)
+suspend fun Any?.tryInteractivelyAnything() = when (this) {
+  is Sample -> tryInteractivelyCheckSample()
+  is Kommand -> toInteractiveCheck().ax()
+  is ReducedSample<*> -> tryInteractivelyCheckReducedSample() // Note: ReducedSample is also ReducedScript
+  is ReducedScript<*> -> tryInteractivelyCheckReducedScript()
+  else -> tryOpenDataInIDE()
 }
 
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
-suspend fun Sample.tryInteractivelyCheckSample(cli: CLI = SYS) =
-  kommand.toInteractiveCheck(expectedLineRaw).ax(cli)
+suspend fun Sample.tryInteractivelyCheckSample() =
+  kommand.toInteractiveCheck(expectedLineRaw).ax()
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
-suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample(cli: CLI = SYS) {
+suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample() {
   reducedKommand.lineRawOrNull() chkEq expectedLineRaw // so also if both are nulls it's treated as fine.
-  tryInteractivelyCheckReducedScript("Exec ReducedSample ?", cli)
+  tryInteractivelyCheckReducedScript("Exec ReducedSample ?")
 }
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
-  question: String = "Exec ReducedScript ?", cli: CLI = SYS,
+  question: String = "Exec ReducedScript ?",
 ) {
-  zenityAskIf(question).ax(cli) || return
-  val reducedOut = ax(cli)
+  zenityAskIf(question).ax() || return
+  val reducedOut = ax()
   reducedOut.tryOpenDataInIDE("Open ReducedOut: ${reducedOut.about} in tmp.notes in IDE ?")
 }
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 /** @param question null means default question */
-suspend fun Any?.tryOpenDataInIDE(question: String? = null, cli: CLI = SYS): Any {
+suspend fun Any?.tryOpenDataInIDE(question: String? = null): Any {
   val log = implictx<ULog>()
+  val cli = implictx<CLI>()
   return when {
     this == null -> log.i("It is null. Nothing to open.")
     this is Unit -> log.i("It is Unit. Nothing to open.")
     this is String && isEmpty() -> log.i("It is empty string. Nothing to open.")
     this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
-    !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax(cli) -> log.i("Not opening.")
+    !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax() -> log.i("Not opening.")
     else -> {
       val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
-      writeFileWithDD(lines, cli.pathToTmpNotes).ax(cli)
-      ideOpen(cli.pathToTmpNotes).ax(cli)
+      writeFileWithDD(lines, cli.pathToTmpNotes).ax()
+      ideOpen(cli.pathToTmpNotes).ax()
     }
   }
 }

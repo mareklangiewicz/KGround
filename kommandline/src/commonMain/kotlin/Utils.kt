@@ -1,8 +1,13 @@
 package pl.mareklangiewicz.kommand
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
+import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.implictx
@@ -99,3 +104,35 @@ inline fun List<String>.chkStdOut(
   test(this) || throw BadStdOutStateErr(this, lazyMessage()); return this
 }
 
+@NotPortableApi @DelicateApi
+expect fun <T> runBlockingOrErr(block: suspend CoroutineScope.() -> T): T
+
+@NotPortableApi
+@DelicateApi
+@Deprecated("Use suspend fun Kommand.ax(...)")
+fun Kommand.axBlockingOrErr(
+  cli: CLI,
+  vararg useNamedArgs: Unit,
+  dir: String? = null,
+  inContent: String? = null,
+  inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
+  inFile: String? = null,
+  outFile: String? = null,
+): List<String> = runBlockingOrErr {
+  uctx(cli) {
+    ax(dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
+  }
+}
+
+@NotPortableApi
+@DelicateApi
+@Deprecated("Use suspend fun Kommand.ax(...)")
+fun <ReducedOut> ReducedScript<ReducedOut>.axBlockingOrErr(
+  cli: CLI,
+  vararg useNamedArgs: Unit,
+  dir: String? = null,
+): ReducedOut = runBlockingOrErr {
+  uctx(cli) {
+    ax(dir = dir)
+  }
+}

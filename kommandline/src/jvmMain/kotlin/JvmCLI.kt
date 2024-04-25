@@ -7,8 +7,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 
 actual fun provideSysCLI(): CLI = JvmCLI()
 
@@ -59,9 +59,9 @@ class JvmCLI : CLI {
   override val pathToUserTmp: String? get() = "$pathToUserHome/tmp" // FIXME_maybe: other paths for specific OSes? sometimes null?
   override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
 
-  @OptIn(DelicateApi::class)
+  @OptIn(DelicateApi::class, NotPortableApi::class)
   private val xdgdesktop by lazy {
-    bashGetExportsMap().axb(SYS)["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
+    bashGetExportsMap().axBlockingOrErr(provideSysCLI())["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
   }
 }
 

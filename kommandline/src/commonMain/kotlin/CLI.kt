@@ -4,13 +4,25 @@ import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.bad
+import pl.mareklangiewicz.uctx.UCtx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
 expect fun provideSysCLI(): CLI
 
-interface CLI {
+
+// TODO NOW: use okio.Path everywhere for paths
+
+suspend inline fun <reified T: CLI> implictxOrNull(): T? = coroutineContext[CLI] as? T
+
+suspend inline fun <reified T: CLI> implictx(): T =
+  implictxOrNull() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+
+interface CLI : UCtx {
+  companion object Key : CoroutineContext.Key<CLI>
+  override val key: CoroutineContext.Key<*> get() = Key
 
   /**
    * TODO_later: experiment with wrapping some remote (ssh? adb?) CLI in sth like bash kommands,
@@ -45,6 +57,8 @@ interface CLI {
 
   val lineEnd: String get() = "\n"
 
+  // TODO: move some sys/platform related flags from here to kground-io/USys
+
   val isJvm: Boolean get() = false
   val isDesktop: Boolean get() = false
   val isUbuntu: Boolean get() = false
@@ -56,10 +70,6 @@ interface CLI {
 
   // TODO_someday: access to input/output streams wrapped in okio Source/Sink
   // (but what about platforms running kommands through ssh or adb?)
-
-  companion object {
-    val SYS = provideSysCLI()
-  }
 }
 
 class FakeCLI(
@@ -140,7 +150,7 @@ fun interface StdinCollector {
 suspend fun StdinCollector.collect(
   lineS: Flow<String>,
   vararg useNamedArgs: Unit,
-  lineEnd: String = CLI.SYS.lineEnd,
+  lineEnd: String = "\n",
   flushAfterEachLine: Boolean = true,
   finallyStdinClose: Boolean = true,
 ) = collect(lineS, lineEnd, flushAfterEachLine, finallyStdinClose)
@@ -180,7 +190,7 @@ interface ExecProcess : AutoCloseable {
 
   /** System.lineSeparator() is added automatically after each input line, so input lines should NOT contain them! */
   @DelicateApi
-  fun stdinWriteLine(line: String, lineEnd: String = CLI.SYS.lineEnd, thenFlush: Boolean = true)
+  fun stdinWriteLine(line: String, lineEnd: String = "\n", thenFlush: Boolean = true)
 
   /** Indepotent. Flushes buffer before closing. */
   @DelicateApi

@@ -1,13 +1,11 @@
 package pl.mareklangiewicz.kommand.jupyter
 
-import kotlin.time.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
+import pl.mareklangiewicz.uctx.uctx
 
 internal class Integration : JupyterIntegration() {
   override fun Builder.onLoaded() {
@@ -33,7 +31,6 @@ fun Flow<*>.logb() = logEachBlocking()
  * BTW I don't want too many shortcut names inside kommandline itself, but here in kommandjupyter it's fine.
  */
 suspend fun Kommand.ax(
-  cli: CLI = SYS,
   dir: String? = null,
   vararg useNamedArgs: Unit,
   inContent: String? = null,
@@ -48,6 +45,7 @@ suspend fun Kommand.ax(
   expectedErr: ((List<String>) -> Boolean)? = null,
   outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = coroutineScope {
+  val cli = implictx<CLI>()
   req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
   req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
   req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
@@ -72,21 +70,15 @@ suspend fun Kommand.ax(
     .unwrap(expectedExit, expectedErr)
 }
 
-fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI = SYS, dir: String? = null) =
+fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI, dir: String? = null) =
   cli.start(this, dir)
-
-
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax(cli: CLI = SYS, dir: String? = null): ReducedOut =
-  ax(cli, dir = dir)
-
-
 
 /**
  * Blocking flavor of fun Kommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
 fun Kommand.axb(
-  cli: CLI = SYS,
+  cli: CLI = provideSysCLI(),
   dir: String? = null,
   vararg useNamedArgs: Unit,
   inContent: String? = null,
@@ -101,26 +93,27 @@ fun Kommand.axb(
   expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
   outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = runBlocking {
-  ax(
-    cli,
-    dir,
-    inContent = inContent,
-    inLineS = inLineS,
-    inFile = inFile,
-    outFile = outFile,
-    outFileAppend = outFileAppend,
-    errToOut = errToOut,
-    errFile = errFile,
-    errFileAppend = errFileAppend,
-    expectedExit = expectedExit,
-    expectedErr = expectedErr,
-    outLinesCollector = outLinesCollector,
-  )
+  uctx(cli) {
+    ax(
+      dir,
+      inContent = inContent,
+      inLineS = inLineS,
+      inFile = inFile,
+      outFile = outFile,
+      outFileAppend = outFileAppend,
+      errToOut = errToOut,
+      errFile = errFile,
+      errFileAppend = errFileAppend,
+      expectedExit = expectedExit,
+      expectedErr = expectedErr,
+      outLinesCollector = outLinesCollector,
+    )
+  }
 }
 
 /**
  * Blocking flavor of fun ReducedKommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <ReducedOut> ReducedKommand<ReducedOut>.axb(cli: CLI = SYS, dir: String? = null): ReducedOut =
-  runBlocking { ax(cli, dir) }
+fun <ReducedOut> ReducedKommand<ReducedOut>.axb(dir: String? = null): ReducedOut =
+  runBlocking { ax(dir = dir) }

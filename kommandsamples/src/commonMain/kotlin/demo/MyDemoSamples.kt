@@ -5,7 +5,6 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kommand.Adb
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.Vim
@@ -31,6 +30,7 @@ import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
 import pl.mareklangiewicz.kommand.pathToTmpNotes
+import pl.mareklangiewicz.kommand.provideSysCLI
 import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
@@ -52,6 +52,9 @@ import pl.mareklangiewicz.ulog.implictx
 @ExampleApi
 @OptIn(DelicateApi::class)
 data object MyDemoSamples {
+
+  // TODO: refactor
+  private val SYS = provideSysCLI()
 
   val btop = btop() s
     "btop"
