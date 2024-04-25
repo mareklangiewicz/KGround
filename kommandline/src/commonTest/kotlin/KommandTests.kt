@@ -18,7 +18,11 @@ import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.bad.chkThrows
 import pl.mareklangiewicz.bad.req
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.uctx.uctx
+import pl.mareklangiewicz.udata.str
+import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.uspek.USpekContext
 import pl.mareklangiewicz.uspek.USpekTree
 import pl.mareklangiewicz.uspek.failed
@@ -36,7 +40,7 @@ class KommandTests {
 
   val platform = getCurrentPlatformKind()
 
-  @Test fun t() = runTestUSpekWithWorkaround {
+  @Test fun t() = runTestUSpekWithWorkarounds {
 
     "On string with bash meta chars" so {
       val string = "abc|&;<def>(ghi) 1 2  3 \"\\jkl\t\nmno"
@@ -154,13 +158,19 @@ suspend inline fun <reified T : Throwable> String.soThrows(
   crossinline code: suspend () -> Unit,
 ) = so { chkThrows<T>(expectation) { code() } }
 
-
-internal fun runTestUSpekWithWorkaround(
+internal fun runTestUSpekWithWorkarounds(
   context: CoroutineContext = USpekContext(),
   timeout: Duration = 10.seconds,
   code: suspend TestScope.() -> Unit,
 ) = runTest(context, timeout) {
-  suspek { code() }
+  val log = UHackySharedFlowLog { level, data -> "T ${level.symbol} ${data.str(maxLength = 512)}" }
+  val submit = ZenitySupervisor("BAD") // TODO later: this should NOT be used; later: provide special USubmit for tests
+  val cli = provideSysCLI()
+  uctx(log, submit, cli) {
+    suspek {
+      code()
+    }
+  }
   coroutineContext.ucontext.branch.assertAllGood()
 }
 
