@@ -19,6 +19,8 @@ import pl.mareklangiewicz.bad.chkThrows
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.konfig.IKonfig
+import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
@@ -130,6 +132,13 @@ class KommandTests {
               "tmp does not contain our dir" so { lsSubDirs("/tmp").ax().chkThis { !contains(dir) } }
             }
 
+            "On konfig in tmpDir" so {
+              val konfigNewDir = "$tmpDir/tmpKonfigForTests"
+              val konfig = konfigInDir(konfigNewDir, implictx())
+
+              testGivenNewKonfigInDir(konfig, konfigNewDir)
+            }
+
           } finally {
             // Clean up. Notice: The "On rmTreeWithForce" above is only for specific test branch,
             // but here we always make sure we clean up in all uspek cases.
@@ -140,6 +149,44 @@ class KommandTests {
     }
 
   }
+}
+
+
+suspend fun testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
+  "is empty" so { konfig.keys.len chkEq 0 }
+  "dir is created" so { testIfFileIsDirectory(dir).ax() chkEq true }
+  "dir is empty" so { ls(dir, wHidden = true).ax().size chkEq 0 }
+
+  "On setting new key and value" so {
+    konfig["somekey1"] = "somevalue1"
+
+    "get returns stored value" so { konfig["somekey1"] chkEq "somevalue1" }
+    "file is created" so { testIfFileIsRegular("$dir/somekey1").ax() chkEq true }
+    "no other files there" so { ls(dir, wHidden = true).ax() chkEq listOf("somekey1") }
+    "file for somekey1 contains correct content" so {
+      val content = readFileWithCat("$dir/somekey1").ax().joinToString("\n")
+      content chkEq "somevalue1"
+    }
+
+    "On changing value to null" so {
+      konfig["somekey1"] = null
+
+      "get returns null" so { konfig["somekey1"] chkEq null }
+      "file is removed" so { testIfFileExists("$dir/somekey1").ax() chkEq false }
+      "no files in konfig dir" so { ls(dir, wHidden = true).ax().size chkEq 0 }
+
+      "On touch removed file again" so {
+        touch("$dir/somekey1").ax()
+        "file is there again" so { testIfFileExists("$dir/somekey1").ax() chkEq true }
+        "get returns not null but empty value" so { konfig["somekey1"] chkEq "" }
+      }
+    }
+  }
+
+  // "On konfig.asEncodedIfAbc16" so {
+  //   val konfigAbc16 = konfig.asEncodedIfAbc16(null)
+  //   // TODO: more tests
+  // }
 }
 
 
