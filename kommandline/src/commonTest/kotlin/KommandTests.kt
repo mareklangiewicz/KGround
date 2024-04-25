@@ -12,11 +12,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExperimentalApi
-import pl.mareklangiewicz.bad.chk
 import pl.mareklangiewicz.bad.chkEmpty
 import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.bad.chkThis
 import pl.mareklangiewicz.bad.chkThrows
-import pl.mareklangiewicz.bad.req
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.core.*
@@ -144,13 +143,6 @@ class KommandTests {
 }
 
 
-// FIXME: Use impl from new KGround instead
-inline fun <T> T.chkThis(lazyMessage: () -> String = { "this is bad" }, thisIsFine: T.() -> Boolean): T =
-  apply { chk(thisIsFine(), lazyMessage) }
-
-inline fun <T> T.reqThis(lazyMessage: () -> String = { "this arg is bad" }, thisIsFine: T.() -> Boolean): T =
-  apply { req(thisIsFine(), lazyMessage) }
-
 
 // TODO_maybe: Add sth like this to USpekX?
 suspend inline fun <reified T : Throwable> String.soThrows(
@@ -164,7 +156,8 @@ internal fun runTestUSpekWithWorkarounds(
   code: suspend TestScope.() -> Unit,
 ) = runTest(context, timeout) {
   val log = UHackySharedFlowLog { level, data -> "T ${level.symbol} ${data.str(maxLength = 512)}" }
-  val submit = ZenitySupervisor("BAD") // TODO later: this should NOT be used; later: provide special USubmit for tests
+  val submit = ZenitySupervisor("FIXME later")
+  // FIXME later: this should NOT be used; later: provide special USubmit for tests
   val cli = provideSysCLI()
   uctx(log, submit, cli) {
     suspek {
