@@ -34,10 +34,8 @@ suspend inline fun ifInteractiveCodeEnabled(code: suspend () -> Unit) {
 
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockingOrErr {
-  uctx(provideSysCLI()) {
-    if (isInteractiveCodeEnabled()) code()
-  }
+fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockingWithCLIOnJvmOnly {
+  if (isInteractiveCodeEnabled()) code()
 }
 
 @DelicateApi("API for manual interactive experimentation; requires zenity; can ignore the this kommand.")
