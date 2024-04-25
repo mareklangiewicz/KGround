@@ -16,8 +16,10 @@ fun interface USubmit : UCtx {
   companion object Key : CoroutineContext.Key<USubmit>
   override val key: CoroutineContext.Key<*> get() = Key
 }
+suspend inline fun <reified T: USubmit> implictxOrNull(): T? = coroutineContext[USubmit] as? T
+
 suspend inline fun <reified T: USubmit> implictx(): T =
-  coroutineContext[USubmit] as? T ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+  implictxOrNull() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
 
 @Deprecated("")
 interface WithUSubmit {
