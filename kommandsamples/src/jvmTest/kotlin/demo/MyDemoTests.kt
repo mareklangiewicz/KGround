@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.uspek.runTestUSpek
 import pl.mareklangiewicz.uspek.so
 
@@ -22,7 +21,7 @@ import pl.mareklangiewicz.uspek.so
 // unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
 // maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
 fun isUserTestClassEnabled(context: ExtensionContext) =
-  getUserFlag(SYS, "tests." + context.requiredTestClass.simpleName)
+  getUserFlag(provideSysCLI(), "tests." + context.requiredTestClass.simpleName)
 
 @ExampleApi
 @OptIn(DelicateApi::class)
@@ -35,9 +34,9 @@ class MyDemoTests {
   @Test fun testExperiment1() = runTestUSpek {
     MyDemoSamples.run {
 
-      "On btopKitty" so { btopK.ax(SYS) }
+      "On btopKitty" so { btopK.ax() }
 
-      "On manAllMan" so { manAllMan.ax(SYS) }
+      "On manAllMan" so { manAllMan.ax() }
     }
   }
 
