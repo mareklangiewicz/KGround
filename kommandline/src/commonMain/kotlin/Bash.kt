@@ -23,6 +23,9 @@ fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) =
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
 
 @OptIn(DelicateApi::class)
+fun bashEchoEnv(envName: String) = bash("echo \"$$envName\"")
+
+@OptIn(DelicateApi::class)
 fun bashGetExportsMap() =
   bash("export").reducedOut {
     this

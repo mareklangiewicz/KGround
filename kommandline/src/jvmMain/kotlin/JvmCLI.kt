@@ -7,7 +7,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
 
 actual fun provideSysCLI(): CLI = JvmCLI()
@@ -48,21 +47,11 @@ class JvmCLI : CLI {
         .start(),
     )
 
-  override val lineEnd: String = System.lineSeparator() ?: "\n"
-
   override val isJvm get() = true
-  override val isDesktop get() = xdgdesktop.isNotEmpty()
-  override val isUbuntu get() = "ubuntu" in xdgdesktop
-  override val isGnome get() = "GNOME" in xdgdesktop
 
   override val pathToUserHome: String? get() = System.getProperty("user.home")
   override val pathToUserTmp: String? get() = "$pathToUserHome/tmp" // FIXME_maybe: other paths for specific OSes? sometimes null?
   override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
-
-  @OptIn(DelicateApi::class, NotPortableApi::class)
-  private val xdgdesktop by lazy {
-    bashGetExportsMap().axBlockingOrErr(provideSysCLI())["XDG_CURRENT_DESKTOP"]?.split(":").orEmpty()
-  }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)

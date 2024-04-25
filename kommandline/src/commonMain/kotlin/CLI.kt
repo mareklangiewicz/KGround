@@ -55,14 +55,9 @@ interface CLI : UCtx {
   // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
   // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
-  val lineEnd: String get() = "\n"
-
   // TODO: move some sys/platform related flags from here to kground-io/USys
 
   val isJvm: Boolean get() = false
-  val isDesktop: Boolean get() = false
-  val isUbuntu: Boolean get() = false
-  val isGnome: Boolean get() = false
 
   val pathToUserHome get(): String? = null
   val pathToUserTmp get(): String? = null

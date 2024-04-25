@@ -12,6 +12,7 @@ import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.bash
+import pl.mareklangiewicz.kommand.bashEchoEnv
 import pl.mareklangiewicz.kommand.bashGetExportsMap
 import pl.mareklangiewicz.kommand.bashGetExportsToFile
 import pl.mareklangiewicz.kommand.core.cat
@@ -32,6 +33,8 @@ import pl.mareklangiewicz.kommand.man
 import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.provideSysCLI
 import pl.mareklangiewicz.kommand.readFileHead
+import pl.mareklangiewicz.kommand.reducedMap
+import pl.mareklangiewicz.kommand.reducedOutToList
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
@@ -74,6 +77,20 @@ data object MyDemoSamples {
   val manEntryAllPages = InteractiveScript {
     val pages = getEntry("manual pages from all sections for", "open")
     termKitty(man { -ManOpt.All; +pages }).ax()
+  }
+
+  val bashEchoXdgDesktop = bashEchoEnv("XDG_CURRENT_DESKTOP")
+
+  val bashMapDesktopKind = bashEchoXdgDesktop.reducedOutToList().reducedMap {
+    val elements = singleOrNull().orEmpty().split(":")
+    val isDesktop = elements.isNotEmpty()
+    val isUbuntu = "ubuntu" in elements
+    val isGnome = "GNOME" in elements
+    mapOf(
+      "isDesktop" to isDesktop,
+      "isUbuntu" to isUbuntu,
+      "isGnome" to isGnome,
+    )
   }
 
   val psAllGrepJava = bash("ps -e | grep java") s
