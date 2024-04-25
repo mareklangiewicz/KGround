@@ -78,8 +78,13 @@ suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execI
 @NotPortableApi
 @DelicateApi
 fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null, execInDir: String? = null) {
+  val cli = provideSysCLI()
+  if (!cli.isJvm) {
+    println("Disabled on CLIs other than JVM.")
+    return
+  }
   runBlockingOrErr {
-    uctx(provideSysCLI()) {
+    uctx(cli) {
       tryInteractivelyCheck(expectedLineRaw, execInDir)
     }
   }
