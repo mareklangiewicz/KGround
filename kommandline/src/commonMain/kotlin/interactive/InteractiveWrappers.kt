@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.interactive
 
+import kotlinx.coroutines.CoroutineScope
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
@@ -78,17 +79,17 @@ suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execI
 @NotPortableApi
 @DelicateApi
 fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null, execInDir: String? = null) {
-  val cli = provideSysCLI()
-  if (!cli.isJvm) {
-    println("Disabled on CLIs other than JVM.")
-    return
-  }
-  runBlockingOrErr {
-    uctx(cli) {
-      tryInteractivelyCheck(expectedLineRaw, execInDir)
-    }
+  runBlockingWithCLIOnJvmOnly {
+    tryInteractivelyCheck(expectedLineRaw, execInDir)
   }
 }
+
+@OptIn(DelicateApi::class, NotPortableApi::class)
+internal fun runBlockingWithCLIOnJvmOnly(cli: CLI = provideSysCLI(), block: suspend CoroutineScope.() -> Unit) {
+  if (!cli.isJvm) { println("Disabled on CLIs other than JVM."); return }
+  runBlockingOrErr { uctx(cli) { block() } }
+}
+
 
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =

@@ -4,6 +4,7 @@ import kotlin.test.*
 import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.interactive.runBlockingWithCLIOnJvmOnly
 import pl.mareklangiewicz.interactive.tryInteractivelyCheckBlockingOrErr
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
@@ -30,25 +31,18 @@ class GpgTest {
 
   @Suppress("DEPRECATION")
   @Test fun testGpgEncryptDecrypt() {
-    runBlockingOrErr {
-      val cli = provideSysCLI()
-      if (!cli.isJvm || !cli.isUbuntu) {
-        println("Disabled on this CLI.")
-        return@runBlockingOrErr
-      }
-      uctx(cli) {
-        val inFile = mktemp(prefix = "testGED").ax()
-        val encFile = "$inFile.enc"
-        val decFile = "$inFile.dec"
-        writeFileWithDD(inLines = listOf("some plain text 667"), outFile = inFile).ax()
-        gpgEncryptPass("correct pass", inFile, encFile).ax()
-        gpgDecryptPass("correct pass", encFile, decFile).ax()
-        val decrypted = readFileWithCat(decFile).ax().single()
-        assertEquals("some plain text 667", decrypted)
-        val errCode = implictx<CLI>().start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
-        assertEquals(2, errCode)
-        rm { +inFile; +encFile; +decFile }.ax()
-      }
+    runBlockingWithCLIOnJvmOnly {
+      val inFile = mktemp(prefix = "testGED").ax()
+      val encFile = "$inFile.enc"
+      val decFile = "$inFile.dec"
+      writeFileWithDD(inLines = listOf("some plain text 667"), outFile = inFile).ax()
+      gpgEncryptPass("correct pass", inFile, encFile).ax()
+      gpgDecryptPass("correct pass", encFile, decFile).ax()
+      val decrypted = readFileWithCat(decFile).ax().single()
+      assertEquals("some plain text 667", decrypted)
+      val errCode = implictx<CLI>().start(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
+      assertEquals(2, errCode)
+      rm { +inFile; +encFile; +decFile }.ax()
     }
   }
 }
