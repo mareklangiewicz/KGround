@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kground
 
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -14,6 +15,9 @@ import pl.mareklangiewicz.ulog.timed
 
 infix fun <T : Any> List<T>.plusIfNN(element: T?) = if (element == null) this else this + element
 infix fun <T : Any> List<T>.prependIfNN(element: T?) = if (element == null) this else listOf(element) + this
+
+infix fun CoroutineContext.plusIfNN(that: CoroutineContext?) = if (that == null) this else this + that
+infix fun CoroutineContext.prependIfNN(that: CoroutineContext?) = if (that == null) this else that + this
 
 
 fun Any.classSimpleWords() = this::class.simpleName!!

@@ -4,8 +4,12 @@ import kotlinx.coroutines.*
 import okio.*
 import pl.mareklangiewicz.bad.*
 
-/** No specific IO dispatcher available on JS */
-actual val DefaultDispatcherForIO: CoroutineDispatcher get() = Dispatchers.Default
 
-actual val DefaultOkioFileSystemOrErr: FileSystem = bad { "JS doesn't have default Okio FileSystem" }
+actual fun getEnv(name: String): String? = js("globalThis.process.env[name]") as String?
+
+/** No specific IO dispatcher available on JS */
+actual fun getDefaultDispatcherIO(): CoroutineDispatcher = Dispatchers.Default
+
+/** Currently no default Okio FileSystem available on JS. TODO_maybe: detect okio-nodefilesystem artifact? */
+actual fun getDefaultFS(): UFileSys = bad { "JS doesn't have default Okio FileSystem" }
 
