@@ -21,7 +21,7 @@ import pl.mareklangiewicz.uspek.so
 // unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
 // maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
 fun isUserTestClassEnabled(context: ExtensionContext) =
-  getUserFlag(provideSysCLI(), "tests." + context.requiredTestClass.simpleName)
+  getUserFlag(getDefaultCLI(), "tests." + context.requiredTestClass.simpleName)
 
 @ExampleApi
 @OptIn(DelicateApi::class)

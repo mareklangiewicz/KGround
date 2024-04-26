@@ -83,7 +83,7 @@ fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null, 
 }
 
 @OptIn(DelicateApi::class, NotPortableApi::class)
-internal fun runBlockingWithCLIOnJvmOnly(cli: CLI = provideSysCLI(), block: suspend CoroutineScope.() -> Unit) {
+internal fun runBlockingWithCLIOnJvmOnly(cli: CLI = getDefaultCLI(), block: suspend CoroutineScope.() -> Unit) {
   if (!cli.isJvm) { println("Disabled on CLIs other than JVM."); return }
   runBlockingOrErr { uctx(cli) { block() } }
 }

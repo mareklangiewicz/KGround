@@ -1,4 +1,4 @@
-@file:OptIn(DelicateApi::class)
+@file:OptIn(DelicateApi::class, NotPortableApi::class)
 
 package pl.mareklangiewicz.kommand.konfig
 
@@ -25,7 +25,7 @@ typealias IKonfig = IMutMap<String, String>
 
 
 fun konfigInUserHomeConfigDir(
-  cli: CLI = provideSysCLI(),
+  cli: CLI = getDefaultCLI(),
   vararg useNamedArgs: Unit,
   isReadOnly: Boolean = false,
   checkForDangerousKeys: Boolean = true,
@@ -46,7 +46,7 @@ fun konfigInUserHomeConfigDir(
  */
 fun konfigInDir(
   dir: String,
-  cli: CLI = provideSysCLI(),
+  cli: CLI = getDefaultCLI(),
   isReadOnly: Boolean = false,
   isClrAllowed: Boolean = false,
   checkForDangerousKeys: Boolean = true,
@@ -55,7 +55,7 @@ fun konfigInDir(
   .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
 @OptIn(NotPortableApi::class)
-private class KonfigInDirUnsafe(val dir: String, val cli: CLI = provideSysCLI()) : IKonfig {
+private class KonfigInDirUnsafe(val dir: String, val cli: CLI = getDefaultCLI()) : IKonfig {
 
   init {
     mkdir(dir, withParents = true).axBlockingOrErr(cli)
@@ -127,7 +127,7 @@ fun IKonfig.withChecks(
 //  even when via ssh or adb or via some strange shell,
 //  so maybe additional encoding of whole file is required for reading/writing over ssh/adb.
 @Deprecated("TODO: implement")
-fun konfigInFile(file: String, cli: CLI = provideSysCLI()): IKonfig = TODO()
+fun konfigInFile(file: String, cli: CLI = getDefaultCLI()): IKonfig = TODO()
 
 suspend fun IKonfig.logEachKeyVal(level: ULogLevel = ULogLevel.INFO) {
   val log = implictx<ULog>()

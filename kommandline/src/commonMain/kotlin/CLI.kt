@@ -4,16 +4,19 @@ import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.uctx.UCtx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
-expect fun provideSysCLI(): CLI
+/** It's NOT for "consuming side". Instead, use: val cli = implictx<CLI>() */
+@NotPortableApi("Returns very different CLIs on different platforms. Can fail or return CLI with failing fun start.")
+expect fun getDefaultCLI(): CLI
 
 
-// TODO NOW: use okio.Path everywhere for paths
+// TODO NOW: use okio.Path everywhere for paths (also class UCWD)
 
 suspend inline fun <reified T: CLI> implictxOrNull(): T? = coroutineContext[CLI] as? T
 
@@ -55,7 +58,7 @@ interface CLI : UCtx {
   // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
   // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
-  // TODO: move some sys/platform related flags from here to kground-io/USys
+  // TODO NOW: move some sys/platform related flags from here to kground-io/UFileSys
 
   val isJvm: Boolean get() = false
 

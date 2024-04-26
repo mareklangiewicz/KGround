@@ -9,7 +9,7 @@ import kotlinx.coroutines.future.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 
-actual fun provideSysCLI(): CLI = JvmCLI()
+actual fun getDefaultCLI(): CLI = JvmCLI()
 
 class JvmCLI : CLI {
 

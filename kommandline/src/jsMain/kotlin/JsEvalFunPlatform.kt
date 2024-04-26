@@ -7,7 +7,7 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
-actual fun provideSysCLI(): CLI = JsEvalFunCLI()
+actual fun getDefaultCLI(): CLI = JsEvalFunCLI()
 
 class JsEvalFunCLI(val log: ULog = UHackySharedFlowLog()) : CLI {
 

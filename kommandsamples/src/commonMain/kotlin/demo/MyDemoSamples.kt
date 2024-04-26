@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand.demo
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kommand.Adb
@@ -31,7 +32,7 @@ import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
 import pl.mareklangiewicz.kommand.pathToTmpNotes
-import pl.mareklangiewicz.kommand.provideSysCLI
+import pl.mareklangiewicz.kommand.getDefaultCLI
 import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.reducedMap
 import pl.mareklangiewicz.kommand.reducedOutToList
@@ -53,11 +54,11 @@ import pl.mareklangiewicz.ulog.implictx
  * (SamplesTests just check generated kommand lines, without executing any kommands)
  */
 @ExampleApi
-@OptIn(DelicateApi::class)
+@OptIn(DelicateApi::class, NotPortableApi::class)
 data object MyDemoSamples {
 
   // TODO: refactor
-  private val SYS = provideSysCLI()
+  private val SYS = getDefaultCLI()
 
   val btop = btop() s
     "btop"

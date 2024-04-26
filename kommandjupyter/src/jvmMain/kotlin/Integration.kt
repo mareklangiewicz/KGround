@@ -78,7 +78,7 @@ fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI, di
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
 fun Kommand.axb(
-  cli: CLI = provideSysCLI(),
+  cli: CLI = getDefaultCLI(),
   dir: String? = null,
   vararg useNamedArgs: Unit,
   inContent: String? = null,

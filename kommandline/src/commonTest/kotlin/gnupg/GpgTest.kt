@@ -10,7 +10,6 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
-import pl.mareklangiewicz.uctx.uctx
 
 
 // FIXME NOW: refactor as samples

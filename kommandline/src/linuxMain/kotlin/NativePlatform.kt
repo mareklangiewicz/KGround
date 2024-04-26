@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.annotations.*
 
 
-actual fun provideSysCLI(): CLI = NativeCLI()
+actual fun getDefaultCLI(): CLI = NativeCLI()
 
 class NativeCLI : CLI {
 

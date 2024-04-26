@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExperimentalApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.chkEmpty
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.bad.chkThis
@@ -197,6 +198,7 @@ suspend inline fun <reified T : Throwable> String.soThrows(
   crossinline code: suspend () -> Unit,
 ) = so { chkThrows<T>(expectation) { code() } }
 
+@OptIn(NotPortableApi::class)
 internal fun runTestUSpekWithWorkarounds(
   context: CoroutineContext = USpekContext(),
   timeout: Duration = 10.seconds,
@@ -205,8 +207,8 @@ internal fun runTestUSpekWithWorkarounds(
   val log = UHackySharedFlowLog { level, data -> "T ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor("FIXME later")
   // FIXME later: this should NOT be used; later: provide special USubmit for tests
-  val cli = provideSysCLI()
-  uctx(log, submit, cli) {
+  val cli = getDefaultCLI()
+  uctx(log + submit + cli) {
     suspek {
       code()
     }
