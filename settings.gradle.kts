@@ -9,6 +9,10 @@ val buildScanPublishingAllowed =
   // true
   // false
 
+val kgroundModulesLocalAllowed =
+  true
+  // false
+
 
 // gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
 
@@ -55,18 +59,10 @@ include(":kommandjupyter")
 
 val kgroundDir = File(rootDir, "../KGround/kground").normalize()
 val kgroundIoDir = File(rootDir, "../KGround/kground-io").normalize()
-val kgroundInclude =
-  kgroundDir.exists()
-  // false
-val kgroundIoInclude =
-  kgroundIoDir.exists()
-// false
-if (kgroundInclude) {
+if (kgroundModulesLocalAllowed && kgroundDir.exists() && kgroundIoDir.exists()) {
   logger.warn("Adding local kground module.")
   include(":kground")
   project(":kground").projectDir = kgroundDir
-}
-if (kgroundIoInclude) {
   logger.warn("Adding local kground-io module.")
   include(":kground-io")
   project(":kground-io").projectDir = kgroundIoDir
