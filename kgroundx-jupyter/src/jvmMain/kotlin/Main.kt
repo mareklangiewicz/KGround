@@ -6,14 +6,17 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.isInteractiveCodeEnabled
 import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.pathToTmpNotes
+import pl.mareklangiewicz.kground.io.uctxWithIO
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.ideOpen
-import pl.mareklangiewicz.kommand.pathToTmpNotes
+import pl.mareklangiewicz.kommand.provideSysCLI
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.kommand.writeFileWithDD
@@ -40,7 +43,9 @@ import pl.mareklangiewicz.ulog.w
 @OptIn(DelicateApi::class, NotPortableApi::class) fun main(args: Array<String>) = runBlocking {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
-  uctx(log, submit) {
+  val cli = provideSysCLI() // TODO use one below when available
+  // val cli = getSysCLI()
+  uctxWithIO(log + submit + cli) {
     when {
       args.size == 2 && args[0] == "try-code" -> try {
         log.w("try-code ${args[1]} started")
@@ -52,8 +57,8 @@ import pl.mareklangiewicz.ulog.w
         log.exWithTrace(ex)
         tryInteractivelyOpenLogCacheInIde()
       }
-      args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(SYS, args[1]))
-      args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(SYS, args[1], args[2].toBoolean())
+      args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))
+      args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(cli, args[1], args[2].toBoolean())
       else -> bad { "Incorrect args. See Main.kt:main" }
     }
   }
@@ -61,9 +66,11 @@ import pl.mareklangiewicz.ulog.w
 
 @OptIn(DelicateApi::class) suspend fun tryInteractivelyOpenLogCacheInIde() {
   val lines = implictxOrNull<UHackySharedFlowLog>()?.flow?.replayCache ?: return
+  val fs = implictx<UFileSys>()
+  val notes = fs.pathToTmpNotes.toString()
   isInteractiveCodeEnabled() && zenityAskIf("Try to open log cache in IDE (in tmp.notes)?").ax() || return
-  writeFileWithDD(lines, SYS.pathToTmpNotes).ax()
-  ideOpen(SYS.pathToTmpNotes).ax()
+  writeFileWithDD(lines, notes).ax()
+  ideOpen(notes).ax()
 }
 
 // FIXME: common "UStr" utils with different MPP parametrized exception conversions / string representations.

@@ -3,36 +3,33 @@ package pl.mareklangiewicz.kgroundx.maintenance
 import kotlin.math.*
 import kotlin.random.*
 import okio.*
-import okio.FileSystem.Companion.SYSTEM
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.pathToSomeTmpOrHome
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.ulog.ULog
-import pl.mareklangiewicz.ulog.ULogLevel
-import pl.mareklangiewicz.ulog.e
-import pl.mareklangiewicz.ulog.hack.ulog
-import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 
 // FIXME NOW separate it from Ure and move Ure common code to better places (later to separate lib)
 
 @OptIn(NotPortableApi::class)
-fun Path.injectSpecialRegion(
+suspend fun Path.injectSpecialRegion(
   regionLabel: String,
   region: String,
-  fs: FileSystem = SYSTEM,
   addIfNotFound: Boolean = true,
 ) {
+  val fs = implictx<UFileSys>()
+  val log = implictx<ULog>()
   val regex = ureWithSpecialRegion(regionLabel).compile()
   fs.processFile(this, this) { output ->
     val outputMR = regex.matchEntire(output)
     if (outputMR == null) {
-      ulog.i("Inject [$regionLabel] to $this - No match.")
+      log.i("Inject [$regionLabel] to $this - No match.")
       if (addIfNotFound) {
-        ulog.i("Adding new region at the end.")
+        log.i("Adding new region at the end.")
         output + "\n\n" + region.trimEnd()
       } else null
     } else {
@@ -49,29 +46,32 @@ fun Path.injectSpecialRegion(
       val newOutput = before + newRegion + newAfter
       val summary =
         if (newOutput == output) "No changes." else "Changes detected (len ${output.length}->${newOutput.length})"
-      ulog.i("Inject [$regionLabel] to $this - $summary")
+      log.i("Inject [$regionLabel] to $this - $summary")
       newOutput
     }
   }
 }
 
-fun downloadTmpFile(
+suspend fun downloadTmpFile(
   url: String,
   name: String = "tmp${Random.nextLong().absoluteValue}.txt",
-  dir: Path = (SYS.pathToUserTmp ?: SYS.pathToSystemTmp ?: "/tmp").toPath(),
 ): Path {
+  val fs = implictx<UFileSys>()
+  val dir = fs.pathToSomeTmpOrHome
   val path = dir / name
-  SYSTEM.createDirectories(dir)
-  SYS.download(url, path)
+  fs.createDirectories(dir)
+  download(url, path)
   return path
 }
 
 @OptIn(DelicateApi::class)
-private fun CLI.download(url: String, to: Path, log: ULog = ulog) {
+private suspend fun download(url: String, to: Path) {
+  val cli = implictx<CLI>()
+  val log = implictx<ULog>()
   // TODO: Add curl to KommandLine library, then use it here
   // -s so no progress bars on error stream; -S to report actual errors on error stream
   val k = kommand("curl", "-s", "-S", "-o", to.toString(), url)
-  val result = start(k).waitForResult()
+  val result = cli.start(k).waitForResult()
   result.unwrap { err ->
     if (err.isNotEmpty()) {
       log.e("FAIL: Error stream was not empty:")
@@ -81,16 +81,17 @@ private fun CLI.download(url: String, to: Path, log: ULog = ulog) {
   }
 }
 
-fun downloadAndInjectFileToSpecialRegion(
+suspend fun downloadAndInjectFileToSpecialRegion(
   inFileUrl: String,
   outFilePath: Path,
   outFileRegionLabel: String,
 ) {
+  val fs = implictx<UFileSys>()
   val inFilePath = downloadTmpFile(inFileUrl)
-  val regionContent = SYSTEM.readUtf8(inFilePath)
+  val regionContent = fs.readUtf8(inFilePath)
   val markBefore = "// region [$outFileRegionLabel]\n"
   val markAfter = "// endregion [$outFileRegionLabel]\n"
   val region = "$markBefore\n$regionContent\n$markAfter"
   outFilePath.injectSpecialRegion(outFileRegionLabel, region)
-  SYSTEM.delete(inFilePath)
+  fs.delete(inFilePath)
 }

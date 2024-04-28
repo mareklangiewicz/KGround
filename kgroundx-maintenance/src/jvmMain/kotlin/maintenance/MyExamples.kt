@@ -55,12 +55,10 @@ object MyBasicExamples {
 object MyTemplatesExamples {
 
   suspend fun tryDiffMyTemplates() {
-    // ulogHackyMinLevel = ULogLevel.DEBUG
     tryDiffMyConflictingTemplatesSrc()
   }
 
   suspend fun tryInjectOneProject() {
-    // ulogHackyMinLevel = ULogLevel.DEBUG
     tryInjectMyTemplatesToProject(PathToKotlinProjects / "AbcdK")
   }
 
@@ -103,7 +101,7 @@ object MyWeirdExamples {
   suspend fun tryToUseAnotherUSubmitAndULog() {
     val log = UHackySharedFlowLog { level, data -> "ANOTHER L ${level.symbol} ${data.str(maxLength = 512)}" }
     val submit = ZenitySupervisor(promptPrefix = "ANOTHER ZENITY")
-    uctx(submit, log) {
+    uctx(submit + log) {
       tryToUseImplicitUSubmitAndULog()
     }
   }

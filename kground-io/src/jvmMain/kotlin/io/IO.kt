@@ -7,6 +7,8 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.bad.*
 import kotlin.math.*
 import kotlin.random.*
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.ulog
 
@@ -26,6 +28,11 @@ fun FileSystem.findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence
     else -> list(path).asSequence().flatMap { findAllFiles(it, maxDepth - 1) }
   }
 }
+
+@Throws(IOException::class)
+@Deprecated("Okio has listRecursively. Use that or maybe implement new listRecursively with additional params.")
+suspend fun findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Path> =
+  implictx<UFileSys>().findAllFiles(path, maxDepth)
 
 fun Path.withName(getNewName: (oldName: String) -> String) =
   parent?.let { it / getNewName(name) } ?: getNewName(name).toPath()

@@ -47,14 +47,21 @@ private val TeeDefaultLog = ULogPrintLn(prefix = "tee")
 
 // FIXME: move it all to better places (but still in kground repo); refactor/redesign
 //   (I need it all in kground right now, so this is temporary implementation)
-//   UPDATE: Think what should be in kground-io/USys (and what flags can be removed from kommandline/CLI)
+//   UPDATE: Think what should be in kground-io
+
+@Deprecated("")
 expect fun getCurrentTimeMs(): Long
+@Deprecated("")
 expect fun getCurrentTimeStr(): String
+@Deprecated("")
 expect fun getCurrentThreadName(): String
+@Deprecated("")
 expect fun getCurrentPlatformName(): String
+@Deprecated("")
 expect fun getCurrentAbsolutePath(): String
 
 /** JVM, JS, LINUX, ... */
+@Deprecated("")
 fun getCurrentPlatformKind(): String = getCurrentPlatformName().takeWhile { it.isLetter() }.uppercase()
 
 

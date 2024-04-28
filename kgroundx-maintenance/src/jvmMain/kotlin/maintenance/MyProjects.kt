@@ -11,7 +11,6 @@ import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.hack.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
@@ -38,14 +37,14 @@ var PathToKGroundProject = PathToKotlinProjects / "KGround"
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
     .collect { projectPath ->
       ulog.i("Searching in project: $projectPath")
-      val listKt = findMyKotlinCode(projectPath.toString()).ax(SYS)
+      val listKt = findMyKotlinCode(projectPath.toString()).ax()
       val listKts =
         if (alsoGradleKts)
           findMyKotlinCode(
             projectPath.toString(),
             withNameBase = "*.gradle.kts",
             withNameFull = null,
-          ).ax(SYS)
+          ).ax()
         else emptyList()
       (listKt + listKts).forEach { ktFilePathStr ->
         val ktFilePath = ktFilePathStr.toPath()
@@ -139,7 +138,7 @@ private fun Ure.withSomeLinesAround(
   ghMyRepoList(onlyPublic = onlyPublic)
     .outputFields("name")
     .reducedOutToFlow()
-    .ax(SYS)
+    .ax()
 
 
 @ExampleApi suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
