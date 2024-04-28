@@ -12,7 +12,6 @@ import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.ulog.*
-import pl.mareklangiewicz.ulog.hack.*
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
@@ -72,21 +71,22 @@ private suspend fun readAndFindUreLineContentWithSomeLinesAround(
   ureLineContent: Ure,
   maxLinesAround: Int = 1,
 ): MatchResult? {
+  val log = implictx<ULog>()
   val fs = implictx<UFileSys>()
   return fs.readUtf8(file).let { fileContent ->
-    ureLineContent.withSomeLinesAround(
-      maxLinesBefore = maxLinesAround,
-      maxLinesAfter = maxLinesAround,
-    ).findFirstOrNull(fileContent)
+    ureLineContent
+      .withSomeLinesAround(log, maxLinesBefore = maxLinesAround, maxLinesAfter = maxLinesAround)
+      .findFirstOrNull(fileContent)
   }
 }
 
 @DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesBefore < 3.")
 private fun Ure.withSomeLinesAround(
+  log: ULog,
   maxLinesBefore: Int = 1,
   maxLinesAfter: Int = 1,
 ) = ure {
-  if (maxLinesBefore > 2) ulog.w("FIXME: this is terribly slow for maxLinesBefore > 2")
+  if (maxLinesBefore > 2) log.w("FIXME: this is terribly slow for maxLinesBefore > 2")
   // FIXME investigate if it can be optimized. https://www.regular-expressions.info/catastrophic.html
   0..maxLinesBefore of ureAnyLine()
   +ureLineWithContent(this@withSomeLinesAround)
@@ -108,7 +108,7 @@ private fun Ure.withSomeLinesAround(
   localSystem: FileSystem = SYSTEM,
 ) = mapFilterLocalKotlinProjectsPathS(localSystem) {
   val isGradleRootProject = exists(it / "settings.gradle.kts") || exists(it / "settings.gradle")
-  if (!isGradleRootProject) ulog.w("Ignoring dworkflows in non-gradle project: $it")
+  if (!isGradleRootProject) implictx<ULog>().w("Ignoring dworkflows in non-gradle project: $it")
   // FIXME_maybe: Change when I have dworkflows for non-gradle projects
   isGradleRootProject
 }
@@ -126,12 +126,13 @@ private fun Ure.withSomeLinesAround(
   onlyPublic: Boolean = false,
   askInteractively: Boolean = true,
 ) {
+  val log = implictx<ULog>()
   val templates = collectMyTemplates()
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
     .collect { path ->
       suspend fun inject() {
-        ulog.i("Injecting my templates to project: $path")
+        log.i("Injecting my templates to project: $path")
         tryInjectMyTemplatesToProject(path, templates, askInteractively)
       }
       !askInteractively || zenityAskIf("Try to inject my templates to project: $path ?").ax() || return@collect
