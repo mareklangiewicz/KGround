@@ -1,16 +1,10 @@
 package pl.mareklangiewicz.ure
 
-import okio.FileSystem.Companion.RESOURCES
 import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import org.junit.jupiter.api.*
-import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kommand.CLI.Companion.SYS
-import pl.mareklangiewicz.kommand.Vim
-import pl.mareklangiewicz.kommand.axb
-import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.uspek.*
 
 @OptIn(NotPortableApi::class)
