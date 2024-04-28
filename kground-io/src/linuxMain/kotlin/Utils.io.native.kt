@@ -23,4 +23,13 @@ actual fun getSysPlatformType(): String? = "NATIVE-Linux"
 
 actual fun getSysDispatcherForIO(): CoroutineDispatcher = Dispatchers.IO
 
-actual fun getSysUFileSys(): UFileSys = UFileSys(FileSystem.SYSTEM)
+actual fun getSysUFileSys(): UFileSys = UNativeSysFileSys()
+
+private class UNativeSysFileSys : UFileSys(SYSTEM) {
+  // TODO_someday: improve getSysProp above so these paths are also better than null on native
+  override val pathToUserHome: Path? = getSysPathToUserHome()
+  override val pathToUserTmp: Path? = getSysPathToUserTmp()
+
+  // TODO_someday: getSysPathToSysTmp() should not do getSysProp("java.io.tmpdir") but some new MPP key instead.
+  override val pathToSysTmp: Path? = getSysPathToSysTmp()
+}
