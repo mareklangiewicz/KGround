@@ -10,6 +10,9 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.kground.io.UCWD
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.cd
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.usubmit.USubmit
@@ -34,12 +37,20 @@ object MyBasicExamples {
 
   /** Simple example of using KommandLine */
   suspend fun justSomeLS() {
-    ulog.w("Let's play with kground and kommand integration...")
+    val log = implictx<ULog>()
+    log.w("Let's play with kground and kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
+    cd("/home/marek/tmp") {
+      val cwd: UCWD = implictx()
+      ls { -LsOpt.LongFormat; -LsOpt.All }
+        .ax(dir = cwd.path.toString()) // TODO: kommandline: make .ax() actually use UCWD from implictx
+        .logEach()
+    }
   }
 
   suspend fun justSomeIdeDiff() {
-    ulog.w("Let's try some ideDiff...")
+    val log = implictx<ULog>()
+    log.w("Let's try some ideDiff...")
     ideDiff(
       "/home/marek/code/kotlin/KGround/template-mpp/build.gradle.kts",
       "/home/marek/code/kotlin/AbcdK/build.gradle.kts",
