@@ -26,9 +26,8 @@ suspend fun tryInjectMyTemplatesToProject(
   collectedTemplates: Map<String, String>? = null,
   askInteractively: Boolean = true,
 ) {
-  val fs = implictx<UFileSys>()
   val templates = collectedTemplates ?: collectMyTemplates()
-  fs.findAllFiles(projectPath).filterExt("kts") // TODO_someday: support templates in .kt files too
+  findAllFiles(projectPath).filterExt("kts") // TODO_someday: support templates in .kt files too
     .forEachSpecialRegionFound(labelAllowTildes = false) { path, label, content, region ->
       val log = implictx<ULog>()
       val templateRegion = templates[label] ?: run {
@@ -47,7 +46,7 @@ suspend fun tryInjectMyTemplatesToProject(
         !askInteractively -> inject()
         zenityAskIf("Automatically inject template [$label]? to file:\n$path").ax() -> inject()
         zenityAskIf("Try opening diff with [$label] in IDE? (put to tmp.notes) with file:\n$path").ax() -> {
-          val notes = fs.pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
+          val notes = implictx<UFileSys>().pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
           writeFileWithDD(templateRegion.lines(), notes).ax()
           ideDiff(notes, path.toString()).ax()
         }
