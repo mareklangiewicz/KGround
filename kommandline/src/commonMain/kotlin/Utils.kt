@@ -24,12 +24,8 @@ fun getUserFlagStr(cli: CLI, key: String) = if (getUserFlag(cli, key)) "enabled"
 
 fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserFlagStr(cli, key) + "."
 
+// TODO: remove cli params from these user flags utils, and let konfigInUserHomeConfigDir use default getDefaultCLI()
 
-/**
- * Just some convention I like; additional "tmp" in name is there to emphasize that
- * this file content is temporary, and can be easily replaced by some kommand/sample/etc.
- */
-val CLI.pathToTmpNotes get() = listOfNotNull(pathToUserTmp, pathToSystemTmp, pathToUserHome).first() + "/tmp.notes"
 
 
 @OptIn(DelicateApi::class)

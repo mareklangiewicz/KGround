@@ -5,6 +5,8 @@ package pl.mareklangiewicz.kommand.konfig
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.getSysUFileSys
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.ulog.ULog
@@ -26,12 +28,13 @@ typealias IKonfig = IMutMap<String, String>
 
 fun konfigInUserHomeConfigDir(
   cli: CLI = getDefaultCLI(),
+  fs: UFileSys = getSysUFileSys(),
   vararg useNamedArgs: Unit,
   isReadOnly: Boolean = false,
   checkForDangerousKeys: Boolean = true,
   checkForDangerousValues: Boolean = true,
 ) = konfigInDir(
-  cli.pathToUserHome!! + "/.config/konfig",
+  fs.pathToUserHome!!.toString() + "/.config/konfig", // FIXME_later: use Path type everywhere
   cli,
   isReadOnly,
   checkForDangerousKeys,

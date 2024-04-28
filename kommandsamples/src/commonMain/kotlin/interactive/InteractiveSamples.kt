@@ -4,15 +4,15 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kommand.CLI
-import pl.mareklangiewicz.kommand.implictx
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.XClipSelection
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.lineRawOrNull
-import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.writeFileWithDD
 import pl.mareklangiewicz.kommand.xclipOut
@@ -104,7 +104,7 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 /** @param question null means default question */
 suspend fun Any?.tryOpenDataInIDE(question: String? = null): Any {
   val log = implictx<ULog>()
-  val cli = implictx<CLI>()
+  val fs = implictx<UFileSys>()
   return when {
     this == null -> log.i("It is null. Nothing to open.")
     this is Unit -> log.i("It is Unit. Nothing to open.")
@@ -113,8 +113,9 @@ suspend fun Any?.tryOpenDataInIDE(question: String? = null): Any {
     !zenityAskIf(question ?: "Open $about in tmp.notes in IDE ?").ax() -> log.i("Not opening.")
     else -> {
       val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
-      writeFileWithDD(lines, cli.pathToTmpNotes).ax()
-      ideOpen(cli.pathToTmpNotes).ax()
+      val notes = fs.pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
+      writeFileWithDD(lines, notes).ax()
+      ideOpen(notes).ax()
     }
   }
 }

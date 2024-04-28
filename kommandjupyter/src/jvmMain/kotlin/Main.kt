@@ -5,7 +5,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
-import pl.mareklangiewicz.kground.io.uctxIO
+import pl.mareklangiewicz.kground.io.uctxWithIO
 import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.getDefaultCLI
@@ -30,8 +30,8 @@ fun main(args: Array<String>) = runBlocking {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
   val cli = getDefaultCLI()
-  // uctxIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
-  uctxIO(log + submit + cli) {
+  // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
+  uctxWithIO(log + submit + cli) {
     when {
       args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
       args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))

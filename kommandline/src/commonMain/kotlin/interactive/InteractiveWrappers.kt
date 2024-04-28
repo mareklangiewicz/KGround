@@ -5,11 +5,16 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.getSysPlatformType
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.termXDefault
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.w
@@ -17,11 +22,14 @@ import pl.mareklangiewicz.ulog.w
 // TODO: Make these interactive wrappers suspendable (or delete if when needed at all) and use: implictx<ULog>()
 private val log: ULog = UHackySharedFlowLog()
 
+val isJvm: Boolean = getSysPlatformType()?.startsWith("JVM") == true
+
 @DelicateApi("API for manual interactive experimentation.")
 suspend fun isInteractiveCodeEnabled(): Boolean {
   val cli = implictx<CLI>()
+  val log = implictx<ULog>()
   return when {
-    !cli.isJvm -> false.also { log.w("Interactive code is only available on JvmCLI (for now).") }
+    !isJvm -> false.also { log.w("Interactive code is only available on Jvm (for now).") }
     !getUserFlag(cli, "code.interactive") -> false.also { log.w("Interactive code NOT enabled.") }
     else -> true
   }
@@ -69,8 +77,7 @@ inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend () -> ReducedO
 @DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
 @Deprecated("Better to use Samples with InteractiveScript s")
 suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execInDir: String? = null) {
-  val cli = implictx<CLI>()
-  if (cli.isJvm) toInteractiveCheck(expectedLineRaw, execInDir).ax()
+  if (isJvm) toInteractiveCheck(expectedLineRaw, execInDir).ax()
   // ifology just to avoid NotImplementedError on nonjvm. this extension fun will be deleted anyway (execb too)
 }
 
@@ -84,7 +91,7 @@ fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null, 
 
 @OptIn(DelicateApi::class, NotPortableApi::class)
 internal fun runBlockingWithCLIOnJvmOnly(cli: CLI = getDefaultCLI(), block: suspend CoroutineScope.() -> Unit) {
-  if (!cli.isJvm) { println("Disabled on CLIs other than JVM."); return }
+  if (!isJvm) { println("Disabled on CLIs other than JVM."); return }
   runBlockingOrErr { uctx(cli) { block() } }
 }
 
@@ -101,8 +108,9 @@ fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: Strin
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 fun writeFileAndStartInGVim(inLines: List<String>, vararg useNamedArgs: Unit, filePath: String? = null) =
   InteractiveScript {
+    val fs = implictx<UFileSys>()
     val cli = implictx<CLI>()
-    val fp = filePath ?: cli.pathToTmpNotes
+    val fp = filePath ?: fs.pathToTmpNotes.toString() // FIXME_later: Use Path everywhere
     writeFileWithDD(inLines, fp).ax()
     cli.start(gvim(fp))
   }

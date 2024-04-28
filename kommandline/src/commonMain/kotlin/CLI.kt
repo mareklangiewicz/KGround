@@ -13,7 +13,12 @@ import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
 /** It's NOT for "consuming side". Instead, use: val cli = implictx<CLI>() */
 @NotPortableApi("Returns very different CLIs on different platforms. Can fail or return CLI with failing fun start.")
+@Deprecated("Use getSysCLI")
 expect fun getDefaultCLI(): CLI
+
+/** It's NOT for "consuming side". Instead, use: val cli = implictx<CLI>() */
+@NotPortableApi("Returns very different CLIs on different platforms. Can fail or return CLI with failing fun start.")
+fun getSysCLI(): CLI = getDefaultCLI() // TODO: remove getDefaultCLI and make this one expect/actual
 
 
 // TODO NOW: use okio.Path everywhere for paths (also class UCWD)
@@ -57,14 +62,6 @@ interface CLI : UCtx {
   ): ExecProcess
   // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
   // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
-
-  // TODO NOW: move some sys/platform related flags from here to kground-io/UFileSys
-
-  val isJvm: Boolean get() = false
-
-  val pathToUserHome get(): String? = null
-  val pathToUserTmp get(): String? = null
-  val pathToSystemTmp get(): String? = null
 
   // TODO_someday: access to input/output streams wrapped in okio Source/Sink
   // (but what about platforms running kommands through ssh or adb?)

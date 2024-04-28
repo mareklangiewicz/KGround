@@ -46,12 +46,6 @@ class JvmCLI : CLI {
         }
         .start(),
     )
-
-  override val isJvm get() = true
-
-  override val pathToUserHome: String? get() = System.getProperty("user.home")
-  override val pathToUserTmp: String? get() = "$pathToUserHome/tmp" // FIXME_maybe: other paths for specific OSes? sometimes null?
-  override val pathToSystemTmp: String? get() = System.getProperty("java.io.tmpdir")
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)

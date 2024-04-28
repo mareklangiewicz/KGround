@@ -5,6 +5,8 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
+import pl.mareklangiewicz.kground.io.getSysUFileSys
+import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.Adb
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
@@ -31,7 +33,6 @@ import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
-import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.getDefaultCLI
 import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.reducedMap
@@ -59,6 +60,9 @@ data object MyDemoSamples {
 
   // TODO: refactor
   private val SYS = getDefaultCLI()
+  private val FS = getSysUFileSys()
+  private val pathToTmpNotes = FS.pathToTmpNotes.toString() // FIXME: use Path type everywhere
+  private val pathToUserTmp = FS.pathToUserTmp!!.toString() // FIXME: use Path type everywhere
 
   val btop = btop() s
     "btop"
@@ -129,21 +133,21 @@ data object MyDemoSamples {
   }
 
   val ideOpenXClip = InteractiveScript {
-    kommand("xclip", "-o").ax(outFile = SYS.pathToTmpNotes)
+    kommand("xclip", "-o").ax(outFile = pathToTmpNotes)
     // bash("xclip -o > ${SYS.pathToTmpNotes}").ax() // equivalent to above
-    ideOpen(SYS.pathToTmpNotes).ax()
+    ideOpen(pathToTmpNotes).ax()
   }
 
   val ideOpenBashExports = InteractiveScript {
-    bashGetExportsToFile(SYS.pathToTmpNotes).ax()
-    ideOpen(SYS.pathToTmpNotes).ax()
+    bashGetExportsToFile(pathToTmpNotes).ax()
+    ideOpen(pathToTmpNotes).ax()
   }
 
   val gvimShowBashExportsForLC = InteractiveScript {
     val exports = bashGetExportsMap().ax()
     val lines = exports.keys.filter { it.startsWith("LC") }.map { "exported env \'$it\' == \'${exports[it]}\'" }
-    writeFileWithDD(lines, SYS.pathToTmpNotes).ax()
-    gvim(SYS.pathToTmpNotes).ax()
+    writeFileWithDD(lines, pathToTmpNotes).ax()
+    gvim(pathToTmpNotes).ax()
   }
 
   val gvimServerDDDDOpenHomeDir = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
@@ -152,14 +156,14 @@ data object MyDemoSamples {
   @OptIn(DelicateApi::class)
   suspend fun showMyRepoMarkdownListInGVim() = InteractiveScript {
     val reposMdContent = GhSamples.myPublicRepoMarkdownList.ax()
-    val tmpReposFileMd = SYS.pathToUserTmp + "/tmp.repos.md" // also to have syntax highlighting
+    val tmpReposFileMd = pathToUserTmp + "/tmp.repos.md" // also to have syntax highlighting
     writeFileAndStartInGVim(reposMdContent, filePath = tmpReposFileMd).ax()
   }
 
   @OptIn(DelicateApi::class)
   suspend fun prepareMyExcludeFolderInKotlinMultiProject() = InteractiveScript {
     val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).ax()
-    val boringFileXml = SYS.pathToUserTmp + "/tmp.boring.xml" // also to have syntax highlighting
+    val boringFileXml = "$pathToUserTmp/tmp.boring.xml" // also to have syntax highlighting
     writeFileAndStartInGVim(out, filePath = boringFileXml).ax()
     // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
     SYS.start(gvim("/home/marek/code/kotlin/kotlin.iml"))

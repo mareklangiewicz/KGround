@@ -2,15 +2,13 @@ package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.*
-import pl.mareklangiewicz.kommand.CLI
+import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
 import pl.mareklangiewicz.kommand.gvim
-import pl.mareklangiewicz.kommand.implictx
-import pl.mareklangiewicz.kommand.pathToTmpNotes
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
 
@@ -50,8 +48,9 @@ data object LsSamples {
 
   // Notice: it will NOT add colors because "ls" is called with file as stdout
   val lsALotNicelyInGVim = InteractiveScript {
-    val cli = implictx<CLI>()
-    lsALotNicely.ax(outFile = cli.pathToTmpNotes)
-    gvim(cli.pathToTmpNotes).ax()
+    val fs = implictx<UFileSys>()
+    val notes = fs.pathToTmpNotes.toString()
+    lsALotNicely.ax(outFile = notes)
+    gvim(notes).ax()
   }
 }
