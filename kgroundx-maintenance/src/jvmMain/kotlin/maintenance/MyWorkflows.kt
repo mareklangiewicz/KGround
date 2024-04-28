@@ -13,13 +13,15 @@ import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
 import okio.*
-import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.ExampleApi
+import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
-import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
@@ -96,21 +98,23 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
 private val MyDWorkflowNames = listOf("dbuild", "drelease")
 
 
-fun FileSystem.checkMyDWorkflowsInProject(
+suspend fun checkMyDWorkflowsInProject(
   projectPath: Path,
   yamlFilesPath: Path = projectPath / ".github" / "workflows",
   yamlFilesExt: String = "yml",
   failIfUnknownWorkflowFound: Boolean = false,
   failIfKnownWorkflowNotFound: Boolean = false,
 ) {
-  ulog.i("Check my dworkflows in project: $projectPath")
+  val log = implictx<ULog>()
+  val fs = implictx<UFileSys>()
+  log.i("Check my dworkflows in project: $projectPath")
   @Suppress("DEPRECATION")
   val yamlFiles = findAllFiles(yamlFilesPath, maxDepth = 1).filterExt(yamlFilesExt)
   val yamlNames = yamlFiles.map { it.name.substringBeforeLast('.') }
   for (dname in MyDWorkflowNames) {
     if (dname !in yamlNames) {
       val summary = "Workflow $dname not found."
-      ulog.e("ERR project:${projectPath.name}: $summary")
+      log.e("ERR project:${projectPath.name}: $summary")
       if (failIfKnownWorkflowNotFound) bad { summary }
     }
   }
@@ -122,41 +126,43 @@ fun FileSystem.checkMyDWorkflowsInProject(
     } catch (e: IllegalStateException) {
       if (failIfUnknownWorkflowFound) throw e
       else {
-        ulog.e(e.message); continue
+        log.e(e.message); continue
       }
     }
-    val contentActual = readUtf8(file)
+    val contentActual = fs.readUtf8(file)
     contentActual.chkEq(contentExpected) {
       val summary = "Workflow $dname was modified."
-      ulog.e("ERR project:${projectPath.name}: $summary")
+      log.e("ERR project:${projectPath.name}: $summary")
       summary
     }
-    ulog.i("OK project:${projectPath.name} workflow:$dname")
+    log.i("OK project:${projectPath.name} workflow:$dname")
   }
 }
 
-@ExampleApi fun injectDWorkflowsToKotlinProject(projectName: String) =
-  SYSTEM.injectDWorkflowsToProject(PathToKotlinProjects / projectName)
+@ExampleApi suspend fun injectDWorkflowsToKotlinProject(projectName: String) =
+  injectDWorkflowsToProject(PathToKotlinProjects / projectName)
 
-fun FileSystem.injectDWorkflowsToProject(
+suspend fun injectDWorkflowsToProject(
   projectPath: Path,
   yamlFilesPath: Path = projectPath / ".github" / "workflows",
   yamlFilesExt: String = "yml",
 ) {
-  ulog.i("Inject default workflows to project: $projectPath")
+  val log = implictx<ULog>()
+  val fs = implictx<UFileSys>()
+  log.i("Inject default workflows to project: $projectPath")
   for (dname in MyDWorkflowNames) {
     val file = yamlFilesPath / "$dname.$yamlFilesExt"
     val contentOld = try {
-      readUtf8(file)
+      fs.readUtf8(file)
     } catch (e: FileNotFoundException) {
       ""
     }
     val contentNew = defaultWorkflow(dname).toYaml()
-    SYSTEM.writeUtf8(file, contentNew, createParentDir = true)
+    fs.writeUtf8(file, contentNew, createParentDir = true)
     val summary =
       if (contentNew == contentOld) "No changes."
       else "Changes detected (len ${contentOld.length}->${contentNew.length})"
-    ulog.i("Inject workflow to project:${projectPath.name} dname:$dname - $summary")
+    log.i("Inject workflow to project:${projectPath.name} dname:$dname - $summary")
   }
 }
 

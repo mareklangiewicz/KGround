@@ -4,7 +4,6 @@ package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.flow.*
 import okio.*
-import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
@@ -31,7 +30,7 @@ var PathToKGroundProject = PathToKotlinProjects / "KGround"
   codeInLineUre: Ure,
   onlyPublic: Boolean = false,
   alsoGradleKts: Boolean = true,
-  alsoFilterProjectPath: suspend FileSystem.(Path) -> Boolean = { true },
+  alsoFilterProjectPath: suspend (Path) -> Boolean = { true },
 ) {
   val log = implictx<ULog>()
   var foundCount = 0
@@ -96,30 +95,34 @@ private fun Ure.withSomeLinesAround(
 @ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean) =
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalDWorkflowsProjectsPathS()
-    .collect { SYSTEM.checkMyDWorkflowsInProject(it) }
+    .collect { checkMyDWorkflowsInProject(it) }
 
 
 @ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean) =
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalDWorkflowsProjectsPathS()
-    .collect { SYSTEM.injectDWorkflowsToProject(it) }
+    .collect { injectDWorkflowsToProject(it) }
 
-@ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS(
-  localSystem: FileSystem = SYSTEM,
-) = mapFilterLocalKotlinProjectsPathS(localSystem) {
-  val isGradleRootProject = exists(it / "settings.gradle.kts") || exists(it / "settings.gradle")
-  if (!isGradleRootProject) implictx<ULog>().w("Ignoring dworkflows in non-gradle project: $it")
-  // FIXME_maybe: Change when I have dworkflows for non-gradle projects
-  isGradleRootProject
-}
+@ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS() =
+  mapFilterLocalKotlinProjectsPathS {
+    val log = implictx<ULog>()
+    val fs = implictx<UFileSys>()
+    val isGradleRootProject = fs.exists(it / "settings.gradle.kts") || fs.exists(it / "settings.gradle")
+    if (!isGradleRootProject) {
+      log.w("Ignoring dworkflows in non-gradle project: $it")
+    }
+    // FIXME_maybe: Change when I have dworkflows for non-gradle projects
+    isGradleRootProject
+  }
 
 /** @receiver Flow of projects names. */
 @ExampleApi internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
-  localSystem: FileSystem = SYSTEM,
-  alsoFilter: suspend FileSystem.(Path) -> Boolean = { true },
-) = map { PathToKotlinProjects / it }
-  .filter { localSystem.exists(it) }
-  .filter { localSystem.alsoFilter(it) }
+  alsoFilter: suspend (Path) -> Boolean = { true },
+): Flow<Path> {
+  return map { PathToKotlinProjects / it }
+    .filter { implictx<UFileSys>().exists(it) }
+    .filter { alsoFilter(it) }
+}
 
 
 @ExampleApi suspend fun tryToInjectMyTemplatesToAllMyProjects(
