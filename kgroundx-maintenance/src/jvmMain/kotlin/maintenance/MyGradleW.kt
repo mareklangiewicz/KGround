@@ -4,13 +4,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.RESOURCES
-import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.ulog.*
-import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.*
@@ -21,16 +20,18 @@ import pl.mareklangiewicz.kommand.find.*
     updateGradlewFilesInProject(it)
   }
 
-@ExampleApi fun updateGradlewFilesInKotlinProject(projectName: String) =
+@ExampleApi suspend fun updateGradlewFilesInKotlinProject(projectName: String) =
   updateGradlewFilesInProject(PathToKotlinProjects / projectName)
 
-fun updateGradlewFilesInProject(fullPath: Path) =
+suspend fun updateGradlewFilesInProject(fullPath: Path) =
   gradlewRelPaths.forEach { gradlewRelPath ->
+    val log = implictx<ULog>()
+    val fs = implictx<UFileSys>()
     val targetPath = fullPath / gradlewRelPath
-    val content = RESOURCES.readByteString(gradlewRelPath.withName { "$it.tmpl" })
-    val action = if (SYSTEM.exists(targetPath)) "Updating" else "Creating new"
-    ulog.i("$action gradlew file: $targetPath")
-    SYSTEM.writeByteString(targetPath, content)
+    val content = RESOURCES.readByteString("/templates".toPath() / gradlewRelPath.withName { "$it.tmpl" })
+    val action = if (fs.exists(targetPath)) "Updating" else "Creating new"
+    log.i("$action gradlew file: $targetPath")
+    fs.writeByteString(targetPath, content)
   }
 
 
