@@ -1,12 +1,12 @@
 package pl.mareklangiewicz.kgroundx.maintenance
 
 import okio.*
-import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.ulog.hack.ulog
-import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.ulog.*
 
 
 private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".toPath()
@@ -14,21 +14,22 @@ private val templatesRelPath = resourcesRelPath / "templates"
 private val resourcesAbsPath = PathToKGroundProject / resourcesRelPath
 private val templatesAbsPath = PathToKGroundProject / templatesRelPath
 
-private val Path.isTmplSymlink
-  get() = name.endsWith(".tmpl") && SYSTEM.metadata(this).symlinkTarget != null
+private suspend fun Path.isTmplSymlink() =
+  name.endsWith(".tmpl") && implictx<UFileSys>().metadata(this).symlinkTarget != null
 
-fun updateKGroundTemplatesSymLinks() = SYSTEM.run {
-
+suspend fun updateKGroundTemplatesSymLinks() {
+  val log = implictx<ULog>()
+  val fs = implictx<UFileSys>()
   // remove all tmpl symlinks (but throw if other unexpected file found)
-  listRecursively(templatesAbsPath).forEach {
-    if (metadata(it).isDirectory) return@forEach
-    it.isTmplSymlink.chkTrue { "Unexpected file in templates: $it" }
-    delete(it)
+  fs.listRecursively(templatesAbsPath).forEach {
+    if (fs.metadata(it).isDirectory) return@forEach
+    it.isTmplSymlink().chkTrue { "Unexpected file in templates: $it" }
+    fs.delete(it)
   }
   // remove all dirs (but throw if non directory still found)
-  list(templatesAbsPath).forEach {
-    metadata(it).isDirectory.chkTrue { "Some non directory left in templates: $it" }
-    deleteRecursively(it)
+  fs.list(templatesAbsPath).forEach {
+    fs.metadata(it).isDirectory.chkTrue { "Some non directory left in templates: $it" }
+    fs.deleteRecursively(it)
   }
 
   // prepare the list of buildfiles (*.gradle.kts)
@@ -47,8 +48,8 @@ fun updateKGroundTemplatesSymLinks() = SYSTEM.run {
     val linkAbs = PathToKGroundProject / linkRel
     val targetDots = linkRel.parent!!.segments.joinToString("/") { ".." }
     val target = targetDots.toPath() / srcRel
-    ulog.i("symlink $linkAbs -> $target")
-    createDirectories(linkAbs.parent!!)
-    createSymlink(linkAbs, target)
+    log.i("symlink $linkAbs -> $target")
+    fs.createDirectories(linkAbs.parent!!)
+    fs.createSymlink(linkAbs, target)
   }
 }
