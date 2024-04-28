@@ -20,9 +20,6 @@ import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.implictx
-import pl.mareklangiewicz.ulog.ULog
-import pl.mareklangiewicz.ulog.e
-import pl.mareklangiewicz.ulog.i
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 

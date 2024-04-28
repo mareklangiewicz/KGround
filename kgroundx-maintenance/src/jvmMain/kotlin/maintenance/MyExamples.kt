@@ -74,7 +74,6 @@ object MyTemplatesExamples {
   }
 
   suspend fun tryInjectAllMyProjects() {
-    // ulogHackyMinLevel = ULogLevel.DEBUG
     tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = true)
   }
 }
