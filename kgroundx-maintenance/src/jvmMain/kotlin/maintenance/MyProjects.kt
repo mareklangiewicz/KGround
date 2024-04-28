@@ -8,6 +8,8 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.io.UFileSys
+import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.hack.*
@@ -32,11 +34,12 @@ var PathToKGroundProject = PathToKotlinProjects / "KGround"
   alsoGradleKts: Boolean = true,
   alsoFilterProjectPath: suspend FileSystem.(Path) -> Boolean = { true },
 ) {
+  val log = implictx<ULog>()
   var foundCount = 0
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
     .collect { projectPath ->
-      ulog.i("Searching in project: $projectPath")
+      log.i("Searching in project: $projectPath")
       val listKt = findMyKotlinCode(projectPath.toString()).ax()
       val listKts =
         if (alsoGradleKts)
@@ -49,30 +52,33 @@ var PathToKGroundProject = PathToKotlinProjects / "KGround"
       (listKt + listKts).forEach { ktFilePathStr ->
         val ktFilePath = ktFilePathStr.toPath()
         val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
-        val result = SYSTEM.readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
+        val result = readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
         result?.value?.let {
           foundCount++
-          ulog.i("found in file ($foundCount): $ktFilePathStr")
-          ulog.i("found code:")
-          it.lines().logEach(ulog)
+          log.i("found in file ($foundCount): $ktFilePathStr")
+          log.i("found code:")
+          it.lines().logEach(log)
         }
       }
     }
-  ulog.i("Total found files: $foundCount")
+  log.i("Total found files: $foundCount")
 }
 
 
 // TODO_someday: sth like this public in UreIO.kt
 @DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesAround < 3.")
-private fun FileSystem.readAndFindUreLineContentWithSomeLinesAround(
+private suspend fun readAndFindUreLineContentWithSomeLinesAround(
   file: Path,
   ureLineContent: Ure,
   maxLinesAround: Int = 1,
-): MatchResult? = readUtf8(file).let { fileContent ->
-  ureLineContent.withSomeLinesAround(
+): MatchResult? {
+  val fs = implictx<UFileSys>()
+  return fs.readUtf8(file).let { fileContent ->
+    ureLineContent.withSomeLinesAround(
       maxLinesBefore = maxLinesAround,
       maxLinesAfter = maxLinesAround,
-  ).findFirstOrNull(fileContent)
+    ).findFirstOrNull(fileContent)
+  }
 }
 
 @DelicateApi("FIXME: Probably leads to catastrophic backtracking. Keep maxLinesBefore < 3.")
