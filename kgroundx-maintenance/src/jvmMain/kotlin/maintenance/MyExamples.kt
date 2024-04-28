@@ -11,6 +11,7 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kground.io.UCWD
+import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kground.io.cd
 import pl.mareklangiewicz.udata.str
@@ -118,14 +119,16 @@ object MyWeirdExamples {
 
 
   suspend fun tryToDiffMySettingsKtsFiles() {
+    val log = implictx<ULog>()
+    val fs = implictx<UFileSys>()
     val pathLeft = PathToKotlinProjects / "KGround" / "settings.gradle.kts"
     fetchMyProjectsNameS(onlyPublic = false)
       .mapFilterLocalKotlinProjectsPathS()
       .collect {
         val pathRight = it / "settings.gradle.kts"
-        if (SYSTEM.exists(pathRight)) {
+        if (fs.exists(pathRight)) {
           val msgDiff = "ideDiff(\n  \"$pathLeft\",\n  \"$pathRight\"\n)"
-          ulog.i(msgDiff)
+          log.i(msgDiff)
           val question = "Try opening diff in IDE?\n$msgDiff"
           val answer = zenityAskIf(question).ax()
           if (answer) ideDiff(pathLeft.toString(), pathRight.toString()).ax()
