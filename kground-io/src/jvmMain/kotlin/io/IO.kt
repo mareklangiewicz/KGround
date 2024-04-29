@@ -9,8 +9,7 @@ import kotlin.math.*
 import kotlin.random.*
 import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.implictx
-import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.ulog
+import pl.mareklangiewicz.ulog.*
 
 // FIXME NOW: this file is moved from DepsKt as is temporarily.
 //   analyze this code and move stuff to more common code and/or other KGround modules
@@ -45,10 +44,10 @@ fun Sequence<Path>.filterExt(ext: String) = filter { it.name.endsWith(".$ext") }
  * nothing is written to file system if it's null;
  * @param process file content transformation; if it returns null - output file is not even touched
  */
-fun FileSystem.processEachFile(
+suspend fun processEachFile(
   inputRoot: Path,
   outputRoot: Path? = null,
-  process: (input: Path, output: Path?, content: String) -> String?,
+  process: suspend (input: Path, output: Path?, content: String) -> String?,
 ) {
   req(inputRoot.isAbsolute)
   req(outputRoot?.isAbsolute != false)
@@ -89,24 +88,21 @@ fun FileSystem.writeByteString(file: Path, content: ByteString, createParentDir:
  * nothing is written to file system if it's null;
  * @param process file content transformation; if it returns null - outputPath is not even touched
  */
-fun FileSystem.processFile(inputPath: Path, outputPath: Path? = null, process: (String) -> String?) {
-
-  val input = readUtf8(inputPath)
-
+suspend fun processFile(inputPath: Path, outputPath: Path? = null, process: suspend (String) -> String?) {
+  val fs = implictx<UFileSys>()
+  val log = implictx<ULog>()
+  val input = fs.readUtf8(inputPath)
   val output = process(input)
-
   if (outputPath == null) {
-    if (output != null) ulog.d("Ignoring non-null output because outputPath is null")
+    if (output != null) log.d("Ignoring non-null output because outputPath is null")
     return
   }
-
   if (output == null) {
-    ulog.d("Ignoring outputPath because output to write is null")
+    log.d("Ignoring outputPath because output to write is null")
     return
   }
-
-  createDirectories(outputPath.parent!!)
-  writeUtf8(outputPath, output)
+  fs.createDirectories(outputPath.parent!!)
+  fs.writeUtf8(outputPath, output)
 }
 
 fun FileSystem.withTempDir(tempDirPrefix: String, code: FileSystem.(tempDir: Path) -> Unit) {

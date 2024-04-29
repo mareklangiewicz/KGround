@@ -2,6 +2,8 @@ package pl.mareklangiewicz.ulog.hack
 
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import pl.mareklangiewicz.annotations.ExperimentalApi
+import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.reqNN
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.ULog
@@ -38,18 +40,10 @@ class UHackySharedFlowLog(
   }
 }
 
-/** This global var is especially hacky and will be removed when we have context parameters */
-@Deprecated("Use val log = implictx<ULog>()")
-var ulog: ULog =
-  UHackySharedFlowLog { level, data -> "Deprecated L ${level.symbol} ${data.str(maxLength = 512)}" }
-  // UHackySharedFlowLog { level, data -> "L ${level.symbol} ${getCurrentTimeStr()} ${data.str(maxLength = 128)}" }
-  // Note: getting current time makes it a bit slower, so it shouldn't be the default.
+@ExperimentalApi("Not sure if I want this or if user should do it manually")
+val ULog.cacheOrNull: List<String>? get() = (this as? UHackySharedFlowLog)?.flow?.replayCache
 
-/** TODO_later: make sure getting snapshot from replayCache is thread-safe */
-@Deprecated("Use val log = implictx<UHackySharedFlowLog>()")
-val ulogCache: List<String>? get() = (ulog as? UHackySharedFlowLog)?.flow?.replayCache
-
-@Deprecated("Use val log = implictx<UHackySharedFlowLog>()")
-var ulogHackyMinLevel: ULogLevel?
-  get() = (ulog as? UHackySharedFlowLog)?.minLevel
-  set(value) { (ulog as? UHackySharedFlowLog)?.minLevel = value.reqNN() }
+@ExperimentalApi("Not sure if I want this or if user should do it manually")
+var ULog.minLevelOrThrow: ULogLevel
+  get() = (this as? UHackySharedFlowLog)?.minLevel ?: bad { "This logger doesn't have minLevel property" }
+  set(value) { (this as? UHackySharedFlowLog).reqNN { "This logger doesn't have minLevel property" }.minLevel = value }

@@ -21,10 +21,9 @@ suspend fun Path.injectSpecialRegion(
   region: String,
   addIfNotFound: Boolean = true,
 ) {
-  val fs = implictx<UFileSys>()
   val log = implictx<ULog>()
   val regex = ureWithSpecialRegion(regionLabel).compile()
-  fs.processFile(this, this) { output ->
+  processFile(this, this) { output ->
     val outputMR = regex.matchEntire(output)
     if (outputMR == null) {
       log.i("Inject [$regionLabel] to $this - No match.")
