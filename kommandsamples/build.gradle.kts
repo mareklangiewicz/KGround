@@ -12,13 +12,13 @@ defaultBuildTemplateForBasicMppLib {
   api(project(":kommandline"))
 
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later
-  implementation(kotlin("reflect"))
+  implementation(Kotlin.reflect.withVer("2.0.0-RC1")) // FIXME
 }
 
 // Note: kground substitutions also needed for KGround project, so kommandsamples module finds local kground modules
 setMyWeirdSubstitutions(
-  "kground" to "0.0.51", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
-  "kground-io" to "0.0.51", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground-io/
+  "kground" to "0.0.52", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+  "kground-io" to "0.0.52", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground-io/
   "uspek" to "0.0.33", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
   "uspek-junit5" to "0.0.33",
   "tuplek" to "0.0.14", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/

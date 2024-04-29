@@ -8,7 +8,7 @@ import pl.mareklangiewicz.interactive.tryInteractivelySomethingRef
 import pl.mareklangiewicz.kground.io.uctxWithIO
 import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
-import pl.mareklangiewicz.kommand.getDefaultCLI
+import pl.mareklangiewicz.kommand.getSysCLI
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.udata.str
@@ -29,7 +29,7 @@ import pl.mareklangiewicz.ulog.i
 fun main(args: Array<String>) = runBlocking {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
-  val cli = getDefaultCLI()
+  val cli = getSysCLI()
   // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
   uctxWithIO(log + submit + cli) {
     when {

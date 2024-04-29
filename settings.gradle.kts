@@ -10,8 +10,8 @@ val buildScanPublishingAllowed =
   // false
 
 val kgroundModulesLocalAllowed =
-  true
-  // false
+  // true
+  false
 
 
 // gradle.logSomeEventsToFile(rootProject.projectDir.toOkioPath() / "my.gradle.log")
@@ -39,7 +39,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.3.01" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.3.02" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "3.17.2" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 

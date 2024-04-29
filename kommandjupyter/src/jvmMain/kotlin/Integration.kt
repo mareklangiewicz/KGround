@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand.jupyter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.uctx.uctx
@@ -77,8 +78,9 @@ fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI, di
  * Blocking flavor of fun Kommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
+@OptIn(NotPortableApi::class)
 fun Kommand.axb(
-  cli: CLI = getDefaultCLI(),
+  cli: CLI = getSysCLI(),
   dir: String? = null,
   vararg useNamedArgs: Unit,
   inContent: String? = null,

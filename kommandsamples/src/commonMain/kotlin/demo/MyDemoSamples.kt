@@ -21,6 +21,7 @@ import pl.mareklangiewicz.kommand.bashGetExportsToFile
 import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.find.findBoringCodeDirsAndReduceAsExcludedFoldersXml
 import pl.mareklangiewicz.kommand.find.myKotlinPath
+import pl.mareklangiewicz.kommand.getSysCLI
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.github.GhSamples
 import pl.mareklangiewicz.kommand.gvim
@@ -33,7 +34,6 @@ import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.kommand.konfig.logEachKeyVal
 import pl.mareklangiewicz.kommand.man
-import pl.mareklangiewicz.kommand.getDefaultCLI
 import pl.mareklangiewicz.kommand.readFileHead
 import pl.mareklangiewicz.kommand.reducedMap
 import pl.mareklangiewicz.kommand.reducedOutToList
@@ -59,7 +59,7 @@ import pl.mareklangiewicz.ulog.implictx
 data object MyDemoSamples {
 
   // TODO: refactor
-  private val SYS = getDefaultCLI()
+  private val SYS = getSysCLI()
   private val FS = getSysUFileSys()
   private val pathToTmpNotes = FS.pathToTmpNotes.toString() // FIXME: use Path type everywhere
   private val pathToUserTmp = FS.pathToUserTmp!!.toString() // FIXME: use Path type everywhere

@@ -27,7 +27,7 @@ typealias IKonfig = IMutMap<String, String>
 
 
 fun konfigInUserHomeConfigDir(
-  cli: CLI = getDefaultCLI(),
+  cli: CLI = getSysCLI(),
   fs: UFileSys = getSysUFileSys(),
   vararg useNamedArgs: Unit,
   isReadOnly: Boolean = false,
@@ -58,7 +58,7 @@ fun konfigInDir(
   .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
 @OptIn(NotPortableApi::class)
-private class KonfigInDirUnsafe(val dir: String, val cli: CLI = getDefaultCLI()) : IKonfig {
+private class KonfigInDirUnsafe(val dir: String, val cli: CLI = getSysCLI()) : IKonfig {
 
   init {
     mkdir(dir, withParents = true).axBlockingOrErr(cli)
@@ -130,7 +130,7 @@ fun IKonfig.withChecks(
 //  even when via ssh or adb or via some strange shell,
 //  so maybe additional encoding of whole file is required for reading/writing over ssh/adb.
 @Deprecated("TODO: implement")
-fun konfigInFile(file: String, cli: CLI = getDefaultCLI()): IKonfig = TODO()
+fun konfigInFile(file: String, cli: CLI = getSysCLI()): IKonfig = TODO()
 
 suspend fun IKonfig.logEachKeyVal(level: ULogLevel = ULogLevel.INFO) {
   val log = implictx<ULog>()

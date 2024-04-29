@@ -207,7 +207,7 @@ internal fun runTestUSpekWithWorkarounds(
   val log = UHackySharedFlowLog { level, data -> "T ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor("FIXME later")
   // FIXME later: this should NOT be used; later: provide special USubmit for tests
-  val cli = getDefaultCLI()
+  val cli = getSysCLI()
   uctx(log + submit + cli) {
     suspek {
       code()

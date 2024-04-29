@@ -5,6 +5,7 @@ import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.api.extension.ExtensionContext
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
+import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.uspek.runTestUSpek
 import pl.mareklangiewicz.uspek.so
@@ -20,8 +21,9 @@ import pl.mareklangiewicz.uspek.so
 
 // unfortunately, this can't be moved to main kommandline jvm code, because it depends on jupiter:ExtensionContext
 // maybe it could be moved to uspekx-jvm, but that would require uspekx depend on kommandline
+@OptIn(NotPortableApi::class)
 fun isUserTestClassEnabled(context: ExtensionContext) =
-  getUserFlag(getDefaultCLI(), "tests." + context.requiredTestClass.simpleName)
+  getUserFlag(getSysCLI(), "tests." + context.requiredTestClass.simpleName)
 
 @ExampleApi
 @OptIn(DelicateApi::class)
