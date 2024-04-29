@@ -10,6 +10,8 @@ import pl.mareklangiewicz.uspek.*
 @OptIn(NotPortableApi::class)
 class UreTestsMaintenance {
 
+  /* TODO NOW: rewrite it all as suspendable uspek tests (also stuff at my intellij shelf)
+
     @TestFactory
     fun ureTestFactory() = uspekTestFactory {
         testUreMultiplatform()
@@ -50,4 +52,6 @@ class UreTestsMaintenance {
             }
         }
     }
+
+  */
 }
