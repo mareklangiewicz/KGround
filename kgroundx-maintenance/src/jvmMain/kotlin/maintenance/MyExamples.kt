@@ -3,7 +3,6 @@
 package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.flow.map
-import okio.FileSystem.Companion.SYSTEM
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
@@ -28,7 +27,6 @@ import pl.mareklangiewicz.usubmit.implictx
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
-import pl.mareklangiewicz.ulog.hack.ulog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
@@ -152,6 +150,7 @@ object MyWeirdExamples {
 
   @OptIn(DelicateApi::class, NotPortableApi::class)
   private suspend fun tryToUpdateMyRepoOrigin(dir: Path) {
+    val log = implictx<ULog>()
     val ureRepoUrl = ure {
       +ureText("git@github.com:")
       +ureIdent().withName("user")
@@ -162,20 +161,20 @@ object MyWeirdExamples {
     val kget = kommand("git", "remote", "get-url", "origin")
     fun kset(url: String) = kommand("git", "remote", "set-url", "origin", url)
 
-    ulog.i(dir)
+    log.i(dir)
     val url = kget.ax(dir = dir.toString()).single()
-    ulog.i(url)
+    log.i(url)
     val result = ureRepoUrl.matchEntireOrThrow(url)
     val vals = result.namedValues
     val user = vals["user"]!!
     val project = vals["project"]!!
     if (user == "mareklangiewicz") {
-      ulog.i("User is already mareklangiewicz.")
+      log.i("User is already mareklangiewicz.")
       return
     }
     user chkEq "langara"
     val newUrl = "git@github.com:mareklangiewicz/$project.git"
-    ulog.w("setting origin -> $newUrl")
+    log.w("setting origin -> $newUrl")
     kset(newUrl).ax(dir = dir.toString())
   }
 }
