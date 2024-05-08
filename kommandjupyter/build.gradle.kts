@@ -37,7 +37,7 @@ kotlin {
   sourceSets {
     val jvmMain by getting {
       dependencies {
-        implementation(Kotlin.reflect.withVer("2.0.0-RC1")) // FIXME
+        implementation(Kotlin.reflect)
       }
     }
   }

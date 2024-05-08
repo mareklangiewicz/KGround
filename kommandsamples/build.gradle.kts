@@ -12,7 +12,7 @@ defaultBuildTemplateForBasicMppLib {
   api(project(":kommandline"))
 
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later
-  implementation(Kotlin.reflect.withVer("2.0.0-RC1")) // FIXME
+  implementation(Kotlin.reflect)
 }
 
 // Note: kground substitutions also needed for KGround project, so kommandsamples module finds local kground modules
