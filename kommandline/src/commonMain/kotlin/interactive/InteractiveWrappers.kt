@@ -14,6 +14,7 @@ import pl.mareklangiewicz.kommand.term.termXDefault
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.ULogPrintLn
 import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
@@ -42,7 +43,7 @@ suspend inline fun ifInteractiveCodeEnabled(code: suspend () -> Unit) {
 
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockingWithCLIOnJvmOnly {
+fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockingWithCLIAndULogOnJvmOnly {
   if (isInteractiveCodeEnabled()) code()
 }
 
@@ -84,15 +85,19 @@ suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execI
 @NotPortableApi
 @DelicateApi
 fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null, execInDir: String? = null) {
-  runBlockingWithCLIOnJvmOnly {
+  runBlockingWithCLIAndULogOnJvmOnly {
     tryInteractivelyCheck(expectedLineRaw, execInDir)
   }
 }
 
 @OptIn(DelicateApi::class, NotPortableApi::class)
-internal fun runBlockingWithCLIOnJvmOnly(cli: CLI = getSysCLI(), block: suspend CoroutineScope.() -> Unit) {
+internal fun runBlockingWithCLIAndULogOnJvmOnly(
+  cli: CLI = getSysCLI(),
+  log: ULog = ULogPrintLn(),
+  block: suspend CoroutineScope.() -> Unit,
+) {
   if (!isJvm) { println("Disabled on CLIs other than JVM."); return }
-  runBlockingOrErr { uctx(cli) { block() } }
+  runBlockingOrErr { uctx(cli + log) { block() } }
 }
 
 

@@ -4,7 +4,7 @@ import kotlin.test.*
 import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
-import pl.mareklangiewicz.interactive.runBlockingWithCLIOnJvmOnly
+import pl.mareklangiewicz.interactive.runBlockingWithCLIAndULogOnJvmOnly
 import pl.mareklangiewicz.interactive.tryInteractivelyCheckBlockingOrErr
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
@@ -30,7 +30,7 @@ class GpgTest {
 
   @Suppress("DEPRECATION")
   @Test fun testGpgEncryptDecrypt() {
-    runBlockingWithCLIOnJvmOnly {
+    runBlockingWithCLIAndULogOnJvmOnly {
       val inFile = mktemp(prefix = "testGED").ax()
       val encFile = "$inFile.enc"
       val decFile = "$inFile.dec"
