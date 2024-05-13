@@ -10,13 +10,13 @@ import pl.mareklangiewicz.ulog.ULogLevel.*
 
 /**
  * NONE should always be ignored (not logged)
- * QUIET should usually be ignored
+ * BABBLE should usually be ignored
  * VERBOSE ... ASSERT as in android (also the same ordinal as android numeric priority, and same char symbol)
  * ASSERT can crash the system/app (meaning unsupported or fatal error)
  */
 enum class ULogLevel(val symbol: Char) {
   NONE('N'),
-  QUIET('Q'),
+  BABBLE('B'),
   VERBOSE('V'),
   DEBUG('D'),
   INFO('I'),
@@ -47,9 +47,13 @@ fun ULog.w(data: Any?) = this(WARN, data)
 fun ULog.e(data: Any?) = this(ERROR, data)
 
 @DelicateApi fun ULog.none(data: Any?) = this(NONE, data)
-@DelicateApi fun ULog.quiet(data: Any?) = this(QUIET, data)
+@DelicateApi fun ULog.babble(data: Any?) = this(BABBLE, data)
 @DelicateApi fun ULog.verbose(data: Any?) = this(VERBOSE, data)
 @DelicateApi fun ULog.assert(data: Any?) = this(ASSERT, data)
+
+@Deprecated("Use babble", ReplaceWith("babble"))
+@DelicateApi fun ULog.quiet(data: Any?) = babble(data)
+// quiet is confusing name because in gradle it means sth like my LogLevel.ASSERT
 
 // DelicateApi annotations are for levels are only for special cases and shouldn't be overused.
 // I don't want any tags and/or exceptions here in API, any tags/keys/etc can be passed inside data.

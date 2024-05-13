@@ -16,7 +16,7 @@ import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.ideOpen
-import pl.mareklangiewicz.kommand.provideSysCLI
+import pl.mareklangiewicz.kommand.getSysCLI
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.withLogBadStreams
 import pl.mareklangiewicz.kommand.writeFileWithDD
@@ -43,8 +43,7 @@ import pl.mareklangiewicz.ulog.w
 @OptIn(DelicateApi::class, NotPortableApi::class) fun main(args: Array<String>) = runBlocking {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
-  val cli = provideSysCLI() // TODO use one below when available
-  // val cli = getSysCLI()
+  val cli = getSysCLI()
   uctxWithIO(log + submit + cli) {
     when {
       args.size == 2 && args[0] == "try-code" -> try {

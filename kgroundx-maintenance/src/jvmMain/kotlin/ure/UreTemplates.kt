@@ -1,15 +1,11 @@
 package pl.mareklangiewicz.kgroundx.maintenance
 
-import kotlin.math.*
-import kotlin.random.*
 import okio.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.implictx
-import pl.mareklangiewicz.kground.io.pathToSomeTmpOrHome
-import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 
@@ -51,46 +47,24 @@ suspend fun Path.injectSpecialRegion(
   }
 }
 
-suspend fun downloadTmpFile(
-  url: String,
-  name: String = "tmp${Random.nextLong().absoluteValue}.txt",
-): Path {
-  val fs = implictx<UFileSys>()
-  val dir = fs.pathToSomeTmpOrHome
-  val path = dir / name
-  fs.createDirectories(dir)
-  download(url, path)
-  return path
+suspend fun Path.injectSpecialRegionContentFromFile(
+  regionLabel: String,
+  regionContentFile: Path,
+  addIfNotFound: Boolean = true,
+  regionContentMap: suspend (String) -> String = { "// region [$regionLabel]\n\n$it\n// endregion [$regionLabel]\n" },
+) {
+  val regionContent = implictx<UFileSys>().readUtf8(regionContentFile)
+  val region = regionContentMap(regionContent)
+  injectSpecialRegion(regionLabel, region, addIfNotFound)
 }
 
 @OptIn(DelicateApi::class)
-private suspend fun download(url: String, to: Path) {
-  val cli = implictx<CLI>()
-  val log = implictx<ULog>()
-  // TODO: Add curl to KommandLine library, then use it here
-  // -s so no progress bars on error stream; -S to report actual errors on error stream
-  val k = kommand("curl", "-s", "-S", "-o", to.toString(), url)
-  val result = cli.start(k).waitForResult()
-  result.unwrap { err ->
-    if (err.isNotEmpty()) {
-      log.e("FAIL: Error stream was not empty:")
-      err.logEach(log, ULogLevel.ERROR)
-      false
-    } else true
-  }
-}
-
 suspend fun downloadAndInjectFileToSpecialRegion(
   inFileUrl: String,
   outFilePath: Path,
   outFileRegionLabel: String,
 ) {
-  val fs = implictx<UFileSys>()
-  val inFilePath = downloadTmpFile(inFileUrl)
-  val regionContent = fs.readUtf8(inFilePath)
-  val markBefore = "// region [$outFileRegionLabel]\n"
-  val markAfter = "// endregion [$outFileRegionLabel]\n"
-  val region = "$markBefore\n$regionContent\n$markAfter"
-  outFilePath.injectSpecialRegion(outFileRegionLabel, region)
-  fs.delete(inFilePath)
+  val inFilePath = curlDownloadTmpFile(inFileUrl)
+  outFilePath.injectSpecialRegionContentFromFile(outFileRegionLabel, inFilePath)
+  implictx<UFileSys>().delete(inFilePath)
 }
