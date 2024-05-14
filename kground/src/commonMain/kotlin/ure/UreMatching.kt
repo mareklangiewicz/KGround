@@ -7,6 +7,7 @@ import pl.mareklangiewicz.regex.*
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
 import kotlin.text.Regex.Companion.escapeReplacement
+import pl.mareklangiewicz.bad.req
 
 fun Ure.matchEntireOrNull(input: CharSequence) = compile().matchEntireOrNull(input)
 
@@ -57,6 +58,12 @@ value class UReplacement private constructor(val raw: String) {
 
     @OptIn(DelicateApi::class)
     fun Group(name: String) = Advanced("\${$name}") // TODO_someday: chk if name doesn't have forbidden chars
+  }
+
+  @ExperimentalApi("TODO: Implement correct checks for all edge cases (with less false positives)")
+  operator fun plus(that: UReplacement) = UReplacement(raw + that.raw).also {
+    req(raw.last() !in "$\\") { "Concatenation with first part ending with \"${raw.last()}\" is not safe." }
+    req(!raw.last().isDigit() || !that.raw.first().isDigit()) { "Concatenation with numbers in the middle is not safe." }
   }
 }
 
