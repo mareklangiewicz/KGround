@@ -6,7 +6,7 @@ import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.regex.*
 import kotlin.jvm.JvmInline
 import kotlin.reflect.*
-
+import kotlin.text.Regex.Companion.escapeReplacement
 
 fun Ure.matchEntireOrNull(input: CharSequence) = compile().matchEntireOrNull(input)
 
@@ -29,32 +29,47 @@ fun Ure.findAll(input: CharSequence, startIndex: Int = 0) = compile().findAll(in
 
 fun Ure.findAllWithOverlap(input: CharSequence, startIndex: Int = 0) = compile().findAllWithOverlap(input, startIndex)
 
-fun Ure.replaceFirstOrNone(
-  input: CharSequence,
-  replacement: String,
-  vararg useNamedArgs: Unit,
-  escapeGroupRefs: Boolean = false,
-  allowGroupRefs: Boolean = false,
-) = compile().replaceFirstOrNone(input, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
 
-fun Ure.replaceAll(
-  input: CharSequence,
-  replacement: String,
-  vararg useNamedArgs: Unit,
-  escapeGroupRefs: Boolean = false,
-  allowGroupRefs: Boolean = false,
-) = compile().replaceAll(input, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
+// Note: UReplacement depends only on Regex and not Ure, but I want it here in pl.mareklangiewicz.ure package,
+// because it will almost always be used with Ure replacements.
+@Suppress("FunctionName")
+@JvmInline
+value class UReplacement private constructor(val raw: String) {
+  companion object {
+    /** Escapes provided replacement string with [escapeReplacement] so it's always treated literally. */
+    fun Literal(literalReplacement: String) = UReplacement(escapeReplacement(literalReplacement))
+    /**
+     * Replacements have different rules/special constructs than regular expressions.
+     * Group references are done with $nr or ${name} instead of \nr or \k<name> as in regexes
+     * Also there is \ escaping special constructs in "replacement syntax".
+     * See [Regex.replaceFirst] and [Regex.escapeReplacement] kdoc for more details.
+     */
+    @DelicateApi("Special constructs for replacement string. Can be really complex in practice - layers of escaping.")
+    fun Advanced(rawReplacement: String) = UReplacement(rawReplacement)
 
-fun Ure.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequence): String =
+    val Empty = Literal("")
+
+    /** Usually doesn't make sense to replace with the same string, but can be useful for debugging or experimenting */
+    val Same = Group(0)
+
+    @OptIn(DelicateApi::class)
+    fun Group(nr: Int) = Advanced("\$$nr") // TODO_someday: chk if nr is not strange
+
+    @OptIn(DelicateApi::class)
+    fun Group(name: String) = Advanced("\${$name}") // TODO_someday: chk if name doesn't have forbidden chars
+  }
+}
+
+
+fun Ure.replaceFirstOrNone(input: CharSequence, replacement: UReplacement) =
+  compile().replaceFirstOrNone(input, replacement)
+
+fun Ure.replaceAll(input: CharSequence, replacement: UReplacement) = compile().replaceAll(input, replacement)
+
+fun Ure.replaceAll(input: CharSequence, transform: (MatchResult) -> UReplacement): String =
   compile().replaceAll(input, transform)
 
-fun Ure.replaceSingle(
-  input: CharSequence,
-  replacement: String,
-  vararg useNamedArgs: Unit,
-  escapeGroupRefs: Boolean = false,
-  allowGroupRefs: Boolean = false,
-) = compile().replaceSingle(input, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
+fun Ure.replaceSingle(input: CharSequence, replacement: UReplacement) = compile().replaceSingle(input, replacement)
 
 
 fun CharSequence.matchEntireOrNull(ure: Ure) = ure.matchEntireOrNull(this)
@@ -77,32 +92,14 @@ fun CharSequence.findAll(ure: Ure, startIndex: Int = 0) = ure.findAll(this, star
 
 fun CharSequence.findAllWithOverlap(ure: Ure, startIndex: Int = 0) = ure.findAllWithOverlap(this, startIndex)
 
-fun CharSequence.replaceFirstOrNone(
-  ure: Ure,
-  replacement: String,
-  vararg useNamedArgs: Unit,
-  escapeGroupRefs: Boolean = false,
-  allowGroupRefs: Boolean = false,
-) = ure.replaceFirstOrNone(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
+fun CharSequence.replaceFirstOrNone(ure: Ure, replacement: UReplacement) = ure.replaceFirstOrNone(this, replacement)
 
-fun CharSequence.replaceAll(
-  ure: Ure,
-  replacement: String,
-  vararg useNamedArgs: Unit,
-  escapeGroupRefs: Boolean = false,
-  allowGroupRefs: Boolean = false,
-) = ure.replaceAll(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
+fun CharSequence.replaceAll(ure: Ure, replacement: UReplacement) = ure.replaceAll(this, replacement)
 
-fun CharSequence.replaceAll(ure: Ure, transform: (MatchResult) -> CharSequence): String =
+fun CharSequence.replaceAll(ure: Ure, transform: (MatchResult) -> UReplacement): String =
   ure.replaceAll(this, transform)
 
-fun CharSequence.replaceSingle(
-  ure: Ure,
-  replacement: String,
-  vararg useNamedArgs: Unit,
-  escapeGroupRefs: Boolean = false,
-  allowGroupRefs: Boolean = false,
-) = ure.replaceSingle(this, replacement, escapeGroupRefs = escapeGroupRefs, allowGroupRefs = allowGroupRefs)
+fun CharSequence.replaceSingle(ure: Ure, replacement: UReplacement) = ure.replaceSingle(this, replacement)
 
 
 

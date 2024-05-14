@@ -2,20 +2,21 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.ure.UReplacement.Companion.Literal
 
 @OptIn(DelicateApi::class) @NotPortableApi
 fun String.commentOutMultiplatformFun(): String {
-  val output1 = ureExpectFun.notCommentedOut().replaceAll(this) { "/*\n${it.value}\n*/" }
-  val output2 = ureText("actual fun").replaceAll(output1) { "/*actual*/ fun" }
-  return ureText("actual suspend fun").replaceAll(output2) { "/*actual*/ suspend fun" }
+  val output1 = ureExpectFun.notCommentedOut().replaceAll(this) { Literal("/*\n${it.value}\n*/") }
+  val output2 = ureText("actual fun").replaceAll(output1) { Literal("/*actual*/ fun") }
+  return ureText("actual suspend fun").replaceAll(output2) { Literal("/*actual*/ suspend fun") }
   // FIXME_maybe: merge this two replaces to one using better URE
 }
 
 @OptIn(DelicateApi::class) @NotPortableApi
 fun String.undoCommentOutMultiplatformFun(): String {
   val myFun = ure("myFun") { +ureExpectFun }
-  val output1 = myFun.commentedOut().replaceAll(this) { it["myFun"] }
-  return ureText("/*actual*/").replaceAll(output1) { "actual" }
+  val output1 = myFun.commentedOut().replaceAll(this) { Literal(it["myFun"]) }
+  return ureText("/*actual*/").replaceAll(output1) { Literal("actual") }
 }
 
 private val ureKeyword = ure { 1..MAX of chLower }.withWordBoundaries()

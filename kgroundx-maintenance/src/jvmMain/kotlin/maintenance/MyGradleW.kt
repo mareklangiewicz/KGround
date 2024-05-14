@@ -13,6 +13,7 @@ import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.*
+import pl.mareklangiewicz.ure.UReplacement
 
 
 @ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean) =
@@ -42,7 +43,7 @@ private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
     .reducedMap {
       // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl
       val regex = Regex("/settings\\.gradle(\\.kts)?\$")
-      map { regex.replaceSingle(it, "").toPath() }
+      map { regex.replaceSingle(it, UReplacement.Empty).toPath() }
     }
     .ax()
 
