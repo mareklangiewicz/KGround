@@ -31,21 +31,21 @@ suspend fun tryInjectMyTemplatesToProject(
     .forEachSpecialRegionFound(allowTildes = false) { path, label, content, region ->
       val log = implictx<ULog>()
       val templateRegion = templates[label] ?: run {
-        log.i("Found unknown region [$label] in $path (length ${region.length}). Ignoring.")
+        log.i("Found unknown region [[$label]] in $path (length ${region.length}). Ignoring.")
         return@forEachSpecialRegionFound
       }
       if(region == templateRegion) {
-        log.i("Found known template [$label] in $path (length ${region.length}). Matching -> Ignoring.")
+        log.i("Found known template [[$label]] in $path (length ${region.length}). Matching -> Ignoring.")
         return@forEachSpecialRegionFound
       }
       suspend fun inject() {
-        log.i("Injecting   template [$label] to $path:")
+        log.i("Injecting   template [[$label]] to $path:")
         path.injectSpecialRegion(label, templateRegion, addIfNotFound = false)
       }
       when {
         !askInteractively -> inject()
-        zenityAskIf("Automatically inject template [$label]? to file:\n$path").ax() -> inject()
-        zenityAskIf("Try opening diff with [$label] in IDE? (put to tmp.notes) with file:\n$path").ax() -> {
+        zenityAskIf("Automatically inject template [[$label]]? to file:\n$path").ax() -> inject()
+        zenityAskIf("Try opening diff with [[$label]] in IDE? (put to tmp.notes) with file:\n$path").ax() -> {
           val notes = implictx<UFileSys>().pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
           writeFileWithDD(templateRegion.lines(), notes).ax()
           ideDiff(notes, path.toString()).ax()
@@ -66,7 +66,7 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
     .collectSpecialRegionsTo(templates, templatesSrc) { path, label, content, region -> // onConflict
       val oldPath = fs.canonicalize(templatesSrc[label]!!).toString()
       val newPath = fs.canonicalize(path).toString()
-      val warning = "Conflicting   region [$label] in files:" // aligned spaces with other logs
+      val warning = "Conflicting   region [[$label]] in files:" // aligned spaces with other logs
       log.w(warning)
       log.w(oldPath)
       log.w(newPath)
@@ -89,7 +89,7 @@ suspend fun collectMyTemplates(): Map<String, String> {
       .collectSpecialRegionsTo(templates, templatesRes) { path, label, content, region -> // onConflict
         val oldPath = fsres.canonicalize(templatesRes[label]!!).toString()
         val newPath = fsres.canonicalize(path).toString()
-        log.w("Conflicting [$label] in resources:")
+        log.w("Conflicting [[$label]] in resources:")
         log.w(oldPath)
         log.w(newPath)
         if (preferred in newPath && preferred !in oldPath) {

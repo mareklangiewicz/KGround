@@ -61,7 +61,7 @@ suspend fun Path.injectSpecialRegionContentFromFile(
   regionLabel: String,
   regionContentFile: Path,
   addIfNotFound: Boolean = true,
-  regionContentMap: suspend (String) -> String = { "// region [$regionLabel]\n\n$it\n// endregion [$regionLabel]\n" },
+  regionContentMap: suspend (String) -> String = { "// region [[$regionLabel]]\n\n$it\n// endregion [[$regionLabel]]\n" },
 ) {
   val regionContent = implictx<UFileSys>().readUtf8(regionContentFile)
   val region = regionContentMap(regionContent)
