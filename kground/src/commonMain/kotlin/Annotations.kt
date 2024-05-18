@@ -40,6 +40,11 @@ annotation class SecondaryApi(val message: String = "", val replaceWith: Replace
 @MustBeDocumented
 annotation class ExperimentalApi(val message: String = "")
 
+/** New API that will be changed a lot in the future. More experimental flavor of ExperimentalApi */
+@RequiresOptIn(level = RequiresOptIn.Level.ERROR)
+@MustBeDocumented
+annotation class IncubatingApi(val message: String = "")
+
 /** API that is included mostly as doc/sample/example usage of underlying API. Not so much for general usage. */
 @RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @MustBeDocumented
