@@ -8,21 +8,31 @@ import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
+import pl.mareklangiewicz.ure.ure
+import pl.mareklangiewicz.ure.ureSpecialRegion
+import pl.mareklangiewicz.ure.ureText
+import pl.mareklangiewicz.ure.ureWhateva
+import pl.mareklangiewicz.ure.withName
 
 // FIXME NOW separate it from Ure and move Ure common code to better places (later to separate lib)
 
-@OptIn(NotPortableApi::class)
+
+@OptIn(NotPortableApi::class, DelicateApi::class)
 suspend fun Path.injectSpecialRegion(
-  regionLabel: String,
+  specialLabel: String,
   region: String,
   addIfNotFound: Boolean = true,
 ) {
   val log = implictx<ULog>()
-  val regex = ureWithSpecialRegion(regionLabel).compile()
+  val regexAllWithSpecialRegion = ure {
+    +ureWhateva().withName("before")
+    +ureSpecialRegion(ureWhateva(), specialLabel = ureText(specialLabel)).withName("region")
+    +ureWhateva(reluctant = false).withName("after")
+  }.compile()
   processFile(this, this) { output ->
-    val outputMR = regex.matchEntire(output)
+    val outputMR = regexAllWithSpecialRegion.matchEntire(output)
     if (outputMR == null) {
-      log.i("Inject [$regionLabel] to $this - No match.")
+      log.i("Inject [[$specialLabel]] to $this - No match.")
       if (addIfNotFound) {
         log.i("Adding new region at the end.")
         output + "\n\n" + region.trimEnd()
@@ -41,7 +51,7 @@ suspend fun Path.injectSpecialRegion(
       val newOutput = before + newRegion + newAfter
       val summary =
         if (newOutput == output) "No changes." else "Changes detected (len ${output.length}->${newOutput.length})"
-      log.i("Inject [$regionLabel] to $this - $summary")
+      log.i("Inject [[$specialLabel]] to $this - $summary")
       newOutput
     }
   }

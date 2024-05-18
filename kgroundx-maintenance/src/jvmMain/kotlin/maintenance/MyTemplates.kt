@@ -28,7 +28,7 @@ suspend fun tryInjectMyTemplatesToProject(
 ) {
   val templates = collectedTemplates ?: collectMyTemplates()
   findAllFiles(projectPath).filterExt("kts") // TODO_someday: support templates in .kt files too
-    .forEachSpecialRegionFound(labelAllowTildes = false) { path, label, content, region ->
+    .forEachSpecialRegionFound(allowTildes = false) { path, label, content, region ->
       val log = implictx<ULog>()
       val templateRegion = templates[label] ?: run {
         log.i("Found unknown region [$label] in $path (length ${region.length}). Ignoring.")
@@ -109,35 +109,35 @@ private suspend fun Sequence<Path>.collectSpecialRegionsTo(
   specialRegionsSrc: MutableMap<String, Path>,
   onConflict: suspend (path: Path, label: String, content: String, region: String) -> Unit =
     { path, label, content, region -> bad { "Different special region labeled $label already found." } },
-) = forEachSpecialRegionFound(labelAllowTildes = false) { path, label, content, region ->
+) = forEachSpecialRegionFound(allowTildes = false) { path, label, content, region ->
   val log = implictx<ULog>()
-  log.d("Found special region [$label] in $path (length ${region.length})")
+  log.d("Found special region [[$label]] in $path (length ${region.length})")
   when (specialRegions[label]) {
     null -> { specialRegions[label] = region; specialRegionsSrc[label] = path }
-    region -> log.d("Same  special region [$label] in ${specialRegionsSrc[label]}") // aligned spaces with other logs
+    region -> log.d("Same  special region [[$label]] in ${specialRegionsSrc[label]}") // aligned spaces with other logs
     else -> onConflict(path, label, content, region)
   }
 }
 
 
 // TODO_maybe: generalize to other regions too?
-@OptIn(NotPortableApi::class)
+@OptIn(NotPortableApi::class, DelicateApi::class, ExperimentalApi::class)
+/** Note: label in action is the part without surrounding double brackets. */
 suspend fun Sequence<Path>.forEachSpecialRegionFound(
-  labelAllowTildes: Boolean = true,
+  allowTildes: Boolean = true,
   action: suspend (path: Path, label: String, content: String, region: String) -> Unit,
 ) {
   val log = implictx<ULog>()
   val fs = implictx<UFileSys>()
   forEach { path ->
     log.d("Searching special regions in file $path")
-    ureAnySpecialRegion(
-      contentName = "content",
-      labelName = "label",
-      labelAllowTildes = labelAllowTildes,
+    ureSpecialRegion(
+      content = ureWhateva().withName("content"),
+      specialLabel = ureAnyRegionLabel(allowTildes = allowTildes, allowBrackets = false).withName("label"),
     ).withName("region")
       .findAll(fs.readUtf8(path))
       .forEach {
-        val label by it
+        val label by it // without [[]]
         val content by it
         val region by it
         action(path, label, content, region)
@@ -147,11 +147,11 @@ suspend fun Sequence<Path>.forEachSpecialRegionFound(
 
 // Do I even need this?
 suspend fun Sequence<Path>.logEachSpecialRegionFound(
-  labelAllowTildes: Boolean = true,
+  allowTildes: Boolean = true,
   level: ULogLevel = ULogLevel.INFO,
 ) {
   val log = implictx<ULog>()
-  forEachSpecialRegionFound(labelAllowTildes) { path, label, content, region ->
-    log(level, "Found special region [$label] in $path (length ${region.length})")
+  forEachSpecialRegionFound(allowTildes) { path, label, content, region ->
+    log(level, "Found special region [[$label]] in $path (length ${region.length})")
   }
 }
