@@ -4,13 +4,33 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CoroutineScope
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.plusIfNN
 import pl.mareklangiewicz.uctx.uctx
 
+// Note: it should pop up as alternative autocompletion to okio deleteRecursively.
+// I think it's good idea to always double-check some specific part of rootPath
+// to make sure we're not accidentally deleting totally wrong dir tree.
+fun FileSystem.deleteTreeWithDoubleChk(
+  rootPath: Path,
+  mustExist: Boolean = true,
+  mustBeDir: Boolean = true,
+  doubleChk: (rootPathString: String) -> Boolean, // mandatory on purpose
+) {
+  val rootPathString = rootPath.toString()
+  val md = metadataOrNull(rootPath) ?: run {
+    mustExist.chkFalse { "Tree rootPath: $rootPathString does NOT exist."}
+    return // So it doesn't exist and it's fine; nothing to delete.
+  }
+  chk(!mustBeDir || md.isDirectory) { "Tree rootPath: $rootPathString is NOT directory." }
+  doubleChk(rootPathString).chkTrue { "Can NOT remove $rootPathString tree because doubleChk failed." }
+  deleteRecursively(rootPath, mustExist)
+}
 
 // See: https://publicobject.com/2023/04/16/read-a-project-file-in-a-kotlin-multiplatform-test/
 @NotPortableApi("TODO: test on different platforms. Browser?")
