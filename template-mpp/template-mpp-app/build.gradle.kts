@@ -9,6 +9,7 @@ import pl.mareklangiewicz.utils.*
 plugins {
   plugAll(
     plugs.KotlinMulti,
+    plugs.KotlinMultiCompose,
     plugs.Compose,
   )
   plug(plugs.AndroAppNoVer) apply false // will be applied conditionally depending on LibSettings

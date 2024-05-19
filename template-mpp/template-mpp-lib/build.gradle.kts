@@ -11,6 +11,7 @@ import pl.mareklangiewicz.utils.*
 plugins {
   plugAll(
     plugs.KotlinMulti,
+    plugs.KotlinMultiCompose,
     plugs.Compose,
     plugs.MavenPublish,
     plugs.Signing,

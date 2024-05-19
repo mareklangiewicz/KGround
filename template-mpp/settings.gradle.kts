@@ -21,7 +21,7 @@ pluginManagement {
     mavenCentral()
   }
 
-  val depsDir = File(rootDir, "../DepsKt").normalize()
+  val depsDir = File(rootDir, "../../DepsKt").normalize()
   val depsInclude =
     // depsDir.exists()
     false
@@ -32,8 +32,8 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.3.01" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.develocity") version "3.17.2" // https://docs.gradle.com/enterprise/gradle-plugin/
+  id("pl.mareklangiewicz.deps.settings") version "0.3.13" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("com.gradle.develocity") version "3.17.4" // https://docs.gradle.com/enterprise/gradle-plugin/
 }
 
 develocity {
