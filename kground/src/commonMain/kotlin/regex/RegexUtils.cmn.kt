@@ -67,8 +67,8 @@ fun Regex.replaceAll(input: CharSequence, replacement: UReplacement): String = r
  * Improved and more explicit version for stdlib [Regex.replace] with custom [transform] fun.
  * No overlapping here - searching with overlap wouldn't have much sense during replacing.
  */
-fun Regex.replaceAll(input: CharSequence, transform: (MatchResult) -> UReplacement): String =
-  replace(input) { transform(it).raw }
+fun Regex.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequence): String =
+  replace(input) { transform(it) }
 
 /** @throws BadArgErr if not found or found more than one */
 fun Regex.replaceSingle(input: CharSequence, replacement: UReplacement): String {
@@ -101,7 +101,7 @@ fun CharSequence.replaceFirstOrNone(re: Regex, replacement: UReplacement) = re.r
 
 fun CharSequence.replaceAll(re: Regex, replacement: UReplacement) = re.replaceAll(this, replacement)
 
-fun CharSequence.replaceAll(re: Regex, transform: (MatchResult) -> UReplacement) = re.replaceAll(this, transform)
+fun CharSequence.replaceAll(re: Regex, transform: (MatchResult) -> CharSequence) = re.replaceAll(this, transform)
 
 fun CharSequence.replaceSingle(re: Regex, replacement: UReplacement) = re.replaceSingle(this, replacement)
 

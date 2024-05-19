@@ -73,7 +73,7 @@ fun Ure.replaceFirstOrNone(input: CharSequence, replacement: UReplacement) =
 
 fun Ure.replaceAll(input: CharSequence, replacement: UReplacement) = compile().replaceAll(input, replacement)
 
-fun Ure.replaceAll(input: CharSequence, transform: (MatchResult) -> UReplacement): String =
+fun Ure.replaceAll(input: CharSequence, transform: (MatchResult) -> CharSequence): String =
   compile().replaceAll(input, transform)
 
 fun Ure.replaceSingle(input: CharSequence, replacement: UReplacement) = compile().replaceSingle(input, replacement)
@@ -103,7 +103,7 @@ fun CharSequence.replaceFirstOrNone(ure: Ure, replacement: UReplacement) = ure.r
 
 fun CharSequence.replaceAll(ure: Ure, replacement: UReplacement) = ure.replaceAll(this, replacement)
 
-fun CharSequence.replaceAll(ure: Ure, transform: (MatchResult) -> UReplacement): String =
+fun CharSequence.replaceAll(ure: Ure, transform: (MatchResult) -> CharSequence): String =
   ure.replaceAll(this, transform)
 
 fun CharSequence.replaceSingle(ure: Ure, replacement: UReplacement) = ure.replaceSingle(this, replacement)
