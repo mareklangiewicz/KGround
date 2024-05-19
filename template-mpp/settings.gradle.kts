@@ -9,10 +9,10 @@ val buildScanPublishingAllowed = true &&
   true
 // false
 
-// region [My Settings Stuff <~~]
+// region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
-// endregion [My Settings Stuff <~~]
-// region [My Settings Stuff]
+// endregion [[My Settings Stuff <~~]]
+// region [[My Settings Stuff]]
 
 pluginManagement {
   repositories {
@@ -44,7 +44,7 @@ develocity {
   }
 }
 
-// endregion [My Settings Stuff]
+// endregion [[My Settings Stuff]]
 
 rootProject.name = "template-mpp"
 

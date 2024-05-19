@@ -18,7 +18,7 @@ dependencies {
   // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
 }
 
-// region [Kotlin Module Build Template]
+// region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,
 // but currently I need these kind of substitutions/locals often enough
@@ -203,9 +203,9 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
   }
 }
 
-// endregion [Kotlin Module Build Template]
+// endregion [[Kotlin Module Build Template]]
 
-// region [Andro Common Build Template]
+// region [[Andro Common Build Template]]
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroDeps(
@@ -344,9 +344,9 @@ fun Project.defaultPublishingOfAndroApp(
 ) = defaultPublishingOfAndroLib(lib, componentName)
 
 
-// endregion [Andro Common Build Template]
+// endregion [[Andro Common Build Template]]
 
-// region [Andro Lib Build Template]
+// region [[Andro Lib Build Template]]
 
 fun Project.defaultBuildTemplateForAndroLib(
   details: LibDetails = rootExtLibDetails,
@@ -424,4 +424,4 @@ fun LibraryExtension.defaultAndroLibPublishAllVariants(
   }
 }
 
-// endregion [Andro Lib Build Template]
+// endregion [[Andro Lib Build Template]]

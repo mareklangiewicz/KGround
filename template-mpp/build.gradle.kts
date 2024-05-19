@@ -36,7 +36,7 @@ defaultBuildTemplateForRootProject(
 
 
 
-// region [Root Build Template]
+// region [[Root Build Template]]
 
 /** Publishing to Sonatype OSSRH has to be explicitly allowed here, by setting withSonatypeOssPublishing to true. */
 fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
@@ -84,4 +84,4 @@ fun Project.defaultSonatypeOssNexusPublishing(
   }
 }
 
-// endregion [Root Build Template]
+// endregion [[Root Build Template]]

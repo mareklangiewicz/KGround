@@ -23,7 +23,7 @@ defaultBuildTemplateForFullMppApp {
   // implementation("pl.mareklangiewicz:template-mpp-lib:0.0.20")
 }
 
-// region [Full MPP App Build Template]
+// region [[Full MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForFullMppApp(
   details: LibDetails = rootExtLibDetails,
@@ -55,10 +55,10 @@ fun Project.defaultBuildTemplateForFullMppApp(
   }
 }
 
-// endregion [Full MPP App Build Template]
+// endregion [[Full MPP App Build Template]]
 
 
-// region [Kotlin Module Build Template]
+// region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,
 // but currently I need these kind of substitutions/locals often enough
@@ -243,9 +243,9 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
   }
 }
 
-// endregion [Kotlin Module Build Template]
+// endregion [[Kotlin Module Build Template]]
 
-// region [MPP Module Build Template]
+// region [[MPP Module Build Template]]
 
 /**
  * Only for very standard small libs. In most cases it's better to not use this function.
@@ -373,9 +373,9 @@ fun KotlinMultiplatformExtension.jsDefault(
   }
 }
 
-// endregion [MPP Module Build Template]
+// endregion [[MPP Module Build Template]]
 
-// region [MPP App Build Template]
+// region [[MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicMppApp(
   appMainPackage: String,
@@ -419,9 +419,9 @@ fun Project.defaultBuildTemplateForBasicMppApp(
   }
 }
 
-// endregion [MPP App Build Template]
+// endregion [[MPP App Build Template]]
 
-// region [Compose MPP Module Build Template]
+// region [[Compose MPP Module Build Template]]
 
 /** Only for very standard compose mpp libs. In most cases, it's better to not use this function. */
 @OptIn(ExperimentalComposeLibrary::class)
@@ -521,9 +521,9 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
   }
 }
 
-// endregion [Compose MPP Module Build Template]
+// endregion [[Compose MPP Module Build Template]]
 
-// region [Compose MPP App Build Template]
+// region [[Compose MPP App Build Template]]
 
 /** Only for very standard compose mpp apps. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForComposeMppApp(
@@ -566,11 +566,11 @@ fun Project.defaultBuildTemplateForComposeMppApp(
   }
 }
 
-// endregion [Compose MPP App Build Template]
+// endregion [[Compose MPP App Build Template]]
 
 
 
-// region [Andro Common Build Template]
+// region [[Andro Common Build Template]]
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroDeps(
@@ -709,9 +709,9 @@ fun Project.defaultPublishingOfAndroApp(
 ) = defaultPublishingOfAndroLib(lib, componentName)
 
 
-// endregion [Andro Common Build Template]
+// endregion [[Andro Common Build Template]]
 
-// region [Andro App Build Template]
+// region [[Andro App Build Template]]
 
 fun Project.defaultBuildTemplateForAndroApp(
   details: LibDetails = rootExtLibDetails,
@@ -778,4 +778,4 @@ fun ApplicationExtension.defaultAndroAppPublishVariant(
   publishing { singleVariant(variant) { if (publishAPK) publishApk() } }
 }
 
-// endregion [Andro App Build Template]
+// endregion [[Andro App Build Template]]

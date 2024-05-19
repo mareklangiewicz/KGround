@@ -32,7 +32,7 @@ defaultBuildTemplateForRootProject(
 //   but as normal sync when syncing all regions in all projects.
 //   The "self-sync" should only sync templates (and be renamed to templates-sync or sth)
 
-// region [Root Build Template]
+// region [[Root Build Template]]
 
 /** Publishing to Sonatype OSSRH has to be explicitly allowed here, by setting withSonatypeOssPublishing to true. */
 fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
@@ -80,4 +80,4 @@ fun Project.defaultSonatypeOssNexusPublishing(
   }
 }
 
-// endregion [Root Build Template]
+// endregion [[Root Build Template]]

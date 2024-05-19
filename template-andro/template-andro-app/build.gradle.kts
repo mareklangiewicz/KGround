@@ -23,7 +23,7 @@ dependencies { implementation(project(":template-andro-lib")) }
 // Also use new libs properties in compose.desktop.application...
 
 
-// region [Kotlin Module Build Template]
+// region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,
 // but currently I need these kind of substitutions/locals often enough
@@ -208,9 +208,9 @@ fun TaskContainer.withPublishingPrintln() = withType<AbstractPublishToMaven>().c
   }
 }
 
-// endregion [Kotlin Module Build Template]
+// endregion [[Kotlin Module Build Template]]
 
-// region [Andro Common Build Template]
+// region [[Andro Common Build Template]]
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroDeps(
@@ -349,9 +349,9 @@ fun Project.defaultPublishingOfAndroApp(
 ) = defaultPublishingOfAndroLib(lib, componentName)
 
 
-// endregion [Andro Common Build Template]
+// endregion [[Andro Common Build Template]]
 
-// region [Andro App Build Template]
+// region [[Andro App Build Template]]
 
 fun Project.defaultBuildTemplateForAndroApp(
   details: LibDetails = rootExtLibDetails,
@@ -418,4 +418,4 @@ fun ApplicationExtension.defaultAndroAppPublishVariant(
   publishing { singleVariant(variant) { if (publishAPK) publishApk() } }
 }
 
-// endregion [Andro App Build Template]
+// endregion [[Andro App Build Template]]
