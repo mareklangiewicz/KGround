@@ -56,6 +56,40 @@ suspend fun tryInjectMyTemplatesToProject(
     }
 }
 
+@Deprecated("Temporary fun to fix templates from single to double square brackets marks")
+@OptIn(DelicateApi::class, ExperimentalApi::class, NotPortableApi::class)
+suspend fun tryFixMyTemplatesInProject(
+  projectPath: Path,
+  askInteractively: Boolean = true,
+) {
+  val log = implictx<ULog>()
+  val ure = ureSpecialRegion(
+    content = ureWhateva().withName("regionContent"),
+    specialLabel = ureAnyRegionLabel(allowTildes = true, allowBrackets = false).withName("specialLabel"),
+    regionLabelPrefix = "[",
+    regionLabelPostfix = "]",
+  ).withName("oldRegion")
+  findAllFiles(projectPath).filterExt("kts") // TODO_someday: support templates in .kt files too
+    .forEach { path ->
+      processFile(path, path) { oldContent ->
+        val newContent = oldContent.replaceAll(ure) { mr ->
+          val oldRegion by mr
+          val regionContent by mr
+          val specialLabel by mr
+          val newRegion = "// region [[$specialLabel]]\n$regionContent// endregion [[$specialLabel]]\n"
+          log.i("found special region $specialLabel (len ${oldRegion.length}->${newRegion.length})")
+          newRegion
+        }
+        when {
+          !askInteractively || newContent == oldContent -> newContent
+          zenityAskIf("Fix regions in $path (len ${oldContent.length}->${newContent.length})?").ax() -> newContent
+          else -> null
+        }
+      }
+      // if (askInteractively) zenityAskIf("Continue fixing templates? (No -> abort)").ax().chkTrue { "Abort fixing templates." }
+    }
+}
+
 @DelicateApi("This needs KGround source code, it's interactive and mostly for myself.")
 suspend fun tryDiffMyConflictingTemplatesSrc() {
   val log = implictx<ULog>()

@@ -143,6 +143,24 @@ private fun Ure.withSomeLinesAround(
     }
 }
 
+@Deprecated("Temporary fun to fix templates from single to double square brackets marks")
+@ExampleApi suspend fun tryFixMyTemplatesInAllMyProjects(
+  onlyPublic: Boolean = false,
+  askInteractively: Boolean = true,
+) {
+  val log = implictx<ULog>()
+  fetchMyProjectsNameS(onlyPublic)
+    .mapFilterLocalKotlinProjectsPathS()
+    .collect { path ->
+      suspend fun fix() {
+        log.i("Fixing my templates in project: $path")
+        tryFixMyTemplatesInProject(path, askInteractively)
+      }
+      !askInteractively || zenityAskIf("Try to fix my templates in project: $path ?").ax() || return@collect
+      fix()
+    }
+}
+
 @Suppress("IdentifierGrammar")
 @ExampleApi suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
   ghMyRepoList(onlyPublic = onlyPublic)
