@@ -2,6 +2,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.getCurrentPlatformKind
+import pl.mareklangiewicz.kground.getCurrentPlatformName
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
 import pl.mareklangiewicz.ulog.d
@@ -10,6 +11,9 @@ import pl.mareklangiewicz.uspek.*
 
 
 internal val platform = getCurrentPlatformKind()
+
+@Deprecated("Temporary solution for testing different behavior on node js.")
+internal val platformLooksLikeNodeJS = getCurrentPlatformName().startsWith("JS Node")
 
 
 // TODO_maybe: Add sth like this to USpekX?

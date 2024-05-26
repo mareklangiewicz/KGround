@@ -44,7 +44,7 @@ fun testUreWithOptions() {
     "reBcDeEOL matches exampleABCDEx3 three times" o { reBcDeEOL.findAll(exampleABCDEx3).count() chkEq 3 }
   }
   "On example ure s wrapped in withOptionsEnabled IGNORE_CASE on $platform" o {
-    if (platform == "JS") ureBOLaBcD.withOptionsEnabled(IGNORE_CASE).tstDoesNotCompile()
+    if (platformLooksLikeNodeJS) ureBOLaBcD.withOptionsEnabled(IGNORE_CASE).tstDoesNotCompile()
     else "On compile normally" o {
       val reBOLaBcD = ureBOLaBcD.withOptionsEnabled(IGNORE_CASE).compile()
       val reBcDeEOL = ureBcDeEOL.withOptionsEnabled(IGNORE_CASE).compile()
@@ -55,7 +55,7 @@ fun testUreWithOptions() {
     }
   }
   "On example ure s wrapped in withOptionsDisabled MULTILINE on $platform" o {
-    if (platform == "JS") ureBOLaBcD.withOptionsDisabled(MULTILINE).tstDoesNotCompile()
+    if (platformLooksLikeNodeJS) ureBOLaBcD.withOptionsDisabled(MULTILINE).tstDoesNotCompile()
     else "On compile normally" o {
       val reBOLaBcD = ureBOLaBcD.withOptionsDisabled(MULTILINE).compile()
       val reBcDeEOL = ureBcDeEOL.withOptionsDisabled(MULTILINE).compile()
