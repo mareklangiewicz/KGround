@@ -15,7 +15,9 @@ val settings = rootExtLibDetails.settings.copy(
 val details = rootExtLibDetails.copy(settings = settings)
 defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-io"))
-  api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
+  api(Io.GitHub.TypeSafeGitHub.github_workflows_kt.withVer("1.15.0"))
+  // TODO: 2.0.0 broke MyWorkflows. The author promised to fix it:
+  // https://github.com/typesafegithub/github-workflows-kt/issues/1468
 }
 
 

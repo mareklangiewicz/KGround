@@ -24,6 +24,10 @@ var PathToKotlinProjects = "/home/marek/code/kotlin".toPath()
 
 var PathToKGroundProject = PathToKotlinProjects / "KGround"
 
+var PathToRefreshDepsProject = PathToKotlinProjects / "refreshDeps"
+
+var PathToDepsKtProject = PathToKotlinProjects / "DepsKt"
+
 // TODO_later: refactor this little experiment fun
 @OptIn(DelicateApi::class)
 @ExampleApi suspend fun searchKotlinCodeInMyProjects(

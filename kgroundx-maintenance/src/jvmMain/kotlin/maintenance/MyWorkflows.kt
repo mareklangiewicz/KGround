@@ -59,7 +59,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
       usesAddAndCommitFile("plugins/dependencies/src/test/resources/objects-for-deps.txt")
     }
   }
-  workflow.writeToFile(gitRootDir = "/home/marek/code/kotlin/refreshDeps".toPath().toNioPath())
+  workflow.writeToFile(gitRootDir = PathToRefreshDepsProject.toNioPath())
 }
 
 
@@ -88,7 +88,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
       usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
     }
   }
-  workflow.writeToFile(gitRootDir = "/home/marek/code/kotlin/DepsKt".toPath().toNioPath())
+  workflow.writeToFile(gitRootDir = PathToDepsKtProject.toNioPath())
 }
 
 
