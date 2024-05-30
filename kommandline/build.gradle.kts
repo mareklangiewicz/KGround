@@ -15,11 +15,11 @@ defaultBuildTemplateForBasicMppLib {
 
 // Note: kground substitutions also needed for KGround project, so kommandline module finds local kground modules
 setMyWeirdSubstitutions(
-  "kground" to "0.0.52", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
-  "kground-io" to "0.0.52", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground-io/
-  "uspek" to "0.0.33", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
-  "uspek-junit5" to "0.0.33",
-  "tuplek" to "0.0.14", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
+  "kground" to "0.0.56", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+  "kground-io" to "0.0.56", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground-io/
+  "uspek" to "0.0.34", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
+  "uspek-junit5" to "0.0.34",
+  "tuplek" to "0.0.15", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
 )
 
 kotlin { js(IR) { nodejs() } }
