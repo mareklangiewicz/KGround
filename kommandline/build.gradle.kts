@@ -17,8 +17,8 @@ defaultBuildTemplateForBasicMppLib {
 setMyWeirdSubstitutions(
   "kground" to "0.0.56", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
   "kground-io" to "0.0.56", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground-io/
-  "uspek" to "0.0.34", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
-  "uspek-junit5" to "0.0.34",
+  "uspek" to "0.0.35", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
+  "uspek-junit5" to "0.0.35",
   "tuplek" to "0.0.15", // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
 )
 
