@@ -21,7 +21,7 @@ pluginManagement {
     mavenCentral()
   }
 
-  val depsDir = File(rootDir, "../../DepsKt").normalize()
+  val depsDir = File(rootDir, "../DepsKt").normalize()
   val depsInclude =
     // depsDir.exists()
     false
