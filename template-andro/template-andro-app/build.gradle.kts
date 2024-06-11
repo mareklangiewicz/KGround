@@ -362,6 +362,9 @@ fun Project.defaultBuildTemplateForAndroApp(
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
+  extensions.configure<KotlinMultiplatformExtension> {
+    details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
+  }
   extensions.configure<ApplicationExtension> {
     defaultAndroApp(details)
     variant?.let { defaultAndroAppPublishVariant(it) }
