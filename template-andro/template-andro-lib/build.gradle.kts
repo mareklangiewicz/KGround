@@ -57,12 +57,11 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withJitpack) maven(repos.jitpack)
 }
 
-// FIXME: doc says it could be now also applied globally instead for each task (and it works for andro too)
-// https://kotlinlang.org/docs/gradle-compiler-options.html#target-the-jvm
+// TODO_maybe: doc says it could be now also applied globally instead for each task (and it works for andro too)
 //   But it's only for jvm+andro, so probably this is better:
 //   https://kotlinlang.org/docs/gradle-compiler-options.html#for-all-kotlin-compilation-tasks
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-  jvmTargetVer: String? = vers.JvmDefaultVer, // FIXME_later: use JvmTarget.JVM_XX enum
+  jvmTargetVer: String? = null, // it's better to use jvmToolchain (normally done in fun allDefault)
   renderInternalDiagnosticNames: Boolean = false,
   suppressComposeCheckKotlinVer: Ver? = null,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -299,10 +298,12 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
 )
 
 fun CommonExtension<*, *, *, *, *, *>.defaultCompileOptions(
-  jvmVer: String = vers.JvmDefaultVer,
+  jvmVer: String? = null, // it's better to use jvmToolchain (normally done in fun allDefault)
 ) = compileOptions {
-  sourceCompatibility(jvmVer)
-  targetCompatibility(jvmVer)
+  jvmVer?.let {
+    sourceCompatibility(it)
+    targetCompatibility(it)
+  }
 }
 
 fun CommonExtension<*, *, *, *, *, *>.defaultComposeStuff(withComposeCompiler: Dep? = null) {
@@ -367,7 +368,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   }
   configurations.checkVerSync()
   tasks.defaultKotlinCompileOptions(
-    details.settings.withJvmVer ?: error("No JVM version in settings."),
+    jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
     suppressComposeCheckKotlinVer = details.settings.compose?.withComposeCompilerAllowWrongKotlinVer,
   )
   defaultGroupAndVerAndDescription(details)
@@ -382,7 +383,7 @@ fun LibraryExtension.defaultAndroLib(
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   compileSdk = andro.sdkCompile
-  defaultCompileOptions(details.settings.withJvmVer!!)
+  defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig(details)
   defaultBuildTypes()
   details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompiler) }
