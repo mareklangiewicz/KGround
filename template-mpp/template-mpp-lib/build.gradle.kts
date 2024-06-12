@@ -636,6 +636,9 @@ fun Project.defaultBuildTemplateForAndroLib(
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   repositories { addRepos(details.settings.repos) }
+  extensions.configure<KotlinMultiplatformExtension> {
+    details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
+  }
   extensions.configure<LibraryExtension> {
     defaultAndroLib(details)
     if (andro.publishAllVariants) defaultAndroLibPublishAllVariants()
@@ -664,7 +667,7 @@ fun LibraryExtension.defaultAndroLib(
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   compileSdk = andro.sdkCompile
-  defaultCompileOptions() // actually it does nothing now. jvm ver is configured via jvmToolchain in fun allDefault
+  defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig(details)
   defaultBuildTypes()
   details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompiler) }
