@@ -49,6 +49,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
       usesGradle(
         name = "MyExperiments.generateDeps",
         env = linkedMapOf("GENERATE_DEPS" to "true"),
+        gradleVersion = "8.6", // FIXME_someday: I have errors when null (when trying to use wrapper)
         arguments = "--info :refreshVersions:test --tests MyExperiments.generateDeps",
         buildRootDirectory = "plugins",
       )
@@ -229,16 +230,31 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   vararg useNamedArgs: Unit,
   name: String? = null,
   env: Map<String, String> = mapOf(),
+  gradleVersion: String? = null, // null means it should try to use wrapper
   arguments: String? = null,
   buildRootDirectory: String? = null,
 ) = uses(
   name = name,
-  action = ActionsSetupGradleV3(arguments = arguments, buildRootDirectory = buildRootDirectory),
+  action = ActionsSetupGradleV3(
+    gradleVersion = gradleVersion,
+    arguments = arguments,
+    buildRootDirectory = buildRootDirectory,
+  ),
   env = env,
 )
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(name: String? = "Build", buildRootDirectory: String? = null) =
-  usesGradle(name = name, arguments = "build", buildRootDirectory = buildRootDirectory)
+private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(
+  name: String? = "Build",
+  env: Map<String, String> = mapOf(),
+  gradleVersion: String? = null, // null means it should try to use wrapper
+  buildRootDirectory: String? = null,
+) = usesGradle(
+  name = name,
+  env = env,
+  gradleVersion = gradleVersion,
+  arguments = "build",
+  buildRootDirectory = buildRootDirectory,
+)
 
 private fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") =
   uses(
