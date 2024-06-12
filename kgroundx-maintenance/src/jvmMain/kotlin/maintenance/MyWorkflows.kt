@@ -214,7 +214,7 @@ private fun defaultReleaseWorkflow() =
     }
   }
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
+fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   name: String? = "Set up JDK",
   version: String? = "21", // fixme_maybe: take from DepsNew.ver...? [Deps Selected]
   distribution: SetupJavaV4.Distribution = SetupJavaV4.Distribution.Zulu, // fixme_later: which dist?
@@ -226,7 +226,7 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   ),
 )
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
+fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   vararg useNamedArgs: Unit,
   name: String? = null,
   env: Map<String, String> = mapOf(),
@@ -243,7 +243,7 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   env = env,
 )
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(
+fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(
   name: String? = "Build",
   env: Map<String, String> = mapOf(),
   gradleVersion: String? = null, // null means it should try to use wrapper
@@ -256,7 +256,7 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(
   buildRootDirectory = buildRootDirectory,
 )
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") =
+fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") =
   uses(
     name = name,
     action = AddAndCommitV9(
