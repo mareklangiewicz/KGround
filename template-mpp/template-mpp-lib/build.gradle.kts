@@ -48,7 +48,7 @@ fun Project.defaultBuildTemplateForFullMppLib(
 
   if (details.settings.withAndro) {
     extensions.configure<LibraryExtension> {
-      defaultAndroLib(ignoreCompose = true) // compose mpp configured already
+      defaultAndroLib(details, ignoreCompose = true) // compose mpp configured already
     }
 
     // this is "single platform way" / "android way" to declare deps,

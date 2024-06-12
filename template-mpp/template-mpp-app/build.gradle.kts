@@ -42,7 +42,7 @@ fun Project.defaultBuildTemplateForFullMppApp(
 
   if (details.settings.withAndro) {
     extensions.configure<ApplicationExtension> {
-      defaultAndroApp(ignoreCompose = true) // compose mpp configured already
+      defaultAndroApp(details, ignoreCompose = true) // compose mpp configured already
     }
     // this is "single platform way" / "android way" to declare deps,
     // it would be more "correct" to configure everything "mpp way" (android deps too),
