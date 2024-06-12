@@ -4,16 +4,16 @@ package pl.mareklangiewicz.kgroundx.maintenance
 
 import io.github.typesafegithub.workflows.actions.actions.*
 import io.github.typesafegithub.workflows.actions.endbug.AddAndCommitV9
-import io.github.typesafegithub.workflows.actions.gradle.GradleBuildActionV3
+import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradleV3
 import io.github.typesafegithub.workflows.domain.JobOutputs
 import io.github.typesafegithub.workflows.domain.RunnerType
+import io.github.typesafegithub.workflows.domain.Workflow
 import io.github.typesafegithub.workflows.domain.triggers.*
 import io.github.typesafegithub.workflows.dsl.JobBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
 import okio.*
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.io.*
@@ -38,7 +38,6 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
   val workflow = workflow(
     name = "Generate Deps",
     on = listOf(Schedule(listOf(everyMondayAt7am)), WorkflowDispatch()),
-    targetFileName = "generate-deps.yml",
   ) {
     job(
       id = "generate-deps",
@@ -47,19 +46,16 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
     ) {
       uses(action = CheckoutV4())
       usesJdk()
-      uses(
+      usesGradle(
         name = "MyExperiments.generateDeps",
-        action = GradleBuildActionV3(
-          gradleVersion = "8.6", // FIXME NOW remove this workaround and change action to SetupGradleV3 when available
-          arguments = "--info :refreshVersions:test --tests MyExperiments.generateDeps",
-          buildRootDirectory = "plugins",
-        ),
         env = linkedMapOf("GENERATE_DEPS" to "true"),
+        arguments = "--info :refreshVersions:test --tests MyExperiments.generateDeps",
+        buildRootDirectory = "plugins",
       )
       usesAddAndCommitFile("plugins/dependencies/src/test/resources/objects-for-deps.txt")
     }
   }
-  workflow.writeToFile(gitRootDir = PathToRefreshDepsProject.toNioPath())
+  workflow.write("generate-deps.yml", PathToRefreshDepsProject)
 }
 
 
@@ -69,7 +65,6 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
   val workflow = workflow(
     name = "Update Generated Deps",
     on = listOf(Schedule(listOf(everyMondayAt8am)), WorkflowDispatch()),
-    targetFileName = "update-generated-deps.yml",
   ) {
     job(
       id = "update-generated-deps",
@@ -79,16 +74,14 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
     ) {
       uses(action = CheckoutV4())
       usesJdk()
-      uses(
+      usesGradle(
         name = "updateGeneratedDeps",
-        action = GradleBuildActionV3(
-          arguments = "updateGeneratedDeps",
-        ),
+        arguments = "updateGeneratedDeps",
       )
       usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
     }
   }
-  workflow.writeToFile(gitRootDir = PathToDepsKtProject.toNioPath())
+  workflow.write("update-generated-deps.yml", PathToDepsKtProject)
 }
 
 
@@ -119,7 +112,7 @@ suspend fun checkMyDWorkflowsInProject(
   for (file in yamlFiles) {
     val dname = file.name.substringBeforeLast('.')
     val contentExpected = try {
-      defaultWorkflow(dname).toYaml()
+      defaultWorkflow(dname).generateYaml()
     } catch (e: IllegalStateException) {
       if (failIfUnknownWorkflowFound) throw e
       else {
@@ -154,7 +147,7 @@ suspend fun injectDWorkflowsToProject(
     } catch (e: FileNotFoundException) {
       ""
     }
-    val contentNew = defaultWorkflow(dname).toYaml()
+    val contentNew = defaultWorkflow(dname).generateYaml()
     fs.writeUtf8(file, contentNew, createParentDir = true)
     val summary =
       if (contentNew == contentOld) "No changes."
@@ -210,11 +203,9 @@ private fun defaultReleaseWorkflow() =
       uses(action = CheckoutV4())
       usesJdk()
       usesGradleBuild()
-      uses(
+      usesGradle(
         name = "Publish to Sonatype",
-        action = GradleBuildActionV3(
-          arguments = "publishToSonatype closeAndReleaseSonatypeStagingRepository",
-        ),
+        arguments = "publishToSonatype closeAndReleaseSonatypeStagingRepository",
       )
       // TODO_someday: something like
       // github-workflows-kt/.github/workflows/release.main.kts#L49
@@ -234,8 +225,20 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   ),
 )
 
-private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(name: String? = "Build") =
-  uses(name = name, action = GradleBuildActionV3(arguments = "build"))
+private fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
+  vararg useNamedArgs: Unit,
+  name: String? = null,
+  env: Map<String, String> = mapOf(),
+  arguments: String? = null,
+  buildRootDirectory: String? = null,
+) = uses(
+  name = name,
+  action = ActionsSetupGradleV3(arguments = arguments, buildRootDirectory = buildRootDirectory),
+  env = env,
+)
+
+private fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(name: String? = "Build", buildRootDirectory: String? = null) =
+  usesGradle(name = name, arguments = "build", buildRootDirectory = buildRootDirectory)
 
 private fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") =
   uses(
@@ -246,3 +249,11 @@ private fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, 
       // without it, I get commits authored with my old username: langara
     ),
   )
+
+fun Workflow.write(fullPath: Path, createParentDir: Boolean = false, fs: FileSystem = FileSystem.SYSTEM) {
+  fs.writeUtf8(fullPath, generateYaml(), createParentDir)
+}
+
+fun Workflow.write(fileName: String, gitRootDir: Path, fs: FileSystem = FileSystem.SYSTEM) {
+  write(gitRootDir / ".github" / "workflows" / fileName, createParentDir = true, fs = fs)
+}
