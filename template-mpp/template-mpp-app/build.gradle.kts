@@ -278,7 +278,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
     )
   }
   configurations.checkVerSync()
-  tasks.defaultKotlinCompileOptions(details.settings.withJvmVer)
+  tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set below with jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
   if (plugins.hasPlugin("maven-publish")) {
     defaultPublishing(details)
@@ -723,6 +723,9 @@ fun Project.defaultBuildTemplateForAndroApp(
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
+  extensions.configure<KotlinMultiplatformExtension> {
+    details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
+  }
   extensions.configure<ApplicationExtension> {
     defaultAndroApp(details)
     variant?.let { defaultAndroAppPublishVariant(it) }
@@ -735,7 +738,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   }
   configurations.checkVerSync()
   tasks.defaultKotlinCompileOptions(
-    details.settings.withJvmVer ?: error("No JVM version in settings."),
+    jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
     suppressComposeCheckKotlinVer = details.settings.compose?.withComposeCompilerAllowWrongKotlinVer,
   )
   defaultGroupAndVerAndDescription(details)
@@ -751,7 +754,7 @@ fun ApplicationExtension.defaultAndroApp(
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   compileSdk = andro.sdkCompile
-  defaultCompileOptions() // actually it does nothing now. jvm ver is configured via jvmToolchain in fun allDefault
+  defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig(details)
   defaultBuildTypes()
   details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff(it.withComposeCompiler) }
