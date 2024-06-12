@@ -113,7 +113,8 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
 
 
 suspend fun collectMyTemplates(): Map<String, String> {
-  val preferred = "template-mpp" // in case of conflict
+  val preferred1 = "template-mpp-lib" // in case of conflict
+  val preferred2 = "template-mpp" // in case of conflict
   val templates = mutableMapOf<String, String>()
   val templatesRes = mutableMapOf<String, Path>()
   val log = implictx<ULog>()
@@ -126,7 +127,7 @@ suspend fun collectMyTemplates(): Map<String, String> {
         log.w("Conflicting [[$label]] in resources:")
         log.w(oldPath)
         log.w(newPath)
-        if (preferred in newPath && preferred !in oldPath) {
+        if ((preferred1 in newPath && preferred1 !in oldPath)||(preferred2 in newPath && preferred2 !in oldPath)) {
           log.w("Overriding with the new one from $path")
           templates[label] = region
           templatesRes[label] = path

@@ -82,6 +82,10 @@ object MyTemplatesExamples {
     tryInjectMyTemplatesToProject(PathToKotlinProjects / "AbcdK")
   }
 
+  suspend fun tryInjectToItSelf() {
+    tryInjectMyTemplatesToProject(PathToKotlinProjects / "KGround")
+  }
+
   suspend fun tryInjectAllMyProjects() {
     tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = true)
   }
