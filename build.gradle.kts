@@ -7,6 +7,11 @@ plugins {
   plug(plugs.KotlinMulti) apply false
 }
 
+// New issue with js and native (unresolved references in common code)
+// TODO: try again after deps update
+val enableJs = false
+val enableNative = false
+
 val enablePublishing = findProject(":kommandline") == null && findProject(":kommandsamples") == null
 // don't publish to sonatype from my machine, because I include local kommandline and kommandsample
 // modules (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
@@ -21,7 +26,8 @@ defaultBuildTemplateForRootProject(
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
     // https://github.com/mareklangiewicz/KGround/releases
     settings = LibSettings(
-      withNativeLinux64 = true,
+      withJs = enableJs,
+      withNativeLinux64 = enableNative,
       compose = null,
       withSonatypeOssPublishing = enablePublishing,
     ),
