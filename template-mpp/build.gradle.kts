@@ -5,26 +5,29 @@ import pl.mareklangiewicz.utils.*
 plugins {
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinMultiCompose) apply false
-  plug(plugs.Compose) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
-  plug(plugs.AndroLibEdge) apply false
-  plug(plugs.AndroAppEdge) apply false
+  plug(plugs.ComposeJb) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
+  plug(plugs.AndroLib) apply false
+  plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
 }
 
-val enableJs = true
+// TODO LATER: I have weird issues on both android and on js (different) after last deps updates
+// Try to enable more platforms again after another big updates.
+// (both android and js were working not so long ago so my configuration is pretty solid)
+val enableJs = false
 val enableNative = false
-val enableAndro = true
+val enableAndro = false
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
     name = "TemplateMPP",
     description = "Template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-mpp",
-    version = Ver(0, 0, 25),
+    version = Ver(0, 0, 26),
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,
-      withKotlinxHtml = enableJs,
+      withKotlinxHtml = true, // also used in common code
       compose = LibComposeSettings(
         withComposeHtmlCore = enableJs,
         withComposeHtmlSvg = enableJs,
