@@ -34,10 +34,10 @@ private val mySecretsEnv = listOf(
 // FIXME: something less hacky/hardcoded
 @Suppress("IdentifierGrammar")
 fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
-  val everyMondayAt7am = Cron(minute = "0", hour = "7", dayWeek = "1")
+  val everydayAt6am = Cron(hour = "6", minute = "0")
   val workflow = workflow(
     name = "Generate Deps",
-    on = listOf(Schedule(listOf(everyMondayAt7am)), WorkflowDispatch()),
+    on = listOf(Schedule(listOf(everydayAt6am)), WorkflowDispatch()),
   ) {
     job(
       id = "generate-deps",
@@ -62,10 +62,10 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
 
 // FIXME: something less hacky/hardcoded/repetitive
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
-  val everyMondayAt8am = Cron(minute = "0", hour = "8", dayWeek = "1")
+  val everydayAt630am = Cron(hour = "6", minute = "30")
   val workflow = workflow(
     name = "Update Generated Deps",
-    on = listOf(Schedule(listOf(everyMondayAt8am)), WorkflowDispatch()),
+    on = listOf(Schedule(listOf(everydayAt630am)), WorkflowDispatch()),
   ) {
     job(
       id = "update-generated-deps",
@@ -204,12 +204,13 @@ private fun defaultReleaseWorkflow() =
       uses(action = CheckoutV4())
       usesJdk()
       usesGradleBuild()
-      usesGradle(
+      run(
         name = "Publish to Sonatype",
-        arguments = "publishToSonatype closeAndReleaseSonatypeStagingRepository",
+        command = "./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel",
       )
-      // TODO_someday: something like
-      // github-workflows-kt/.github/workflows/release.main.kts#L49
+      // TODO_someday: consider sth like: https://github.com/ansman/sonatype-publish-fix
+      // TODO_someday: something more like
+      // github-workflows-kt/.github/workflows/release.main.kts
       // github-workflows-kt/buildSrc/src/main/kotlin/buildsrc/tasks/AwaitMavenCentralDeployTask.kt
     }
   }
