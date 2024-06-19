@@ -21,8 +21,10 @@ defaultBuildTemplateForBasicMppLib(details) {
 
 setMyWeirdSubstitutions(
   // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-  "kommandline" to "0.0.64",
-  "kommandsamples" to "0.0.64",
+  // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/abcdk/
+  "abcdk" to "0.0.23",
+  "kommandline" to "0.0.65",
+  "kommandsamples" to "0.0.65",
   "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
 )
 

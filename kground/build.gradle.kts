@@ -28,6 +28,12 @@ defaultBuildTemplateForBasicMppLib(
   // api("org.jetbrains.kotlinx:atomicfu:0.23.1")
 }
 
+setMyWeirdSubstitutions(
+  // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/abcdk/
+  "abcdk" to "0.0.23",
+)
+
+
 // region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,

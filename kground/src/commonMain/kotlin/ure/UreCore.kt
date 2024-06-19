@@ -153,7 +153,7 @@ value class UreConcatenation internal constructor(val tokens: MutableList<Ure> =
   infix fun Int.of(init: UreConcatenation.() -> Unit) = x(this) of init
 }
 
-data class UreAlternation internal constructor(val first: Ure, val second: Ure) : UreNonCapturing {
+data class UreAlternation @DelicateApi constructor(val first: Ure, val second: Ure) : UreNonCapturing {
   override fun toIR() = "${first.toClosedIR()}|${second.toClosedIR()}".asIR
   override fun toClosedIR() = this.groupNonCapt().toIR()
 }
@@ -170,17 +170,17 @@ sealed interface UreGroup : Ure {
   override fun toClosedIR() = toIR() // group is always "closed" - has parentheses outside
 }
 
-data class UreNamedGroup internal constructor(override val content: Ure, val name: String) : UreGroup, UreNamed {
+data class UreNamedGroup @DelicateApi constructor(override val content: Ure, val name: String) : UreGroup, UreNamed {
   override val typeIR get() = "?<$name>".asIR
 }
 
 @JvmInline
-value class UreNonCapturingGroup internal constructor(override val content: Ure) : UreGroup, UreNonCapturing {
+value class UreNonCapturingGroup @DelicateApi constructor(override val content: Ure) : UreGroup, UreNonCapturing {
   override val typeIR get() = "?:".asIR
 }
 
 @JvmInline
-value class UreNumberedGroup internal constructor(override val content: Ure) : UreGroup, UreNumbered {
+value class UreNumberedGroup @DelicateApi constructor(override val content: Ure) : UreGroup, UreNumbered {
   override val typeIR get() = "".asIR
 }
 
@@ -188,7 +188,7 @@ value class UreNumberedGroup internal constructor(override val content: Ure) : U
 /** https://www.regular-expressions.info/atomic.html */
 @JvmInline
 @NotPortableApi("Does NOT even compile (Ure.compile) on JS.")
-value class UreAtomicGroup internal constructor(override val content: Ure) : UreGroup, UreAtomic {
+value class UreAtomicGroup @DelicateApi constructor(override val content: Ure) : UreGroup, UreAtomic {
   override val typeIR get() = "?>".asIR
 }
 
@@ -226,7 +226,7 @@ sealed class UreChangeOptions @DelicateApi @NotPortableApi protected constructor
   protected val optionsCode get() = "$oec$odc"
 }
 
-data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal constructor(
+data class UreChangeOptionsGroup @DelicateApi @NotPortableApi constructor(
   override val content: Ure,
   override val enable: Set<RegexOption> = emptySet(),
   override val disable: Set<RegexOption> = emptySet(),
@@ -246,7 +246,7 @@ data class UreChangeOptionsGroup @DelicateApi @NotPortableApi internal construct
 @DelicateApi("Makes the whole Ure very difficult to analyze.", ReplaceWith("UreChangingOptionsGroup"))
 @SecondaryApi("Use UreChangingOptionsGroup", ReplaceWith("UreChangingOptionsGroup"))
 @NotPortableApi("Does NOT even compile (Ure.compile) on JS.", ReplaceWith("UreChangingOptionsGroup"))
-data class UreChangeOptionsAhead internal constructor(
+data class UreChangeOptionsAhead @DelicateApi constructor(
   override val enable: Set<RegexOption> = emptySet(),
   override val disable: Set<RegexOption> = emptySet(),
 ) : UreChangeOptions(), UreNonCapturing {
@@ -262,7 +262,7 @@ data class UreChangeOptionsAhead internal constructor(
 // Note: For delicate/not portable reasons, see
 //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Lookbehind_assertion#description
 //   search: "This behavior is reasonable...Therefore, it starts... Regexes in some other languages forbid..."
-data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
+data class UreLookGroup @DelicateApi @NotPortableApi constructor(
   override val content: Ure,
   val ahead: Boolean = true,
   val positive: Boolean = true,
@@ -280,7 +280,7 @@ data class UreLookGroup @DelicateApi @NotPortableApi internal constructor(
 }
 
 
-data class UreGroupRef internal constructor(val nr: Int? = null, val name: String? = null) : UreAtomic {
+data class UreGroupRef @DelicateApi constructor(val nr: Int? = null, val name: String? = null) : UreAtomic {
   init {
     nr == null || name == null || bad { "Can not reference capturing group by both nr ($nr) and name ($name)" }
     nr == null && name == null && bad { "Either nr or name has to be provided for the group reference" }
@@ -296,7 +296,7 @@ data class UreGroupRef internal constructor(val nr: Int? = null, val name: Strin
  * @param reluctant - Tries to eat as little "times" as possible. Opposite to default "greedy" behavior.
  * @param possessive - It's like more greedy than default greedy. Never backtracks - fails instead. Just as [UreAtomicGroup].
  */
-data class UreQuantifier internal constructor(
+data class UreQuantifier @DelicateApi constructor(
   val content: Ure,
   val times: IntRange,
   val reluctant: Boolean = false,
@@ -347,7 +347,7 @@ data class UreQuantifier internal constructor(
  * It all should be the same common implementation, except actual regex matching (which is outside Ure).
  * (usecases like: tool on website creating IR to copy&paste to different places)
  */
-@JvmInline value class UreCharExact @NotPortableApi internal constructor(val str: String) : UreCharClass {
+@JvmInline value class UreCharExact @NotPortableApi @DelicateApi constructor(val str: String) : UreCharClass {
   init {
     req(str.isNotEmpty()) { "Empty char point." }
     req(str.isSingleUnicodeCharacter) { "Looks like more than one char point." }
@@ -389,7 +389,7 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
  * https://www.regular-expressions.info/anchors.html
  * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#bounds
  */
-@JvmInline value class UreAnchorPreDef @NotPortableApi internal constructor(val name: Char) : UreAnchor {
+@JvmInline value class UreAnchorPreDef @NotPortableApi @DelicateApi constructor(val name: Char) : UreAnchor {
   init {
     req(name.isNameOfAnchorPreDef) { "Incorrect name of predefined anchor: $name" }
   }
@@ -397,7 +397,7 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
   override fun toIR(): IR = if (name in "^$") "$name".asIR else "\\$name".asIR
   override fun toClosedIR(): IR = toIR()
 
-  @OptIn(NotPortableApi::class) operator fun not() =
+  @OptIn(NotPortableApi::class, DelicateApi::class) operator fun not() =
     if (name in "bB") UreAnchorPreDef(name.switchCase()) else bad { "The anchor: $name can't be negated." }
 
   companion object {
@@ -411,7 +411,7 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
  * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#predef
  * https://www.regular-expressions.info/shorthand.html
  */
-@JvmInline value class UreCharClassPreDef @DelicateApi internal constructor(val name: Char) : UreCharClass {
+@JvmInline value class UreCharClassPreDef @DelicateApi constructor(val name: Char) : UreCharClass {
   init {
     req(name.isNameOfPreDefCC) { "Incorrect name of predefined character class: $name" }
   }
@@ -430,7 +430,7 @@ private val Char.isMetaInCharClass get() = this in "\\[]^-" // https://www.regul
 }
 
 
-data class UreCharClassUnion @NotPortableApi internal constructor(
+data class UreCharClassUnion @NotPortableApi @DelicateApi constructor(
   val tokens: List<UreCharClass>,
   val positive: Boolean = true,
 ) : UreCharClass {
@@ -444,7 +444,7 @@ data class UreCharClassUnion @NotPortableApi internal constructor(
   override fun toClosedIR(): IR = toIR()
   override fun toIRInCharClass(): IR =
     tokens.joinToString("", if (positive) "" else "[^", if (positive) "" else "]") { it.toIRInCharClass().str }.asIR
-  @OptIn(NotPortableApi::class)
+  @OptIn(NotPortableApi::class, DelicateApi::class)
   operator fun not() = UreCharClassUnion(tokens, !positive)
 }
 
@@ -471,7 +471,7 @@ data class UreCharClassRange @NotPortableApi constructor(
  * Some are reproduced in fun testUreCharClasses in TestUreCharClasses.cmn.kt
  * Usual workaround for weird behavior is to wrap some parts in additional chOfAny(token).
  */
-data class UreCharClassIntersect @NotPortableApi @DelicateApi internal constructor(
+data class UreCharClassIntersect @NotPortableApi @DelicateApi constructor(
   val tokens: List<UreCharClass>,
   val positive: Boolean = true,
 ) : UreCharClass {
@@ -484,17 +484,17 @@ data class UreCharClassIntersect @NotPortableApi @DelicateApi internal construct
   operator fun not() = UreCharClassIntersect(tokens, !positive)
 }
 
-data class UreCharClassProp @NotPortableApi internal constructor(val prop: String, val positive: Boolean = true) :
+data class UreCharClassProp @NotPortableApi @DelicateApi constructor(val prop: String, val positive: Boolean = true) :
   UreCharClass {
   override fun toIR(): IR = "\\${if (positive) "p" else "P"}{$prop}".asIR
   override fun toClosedIR(): IR = toIR()
   override fun toIRInCharClass(): IR = toIR()
-  @OptIn(NotPortableApi::class)
+  @OptIn(NotPortableApi::class, DelicateApi::class)
   operator fun not() = UreCharClassProp(prop, !positive)
 }
 
 /** Dirty way to inject whole regexes fast. Avoid if possible. */
-@JvmInline value class UreWithRawIR @DelicateApi @NotPortableApi internal constructor(val ir: IR) : Ure {
+@JvmInline value class UreWithRawIR @DelicateApi @NotPortableApi constructor(val ir: IR) : Ure {
   override fun toIR(): IR = ir
   override fun toClosedIR(): IR = if (isClosed) ir else this.groupNonCapt().toIR()
   private val isClosed
@@ -506,13 +506,13 @@ data class UreCharClassProp @NotPortableApi internal constructor(val prop: Strin
   // TODO_someday: analyze more carefully and drop grouping when actually not needed.
 }
 
-@JvmInline value class UreQuote @NotPortableApi internal constructor(val str: String) : UreAtomic {
+@JvmInline value class UreQuote @NotPortableApi @DelicateApi constructor(val str: String) : UreAtomic {
   override fun toClosedIR(): IR = toIR()
   override fun toIR() = "\\Q$str\\E".asIR
 }
 
 /** Could be implemented as [UreConcatenation] of each character, but it's better to have a smaller tree. */
-@JvmInline value class UreText internal constructor(val str: String) : UreAtomic {
+@JvmInline value class UreText @DelicateApi constructor(val str: String) : UreAtomic {
   override fun toClosedIR(): IR = this.groupNonCapt().toIR()
   override fun toIR() = str.map { if (it.isMeta) "\\$it" else "$it" }.joinToString("").asIR
 }

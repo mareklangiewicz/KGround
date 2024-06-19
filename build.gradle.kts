@@ -9,8 +9,8 @@ plugins {
 
 // New issue with js and native (unresolved references in common code)
 // TODO: try again after deps update
-val enableJs = false
-val enableNative = false
+val enableJs = true
+val enableNative = true
 
 val enablePublishing = findProject(":kommandline") == null && findProject(":kommandsamples") == null
 // don't publish to sonatype from my machine, because I include local kommandline and kommandsample
@@ -22,7 +22,7 @@ defaultBuildTemplateForRootProject(
     name = "KGround",
     description = "Kotlin Common Ground.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 58),
+    version = Ver(0, 0, 59),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
     // https://github.com/mareklangiewicz/KGround/releases
     settings = LibSettings(

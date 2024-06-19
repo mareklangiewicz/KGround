@@ -1,4 +1,5 @@
 @file:Suppress("SpellCheckingInspection")
+@file:OptIn(DelicateApi::class)
 
 package pl.mareklangiewicz.ure
 
