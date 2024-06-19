@@ -117,7 +117,7 @@ internal class ReducedKommandImpl<K : Kommand, In, Out, Err, ReducedOut>(
 ) : ReducedKommand<ReducedOut> {
   override suspend fun ax(dir: String?): ReducedOut {
     val cli = implictx<CLI>()
-    return reduce(cli.start(typedKommand, dir))
+    return reduce(cli.lx(typedKommand, dir))
   }
 }
 

@@ -32,7 +32,7 @@ suspend fun curlDownload(url: String, to: Path) {
   // TODO: Add curl as Kommand, then use it here
   // -s so no progress bars on error stream; -S to report actual errors on error stream
   val k = kommand("curl", "-s", "-S", "-o", to.toString(), url)
-  val result = cli.start(k).waitForResult()
+  val result = cli.lx(k).waitForResult()
   result.unwrap { err ->
     if (err.isNotEmpty()) {
       log.e("FAIL: Error stream was not empty:")

@@ -20,7 +20,7 @@ class ZenityTest {
   @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.tryInteractivelyCheckBlockingOrErr()
   @Test fun testZenityEntryStart() = ifInteractiveCodeEnabledBlockingOrErr {
     val cli = implictx<CLI>()
-    cli.start(zenity(Entry) { -EntryText("suggested text") })
+    cli.lx(zenity(Entry) { -EntryText("suggested text") })
   }
 
   @Test fun testZenityCalendar() = zenity(Calendar) { -Title("some title"); -Text("some text") }

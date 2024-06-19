@@ -63,7 +63,7 @@ suspend fun Kommand.tryInteractivelyStartInTerm(
       else -> this
     }
     val cli = implictx<CLI>()
-    cli.start(termKommand(k), dir = startInDir)
+    cli.lx(termKommand(k), dir = startInDir)
   }
 }
 
@@ -117,7 +117,7 @@ fun writeFileAndStartInGVim(inLines: List<String>, vararg useNamedArgs: Unit, fi
     val cli = implictx<CLI>()
     val fp = filePath ?: fs.pathToTmpNotes.toString() // FIXME_later: Use Path everywhere
     writeFileWithDD(inLines, fp).ax()
-    cli.start(gvim(fp))
+    cli.lx(gvim(fp))
   }
 
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")

@@ -57,7 +57,6 @@ fun konfigInDir(
 ) = KonfigInDirUnsafe(dir, cli)
   .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
-@OptIn(NotPortableApi::class)
 private class KonfigInDirUnsafe(val dir: String, val cli: CLI = getSysCLI()) : IKonfig {
 
   init {

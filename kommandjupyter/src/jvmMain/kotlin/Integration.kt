@@ -50,7 +50,7 @@ suspend fun Kommand.ax(
   req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
   req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
   req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
-  val eprocess = cli.start(
+  val eprocess = cli.lx(
     this@ax,
     dir = dir,
     inFile = inFile,
@@ -72,7 +72,7 @@ suspend fun Kommand.ax(
 }
 
 fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI, dir: String? = null) =
-  cli.start(this, dir)
+  cli.lx(this, dir)
 
 /**
  * Blocking flavor of fun Kommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.

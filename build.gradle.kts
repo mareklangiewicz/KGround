@@ -8,8 +8,8 @@ plugins {
   plug(plugs.KotlinJvm) apply false
 }
 
-val enableJs = true
-val enableNative = true
+val enableJs = false
+val enableNative = false
 val enablePublishing = findProject(":kground") == null
 // don't publish to sonatype from my machine, because I include local KGround/kground module
 // (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
