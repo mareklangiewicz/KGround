@@ -16,7 +16,7 @@ plugins {
 // (both android and js were working not so long ago so my configuration is pretty solid)
 val enableJs = true
 val enableNative = false
-val enableAndro = false
+val enableAndro = true
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
