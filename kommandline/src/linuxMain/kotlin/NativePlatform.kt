@@ -10,7 +10,7 @@ class NativeCLI : CLI {
   override val isRedirectFileSupported get() = false
 
   @DelicateApi
-  override fun start(
+  override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
     dir: String?,

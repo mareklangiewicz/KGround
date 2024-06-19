@@ -15,7 +15,7 @@ class JvmCLI : CLI {
 
   override val isRedirectFileSupported get() = true
 
-  override fun start(
+  override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
     dir: String?,

@@ -166,8 +166,8 @@ data object MyDemoSamples {
     val boringFileXml = "$pathToUserTmp/tmp.boring.xml" // also to have syntax highlighting
     writeFileAndStartInGVim(out, filePath = boringFileXml).ax()
     // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
-    SYS.start(gvim("/home/marek/code/kotlin/kotlin.iml"))
-    SYS.start(gvim("/home/marek/code/kotlin/.idea/kotlin.iml"))
+    SYS.lx(gvim("/home/marek/code/kotlin/kotlin.iml"))
+    SYS.lx(gvim("/home/marek/code/kotlin/.idea/kotlin.iml"))
   }
 
 

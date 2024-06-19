@@ -71,7 +71,7 @@ suspend fun Kommand.ax(
     .unwrap(expectedExit, expectedErr)
 }
 
-fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.start(cli: CLI, dir: String? = null) =
+fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.lx(cli: CLI, dir: String? = null) =
   cli.lx(this, dir)
 
 /**

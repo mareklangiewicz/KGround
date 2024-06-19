@@ -34,35 +34,6 @@ interface CLI : UCtx {
   val isRedirectFileSupported: Boolean
 
   /**
-   * @param dir working directory for started subprocess - null means inherit from current process
-   * @param inFile - redirect std input from given file - null means do not redirect
-   * @param outFile - redirect std output (std err too) to given file - null means do not redirect
-   * TODO_maybe: support other redirections (streams/strings with content)
-   *   (might require separate flag like: isRedirectStreamsSupported)
-   *   (also see comment above at isRedirectContentSupported flag)
-   * @param envModify Allows to modify default inherited environment variables for child process.
-   *   Can throw exepction if it's unsupported on particular platform.
-   */
-  @Deprecated("Renamed to lx", ReplaceWith("lx"))
-  fun start(
-    kommand: Kommand,
-    vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inFile: String? = null,
-    outFile: String? = null,
-    outFileAppend: Boolean = false,
-    errToOut: Boolean = false,
-    errFile: String? = null,
-    errFileAppend: Boolean = false,
-    envModify: (MutableMap<String, String>.() -> Unit)? = null,
-  ): ExecProcess
-  // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
-  // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
-
-  // TODO_someday: access to input/output streams wrapped in okio Source/Sink
-  // (but what about platforms running kommands through ssh or adb?)
-
-  /**
    * Launch eXternal process.
    *
    * Why weird short name:
@@ -80,7 +51,7 @@ interface CLI : UCtx {
    *   (might require separate flag like: isRedirectStreamsSupported)
    *   (also see comment above at isRedirectContentSupported flag)
    * @param envModify Allows to modify default inherited environment variables for child process.
-   *   Can throw exepction if it's unsupported on particular platform.
+   *   Can throw exception if it's unsupported on particular platform.
    */
   fun lx(
     kommand: Kommand,
@@ -93,10 +64,7 @@ interface CLI : UCtx {
     errFile: String? = null,
     errFileAppend: Boolean = false,
     envModify: (MutableMap<String, String>.() -> Unit)? = null,
-  ): ExecProcess = start(
-    kommand, dir = dir, inFile = inFile, outFile = outFile, outFileAppend = outFileAppend,
-    errToOut = errToOut, errFile = errFile, errFileAppend = errFileAppend,envModify = envModify,
-  )
+  ): ExecProcess
   // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
   // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 
@@ -113,7 +81,7 @@ class FakeCLI(
   override val isRedirectFileSupported get() = true // not really, but it's all fake
 
   @DelicateApi
-  override fun start(
+  override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
     dir: String?,
@@ -125,7 +93,7 @@ class FakeCLI(
     errFileAppend: Boolean,
     envModify: (MutableMap<String, String>.() -> Unit)?,
   ): ExecProcess {
-    log.d("start($kommand, $dir, ...)")
+    log.d("lx($kommand, $dir, ...)")
     chkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
     return FakeProcess(log)
   }

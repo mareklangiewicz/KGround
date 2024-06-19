@@ -80,11 +80,11 @@ suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
 /**
  * @param dir working directory for started subprocess - null means inherit from the current process
  */
-fun <K : Kommand, In, Out, Err> CLI.start(
+fun <K : Kommand, In, Out, Err> CLI.lx(
   kommand: TypedKommand<K, In, Out, Err>,
   dir: String? = null,
 ) = TypedExecProcess(
-  eprocess = start(kommand = kommand.kommand, dir = dir, errToOut = kommand.stderrToOut),
+  eprocess = lx(kommand = kommand.kommand, dir = dir, errToOut = kommand.stderrToOut),
   stdinRetype = kommand.stdinRetype,
   stderrRetype = kommand.stderrRetype,
   stdoutRetype = kommand.stdoutRetype,
