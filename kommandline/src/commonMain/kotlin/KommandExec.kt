@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.bad.*
 
 
-// TODO_someday: CLI as context receiver
+// TODO_someday: CLI as context parameter
 //  for now convention is: first parameter "cli: CLI", because it's the same as kgroundxio:WithCLI interface
 /**
  * The ax Awaits/eXecutes the kommand. And it's dangerous :)
@@ -23,7 +23,7 @@ suspend fun Kommand.ax(
   val cli = implictx<CLI>()
   req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
   req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
-  cli.start(this@ax, dir = dir, inFile = inFile, outFile = outFile)
+  cli.lx(this@ax, dir = dir, inFile = inFile, outFile = outFile)
     .awaitResult(inLineS = inLineS)
     .unwrap()
 }

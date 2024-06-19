@@ -49,7 +49,7 @@ fun konfigInUserHomeConfigDir(
  */
 fun konfigInDir(
   dir: String,
-  cli: CLI = getDefaultCLI(),
+  cli: CLI = getSysCLI(),
   isReadOnly: Boolean = false,
   isClrAllowed: Boolean = false,
   checkForDangerousKeys: Boolean = true,

@@ -24,7 +24,7 @@ fun getUserFlagStr(cli: CLI, key: String) = if (getUserFlag(cli, key)) "enabled"
 
 fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserFlagStr(cli, key) + "."
 
-// TODO: remove cli params from these user flags utils, and let konfigInUserHomeConfigDir use default getDefaultCLI()
+// TODO: remove cli params from these user flags utils, and let konfigInUserHomeConfigDir use default getSysCLI()
 
 
 
