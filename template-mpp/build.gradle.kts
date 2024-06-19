@@ -14,7 +14,7 @@ plugins {
 // TODO LATER: I have weird issues on both android and on js (different) after last deps updates
 // Try to enable more platforms again after another big updates.
 // (both android and js were working not so long ago so my configuration is pretty solid)
-val enableJs = false
+val enableJs = true
 val enableNative = false
 val enableAndro = false
 
@@ -23,7 +23,7 @@ defaultBuildTemplateForRootProject(
     name = "TemplateMPP",
     description = "Template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-mpp",
-    version = Ver(0, 0, 26),
+    version = Ver(0, 0, 27),
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,
