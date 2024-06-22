@@ -21,6 +21,7 @@ pluginManagement {
     gradlePluginPortal()
     google()
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
 
   val depsDir = File(rootDir, "../DepsKt").normalize()
