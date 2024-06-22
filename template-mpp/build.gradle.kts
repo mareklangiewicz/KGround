@@ -6,8 +6,7 @@ import pl.mareklangiewicz.utils.*
 plugins {
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinMultiCompose) apply false
-  // plug(plugs.ComposeJb) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
-  id("org.jetbrains.compose") version "1.7.0-dev1686" apply false // FIXME: remove when they fully release next ver
+  plug(plugs.ComposeJb) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
   plug(plugs.AndroLib) apply false
   plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
