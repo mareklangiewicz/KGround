@@ -12,10 +12,11 @@ plugins {
   plugAll(
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
-    plugs.ComposeJb,
+    // plugs.ComposeJb,
     plugs.MavenPublish,
     plugs.Signing,
   )
+  id("org.jetbrains.compose")
   plug(plugs.AndroLibNoVer) apply false // will be applied conditionally depending on LibSettings
 }
 
