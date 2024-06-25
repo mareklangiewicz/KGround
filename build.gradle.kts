@@ -17,15 +17,15 @@ val enablePublishing = findProject(":kground") == null
 
 rootExtString["verKGround"] = "0.0.59" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 rootExtString["verAbcdK"] = "0.0.23" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/abcdk/
-rootExtString["verTuplek"] = "0.0.17" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
-rootExtString["verUSpek"] = "0.0.35" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
+rootExtString["verTuplek"] = "0.0.18" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
+rootExtString["verUSpek"] = "0.0.36" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
     name = "KommandLine",
     description = "Kotlin DSL for popular CLI commands.",
     githubUrl = "https://github.com/mareklangiewicz/KommandLine",
-    version = Ver(0, 0, 66),
+    version = Ver(0, 0, 67),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
     // https://github.com/mareklangiewicz/KommandLine/releases
     settings = LibSettings(
