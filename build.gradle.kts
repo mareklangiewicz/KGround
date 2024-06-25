@@ -16,7 +16,7 @@ val enablePublishing = findProject(":kommandline") == null && findProject(":komm
 // exception: publishToMavenLocal for debugging
 
 // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-rootExtString["verKL"] = "0.0.65"
+rootExtString["verKL"] = "0.0.67"
 
 
 defaultBuildTemplateForRootProject(
@@ -24,7 +24,7 @@ defaultBuildTemplateForRootProject(
     name = "KGround",
     description = "Kotlin Common Ground.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 59),
+    version = Ver(0, 0, 60),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
     // https://github.com/mareklangiewicz/KGround/releases
     settings = LibSettings(

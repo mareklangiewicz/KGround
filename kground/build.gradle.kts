@@ -19,13 +19,10 @@ defaultBuildTemplateForBasicMppLib(
   api(KotlinX.datetime.withVer("0.5.0"))
   // FIXME: track:assemble fails on native in new 0.6.0-RC.2 version:
   // KLIB resolver: Could not find "org.jetbrains.kotlinx:kotlinx-datetime-cinterop-date"
+  // https://youtrack.jetbrains.com/issue/KT-60874/KLIB-Resolve-Dont-save-transitive-dependencies-in-manifests-depends-property#focus=Comments-27-7983307.0-0
 
   api(KotlinX.coroutines_core)
   implementation(Kotlin.reflect)
-
-  // FIXME: remove hardcoded atomicfu when bug is fixed. Update: Looks like it's working, but wait for youtrack update.
-  // https://youtrack.jetbrains.com/issue/KT-64111/kotlinx-coroutines-1.8.0-RC-cant-be-used-Could-not-find-org.jetbrains.kotlinxatomicfu-cinterop-interop
-  // api("org.jetbrains.kotlinx:atomicfu:0.23.1")
 }
 
 // region [[Kotlin Module Build Template]]
