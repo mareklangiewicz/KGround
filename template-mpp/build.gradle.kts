@@ -24,7 +24,7 @@ defaultBuildTemplateForRootProject(
     name = "TemplateMPP",
     description = "Template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-mpp",
-    version = Ver(0, 0, 27),
+    version = Ver(0, 0, 30),
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,
