@@ -1,9 +1,9 @@
-@file:Suppress("DEPRECATION", "unused", "UnusedVariable")
 
+// region [[Andro App Build Imports and Plugs]]
+
+import com.android.build.api.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
-import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.CommonExtension
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
@@ -13,11 +13,13 @@ plugins {
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
+    plugs.AndroAppNoVer,
     plugs.MavenPublish,
     plugs.Signing,
   )
-  plug(plugs.AndroAppNoVer)
 }
+
+// endregion [[Andro App Build Imports and Plugs]]
 
 defaultBuildTemplateForAndroApp {
   implementation(project(":template-andro-lib"))

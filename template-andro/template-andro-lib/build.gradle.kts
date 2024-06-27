@@ -1,4 +1,5 @@
-@file:Suppress("DEPRECATION", "unused", "UnusedVariable")
+
+// region [[Andro Lib Build Imports and Plugs]]
 
 import com.android.build.api.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -12,11 +13,13 @@ plugins {
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
+    plugs.AndroLibNoVer,
     plugs.MavenPublish,
-    plugs.Signing,
+    plugs.Signing
   )
-  plug(plugs.AndroLibNoVer)
 }
+
+// endregion [[Andro Lib Build Imports and Plugs]]
 
 defaultBuildTemplateForAndroLib()
 

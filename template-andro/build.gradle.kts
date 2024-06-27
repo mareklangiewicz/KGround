@@ -1,3 +1,6 @@
+
+// region [[Root Build Imports and Plugs]]
+
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
@@ -5,11 +8,13 @@ import pl.mareklangiewicz.deps.*
 plugins {
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinMultiCompose) apply false
-  plug(plugs.ComposeJb) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
+  plug(plugs.ComposeJb) apply false
   plug(plugs.AndroLib) apply false
   plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
 }
+
+// endregion [[Root Build Imports and Plugs]]
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
