@@ -8,9 +8,9 @@ import org.w3c.dom.*
 
 fun tryToInstallAppIn(rootElement: Element?) {
   when (rootElement as? HTMLElement) {
-    null -> console.warn("TemplateMPPWebApp: Incorrect rootElement")
+    null -> console.warn("TemplateFullWebApp: Incorrect rootElement")
     else -> renderComposable(root = rootElement) {
-      H1 { Text("Template MPP Web App") }
+      H1 { Text("Template Full Web App") }
       P { Text(remember { helloCommon() }) }
       P { Text(remember { helloPlatform() }) }
       P { Text(remember { helloSomeHtml() }) }

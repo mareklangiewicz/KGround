@@ -21,7 +21,7 @@ fun helloSomeHtml(): String =
   buildString {
     appendHTML().html {
       body {
-        h1 { +"Some H1 in Template MPP App" }
+        h1 { +"Some H1 in Template Full App" }
         p { +"Some paragraph" }
         p { +"Some other paragraph" }
         p { +helloCommon() }

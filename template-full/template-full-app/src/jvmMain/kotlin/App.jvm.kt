@@ -1,10 +1,5 @@
 package pl.mareklangiewicz.templatefull
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.*
 import androidx.compose.ui.window.*
 
 fun main() {
@@ -21,8 +16,8 @@ fun mainCli() {
 }
 
 fun mainComposeApp() = application {
-  Window(onCloseRequest = ::exitApplication, title = "Template MPP App") {
-    TemplateMppTheme(
+  Window(onCloseRequest = ::exitApplication, title = "Template Full App") {
+    TemplateFullTheme(
       darkTheme = true,
       // default isSystemInDarkTheme doesn't work for me yet
       // (there was some issue about linux support)

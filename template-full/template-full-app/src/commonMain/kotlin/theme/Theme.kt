@@ -29,7 +29,7 @@ val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun TemplateMppTheme(
+fun TemplateFullTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
   content: @Composable () -> Unit,
 ) {

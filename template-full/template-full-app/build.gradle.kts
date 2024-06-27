@@ -735,7 +735,7 @@ fun ApplicationExtension.defaultAndroApp(
   ignoreCompose: Boolean = false,
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
-  compileSdk = andro.sdkCompile
+  andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig(details)
   defaultBuildTypes()
@@ -747,7 +747,7 @@ fun ApplicationExtension.defaultDefaultConfig(details: LibDetails) = defaultConf
   val asettings = details.settings.andro ?: error("No andro settings.")
   applicationId = details.appId
   namespace = details.namespace
-  targetSdk = asettings.sdkTarget
+  asettings.sdkTargetPreview?.let { targetSdkPreview = it } ?: run { targetSdk = asettings.sdkTarget }
   minSdk = asettings.sdkMin
   versionCode = details.appVerCode
   versionName = details.appVerName
