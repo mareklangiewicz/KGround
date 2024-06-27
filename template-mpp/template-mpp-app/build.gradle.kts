@@ -701,6 +701,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
   extensions.configure<KotlinMultiplatformExtension> {
+    androidTarget()
     details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   }
   extensions.configure<ApplicationExtension> {

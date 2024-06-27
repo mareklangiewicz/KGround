@@ -614,6 +614,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   val andro = details.settings.andro ?: error("No andro settings.")
   repositories { addRepos(details.settings.repos) }
   extensions.configure<KotlinMultiplatformExtension> {
+    androidTarget()
     details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   }
   extensions.configure<LibraryExtension> {
