@@ -1,12 +1,16 @@
+
+// region [[Basic Root Build Imports and Plugs]]
+
 import pl.mareklangiewicz.defaults.*
-import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
+import pl.mareklangiewicz.deps.*
 
 plugins {
-  plug(plugs.NexusPublish)
   plug(plugs.KotlinMulti) apply false
-  plug(plugs.KotlinJvm) apply false
+  plug(plugs.NexusPublish)
 }
+
+// endregion [[Basic Root Build Imports and Plugs]]
 
 val enableJs = true
 val enableNative = true
@@ -15,7 +19,7 @@ val enablePublishing = findProject(":kground") == null
 // (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
 // exception: publishToMavenLocal for debugging
 
-rootExtString["verKGround"] = "0.0.59" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+rootExtString["verKGround"] = "0.0.61" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 rootExtString["verAbcdK"] = "0.0.23" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/abcdk/
 rootExtString["verTuplek"] = "0.0.18" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
 rootExtString["verUSpek"] = "0.0.36" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
@@ -62,7 +66,7 @@ fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
  * * MYKOTLIBS_ossrhPassword
  * * MYKOTLIBS_sonatypeStagingProfileId
  * * First three of these used in fun pl.mareklangiewicz.defaults.defaultSigning
- * * See DepsKt/template-mpp/template-mpp-lib/build.gradle.kts
+ * * See KGround/template-full/template-full-lib/build.gradle.kts
  */
 fun ExtraPropertiesExtension.addDefaultStuffFromSystemEnvs(envKeyMatchPrefix: String = "MYKOTLIBS_") =
   addAllFromSystemEnvs(envKeyMatchPrefix)
