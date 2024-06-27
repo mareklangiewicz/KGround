@@ -110,7 +110,7 @@ fun MavenPublication.defaultPOM(lib: LibDetails) = pom {
   scm { url put lib.githubUrl }
 }
 
-/** See also: root project template-basic: addDefaultStuffFromSystemEnvs */
+/** See also: root project template-full: addDefaultStuffFromSystemEnvs */
 fun Project.defaultSigning(
   keyId: String = rootExtString["signing.keyId"],
   key: String = rootExtReadFileUtf8TryOrNull("signing.keyFile") ?: rootExtString["signing.key"],
