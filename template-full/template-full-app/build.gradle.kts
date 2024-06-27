@@ -377,8 +377,6 @@ fun KotlinMultiplatformExtension.jsDefault(
 // region [[MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicMppApp(
-  appMainPackage: String,
-  appMainFun: String = "main",
   details: LibDetails = rootExtLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
@@ -411,7 +409,7 @@ fun Project.defaultBuildTemplateForBasicMppApp(
     if (details.settings.withNativeLinux64) linuxX64 {
       binaries {
         executable {
-          entryPoint = "$appMainPackage.$appMainFun"
+          entryPoint = "${details.appMainPackage}.${details.appMainFun}"
         }
       }
     }
