@@ -64,16 +64,6 @@ object MyBasicExamples {
 @ExampleApi
 object MyTemplatesExamples {
 
-  @Deprecated("Temporary fun to fix templates from single to double square brackets marks")
-  suspend fun tryFixingOneProjectTemplates() {
-    tryFixMyTemplatesInProject(PathToKotlinProjects / "AbcdK")
-  }
-
-  @Deprecated("Temporary fun to fix templates from single to double square brackets marks")
-  suspend fun tryFixingAllMyProjectsTemplates() {
-    tryFixMyTemplatesInAllMyProjects(onlyPublic = false, askInteractively = false)
-  }
-
   suspend fun tryDiffMyTemplates() {
     tryDiffMyConflictingTemplatesSrc()
   }

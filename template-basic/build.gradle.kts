@@ -1,5 +1,5 @@
 
-// region [[Full Root Build Imports and Plugs]]
+// region [[Basic Root Build Imports and Plugs]]
 
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
@@ -7,35 +7,26 @@ import pl.mareklangiewicz.deps.*
 
 plugins {
   plug(plugs.KotlinMulti) apply false
-  plug(plugs.KotlinMultiCompose) apply false
-  plug(plugs.ComposeJb) apply false
-  plug(plugs.AndroLib) apply false
-  plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
 }
 
-// endregion [[Full Root Build Imports and Plugs]]
+// endregion [[Basic Root Build Imports and Plugs]]
 
 val enableJs = true
-val enableNative = false
-val enableAndro = true
+val enableNative = true
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
-    name = "TemplateMPP",
-    description = "Template for multi platform projects.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-mpp",
-    version = Ver(0, 0, 30),
+    name = "TemplateBasic",
+    description = "Template for basic multi platform projects. No android or compose here.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
+    version = Ver(0, 0, 1),
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,
       withKotlinxHtml = true, // also used in common code
-      compose = LibComposeSettings(
-        withComposeHtmlCore = enableJs,
-        withComposeHtmlSvg = enableJs,
-        withComposeTestHtmlUtils = enableJs,
-      ),
-      andro = if (enableAndro) LibAndroSettings() else null,
+      compose = null,
+      andro = null,
     ),
   ),
 )
