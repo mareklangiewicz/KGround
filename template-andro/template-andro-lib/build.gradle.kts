@@ -380,7 +380,7 @@ fun LibraryExtension.defaultAndroLib(
   ignoreCompose: Boolean = false,
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
-  compileSdk = andro.sdkCompile
+  andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig(details)
   defaultBuildTypes()
