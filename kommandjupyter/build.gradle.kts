@@ -1,3 +1,6 @@
+
+// region [Custom MPP Lib Build Imports and Plugs]
+
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
@@ -10,12 +13,14 @@ plugins {
     plugs.KotlinMulti,
     plugs.MavenPublish,
     plugs.Signing,
-    // plugs.Ktor,
+    plugs.Ktor,
     plugs.KotlinJupyter,
   )
-  id("io.ktor.plugin") version "2.3.6"
-  // FIXME: ktor 3.0.0-beta-1 from deps .61 gives me error, when syncing, so I have to use ktor 2.3.6
+  // id("io.ktor.plugin") version "2.3.6"
+  // // FIXME: ktor 3.0.0-beta-1 from deps .61 gives me error, when syncing, so I have to use ktor 2.3.6
 }
+
+// endregion [Custom MPP Lib Build Imports and Plugs]
 
 val settings = rootExtLibDetails.settings.copy(
   withJs = false,
