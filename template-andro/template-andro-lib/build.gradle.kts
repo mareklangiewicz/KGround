@@ -1,7 +1,6 @@
 @file:Suppress("DEPRECATION", "unused", "UnusedVariable")
 
-import com.android.build.api.dsl.CommonExtension
-import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
@@ -9,7 +8,14 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-  plugAll(plugs.AndroLibNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
+  plugAll(
+    plugs.KotlinMulti,
+    plugs.KotlinMultiCompose,
+    plugs.ComposeJbNoVer,
+    plugs.MavenPublish,
+    plugs.Signing,
+  )
+  plug(plugs.AndroLibNoVer)
 }
 
 defaultBuildTemplateForAndroLib()
@@ -342,6 +348,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   val andro = details.settings.andro ?: error("No andro settings.")
   repositories { addRepos(details.settings.repos) }
   extensions.configure<KotlinMultiplatformExtension> {
+    androidTarget()
     details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   }
   extensions.configure<LibraryExtension> {

@@ -3,10 +3,12 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 
 plugins {
+  plug(plugs.KotlinMulti) apply false
+  plug(plugs.KotlinMultiCompose) apply false
+  plug(plugs.ComposeJb) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
+  plug(plugs.AndroLib) apply false
+  plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
-  plug(plugs.AndroLibEdge) apply false
-  plug(plugs.AndroAppEdge) apply false
-  plug(plugs.KotlinAndro) apply false
 }
 
 defaultBuildTemplateForRootProject(
@@ -14,14 +16,10 @@ defaultBuildTemplateForRootProject(
     name = "TemplateAndro",
     description = "Template for android projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 14),
+    version = Ver(0, 0, 15),
     settings = LibSettings(
       withTestJUnit4 = true,
       withTestJUnit5 = false,
-      compose = LibComposeSettings(
-        // withComposeCompiler = ComposeCompilerJb, // can't use Jb because andro plugin doesn't support it.
-        withComposeCompiler = ComposeCompilerAx,
-      ),
       andro = LibAndroSettings(publishVariant = "debug"),
     ),
   ),

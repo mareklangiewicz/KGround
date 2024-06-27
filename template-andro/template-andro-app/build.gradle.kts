@@ -9,13 +9,19 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-  plugAll(plugs.AndroAppNoVer, plugs.KotlinAndro, plugs.MavenPublish, plugs.Signing)
+  plugAll(
+    plugs.KotlinMulti,
+    plugs.KotlinMultiCompose,
+    plugs.ComposeJbNoVer,
+    plugs.MavenPublish,
+    plugs.Signing,
+  )
+  plug(plugs.AndroAppNoVer)
 }
 
-defaultBuildTemplateForAndroApp()
-
-// besides default dependencies declared by fun defaultBuildTemplateForAndroApp
-dependencies { implementation(project(":template-andro-lib")) }
+defaultBuildTemplateForAndroApp {
+  implementation(project(":template-andro-lib"))
+}
 
 
 // TODO_later: better defaults for versions - algo from (major, minor, path) to code;
@@ -349,6 +355,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
   extensions.configure<KotlinMultiplatformExtension> {
+    androidTarget()
     details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   }
   extensions.configure<ApplicationExtension> {
