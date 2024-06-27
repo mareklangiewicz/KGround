@@ -1,16 +1,20 @@
-import pl.mareklangiewicz.defaults.*
-import pl.mareklangiewicz.deps.*
+
+// region [[Root Build Imports and Plugs]]
+
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
+import pl.mareklangiewicz.deps.*
 
 plugins {
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinMultiCompose) apply false
-  plug(plugs.ComposeJb) apply false // https://github.com/JetBrains/compose-multiplatform/issues/3459
+  plug(plugs.ComposeJb) apply false
   plug(plugs.AndroLib) apply false
   plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
 }
+
+// endregion [[Root Build Imports and Plugs]]
 
 // TODO LATER: I have weird issues on both android and on js (different) after last deps updates
 // Try to enable more platforms again after another big updates.

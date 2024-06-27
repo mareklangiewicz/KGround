@@ -1,3 +1,6 @@
+
+// region [[MPP App Build Imports and Plugs]]
+
 import com.android.build.api.dsl.*
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -14,6 +17,9 @@ plugins {
   )
   plug(plugs.AndroAppNoVer) apply false // will be applied conditionally depending on LibSettings
 }
+
+// endregion [[MPP App Build Imports and Plugs]]
+
 
 // workaround for crazy gradle bugs like this one or similar:
 // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
