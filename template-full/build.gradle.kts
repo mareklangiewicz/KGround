@@ -16,19 +16,31 @@ plugins {
 
 // endregion [[Full Root Build Imports and Plugs]]
 
+val enableJs = true
+val enableNative = false
+val enableAndro = true
+
 defaultBuildTemplateForRootProject(
   myLibDetails(
-    name = "TemplateAndro",
-    description = "Template for android projects.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 15),
+    name = "TemplateMPP",
+    description = "Template for multi platform projects.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-full",
+    version = Ver(0, 0, 30),
     settings = LibSettings(
-      withTestJUnit4 = true,
-      withTestJUnit5 = false,
-      andro = LibAndroSettings(publishVariant = "debug"),
+      withJs = enableJs,
+      withNativeLinux64 = enableNative,
+      withKotlinxHtml = true, // also used in common code
+      compose = LibComposeSettings(
+        withComposeHtmlCore = enableJs,
+        withComposeHtmlSvg = enableJs,
+        withComposeTestHtmlUtils = enableJs,
+      ),
+      andro = if (enableAndro) LibAndroSettings() else null,
     ),
   ),
 )
+
+
 
 // region [[Root Build Template]]
 

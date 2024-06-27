@@ -113,8 +113,8 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
 
 
 suspend fun collectMyTemplates(): Map<String, String> {
-  val preferred1 = "template-mpp-lib" // in case of conflict
-  val preferred2 = "template-mpp" // in case of conflict
+  val preferred1 = "template-full-lib" // in case of conflict
+  val preferred2 = "template-full" // in case of conflict
   val templates = mutableMapOf<String, String>()
   val templatesRes = mutableMapOf<String, Path>()
   val log = implictx<ULog>()
