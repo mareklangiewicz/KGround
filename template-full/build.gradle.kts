@@ -22,7 +22,7 @@ val enableAndro = true
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
-    name = "TemplateMPP",
+    name = "TemplateFull",
     description = "Template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-full",
     version = Ver(0, 0, 30),
