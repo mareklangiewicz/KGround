@@ -170,7 +170,7 @@ FAILURE: Build failed with an exception.
 
 * What went wrong:
 A problem was found with the configuration of task ':template-full-lib:signJvmPublication' (type 'Sign').
-  - Gradle detected a problem with the following location: '/home/marek/code/kotlin/DepsKt/template-full/template-full-lib/build/libs/template-full-lib-0.0.02-javadoc.jar.asc'.
+  - Gradle detected a problem with the following location: '/home/marek/code/kotlin/KGround/template-full/template-full-lib/build/libs/template-full-lib-0.0.02-javadoc.jar.asc'.
 
     Reason: Task ':template-full-lib:publishJsPublicationToMavenLocal' uses this output of task ':template-full-lib:signJvmPublication' without declaring an explicit or implicit dependency. This can lead to incorrect results being produced, depending on what order the tasks are executed.
 
