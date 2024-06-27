@@ -1,5 +1,5 @@
 
-// region [[Root Build Imports and Plugs]]
+// region [[Full Root Build Imports and Plugs]]
 
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
@@ -14,7 +14,7 @@ plugins {
   plug(plugs.NexusPublish)
 }
 
-// endregion [[Root Build Imports and Plugs]]
+// endregion [[Full Root Build Imports and Plugs]]
 
 defaultBuildTemplateForRootProject(
   myLibDetails(

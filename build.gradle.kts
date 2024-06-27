@@ -1,11 +1,16 @@
+
+// region [[Basic Root Build Imports and Plugs]]
+
 import pl.mareklangiewicz.defaults.*
-import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
+import pl.mareklangiewicz.deps.*
 
 plugins {
-  plug(plugs.NexusPublish)
   plug(plugs.KotlinMulti) apply false
+  plug(plugs.NexusPublish)
 }
+
+// endregion [[Basic Root Build Imports and Plugs]]
 
 val enableJs = true
 val enableNative = true

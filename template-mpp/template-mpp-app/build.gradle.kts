@@ -1,5 +1,5 @@
 
-// region [[MPP App Build Imports and Plugs]]
+// region [[Full MPP App Build Imports and Plugs]]
 
 import com.android.build.api.dsl.*
 import org.jetbrains.compose.*
@@ -18,7 +18,7 @@ plugins {
   plug(plugs.AndroAppNoVer) apply false // will be applied conditionally depending on LibSettings
 }
 
-// endregion [[MPP App Build Imports and Plugs]]
+// endregion [[Full MPP App Build Imports and Plugs]]
 
 
 // workaround for crazy gradle bugs like this one or similar:

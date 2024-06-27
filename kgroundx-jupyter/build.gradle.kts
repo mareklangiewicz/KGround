@@ -1,3 +1,6 @@
+
+// region [Custom MPP Lib Build Imports and Plugs]
+
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
@@ -33,6 +36,8 @@ at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator.lambda$resolveP
 ...
    */
 }
+
+// endregion [Custom MPP Lib Build Imports and Plugs]
 
 val settings = rootExtLibDetails.settings.copy(
   withJs = false,
