@@ -57,7 +57,7 @@ suspend fun processEachFile(
   }
 }
 
-// FIXME: okio has Path.relativeTo - is it the same?
+@Deprecated("Use okio fun Path.relativeTo")
 fun Path.asRelativeTo(path: Path): Path {
   req(this.isAbsolute)
   req(path.isAbsolute)
@@ -67,6 +67,20 @@ fun Path.asRelativeTo(path: Path): Path {
     parent == null -> bad { "Can not find $path in $this" }
     else -> parent!!.asRelativeTo(path) / name
   }
+}
+
+tailrec fun Path?.commonPartWith(that: Path?): Path? = when {
+  this == that -> this
+  this == null || that == null -> null
+  segmentsBytes.size > that.segmentsBytes.size -> parent.commonPartWith(that)
+  segmentsBytes.size < that.segmentsBytes.size -> commonPartWith(that.parent)
+  else -> parent.commonPartWith(that.parent)
+}
+
+fun List<Path?>.commonPart(): Path? = when {
+  isEmpty() -> null
+  size == 1 -> this[0]
+  else -> reduce { path1, path2 -> path1.commonPartWith(path2) }
 }
 
 fun FileSystem.readUtf8(file: Path): String = read(file) { readUtf8() }

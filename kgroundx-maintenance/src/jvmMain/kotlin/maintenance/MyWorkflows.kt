@@ -31,13 +31,22 @@ private val mySecretsEnv = listOf(
   .associateWith { expr("secrets.$it") } as LinkedHashMap<String, String>
 
 
+
+// Github cron is UTC so about 2 hours behind Warsaw.
+// https://www.timeanddate.com/worldclock/timezone/utc
+// Github can delay or even drop sheduled events depending on
+// high load times (like full hours), repo usage, and many different things.
+// https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+private val everydayAfter5amUTC = Cron(hour = "5", minute = "37")
+// BTW refreshDeps should take less than 10min
+private val everydayBefore6amUTC = Cron(hour = "5", minute = "53")
+
 // FIXME: something less hacky/hardcoded
 @Suppress("IdentifierGrammar")
 fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
-  val everydayAt6am = Cron(hour = "6", minute = "0")
   val workflow = workflow(
     name = "Generate Deps",
-    on = listOf(Schedule(listOf(everydayAt6am)), WorkflowDispatch()),
+    on = listOf(Schedule(listOf(everydayAfter5amUTC)), WorkflowDispatch()),
   ) {
     job(
       id = "generate-deps",
@@ -62,10 +71,9 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
 
 // FIXME: something less hacky/hardcoded/repetitive
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
-  val everydayAt630am = Cron(hour = "6", minute = "30")
   val workflow = workflow(
     name = "Update Generated Deps",
-    on = listOf(Schedule(listOf(everydayAt630am)), WorkflowDispatch()),
+    on = listOf(Schedule(listOf(everydayBefore6amUTC)), WorkflowDispatch()),
   ) {
     job(
       id = "update-generated-deps",
