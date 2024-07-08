@@ -19,8 +19,8 @@ val enablePublishing = findProject(":kground") == null
 // (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
 // exception: publishToMavenLocal for debugging
 
-rootExtString["verKGround"] = "0.0.62" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
-rootExtString["verAbcdK"] = "0.0.23" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/abcdk/
+rootExtString["verKGround"] = "0.0.63" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+rootExtString["verAbcdK"] = "0.0.24" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/abcdk/
 rootExtString["verTuplek"] = "0.0.18" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/tuplek/
 rootExtString["verUSpek"] = "0.0.36" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/uspek/
 
@@ -29,7 +29,7 @@ defaultBuildTemplateForRootProject(
     name = "KommandLine",
     description = "Kotlin DSL for popular CLI commands.",
     githubUrl = "https://github.com/mareklangiewicz/KommandLine",
-    version = Ver(0, 0, 68),
+    version = Ver(0, 0, 69),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
     // https://github.com/mareklangiewicz/KommandLine/releases
     settings = LibSettings(
