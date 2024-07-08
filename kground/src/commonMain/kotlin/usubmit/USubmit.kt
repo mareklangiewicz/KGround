@@ -72,7 +72,18 @@ data class UTask(val name: String) : USubmitItem
  *   (cancellation/exceptions won't be easily serializable, but we can probably do it similarly to rsocket-kotlin)
  */
 data class UIssue(val name: String, val type: UIssueType, val id: Any? = null) : USubmitItem
+
 enum class UIssueType { Info, Warning, Error, Question }
+
+
+/**
+ * When sent to submitter it means we WANT some entry (so field entry here is SUGGESTED)
+ * When returned it means actual entry (usually) entered by the user, or null if user cancelled/escaped/etc.
+ * @param hidden only means it should be hidden to the user when he enters it (passed both ways).
+ * So usually hidden means this entry represents password. Warning: entry/password is not encrypted here!
+ */
+@ExperimentalApi // Even more experimental stuff. Not sure if I really want to complicate these "conventions" that much.
+data class UEntry(val entry: String? = null, val hidden: Boolean = false) : USubmitItem
 
 /**
  * A hint from worker to supervisor not to wait too long for user and return the same [UTimeout] object back after duration.
@@ -103,12 +114,14 @@ data class USubmitItems(
   val issue: UIssue? = null,
   val progress: UProgress? = null,
   val timeout: UTimeout? = null,
+  val entry: UEntry? = null,
   val tasks: List<UTask> = emptyList(),
 ) {
   fun mergeWith(that: USubmitItems, failOnDuplicates: Boolean = true): USubmitItems = USubmitItems(
       issue = oneOrNull(that.issue, issue, failOnDuplicates = failOnDuplicates),
       progress = oneOrNull(that.progress, progress, failOnDuplicates = failOnDuplicates),
       timeout = oneOrNull(that.timeout, timeout, failOnDuplicates = failOnDuplicates),
+      entry = oneOrNull(that.entry, entry, failOnDuplicates = failOnDuplicates),
       tasks = run {
         if (failOnDuplicates) chk(that.tasks.all { it !in this.tasks })
         this.tasks + that.tasks
@@ -132,6 +145,7 @@ fun Any?.getAllUSubmitItems(
   is UIssue -> USubmitItems(this)
   is UProgress -> USubmitItems(progress = this)
   is UTimeout -> USubmitItems(timeout = this)
+  is UEntry -> USubmitItems(entry = this)
   is UTask -> USubmitItems(tasks = listOf(this))
   is Collection<*> -> fold(USubmitItems()) { acc, next -> acc.mergeWith(next.getAllUSubmitItems(), failOnDuplicates) }
   else ->
@@ -171,4 +185,9 @@ suspend fun USubmit.askIf(question: String, labelYes: String = "Yes", labelNo: S
 suspend fun USubmit.askForOneOf(question: String, vararg answers: String): String? {
   val tasks = answers.map(::UTask).toTypedArray()
   return (this(UIssue(question, UIssueType.Question), *tasks) as? UTask)?.name
+}
+
+@OptIn(ExperimentalApi::class)
+suspend fun USubmit.askForEntry(question: String, suggested: String? = null, hidden: Boolean = false): String? {
+  return (this(UIssue(question, UIssueType.Question), UEntry(suggested, hidden)) as? UEntry)?.entry
 }

@@ -11,7 +11,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.3.32" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.3.33" // https://plugins.gradle.org/search?term=mareklangiewicz
 }
 
 rootProject.name = "template-andro"
