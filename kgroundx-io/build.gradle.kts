@@ -25,8 +25,8 @@ defaultBuildTemplateForBasicMppLib {
 }
 
 setMyWeirdSubstitutions(
-  "kommandline" to rootExtString["verKL"],
-  "kommandsamples" to rootExtString["verKL"],
+  "kommandline" to rootExtString["verKommand"],
+  "kommandsamples" to rootExtString["verKommand"],
   "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
 )
 
