@@ -30,6 +30,7 @@ import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
+import pl.mareklangiewicz.usubmit.askForEntry
 
 @ExampleApi
 object MyBasicExamples {
@@ -109,6 +110,10 @@ object MyWeirdExamples {
     val submit = implictx<USubmit>()
     val answer = submit.askForOneOf("How do you feel?", "Fine", "Bad")
     log.w(answer)
+    val entry = submit.askForEntry("How do you feel?", "Normal..or..")
+    log.w(entry)
+    val secret = submit.askForEntry("Tell me a secret", hidden = true)
+    log.w(secret)
   }
 
   suspend fun tryToUseAnotherUSubmitAndULog() {
