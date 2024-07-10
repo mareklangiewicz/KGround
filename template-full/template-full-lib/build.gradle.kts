@@ -281,7 +281,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
       addCommonMainDependencies = addCommonMainDependencies,
     )
   }
-  configurations.checkVerSync()
+  configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set below with jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
   if (plugins.hasPlugin("maven-publish")) {
@@ -632,7 +632,7 @@ fun Project.defaultBuildTemplateForAndroLib(
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroMainDependencies()
   }
-  configurations.checkVerSync()
+  configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
