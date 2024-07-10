@@ -42,6 +42,7 @@ class USubmitNotSupportedErr : USubmit {
  * Maybe acceptable practice will be for client/worker code to first chk(usubmit is FamiliarSupervisorInterface)...
  * But I want typical client code to be developed independently of potential supervisor setup by the user.
  */
+@Deprecated("Use XD Model")
 interface USubmitItem
 
 /**
@@ -52,6 +53,7 @@ interface USubmitItem
  * Supervisor always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from [USubmit.invoke].
  * Also [UIssue] can be included by worker to show sth to the user (but normally [UTask] is returned back).
  */
+@Deprecated("Use XD Model")
 data class UTask(val name: String) : USubmitItem
 
 /**
@@ -71,8 +73,10 @@ data class UTask(val name: String) : USubmitItem
  *   so we can have remote supervisor easily (with kotlinx.serialization)
  *   (cancellation/exceptions won't be easily serializable, but we can probably do it similarly to rsocket-kotlin)
  */
+@Deprecated("Use XD Model")
 data class UIssue(val name: String, val type: UIssueType, val id: Any? = null) : USubmitItem
 
+@Deprecated("Use XD Model")
 enum class UIssueType { Info, Warning, Error, Question }
 
 
@@ -83,12 +87,14 @@ enum class UIssueType { Info, Warning, Error, Question }
  * So usually hidden means this entry represents password. Warning: entry/password is not encrypted here!
  */
 @ExperimentalApi // Even more experimental stuff. Not sure if I really want to complicate these "conventions" that much.
+@Deprecated("Use XD Model")
 data class UEntry(val entry: String? = null, val hidden: Boolean = false) : USubmitItem
 
 /**
  * A hint from worker to supervisor not to wait too long for user and return the same [UTimeout] object back after duration.
  * But supervisor can ignore it, obviously, or wait a bit longer when busy etc. (zenity support timeout only in seconds).
  */
+@Deprecated("Use XD Model")
 data class UTimeout(val duration: Duration = 10.seconds) : USubmitItem
 
 /**
@@ -99,6 +105,7 @@ data class UTimeout(val duration: Duration = 10.seconds) : USubmitItem
  * for example when searching through big file tree and discovering new subtrees.
  * @param highlight Just a hint for supervisor to highlight current progress more. Usually with bold font.
  */
+@Deprecated("Use XD Model")
 data class UProgress(
   val pos: Float? = null,
   val min: Float = 0f,
@@ -109,6 +116,7 @@ data class UProgress(
 
 val UProgress.fraction: Float? get() = pos?.let { lerpInv(min, max, it) }
 
+@Deprecated("Use XD Model")
 @ExperimentalApi // even more experimental stuff than above conventions based on USubmitItem
 data class USubmitItems(
   val issue: UIssue? = null,
@@ -136,6 +144,7 @@ data class USubmitItems(
   }
 }
 
+@Deprecated("Use XD Model")
 @ExperimentalApi
 fun Any?.getAllUSubmitItems(
   failOnUnexpected: Boolean = true,
@@ -153,10 +162,12 @@ fun Any?.getAllUSubmitItems(
     else USubmitItems().also { println("Ignoring unexpected usubmit data: $this") }
 }
 
+@Deprecated("Use XD Model")
 @ExperimentalApi
 suspend operator fun USubmit.invoke(vararg items: USubmitItem?) = invoke(items.toList())
 
 
+@Deprecated("Use XD Model")
 @ExperimentalApi fun USubmitItems.chkItems(maxTasks: Int = 16) = apply {
   with (tasks) {
     chkSize(max = maxTasks) { "Too many tasks to select from: $size > $maxTasks" }
@@ -165,14 +176,18 @@ suspend operator fun USubmit.invoke(vararg items: USubmitItem?) = invoke(items.t
   }
 }
 
+@Deprecated("Use XD Model")
 val UTask.isAccepting: Boolean get() =
   name.lowercase() in setOf("accept", "yes", "yeah", "confirm", "ok", "fine", "enter", "go", "start", "begin", "select")
 
+@Deprecated("Use XD Model")
 val UTask.isDeclining: Boolean get() =
   name.lowercase() in setOf("decline", "no", "nope", "cancel", "abort", "esc", "escape", "nah", "stop", "end")
 
+@Deprecated("Use XD Model")
 val UTask.isCustom: Boolean get() = !isAccepting && !isDeclining
 
+@Deprecated("Use XD Model")
 @OptIn(ExperimentalApi::class)
 suspend fun USubmit.askIf(question: String, labelYes: String = "Yes", labelNo: String = "No"): Boolean {
   val taskYes = UTask(labelYes).reqThis { isAccepting }
@@ -181,12 +196,14 @@ suspend fun USubmit.askIf(question: String, labelYes: String = "Yes", labelNo: S
   // BTW it's fine if we get another instance of task with matching label (we use "==" on data classes)
 }
 
+@Deprecated("Use XD Model")
 @OptIn(ExperimentalApi::class)
 suspend fun USubmit.askForOneOf(question: String, vararg answers: String): String? {
   val tasks = answers.map(::UTask).toTypedArray()
   return (this(UIssue(question, UIssueType.Question), *tasks) as? UTask)?.name
 }
 
+@Deprecated("Use XD Model")
 @OptIn(ExperimentalApi::class)
 suspend fun USubmit.askForEntry(question: String, suggested: String? = null, hidden: Boolean = false): String? {
   return (this(UIssue(question, UIssueType.Question), UEntry(suggested, hidden)) as? UEntry)?.entry
