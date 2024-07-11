@@ -42,11 +42,12 @@ import pl.mareklangiewicz.usubmit.xd.XD.*
   data class Entry(val entry: String = "", val hidden: Boolean = false) : XD
 
   /**
-   * The worker provides [UIssue] to [USubmit.invoke] in some [ToAsk] to ask the supervisor/user about some issue.
+   * The worker provides [UIssue] to [USubmit.invoke] in some [ToAsk] to ask the supervisor/user about some issue,
+   * Or in some [ToShow] to show/inform the supervisor/user about some issue.
    * These issues are meant to be "recoverable", so worker should be able to continue
    * if the supervisor returns normally from [USubmit.invoke].
-   * More critical worker issues/errors should be thrown as exceptions (as usual).
-   * @param id identifies issue, so Supervisor+user can decide to sth like "Yes for all":
+   * More critical/unrecoverable worker issues/errors should be thrown as exceptions (as usual).
+   * @param id identifies issue, so supervisor/user can decide to sth like "Yes for all":
    * automatically react the same way on future issues with the same [id]
    * for next... 100 same issues, or next... 5 minutes, etc.
    * I consider it bad to allow user to "Yes for all" for all the same issues FOREVER.
@@ -152,6 +153,18 @@ val Confirm = Accept("Confirm")
 val Refuse = Decline("Refuse")
 val Accept = Accept("Accept")
 val Deny = Decline("Deny")
+
+@ExperimentalApi
+suspend fun USubmit.showInfo(info: String, timeout: Duration? = null, infoId: Any? = null) =
+  this(ShowInfo(Issue(info, infoId), timeout?.let(::SuggestTimeout))) as Unit
+
+@ExperimentalApi
+suspend fun USubmit.showWarning(warning: String, timeout: Duration? = null, warningId: Any? = null) =
+  this(ShowWarning(Issue(warning, warningId), timeout?.let(::SuggestTimeout))) as Unit
+
+@ExperimentalApi
+suspend fun USubmit.showError(error: String, timeout: Duration? = null, errorId: Any? = null) =
+  this(ShowError(Issue(error, errorId), timeout?.let(::SuggestTimeout))) as Unit
 
 @ExperimentalApi
 suspend fun USubmit.askIf(
