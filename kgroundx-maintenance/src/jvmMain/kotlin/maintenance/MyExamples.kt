@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
+import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
@@ -16,7 +17,7 @@ import pl.mareklangiewicz.kground.io.cd
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.usubmit.USubmit
-import pl.mareklangiewicz.usubmit.askForOneOf
+import pl.mareklangiewicz.usubmit.xd.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.core.ls
@@ -30,7 +31,6 @@ import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
-import pl.mareklangiewicz.usubmit.askForEntry
 
 @ExampleApi
 object MyBasicExamples {
@@ -102,18 +102,26 @@ object MyWorkflowsExamples {
   suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false)
 }
 
+@OptIn(ExperimentalApi::class)
 @ExampleApi
 object MyWeirdExamples {
 
   suspend fun tryToUseImplicitUSubmitAndULog() {
     val log = implictx<ULog>()
     val submit = implictx<USubmit>()
-    val answer = submit.askForOneOf("How do you feel?", "Fine", "Bad")
+
+    submit.showInfo("Some info.")
+    submit.showWarning("Some warning.")
+    submit.showError("Some Error.")
+
+    val answer = submit.askForAction("How do you feel?", "Fine", "Bad")
     log.w(answer)
     val entry = submit.askForEntry("How do you feel?", "Normal..or..")
     log.w(entry)
     val secret = submit.askForEntry("Tell me a secret", hidden = true)
     log.w(secret)
+    val ok = submit.askIf("Everything fine?")
+    log.w(ok)
   }
 
   suspend fun tryToUseAnotherUSubmitAndULog() {
