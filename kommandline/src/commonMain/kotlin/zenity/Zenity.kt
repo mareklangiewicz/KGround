@@ -74,7 +74,7 @@ fun zenityAskForOneOf(
   labelCancel: String? = null, // default should be sth like "Cancel" (probably localized)
   labelColumn: String = "Answer",
   withTimeoutSec: Int? = null,
-) = zenity(Type.List) {
+): ReducedKommand<String?> = zenity(Type.List) {
   prompt?.let { -Text(it) }
   title?.let { -Title(it) }
   labelOk?.let { -OkLabel(it) }
@@ -102,7 +102,7 @@ fun zenityAskForEntry(
   withTimeoutSec: Int? = null,
   withSuggestedEntry: String? = null,
   withHiddenEntry: Boolean = false,
-) =
+): ReducedKommand<String?> =
   zenity(Type.Entry) {
     -Text(prompt)
     title?.let { -Title(it) }

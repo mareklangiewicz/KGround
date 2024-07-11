@@ -28,10 +28,6 @@ defaultBuildTemplateForBasicMppLib {
 setMyWeirdSubstitutions(
   "kground" to rootExtString["verKGround"],
   "kground-io" to rootExtString["verKGround"],
-  "uspek" to rootExtString["verUSpek"],
-  "uspek-junit5" to rootExtString["verUSpek"],
-  "tuplek" to rootExtString["verTuplek"],
-  "abcdk" to rootExtString["verAbcdK"],
 )
 
 
@@ -248,7 +244,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
       addCommonMainDependencies = addCommonMainDependencies,
     )
   }
-  configurations.checkVerSync()
+  configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set below with jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
   if (plugins.hasPlugin("maven-publish")) {

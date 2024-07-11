@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalApi::class)
+
 package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlin.coroutines.coroutineContext
@@ -6,19 +8,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExperimentalApi
-import pl.mareklangiewicz.bad.chkNN
-import pl.mareklangiewicz.usubmit.UIssueType
-import pl.mareklangiewicz.usubmit.UProgress
-import pl.mareklangiewicz.usubmit.USubmit
-import pl.mareklangiewicz.usubmit.chkItems
-import pl.mareklangiewicz.usubmit.getAllUSubmitItems
-import pl.mareklangiewicz.usubmit.isAccepting
-import pl.mareklangiewicz.usubmit.isCustom
-import pl.mareklangiewicz.usubmit.isDeclining
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.zenity.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
-import pl.mareklangiewicz.usubmit.USubmitItem
+import pl.mareklangiewicz.udata.unt
+import pl.mareklangiewicz.usubmit.xd.XD.*
+import pl.mareklangiewicz.usubmit.*
 
 // TODO_later: probably refactor,
 //   But keep usubmit communication/protocol/invariants simple, not specific to zenity or any style of UI.
@@ -27,74 +23,54 @@ class ZenitySupervisor(val promptPrefix: String? = null): USubmit {
 
   private val mutex = Mutex()
 
-  @OptIn(ExperimentalApi::class, DelicateApi::class)
-  override suspend fun invoke(data: Any?): USubmitItem? = mutex.withLock {
-    val coroutineName = coroutineContext[CoroutineName]?.name
-    val items = data.getAllUSubmitItems().chkItems()
-    val issue = items.issue
-    val entry = items.entry
-    val taskOk = items.tasks.singleOrNull { it.isAccepting }
-    val taskCancel = items.tasks.singleOrNull { it.isDeclining }
-    val prompt = joinLinesNN(promptPrefix, issue?.name, items.progress?.str)
-    val title = coroutineName ?: issue?.type?.name
-    val timeoutSec = items.timeout?.duration?.inWholeSeconds?.toInt()?.let { it + 1 }
-    return when {
-      entry != null -> {
-        val result = zenityAskForEntry(
-          prompt = prompt,
-          title = title,
-          labelOk = taskOk?.name,
-          labelCancel = taskCancel?.name,
-          withTimeoutSec = timeoutSec,
-          withSuggestedEntry = entry.entry,
-          withHiddenEntry = entry.hidden
-        ).ax()
-        entry.copy(entry = result)
+  override suspend fun invoke(data: Any?): Any? = mutex.withLock {
+    data as? ToSubmit ?: bad { "Unsupported data type ${data!!::class}" }
+    val issue = data.issue
+    val timeoutSec = data.timeout?.duration?.inWholeSeconds?.toInt()?.let { it + 1 }
+    val name = issue?.name
+    val title = coroutineContext[CoroutineName]?.name ?: name
+    val prompt = joinLinesNN(promptPrefix, name)
+
+    return when (data) {
+
+      is ToShow -> when (data) {
+        is ShowError -> zenityShowError(prompt, title, withTimeoutSec = timeoutSec).ax().unt
+        is ShowWarning -> zenityShowWarning(prompt, title, withTimeoutSec = timeoutSec).ax().unt
+        is ShowInfo -> zenityShowInfo(prompt, title, withTimeoutSec = timeoutSec).ax().unt
+        is ShowProgress -> println(data.str)
+          // FIXME: some non-suspending notification?? progress itself should never actually suspend!
+        is ShowMany -> data.stuff.forEach { invoke(it) }
+          // FIXME: show more at once?
+          //   collect errors, warnings, infos, and especially progress, and show one nice big dialog?
       }
-      items.tasks.any { it.isCustom } -> {
-        // We have some custom tasks so will be using zenity list type (via zenityAskForOneOf).
-        // So all provided tasks will be on the list and zenity ok/cancel buttons will not represent any task.
-        // Cancel will always return null (no matter if there is any .isDeclining task on the list)
-        // Ok will return selected task (or null if no task is selected)
-        val answer: String? = zenityAskForOneOf(
-          *items.tasks.map { it.name }.toTypedArray(),
-          prompt = prompt,
-          title = title,
-          withTimeoutSec = timeoutSec,
-        ).ax()
-        items.tasks.firstOrNull { it.name == answer }
-      }
-      issue?.type == UIssueType.Question -> {
-        // No custom tasks, so just accept/decline (ok/cancel) (yes/no) kind of question.
-        taskOk.chkNN { "No accepting answer available" }
-        taskCancel.chkNN { "No declining answer available" }
-        val ok = zenityAskIf(
-          question = prompt,
-          title = title,
-          labelOk = taskOk.name,
-          labelCancel = taskCancel.name,
-          withTimeoutSec = timeoutSec,
-        ).ax()
-        if (ok) taskOk else taskCancel
-      }
-      else -> {
-        // Not question (and no custom tasks), so just informative Info/Warning/Error/progress
-        val ok: Boolean = zenityShowText(
-          type = when (issue?.type) {
-            UIssueType.Warning -> Type.Warning
-            UIssueType.Error -> Type.Error
-            else -> Type.Info // so null/no issue (for example just the progress) is also shown as zenity info
-          },
-          text = prompt,
-          withTimeoutSec = timeoutSec,
-        ).ax()
-        if (ok) taskOk else taskCancel // either or both can be null which is fine in this case.
+
+      is ToAsk -> {
+        when (data) {
+          is AskForEntry -> zenityAskForEntry(
+            prompt = prompt,
+            title = title,
+            withTimeoutSec = timeoutSec,
+            withSuggestedEntry = data.suggest.entry.entry,
+            withHiddenEntry = data.suggest.entry.hidden,
+          ).ax()?.let { UseEntry(Entry(it, data.suggest.entry.hidden)) }
+          is AskIf -> {
+            val ok = zenityAskIf(prompt, title, data.accept.name, data.decline.name, withTimeoutSec = timeoutSec).ax()
+            if (ok) data.accept else data.decline
+          }
+          is AskForAction -> {
+            zenityAskForOneOf(*data.actions.map { it.name }.toTypedArray(), prompt = prompt, title = title)
+              .ax()?.let { DoAction(Action(it)) }
+          }
+          is AskAndShow -> { invoke(data.toShow); invoke(data.toAsk) }
+            // FIXME: show all to show and ask question at once? (toShow will often be ShowMany)
+            //   collect question, errors, warnings, infos, and especially progress, and show one nice big dialog?
+        }
       }
     }
   }
 }
 
-private val UProgress.str get() = listOfNotNull("progress", pos?.let { "$pos of $min..$max" }, details).joinToString(" ")
+private val ShowProgress.str get() = listOfNotNull("progress", pos?.let { "$pos of $min..$max" }, details).joinToString(" ")
 
 // TODO_later: more public similar DSL (and use it more)? What similar do I have in kground already?
 private fun joinLinesNN(vararg lines: String?) = lines.filterNotNull().joinToString("\n")

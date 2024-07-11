@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand.demo
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
+import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
@@ -48,6 +49,10 @@ import pl.mareklangiewicz.kommand.zenity.zenityShowInfo
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.usubmit.USubmit
+import pl.mareklangiewicz.usubmit.implictx
+import pl.mareklangiewicz.usubmit.xd.askForEntry
+import pl.mareklangiewicz.usubmit.xd.showError
 
 /**
  * A bunch of samples to show on my machine when presenting KommandLine.
@@ -222,9 +227,10 @@ data object MyDemoSamples {
   suspend fun readNonExistentHead() = readFileHead("/home/marek/non-existent-file-46578563").ax()
 }
 
-private suspend fun askEntry(question: String, suggested: String? = null) =
-  zenityAskForEntry(question, withSuggestedEntry = suggested).ax()?.takeIf { it.isNotBlank() }
 
-private suspend fun getEntry(question: String, suggested: String? = null, errorMsg: String = "User didn't answer.") =
-  askEntry(question, suggested) ?: run { zenityShowError(errorMsg); bad { errorMsg } }
+@OptIn(ExperimentalApi::class)
+private suspend fun getEntry(question: String, suggested: String = "", errorMsg: String = "User didn't answer."): String {
+  val submit = implictx<USubmit>()
+  return submit.askForEntry(question, suggested) ?: run { submit.showError(errorMsg); bad { errorMsg } }
+}
 
