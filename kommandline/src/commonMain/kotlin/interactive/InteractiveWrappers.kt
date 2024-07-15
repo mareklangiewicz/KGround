@@ -11,14 +11,16 @@ import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.termXDefault
-import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogPrintLn
-import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
+import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.ulog.w
+import pl.mareklangiewicz.usubmit.*
+import pl.mareklangiewicz.usubmit.implictx
+import pl.mareklangiewicz.usubmit.xd.*
 
 // TODO: Make these interactive wrappers suspendable (or delete if when needed at all) and use: implictx<ULog>()
 private val log: ULog = UHackySharedFlowLog()
@@ -47,16 +49,16 @@ fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockin
   if (isInteractiveCodeEnabled()) code()
 }
 
-@DelicateApi("API for manual interactive experimentation; requires zenity; can ignore the this kommand.")
+@DelicateApi("API for manual interactive experimentation; can ignore the this kommand.")
 suspend fun Kommand.tryInteractivelyStartInTerm(
   confirmation: String = "Start ::${line()}:: in terminal?",
-  title: String = name,
   insideBash: Boolean = true,
   pauseBeforeExit: Boolean = insideBash,
   startInDir: String? = null,
   termKommand: (innerKommand: Kommand) -> Kommand = { termXDefault(it) },
 ) = ifInteractiveCodeEnabled {
-  if (zenityAskIf(confirmation, title).ax()) {
+  val submit = implictx<USubmit>()
+  if (submit.askIf(confirmation)) {
     val k = when {
       insideBash -> bash(this, pauseBeforeExit)
       pauseBeforeExit -> bad { "Can not pause before exit if not using bash shell" }
@@ -75,7 +77,7 @@ inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend () -> ReducedO
 
 // FIXME NOW: I want more InteractiveScripts in Samples instead of "tests" with weird logic when to skip them
 //   rethink this
-@DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
+@DelicateApi("API for manual interactive experimentation. Conditionally skips.")
 @Deprecated("Better to use Samples with InteractiveScript s")
 suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, execInDir: String? = null) {
   if (isJvm) toInteractiveCheck(expectedLineRaw, execInDir).ax()
@@ -101,7 +103,7 @@ internal fun runBlockingWithCLIAndULogOnJvmOnly(
 }
 
 
-@DelicateApi("API for manual interactive experimentation. Requires Zenity, conditionally skips")
+@DelicateApi("API for manual interactive experimentation. Conditionally skips")
 fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =
   InteractiveScript {
     log.d(lineRaw())

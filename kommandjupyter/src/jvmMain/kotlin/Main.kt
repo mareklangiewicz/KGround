@@ -31,7 +31,7 @@ fun main(args: Array<String>) = runBlocking {
   val submit = ZenitySupervisor()
   val cli = getSysCLI()
   // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
-  uctxWithIO(log + submit + cli) {
+  uctxWithIO(log + submit + cli, name = args[0]) {
     when {
       args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
       args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))
