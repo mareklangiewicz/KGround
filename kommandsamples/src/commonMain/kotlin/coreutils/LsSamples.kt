@@ -8,7 +8,7 @@ import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
-import pl.mareklangiewicz.kommand.gvim
+import pl.mareklangiewicz.kommand.vim.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
 

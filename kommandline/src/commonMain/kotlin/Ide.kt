@@ -9,6 +9,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Ide.*
 import pl.mareklangiewicz.kommand.admin.psAllFull
 import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
+import pl.mareklangiewicz.kommand.vim.gvim
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 

@@ -11,7 +11,7 @@ import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.Adb
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
-import pl.mareklangiewicz.kommand.Vim
+import pl.mareklangiewicz.kommand.vim.XVim
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.ax
@@ -25,7 +25,6 @@ import pl.mareklangiewicz.kommand.find.myKotlinPath
 import pl.mareklangiewicz.kommand.getSysCLI
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.github.GhSamples
-import pl.mareklangiewicz.kommand.gvim
 import pl.mareklangiewicz.kommand.ideDiff
 import pl.mareklangiewicz.kommand.ideOpen
 import pl.mareklangiewicz.kommand.iproute2.ssTulpn
@@ -41,10 +40,10 @@ import pl.mareklangiewicz.kommand.reducedOutToList
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
+import pl.mareklangiewicz.kommand.vim.gvim
+import pl.mareklangiewicz.kommand.vim.gvimOpenContentLines
 import pl.mareklangiewicz.kommand.writeFileWithDD
-import pl.mareklangiewicz.kommand.zenity.zenityAskForEntry
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
-import pl.mareklangiewicz.kommand.zenity.zenityShowError
 import pl.mareklangiewicz.kommand.zenity.zenityShowInfo
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.i
@@ -151,17 +150,19 @@ data object MyDemoSamples {
   val gvimShowBashExportsForLC = InteractiveScript {
     val exports = bashGetExportsMap().ax()
     val lines = exports.keys.filter { it.startsWith("LC") }.map { "exported env \'$it\' == \'${exports[it]}\'" }
-    writeFileWithDD(lines, pathToTmpNotes).ax()
-    gvim(pathToTmpNotes).ax()
+    // writeFileWithDD(lines, pathToTmpNotes).ax()
+    // gvim(pathToTmpNotes).ax()
+    // better way instead of using tmp file:
+    gvimOpenContentLines(lines).ax()
   }
 
-  val gvimServerDDDDOpenHomeDir = gvim("/home") { -Vim.Option.ServerName("DDDD") } s "vim -g --servername DDDD /home"
+  val gvimServerDDDDOpenHomeDir = gvim("/home") { -XVim.Option.ServerName("DDDD") } s "gvim --servername DDDD /home"
 
 
   @OptIn(DelicateApi::class)
   suspend fun showMyRepoMarkdownListInGVim() = InteractiveScript {
     val reposMdContent = GhSamples.myPublicRepoMarkdownList.ax()
-    val tmpReposFileMd = pathToUserTmp + "/tmp.repos.md" // also to have syntax highlighting
+    val tmpReposFileMd = "$pathToUserTmp/tmp.repos.md" // also to have syntax highlighting
     writeFileAndStartInGVim(reposMdContent, filePath = tmpReposFileMd).ax()
   }
 

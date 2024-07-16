@@ -10,6 +10,7 @@ import pl.mareklangiewicz.kground.io.getSysPlatformType
 import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.vim.*
 import pl.mareklangiewicz.kommand.term.termXDefault
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.ulog.ULog
