@@ -1,30 +1,32 @@
 package pl.mareklangiewicz.kommand.vim
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.Vim.Option.*
 import pl.mareklangiewicz.kommand.*
 
 @DelicateApi("When opening stdin content, vim expects commands from (redirected) stderr!")
 fun vimOpenStdInContent(init: XVim.() -> Unit = {}) = vim("-", init = init)
+fun vimStdIn(init: XVim.() -> Unit = {}) = vim("-", init = init)
+
+fun gvimStdIn(init: XVim.() -> Unit = {}) = gvim("-", init = init)
 
 fun gvimOpenStdInContent(init: XVim.() -> Unit = {}) = gvim("-", init = init)
 
-fun gvimOpenContent(content: String, init: XVim.() -> Unit = {}) = ReducedScript {
-  gvimOpenStdInContent(init).ax(inContent = content)
+fun gvimStdIn(inLineS: Flow<String>, init: XVim.() -> Unit = {}) = ReducedScript {
+  gvimStdIn(init).ax(inLineS = inLineS)
 }
 
+fun gvimStdIn(inLines: List<String>, init: XVim.() -> Unit = {}) = gvimStdIn(inLineS = inLines.asFlow(), init)
 
-fun gvimOpenContentLines(lines: List<String>, init: XVim.() -> Unit = {}) = ReducedScript {
-  gvimOpenStdInContent(init).ax(inContent = lines.joinToString("\n"))
-}
+fun gvimStdIn(inContent: String, init: XVim.() -> Unit = {}) = gvimStdIn(inLineS = inContent.lineSequence().asFlow(), init)
+
 
 fun vim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.vim, files.toMutableList()).apply(init)
 
 fun nvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.nvim, files.toMutableList()).apply(init)
 
-fun vim(vararg files: String, init: Vim.() -> Unit = {}) = Vim(files.toMutableList()).apply(init)
-fun gvim(vararg files: String, init: Vim.() -> Unit = {}) = vim(*files) { -Gui; init() }
 fun gvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.gvim, files.toMutableList()).apply(init)
 
 
@@ -117,7 +119,7 @@ data class XVim(
     // important: name and arg has to be separate in XVim.args - for Kommand.ax to work correctly
     val str get() = listOf(name) plusIfNN arg
 
-    /** For the first file the cursor will be positioned on given line */
+    /** For the first file the cursor will be positioned on given line. Lines are numbered from 1 */
     data class CursorLine(val line: Int) : Option("+$line")
     data object CursorLineLast : Option("+")
 
@@ -125,7 +127,7 @@ data class XVim(
      * For the first file the cursor will be positioned in the line with the first occurrence of pattern.
      * see also :help search-pattern
      */
-    data class CursorLineFind(val pattern: Int) : Option("+/$pattern")
+    data class CursorLineFind(val pattern: String) : Option("+/$pattern")
 
 
     /** Ex [cmd] will be executed after the first file has been read. Can be used up to 10 times. */
