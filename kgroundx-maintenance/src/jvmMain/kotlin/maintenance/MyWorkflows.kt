@@ -225,7 +225,7 @@ private fun defaultReleaseWorkflow() =
 
 fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   name: String? = "Set up JDK",
-  version: String? = "21", // fixme_maybe: take from DepsNew.ver...? [Deps Selected]
+  version: String? = "22", // fixme_maybe: somehow take from DepsKt:Vers:JvmDefaultVer ?
   distribution: SetupJavaV4.Distribution = SetupJavaV4.Distribution.Zulu, // fixme_later: which dist?
 ) = uses(
   name = name,
