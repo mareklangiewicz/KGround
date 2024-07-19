@@ -2,10 +2,10 @@ package pl.mareklangiewicz.kommand.vim
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kommand.find.myKommandLinePath
+import pl.mareklangiewicz.kommand.find.myTmpPath
 import pl.mareklangiewicz.kommand.vim.XVim.Option.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.termKitty
@@ -29,25 +29,59 @@ data object VimSamples {
   val nvimVerboseVersion = nvim { -Verbose(); -Version } s
     "nvim -V --version"
 
-  val gvimBlaContent = gvimStdIn(blas.joinToString("\n"))
+  val gvimBlaContent = gvimContent(blas.joinToString("\n"))
 
-  val gvimBlas = gvimStdIn(blas)
+  val gvimBlas = gvimLines(blas)
 
-  val gvimBlaS = gvimStdIn(blaS)
+  val gvimBlaS = gvimLineS(blaS)
 
   /** GVim will display 'reading from stdin...' until it reads full flow and at the end show the full content */
-  val gvimBlaSlowS = gvimStdIn(blaSlowS)
+  val gvimBlaSlowS = gvimLineS(blaSlowS)
 
-  val gvimBlaSCursorLineBlu = gvimStdIn(blaS) { -CursorLineFind("blu") }
+  val gvimBlaSCursorLineBlu = gvimLineS(blaS) { -CursorLineFind("blu") }
 
   /** Lines are numbered from 1 */
-  val gvimBlaSCursorLine2 = gvimStdIn(blaS) { -CursorLine(2) }
+  val gvimBlaSCursorLine2 = gvimLineS(blaS) { -CursorLine(2) }
 
-  val gvimBlaSCursorLineLast = gvimStdIn(blaS) { -CursorLineLast }
+  val gvimBlaSCursorLineLast = gvimLineS(blaS) { -CursorLineLast }
+
+  // FIXME_later: use UFileSys.pathXXX, and generally use Path type
+  private val myBuildFile = "$myKommandLinePath/build.gradle.kts"
+  private val myTmpKeysFile = "$myTmpPath/tmp.keys.vim"
+
+  val gvimBuildGradleCursorFindVer = gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)") }
 
   /** Gvim will have all default look&feel (usually white background, small window, graphical menu, etc) */
-  val gvimBlaSlowSCleanMode = gvimStdIn(blaSlowS) { -CleanMode }
+  val gvimBlaSlowSCleanMode = gvimLineS(blaSlowS) { -CleanMode }
 
+  // TODO: better kitty integration (starting in existing kitty in new window/tab/etc..)
   val nvimInKittyBashRc = termKitty(nvim("~/.bashrc"))
+
+
+
+  // Note: I had strange issues with GVim. Prefer NVim in CleanMode!
+  // (especially when recording but CleanMode when replying is also recommended)
+  // TODO: I can use nvim because my setup run kommands in kitty terminal anyway, but it's implicit and it can change;
+  //   so better to use other more explicit method (some proper nvim kitty wrapper fun knvim??)
+  val nvimBuildGradleRecord = nvim(myBuildFile) { -CleanMode; -KeysScriptOut(myTmpKeysFile, overwrite = true) }
+
+  val nvimShowRecord = nvim(myTmpKeysFile)
+
+  val nvimBuildGradleReplay = nvim(myBuildFile) { -KeysScriptIn(myTmpKeysFile) }
+
+
+
+
+  @DelicateApi
+  val gvimBuildGradleBumpVer1 =
+    gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)"); -ExCmd("norm t)"); -ExCmd("exe \"norm \\<C-A>\"") }
+    // Note: this :exe (:execute) complication is there only due to the problem with entering <C-A> key in commandline
+
+  @DelicateApi
+  val gvimBuildGradleBumpVer2 =
+    gvim(myBuildFile) { -ExCmd("g/version = Ver(.*)/exe \"norm t)\\<C-A>\"") }
+
+  @DelicateApi
+  val vimExScriptBuildGradleBumpVer3 = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myBuildFile)
 
 }

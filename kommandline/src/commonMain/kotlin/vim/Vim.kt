@@ -2,25 +2,31 @@ package pl.mareklangiewicz.kommand.vim
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.toList
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.bad.chk
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.vim.XVim.Option.*
+import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
 
 @DelicateApi("When opening stdin content, vim expects commands from (redirected) stderr!")
-fun vimOpenStdInContent(init: XVim.() -> Unit = {}) = vim("-", init = init)
+// TODO NOW: correct tested example with redirection
 fun vimStdIn(init: XVim.() -> Unit = {}) = vim("-", init = init)
 
 fun gvimStdIn(init: XVim.() -> Unit = {}) = gvim("-", init = init)
 
-fun gvimOpenStdInContent(init: XVim.() -> Unit = {}) = gvim("-", init = init)
+// TODO NOW: quick way to open man in nvim+kitty (using nvim builtin :Man support)
 
-fun gvimStdIn(inLineS: Flow<String>, init: XVim.() -> Unit = {}) = ReducedScript {
+/** GVim can display 'reading from stdin...' until it reads full [inLineS] flow and only then show the full content */
+fun gvimLineS(inLineS: Flow<String>, init: XVim.() -> Unit = {}) = ReducedScript {
   gvimStdIn(init).ax(inLineS = inLineS)
 }
 
-fun gvimStdIn(inLines: List<String>, init: XVim.() -> Unit = {}) = gvimStdIn(inLineS = inLines.asFlow(), init)
+fun gvimLines(inLines: List<String>, init: XVim.() -> Unit = {}) = gvimLineS(inLines.asFlow(), init)
 
-fun gvimStdIn(inContent: String, init: XVim.() -> Unit = {}) = gvimStdIn(inLineS = inContent.lineSequence().asFlow(), init)
+fun gvimContent(inContent: String, init: XVim.() -> Unit = {}) = gvimLines(inContent.lines(), init)
 
 
 fun vim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.vim, files.toMutableList()).apply(init)
@@ -28,6 +34,81 @@ fun vim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.vim, 
 fun nvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.nvim, files.toMutableList()).apply(init)
 
 fun gvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.gvim, files.toMutableList()).apply(init)
+// TODO NOW: nvim, opening specific lines, opening in existing editor (is servername same as in vim?),
+//  combine with Ide as in kolib openInIdeOrGVim but better selecting (with nvim too)
+
+/**
+ * Useful for playing with ex-mode interactively before writing script for one of:
+ * [vimExScriptStdIn] or [vimExScriptContent] or [vimExScriptFile]
+ * Note: there is :vi (:visual) command available to switch to normal (visual) mode.
+ */
+fun vimEx(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExMode; init() }
+
+/**
+ * Useful for playing with ex-mode interactively before writing script for one of:
+ * [vimExScriptStdIn] or [vimExScriptContent] or [vimExScriptFile]
+ * This "Improved" flavor differs mostly (only??) in interactive features, so it's nicer,
+ * but still can be useful playground before creating ex-mode script.
+ * Note: there is :vi (:visual) command available to switch to normal (visual) mode.
+ */
+fun vimExIm(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExImMode; init() }
+
+fun vimExScriptStdIn(vararg files: String, isViCompat: Boolean = false): XVim = vim(*files) {
+  -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  -ExScriptMode // BTW initialization should be skipped in this mode
+}
+
+/**
+ * Normally should not be needed, but in case of problems it can be useful to experiment with these settings
+ * Proposed settings are inspired by answers/flags from SO (which can be incorrect or redundant):
+ * https://stackoverflow.com/questions/18860020/executing-vim-commands-in-a-shell-script
+ */
+fun vimExScriptStdInWithExplicitSettings(
+  vararg files: String,
+  isViCompat: Boolean = false,
+  isDebugMode: Boolean = false,
+  isCleanMode: Boolean = false,
+  isNoPluginMode: Boolean = false,
+  isVimRcNONE: Boolean = true,
+  isSwapNONE: Boolean = false, // in nvim swap is disabled in ExScriptMode anyway (not sure about original vim)
+  isSetNoMore: Boolean = false, // I guess it shouldn't be needed because ExScriptMode is not TUI, but I'm not sure.
+  isTermDumb: Boolean = false, // I guess it shouldn't be needed because ExScriptMode is not TUI, but I'm not sure.
+): XVim = vim(*files) {
+  -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  if (isDebugMode) -DebugMode
+  if (isCleanMode) -CleanMode
+  if (isNoPluginMode) -NoPluginMode
+  if (isVimRcNONE) -VimRcNONE // although initialization should be skipped anyway in ExScriptMode
+  if (isSwapNONE) -SwapNONE
+  if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
+  if (isTermDumb) -TermName("dumb")
+  -ExScriptMode
+}
+
+fun vimExScriptContent(
+  exScriptContent: String,
+  vararg files: String,
+  isViCompat: Boolean = false,
+): ReducedKommand<List<String>> = vimExScriptStdIn(files = files, isViCompat = isViCompat).reducedManually {
+  stdin.collect(exScriptContent.lineSequence().asFlow())
+  val out = stdout.toList() // ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
+  awaitAndChkExit(firstCollectErr = true) // FIXME NOW: check if firstCollectErr is fine (both in vim and nvim).
+  out
+}
+
+/**
+ * This version uses [XVim.Option.Session] for [exScriptFile].
+ * @param exScriptFile can not start with "-" (or be empty).
+ */
+fun vimExScriptFile(
+  exScriptFile: String = "Session.vim",
+  vararg files: String,
+  isViCompat: Boolean = false,
+) = vim(*files) {
+  -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  -ExScriptMode // still needed (even though Session below) because we want silent mode prepared for usage without TTY
+  -Session(exScriptFile)
+}.reducedOutToList() // ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
 
 
 @Suppress("unused")
@@ -48,7 +129,7 @@ data class XVim(
     vim,
 
     /**
-     * Graphical mode of [vim]. Starts new GUI window. Can also be done with "-g" argument [Option.Gui]
+     * Graphical mode of [vim]. Starts new GUI window. Can also be done with "-g" argument [Option.GuiMode]
      * Note1: it does NOT use [nvim] - which doesn't have official gui support.
      * Note2: It's usually better to start [nvim] inside kitty terminal - better nerd fonts support and everything.
      */
@@ -67,8 +148,9 @@ data class XVim(
     /**
      * The [vim], but started in improved Ex mode. Go to Normal mode with the ":vi" command.
      * Allows for more advanced commands than the vi-compatible Ex mode, and behaves more like typing :commands in Vim.
-     * Can also be done with the "-E" argument [Option.EximMode]. See also [Type.ex]
+     * Can also be done with the "-E" argument [Option.ExImMode]. See also [Type.ex]
      */
+    @DelicateApi("Normally not installed. Use vim -E instead. See [Option.ExImMode].")
     exim,
 
     /**
@@ -79,6 +161,10 @@ data class XVim(
 
     /** Graphical mode of [view], so also read-only. */
     gview,
+
+    /** Graphical mode of [ex]. */
+    @DelicateApi("Usually not installed. Use vim -e -g instead. See [Option.ExMode] [Option.GuiMode].")
+    gex,
 
     /**
      * Easy mode of [gvim]. Graphical, starts new window, behave like click-and-type editor.
@@ -104,10 +190,10 @@ data class XVim(
     /** [gview] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
     rgview,
 
-    /** Start [vim] in diff mode. Can also be done with the "-d" argument [Option.Diff]. */
+    /** Start [vim] in diff mode. Can also be done with the "-d" argument [Option.DiffMode]. */
     vimdiff,
 
-    /** Start [gvim] in diff mode. Can also be done with the "-d" argument [Option.Diff]. */
+    /** Start [gvim] in diff mode. Can also be done with the "-d" argument [Option.DiffMode]. */
     gvimdiff,
   }
 
@@ -137,42 +223,87 @@ data class XVim(
     data class ExCmdBeforeRc(val cmd: String) : Option("--cmd", cmd)
 
     /**
-     * The [sourcedFile] will be sourced after the first file has been read.
-     * This is equivalent to ExCmd("source [sourcedFile]").
-     * The [sourcedFile] cannot start with '-'.
-     * If null, then "Session.vim" is used (only works when -S is the last argument).
+     * The [sessionFile] will be sourced after the first file has been read.
+     * This is equivalent to ExCmd("source [sessionFile]").
+     * The [sessionFile] cannot start with '-' (or be empty).
      */
-    data class Source(val sourcedFile: String? = null) : Option("-S", sourcedFile)
+    data class Session(val sessionFile: String = "Session.vim") : Option("-S", sessionFile) {
+      init {
+        chk(sessionFile.isNotEmpty()) { "The sessionFile can NOT be empty."}
+        chk(sessionFile[0] != '-') { "The sessionFile can NOT start with the \"-\"."}
+      }
+    }
 
     /** Binary mode.  A few options will be set that makes it possible to edit a binary or executable file. */
     data object Binary : Option("-b")
 
-    /** Set the 'compatible' option.  This will make Vim behave mostly like Vi, even though a .vimrc file exists. */
-    data object Compatible : Option("-C")
-
     /**
-     * No-compatible mode. Resets the 'compatible' option. This will make Vim behave a bit better,
-     * but less Vi compatible, even though a .vimrc file does not exist.
+     * Set 'compatible' / 'nocompatible' option.
+     * Without [ViCompat] vim should set compatible/nocompatible according .vimrc absence/presence.
+     * Warning: nvim doesn't support it and is always nocompatible.
+     * @param compatible sets vim option 'compatible' if true, or 'nocompatible' if false.
+     *   true will This will make Vim behave mostly like Vi (even if a .vimrc file exists).
+     *   false will make Vim behave a bit better, but less Vi compatible (even if a .vimrc file does not exist).
      */
-    data object NoCompatible : Option("-N")
+    data class ViCompat(val compatible: Boolean) : Option(if (compatible) "-C" else "-N")
 
     /**
      * Start in diff mode. There should between two to eight file name arguments.
      * Vim will open all the files and show differences between them. Works like vimdiff
      */
-    data object Diff : Option("-d")
+    data object DiffMode : Option("-d")
 
     /** Go to debugging mode when executing the first command from a script. */
-    data object Debug : Option("-D")
+    data object DebugMode : Option("-D")
 
-    /** Traditional vi-compatible Ex mode. Just like executable was called "ex" [Type.ex]. See also [EximMode] */
+    /** Start in Ex-mode. Just like executable was called "ex" [Type.ex]. See also [ExImMode] */
     data object ExMode : Option("-e")
 
     /**
-     * Improved Ex mode, just like the executable was called "exim" [Type.exim]. See also [ExMode].
-     * Allows for more advanced commands than the vi-compatible Ex mode, and behaves more like typing :commands in Vim.
+     * Improved Ex-mode, just like the executable was called "exim" [Type.exim]. See also [ExMode].
+     * Allows for more advanced commands than the Ex-mode, and behaves more like typing :commands in Vim.
+     * All command line editing, completion etc. is available.
      */
-    data object EximMode : Option("-E")
+    data object ExImMode : Option("-E")
+
+
+    // FIXME NOW: check what if I put filename afterwards. Will it misinterpret it as KeysScriptIn?? (check both vim and nvim)
+    /**
+     * Ex Script (aka Ex Silent) mode, aka "batch mode". No UI, disables most prompts and messages.
+     * Remember to quit vim at the end of the Ex-mode script (which is read from stdin).
+     * BTW if you forget in nvim, then it will add for you sth like "-c qa!", not vim WILL NOT!
+     * So don't relay on it, especially if running scripts on CI where there's usually no nvim installed.
+     * Note: If Vim appears to be stuck try typing "qa!<Enter>".
+     * You don't get a prompt thus you can't see Vim is waiting for you to type something.
+     * Initializations are skipped (except the ones given with the "-u" argument).
+     */
+    data object ExScriptMode : Option("-es")
+
+    // FIXME NOW: check what if I put filename afterwards. Will it misinterpret it as ScriptIn?? (check both vim and nvim)
+    /**
+     * Ex Im Script (aka Ex Im Silent) mode. Deprecated mostly because differences between vim an nvim. Use [ExScriptMode] instead.
+     * See :h -s-ex in both vim and nvim, also see :h vim-differences /Startup in nvim.
+     * See also: [ExScriptMode]; [ExImMode]
+     */
+    // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
+    @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+    @NotPortableApi("Behaves differently in vim and nvim", ReplaceWith("ExScriptMode"))
+    data object ExImScriptMode : Option("-Es")
+
+    /**
+     * Executes Lua {script} non-interactively (no UI) with optional args after processing any preceding cli-arguments,
+     * then exits. Exits 1 on Lua error. See -S to run multiple Lua scripts without args, with a UI.
+     */
+    @NotPortableApi("Only in nvim")
+    data class LuaScriptMode(val luaFile: String) : Option("-l", luaFile)
+
+    /**
+     * Execute a Lua script, similarly to -l, but the editor is not initialized.
+     * This gives a Lua environment similar to a worker thread. See :h lua-loop-threading.
+     * Unlike -l no prior arguments are allowed.
+     */
+    @NotPortableApi("Only in nvim")
+    data class LuaWorkerMode(val luaFile: String) : Option("-ll", luaFile)
 
     /**
      * Start in vi-compatible mode, just like the executable was called "vi" [Type.vi].
@@ -194,7 +325,7 @@ data class XVim(
      */
     data object CleanMode : Option("--clean")
 
-    /** Skip loading plugins. Implied by -u NONE [VimRc]. */
+    /** Skip loading plugins. Implied by -u NONE [VimRcNONE]. */
     data object NoPluginMode : Option("--noplugin")
 
     /**
@@ -208,21 +339,24 @@ data class XVim(
      * The GUI mode. Supported only in original [vim] and only if compiled with GUI support. Like [Type.gvim]
      * Note: the [Type.nvim] does NOT support it, but better solution is to run [Type.nvim] inside kitty terminal.
      */
-    data object Gui : Option("-g")
+    data object GuiMode : Option("-g")
 
     data object Help : Option("-h")
 
     /**
      * Specifies  the filename to use when reading or writing the viminfo file, instead of the default "~/.viminfo".
-     * This can also be used to skip the use of the .viminfo file, by giving the name "NONE".
+     * This can also be used to skip the use of the .viminfo file, by giving the name "NONE" [VimInfoNONE].
      */
     data class VimInfo(val vimInfoFile: String) : Option("-i", vimInfoFile)
+
+    /** Special case of [VimInfo] */
+    data object VimInfoNONE : Option("-i", "NONE")
 
     /**
      * Use the commands in the [vimRcFile] for initializations.
      * All the other initializations are skipped.
      * Use this to edit a special kind of files.
-     * It can also be used to skip all initializations by giving the name "NONE".
+     * It can also be used to skip all initializations by giving the name "NONE" [VimRcNONE].
      * See ":help initialization" within vim for more details.
      */
     data class VimRc(val vimRcFile: String) : Option("-u", vimRcFile)
@@ -230,7 +364,7 @@ data class XVim(
     /**
      * Use  the commands in the [gvimRcFile] for GUI initializations.
      * All the other GUI initializations are skipped.
-     * It can also be used to skip all GUI initializations by giving the name "NONE".
+     * It can also be used to skip all GUI initializations by giving the name "NONE" [GVimRcNONE].
      * See ":help gui-init" within vim for more details.
      */
     data class GVimRc(val gvimRcFile: String) : Option("-U", gvimRcFile)
@@ -253,7 +387,7 @@ data class XVim(
      * Handy if you want to edit a file on a very slow medium (e.g. floppy).
      * Can also be done with ":set uc=0". Can be undone with ":set uc=200".
      */
-    data object NoSwap : Option("-n")
+    data object SwapNONE : Option("-n")
 
     /**
      * Don't connect to the X server. Shortens startup time in a terminal,
@@ -278,7 +412,7 @@ data class XVim(
      * Read-only  mode. The 'readonly' option will be set.
      * You can still edit the buffer, but will be prevented from accidentally overwriting a file.
      * If you do want to overwrite a file, add an exclamation mark to the Ex command, as in ":w!".
-     * The -R option also implies the -n option [NoSwap].
+     * The -R option also implies the -n option [SwapNONE].
      * The 'readonly' option can be reset with ":set noro". See ":help 'readonly'".
      */
     data object ReadOnly : Option("-R")
@@ -291,26 +425,44 @@ data class XVim(
      */
     data class Recovery(val swapFile: String? = null) : Option("-r", swapFile)
 
-    /** Silent mode.  Only when started as "Ex" or when the "-e" option was given before the "-s" option. */
-    data object Silent : Option("-s")
+    /**
+     * Script (aka Silent) mode. Deprecated mostly because differences between vim an nvim. Use [ExScriptMode] instead.
+     * See :h -s-ex in both vim and nvim, also see :h vim-differences /Startup in nvim.
+     * Only when started as "ex" (or "exim") or when the "-e" (or "-E") option was given BEFORE the "-s" option.
+     * See also: [Type.ex]; [Type.exim]; [ExMode]; [ExImMode]
+     */
+    // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
+    @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+    @NotPortableApi("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+    data object ScriptMode : Option("-s")
 
     /**
-     * The script file [inTypedCharsFile] is read.
+     * The script file [inKeysFile] is read.
      * The characters in the file are interpreted as if you had typed them.
-     * The same can be done with the command ":source! [inTypedCharsFile]".
+     * The same can be done with the command ":source! [inKeysFile]".
      * If the end of the file is reached before the editor exits,
      * further characters are read from the keyboard.
+     * It might be good idea to use [CleanMode] too.
      */
-    data class ScriptIn(val inTypedCharsFile: String) : Option("-s", inTypedCharsFile)
+    data class KeysScriptIn(val inKeysFile: String) : Option("-s", inKeysFile)
+    // yes, the same letter "-s" as ScriptMode, but with argument.
 
     /**
-     * All the characters that you type are recorded in the [outTypedCharsFile], until you exit Vim.
-     * This is useful if you want to create a script file to be used with "vim -s" or ":source!" [ScriptIn].
-     * If the [outTypedCharsFile] file exists, characters are either appended (default),
+     * All the characters that you type are recorded in the [outKeysFile], until you exit Vim.
+     * This is useful if you want to create a script file to be used with "vim -s" or ":source!" [KeysScriptIn].
+     *
+     * Warning: Different settings, plugins etc. may mess up with recorded keys.
+     * It's best to always use [CleanMode] with [KeysScriptOut], and it looks like nvim records better for me,
+     * so prefer nvim (even if later "replaying" [KeysScriptIn] with normal vim (like on CI or sth))
+     * It can also be good idea to review recorded file and clean it up by hand??
+     * And try to use basic keys while recording.
+     *
+     * If the [outKeysFile] file exists, characters are either appended (default),
      * or file is overwritten (when [overwrite] == true).
      */
-    data class ScriptOut(val outTypedCharsFile: String, val overwrite: Boolean = false)
-      : Option(if (overwrite) "-W" else "-w", outTypedCharsFile) {
+    @DelicateApi("To avoid garbage it's best to use CleanMode (and nvim works better even if then replaying with vim)")
+    data class KeysScriptOut(val outKeysFile: String, val overwrite: Boolean = false)
+      : Option(if (overwrite) "-W" else "-w", outKeysFile) {
       val append: Boolean get() = !overwrite
     }
 
@@ -321,7 +473,7 @@ data class XVim(
      * Tells Vim the name of the terminal you are using. Only required when the automatic way doesn't work.
      * Should be a terminal known to Vim (builtin) or defined in the termcap or terminfo file.
      */
-    data class Terminal(val terminalName: String) : Option("-T", terminalName)
+    data class TermName(val term: String) : Option("-T", term)
 
     /**
      * Give messages about which files are sourced and for reading and writing a viminfo file.
@@ -373,6 +525,33 @@ data class XVim(
      * This can be used to edit a filename that starts with a '-'.
      */
     data object EOOpt : Option("--")
+
+    companion object {
+
+      /** Special case of [VimRc] */
+      val VimRcNONE = VimRc("NONE")
+
+      /** Special case of [GVimRc] */
+      val GVimRcNONE = GVimRc("NONE")
+
+
+      // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
+      @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+      @NotPortableApi("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+      val SilentMode = ScriptMode
+
+      val ExSilentMode = ExScriptMode
+
+      // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
+      @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+      @NotPortableApi("Behaves differently in vim and nvim", ReplaceWith("ExScriptMode"))
+      val ExImSilentMode = ExImScriptMode
+
+
+      // TODO NOW: experiment with keys from stdin
+      //  (maybe workflow when I start with recording macro to register and then put it to.. source code??)
+      val KeysScriptStdIn = KeysScriptIn("-")
+    }
   }
 
   operator fun Option.unaryMinus() = options.add(this)

@@ -41,7 +41,7 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.termKitty
 import pl.mareklangiewicz.kommand.vim.gvim
-import pl.mareklangiewicz.kommand.vim.gvimStdIn
+import pl.mareklangiewicz.kommand.vim.gvimLines
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowInfo
 import pl.mareklangiewicz.ulog.ULog
@@ -152,7 +152,7 @@ data object MyDemoSamples {
     // writeFileWithDD(lines, pathToTmpNotes).ax()
     // gvim(pathToTmpNotes).ax()
     // better way instead of using tmp file:
-    gvimStdIn(lines).ax()
+    gvimLines(lines).ax()
   }
 
   val gvimServerDDDDOpenHomeDir = gvim("/home") { -XVim.Option.ServerName("DDDD") } s "gvim --servername DDDD /home"
