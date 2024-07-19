@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.find.FindOpt.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.text.*
 
+// FIXME_later: use UFileSys.pathToUserHome, and generally use Path type
 val myHomePath = "/home/marek"
 val myTmpPath = "$myHomePath/tmp"
 val myKotlinPath = "$myHomePath/code/kotlin"

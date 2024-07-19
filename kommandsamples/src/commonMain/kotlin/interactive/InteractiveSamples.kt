@@ -11,7 +11,7 @@ import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.XClipSelection
 import pl.mareklangiewicz.kommand.ax
-import pl.mareklangiewicz.kommand.ideOpen
+import pl.mareklangiewicz.kommand.ideOrGVimOpen
 import pl.mareklangiewicz.kommand.lineRawOrNull
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.writeFileWithDD
@@ -80,7 +80,7 @@ suspend fun Any?.tryInteractivelyAnything() = when (this) {
   is Kommand -> toInteractiveCheck().ax()
   is ReducedSample<*> -> tryInteractivelyCheckReducedSample() // Note: ReducedSample is also ReducedScript
   is ReducedScript<*> -> tryInteractivelyCheckReducedScript()
-  else -> tryOpenDataInIDE()
+  else -> tryOpenDataInIDEOrGVim()
 }
 
 
@@ -101,12 +101,12 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
   val submit = implictx<USubmit>()
   submit.askIf(question) || return
   val reducedOut = ax()
-  reducedOut.tryOpenDataInIDE("Open ReducedOut: ${reducedOut.about} in tmp.notes in IDE ?")
+  reducedOut.tryOpenDataInIDEOrGVim("Open ReducedOut: ${reducedOut.about} in tmp.notes in IDE (if running) or in GVim ?")
 }
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 /** @param question null means default question */
-suspend fun Any?.tryOpenDataInIDE(question: String? = null): Any {
+suspend fun Any?.tryOpenDataInIDEOrGVim(question: String? = null): Any {
   val log = implictx<ULog>()
   val fs = implictx<UFileSys>()
   val submit = implictx<USubmit>()
@@ -115,12 +115,12 @@ suspend fun Any?.tryOpenDataInIDE(question: String? = null): Any {
     this is Unit -> log.i("It is Unit. Nothing to open.")
     this is String && isEmpty() -> log.i("It is empty string. Nothing to open.")
     this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
-    !submit.askIf(question ?: "Open $about in tmp.notes in IDE ?") -> log.i("Not opening.")
+    !submit.askIf(question ?: "Open $about in tmp.notes in IDE (if running) or in GVim ?") -> log.i("Not opening.")
     else -> {
       val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
       val notes = fs.pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
       writeFileWithDD(lines, notes).ax()
-      ideOpen(notes).ax()
+      ideOrGVimOpen(notes).ax()
     }
   }
 }
