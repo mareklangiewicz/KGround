@@ -2,13 +2,20 @@ package pl.mareklangiewicz.kommand.vim
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.find.myKommandLinePath
 import pl.mareklangiewicz.kommand.find.myTmpPath
-import pl.mareklangiewicz.kommand.vim.XVim.Option.*
+import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.termKitty
+import pl.mareklangiewicz.kommand.vim.XVim.Option.*
+import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForNVim
+import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForVim
 
 val blas = listOf("bla", "ble", "blu", "bli", "blo")
 val blaS = blas.asFlow()
@@ -84,4 +91,22 @@ data object VimSamples {
   @DelicateApi
   val vimExScriptBuildGradleBumpVer3 = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myBuildFile)
 
+  private const val keyCtrlA = '\u0001' // to increase number at cursor in vim
+
+  @NotPortableApi @DelicateApi
+  val gvimKeyScriptBuildGradleBumpVer4 = ReducedScript {
+    gvim(myBuildFile) { -KeysScriptStdInForVim }.ax(inContent = "/version = Ver\nt)$keyCtrlA:wq")
+  }
+
+  @NotPortableApi @DelicateApi
+  val vimKeyScriptBuildGradleBumpVer5 = vim(myBuildFile) { -KeysScriptStdInForVim }.reducedManually {
+    stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
+    awaitAndChkExit(firstCollectErr = true)
+  }
+
+  @NotPortableApi @DelicateApi
+  val nvimKeyScriptBuildGradleBumpVer6 = nvim(myBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
+    stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
+    awaitAndChkExit(firstCollectErr = true)
+  }
 }

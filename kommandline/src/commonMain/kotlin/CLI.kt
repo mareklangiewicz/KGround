@@ -153,7 +153,7 @@ suspend fun StdinCollector.collect(
   lineEnd: String = "\n",
   flushAfterEachLine: Boolean = true,
   finallyStdinClose: Boolean = true,
-) = collect(lineS, lineEnd, flushAfterEachLine, finallyStdinClose)
+): Unit = collect(lineS, lineEnd, flushAfterEachLine, finallyStdinClose)
 
 /**
  * Methods marked DelicateApi are NOT thread safe! Use other ones.
@@ -192,7 +192,7 @@ interface ExecProcess : AutoCloseable {
   @DelicateApi
   fun stdinWriteLine(line: String, lineEnd: String = "\n", thenFlush: Boolean = true)
 
-  /** Indepotent. Flushes buffer before closing. */
+  /** Idempotent. Flushes buffer before closing. */
   @DelicateApi
   fun stdinClose()
 
@@ -200,7 +200,7 @@ interface ExecProcess : AutoCloseable {
   @DelicateApi
   fun stdoutReadLine(): String?
 
-  /** Indepotent. */
+  /** Idempotent. */
   @DelicateApi
   fun stdoutClose()
 

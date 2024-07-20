@@ -63,6 +63,7 @@ fun vimExScriptStdIn(vararg files: String, isViCompat: Boolean = false): XVim = 
  * Proposed settings are inspired by answers/flags from SO (which can be incorrect or redundant):
  * https://stackoverflow.com/questions/18860020/executing-vim-commands-in-a-shell-script
  */
+@OptIn(NotPortableApi::class)
 fun vimExScriptStdInWithExplicitSettings(
   vararg files: String,
   isViCompat: Boolean = false,
@@ -81,7 +82,7 @@ fun vimExScriptStdInWithExplicitSettings(
   if (isVimRcNONE) -VimRcNONE // although initialization should be skipped anyway in ExScriptMode
   if (isSwapNONE) -SwapNONE
   if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
-  if (isTermDumb) -TermName("dumb")
+  if (isTermDumb) -TermName("dumb") // BTW nvim does not support it
   -ExScriptMode
 }
 
@@ -440,9 +441,8 @@ data class XVim(
      * The script file [inKeysFile] is read.
      * The characters in the file are interpreted as if you had typed them.
      * The same can be done with the command ":source! [inKeysFile]".
-     * If the end of the file is reached before the editor exits,
-     * further characters are read from the keyboard.
-     * It might be good idea to use [CleanMode] too.
+     * If the end of the file is reached before the editor exits, further characters are read from the keyboard.
+     * It might be good idea to use [CleanMode] too. Does not work with -es or -Es ([ExScriptMode] or [ExImScriptMode]).
      */
     data class KeysScriptIn(val inKeysFile: String) : Option("-s", inKeysFile)
     // yes, the same letter "-s" as ScriptMode, but with argument.
@@ -473,6 +473,7 @@ data class XVim(
      * Tells Vim the name of the terminal you are using. Only required when the automatic way doesn't work.
      * Should be a terminal known to Vim (builtin) or defined in the termcap or terminfo file.
      */
+    @NotPortableApi("NVim doesn't support this.")
     data class TermName(val term: String) : Option("-T", term)
 
     /**
@@ -548,9 +549,28 @@ data class XVim(
       val ExImSilentMode = ExImScriptMode
 
 
-      // TODO NOW: experiment with keys from stdin
-      //  (maybe workflow when I start with recording macro to register and then put it to.. source code??)
-      val KeysScriptStdIn = KeysScriptIn("-")
+      /**
+       * NVim interprets the "-" as stdin. Also in case of KeysScriptIn("-"), as in [KeysScriptStdInForNVim],
+       * after stdin finishes, it starts getting actual keyboard from user (reopens tty?), so that's very useful.
+       * On the other hand if we were using "-s /dev/stdin", as in [KeysScriptStdInForVim],
+       * it could freeze, and the nvim process would have to be killed.
+       * It did freeze when I tried experiment like this: printf 'iBLA\e:wq\n' | nvim -s /dev/stdin bla.txt
+       * BTW looks like in that (incorrect) use-case, the nvim doesn't even run any given keys from /dev/stdin,
+       * maybe it first try to read whole stdin "file", but /dev/stdin is never closing/ending?
+       */
+      @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't and tries to open the \"-\" file.")
+      val KeysScriptStdInForNVim = KeysScriptIn("-")
+
+
+        /**
+         * Note: (if don't have nvim available) it's better to start experimenting with this using [GuiMode],
+         * because gvim nicely allows user to continue using keyboard, and inspect what has happened.
+         * Then when the keys are all good, add the :wq (or sth) to automatically quit, and then
+         * maybe switch from gvim/[GuiMode] to just vim. BTW I guess vim will need terminal even with fully automated keyscript?
+         */
+        @DelicateApi("Provided keys have to quit vim at the end (if no GuiMode). Or Vim will do sth, show error and output some additional garbage.")
+        @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't. So /dev/stdin might work better in Vim.")
+      val KeysScriptStdInForVim = KeysScriptIn("/dev/stdin")
     }
   }
 
