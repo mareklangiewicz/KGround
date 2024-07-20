@@ -11,8 +11,13 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
 
+/**
+ * When opening stdin content, vim expects commands from stderr.
+ *
+ * BTW: When launching vim from terminal, all (0, 1, 2) streams are connected to the same tty device by default,
+ * so in that case, it's great default behavior, that vim tries to use stderr as input when stdin is used for content.
+ */
 @DelicateApi("When opening stdin content, vim expects commands from (redirected) stderr!")
-// TODO NOW: correct tested example with redirection
 fun vimStdIn(init: XVim.() -> Unit = {}) = vim("-", init = init)
 
 fun gvimStdIn(init: XVim.() -> Unit = {}) = gvim("-", init = init)
