@@ -44,7 +44,7 @@ import pl.mareklangiewicz.ulog.w
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
   val cli = getSysCLI()
-  uctxWithIO(log + submit + cli) {
+  uctxWithIO(log + submit + cli, name = args[0]) {
     when {
       args.size == 2 && args[0] == "try-code" -> try {
         log.w("try-code ${args[1]} started")
