@@ -277,8 +277,8 @@ data class XVim(
     /**
      * Ex Script (aka Ex Silent) mode, aka "batch mode". No UI, disables most prompts and messages.
      * Remember to quit vim at the end of the Ex-mode script (which is read from stdin).
-     * BTW if you forget in nvim, then it will add for you sth like "-c qa!", not vim WILL NOT!
-     * So don't relay on it, especially if running scripts on CI where there's usually no nvim installed.
+     * BTW if you forget in nvim, then it will add for you sth like "-c qa!", but vim WILL NOT!
+     * So don't relay on it, especially if running scripts on CI where there's no nvim installed.
      * Note: If Vim appears to be stuck try typing "qa!<Enter>".
      * You don't get a prompt thus you can't see Vim is waiting for you to type something.
      * Initializations are skipped (except the ones given with the "-u" argument).
@@ -287,13 +287,12 @@ data class XVim(
 
     // FIXME NOW: check what if I put filename afterwards. Will it misinterpret it as ScriptIn?? (check both vim and nvim)
     /**
-     * Ex Im Script (aka Ex Im Silent) mode. Deprecated mostly because differences between vim an nvim. Use [ExScriptMode] instead.
+     * Ex Im Script (aka Ex Im Silent) mode. Delicate because tricky differences between vim an nvim. Use [ExScriptMode] instead.
      * See :h -s-ex in both vim and nvim, also see :h vim-differences /Startup in nvim.
      * See also: [ExScriptMode]; [ExImMode]
      */
-    // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
-    @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
-    @NotPortableApi("Behaves differently in vim and nvim", ReplaceWith("ExScriptMode"))
+    @DelicateApi("Tricky to get always right. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
+    @NotPortableApi("Supported differently in vim and nvim. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
     data object ExImScriptMode : Option("-Es")
 
     /**
@@ -432,14 +431,13 @@ data class XVim(
     data class Recovery(val swapFile: String? = null) : Option("-r", swapFile)
 
     /**
-     * Script (aka Silent) mode. Deprecated mostly because differences between vim an nvim. Use [ExScriptMode] instead.
+     * Script (aka Silent) mode. Delicate because tricky differences between vim an nvim. Use [ExScriptMode] instead.
      * See :h -s-ex in both vim and nvim, also see :h vim-differences /Startup in nvim.
      * Only when started as "ex" (or "exim") or when the "-e" (or "-E") option was given BEFORE the "-s" option.
      * See also: [Type.ex]; [Type.exim]; [ExMode]; [ExImMode]
      */
-    // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
-    @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
-    @NotPortableApi("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+    @DelicateApi("Tricky to get always right with other options. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
+    @NotPortableApi("Supported differently in vim and nvim. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
     data object ScriptMode : Option("-s")
 
     /**
@@ -447,7 +445,7 @@ data class XVim(
      * The characters in the file are interpreted as if you had typed them.
      * The same can be done with the command ":source! [inKeysFile]".
      * If the end of the file is reached before the editor exits, further characters are read from the keyboard.
-     * It might be good idea to use [CleanMode] too. Does not work with -es or -Es ([ExScriptMode] or [ExImScriptMode]).
+     * It might be good idea to use [CleanMode] too. Does NOT work with -es or -Es ([ExScriptMode] or [ExImScriptMode]).
      */
     data class KeysScriptIn(val inKeysFile: String) : Option("-s", inKeysFile)
     // yes, the same letter "-s" as ScriptMode, but with argument.
@@ -540,17 +538,22 @@ data class XVim(
       /** Special case of [GVimRc] */
       val GVimRcNONE = GVimRc("NONE")
 
+      // Some modes are known by names like "silent-mode", so let's add aliases for users knowing these names.
 
-      // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
-      @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
-      @NotPortableApi("Use ExScriptMode", ReplaceWith("ExScriptMode"))
+      // Note: This name for ScriptMode is here to stay mostly as some form of a documentation.
+      /** Same as [ScriptMode] emphasizing that it's silencing behavior */
+      @DelicateApi("Tricky to get always right with other options. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
+      @NotPortableApi("Supported differently in vim and nvim. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
       val SilentMode = ScriptMode
 
+      // Note: this second name for ScriptMode is here to stay mostly as some form of a documentation.
+      /** Same as [ExScriptMode] emphasizing that it's silencing behavior */
       val ExSilentMode = ExScriptMode
 
-      // Note: do not remove it even it's "deprecated", should stay mostly as warning/documentation.
-      @Deprecated("Use ExScriptMode", ReplaceWith("ExScriptMode"))
-      @NotPortableApi("Behaves differently in vim and nvim", ReplaceWith("ExScriptMode"))
+      // Note: this second name for ExImScriptMode is here to stay mostly as some form of a documentation.
+      /** Same as [ExImScriptMode] emphasizing that it's silencing behavior */
+      @DelicateApi("Tricky to get always right. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
+      @NotPortableApi("Supported differently in vim and nvim. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
       val ExImSilentMode = ExImScriptMode
 
 
@@ -570,8 +573,8 @@ data class XVim(
         /**
          * Note: (if don't have nvim available) it's better to start experimenting with this using [GuiMode],
          * because gvim nicely allows user to continue using keyboard, and inspect what has happened.
-         * Then when the keys are all good, add the :wq (or sth) to automatically quit, and then
-         * maybe switch from gvim/[GuiMode] to just vim. BTW I guess vim will need terminal even with fully automated keyscript?
+         * Then when the keys are all good, add the :wq (or sth) to MAKE SURE it automatically quits,
+         * and then maybe switch from gvim/[GuiMode] to just vim.
          */
         @DelicateApi("Provided keys have to quit vim at the end (if no GuiMode). Or Vim will do sth, show error and output some additional garbage.")
         @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't. So /dev/stdin might work better in Vim.")
