@@ -9,6 +9,7 @@ import pl.mareklangiewicz.bad.chk
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.*
+import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForVim
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
 
 /**
@@ -21,6 +22,8 @@ import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
 fun vimStdIn(init: XVim.() -> Unit = {}) = vim("-", init = init)
 
 fun gvimStdIn(init: XVim.() -> Unit = {}) = gvim("-", init = init)
+
+fun nvimStdIn(init: XVim.() -> Unit = {}) = nvim("-", init = init)
 
 // TODO NOW: quick way to open man in nvim+kitty (using nvim builtin :Man support)
 
@@ -58,8 +61,13 @@ fun vimEx(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) 
  */
 fun vimExIm(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExImMode; init() }
 
-fun vimExScriptStdIn(vararg files: String, isViCompat: Boolean = false): XVim = vim(*files) {
+fun vimExScriptStdIn(
+  vararg files: String,
+  isViCompat: Boolean = false,
+  isCleanMode: Boolean = true,
+): XVim = vim(*files) {
   -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  if (isCleanMode) -CleanMode
   -ExScriptMode // BTW initialization should be skipped in this mode
 }
 
@@ -73,7 +81,7 @@ fun vimExScriptStdInWithExplicitSettings(
   vararg files: String,
   isViCompat: Boolean = false,
   isDebugMode: Boolean = false,
-  isCleanMode: Boolean = false,
+  isCleanMode: Boolean = true,
   isNoPluginMode: Boolean = false,
   isVimRcNONE: Boolean = true,
   isSwapNONE: Boolean = false, // in nvim swap is disabled in ExScriptMode anyway (not sure about original vim)
@@ -95,12 +103,14 @@ fun vimExScriptContent(
   exScriptContent: String,
   vararg files: String,
   isViCompat: Boolean = false,
-): ReducedKommand<List<String>> = vimExScriptStdIn(files = files, isViCompat = isViCompat).reducedManually {
-  stdin.collect(exScriptContent.lineSequence().asFlow())
-  val out = stdout.toList() // ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
-  awaitAndChkExit(firstCollectErr = true) // FIXME NOW: check if firstCollectErr is fine (both in vim and nvim).
-  out
-}
+  isCleanMode: Boolean = true,
+): ReducedKommand<List<String>> = vimExScriptStdIn(files = files, isViCompat = isViCompat, isCleanMode = isCleanMode)
+  .reducedManually {
+    stdin.collect(exScriptContent.lineSequence().asFlow())
+    val out = stdout.toList() // ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
+    awaitAndChkExit(firstCollectErr = true)
+    out
+  }
 
 /**
  * This version uses [XVim.Option.Session] for [exScriptFile].
@@ -110,11 +120,85 @@ fun vimExScriptFile(
   exScriptFile: String = "Session.vim",
   vararg files: String,
   isViCompat: Boolean = false,
-) = vim(*files) {
+  isCleanMode: Boolean = true,
+): XVim = vim(*files) {
   -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  if (isCleanMode) -CleanMode
   -ExScriptMode // still needed (even though Session below) because we want silent mode prepared for usage without TTY
   -Session(exScriptFile)
-}.reducedOutToList() // ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
+} // BTW ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
+
+
+@OptIn(NotPortableApi::class)
+fun vimKeysScriptFile(
+  keysScriptFile: String,
+  vararg files: String,
+  isViCompat: Boolean = false,
+  isCleanMode: Boolean = true,
+  isSwapNONE: Boolean = true,
+  isSetNoMore: Boolean = true,
+  isTermDumb: Boolean = true,
+): XVim = vim(*files) {
+  -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  if (isCleanMode) -CleanMode
+  if (isSwapNONE) -SwapNONE
+  if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
+  if (isTermDumb) -TermName("dumb") // BTW nvim does not support it
+  -KeysScriptIn(keysScriptFile)
+} // BTW stdout should not be used as vim will unfortunately print screen content there
+
+/**
+ * Note: current impl adds \n at the end of the keys script.
+ * It's because internal details of [StdinCollector.collect], [Kommand.ax], etc..
+ * generally KommandLine currently treats input as flow of lines.
+ */
+@OptIn(NotPortableApi::class, DelicateApi::class)
+fun vimKeysScriptStdIn(
+  vararg files: String,
+  isViCompat: Boolean = false,
+  isCleanMode: Boolean = true,
+  isSwapNONE: Boolean = true,
+  isSetNoMore: Boolean = true,
+  isTermDumb: Boolean = true,
+): XVim = vim(*files) {
+  -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW nvim is always nocompatible
+  if (isCleanMode) -CleanMode
+  if (isSwapNONE) -SwapNONE
+  if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
+  if (isTermDumb) -TermName("dumb") // BTW nvim does not support it
+  -KeysScriptStdInForVim // BTW waiting for answer if it's a good approach: https://github.com/vim/vim/discussions/15315
+} // BTW stdout should not be used as vim will unfortunately print screen content there
+
+/**
+ * Note: current impl adds \n at the end of the [keysScriptContent].
+ * It's because internal details of [StdinCollector.collect], [Kommand.ax], etc..
+ * generally KommandLine currently treats input as flow of lines.
+ */
+@OptIn(NotPortableApi::class, DelicateApi::class)
+fun vimKeysScriptContent(
+  keysScriptContent: String,
+  vararg files: String,
+  isViCompat: Boolean = false,
+  isCleanMode: Boolean = true,
+  isSwapNONE: Boolean = true,
+  isSetNoMore: Boolean = true,
+  isTermDumb: Boolean = true,
+): ReducedKommand<Int> = vimKeysScriptStdIn(
+  files = files,
+  isViCompat = isViCompat,
+  isCleanMode = isCleanMode,
+  isSwapNONE = isSwapNONE,
+  isSetNoMore = isSetNoMore,
+  isTermDumb = isTermDumb,
+).reducedManually {
+  stdin.collect(keysScriptContent.lineSequence().asFlow())
+  awaitAndChkExit(firstCollectErr = true)
+}
+
+
+
+// Note: I could add all script flavored wrappers here for nvim as well, but let's not do it.
+// Vim is more portable (github actions etc), and user can wrap nvim himself if needed.
 
 
 @Suppress("unused")

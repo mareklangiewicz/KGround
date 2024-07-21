@@ -22,7 +22,7 @@ val blaS = blas.asFlow()
 val blaSlowS = blaS.map { delay(1000); it }
 
 @OptIn(DelicateApi::class)
-data object VimSamples {
+data object VimBasicSamples {
 
   val vimHelp = vim { -Help } s
     "vim -h"
@@ -51,6 +51,12 @@ data object VimSamples {
   val gvimBlaSCursorLine2 = gvimLineS(blaS) { -CursorLine(2) }
 
   val gvimBlaSCursorLineLast = gvimLineS(blaS) { -CursorLineLast }
+}
+
+
+
+@DelicateApi("Many are changing files, like KommandLine:build.gradle.kts (f.e. to bump version automatically)")
+data object VimAdvancedSamples {
 
   // FIXME_later: use UFileSys.pathXXX, and generally use Path type
   private val myBuildFile = "$myKommandLinePath/build.gradle.kts"
@@ -76,37 +82,48 @@ data object VimSamples {
 
   val nvimBuildGradleReplay = nvim(myBuildFile) { -KeysScriptIn(myTmpKeysFile) }
 
-
-
-
-  @DelicateApi
-  val gvimBuildGradleBumpVer1 =
+  /**
+   * Bumps version in KommmandLine:build.gradle.kts using gvim, and leave gvim open without saving, to inspect
+   * The last ":execute" / ":exe" [ExCmd] is needed because the problem with entering <C-A> in vim cmd-line
+   */
+  val gvimBumpVerImpl1ExSc =
     gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)"); -ExCmd("norm t)"); -ExCmd("exe \"norm \\<C-A>\"") }
     // Note: this :exe (:execute) complication is there only due to the problem with entering <C-A> key in commandline
 
-  @DelicateApi
-  val gvimBuildGradleBumpVer2 =
-    gvim(myBuildFile) { -ExCmd("g/version = Ver(.*)/exe \"norm t)\\<C-A>\"") }
+  /** Better impl of [gvimBumpVerImpl1] */
+  val gvimBumpVerImpl2ExSc = gvim(myBuildFile) { -ExCmd("g/version = Ver(.*)/exe \"norm t)\\<C-A>\"") }
 
-  @DelicateApi
-  val vimExScriptBuildGradleBumpVer3 = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myBuildFile)
+  /** Pretty good impl of bumping versions in scripts using ex-script (but keys-scripts are more awesome). */
+  val vimBumpVerImpl3ExSc = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myBuildFile)
 
   private const val keyCtrlA = '\u0001' // to increase number at cursor in vim
 
-  @NotPortableApi @DelicateApi
-  val gvimKeyScriptBuildGradleBumpVer4 = ReducedScript {
-    gvim(myBuildFile) { -KeysScriptStdInForVim }.ax(inContent = "/version = Ver\nt)$keyCtrlA:wq")
+  /** Impl for experiments with KeysScripts with gvim */
+  @NotPortableApi("Not for NVim")
+  val gvimBumpVerImpl4KeysSc = ReducedScript {
+    val inContent = "/version = Ver\nt)$keyCtrlA"
+    // val inContent = "/version = Ver\nt)$keyCtrlA:wq"
+    // Warning: ax always ends inContent with \n, so it WILL do :wq
+    gvim(myBuildFile) { -KeysScriptStdInForVim }.ax(inContent = inContent)
   }
 
-  @NotPortableApi @DelicateApi
-  val vimKeyScriptBuildGradleBumpVer5 = vim(myBuildFile) { -KeysScriptStdInForVim }.reducedManually {
+  /** Pretty good impl of bumping versions in scripts using keys-script. */
+  @NotPortableApi("Not for NVim")
+  val vimBumpVerImpl5KeysSc = vim(myBuildFile) { -KeysScriptStdInForVim }.reducedManually {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
+    // Warning: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
   }
 
-  @NotPortableApi @DelicateApi
-  val nvimKeyScriptBuildGradleBumpVer6 = nvim(myBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
+  @NotPortableApi("Not for original Vim")
+  val nvimBumpVerImpl6KeysSc = nvim(myBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
+    // Warning: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
   }
+
+
+  /** Pretty good impl of bumping versions in scripts using keys-script. */
+  @NotPortableApi("Not for NVim")
+  val vimBumpVerImpl7KeysSc = vimKeysScriptContent("/version = Ver\nt)$keyCtrlA:wq\n", myBuildFile)
 }
