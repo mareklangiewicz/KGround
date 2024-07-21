@@ -113,6 +113,9 @@ suspend fun Any?.tryOpenDataInIDEOrGVim(question: String? = null): Any {
   return when {
     this == null -> log.i("It is null. Nothing to open.")
     this is Unit -> log.i("It is Unit. Nothing to open.")
+    this is Int && this in 0..10 -> log.i("It is small Int: $this. Nothing to open.")
+    this is Long && this in 0..10 -> log.i("It is small Long: $this. Nothing to open.")
+    this is Boolean -> log.i("It is Boolean: $this. Nothing to open.")
     this is String && isEmpty() -> log.i("It is empty string. Nothing to open.")
     this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
     !submit.askIf(question ?: "Open $about in tmp.notes in IDE (if running) or in GVim ?") -> log.i("Not opening.")
