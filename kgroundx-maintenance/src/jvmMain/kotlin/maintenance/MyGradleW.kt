@@ -22,7 +22,11 @@ import pl.mareklangiewicz.ure.UReplacement
  */
 @ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, skipReproducers: Boolean) =
   getMyGradleProjectsPathS(onlyPublic).collect {
-    if (!skipReproducers || it.name != "reproducers") updateGradlewFilesInProject(it)
+    val log = implictx<ULog>()
+    when {
+      skipReproducers && it.segments.any { it == "reproducers" } -> log.i("Skipping reproducer $it")
+      else -> updateGradlewFilesInProject(it)
+    }
   }
 
 @ExampleApi suspend fun updateGradlewFilesInKotlinProject(projectName: String) =
@@ -33,10 +37,14 @@ suspend fun updateGradlewFilesInProject(fullPath: Path) =
     val log = implictx<ULog>()
     val fs = implictx<UFileSys>()
     val targetPath = fullPath / gradlewRelPath
-    val content = RESOURCES.readByteString("/templates".toPath() / gradlewRelPath.withName { "$it.tmpl" })
-    val action = if (fs.exists(targetPath)) "Updating" else "Creating new"
-    log.i("$action gradlew file: $targetPath")
-    fs.writeByteString(targetPath, content)
+    val oldContent = fs.readByteString(targetPath)
+    val newContent = RESOURCES.readByteString("/templates".toPath() / gradlewRelPath.withName { "$it.tmpl" })
+    if (oldContent == newContent) log.i("Skipping already updated gradlew file: $targetPath")
+    else {
+      val action = if (fs.exists(targetPath)) "Updating" else "Creating new"
+      log.i("$action gradlew file: $targetPath")
+      fs.writeByteString(targetPath, newContent)
+    }
   }
 
 
