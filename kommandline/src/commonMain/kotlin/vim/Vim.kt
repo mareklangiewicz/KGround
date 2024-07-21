@@ -290,6 +290,9 @@ data class XVim(
   override val name get() = type.name
   override val args get() = options.flatMap { it.str } + files
 
+  // TODO_someday: Go through all :h starting.txt in NVim, and make sure, we have all options here
+  // (I skipped some for now) (annotate which are NotPortableApi)
+
   sealed class Option(val name: String, val arg: String? = null) {
 
     // important: name and arg has to be separate in XVim.args - for Kommand.ax to work correctly
@@ -413,6 +416,12 @@ data class XVim(
      * Useful to see if a problem reproduces with a clean Vim setup.
      */
     data object CleanMode : Option("--clean")
+
+    @NotPortableApi("NVim only.")
+    data object EmbedMode : Option("--embed")
+
+    @NotPortableApi("NVim only.")
+    data object HeadlessMode : Option("--headless")
 
     /** Skip loading plugins. Implied by -u NONE [VimRcNONE]. */
     data object NoPluginMode : Option("--noplugin")
