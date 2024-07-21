@@ -16,9 +16,13 @@ import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.ure.UReplacement
 
 
-@ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean) =
+/**
+ * My reproducers most of the time have nothing to do with gradle version, so it's nice to have gradle updated there,
+ * but sometimes they depend on gradle version, so each update have to be checked/reproduced, before commiting/pushing.
+ */
+@ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, skipReproducers: Boolean) =
   getMyGradleProjectsPathS(onlyPublic).collect {
-    updateGradlewFilesInProject(it)
+    if (!skipReproducers || it.name != "reproducers") updateGradlewFilesInProject(it)
   }
 
 @ExampleApi suspend fun updateGradlewFilesInKotlinProject(projectName: String) =

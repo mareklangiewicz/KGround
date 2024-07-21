@@ -99,7 +99,7 @@ object MyWorkflowsExamples {
 
   suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")
 
-  suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false)
+  suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false, skipReproducers = true)
 }
 
 @OptIn(ExperimentalApi::class)
