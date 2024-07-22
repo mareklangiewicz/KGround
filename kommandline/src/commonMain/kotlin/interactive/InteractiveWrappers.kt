@@ -59,7 +59,7 @@ suspend fun Kommand.lxInteractiveTry(
   val submit = implictx<USubmit>()
   if (submit.askIf(confirmation)) {
     val k = when {
-      insideBash -> bash(this, pauseBeforeExit)
+      insideBash -> inBash(pauseBeforeExit)
       pauseBeforeExit -> bad { "Can not pause before exit if not using bash shell" }
       else -> this
     }

@@ -6,18 +6,35 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
 
+
+@OptIn(DelicateApi::class)
+fun Kommand.inTermKitty(
+  one: Boolean = false,
+  detach: Boolean = true,
+  hold: Boolean = false,
+  startAs: StartAsType = StartAsType.normal,
+): TermKitty = termKitty(this, one, detach, hold, startAs)
+
 /**
  * [kitty homepage](https://sw.kovidgoyal.net/kitty/)
  * [kitty invocation syntax](https://sw.kovidgoyal.net/kitty/invocation/)
  * [kitty ubuntu man page for older ver](https://manpages.ubuntu.com/manpages/noble/man1/kitty.1.html)
+ * BTW [StartAsType.normal] is default so --start-as option is added only if changed to other type.
+ * BTW [StartAsType.fullscreen] also disables any transparency which can be nice f.e. to show sth like btop.
  */
 @OptIn(DelicateApi::class)
 fun termKitty(
   kommand: Kommand? = null,
-  one: Boolean = true,
+  one: Boolean = false,
   detach: Boolean = true,
   hold: Boolean = false,
-): TermKitty = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold }
+  startAs: StartAsType = StartAsType.normal,
+): TermKitty = termKitty(kommand) {
+  if (one) -One
+  if (detach) -Detach
+  if (hold) -Hold
+  if (startAs != StartAsType.normal) -StartAs(startAs)
+}
 
 @DelicateApi
 fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
@@ -71,6 +88,11 @@ interface TermKittyOpt : KOptTypical {
    * being created in the first kitty instance within that group.
    */
   data class OneInGroup(val group: String) : KOptL("instance-group", group, nameSeparator = " "), TermKittyOpt
+
+  @Suppress("EnumEntryName")
+  enum class StartAsType { normal, fullscreen, maximized, minimized }
+  data class StartAs(val type: StartAsType = StartAsType.normal) :
+    KOptL("start-as", type.name, nameSeparator = " "), TermKittyOpt
 
   data object Help : KOptS("h"), TermKittyOpt
   data object Version : KOptS("v"), TermKittyOpt

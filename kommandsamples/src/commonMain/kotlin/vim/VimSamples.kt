@@ -12,7 +12,7 @@ import pl.mareklangiewicz.kommand.find.myKommandLinePath
 import pl.mareklangiewicz.kommand.find.myTmpPath
 import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.kommand.term.termKitty
+import pl.mareklangiewicz.kommand.term.inTermKitty
 import pl.mareklangiewicz.kommand.vim.XVim.Option.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForNVim
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForVim
@@ -67,8 +67,8 @@ data object VimAdvancedSamples {
   /** Gvim will have all default look&feel (usually white background, small window, graphical menu, etc) */
   val gvimBlaSlowSCleanMode = gvimLineS(blaSlowS) { -CleanMode }
 
-  // TODO: better kitty integration (starting in existing kitty in new window/tab/etc..)
-  val nvimInKittyBashRc = termKitty(nvim("/home/marek/.bashrc"))
+  // TODO_someday: better kitty integration (starting in existing kitty in new window/tab/etc..)
+  val nvimInKittyBashRc = nvim("/home/marek/.bashrc").inTermKitty()
 
 
 

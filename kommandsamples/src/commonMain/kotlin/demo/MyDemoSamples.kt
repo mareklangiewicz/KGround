@@ -39,7 +39,8 @@ import pl.mareklangiewicz.kommand.reducedMap
 import pl.mareklangiewicz.kommand.reducedOutToList
 import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
-import pl.mareklangiewicz.kommand.term.termKitty
+import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
+import pl.mareklangiewicz.kommand.term.inTermKitty
 import pl.mareklangiewicz.kommand.vim.gvim
 import pl.mareklangiewicz.kommand.vim.gvimLines
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
@@ -67,11 +68,9 @@ data object MyDemoSamples {
   private val pathToTmpNotes = FS.pathToTmpNotes.toString() // FIXME: use Path type everywhere
   private val pathToUserTmp = FS.pathToUserTmp!!.toString() // FIXME: use Path type everywhere
 
-  val btop = btop() s
-    "btop"
+  val btop = btop() s "btop"
 
-  val btopK = termKitty(btop) s
-    "kitty -1 --detach -- btop"
+  val btopK = btop.inTermKitty(startAs = StartAsType.maximized) s "kitty --detach --start-as maximized -- btop"
 
   val manAllMan = man { -ManOpt.All; +"man" } s "man -a man"
 
@@ -79,12 +78,12 @@ data object MyDemoSamples {
 
   val manEntryPage = InteractiveScript {
     val page = getEntry("manual page for")
-    termKitty(man { +page }).ax()
+    man { +page }.inTermKitty().ax()
   }
 
   val manEntryAllPages = InteractiveScript {
     val pages = getEntry("manual pages from all sections for", "open")
-    termKitty(man { -ManOpt.All; +pages }).ax()
+    man { -ManOpt.All; +pages }.inTermKitty().ax()
   }
 
   val bashEchoXdgDesktop = bashEchoEnv("XDG_CURRENT_DESKTOP")
@@ -104,19 +103,18 @@ data object MyDemoSamples {
   val psAllGrepJava = bash("ps -e | grep java") s
     "bash -c ps -e | grep java"
 
-  val psAllGrepJavaK = termKitty(psAllGrepJava, hold = true) s
-    "kitty -1 --detach --hold -- bash -c ps -e | grep java"
+  val psAllGrepJavaK = psAllGrepJava.inTermKitty(hold = true) s "kitty --detach --hold -- bash -c ps -e | grep java"
 
   val psAllGrepEntry = InteractiveScript {
     val process = getEntry("find process")
-    termKitty(bash("ps -e | grep $process"), hold = true).ax()
+    bash("ps -e | grep $process").inTermKitty(hold = true).ax()
   }
 
   val catFstabAndHosts = cat { +"/etc/fstab"; +"/etc/hosts" } s
     "cat /etc/fstab /etc/hosts"
 
-  val catFstabAndHostsK = termKitty(catFstabAndHosts, hold = true) s
-    "kitty -1 --detach --hold -- cat /etc/fstab /etc/hosts"
+  val catFstabAndHostsK = catFstabAndHosts.inTermKitty(hold = true) s
+    "kitty --detach --hold -- cat /etc/fstab /etc/hosts"
 
   val ssTulpn = ssTulpn() s "ss --tcp --udp --listening --processes --numeric"
 

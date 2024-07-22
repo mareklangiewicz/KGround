@@ -14,7 +14,7 @@ fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
   }
 
 @DelicateApi
-fun Kommand.withBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
+fun Kommand.inBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
 
 @DelicateApi
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)

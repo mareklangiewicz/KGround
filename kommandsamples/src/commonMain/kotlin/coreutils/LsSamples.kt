@@ -43,8 +43,8 @@ data object LsSamples {
     "ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 
   // Notice: it should add colors because "ls" is called with terminal as stdout
-  val lsALotNicelyInTerm = termKitty(lsALotNicely, hold = true) s
-    "kitty -1 --detach --hold -- ls -A --color=always --author -l -h --sort=time /home/marek /usr"
+  val lsALotNicelyInTerm = lsALotNicely.inTermKitty(hold = true) s
+    "kitty --detach --hold -- ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 
   // Notice: it will NOT add colors because "ls" is called with file as stdout
   val lsALotNicelyInGVim = InteractiveScript {

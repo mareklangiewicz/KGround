@@ -6,6 +6,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.TermGnomeOpt.*
 
+@OptIn(DelicateApi::class)
+fun Kommand.inTermGnome(): TermGnome = termGnome(this)
+
 /** [gnome-terminal ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-terminal.1.html) */
 @OptIn(DelicateApi::class)
 fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}): TermGnome =
