@@ -12,6 +12,7 @@ import pl.mareklangiewicz.kommand.find.myKommandLinePath
 import pl.mareklangiewicz.kommand.find.myTmpPath
 import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
 import pl.mareklangiewicz.kommand.term.inTermKitty
 import pl.mareklangiewicz.kommand.vim.XVim.Option.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForNVim
@@ -24,17 +25,21 @@ val blaSlowS = blaS.map { delay(1000); it }
 @OptIn(DelicateApi::class)
 data object VimBasicSamples {
 
-  val vimHelp = vim { -Help } s
-    "vim -h"
+  val vimHelp = vim { -Help } s "vim -h"
 
-  val vimVersion = vim { -Version } s
-    "vim --version"
+  val vimVersion = vim { -Version } s "vim --version"
 
-  val nvimVersion = nvim { -Version } s
-    "nvim --version"
+  val nvimVersion = nvim { -Version } s "nvim --version"
 
-  val nvimVerboseVersion = nvim { -Verbose(); -Version } s
-    "nvim -V --version"
+  val nvimVerboseVersion = nvim { -Verbose(); -Version } s "nvim -V --version"
+
+  val nvimManVim = nvimMan("vim") s "nvim -c hid Man vim"
+    // Note: it looks like lacking additional quotes around "hid Man vim",
+    // but the "hid Man vim" is passed as ONE argument to nvim so it's fine (no bash/shell is used here)
+
+  val nvimManManInFullTermKitty = nvimMan("man").inTermKitty(startAs = StartAsType.fullscreen)
+    // Note: here we're wrapping in kitty explicitly (in fullscreen, without hold),
+    // but sample nvimManVim will also use kitty if run via Main.kt:main:try-code (by default, with hold = true)
 
   val gvimBlaContent = gvimContent(blas.joinToString("\n"))
 

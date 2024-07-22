@@ -19,13 +19,16 @@ import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
  * so in that case, it's great default behavior, that vim tries to use stderr as input when stdin is used for content.
  */
 @DelicateApi("When opening stdin content, vim expects commands from (redirected) stderr!")
-fun vimStdIn(init: XVim.() -> Unit = {}) = vim("-", init = init)
+fun vimStdIn(init: XVim.() -> Unit = {}): XVim = vim("-", init = init)
 
-fun gvimStdIn(init: XVim.() -> Unit = {}) = gvim("-", init = init)
+fun gvimStdIn(init: XVim.() -> Unit = {}): XVim = gvim("-", init = init)
 
-fun nvimStdIn(init: XVim.() -> Unit = {}) = nvim("-", init = init)
+fun nvimStdIn(init: XVim.() -> Unit = {}): XVim = nvim("-", init = init)
 
-// TODO NOW: quick way to open man in nvim+kitty (using nvim builtin :Man support)
+fun nvimMan(manpage: String, section: ManSection? = null): XVim = nvim {
+  val cmd = section?.number?.let { "hid Man $it $manpage" } ?: "hid Man $manpage"
+  -ExCmd(cmd)
+}
 
 /** GVim can display 'reading from stdin...' until it reads full [inLineS] flow and only then show the full content */
 fun gvimLineS(inLineS: Flow<String>, init: XVim.() -> Unit = {}) = ReducedScript {
