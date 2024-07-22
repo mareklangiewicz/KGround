@@ -5,9 +5,16 @@ package pl.mareklangiewicz.kommand.term
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 
+/**
+ * Marker for [Kommand] that starts new terminal emulator.
+ * Sometimes useful to dynamically decide how to launch some kommand in terminal.
+ * To avoid wrapping terminal kommand in another terminal kommand.
+ */
+interface TermKommand : Kommand
+
 /** [debian packages providing x-terminal-emulator](https://packages.debian.org/stable/virtual/x-terminal-emulator) */
 @OptIn(DelicateApi::class)
-fun termXDefault(kommand: Kommand? = null, init: TermXDefault.() -> Unit = {}) = TermXDefault().apply {
+fun termXDefault(kommand: Kommand? = null, init: TermXDefault.() -> Unit = {}): TermXDefault = TermXDefault().apply {
   init()
   kommand?.let { -KOptL(""); nonopts.addAll(kommand.toArgs()) }
   // I assume the "--" separator support. It works at least for gnome-term and kitty,
@@ -19,7 +26,7 @@ fun termXDefault(kommand: Kommand? = null, init: TermXDefault.() -> Unit = {}) =
 data class TermXDefault(
   override val opts: MutableList<KOptTypical> = mutableListOf(),
   override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<KOptTypical> {
+) : KommandTypical<KOptTypical>, TermKommand {
   override val name get() = "x-terminal-emulator"
 }
 

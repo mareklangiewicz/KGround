@@ -8,7 +8,7 @@ import pl.mareklangiewicz.kommand.term.TermGnomeOpt.*
 
 /** [gnome-terminal ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-terminal.1.html) */
 @OptIn(DelicateApi::class)
-fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}) =
+fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}): TermGnome =
   TermGnome().apply {
     init()
     kommand?.let { -EOOpt; nonopts.addAll(kommand.toArgs()) }
@@ -19,7 +19,7 @@ fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}) =
 data class TermGnome(
   override val opts: MutableList<TermGnomeOpt> = mutableListOf(),
   override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<TermGnomeOpt> {
+) : KommandTypical<TermGnomeOpt>, TermKommand {
   override val name get() = "gnome-terminal"
 }
 

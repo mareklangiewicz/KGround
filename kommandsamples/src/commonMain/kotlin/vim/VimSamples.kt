@@ -68,7 +68,7 @@ data object VimAdvancedSamples {
   val gvimBlaSlowSCleanMode = gvimLineS(blaSlowS) { -CleanMode }
 
   // TODO: better kitty integration (starting in existing kitty in new window/tab/etc..)
-  val nvimInKittyBashRc = termKitty(nvim("~/.bashrc"))
+  val nvimInKittyBashRc = termKitty(nvim("/home/marek/.bashrc"))
 
 
 

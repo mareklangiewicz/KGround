@@ -11,14 +11,11 @@ import pl.mareklangiewicz.kground.io.implictx
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.vim.*
-import pl.mareklangiewicz.kommand.term.termXDefault
+import pl.mareklangiewicz.kommand.term.*
 import pl.mareklangiewicz.uctx.uctx
-import pl.mareklangiewicz.ulog.ULog
-import pl.mareklangiewicz.ulog.ULogPrintLn
-import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.implictx
-import pl.mareklangiewicz.ulog.w
+import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.usubmit.*
 import pl.mareklangiewicz.usubmit.implictx
 import pl.mareklangiewicz.usubmit.xd.*
@@ -51,12 +48,13 @@ fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockin
 }
 
 @DelicateApi("API for manual interactive experimentation; can ignore the this kommand.")
-suspend fun Kommand.tryInteractivelyStartInTerm(
-  confirmation: String = "Start ::${line()}:: in terminal?",
-  insideBash: Boolean = true,
+suspend fun Kommand.lxInteractiveTry(
+  confirmation: String = "Start ::${line()}::?",
+  insideBash: Boolean = this !is TermKommand,
+  insideTerm: Boolean = this !is TermKommand,
   pauseBeforeExit: Boolean = insideBash,
   startInDir: String? = null,
-  termKommand: (innerKommand: Kommand) -> Kommand = { termXDefault(it) },
+  optTermWrap: (innerKommand: Kommand) -> Kommand = { termXDefault(it) },
 ) = ifInteractiveCodeEnabled {
   val submit = implictx<USubmit>()
   if (submit.askIf(confirmation)) {
@@ -66,14 +64,14 @@ suspend fun Kommand.tryInteractivelyStartInTerm(
       else -> this
     }
     val cli = implictx<CLI>()
-    cli.lx(termKommand(k), dir = startInDir)
+    cli.lx(if (insideTerm) optTermWrap(k) else k, dir = startInDir)
   }
 }
 
 
 @Suppress("FunctionName")
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend () -> ReducedOut) =
+inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend () -> ReducedOut): ReducedScript<Unit> =
   ReducedScript { ifInteractiveCodeEnabled { ax() } }
 
 // FIXME NOW: I want more InteractiveScripts in Samples instead of "tests" with weird logic when to skip them
@@ -105,11 +103,11 @@ internal fun runBlockingWithCLIAndULogOnJvmOnly(
 
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null) =
+fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, execInDir: String? = null): ReducedScript<Unit> =
   InteractiveScript {
-    log.d(lineRaw())
+    log.i(lineRaw())
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    tryInteractivelyStartInTerm(startInDir = execInDir)
+    lxInteractiveTry(startInDir = execInDir)
   }
 
 

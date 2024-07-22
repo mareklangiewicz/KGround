@@ -17,7 +17,7 @@ fun termKitty(
   one: Boolean = true,
   detach: Boolean = true,
   hold: Boolean = false,
-) = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold }
+): TermKitty = termKitty(kommand) { if (one) -One; if (detach) -Detach; if (hold) -Hold }
 
 @DelicateApi
 fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
@@ -38,7 +38,7 @@ fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
 data class TermKitty(
   override val opts: MutableList<TermKittyOpt> = mutableListOf(),
   override val nonopts: MutableList<String> = mutableListOf(),
-) : KommandTypical<TermKittyOpt> {
+) : KommandTypical<TermKittyOpt>, TermKommand {
   override val name get() = "kitty"
 }
 
