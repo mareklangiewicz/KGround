@@ -1,9 +1,10 @@
 @file:Suppress("unused", "ClassName")
 
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.shell
 
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kommand.*
 
 @DelicateApi
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
@@ -42,11 +43,11 @@ fun bashGetExportsToFile(outFile: String) =
 // TODO_someday: better bash composition support; make sure I correctly 'quote' stuff when composing Kommands with Bash
 // https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Quoting
 // TODO_maybe: typesafe DSL for composing bash scripts? (similar to URE)
-// TODO NOW: mark all lowlevel stuff as delicate api; default api should always fail fast, for example:
+// TODO NOW: mark all low-level stuff as delicate api; default api should always fail fast, for example:
 //  - always check weird filenames (like with \n)
-//  - bash -c more than one nonopt (is confusing and should be opt in)
-//  - ssh host command separatearg (instead of ssh host "command arg") is delicate
-//    because it always concatenate separatearg with just space and send to remote shell as one script
+//  - bash -c more than one non-opt (is confusing and should be opt in)
+//  - ssh host command separate-arg (instead of ssh host "command arg") is delicate
+//    because it always concatenate separate-arg with just space and send to remote shell as one script
 //  - generally all direct manipulation of Kommand classes should be marked as @DelicateApi!
 @DelicateApi
 data class Bash(
@@ -72,7 +73,7 @@ interface BashOpt : KOptTypical {
    * if the -s option is present, or if no arguments remain after option processing,
    * then commands are read from the standard input.
    * This option allows the positional parameters to be set
-   * when invoking an interactiveshell or when reading input through a pipe.
+   * when invoking an interactive shell or when reading input through a pipe.
    */
   data object Stdin : BashOpt, KOptS("s")
   data object Posix : BashOpt, KOptL("posix")

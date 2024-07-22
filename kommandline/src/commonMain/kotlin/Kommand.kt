@@ -5,6 +5,7 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kommand.shell.bashQuoteMetaChars
 
 /**
  * Anonymous kommand to use only if no more specific Kommand class defined

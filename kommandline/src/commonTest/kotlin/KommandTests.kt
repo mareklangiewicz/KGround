@@ -20,6 +20,7 @@ import pl.mareklangiewicz.bad.chkThrows
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.shell.bashQuoteMetaChars
 import pl.mareklangiewicz.kommand.konfig.IKonfig
 import pl.mareklangiewicz.kommand.konfig.konfigInDir
 import pl.mareklangiewicz.uctx.uctx

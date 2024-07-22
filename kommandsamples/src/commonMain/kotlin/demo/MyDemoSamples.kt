@@ -15,10 +15,7 @@ import pl.mareklangiewicz.kommand.vim.XVim
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.ax
-import pl.mareklangiewicz.kommand.bash
-import pl.mareklangiewicz.kommand.bashEchoEnv
-import pl.mareklangiewicz.kommand.bashGetExportsMap
-import pl.mareklangiewicz.kommand.bashGetExportsToFile
+import pl.mareklangiewicz.kommand.shell.*
 import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.find.findBoringCodeDirsAndReduceAsExcludedFoldersXml
 import pl.mareklangiewicz.kommand.find.myKotlinPath
