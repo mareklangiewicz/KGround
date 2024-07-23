@@ -20,8 +20,8 @@ val enablePublishing = findProject(":kommandline") == null && findProject(":komm
 // modules (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
 // exception: publishToMavenLocal for debugging
 
-rootExtString["verKommand"] = "0.0.72" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-rootExtString["verKGround"] = "0.0.68" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+rootExtString["verKommand"] = "0.0.73" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
+rootExtString["verKGround"] = "0.0.69" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 // Note: verKGround needed too because if we include local kommandline, then that build can look for it.
 
 
