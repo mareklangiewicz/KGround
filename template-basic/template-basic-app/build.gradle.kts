@@ -350,7 +350,7 @@ fun Project.defaultBuildTemplateForBasicMppApp(
   extensions.configure<KotlinMultiplatformExtension> {
     if (details.settings.withJvm) jvm {
       mainRun {
-        mainClass.set(details.run { "$appMainPackage.$appMainClass" })
+        mainClass = details.run { "$appMainPackage.$appMainClass" }
         println("MPP App ${project.name}: MPP plugin (without compose) creates only jvmRun task (also experimental).")
         println("MPP App ${project.name}: Workaround to generate jvm binary: separate kotlin(jvm)+application module.")
         // see also:

@@ -278,7 +278,7 @@ fun Project.defaultBuildTemplateForBasicJvmApp(
 ) {
   defaultBuildTemplateForBasicJvmLib(details, ignoreCompose, ignoreAndroTarget, addJvmDependencies)
   extensions.configure<JavaApplication> {
-    mainClass.set(details.run { "$appMainPackage.$appMainClass" })
+    mainClass = details.run { "$appMainPackage.$appMainClass" }
   }
 }
 

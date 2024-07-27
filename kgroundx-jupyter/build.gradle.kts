@@ -63,7 +63,7 @@ kotlin {
 }
 
 application {
-  mainClass.set("pl.mareklangiewicz.kgroundx.jupyter.MainKt")
+  mainClass = "pl.mareklangiewicz.kgroundx.jupyter.MainKt"
 }
 
 tasks.processJupyterApiResources {
