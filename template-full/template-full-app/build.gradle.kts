@@ -395,8 +395,11 @@ fun Project.defaultBuildTemplateForBasicMppApp(
     if (details.settings.withJvm) jvm {
       mainRun {
         mainClass = details.run { "$appMainPackage.$appMainClass" }
-        println("MPP App ${project.name}: MPP plugin (without compose) creates only jvmRun task (also experimental).")
-        println("MPP App ${project.name}: Workaround to generate jvm binary: separate kotlin(jvm)+application module.")
+        logger.info("MPP App ${project.name}: MPP plugin (without compose) just adds jvmRun task (experimental). No executable.")
+        // Workaround to generate jvm binary: Separate jvm module with plugAll(plugs.KotlinJvm, plugs.JvmApp)
+        // As Gradle/KMP warning says (when trying to combine KotlinMulti with JvmApp):
+        // w: 'application' (also applies 'java' plugin) Gradle plugin is not compatible with 'org.jetbrains.kotlin.multiplatform' plugin.
+        // Consider adding a new subproject with 'application' plugin where the KMP project is added as a dependency.
         // see also:
         // https://youtrack.jetbrains.com/issue/KT-45038
         // https://youtrack.jetbrains.com/issue/KT-31424
