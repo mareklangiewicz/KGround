@@ -13,28 +13,9 @@ plugins {
     plugs.KotlinMulti,
     plugs.MavenPublish,
     plugs.Signing,
-    // plugs.Ktor,
+    plugs.Ktor,
     plugs.KotlinJupyter,
-
-    )
-
-
-  id("io.ktor.plugin") version "2.3.6"
-  /*
-  FIXME: ktor 3.0.0-beta-1 from deps .61 gives me error, when syncing, so I have to use ktor 2.3.6
-
-org.gradle.api.plugins.UnknownPluginException: Plugin [id: 'io.ktor.plugin', version: '3.0.0-beta-1'] was not found in any of the following sources:
-
-- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
-- Plugin Repositories (could not resolve plugin artifact 'io.ktor.plugin:io.ktor.plugin.gradle.plugin:3.0.0-beta-1')
-Searched in the following repositories:
-  Gradle Central Plugin Repository
-  Google
-  MavenRepo
-at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator.resolveToFoundResult(DefaultPluginRequestApplicator.java:275)
-at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator.lambda$resolvePluginRequests$3(DefaultPluginRequestApplicator.java:200)
-...
-   */
+  )
 }
 
 // endregion [Custom MPP Lib Build Imports and Plugs]
