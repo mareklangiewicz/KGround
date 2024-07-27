@@ -7,6 +7,7 @@ import pl.mareklangiewicz.deps.*
 
 plugins {
   plug(plugs.KotlinMulti) apply false
+  plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false
   plug(plugs.ComposeJb) apply false
   plug(plugs.AndroLib) apply false

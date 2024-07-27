@@ -408,7 +408,7 @@ fun Project.defaultBuildTemplateForBasicMppApp(
     if (details.settings.withNativeLinux64) linuxX64 {
       binaries {
         executable {
-          entryPoint = "${details.appMainPackage}.${details.appMainFun}"
+          entryPoint = details.run { "$appMainPackage.$appMainFun" }
         }
       }
     }
