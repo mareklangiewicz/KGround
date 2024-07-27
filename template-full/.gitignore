@@ -5,5 +5,6 @@
 /build
 /template-full-lib/build
 /template-full-app/build
+/template-full-jvm-cli-app/build
 /captures
 my.gradle.log

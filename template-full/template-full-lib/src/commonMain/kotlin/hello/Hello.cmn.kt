@@ -31,6 +31,15 @@ fun helloSomeHtml(): String =
   }
     .also { println(it) }
 
+fun helloAllTogetherForFullCli(hint: String) {
+  println("helloAllTogetherForFullCli begin ($hint)")
+  helloCommon()
+  helloPlatform()
+  helloSomeHtml()
+  println("helloAllTogetherForFullCli end ($hint)")
+}
+
+
 /** Wrapped with full screen surface as background (so it obeys the theme color) */
 @Composable fun HelloComposableFull(name: String) =
   Surface(Mod.fillMaxSize()) { HelloComposable(name) }
@@ -46,4 +55,3 @@ fun helloSomeHtml(): String =
     Text(helloEveryOneWithSomeHtml())
   }
 }
-

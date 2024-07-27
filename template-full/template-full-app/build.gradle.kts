@@ -393,15 +393,14 @@ fun Project.defaultBuildTemplateForBasicMppApp(
   )
   extensions.configure<KotlinMultiplatformExtension> {
     if (details.settings.withJvm) jvm {
-      println("MPP App ${project.name}: Generating general jvm executables with kotlin multiplatform plugin is not supported (without compose).")
-      // TODO_someday: Will they support multiplatform way of declaring jvm app?
-      // binaries.executable()
-      // UPDATE:TODO_later: analyze experimental: mainRun {  } it doesn't work yet (compilation fails) even though IDE recognizes it
-      // for now workaround is: kotlin { jvm { withJava() } }; application { mainClass.set("...") }
-      // but I don't want to include such old dsl in this default fun.
-      // see also:
-      // https://youtrack.jetbrains.com/issue/KT-45038
-      // https://youtrack.jetbrains.com/issue/KT-31424
+      mainRun {
+        mainClass = details.run { "$appMainPackage.$appMainClass" }
+        println("MPP App ${project.name}: MPP plugin (without compose) creates only jvmRun task (also experimental).")
+        println("MPP App ${project.name}: Workaround to generate jvm binary: separate kotlin(jvm)+application module.")
+        // see also:
+        // https://youtrack.jetbrains.com/issue/KT-45038
+        // https://youtrack.jetbrains.com/issue/KT-31424
+      }
     }
     if (details.settings.withJs) js(IR) {
       binaries.executable()
@@ -542,7 +541,7 @@ fun Project.defaultBuildTemplateForComposeMppApp(
   if (details.settings.withJvm) {
     compose.desktop {
       application {
-        mainClass = "${details.appMainPackage}.${details.appMainClass}"
+        mainClass = details.run { "$appMainPackage.$appMainClass" }
         nativeDistributions {
           targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb)
           packageName = details.name

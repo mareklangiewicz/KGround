@@ -3,16 +3,11 @@ package pl.mareklangiewicz.templatefull
 import androidx.compose.ui.window.*
 
 fun main() {
-  mainCli()
-  mainComposeApp() // comment this out to pretend it's just cli app
-}
+  helloAllTogetherForFullCli("Full MPP App")
 
-fun mainCli() {
-  println("mainCli begin")
-  helloCommon()
-  helloPlatform()
-  helloSomeHtml()
-  println("mainCli end")
+  mainComposeApp()
+    // BTW: comment this out to pretend it's just cli app, but it's better to have separate small jvm module,
+    // for pure cli app without compose if needed (see: template-full-jvm-cli-app)
 }
 
 fun mainComposeApp() = application {
@@ -26,4 +21,3 @@ fun mainComposeApp() = application {
     }
   }
 }
-
