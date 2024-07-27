@@ -24,3 +24,12 @@ fun helloSomeHtml(): String =
     }
   }
     .also { println(it) }
+
+
+fun helloAllTogetherForBasicCli(hint: String) {
+  println("helloAllTogetherForBasicCli begin ($hint)")
+  helloCommon()
+  helloPlatform()
+  helloSomeHtml()
+  println("helloAllTogetherForBasicCli end ($hint)")
+}

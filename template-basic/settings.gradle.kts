@@ -51,3 +51,4 @@ rootProject.name = "template-basic"
 
 include(":template-basic-lib")
 include(":template-basic-app")
+include(":template-basic-jvm-app")
