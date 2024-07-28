@@ -8,5 +8,6 @@
 /kommandsamples/build
 /kommandsamples/src/test/kotlin/demos/*REPL.kt
 /kommandjupyter/build
-/kommandjupyter/src/jvmMain/kotlin/gitignored
+/kommandapp/build
+/kommandapp/src/main/kotlin/gitignored
 my.gradle.log

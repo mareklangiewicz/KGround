@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kommand.jupyter
+package pl.mareklangiewicz.kommandline
 
 import kotlinx.coroutines.*
 import pl.mareklangiewicz.annotations.*

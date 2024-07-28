@@ -57,6 +57,7 @@ develocity {
 include(":kommandline")
 include(":kommandsamples")
 include(":kommandjupyter")
+include(":kommandapp")
 
 val kgroundDir = File(rootDir, "../KGround/kground").normalize()
 val kgroundIoDir = File(rootDir, "../KGround/kground-io").normalize()

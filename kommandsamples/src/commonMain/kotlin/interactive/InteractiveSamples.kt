@@ -24,9 +24,9 @@ import pl.mareklangiewicz.usubmit.xd.askIf
  * (see also IntelliJ action: CopyReference)
  * Usually it will be from samples/examples/demos, or from gitignored playground, like:
  * pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop
- * pl.mareklangiewicz.kommand.jupyter.PlaygroundKt#play
+ * pl.mareklangiewicz.kommand.app.Playground#play
  * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
- * The gradle kommandjupyter:run task is set up to run the main fun here.
+ * The gradle kommandapp:run task is set up to run the mainCodeExperiments fun here.
  */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips. Can easily call any code by reflection.")
@@ -35,13 +35,14 @@ suspend fun mainCodeExperiments(args: Array<String>) {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
   val cli = getSysCLI()
+  val a0 = args.firstOrNull()
   // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
-  uctxWithIO(log + submit + cli, name = args[0]) {
+  uctxWithIO(log + submit + cli, name = a0) {
     when {
-      args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
-      args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))
-      args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(cli, args[1], args[2].toBoolean())
-      else -> bad { "Incorrect args. See Main.kt:main" }
+      args.size == 2 && a0 == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
+      args.size == 2 && a0 == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))
+      args.size == 3 && a0 == "set-user-flag" -> setUserFlag(cli, args[1], args[2].toBoolean())
+      else -> bad { "Incorrect args. See KommandLine -> InteractiveSamples.kt -> mainCodeExperiments" }
     }
   }
 }
