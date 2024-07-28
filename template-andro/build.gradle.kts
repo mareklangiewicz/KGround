@@ -28,7 +28,7 @@ defaultBuildTemplateForRootProject(
       withTestJUnit5 = false,
       andro = LibAndroSettings(
         sdkCompilePreview = Vers.AndroSdkPreview,
-        publishVariant = "debug"
+        publishVariant = "debug",
       ),
     ),
   ),
