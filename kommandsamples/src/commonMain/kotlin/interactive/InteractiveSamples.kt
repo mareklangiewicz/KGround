@@ -1,22 +1,15 @@
 package pl.mareklangiewicz.interactive
 
-import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
-import pl.mareklangiewicz.kground.io.pathToTmpNotes
-import pl.mareklangiewicz.kommand.Kommand
-import pl.mareklangiewicz.kommand.ReducedScript
-import pl.mareklangiewicz.kommand.XClipSelection
-import pl.mareklangiewicz.kommand.ax
-import pl.mareklangiewicz.kommand.ideOrGVimOpen
-import pl.mareklangiewicz.kommand.lineRawOrNull
+import pl.mareklangiewicz.kground.io.*
+import pl.mareklangiewicz.kgroundx.maintenance.*
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.kommand.writeFileWithDD
-import pl.mareklangiewicz.kommand.xclipOut
+import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.hack.*
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.implictx
 import pl.mareklangiewicz.ure.*
@@ -25,6 +18,33 @@ import pl.mareklangiewicz.usubmit.USubmit
 import pl.mareklangiewicz.usubmit.implictx
 import pl.mareklangiewicz.usubmit.xd.askIf
 
+/**
+ * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
+ * So this fun (called from main fun) allows invoking any code pointed by reference or clipboard (containing reference)
+ * (see also IntelliJ action: CopyReference)
+ * Usually it will be from samples/examples/demos, or from gitignored playground, like:
+ * pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop
+ * pl.mareklangiewicz.kommand.jupyter.PlaygroundKt#play
+ * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
+ * The gradle kommandjupyter:run task is set up to run the main fun here.
+ */
+@NotPortableApi
+@DelicateApi("API for manual interactive experimentation. Conditionally skips. Can easily call any code by reflection.")
+@ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
+suspend fun mainCodeExperiments(args: Array<String>) {
+  val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
+  val submit = ZenitySupervisor()
+  val cli = getSysCLI()
+  // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
+  uctxWithIO(log + submit + cli, name = args[0]) {
+    when {
+      args.size == 2 && args[0] == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
+      args.size == 2 && args[0] == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))
+      args.size == 3 && args[0] == "set-user-flag" -> setUserFlag(cli, args[1], args[2].toBoolean())
+      else -> bad { "Incorrect args. See Main.kt:main" }
+    }
+  }
+}
 
 /**
  * @param reference Either "xclip", or reference in format like from IntelliJ:CopyReference action.
