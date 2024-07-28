@@ -55,6 +55,7 @@ include(":kground-io")
 include(":kgroundx-io")
 include(":kgroundx-maintenance")
 include(":kgroundx-jupyter")
+include(":kgroundx-app")
 
 
 val kommandlineDir = File(rootDir, "../KommandLine/kommandline").normalize()
