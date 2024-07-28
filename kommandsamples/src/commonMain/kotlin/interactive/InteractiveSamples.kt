@@ -1,51 +1,16 @@
 package pl.mareklangiewicz.interactive
 
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.bad.bad
-import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.*
-import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.udata.*
-import pl.mareklangiewicz.ulog.ULog
-import pl.mareklangiewicz.ulog.hack.*
-import pl.mareklangiewicz.ulog.i
-import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
-import pl.mareklangiewicz.ureflect.getReflectCallOrNull
-import pl.mareklangiewicz.usubmit.USubmit
-import pl.mareklangiewicz.usubmit.implictx
-import pl.mareklangiewicz.usubmit.xd.askIf
+import pl.mareklangiewicz.ureflect.*
+import pl.mareklangiewicz.usubmit.*
+import pl.mareklangiewicz.usubmit.xd.*
 
-/**
- * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
- * So this fun (called from main fun) allows invoking any code pointed by reference or clipboard (containing reference)
- * (see also IntelliJ action: CopyReference)
- * Usually it will be from samples/examples/demos, or from gitignored playground, like:
- * pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop
- * pl.mareklangiewicz.kommand.app.Playground#play
- * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
- * The gradle kommandapp:run task is set up to run the mainCodeExperiments fun here.
- */
-@NotPortableApi
-@DelicateApi("API for manual interactive experimentation. Conditionally skips. Can easily call any code by reflection.")
-@ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-suspend fun mainCodeExperiments(args: Array<String>) {
-  val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
-  val submit = ZenitySupervisor()
-  val cli = getSysCLI()
-  val a0 = args.firstOrNull()
-  // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
-  uctxWithIO(log + submit + cli, name = a0) {
-    when {
-      args.size == 2 && a0 == "try-code" -> withLogBadStreams { tryInteractivelySomethingRef(args[1]) }
-      args.size == 2 && a0 == "get-user-flag" -> log.i(getUserFlagFullStr(cli, args[1]))
-      args.size == 3 && a0 == "set-user-flag" -> setUserFlag(cli, args[1], args[2].toBoolean())
-      else -> bad { "Incorrect args. See KommandLine -> InteractiveSamples.kt -> mainCodeExperiments" }
-    }
-  }
-}
 
 /**
  * @param reference Either "xclip", or reference in format like from IntelliJ:CopyReference action.

@@ -18,7 +18,6 @@ plugins {
 
 defaultBuildTemplateForBasicJvmApp {
   implementation(project(":kommandjupyter"))
-  // implementation(Kotlin.reflect)
 }
 
 setMyWeirdSubstitutions(
