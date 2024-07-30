@@ -17,7 +17,6 @@ internal class Integration : JupyterIntegration() {
     //   maybe high-level fun stuff up to pl.mareklangiewicz.kommand package??
     import("pl.mareklangiewicz.kommand.*")
     import("pl.mareklangiewicz.kommand.core.*")
-    import("pl.mareklangiewicz.kommand.CLI.Companion.SYS")
     import("pl.mareklangiewicz.kommand.find.*")
     import("pl.mareklangiewicz.kommand.github.*")
   }
@@ -117,5 +116,5 @@ fun Kommand.axb(
  * Blocking flavor of fun ReducedKommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <ReducedOut> ReducedKommand<ReducedOut>.axb(dir: String? = null): ReducedOut =
-  runBlocking { ax(dir = dir) }
+fun <ReducedOut> ReducedKommand<ReducedOut>.axb(cli: CLI = getSysCLI(), dir: String? = null): ReducedOut =
+  runBlocking { uctx(cli) { ax(dir = dir) } }
