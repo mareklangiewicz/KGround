@@ -10,9 +10,8 @@ import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
 import pl.mareklangiewicz.kommand.reducedOutToFlow
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.i
-import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.ulog.localULog
 
 @OptIn(ExperimentalCoroutinesApi::class)
 data object GnomeSamples {
@@ -26,7 +25,7 @@ data object GnomeSamples {
   val listCalendarActions = gnomeapp(ListActions("org.gnome.Calendar")) s "gapplication list-actions org.gnome.Calendar"
 
   val listAllAppsActions = ReducedScript {
-    val log = implictx<ULog>()
+    val log = localULog()
     gnomeapp(ListApps)
       .reducedOutToFlow().ax()
       .onEachLog(log, timed = false)

@@ -4,7 +4,9 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kground.io.localUWorkDirOrNull
 
 /**
  * Separate from Kommand, because I want Kommand to be simple and serializable!
@@ -78,13 +80,13 @@ suspend fun TypedExecProcess<*, *, *>.awaitAndChkExitIgnoringStdErr(
 ) = awaitExit(finallyClose).chkExit(testExit)
 
 /**
- * @param dir working directory for started subprocess - null means inherit from the current process
+ * @param workDir working directory for started subprocess - null means inherit from the current process
  */
 fun <K : Kommand, In, Out, Err> CLI.lx(
   kommand: TypedKommand<K, In, Out, Err>,
-  dir: String? = null,
+  workDir: Path? = null,
 ) = TypedExecProcess(
-  eprocess = lx(kommand = kommand.kommand, dir = dir, errToOut = kommand.stderrToOut),
+  eprocess = lx(kommand = kommand.kommand, workDir = workDir, errToOut = kommand.stderrToOut),
   stdinRetype = kommand.stdinRetype,
   stderrRetype = kommand.stderrRetype,
   stdoutRetype = kommand.stdoutRetype,
@@ -101,23 +103,20 @@ fun <K : Kommand, In, Out, Err> CLI.lx(
 //   Then ReducedKommandMap, etc. would also be just a specific form of ReducedScript.
 
 fun interface ReducedScript<ReducedOut> {
-  // TODO_maybe: dir should probably be inside CLI as val currentDir.
-  //   and maybe sth like CLI.withCurrentDir(dir, code:...) (or rather with context receivers)
-  suspend fun ax(dir: String?): ReducedOut
+  suspend fun ax(): ReducedOut
   // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
 }
-
-suspend fun <ReducedOut> ReducedScript<ReducedOut>.ax() = ax(dir = null)
 
 interface ReducedKommand<ReducedOut> : ReducedScript<ReducedOut>
 
 internal class ReducedKommandImpl<K : Kommand, In, Out, Err, ReducedOut>(
   val typedKommand: TypedKommand<K, In, Out, Err>,
-  val reduce: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
+  val reduceTEProcess: suspend TypedExecProcess<In, Out, Err>.() -> ReducedOut,
 ) : ReducedKommand<ReducedOut> {
-  override suspend fun ax(dir: String?): ReducedOut {
-    val cli = implictx<CLI>()
-    return reduce(cli.lx(typedKommand, dir))
+  override suspend fun ax(): ReducedOut {
+    val cli = localCLI()
+    val dir = localUWorkDirOrNull()
+    return reduceTEProcess(cli.lx(typedKommand, workDir = dir?.dir))
   }
 }
 
@@ -125,7 +124,7 @@ internal class ReducedKommandMap<InnerOut, MappedOut>(
   val reducedKommand: ReducedKommand<InnerOut>,
   val reduceMap: suspend InnerOut.() -> MappedOut,
 ) : ReducedKommand<MappedOut> {
-  override suspend fun ax(dir: String?): MappedOut = reducedKommand.ax(dir = dir).reduceMap()
+  override suspend fun ax(): MappedOut = reducedKommand.ax().reduceMap()
 }
 
 fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(

@@ -19,7 +19,7 @@ import pl.mareklangiewicz.usubmit.xd.*
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
-  val log = implictx<ULog>()
+  val log = localULog()
   log.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
     xclipOut(XClipSelection.Clipboard).ax().singleOrNull()
@@ -43,14 +43,14 @@ suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
-  val log = implictx<ULog>()
+  val log = localULog()
   log.i("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
   val call = getReflectCallOrNull(className, memberName) ?: return
   // Note: prepareCallFor fails early if member not found,
   // before we start to interact with the user,
   // but the code is never called without confirmation.
   ifInteractiveCodeEnabled {
-    val submit = implictx<USubmit>()
+    val submit = localUSubmit()
     submit.askIf("Call member $memberName\nfrom class $className?") || return
     val member: Any? = call()
     // Note: call() will either already "do the thing" (when the member is just a fun to call)
@@ -84,7 +84,7 @@ suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample() {
 suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
   question: String = "Exec ReducedScript ?",
 ) {
-  val submit = implictx<USubmit>()
+  val submit = localUSubmit()
   submit.askIf(question) || return
   val reducedOut = ax()
   reducedOut.tryOpenDataInIDEOrGVim("Open ReducedOut: ${reducedOut.about} in tmp.notes in IDE (if running) or in GVim ?")
@@ -93,9 +93,9 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 /** @param question null means default question */
 suspend fun Any?.tryOpenDataInIDEOrGVim(question: String? = null): Any {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
-  val submit = implictx<USubmit>()
+  val log = localULog()
+  val fs = localUFileSys()
+  val submit = localUSubmit()
   return when {
     this == null -> log.i("It is null. Nothing to open.")
     this is Unit -> log.i("It is Unit. Nothing to open.")

@@ -19,7 +19,7 @@ import pl.mareklangiewicz.kommand.zenity.*
 class ZenityTest {
   @Test fun testZenityEntryCheck() = zenity(Entry) { -Text("some question") }.tryInteractivelyCheckBlockingOrErr()
   @Test fun testZenityEntryStart() = ifInteractiveCodeEnabledBlockingOrErr {
-    val cli = implictx<CLI>()
+    val cli = localCLI()
     cli.lx(zenity(Entry) { -EntryText("suggested text") })
   }
 

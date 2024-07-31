@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import okio.Path
 import pl.mareklangiewicz.annotations.*
 
 
@@ -13,12 +14,12 @@ class NativeCLI : CLI {
   override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
-    dir: String?,
-    inFile: String?,
-    outFile: String?,
+    workDir: Path?,
+    inFile: Path?,
+    outFile: Path?,
     outFileAppend: Boolean,
     errToOut: Boolean,
-    errFile: String?,
+    errFile: Path?,
     errFileAppend: Boolean,
     envModify: (MutableMap<String, String>.() -> Unit)?,
   ): ExecProcess {

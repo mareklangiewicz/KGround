@@ -1,11 +1,11 @@
 package pl.mareklangiewicz.kommand
 
-import java.io.*
 import java.lang.ProcessBuilder.*
 import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 
@@ -18,12 +18,12 @@ class JvmCLI : CLI {
   override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
-    dir: String?,
-    inFile: String?,
-    outFile: String?,
+    workDir: Path?,
+    inFile: Path?,
+    outFile: Path?,
     outFileAppend: Boolean,
     errToOut: Boolean,
-    errFile: String?,
+    errFile: Path?,
     errFileAppend: Boolean,
     envModify: (MutableMap<String, String>.() -> Unit)?,
   ): ExecProcess =
@@ -31,15 +31,15 @@ class JvmCLI : CLI {
       ProcessBuilder()
         .apply {
           command(kommand.toArgs())
-          directory(dir?.let(::File))
-          inFile?.let(::File)?.let(::redirectInput)
+          directory(workDir?.toFile())
+          inFile?.toFile()?.let(::redirectInput)
           outFile ?: chk(!outFileAppend) { "No output file to append to" }
-          outFile?.let(::File)?.let {
+          outFile?.toFile()?.let {
             redirectOutput(if (outFileAppend) Redirect.appendTo(it) else Redirect.to(it))
           }
           redirectErrorStream(errToOut)
           errFile ?: chk(!errFileAppend) { "No error file to append to" }
-          errFile?.let(::File)?.let {
+          errFile?.toFile()?.let {
             redirectError(if (errFileAppend) Redirect.appendTo(it) else Redirect.to(it))
           }
           envModify?.let { environment().it() }

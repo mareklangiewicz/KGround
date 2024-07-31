@@ -3,14 +3,16 @@ package pl.mareklangiewicz.kommand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.kground.io.UWorkDir
+import pl.mareklangiewicz.kground.plusIfNN
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.uctx.uctx
-import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.e
-import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.ulog.localULog
 
 
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
@@ -50,7 +52,7 @@ suspend inline fun withLogBadStreams(
   skippedMarkersSuffix: String = " lines skipped",
   code: () -> Unit,
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   // Kotlin doesn't support local fun inside inline fun, or even private fun below in the same file,
   // that's the reason why logSome lambda is "val"
   val logSome: List<String>.(prefix: String) -> Unit = { prefix ->
@@ -109,14 +111,14 @@ expect fun <T> runBlockingOrErr(block: suspend CoroutineScope.() -> T): T
 fun Kommand.axBlockingOrErr(
   cli: CLI,
   vararg useNamedArgs: Unit,
-  dir: String? = null,
+  workDir: Path? = null,
   inContent: String? = null,
   inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
-  inFile: String? = null,
-  outFile: String? = null,
+  inFile: Path? = null,
+  outFile: Path? = null,
 ): List<String> = runBlockingOrErr {
-  uctx(cli) {
-    ax(dir = dir, inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
+  uctx(cli plusIfNN workDir?.let(::UWorkDir)) {
+    ax(inContent = inContent, inLineS = inLineS, inFile = inFile, outFile = outFile)
   }
 }
 
@@ -126,9 +128,7 @@ fun Kommand.axBlockingOrErr(
 fun <ReducedOut> ReducedScript<ReducedOut>.axBlockingOrErr(
   cli: CLI,
   vararg useNamedArgs: Unit,
-  dir: String? = null,
+  workDir: Path? = null,
 ): ReducedOut = runBlockingOrErr {
-  uctx(cli) {
-    ax(dir = dir)
-  }
+  uctx(cli plusIfNN workDir?.let(::UWorkDir)) { ax() }
 }

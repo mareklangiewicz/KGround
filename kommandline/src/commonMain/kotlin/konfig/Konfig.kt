@@ -11,7 +11,7 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
-import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.ulog.localULog
 import pl.mareklangiewicz.upue.IMutMap
 import pl.mareklangiewicz.upue.asCol
 
@@ -132,7 +132,7 @@ fun IKonfig.withChecks(
 fun konfigInFile(file: String, cli: CLI = getSysCLI()): IKonfig = TODO()
 
 suspend fun IKonfig.logEachKeyVal(level: ULogLevel = ULogLevel.INFO) {
-  val log = implictx<ULog>()
+  val log = localULog()
   keys.forEach { logKeyVal(log, level, it) }
 }
 

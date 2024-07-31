@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ulog.*
@@ -17,16 +18,16 @@ class JsEvalFunCLI(val log: ULog = UHackySharedFlowLog()) : CLI {
   override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
-    dir: String?,
-    inFile: String?,
-    outFile: String?,
+    workDir: Path?,
+    inFile: Path?,
+    outFile: Path?,
     outFileAppend: Boolean,
     errToOut: Boolean,
-    errFile: String?,
+    errFile: Path?,
     errFileAppend: Boolean,
     envModify: (MutableMap<String, String>.() -> Unit)?,
   ): ExecProcess {
-    req(dir == null) { "dir unsupported" }
+    req(workDir == null) { "workDir unsupported" }
     req(inFile == null) { "inFile unsupported" }
     req(outFile == null) { "outFile unsupported" }
     req(errFile == null) { "errFile unsupported" }

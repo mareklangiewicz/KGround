@@ -136,7 +136,7 @@ class KommandTests {
 
             "On konfig in tmpDir" so {
               val konfigNewDir = "$tmpDir/tmpKonfigForTests"
-              val konfig = konfigInDir(konfigNewDir, implictx())
+              val konfig = konfigInDir(konfigNewDir, localCLI())
 
               testGivenNewKonfigInDir(konfig, konfigNewDir)
             }

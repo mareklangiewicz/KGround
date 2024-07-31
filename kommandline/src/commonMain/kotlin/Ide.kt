@@ -13,6 +13,7 @@ import pl.mareklangiewicz.kommand.vim.gvim
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
+// FIXME NOW: use Path everywhere
 
 fun ideOpen(
   path1: String,
@@ -23,11 +24,11 @@ fun ideOpen(
   ifNoIdeRunningStart: Type? = null,
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
-fun ideOrGVimOpen(path: String) = ReducedScript { dir ->
+fun ideOrGVimOpen(path: String) = ReducedScript {
   try {
-    ideOpen(path).ax(dir = dir)
+    ideOpen(path).ax()
   } catch (_: BadStateErr) {
-    gvim(path).ax(dir = dir)
+    gvim(path).ax()
   }
 }
 
@@ -40,9 +41,9 @@ fun ideMerge(path1: String, path2: String, output: String, base: String? = null,
   ide(Cmd.Merge(path1, path2, output, base), ifNoIdeRunningStart)
 
 fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
-  ReducedScript { dir ->
+  ReducedScript {
     val type = getFirstRunningIdeType() ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
-    ide(type, cmd, init).ax(dir = dir)
+    ide(type, cmd, init).ax()
   }
 
 

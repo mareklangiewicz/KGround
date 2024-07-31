@@ -44,6 +44,7 @@ fun vim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.vim, 
 
 fun nvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.nvim, files.toMutableList()).apply(init)
 
+// FIXME NOW: use Path everywhere
 fun gvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.gvim, files.toMutableList()).apply(init)
 // TODO NOW: nvim, opening specific lines, opening in existing editor (is servername same as in vim?),
 //  combine with Ide as in kolib openInIdeOrGVim but better selecting (with nvim too)

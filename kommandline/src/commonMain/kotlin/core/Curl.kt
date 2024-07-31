@@ -15,7 +15,7 @@ suspend fun curlDownloadTmpFile(
   url: String,
   name: String = "tmp${Random.nextLong().absoluteValue}.txt",
 ): Path {
-  val fs = implictx<UFileSys>()
+  val fs = localUFileSys()
   val dir = fs.pathToSomeTmpOrHome
   val path = dir / name
   fs.createDirectories(dir)
@@ -27,8 +27,8 @@ suspend fun curlDownloadTmpFile(
 // TODO: Lazy/fast implementation; implement sth solid instead.
 @DelicateApi("TODO: implement some versatile version of downloading with curl instead.")
 suspend fun curlDownload(url: String, to: Path) {
-  val cli = implictx<CLI>()
-  val log = implictx<ULog>()
+  val cli = localCLI()
+  val log = localULog()
   // TODO: Add curl as Kommand, then use it here
   // -s so no progress bars on error stream; -S to report actual errors on error stream
   val k = kommand("curl", "-s", "-S", "-o", to.toString(), url)

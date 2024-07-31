@@ -42,11 +42,9 @@ import pl.mareklangiewicz.kommand.vim.gvim
 import pl.mareklangiewicz.kommand.vim.gvimLines
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowInfo
-import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.i
-import pl.mareklangiewicz.ulog.implictx
-import pl.mareklangiewicz.usubmit.USubmit
-import pl.mareklangiewicz.usubmit.implictx
+import pl.mareklangiewicz.ulog.localULog
+import pl.mareklangiewicz.usubmit.localUSubmit
 import pl.mareklangiewicz.usubmit.xd.askForEntry
 import pl.mareklangiewicz.usubmit.xd.showError
 
@@ -62,8 +60,8 @@ data object MyDemoSamples {
   // TODO: refactor
   private val SYS = getSysCLI()
   private val FS = getSysUFileSys()
-  private val pathToTmpNotes = FS.pathToTmpNotes.toString() // FIXME: use Path type everywhere
-  private val pathToUserTmp = FS.pathToUserTmp!!.toString() // FIXME: use Path type everywhere
+  private val pathToTmpNotes = FS.pathToTmpNotes
+  private val pathToUserTmp = FS.pathToUserTmp!!
 
   val btop = btop() s "btop"
 
@@ -133,12 +131,12 @@ data object MyDemoSamples {
   val ideOpenXClip = InteractiveScript {
     kommand("xclip", "-o").ax(outFile = pathToTmpNotes)
     // bash("xclip -o > ${SYS.pathToTmpNotes}").ax() // equivalent to above
-    ideOpen(pathToTmpNotes).ax()
+    ideOpen(pathToTmpNotes.toString()).ax()
   }
 
   val ideOpenBashExports = InteractiveScript {
-    bashGetExportsToFile(pathToTmpNotes).ax()
-    ideOpen(pathToTmpNotes).ax()
+    bashGetExportsToFile(pathToTmpNotes.toString()).ax()
+    ideOpen(pathToTmpNotes.toString()).ax()
   }
 
   val gvimShowBashExportsForLC = InteractiveScript {
@@ -175,7 +173,7 @@ data object MyDemoSamples {
 
   val interactiveCodeEnable = ReducedScript { setUserFlag(SYS, "code.interactive", true) }
   val interactiveCodeDisable = ReducedScript { setUserFlag(SYS, "code.interactive", false) }
-  val interactiveCodeLog = ReducedScript { implictx<ULog>().i(getUserFlagFullStr(SYS, "code.interactive")) }
+  val interactiveCodeLog = ReducedScript { localULog().i(getUserFlagFullStr(SYS, "code.interactive")) }
 
   // Note: NOT InteractiveScript because I want to be able to switch interactive code even when it's NOT enabled.
   val interactiveCodeSwitch = ReducedScript {
@@ -196,7 +194,7 @@ data object MyDemoSamples {
   }
 
   val playWithKonfigExamples = InteractiveScript {
-    val log = implictx<ULog>()
+    val log = localULog()
     val k = konfigInDir("/home/marek/tmp/konfig_examples", checkForDangerousValues = false)
     log.i("before adding anything:")
     k.logEachKeyVal()
@@ -225,7 +223,7 @@ data object MyDemoSamples {
 
 @OptIn(ExperimentalApi::class)
 private suspend fun getEntry(question: String, suggested: String = "", errorMsg: String = "User didn't answer."): String {
-  val submit = implictx<USubmit>()
+  val submit = localUSubmit()
   return submit.askForEntry(question, suggested) ?: run { submit.showError(errorMsg); bad { errorMsg } }
 }
 

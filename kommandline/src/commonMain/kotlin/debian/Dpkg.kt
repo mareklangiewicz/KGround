@@ -10,8 +10,8 @@ import pl.mareklangiewicz.kommand.*
  *  an empty list means dpkg haven't found any package containing command path
  */
 @OptIn(DelicateApi::class)
-fun searchCommand(command: String): ReducedScript<List<String>?> = ReducedScript { dir ->
-  val first = whichFirstOrNull(command).ax(dir = dir) ?: return@ReducedScript null
+fun searchCommand(command: String): ReducedScript<List<String>?> = ReducedScript {
+  val first = whichFirstOrNull(command).ax() ?: return@ReducedScript null
   dpkg(DpkgAct.Search(first)).ax()
 }
 

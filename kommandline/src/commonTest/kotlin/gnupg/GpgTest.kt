@@ -39,7 +39,7 @@ class GpgTest {
       gpgDecryptPass("correct pass", encFile, decFile).ax()
       val decrypted = readFileWithCat(decFile).ax().single()
       assertEquals("some plain text 667", decrypted)
-      val errCode = implictx<CLI>().lx(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
+      val errCode = localCLI().lx(gpgDecryptPass("incorrect pass", encFile, "$decFile.err")).waitForExit()
       assertEquals(2, errCode)
       rm { +inFile; +encFile; +decFile }.ax()
     }

@@ -2,9 +2,13 @@ package pl.mareklangiewicz.kommand.jupyter
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import okio.Path
 import org.jetbrains.kotlinx.jupyter.api.libraries.*
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.kground.io.UWorkDir
+import pl.mareklangiewicz.kground.io.localUWorkDirOrNull
+import pl.mareklangiewicz.kground.plusIfNN
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.uctx.uctx
 
@@ -31,27 +35,27 @@ fun Flow<*>.logb() = logEachBlocking()
  * BTW I don't want too many shortcut names inside kommandline itself, but here in kommandjupyter it's fine.
  */
 suspend fun Kommand.ax(
-  dir: String? = null,
   vararg useNamedArgs: Unit,
   inContent: String? = null,
   inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
-  inFile: String? = null,
-  outFile: String? = null,
+  inFile: Path? = null,
+  outFile: Path? = null,
   outFileAppend: Boolean = false,
   errToOut: Boolean = false,
-  errFile: String? = null,
+  errFile: Path? = null,
   errFileAppend: Boolean = false,
   expectedExit: ((Int) -> Boolean)? = { it == 0 },
   expectedErr: ((List<String>) -> Boolean)? = null,
   outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = coroutineScope {
-  val cli = implictx<CLI>()
+  val cli = localCLI()
   req(cli.isRedirectFileSupported || (inFile == null && outFile == null)) { "redirect file not supported here" }
   req(inLineS == null || inFile == null) { "Either inLineS or inFile or none, but not both" }
   req(outLinesCollector == null || outFile == null) { "Either outLinesCollector or outFile or none, but not both" }
+  val workDir = localUWorkDirOrNull()
   val eprocess = cli.lx(
     this@ax,
-    dir = dir,
+    workDir = workDir?.dir,
     inFile = inFile,
     outFile = outFile,
     outFileAppend = outFileAppend,
@@ -70,8 +74,8 @@ suspend fun Kommand.ax(
     .unwrap(expectedExit, expectedErr)
 }
 
-fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.lx(cli: CLI, dir: String? = null) =
-  cli.lx(this, dir)
+fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.lx(cli: CLI, workDir: Path? = null) =
+  cli.lx(this, workDir = workDir)
 
 /**
  * Blocking flavor of fun Kommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
@@ -80,23 +84,22 @@ fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.lx(cli: CLI, dir: 
 @OptIn(NotPortableApi::class)
 fun Kommand.axb(
   cli: CLI = getSysCLI(),
-  dir: String? = null,
+  workDir: Path? = null,
   vararg useNamedArgs: Unit,
   inContent: String? = null,
   inLineS: Flow<String>? = inContent?.lineSequence()?.asFlow(),
-  inFile: String? = null,
-  outFile: String? = null,
+  inFile: Path? = null,
+  outFile: Path? = null,
   outFileAppend: Boolean = false,
   errToOut: Boolean = false,
-  errFile: String? = null,
+  errFile: Path? = null,
   errFileAppend: Boolean = false,
   expectedExit: ((Int) -> Boolean)? = { it == 0 },
   expectedErr: ((List<String>) -> Boolean)? = { it.isEmpty() },
   outLinesCollector: FlowCollector<String>? = null,
 ): List<String> = runBlocking {
-  uctx(cli) {
+  uctx(cli plusIfNN workDir?.let(::UWorkDir)) {
     ax(
-      dir,
       inContent = inContent,
       inLineS = inLineS,
       inFile = inFile,
@@ -116,5 +119,5 @@ fun Kommand.axb(
  * Blocking flavor of fun ReducedKommand.ax(...). Will be deprecated when kotlin notebooks support suspending fun.
  * See: https://github.com/Kotlin/kotlin-jupyter/issues/239
  */
-fun <ReducedOut> ReducedKommand<ReducedOut>.axb(cli: CLI = getSysCLI(), dir: String? = null): ReducedOut =
-  runBlocking { uctx(cli) { ax(dir = dir) } }
+fun <ReducedOut> ReducedKommand<ReducedOut>.axb(cli: CLI = getSysCLI(), workDir: Path? = null): ReducedOut =
+  runBlocking { uctx(cli plusIfNN workDir?.let(::UWorkDir)) { ax() } }

@@ -48,9 +48,9 @@ data object LsSamples {
 
   // Notice: it will NOT add colors because "ls" is called with file as stdout
   val lsALotNicelyInGVim = InteractiveScript {
-    val fs = implictx<UFileSys>()
-    val notes = fs.pathToTmpNotes.toString()
+    val fs = localUFileSys()
+    val notes = fs.pathToTmpNotes
     lsALotNicely.ax(outFile = notes)
-    gvim(notes).ax()
+    gvim(notes.toString()).ax()
   }
 }

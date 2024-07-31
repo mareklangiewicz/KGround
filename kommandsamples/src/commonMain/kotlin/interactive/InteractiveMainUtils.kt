@@ -47,7 +47,7 @@ suspend fun mainCodeExperiments(args: Array<String>) {
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 @ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
 suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
-  val log = implictx<ULog>()
+  val log = localULog()
   try {
     log.w("try-code $reference starting")
     withLogBadStreams {
@@ -62,9 +62,9 @@ suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
 }
 
 @OptIn(DelicateApi::class, ExperimentalApi::class) suspend fun tryInteractivelyOpenLogCache() {
-  val lines = implictxOrNull<UHackySharedFlowLog>()?.flow?.replayCache ?: return
-  val fs = implictx<UFileSys>()
-  val submit = implictx<USubmit>()
+  val lines = localULogAsOrNull<UHackySharedFlowLog>()?.flow?.replayCache ?: return
+  val fs = localUFileSys()
+  val submit = localUSubmit()
   val notes = fs.pathToTmpNotes.toString()
   isInteractiveCodeEnabled() && submit.askIf("Try to open log cache in IDE (in tmp.notes)?") || return
   writeFileWithDD(lines, notes).ax()

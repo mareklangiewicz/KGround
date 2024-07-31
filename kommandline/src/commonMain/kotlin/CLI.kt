@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand
 import kotlin.coroutines.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
@@ -11,17 +12,22 @@ import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
-/** It's NOT for "consuming side". Instead, use: val cli = implictx<CLI>() */
+/** It's NOT for "consuming side". Instead, use: val cli = localCLI() */
 @NotPortableApi("Returns very different CLIs on different platforms. Can fail or return CLI with failing fun start.")
 expect fun getSysCLI(): CLI
 
 
-// TODO NOW: use okio.Path everywhere for paths (also class UCWD)
+suspend inline fun <reified T: CLI> localCLIAs(): T =
+  localCLIAsOrNull() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
 
-suspend inline fun <reified T: CLI> implictxOrNull(): T? = coroutineContext[CLI] as? T
+suspend inline fun <reified T: CLI> localCLIAsOrNull(): T? = localCLIOrNull() as? T
 
-suspend inline fun <reified T: CLI> implictx(): T =
-  implictxOrNull() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+
+suspend inline fun localCLI(): CLI =
+  localCLIOrNull() ?: bad { "No CLI provided in coroutine context." }
+
+suspend inline fun localCLIOrNull(): CLI? = coroutineContext[CLI]
+
 
 interface CLI : UCtx {
   companion object Key : CoroutineContext.Key<CLI>
@@ -44,37 +50,35 @@ interface CLI : UCtx {
    * TODO_someday: how to colorize it (can I somehow use @DslMarker ?)
    * see also [Kommand.ax]
    *
-   * @param dir working directory for started subprocess - null means inherit from current process
+   * @param workDir working directory for started subprocess - null means inherit from current process
    * @param inFile - redirect std input from given file - null means do not redirect
    * @param outFile - redirect std output (std err too) to given file - null means do not redirect
    * TODO_maybe: support other redirections (streams/strings with content)
    *   (might require separate flag like: isRedirectStreamsSupported)
-   *   (also see comment above at isRedirectContentSupported flag)
    * @param envModify Allows to modify default inherited environment variables for child process.
    *   Can throw exception if it's unsupported on particular platform.
    */
   fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
-    dir: String? = null,
-    inFile: String? = null,
-    outFile: String? = null,
+    workDir: Path? = null,
+    inFile: Path? = null,
+    outFile: Path? = null,
     outFileAppend: Boolean = false,
     errToOut: Boolean = false,
-    errFile: String? = null,
+    errFile: Path? = null,
     errFileAppend: Boolean = false,
     envModify: (MutableMap<String, String>.() -> Unit)? = null,
   ): ExecProcess
   // TODO_maybe: access to input/output/error streams (when not redirected) with Okio source/sink
   // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719
-
   // TODO_someday: access to input/output streams wrapped in okio Source/Sink
   // (but what about platforms running kommands through ssh or adb?)
 }
 
 class FakeCLI(
   val log: ULog = UHackySharedFlowLog(),
-  private val chkStart: (Kommand, String?, String?, String?, Boolean, Boolean, String?, Boolean) -> Unit =
+  private val chkStart: (Kommand, Path?, Path?, Path?, Boolean, Boolean, Path?, Boolean) -> Unit =
     { _, _, _, _, _, _, _, _ -> },
 ) : CLI {
 
@@ -84,17 +88,17 @@ class FakeCLI(
   override fun lx(
     kommand: Kommand,
     vararg useNamedArgs: Unit,
-    dir: String?,
-    inFile: String?,
-    outFile: String?,
+    workDir: Path?,
+    inFile: Path?,
+    outFile: Path?,
     outFileAppend: Boolean,
     errToOut: Boolean,
-    errFile: String?,
+    errFile: Path?,
     errFileAppend: Boolean,
     envModify: (MutableMap<String, String>.() -> Unit)?,
   ): ExecProcess {
-    log.d("lx($kommand, $dir, ...)")
-    chkStart(kommand, dir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
+    log.d("lx($kommand, $workDir, ...)")
+    chkStart(kommand, workDir, inFile, outFile, outFileAppend, errToOut, errFile, errFileAppend)
     return FakeProcess(log)
   }
 }
