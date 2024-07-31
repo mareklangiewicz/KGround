@@ -2,10 +2,9 @@ package pl.mareklangiewicz.kgroundx.maintenance
 
 import okio.*
 import okio.Path.Companion.toPath
-import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.ulog.*
 
 
@@ -15,11 +14,11 @@ private val resourcesAbsPath = PathToKGroundProject / resourcesRelPath
 private val templatesAbsPath = PathToKGroundProject / templatesRelPath
 
 private suspend fun Path.isTmplSymlink() =
-  name.endsWith(".tmpl") && implictx<UFileSys>().metadata(this).symlinkTarget != null
+  name.endsWith(".tmpl") && localUFileSys().metadata(this).symlinkTarget != null
 
 suspend fun updateKGroundTemplatesSymLinks() {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
+  val log = localULog()
+  val fs = localUFileSys()
   // remove all tmpl symlinks (but throw if other unexpected file found)
   fs.listRecursively(templatesAbsPath).forEach {
     if (fs.metadata(it).isDirectory) return@forEach

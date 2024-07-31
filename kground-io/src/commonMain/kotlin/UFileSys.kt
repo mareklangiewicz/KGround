@@ -15,7 +15,7 @@ open class UFileSys(delegate: FileSystem) : UCtx, ForwardingFileSystem(delegate)
 
   // TODO_someday_maybe: add some additional "micro file system" stuff here?
   // (but not val lineEnd: It should always be "\n" except for very specific cases handled manually/separately)
-  // (also not var currentDir/Path/CWD: It should probably have separate immutable context element)
+  // (also not var currentDir/Path/workingDir: I already have separate immutable context element: UWorkDir)
 
   open val pathToUserHome: Path? = null
   open val pathToUserTmp: Path? = null
@@ -32,6 +32,13 @@ val UFileSys.pathToTmpNotes get() = pathToSomeTmpOrHome / "tmp.notes"
 
 
 
-suspend inline fun <reified T: UFileSys> implictx(): T =
-  coroutineContext[UFileSys] as? T ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+suspend inline fun <reified T: UFileSys> localUFileSysAs(): T =
+  localUFileSysAsOrNull<T>() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+
+suspend inline fun <reified T: UFileSys> localUFileSysAsOrNull(): T? = coroutineContext[UFileSys] as? T
+
+suspend inline fun localUFileSys(): UFileSys =
+  localUFileSysOrNull() ?: bad { "No UFileSys provided in coroutine context." }
+
+suspend inline fun localUFileSysOrNull(): UFileSys? = coroutineContext[UFileSys]
 

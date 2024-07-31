@@ -22,7 +22,7 @@ import pl.mareklangiewicz.ure.UReplacement
  */
 @ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, skipReproducers: Boolean) =
   getMyGradleProjectsPathS(onlyPublic).collect {
-    val log = implictx<ULog>()
+    val log = localULog()
     when {
       skipReproducers && it.segments.any { it == "reproducers" } -> log.i("Skipping reproducer $it")
       else -> updateGradlewFilesInProject(it)
@@ -34,8 +34,8 @@ import pl.mareklangiewicz.ure.UReplacement
 
 suspend fun updateGradlewFilesInProject(fullPath: Path) =
   gradlewRelPaths.forEach { gradlewRelPath ->
-    val log = implictx<ULog>()
-    val fs = implictx<UFileSys>()
+    val log = localULog()
+    val fs = localUFileSys()
     val targetPath = fullPath / gradlewRelPath
     val oldContent = fs.readByteString(targetPath)
     val newContent = RESOURCES.readByteString("/templates".toPath() / gradlewRelPath.withName { "$it.tmpl" })

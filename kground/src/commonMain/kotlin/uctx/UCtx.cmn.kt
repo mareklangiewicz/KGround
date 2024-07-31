@@ -20,8 +20,9 @@ import pl.mareklangiewicz.kground.plusIfNN
  *   companion object Key : CoroutineContext.Key<ULog>
  *   override val key: CoroutineContext.Key<*> get() = Key
  * }
- * suspend inline fun <reified T: ULog> implictx(): T =
- *   coroutineContext[ULog] as? T ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+ * @see [pl.mareklangiewicz.ulog.ULog]
+ * @see [pl.mareklangiewicz.ulog.localULog]
+ * @see [pl.mareklangiewicz.ulog.localULogAs]
  */
 interface UCtx : CoroutineContext.Element
 

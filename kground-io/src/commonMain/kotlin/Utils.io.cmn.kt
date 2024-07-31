@@ -95,6 +95,6 @@ suspend inline fun <R> uctxWithIO(
   name: String? = null,
   dispatcher: CoroutineDispatcher? = getSysDispatcherForIO(),
   fs: UFileSys? = getSysUFileSys(),
-  cwd: UCWD? = fs?.getSysWorkingDir()?.let(::UCWD),
+  cwd: UWorkDir? = fs?.getSysWorkingDir()?.let(::UWorkDir),
   noinline block: suspend CoroutineScope.() -> R,
 ) = uctx(context plusIfNN dispatcher plusIfNN fs plusIfNN cwd, name = name, block)

@@ -7,7 +7,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.ax
@@ -29,7 +29,7 @@ suspend fun tryInjectMyTemplatesToProject(
   val templates = collectedTemplates ?: collectMyTemplates()
   findAllFiles(projectPath).filterExt("kts") // TODO_someday: support templates in .kt files too
     .forEachSpecialRegionFound(allowTildes = false) { path, label, content, region ->
-      val log = implictx<ULog>()
+      val log = localULog()
       val templateRegion = templates[label] ?: run {
         log.i("Found unknown region [[$label]] in $path (length ${region.length}). Ignoring.")
         return@forEachSpecialRegionFound
@@ -46,7 +46,7 @@ suspend fun tryInjectMyTemplatesToProject(
         !askInteractively -> inject()
         zenityAskIf("Automatically inject template [[$label]]? to file:\n$path").ax() -> inject()
         zenityAskIf("Try opening diff with [[$label]] in IDE? (put to tmp.notes) with file:\n$path").ax() -> {
-          val notes = implictx<UFileSys>().pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
+          val notes = localUFileSys().pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
           writeFileWithDD(templateRegion.lines(), notes).ax()
           ideDiff(notes, path.toString()).ax()
         }
@@ -62,7 +62,7 @@ suspend fun tryFixMyTemplatesInProject(
   projectPath: Path,
   askInteractively: Boolean = true,
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   val ure = ureSpecialRegion(
     content = ureWhateva().withName("regionContent"),
     specialLabel = ureAnyRegionLabel(allowTildes = true, allowBrackets = false).withName("specialLabel"),
@@ -92,8 +92,8 @@ suspend fun tryFixMyTemplatesInProject(
 
 @DelicateApi("This needs KGround source code, it's interactive and mostly for myself.")
 suspend fun tryDiffMyConflictingTemplatesSrc() {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
+  val log = localULog()
+  val fs = localUFileSys()
   val templates = mutableMapOf<String, String>()
   val templatesSrc = mutableMapOf<String, Path>()
   fs.findAllFiles(PathToKGroundProject).filterExt("kts") // TODO_someday: support future templates in .kt files
@@ -117,7 +117,7 @@ suspend fun collectMyTemplates(): Map<String, String> {
   val preferred2 = "template-full" // in case of conflict
   val templates = mutableMapOf<String, String>()
   val templatesRes = mutableMapOf<String, Path>()
-  val log = implictx<ULog>()
+  val log = localULog()
   val fsres = UFileSys(RESOURCES)
   uctx(fsres) {
     findAllFiles("templates".toPath()).filterExt("kts.tmpl")
@@ -145,7 +145,7 @@ private suspend fun Sequence<Path>.collectSpecialRegionsTo(
   onConflict: suspend (path: Path, label: String, content: String, region: String) -> Unit =
     { path, label, content, region -> bad { "Different special region labeled $label already found." } },
 ) = forEachSpecialRegionFound(allowTildes = false) { path, label, content, region ->
-  val log = implictx<ULog>()
+  val log = localULog()
   log.d("Found special region [[$label]] in $path (length ${region.length})")
   when (specialRegions[label]) {
     null -> { specialRegions[label] = region; specialRegionsSrc[label] = path }
@@ -162,8 +162,8 @@ suspend fun Sequence<Path>.forEachSpecialRegionFound(
   allowTildes: Boolean = true,
   action: suspend (path: Path, label: String, content: String, region: String) -> Unit,
 ) {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
+  val log = localULog()
+  val fs = localUFileSys()
   forEach { path ->
     log.d("Searching special regions in file $path")
     ureSpecialRegion(
@@ -185,7 +185,7 @@ suspend fun Sequence<Path>.logEachSpecialRegionFound(
   allowTildes: Boolean = true,
   level: ULogLevel = ULogLevel.INFO,
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   forEachSpecialRegionFound(allowTildes) { path, label, content, region ->
     log(level, "Found special region [[$label]] in $path (length ${region.length})")
   }

@@ -10,46 +10,44 @@ import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kground.io.UCWD
-import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.UWorkDir
 import pl.mareklangiewicz.kground.io.cd
-import pl.mareklangiewicz.udata.str
+import pl.mareklangiewicz.kground.io.localUFileSys
+import pl.mareklangiewicz.kground.io.localUWorkDir
 import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.usubmit.USubmit
-import pl.mareklangiewicz.usubmit.xd.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
-import pl.mareklangiewicz.ulog.implictx
-import pl.mareklangiewicz.usubmit.implictx
 import pl.mareklangiewicz.uctx.uctx
-import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
+import pl.mareklangiewicz.ulog.localULog
 import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
+import pl.mareklangiewicz.usubmit.localUSubmit
+import pl.mareklangiewicz.usubmit.xd.*
 
 @ExampleApi
 object MyBasicExamples {
 
   /** Simple example of using KommandLine */
   suspend fun justSomeLS() {
-    val log = implictx<ULog>()
+    val log = localULog()
     log.w("Let's play with kground and kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
     cd("/home/marek/tmp") {
-      val cwd: UCWD = implictx()
+      val workDir: UWorkDir = localUWorkDir()
       ls { -LsOpt.LongFormat; -LsOpt.All }
-        .ax(dir = cwd.path.toString()) // TODO: kommandline: make .ax() actually use UCWD from implictx
+        .ax(dir = workDir.dir.toString()) // TODO: kommandline: make .ax() actually use localUWorkDir()
         .logEach()
     }
   }
 
   suspend fun justSomeIdeDiff() {
-    val log = implictx<ULog>()
+    val log = localULog()
     log.w("Let's try some ideDiff...")
     ideDiff(
       "/home/marek/code/kotlin/KGround/template-full/build.gradle.kts",
@@ -107,8 +105,8 @@ object MyWorkflowsExamples {
 object MyWeirdExamples {
 
   suspend fun tryToUseImplicitUSubmitAndULog() {
-    val log = implictx<ULog>()
-    val submit = implictx<USubmit>()
+    val log = localULog()
+    val submit = localUSubmit()
 
     submit.showInfo("Some info.")
     submit.showWarning("Some warning.")
@@ -134,8 +132,8 @@ object MyWeirdExamples {
 
 
   suspend fun tryToDiffMySettingsKtsFiles() {
-    val log = implictx<ULog>()
-    val fs = implictx<UFileSys>()
+    val log = localULog()
+    val fs = localUFileSys()
     val pathLeft = PathToKotlinProjects / "KGround" / "settings.gradle.kts"
     fetchMyProjectsNameS(onlyPublic = false)
       .mapFilterLocalKotlinProjectsPathS()
@@ -167,7 +165,7 @@ object MyWeirdExamples {
 
   @OptIn(DelicateApi::class, NotPortableApi::class)
   private suspend fun tryToUpdateMyRepoOrigin(dir: Path) {
-    val log = implictx<ULog>()
+    val log = localULog()
     val ureRepoUrl = ure {
       +ureText("git@github.com:")
       +ureIdent().withName("user")

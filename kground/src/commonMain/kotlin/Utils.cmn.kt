@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.full
-import pl.mareklangiewicz.ulog.implictx
+import pl.mareklangiewicz.ulog.localULog
 import pl.mareklangiewicz.ulog.timed
 
 
@@ -38,7 +38,7 @@ inline fun <K, V> Map<K, V>.logEachEntry(log: ULog, level: ULogLevel = ULogLevel
   iterator().logEach(log, level, timed)
 
 suspend inline fun <T> Iterator<T>.logEach(level: ULogLevel = ULogLevel.INFO, full: Boolean = true) {
-  val log = implictx<ULog>()
+  val log = localULog()
   forEach { if (full) log.full(level, it) else log(level, it) }
 }
 
@@ -55,7 +55,7 @@ inline fun <T> Flow<T>.onEachLog(log: ULog, level: ULogLevel = ULogLevel.INFO, t
   onEach { if (timed) log.timed(level, it) else log(level, it) }
 
 suspend inline fun <T> Flow<T>.onEachLog(level: ULogLevel = ULogLevel.INFO, full: Boolean = true): Flow<T> {
-  val log = implictx<ULog>()
+  val log = localULog()
   return onEach { if (full) log.full(level, it) else log(level, it) }
 }
 

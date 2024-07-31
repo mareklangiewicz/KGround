@@ -15,11 +15,10 @@ import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
 import okio.*
 import pl.mareklangiewicz.annotations.ExampleApi
-import pl.mareklangiewicz.ulog.*
-import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.io.*
+import pl.mareklangiewicz.kground.io.localUFileSys
+import pl.mareklangiewicz.ulog.*
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 
@@ -104,8 +103,8 @@ suspend fun checkMyDWorkflowsInProject(
   failIfUnknownWorkflowFound: Boolean = false,
   failIfKnownWorkflowNotFound: Boolean = false,
 ) {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
+  val log = localULog()
+  val fs = localUFileSys()
   log.i("Check my dworkflows in project: $projectPath")
   @Suppress("DEPRECATION")
   val yamlFiles = findAllFiles(yamlFilesPath, maxDepth = 1).filterExt(yamlFilesExt)
@@ -146,8 +145,8 @@ suspend fun injectDWorkflowsToProject(
   yamlFilesPath: Path = projectPath / ".github" / "workflows",
   yamlFilesExt: String = "yml",
 ) {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
+  val log = localULog()
+  val fs = localUFileSys()
   log.i("Inject default workflows to project: $projectPath")
   for (dname in MyDWorkflowNames) {
     val file = yamlFilesPath / "$dname.$yamlFilesExt"

@@ -1,14 +1,13 @@
 package pl.mareklangiewicz.io
 
+import kotlin.math.*
+import kotlin.random.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.FileSystem.Companion.SYSTEM_TEMPORARY_DIRECTORY
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.bad.*
-import kotlin.math.*
-import kotlin.random.*
-import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.ulog.*
 
 // FIXME NOW: this file is moved from DepsKt as is temporarily.
@@ -31,7 +30,7 @@ fun FileSystem.findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence
 @Throws(IOException::class)
 @Deprecated("Okio has listRecursively. Use that or maybe implement new listRecursively with additional params.")
 suspend fun findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Path> =
-  implictx<UFileSys>().findAllFiles(path, maxDepth)
+  localUFileSys().findAllFiles(path, maxDepth)
 
 fun Path.withName(getNewName: (oldName: String) -> String) =
   parent?.let { it / getNewName(name) } ?: getNewName(name).toPath()
@@ -103,8 +102,8 @@ fun FileSystem.writeByteString(file: Path, content: ByteString, createParentDir:
  * @param process file content transformation; if it returns null - outputPath is not even touched
  */
 suspend fun processFile(inputPath: Path, outputPath: Path? = null, process: suspend (String) -> String?) {
-  val fs = implictx<UFileSys>()
-  val log = implictx<ULog>()
+  val fs = localUFileSys()
+  val log = localULog()
   val input = fs.readUtf8(inputPath)
   val output = process(input)
   if (outputPath == null) {

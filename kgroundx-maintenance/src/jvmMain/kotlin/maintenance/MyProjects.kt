@@ -7,15 +7,14 @@ import okio.*
 import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.reducedOutToFlow
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
+import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.core.Ure
 
@@ -36,7 +35,7 @@ var PathToDepsKtProject = PathToKotlinProjects / "DepsKt"
   alsoGradleKts: Boolean = true,
   alsoFilterProjectPath: suspend (Path) -> Boolean = { true },
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   var foundCount = 0
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
@@ -74,8 +73,8 @@ private suspend fun readAndFindUreLineContentWithSomeLinesAround(
   ureLineContent: Ure,
   maxLinesAround: Int = 1,
 ): MatchResult? {
-  val log = implictx<ULog>()
-  val fs = implictx<UFileSys>()
+  val log = localULog()
+  val fs = localUFileSys()
   return fs.readUtf8(file).let { fileContent ->
     ureLineContent
       .withSomeLinesAround(log, maxLinesBefore = maxLinesAround, maxLinesAfter = maxLinesAround)
@@ -109,8 +108,8 @@ private fun Ure.withSomeLinesAround(
 
 @ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS() =
   mapFilterLocalKotlinProjectsPathS {
-    val log = implictx<ULog>()
-    val fs = implictx<UFileSys>()
+    val log = localULog()
+    val fs = localUFileSys()
     val isGradleRootProject = fs.exists(it / "settings.gradle.kts") || fs.exists(it / "settings.gradle")
     if (!isGradleRootProject) {
       log.w("Ignoring dworkflows in non-gradle project: $it")
@@ -124,7 +123,7 @@ private fun Ure.withSomeLinesAround(
   alsoFilter: suspend (Path) -> Boolean = { true },
 ): Flow<Path> {
   return map { PathToKotlinProjects / it }
-    .filter { implictx<UFileSys>().exists(it) }
+    .filter { localUFileSys().exists(it) }
     .filter { alsoFilter(it) }
 }
 
@@ -133,7 +132,7 @@ private fun Ure.withSomeLinesAround(
   onlyPublic: Boolean = false,
   askInteractively: Boolean = true,
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   val templates = collectMyTemplates()
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
@@ -152,7 +151,7 @@ private fun Ure.withSomeLinesAround(
   onlyPublic: Boolean = false,
   askInteractively: Boolean = true,
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   fetchMyProjectsNameS(onlyPublic)
     .mapFilterLocalKotlinProjectsPathS()
     .collect { path ->

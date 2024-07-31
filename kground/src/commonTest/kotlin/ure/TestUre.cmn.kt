@@ -8,7 +8,7 @@ import kotlin.test.Test
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
-// TODO_someday: all my tests should be suspendable, and log should be injected to context and received by implictx
+// TODO_someday: all my tests should be suspendable, and log should be injected to context and received by localULog
 internal var log: ULog = UHackySharedFlowLog()
 
 class TestUreCmn {

@@ -16,14 +16,14 @@ fun FileSystem.readAndMatchUre(file: Path, ure: Ure): MatchResult? =
 
 @NotPortableApi
 suspend fun commentOutMultiplatformFunInFile(file: Path) {
-  val log = implictx<ULog>()
+  val log = localULog()
   log.d("\ncommenting: $file")
   processFile(file, file, String::commentOutMultiplatformFun)
 }
 
 @NotPortableApi
 suspend fun undoCommentOutMultiplatformFunInFile(file: Path) {
-  val log = implictx<ULog>()
+  val log = localULog()
   log.d("\nundo comments: $file")
   processFile(file, file, String::undoCommentOutMultiplatformFun)
 }

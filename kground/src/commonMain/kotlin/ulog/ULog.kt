@@ -30,10 +30,15 @@ fun interface ULog: UCtx {
   companion object Key : CoroutineContext.Key<ULog>
   override val key: CoroutineContext.Key<*> get() = Key
 }
-suspend inline fun <reified T: ULog> implictx(): T =
-  implictxOrNull() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
 
-suspend inline fun <reified T: ULog> implictxOrNull(): T? = coroutineContext[ULog] as? T
+suspend inline fun <reified T: ULog> localULogAs(): T =
+  localULogAsOrNull<T>() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
+
+suspend inline fun <reified T: ULog> localULogAsOrNull(): T? = coroutineContext[ULog] as? T
+
+suspend inline fun localULog(): ULog = localULogOrNull() ?: bad { "No ULog provided in coroutine context." }
+
+suspend inline fun localULogOrNull(): ULog? = coroutineContext[ULog]
 
 @Deprecated("")
 interface WithULog {

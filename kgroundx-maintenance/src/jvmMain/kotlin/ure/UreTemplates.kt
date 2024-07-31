@@ -4,7 +4,7 @@ import okio.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.UFileSys
-import pl.mareklangiewicz.kground.io.implictx
+import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
@@ -23,7 +23,7 @@ suspend fun Path.injectSpecialRegion(
   region: String,
   addIfNotFound: Boolean = true,
 ) {
-  val log = implictx<ULog>()
+  val log = localULog()
   val regexAllWithSpecialRegion = ure {
     +ureWhateva().withName("before")
     +ureSpecialRegion(ureWhateva(), specialLabel = ureText(specialLabel)).withName("region")
@@ -63,7 +63,7 @@ suspend fun Path.injectSpecialRegionContentFromFile(
   addIfNotFound: Boolean = true,
   regionContentMap: suspend (String) -> String = { "// region [[$regionLabel]]\n\n$it\n// endregion [[$regionLabel]]\n" },
 ) {
-  val regionContent = implictx<UFileSys>().readUtf8(regionContentFile)
+  val regionContent = localUFileSys().readUtf8(regionContentFile)
   val region = regionContentMap(regionContent)
   injectSpecialRegion(regionLabel, region, addIfNotFound)
 }
@@ -76,5 +76,5 @@ suspend fun downloadAndInjectFileToSpecialRegion(
 ) {
   val inFilePath = curlDownloadTmpFile(inFileUrl)
   outFilePath.injectSpecialRegionContentFromFile(outFileRegionLabel, inFilePath)
-  implictx<UFileSys>().delete(inFilePath)
+  localUFileSys().delete(inFilePath)
 }
