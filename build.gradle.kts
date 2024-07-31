@@ -21,8 +21,8 @@ val enablePublishing = findProject(":kommandline") == null && findProject(":komm
 // modules (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
 // exception: publishToMavenLocal for debugging
 
-rootExtString["verKommand"] = "0.0.74" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-rootExtString["verKGround"] = "0.0.69" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+rootExtString["verKommand"] = "0.0.77" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
+rootExtString["verKGround"] = "0.0.70" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 // Note: verKGround needed too because if we include local kommandline, then that build can look for it.
 
 
@@ -31,7 +31,7 @@ defaultBuildTemplateForRootProject(
     name = "KGround",
     description = "Kotlin Common Ground.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 69),
+    version = Ver(0, 0, 70),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
     // https://github.com/mareklangiewicz/KGround/releases
     settings = LibSettings(
@@ -42,10 +42,6 @@ defaultBuildTemplateForRootProject(
     ),
   ),
 )
-
-// FIXME: make sure this region below is synced, but not as a part of "self-sync" as it was in DepsKt,
-//   but as normal sync when syncing all regions in all projects.
-//   The "self-sync" should only sync templates (and be renamed to templates-sync or sth)
 
 // region [[Root Build Template]]
 
