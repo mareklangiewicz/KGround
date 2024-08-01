@@ -1,24 +1,24 @@
 package pl.mareklangiewicz.kommand.core
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.RmOpt.*
+import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
-fun rmFileIfExists(file: String) = ReducedScript {
+fun rmFileIfExists(file: Path): ReducedScript<List<String>> = ReducedScript {
   val exists = testIfFileExists(file).ax()
   if (exists) rm(file).ax()
   else listOf("File not found")
 }
 
-// FIXME NOW: use Path everywhere
-
 @OptIn(DelicateApi::class)
-fun rmDirIfEmpty(dir: String) = rm { -Dir; +dir }
+fun rmDirIfEmpty(dir: Path): Rm = rm { -Dir; +dir.strf }
 
 @DelicateApi
-fun rmTreeWithForce(rootDir: String, doubleChk: suspend (path: String) -> Boolean) =
+fun rmTreeWithForce(rootDir: Path, doubleChk: suspend (path: Path) -> Boolean): ReducedScript<List<String>> =
   ReducedScript {
     doubleChk(rootDir).chkTrue { "ERROR: Can not remove whole '$rootDir' tree. Double chk failed." }
     rm(rootDir, recursive = true, force = true).ax()
@@ -26,15 +26,15 @@ fun rmTreeWithForce(rootDir: String, doubleChk: suspend (path: String) -> Boolea
 
 @DelicateApi
 fun rm(
-  path: String,
+  path: Path,
   vararg useNamedArgs: Unit,
   recursive: Boolean = false,
   force: Boolean = false,
   verbose: Boolean = false,
-) = rm { if (recursive) -Recursive; if (force) -Force; if (verbose) -Verbose; +path }
+): Rm = rm { if (recursive) -Recursive; if (force) -Force; if (verbose) -Verbose; +path.strf }
 
 @DelicateApi
-fun rm(init: Rm.() -> Unit) = Rm().apply(init)
+fun rm(init: Rm.() -> Unit): Rm = Rm().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/rm.1.html) */
 @DelicateApi

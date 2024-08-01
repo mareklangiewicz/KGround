@@ -11,6 +11,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
+import pl.mareklangiewicz.udata.strf
 
 
 /**
@@ -257,8 +258,8 @@ interface FindExpr : KOpt {
    */
   data class DepthFirst(val posix: Boolean = true) : KOptS("d" + "epth".iff(posix)), FindExpr
 
-  data class DepthMax(val levels: Int) : KOptS("maxdepth", levels.toString()), FindExpr
-  data class DepthMin(val levels: Int) : KOptS("mindepth", levels.toString()), FindExpr
+  data class DepthMax(val levels: Int) : KOptS("maxdepth", levels.strf), FindExpr
+  data class DepthMin(val levels: Int) : KOptS("mindepth", levels.strf), FindExpr
 
   /**
    * @param file default "-" is stdin
@@ -576,7 +577,7 @@ interface FindOpt : KOpt {
     }
   }
 
-  data class Optimisation(val level: Int) : KOptS("O", level.toString(), nameSeparator = ""), FindOpt {
+  data class Optimisation(val level: Int) : KOptS("O", level.strf, nameSeparator = ""), FindOpt {
     init {
       chk(level in 0..3)
     }

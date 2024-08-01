@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.ssh
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.strf
 
 
 @DelicateApi
@@ -43,12 +44,12 @@ interface SshKeygenOpt : KOptTypical {
    * Higher numbers result in slower passphrase verification
    * and increased resistance to brute-force password cracking (should the keys be stolen).
    */
-  data class KdfRounds(val rounds: Int = 16) : KOptS("a", rounds.toString()), SshKeygenOpt
+  data class KdfRounds(val rounds: Int = 16) : KOptS("a", rounds.strf), SshKeygenOpt
 
   /** Show the bubblebabble digest of specified private or public key file. */
   data object BubbleBabble : KOptS("B"), SshKeygenOpt
 
-  data class KeySize(val bits: Int = 3072) : KOptS("b", bits.toString()), SshKeygenOpt
+  data class KeySize(val bits: Int = 3072) : KOptS("b", bits.strf), SshKeygenOpt
 
   /** Provides a new comment. */
   data class CommentNew(val comment: String) : KOptS("C", comment), SshKeygenOpt

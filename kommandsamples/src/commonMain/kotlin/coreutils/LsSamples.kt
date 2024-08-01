@@ -3,11 +3,10 @@ package pl.mareklangiewicz.kommand.core
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kground.io.*
-import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.ColorType.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
-import pl.mareklangiewicz.kommand.core.LsOpt.SortType.*
 import pl.mareklangiewicz.kommand.vim.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.*
@@ -21,24 +20,24 @@ data object LsSamples {
   val lsVersion = ls { -Version } s
     "ls --version"
 
-  val lsEtcDir = ls("/etc") s
+  val lsEtcDir = ls("/etc".pth) s
     "ls /etc"
 
-  val lsWithHidden = ls(".", wHidden = true) s
+  val lsWithHidden = ls(".".pth, wHidden = true) s
     "ls -A ."
 
-  val lsParentWithSlashes = ls("..", wIndicator = SLASH) s
+  val lsParentWithSlashes = ls("..".pth, wIndicator = Slash) s
     "ls --indicator-style=slash .."
 
-  val lsParentSubDirs = lsSubDirs("..") rs
+  val lsParentSubDirs = lsSubDirs("..".pth) rs
     "ls --indicator-style=slash .."
 
   // same kommand line as above because difference is only in postprocessing: the "reduce" lambda
-  val lsParentRegFiles = lsRegFiles("..") rs
+  val lsParentRegFiles = lsRegFiles("..".pth) rs
     "ls --indicator-style=slash .."
 
-  val lsALotNicely = ls("/home/marek", "/usr", wHidden = true, wColor = ALWAYS) {
-    -Author; -LongFormat; -HumanReadable; -Sort(TIME)
+  val lsALotNicely = ls("/home/marek".pth, "/usr".pth, wHidden = true, wColor = Always) {
+    -Author; -LongFormat; -HumanReadable; -Sort(SortType.Time)
   } s
     "ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 
@@ -51,6 +50,6 @@ data object LsSamples {
     val fs = localUFileSys()
     val notes = fs.pathToTmpNotes
     lsALotNicely.ax(outFile = notes)
-    gvim(notes.toString()).ax()
+    gvim(notes).ax()
   }
 }

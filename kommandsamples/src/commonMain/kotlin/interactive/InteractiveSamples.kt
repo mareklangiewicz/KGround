@@ -3,6 +3,7 @@ package pl.mareklangiewicz.interactive
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.*
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.ulog.*
@@ -106,8 +107,8 @@ suspend fun Any?.tryOpenDataInIDEOrGVim(question: String? = null): Any {
     this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
     !submit.askIf(question ?: "Open $about in tmp.notes in IDE (if running) or in GVim ?") -> log.i("Not opening.")
     else -> {
-      val lines = if (this is Collection<*>) map { it.toString() } else toString().lines()
-      val notes = fs.pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
+      val lines = if (this is Collection<*>) map { it.strf } else strf.lines()
+      val notes = fs.pathToTmpNotes
       writeFileWithDD(lines, notes).ax()
       ideOrGVimOpen(notes).ax()
     }
@@ -125,4 +126,3 @@ private val Any?.about: String
       else this::class.simpleName + "(length:$length)"
     else -> this::class.simpleName ?: "???"
   }
-

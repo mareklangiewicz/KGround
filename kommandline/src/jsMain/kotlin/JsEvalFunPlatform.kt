@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.*
 import okio.Path
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 
@@ -60,12 +61,12 @@ private class JsEvalFunProcess(code: String, var log: ULog? = null) : ExecProces
     chk(isEvalEnabled) { "eval is disabled" }
     try {
       exit = 0
-      out = eval(code).toString().lines().iterator()
+      out = eval(code).strf.lines().iterator()
       err = null
     } catch (e: Exception) {
       exit = e::class.hashCode().mod(120) + 4 // positive number dependent on exception class
       out = null
-      err = e.toString().lines().iterator()
+      err = e.strf.lines().iterator()
     }
   }
 

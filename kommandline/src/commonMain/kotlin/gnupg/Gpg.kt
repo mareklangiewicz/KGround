@@ -2,35 +2,38 @@
 
 package pl.mareklangiewicz.kommand.gnupg
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.PinentryMode.*
+import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
-fun gpgDecrypt(inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg"), cacheSymKey: Boolean = true) =
-  gpg(Decrypt) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile }
+fun gpgDecrypt(inFile: Path, outFile: Path = inFile.removeRequiredSuffix(".gpg"), cacheSymKey: Boolean = true) =
+  gpg(Decrypt) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile.strf }
 
 @OptIn(DelicateApi::class)
-fun gpgEncryptSym(inFile: String, outFile: String = "$inFile.gpg", cacheSymKey: Boolean = true) =
-  gpg(Symmetric) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile }
+fun gpgEncryptSym(inFile: Path, outFile: Path = "$inFile.gpg".pth, cacheSymKey: Boolean = true) =
+  gpg(Symmetric) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile.strf }
 
 @DelicateApi
 @Suppress("DEPRECATION")
 @Deprecated("Be careful with password in command line - see man gpg")
-fun gpgDecryptPass(password: String, inFile: String, outFile: String = inFile.removeRequiredSuffix(".gpg")) =
-  gpg(Decrypt) { -PassPhrase(password); -Batch; Pinentry(LoopBack); -OutputFile(outFile); +inFile }
+fun gpgDecryptPass(password: String, inFile: Path, outFile: Path = inFile.removeRequiredSuffix(".gpg")) =
+  gpg(Decrypt) { -PassPhrase(password); -Batch; Pinentry(LoopBack); -OutputFile(outFile); +inFile.strf }
 
 @DelicateApi
 @Suppress("DEPRECATION")
 @Deprecated("Be careful with password in command line - see man gpg")
-fun gpgEncryptPass(password: String, inFile: String, outFile: String = "$inFile.gpg") =
-  gpg(Symmetric) { -PassPhrase(password); -Batch; Pinentry(LoopBack); -OutputFile(outFile); +inFile }
+fun gpgEncryptPass(password: String, inFile: Path, outFile: Path = "$inFile.gpg".pth) =
+  gpg(Symmetric) { -PassPhrase(password); -Batch; Pinentry(LoopBack); -OutputFile(outFile); +inFile.strf }
 
-private fun String.removeRequiredSuffix(suffix: CharSequence) =
-  removeSuffix(suffix).also { req(length == it.length - suffix.length) }
+private fun Path.removeRequiredSuffix(suffix: CharSequence): Path =
+  strf.removeSuffix(suffix).also { req(strf.length == it.strf.length - suffix.length) }.pth
 
 @DelicateApi
 fun gpg(cmd: GpgCmd? = null, init: Gpg.() -> Unit = {}) = Gpg().apply { cmd?.let { -it }; init() }
@@ -93,7 +96,7 @@ interface GpgOpt : KOptTypical {
   data object WithColons : GpgOpt, KOptLN()
 
   /** Set the pinentry mode to mode. */
-  data class Pinentry(val mode: PinentryMode = Default) : GpgOpt, KOptL("pinentry-mode", mode.toString().lowercase())
+  data class Pinentry(val mode: PinentryMode = Default) : GpgOpt, KOptL("pinentry-mode", mode.namelowords(""))
   enum class PinentryMode { Default, Ask, Cancel, Error, LoopBack }
 
   /** create ascii armored output */
@@ -108,20 +111,20 @@ interface GpgOpt : KOptTypical {
 
   /** Disable the passphrase cache used for symmetrical en- and decryption. */
   data object NoSymkeyCache : GpgOpt, KOptLN()
-  data class HomeDir(val dir: String) : GpgOpt, KOptL("homedir", dir)
-  data class OptionsFile(val file: String) : GpgOpt, KOptL("options", file)
-  data class OutputFile(val file: String) : GpgOpt, KOptL("output", file)
+  data class HomeDir(val dir: Path) : GpgOpt, KOptL("homedir", dir.strf)
+  data class OptionsFile(val file: Path) : GpgOpt, KOptL("options", file.strf)
+  data class OutputFile(val file: Path) : GpgOpt, KOptL("output", file.strf)
 
   /** encrypt for userid */
   data class Recipient(val userId: String) : GpgOpt, KOptLN(userId)
 
   /** use userid to sign or decrypt */
   data class LocalUser(val userId: String) : GpgOpt, KOptLN(userId)
-  data class CompressLevel(val level: Int) : GpgOpt, KOptLN(level.toString())
-  data class StatusFile(val file: String) : GpgOpt, KOptLN(file)
-  data class StatusFd(val fileDescriptor: Int) : GpgOpt, KOptLN(fileDescriptor.toString())
-  data class LoggerFile(val file: String) : GpgOpt, KOptLN(file)
-  data class LoggerFd(val fileDescriptor: Int) : GpgOpt, KOptLN(fileDescriptor.toString())
+  data class CompressLevel(val level: Int) : GpgOpt, KOptLN(level.strf)
+  data class StatusFile(val file: Path) : GpgOpt, KOptLN(file.strf)
+  data class StatusFd(val fileDescriptor: Int) : GpgOpt, KOptLN(fileDescriptor.strf)
+  data class LoggerFile(val file: Path) : GpgOpt, KOptLN(file.strf)
+  data class LoggerFd(val fileDescriptor: Int) : GpgOpt, KOptLN(fileDescriptor.strf)
   data class CipherAlgo(val algo: String) : GpgOpt, KOptLN(algo)
   data class DigestAlgo(val algo: String) : GpgOpt, KOptLN(algo)
   data class CompressAlgo(val algo: String) : GpgOpt, KOptLN(algo)
@@ -138,13 +141,13 @@ interface GpgOpt : KOptTypical {
 
   /** Read the passphrase from the file. Only the first line will be read from the file. */
   @Deprecated("dangerous - see man gpg")
-  data class PassPhraseFile(val file: String) : GpgOpt, KOptL("passphrase-file", file)
+  data class PassPhraseFile(val file: Path) : GpgOpt, KOptL("passphrase-file", file.strf)
 
   /** Read the passphrase from file descriptor. Only the first line will be read from file descriptor n. */
   @Deprecated("dangerous - see man gpg")
-  data class PassPhraseFd(val fileDescriptor: Int) : GpgOpt, KOptL("passphrase-fd", fileDescriptor.toString())
+  data class PassPhraseFd(val fileDescriptor: Int) : GpgOpt, KOptL("passphrase-fd", fileDescriptor.strf)
 
   /** Specify how many times gpg will request a new passphrase be repeated. */
-  data class PassPhraseRepeat(val repeat: Int = 1) : GpgOpt, KOptL("passphrase-repeat", repeat.toString())
+  data class PassPhraseRepeat(val repeat: Int = 1) : GpgOpt, KOptL("passphrase-repeat", repeat.strf)
 
 }

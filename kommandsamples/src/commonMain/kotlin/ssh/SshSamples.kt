@@ -3,6 +3,8 @@
 package pl.mareklangiewicz.kommand.ssh
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import okio.Path
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
@@ -26,9 +28,8 @@ data object SshSamples {
 // TODO NOW: Continue, it's first experiment based on:
 // https://www.codejam.info/2021/11/standalone-userland-ssh-server.html
 @OptIn(DelicateApi::class)
-suspend fun runSshdStandalone(dir: String = "/tmp/sshd-sdandalone") {
+suspend fun runSshdStandalone(dir: Path = "/tmp/sshd-sdandalone".pth) {
   mkdir(dir, withParents = true).ax()
   TODO()
 
 }
-

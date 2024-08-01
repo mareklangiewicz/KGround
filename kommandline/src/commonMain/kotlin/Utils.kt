@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import okio.Path
+import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
@@ -11,13 +12,24 @@ import pl.mareklangiewicz.kground.io.UWorkDir
 import pl.mareklangiewicz.kground.plusIfNN
 import pl.mareklangiewicz.kommand.konfig.konfigInUserHomeConfigDir
 import pl.mareklangiewicz.uctx.uctx
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.localULog
 
 
+
+// FIXME: use ones from kground after updating
+val CharSequence.lowords get() = split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
+fun CharSequence.lowords(joint: CharSequence) = lowords.joinToString(joint)
+val Any.classlowords get() = this::class.simpleName!!.lowords
+fun Any.classlowords(joint: CharSequence) = classlowords.joinToString(joint)
+val Enum<*>.namelowords get() = name.lowords
+fun Enum<*>.namelowords(joint: CharSequence) = name.lowords.joinToString(joint)
+
+
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) {
-  konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.toString()
+  konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.strf
 }
 
 fun getUserFlag(cli: CLI, key: String) = konfigInUserHomeConfigDir(cli)["$key.enabled"]?.trim().toBoolean()

@@ -65,7 +65,7 @@ suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
   val lines = localULogAsOrNull<UHackySharedFlowLog>()?.flow?.replayCache ?: return
   val fs = localUFileSys()
   val submit = localUSubmit()
-  val notes = fs.pathToTmpNotes.toString()
+  val notes = fs.pathToTmpNotes
   isInteractiveCodeEnabled() && submit.askIf("Try to open log cache in IDE (in tmp.notes)?") || return
   writeFileWithDD(lines, notes).ax()
   ideOrGVimOpen(notes).ax()
@@ -75,10 +75,10 @@ suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
 //   (start with moving some of what is in UWidgets to KGround) (see comments in UHackyLog)
 @Deprecated("This is temporary fast&dirty impl")
 private fun ULog.exWithTrace(ex: Throwable) {
-  e(ex.toString())
+  e(ex.strf)
   ex.stackTraceToString().let {
     e("STACK TRACE:")
-    it.toList().logEach(this, ULogLevel.ERROR)
+    it.lines().logEach(this, ULogLevel.ERROR)
     // each line have to be logged separately: don't use it.joinToString("\n"), because truncation in logger
   }
   ex.cause?.let {

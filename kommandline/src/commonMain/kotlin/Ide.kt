@@ -1,5 +1,6 @@
 package pl.mareklangiewicz.kommand
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.BadStateErr
@@ -10,21 +11,22 @@ import pl.mareklangiewicz.kommand.Ide.*
 import pl.mareklangiewicz.kommand.admin.psAllFull
 import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
 import pl.mareklangiewicz.kommand.vim.gvim
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
 // FIXME NOW: use Path everywhere
 
 fun ideOpen(
-  path1: String,
-  path2: String? = null,
-  path3: String? = null,
+  path1: Path,
+  path2: Path? = null,
+  path3: Path? = null,
   line: Int? = null,
   column: Int? = null,
   ifNoIdeRunningStart: Type? = null,
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
-fun ideOrGVimOpen(path: String) = ReducedScript {
+fun ideOrGVimOpen(path: Path) = ReducedScript {
   try {
     ideOpen(path).ax()
   } catch (_: BadStateErr) {
@@ -33,12 +35,12 @@ fun ideOrGVimOpen(path: String) = ReducedScript {
 }
 
 /** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
-fun ideDiff(path1: String, path2: String, path3: String? = null, ifNoIdeRunningStart: Type? = null) =
+fun ideDiff(path1: Path, path2: Path, path3: Path? = null, ifNoIdeRunningStart: Type? = null) =
   ide(Cmd.Diff(path1, path2, path3), ifNoIdeRunningStart)
 
 /** https://www.jetbrains.com/help/idea/command-line-merge-tool.html */
-fun ideMerge(path1: String, path2: String, output: String, base: String? = null, ifNoIdeRunningStart: Type? = null) =
-  ide(Cmd.Merge(path1, path2, output, base), ifNoIdeRunningStart)
+fun ideMerge(path1: Path, path2: Path, pathOut: Path, pathBase: Path? = null, ifNoIdeRunningStart: Type? = null) =
+  ide(Cmd.Merge(path1, path2, pathOut, pathBase), ifNoIdeRunningStart)
 
 fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
   ReducedScript {
@@ -66,7 +68,7 @@ fun <CmdT : Cmd> ide(type: Type, cmd: CmdT, init: CmdT.() -> Unit = {}) = Ide(ty
  * IntelliJ IDEA adds the .idea directory to it, making it a project.
  */
 data class Ide(var type: Type, var cmd: Cmd) : Kommand {
-  override val name get() = type.name
+  override val name get() = type.cmdName
   override val args get() = cmd.toArgs()
 
   /**
@@ -74,19 +76,18 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
    * and separate Idea Slim installation (without most plugins installed, configured to be fast)
    * https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html#d4a34497_155
    */
-  @Suppress("EnumEntryName")
-  enum class Type { idea, ideap, ideaslim, studio }
+  enum class Type { Idea, IdeaP, IdeaSlim, Studio; val cmdName get() = namelowords("") }
 
   sealed class Cmd(val name: String?) : ToArgs {
 
     data class Open(
       val opts: MutableList<Opt> = mutableListOf(),
-      val paths: MutableList<String> = mutableListOf(),
+      val paths: MutableList<Path> = mutableListOf(),
     ) : Cmd(null) {
       constructor(
-        path1: String? = null,
-        path2: String? = null,
-        path3: String? = null,
+        path1: Path? = null,
+        path2: Path? = null,
+        path3: Path? = null,
         line: Int? = null,
         column: Int? = null,
       ) : this(
@@ -94,7 +95,7 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
         listOfNotNull(path1, path2, path3).toMutableList(),
       )
 
-      override fun toArgs() = opts.flatMap { it.toArgs() } + paths
+      override fun toArgs() = opts.flatMap { it.toArgs() } + paths.map { it.strf }
 
       sealed class Opt(val name: String, val arg: String? = null) : KOpt {
         override fun toArgs() = listOf(name) plusIfNN arg
@@ -103,21 +104,20 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
         data object NoProjects : Opt("dontReopenProjects")
         data object NoPlugins : Opt("disableNonBundledPlugins")
         data object Wait : Opt("--wait")
-        data class Line(val l: Int) : Opt("--line", l.toString())
-        data class Column(val c: Int) : Opt("--column", c.toString())
+        data class Line(val l: Int) : Opt("--line", l.strf)
+        data class Column(val c: Int) : Opt("--column", c.strf)
       }
 
       operator fun Opt.unaryMinus() = opts.add(this)
-      operator fun String.unaryPlus() = paths.add(this)
+      operator fun Path.unaryPlus() = paths.add(this)
     }
 
-    data class Diff(var path1: String, var path2: String, var path3: String? = null) : Cmd("diff") {
-      override fun toArgs() = listOfNotNull(name, path1, path2, path3)
+    data class Diff(var path1: Path, var path2: Path, var path3: Path? = null) : Cmd("diff") {
+      override fun toArgs() = listOfNotNull(name, path1.strf, path2.strf, path3?.strf)
     }
 
-    data class Merge(var path1: String, var path2: String, var pathOut: String, var pathBase: String? = null) :
-      Cmd("merge") {
-      override fun toArgs() = listOfNotNull(name, path1, path2, pathBase, pathOut)
+    data class Merge(var path1: Path, var path2: Path, var pathOut: Path, var pathBase: Path? = null) : Cmd("merge") {
+      override fun toArgs() = listOfNotNull(name, path1.strf, path2.strf, pathBase?.strf, pathOut.strf)
     }
 
     /**
@@ -196,8 +196,8 @@ private suspend fun getFirstRunningIdeType(): Type? {
     .toSet()
 
   suspend fun Type.getRealName(): String {
-    val path = whichFirstOrNull(name).ax().chkNN { "Command $name not found." }
-    kommand("file", path).ax().single().chkFindSingle(ureText("shell script"))
+    val path = whichFirstOrNull(cmdName).ax().chkNN { "Command $cmdName not found." }
+    kommand("file", path.strf).ax().single().chkFindSingle(ureText("shell script"))
     for (line in readFileHead(path).ax())
       return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue
     bad { "Real name of $this not found in script $path" }
@@ -209,5 +209,3 @@ private suspend fun getFirstRunningIdeType(): Type? {
     if (i.getRealName() in running) return i
   return null
 }
-
-

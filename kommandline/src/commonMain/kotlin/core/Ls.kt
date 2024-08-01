@@ -1,17 +1,20 @@
 package pl.mareklangiewicz.kommand.core
 
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
+import pl.mareklangiewicz.udata.strf
 
-fun lsRegFiles(dir: String, wHidden: Boolean = false) =
-  ls(dir, wHidden = wHidden, wIndicator = SLASH).reducedOut { toList().filter { !it.endsWith('/') } }
+fun lsRegFiles(dir: Path, wHidden: Boolean = false): ReducedKommand<List<Path>> =
+  ls(dir, wHidden = wHidden, wIndicator = Slash).reducedOut { toList().filter { !it.endsWith('/') }.map { it.pth } }
 
-fun lsSubDirs(dir: String, wHidden: Boolean = false) =
-  ls(dir, wHidden = wHidden, wIndicator = SLASH).reducedOut {
-    toList().filter { it.endsWith('/') }.map { it.dropLast(1) }
+fun lsSubDirs(dir: Path, wHidden: Boolean = false): ReducedKommand<List<Path>> =
+  ls(dir, wHidden = wHidden, wIndicator = Slash).reducedOut {
+    toList().filter { it.endsWith('/') }.map { it.dropLast(1).pth }
   }
 
 /**
@@ -22,14 +25,14 @@ fun lsSubDirs(dir: String, wHidden: Boolean = false) =
  * because it only adds colors when stdout is terminal (not piped to any file or sth)
  */
 fun ls(
-  vararg paths: String,
+  vararg paths: Path,
   wHidden: Boolean = false,
   wIndicator: IndicatorStyle? = null,
   wColor: ColorType? = null,
   wDirsFirst: Boolean = false,
   init: Ls.() -> Unit = {},
 ) = Ls().apply {
-  for (p in paths) +p
+  for (p in paths) +p.strf
   if (wHidden) -AlmostAll
   wIndicator?.let { -Indicator(it) }
   wColor?.let { -Color(it) }
@@ -72,12 +75,8 @@ interface LsOpt : KOptTypical {
   data object ListByColumns : KOptS("C"), LsOpt
   data object ListByLines : KOptS("x"), LsOpt
 
-  data class Color(val type: ColorType) : KOptL("color", "$type"), LsOpt
-  enum class ColorType {
-    ALWAYS, AUTO, NEVER;
-
-    override fun toString() = super.toString().lowercase()
-  }
+  data class Color(val type: ColorType) : KOptL("color", type.namelowords("")), LsOpt
+  enum class ColorType { Always, Auto, Never }
 
   data object Directory : KOptS("d"), LsOpt
 
@@ -92,12 +91,8 @@ interface LsOpt : KOptTypical {
   /** like classify, except do not add * symbol */
   data object ClassifyFileType : KOptL("file-type"), LsOpt
 
-  data class Format(val type: FormatType) : KOptL("--format=$type"), LsOpt
-  enum class FormatType {
-    ACROSS, COMMAS, HORIZONTAL, LONG, SINGLECOLUMN, VERBOSE, VERTICAL;
-
-    override fun toString() = super.toString().lowercase()
-  }
+  data class Format(val type: FormatType) : KOptL("--format=" + type.namelowords("")), LsOpt
+  enum class FormatType { Across, Commas, Horizontal, Long, SingleColumn, Verbose, Vertical }
 
   /** like -l --time-style=full-iso */
   data object FullTime : KOptL("full-time"), LsOpt
@@ -123,19 +118,11 @@ interface LsOpt : KOptTypical {
   /** show nongraphic characters as-is (the default, unless program is 'ls' and output is a terminal) */
   data object ShowControlChars : KOptL("show-control-chars"), LsOpt
 
-  data class Hyperlink(val type: HyperlinkType) : KOptL("hyperlink", "$type"), LsOpt
-  enum class HyperlinkType {
-    ALWAYS, AUTO, NEVER;
+  data class Hyperlink(val type: HyperlinkType) : KOptL("hyperlink", type.namelowords("")), LsOpt
+  enum class HyperlinkType { Always, Auto, Never }
 
-    override fun toString() = super.toString().lowercase()
-  }
-
-  data class Indicator(val style: IndicatorStyle) : KOptL("indicator-style", "$style"), LsOpt
-  enum class IndicatorStyle {
-    NONE, SLASH, FILETYPE, CLASSIFY;
-
-    override fun toString() = if (this == FILETYPE) "file-type" else super.toString().lowercase()
-  }
+  data class Indicator(val style: IndicatorStyle) : KOptL("indicator-style", style.namelowords("-")), LsOpt
+  enum class IndicatorStyle { None, Slash, FileType, Classify }
 
   data object IndicatorSlash : KOptS("p"), LsOpt
 
@@ -153,17 +140,8 @@ interface LsOpt : KOptTypical {
 
   data object QuoteName : KOptL("quote-name"), LsOpt
 
-  data class Quoting(val style: QuotingStyle) : KOptL("quoting-style", "$style"), LsOpt
-  enum class QuotingStyle {
-    LITERAL, LOCALE, SHELL, SHELLALWAYS, SHELLESCAPE, SHELLESCAPEALWAYS, C, ESCAPE;
-
-    override fun toString() = when (this) {
-      SHELLALWAYS -> "shell-always"
-      SHELLESCAPE -> "shell-escape"
-      SHELLESCAPEALWAYS -> "shell-escape-always"
-      else -> super.toString().lowercase()
-    }
-  }
+  data class Quoting(val style: QuotingStyle) : KOptL("quoting-style", style.namelowords("-")), LsOpt
+  enum class QuotingStyle { Literal, Locale, Shell, ShellAlways, ShellEscape, ShellEscapeAlways, C, Escape }
 
   data object Reverse : KOptS("r"), LsOpt
 
@@ -171,34 +149,26 @@ interface LsOpt : KOptTypical {
 
   data object Size : KOptS("s"), LsOpt
 
-  data class Sort(val type: SortType) : KOptL("sort", "$type"), LsOpt
-  enum class SortType {
-    NONE, SIZE, TIME, VERSION, EXTENSION;
-
-    override fun toString() = super.toString().lowercase()
-  }
+  data class Sort(val type: SortType) : KOptL("sort", type.namelowords("")), LsOpt
+  enum class SortType { None, Size, Time, Version, Extension }
   /** largest first */
   data object SortBySize : KOptS("S"), LsOpt
   data object SortByTime : KOptS("t"), LsOpt
   /** do not sort */
   data object SortByNothing : KOptS("U"), LsOpt
-  /** FIXME_later: what does it mean: natural sort of (version) numbers within text */
-  data object SortByNatural : KOptS("v"), LsOpt
+  /** Natural sort of (version) numbers within text */
+  data object SortByVersion : KOptS("v"), LsOpt
   data object SortByExtension : KOptS("X"), LsOpt
 
-  data class Time(val type: TimeType) : KOptL("time", "$type"), LsOpt
+  data class Time(val type: TimeType) : KOptL("time", type.namelowords("")), LsOpt
 
   /**
    * There are duplicates:
-   * last access time: ATIME, ACCESS, USE
-   * last change time: CTIME, STATUS
-   * creation time: BIRTH, CREATION
+   * last access time: ATime, Access, Use
+   * last change time: CTime, Status
+   * creation time: Birth, Creation
    */
-  enum class TimeType {
-    ATIME, ACCESS, USE, CTIME, STATUS, BIRTH, CREATION;
-
-    override fun toString() = super.toString().lowercase()
-  }
+  enum class TimeType { ATime, Access, Use, CTime, Status, Birth, Creation }
 
   data object TimeOfAccess : KOptS("u"), LsOpt
   data object TimeOfChange : KOptS("c"), LsOpt

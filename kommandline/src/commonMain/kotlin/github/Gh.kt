@@ -5,6 +5,7 @@ package pl.mareklangiewicz.kommand.github
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.strf
 
 fun ghHelp(init: GhHelp.() -> Unit = {}) = GhHelp().apply(init)
 fun ghVersion(init: GhVersion.() -> Unit = {}) = GhVersion().apply(init)
@@ -93,7 +94,7 @@ data object Source : GhOpt(), KOptGhRepoList // means NotFork
 
 data class Language(val name: String) : GhOpt(name), KOptGhRepoList
 
-data class Limit(val max: Int) : GhOpt(max.toString()), KOptGhRepoList
+data class Limit(val max: Int) : GhOpt(max.strf), KOptGhRepoList
 
 data class Topic(val name: String) : GhOpt(name), KOptGhRepoList
 

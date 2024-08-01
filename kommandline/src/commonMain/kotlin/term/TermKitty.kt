@@ -12,7 +12,7 @@ fun Kommand.inTermKitty(
   one: Boolean = false,
   detach: Boolean = true,
   hold: Boolean = false,
-  startAs: StartAsType = StartAsType.normal,
+  startAs: StartAsType = StartAsType.Normal,
 ): TermKitty = termKitty(this, one, detach, hold, startAs)
 
 /**
@@ -28,12 +28,12 @@ fun termKitty(
   one: Boolean = false,
   detach: Boolean = true,
   hold: Boolean = false,
-  startAs: StartAsType = StartAsType.normal,
+  startAs: StartAsType = StartAsType.Normal,
 ): TermKitty = termKitty(kommand) {
   if (one) -One
   if (detach) -Detach
   if (hold) -Hold
-  if (startAs != StartAsType.normal) -StartAs(startAs)
+  if (startAs != StartAsType.Normal) -StartAs(startAs)
 }
 
 @DelicateApi
@@ -89,10 +89,9 @@ interface TermKittyOpt : KOptTypical {
    */
   data class OneInGroup(val group: String) : KOptL("instance-group", group, nameSeparator = " "), TermKittyOpt
 
-  @Suppress("EnumEntryName")
-  enum class StartAsType { normal, fullscreen, maximized, minimized }
-  data class StartAs(val type: StartAsType = StartAsType.normal) :
-    KOptL("start-as", type.name, nameSeparator = " "), TermKittyOpt
+  data class StartAs(val type: StartAsType = StartAsType.Normal) :
+    KOptL("start-as", type.namelowords(""), nameSeparator = " "), TermKittyOpt
+  enum class StartAsType { Normal, FullScreen, Maximized, Minimized }
 
   data object Help : KOptS("h"), TermKittyOpt
   data object Version : KOptS("v"), TermKittyOpt

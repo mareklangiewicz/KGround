@@ -3,9 +3,11 @@
 package pl.mareklangiewicz.kommand.admin
 
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.admin.SudoOpt.*
+import pl.mareklangiewicz.udata.strf
 
 /**
  * Tested only for simple non-interactive commands, that don't expect any input and just print some output.
@@ -37,8 +39,8 @@ fun sudo(
 }
 
 @DelicateApi
-fun sudoEdit(file: String, asUser: String? = null) = sudo {
-  -Edit; asUser?.let { -User(it) }; +file
+fun sudoEdit(file: Path, asUser: String? = null) = sudo {
+  -Edit; asUser?.let { -User(it) }; +file.strf
 }
 
 @DelicateApi

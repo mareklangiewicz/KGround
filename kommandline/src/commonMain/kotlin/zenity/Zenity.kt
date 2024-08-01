@@ -7,6 +7,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.chkThis
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
+import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class) fun zenityShowError(
   error: String,
@@ -169,13 +170,13 @@ interface ZenityOpt : KOptTypical {
   data class Title(val t: String) : ZenityOpt, KOptLN(t)
   /** icon path or one of keywords: info, warning, question, error */
   data class Icon(val icon: String) : ZenityOpt, KOptL("window-icon", icon)
-  data class Timeout(val seconds: Int) : ZenityOpt, KOptLN(seconds.toString())
+  data class Timeout(val seconds: Int) : ZenityOpt, KOptLN(seconds.strf)
   data class Text(val t: String) : ZenityOpt, KOptLN(t)
   data class OkLabel(val label: String) : ZenityOpt, KOptLN(label)
   data class CancelLabel(val label: String) : ZenityOpt, KOptLN(label)
-  data class Day(val d: Int) : ZenityOpt, KOptLN(d.toString())
-  data class Month(val m: Int) : ZenityOpt, KOptLN(m.toString())
-  data class Year(val y: Int) : ZenityOpt, KOptLN(y.toString())
+  data class Day(val d: Int) : ZenityOpt, KOptLN(d.strf)
+  data class Month(val m: Int) : ZenityOpt, KOptLN(m.strf)
+  data class Year(val y: Int) : ZenityOpt, KOptLN(y.strf)
   data class DateFormat(val format: String) : ZenityOpt, KOptLN(format)
   data class EntryText(val t: String) : ZenityOpt, KOptLN(t)
   data object HideText : ZenityOpt, KOptLN()
@@ -191,17 +192,15 @@ interface ZenityOpt : KOptTypical {
   data object RadioList : ZenityOpt, KOptL("radiolist")
   data object Editable : ZenityOpt, KOptLN()
   data class PrintColumn(val c: String) : ZenityOpt, KOptLN(c)
-  data class HideColumn(val c: Int) : ZenityOpt, KOptLN(c.toString())
+  data class HideColumn(val c: Int) : ZenityOpt, KOptLN(c.strf)
   data object Listen : ZenityOpt, KOptLN()
-  data class Percentage(val p: Int) : ZenityOpt, KOptLN(p.toString())
+  data class Percentage(val p: Int) : ZenityOpt, KOptLN(p.strf)
   data object AutoClose : ZenityOpt, KOptLN()
   data object AutoKill : ZenityOpt, KOptLN()
   data object Pulsate : ZenityOpt, KOptLN()
-  data class InitValue(val v: Int) : ZenityOpt, KOptL("value", v.toString())
-  data class MinValue(val v: Int) : ZenityOpt, KOptLN(v.toString())
-  data class MaxValue(val v: Int) : ZenityOpt, KOptLN(v.toString())
-  data class Step(val v: Int) : ZenityOpt, KOptLN(v.toString())
+  data class InitValue(val v: Int) : ZenityOpt, KOptL("value", v.strf)
+  data class MinValue(val v: Int) : ZenityOpt, KOptLN(v.strf)
+  data class MaxValue(val v: Int) : ZenityOpt, KOptLN(v.strf)
+  data class Step(val v: Int) : ZenityOpt, KOptLN(v.strf)
   data object PrintPartial : ZenityOpt, KOptLN()
 }
-
-

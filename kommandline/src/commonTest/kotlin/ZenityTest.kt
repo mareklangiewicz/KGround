@@ -13,6 +13,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.Type.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.zenity.*
+import pl.mareklangiewicz.udata.strf
 
 
 @OptIn(DelicateApi::class)
@@ -66,7 +67,7 @@ class ZenityTest {
     -Column("chk")
     -Column("labels")
     repeat(10) {
-      +(it % 3 == 0).toString()
+      +(it % 3 == 0).strf
       +"label $it"
     }
   }.tryInteractivelyCheckBlockingOrErr()
@@ -78,7 +79,7 @@ class ZenityTest {
     -Column("labels")
     -Column("descs")
     repeat(6) {
-      +(it == 1).toString()
+      +(it == 1).strf
       +"label $it"
       +"desc $it"
     }

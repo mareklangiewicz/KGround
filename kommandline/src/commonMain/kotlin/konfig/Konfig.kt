@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.konfig
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
@@ -9,6 +10,7 @@ import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.getSysUFileSys
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.ULog
 import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.localULog
@@ -34,7 +36,7 @@ fun konfigInUserHomeConfigDir(
   checkForDangerousKeys: Boolean = true,
   checkForDangerousValues: Boolean = true,
 ) = konfigInDir(
-  fs.pathToUserHome!!.toString() + "/.config/konfig", // FIXME_later: use Path type everywhere
+  fs.pathToUserHome!! / ".config" / "konfig",
   cli,
   isReadOnly,
   checkForDangerousKeys,
@@ -48,7 +50,7 @@ fun konfigInUserHomeConfigDir(
  * I want to be able to use it over ssh and/or adb, so that's another reason to avoid special chars.
  */
 fun konfigInDir(
-  dir: String,
+  dir: Path,
   cli: CLI = getSysCLI(),
   isReadOnly: Boolean = false,
   isClrAllowed: Boolean = false,
@@ -57,7 +59,7 @@ fun konfigInDir(
 ) = KonfigInDirUnsafe(dir, cli)
   .withChecks(isReadOnly, isClrAllowed, checkForDangerousKeys, checkForDangerousValues)
 
-private class KonfigInDirUnsafe(val dir: String, val cli: CLI = getSysCLI()) : IKonfig {
+private class KonfigInDirUnsafe(val dir: Path, val cli: CLI = getSysCLI()) : IKonfig {
 
   init {
     mkdir(dir, withParents = true).axBlockingOrErr(cli)
@@ -65,18 +67,18 @@ private class KonfigInDirUnsafe(val dir: String, val cli: CLI = getSysCLI()) : I
 
   override fun get(key: String): String? =
     try {
-      readFileWithCat("$dir/$key").axBlockingOrErr(cli).joinToString("\n")
+      readFileWithCat(dir / key).axBlockingOrErr(cli).joinToString("\n")
     } catch (e: RuntimeException) {
       null
     }
 
   override fun set(key: String, item: String?) {
-    val file = "$dir/$key"
+    val file = dir / key
     if (item == null) rmFileIfExists(file).axBlockingOrErr(cli)
     else writeFileWithDD(inLines = listOf(item), outFile = file).axBlockingOrErr(cli)
   }
 
-  override val keys get() = lsRegFiles(dir).axBlockingOrErr(cli).asCol()
+  override val keys get() = lsRegFiles(dir).axBlockingOrErr(cli).map { it.strf }.asCol()
 }
 
 private class KonfigWithChecks(

@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.ssh
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.strf
 
 
 @DelicateApi
@@ -343,7 +344,7 @@ interface SshOpt : KOptTypical {
    * Port to connect to on the remote host.
    * This can be specified on a per-host basis in the configuration file.
    */
-  data class Port(val port: Int) : KOptS("p", port.toString()), SshOpt
+  data class Port(val port: Int) : KOptS("p", port.strf), SshOpt
 
   /** Quiet mode. Causes most warning and diagnostic messages to be suppressed. */
   data object Quiet : KOptS("q"), SshOpt
@@ -381,4 +382,4 @@ interface SshOpt : KOptTypical {
   // TODO_maybe: rename most options here to match corresponding keywords in: https://man.openbsd.org/ssh_config.5
 }
 
-private infix fun String?.col(that: Any?) = this?.let { "$it:" }.orEmpty() + that?.toString().orEmpty()
+private infix fun String?.col(that: Any?) = this?.let { "$it:" }.orEmpty() + that?.strf.orEmpty()

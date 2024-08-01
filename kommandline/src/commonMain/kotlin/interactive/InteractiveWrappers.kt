@@ -111,16 +111,16 @@ fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, workDir: Path? =
 
 
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-fun writeFileAndStartInGVim(inLines: List<String>, vararg useNamedArgs: Unit, filePath: String? = null) =
+fun writeFileAndStartInGVim(inLines: List<String>, vararg useNamedArgs: Unit, filePath: Path? = null) =
   InteractiveScript {
     val fs = localUFileSys()
     val cli = localCLI()
-    val fp = filePath ?: fs.pathToTmpNotes.toString() // FIXME NOW: Use Path everywhere
+    val fp = filePath ?: fs.pathToTmpNotes
     writeFileWithDD(inLines, fp).ax()
     cli.lx(gvim(fp))
   }
 
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-fun writeFileAndStartInGVim(inContent: String, vararg useNamedArgs: Unit, filePath: String? = null) =
+fun writeFileAndStartInGVim(inContent: String, vararg useNamedArgs: Unit, filePath: Path? = null) =
   writeFileAndStartInGVim(listOf(inContent), filePath = filePath)
 

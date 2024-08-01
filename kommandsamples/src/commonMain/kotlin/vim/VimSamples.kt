@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.find.myKommandLinePath
@@ -37,7 +38,7 @@ data object VimBasicSamples {
     // Note: it looks like lacking additional quotes around "hid Man vim",
     // but the "hid Man vim" is passed as ONE argument to nvim so it's fine (no bash/shell is used here)
 
-  val nvimManManInFullTermKitty = nvimMan("man").inTermKitty(startAs = StartAsType.fullscreen)
+  val nvimManManInFullTermKitty = nvimMan("man").inTermKitty(startAs = StartAsType.FullScreen)
     // Note: here we're wrapping in kitty explicitly (in fullscreen, without hold),
     // but sample nvimManVim will also use kitty if run via Main.kt:main:try-code (by default, with hold = true)
 
@@ -63,9 +64,9 @@ data object VimBasicSamples {
 @DelicateApi("Many are changing files, like KommandLine:build.gradle.kts (f.e. to bump version automatically)")
 data object VimAdvancedSamples {
 
-  // FIXME_later: use UFileSys.pathXXX, and generally use Path type
-  private val myBuildFile = "$myKommandLinePath/build.gradle.kts"
-  private val myTmpKeysFile = "$myTmpPath/tmp.keys.vim"
+  // FIXME_later: use UFileSys.pathXXX
+  private val myBuildFile = "$myKommandLinePath/build.gradle.kts".pth
+  private val myTmpKeysFile = "$myTmpPath/tmp.keys.vim".pth
 
   val gvimBuildGradleCursorFindVer = gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)") }
 
@@ -73,7 +74,7 @@ data object VimAdvancedSamples {
   val gvimBlaSlowSCleanMode = gvimLineS(blaSlowS) { -CleanMode }
 
   // TODO_someday: better kitty integration (starting in existing kitty in new window/tab/etc..)
-  val nvimInKittyBashRc = nvim("/home/marek/.bashrc").inTermKitty()
+  val nvimInKittyBashRc = nvim("/home/marek/.bashrc".pth).inTermKitty()
 
 
 

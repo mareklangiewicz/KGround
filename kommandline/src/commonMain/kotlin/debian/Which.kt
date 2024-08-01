@@ -1,7 +1,9 @@
 package pl.mareklangiewicz.kommand.debian
 
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 
 fun isKommandAvailable(kommand: Kommand) = isCommandAvailable(kommand.name)
@@ -9,10 +11,10 @@ fun isKommandAvailable(kommand: Kommand) = isCommandAvailable(kommand.name)
 fun isCommandAvailable(command: String) = whichFirstOrNull(command).reducedMap { this != null }
 
 @OptIn(DelicateApi::class)
-fun whichFirstOrNull(command: String) = which(command).reducedOut { firstOrNull() }
+fun whichFirstOrNull(command: String): ReducedKommand<Path?> = which(command).reducedOut { firstOrNull()?.pth }
 
 @OptIn(DelicateApi::class)
-fun which(vararg commands: String, all: Boolean = false) =
+fun which(vararg commands: String, all: Boolean = false): Which =
   which { if (all) -WhichOpt.All; for (c in commands) +c }
 
 @DelicateApi

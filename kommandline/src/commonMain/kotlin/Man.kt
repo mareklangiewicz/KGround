@@ -1,13 +1,14 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
 fun man(section: ManSection? = null, init: Man.() -> Unit = {}) = man(section?.number, init)
 
 @OptIn(DelicateApi::class)
 fun man(sectionNumber: Int?, init: Man.() -> Unit = {}) =
-  Man().apply { sectionNumber?.let { +it.toString() }; init() }
+  Man().apply { sectionNumber?.let { +it.strf }; init() }
 
 @DelicateApi
 data class Man(

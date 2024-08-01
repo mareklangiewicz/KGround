@@ -1,11 +1,13 @@
 package pl.mareklangiewicz.kommand.core
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.strf
 
 /** Update the access and modification times of each file to the current time. Create empty files if necessary. */
 @OptIn(DelicateApi::class)
-fun touch(vararg files: String) = touch { nonopts.addAll(files) }.reducedOutToUnit()
+fun touch(vararg files: Path) = touch { nonopts.addAll(files.map { it.strf }) }.reducedOutToUnit()
 
 @DelicateApi
 fun touch(init: Touch.() -> Unit) = Touch().apply(init)

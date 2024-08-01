@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.strf
 
 /**
  * @return null means command was not found at all,
@@ -12,7 +13,7 @@ import pl.mareklangiewicz.kommand.*
 @OptIn(DelicateApi::class)
 fun searchCommand(command: String): ReducedScript<List<String>?> = ReducedScript {
   val first = whichFirstOrNull(command).ax() ?: return@ReducedScript null
-  dpkg(DpkgAct.Search(first)).ax()
+  dpkg(DpkgAct.Search(first.strf)).ax()
 }
 
 /** There has to be exactly one action in each invocation */

@@ -1,9 +1,12 @@
 package pl.mareklangiewicz.kommand.core
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.TestIfFile.*
+import pl.mareklangiewicz.udata.str
+import pl.mareklangiewicz.udata.strf
 
 // names here are all like testIf/TestIf instead of just test/Test,
 // mostly to be different from normal test annotations/classes/functions
@@ -18,21 +21,21 @@ fun testIfFirstFileNewer(file1: String, file2: String) = testIf(file1, "-nt", fi
 fun testIfFirstFileOlder(file1: String, file2: String) = testIf(file1, "-ot", file2)
 
 /** Can be any kind of file (e.g., directory) */
-fun testIfFileExists(file: String) = testIf(file, FileExists)
+fun testIfFileExists(file: Path) = testIf(file, FileExists)
 
-fun testIfFileIsRegular(file: String) = testIf(file, FileIsRegular)
+fun testIfFileIsRegular(file: Path) = testIf(file, FileIsRegular)
 
-fun testIfFileIsDirectory(file: String) = testIf(file, FileIsDirectory)
+fun testIfFileIsDirectory(file: Path) = testIf(file, FileIsDirectory)
 
-fun testIfFileIsSymLink(file: String) = testIf(file, FileIsSymLink)
+fun testIfFileIsSymLink(file: Path) = testIf(file, FileIsSymLink)
 
-fun testIfFileIsNamedPipe(file: String) = testIf(file, FileIsNamedPipe)
+fun testIfFileIsNamedPipe(file: Path) = testIf(file, FileIsNamedPipe)
 
-fun testIfFileHasGrantedRead(file: String) = testIf(file, FileHasGrantedRead)
+fun testIfFileHasGrantedRead(file: Path) = testIf(file, FileHasGrantedRead)
 
-fun testIfFileHasGrantedWrite(file: String) = testIf(file, FileHasGrantedWrite)
+fun testIfFileHasGrantedWrite(file: Path) = testIf(file, FileHasGrantedWrite)
 
-fun testIfFileHasGrantedExec(file: String) = testIf(file, FileHasGrantedExec)
+fun testIfFileHasGrantedExec(file: Path) = testIf(file, FileHasGrantedExec)
 
 
 enum class TestIfFile(val code: Char) {
@@ -60,7 +63,7 @@ enum class TestIfFile(val code: Char) {
 }
 
 @OptIn(DelicateApi::class)
-fun testIf(file: String, testIfFile: TestIfFile) = testIf("-${testIfFile.code}", file)
+fun testIf(file: Path, testIfFile: TestIfFile) = testIf("-${testIfFile.code}", file.strf)
 
 
 // TODO_someday: @CheckResult https://youtrack.jetbrains.com/issue/KT-12719

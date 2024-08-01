@@ -3,14 +3,17 @@ package pl.mareklangiewicz.kommand.vim
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.chk
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.*
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForVim
 import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
+import pl.mareklangiewicz.udata.strf
 
 /**
  * When opening stdin content, vim expects commands from stderr.
@@ -19,11 +22,11 @@ import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.VimRcNONE
  * so in that case, it's great default behavior, that vim tries to use stderr as input when stdin is used for content.
  */
 @DelicateApi("When opening stdin content, vim expects commands from (redirected) stderr!")
-fun vimStdIn(init: XVim.() -> Unit = {}): XVim = vim("-", init = init)
+fun vimStdIn(init: XVim.() -> Unit = {}): XVim = vim("-".pth, init = init)
 
-fun gvimStdIn(init: XVim.() -> Unit = {}): XVim = gvim("-", init = init)
+fun gvimStdIn(init: XVim.() -> Unit = {}): XVim = gvim("-".pth, init = init)
 
-fun nvimStdIn(init: XVim.() -> Unit = {}): XVim = nvim("-", init = init)
+fun nvimStdIn(init: XVim.() -> Unit = {}): XVim = nvim("-".pth, init = init)
 
 fun nvimMan(manpage: String, section: ManSection? = null): XVim = nvim {
   val cmd = section?.number?.let { "hid Man $it $manpage" } ?: "hid Man $manpage"
@@ -40,12 +43,11 @@ fun gvimLines(inLines: List<String>, init: XVim.() -> Unit = {}) = gvimLineS(inL
 fun gvimContent(inContent: String, init: XVim.() -> Unit = {}) = gvimLines(inContent.lines(), init)
 
 
-fun vim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.vim, files.toMutableList()).apply(init)
+fun vim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(XVim.Type.Vim, files.toMutableList()).apply(init)
 
-fun nvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.nvim, files.toMutableList()).apply(init)
+fun nvim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(XVim.Type.NVim, files.toMutableList()).apply(init)
 
-// FIXME NOW: use Path everywhere
-fun gvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.gvim, files.toMutableList()).apply(init)
+fun gvim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(XVim.Type.GVim, files.toMutableList()).apply(init)
 // TODO NOW: nvim, opening specific lines, opening in existing editor (is servername same as in vim?),
 //  combine with Ide as in kolib openInIdeOrGVim but better selecting (with nvim too)
 
@@ -54,7 +56,7 @@ fun gvim(vararg files: String, init: XVim.() -> Unit = {}) = XVim(XVim.Type.gvim
  * [vimExScriptStdIn] or [vimExScriptContent] or [vimExScriptFile]
  * Note: there is :vi (:visual) command available to switch to normal (visual) mode.
  */
-fun vimEx(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExMode; init() }
+fun vimEx(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExMode; init() }
 
 /**
  * Useful for playing with ex-mode interactively before writing script for one of:
@@ -63,10 +65,10 @@ fun vimEx(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) 
  * but still can be useful playground before creating ex-mode script.
  * Note: there is :vi (:visual) command available to switch to normal (visual) mode.
  */
-fun vimExIm(vararg files: String, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExImMode; init() }
+fun vimExIm(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExImMode; init() }
 
 fun vimExScriptStdIn(
-  vararg files: String,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
 ): XVim = vim(*files) {
@@ -82,7 +84,7 @@ fun vimExScriptStdIn(
  */
 @OptIn(NotPortableApi::class)
 fun vimExScriptStdInWithExplicitSettings(
-  vararg files: String,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isDebugMode: Boolean = false,
   isCleanMode: Boolean = true,
@@ -105,7 +107,7 @@ fun vimExScriptStdInWithExplicitSettings(
 
 fun vimExScriptContent(
   exScriptContent: String,
-  vararg files: String,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
 ): ReducedKommand<List<String>> = vimExScriptStdIn(files = files, isViCompat = isViCompat, isCleanMode = isCleanMode)
@@ -122,7 +124,7 @@ fun vimExScriptContent(
  */
 fun vimExScriptFile(
   exScriptFile: String = "Session.vim",
-  vararg files: String,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
 ): XVim = vim(*files) {
@@ -135,8 +137,8 @@ fun vimExScriptFile(
 
 @OptIn(NotPortableApi::class)
 fun vimKeysScriptFile(
-  keysScriptFile: String,
-  vararg files: String,
+  keysScriptFile: Path,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
   isSwapNONE: Boolean = true,
@@ -158,7 +160,7 @@ fun vimKeysScriptFile(
  */
 @OptIn(NotPortableApi::class, DelicateApi::class)
 fun vimKeysScriptStdIn(
-  vararg files: String,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
   isSwapNONE: Boolean = true,
@@ -181,7 +183,7 @@ fun vimKeysScriptStdIn(
 @OptIn(NotPortableApi::class, DelicateApi::class)
 fun vimKeysScriptContent(
   keysScriptContent: String,
-  vararg files: String,
+  vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
   isSwapNONE: Boolean = true,
@@ -207,92 +209,91 @@ fun vimKeysScriptContent(
 
 @Suppress("unused")
 data class XVim(
-  val type: Type = Type.vim,
-  val files: MutableList<String> = mutableListOf(),
+  val type: Type = Type.Vim,
+  val files: MutableList<Path> = mutableListOf(),
   val options: MutableList<Option> = mutableListOf(),
 ) : Kommand {
 
-  /** Type of vim binary. Names are actual binary file/kommand names. */
-  @Suppress("EnumEntryName")
+  /** Type of vim binary. Names (when lowercased) are actual binary file/kommand names. */
   enum class Type {
 
     /** Neo Vim */
-    nvim,
+    NVim,
 
     /** Base/official/original Vim. Started in normal way. */
-    vim,
+    Vim,
 
     /**
-     * Graphical mode of [vim]. Starts new GUI window. Can also be done with "-g" argument [Option.GuiMode]
-     * Note1: it does NOT use [nvim] - which doesn't have official gui support.
-     * Note2: It's usually better to start [nvim] inside kitty terminal - better nerd fonts support and everything.
+     * Graphical mode of [Vim]. Starts new GUI window. Can also be done with "-g" argument [Option.GuiMode]
+     * Note1: it does NOT use [NVim] - which doesn't have official gui support.
+     * Note2: It's usually better to start [NVim] inside kitty terminal - better nerd fonts support and everything.
      */
-    gvim,
+    GVim,
 
 
-    /** The [vim], but might be acting more like Vi (But it depends on .vimrc and the 'compatible' option) */
-    vi,
+    /** The [Vim], but might be acting more like Vi (But it depends on .vimrc and the 'compatible' option) */
+    Vi,
 
     /**
-     * The [vim], but started in traditional vi-compatible Ex mode. Go to Normal mode with the ":vi" command.
-     * Can also be done with the "-e" argument [Option.ExMode]. See also [Type.exim]
+     * The [Vim], but started in traditional vi-compatible Ex mode. Go to Normal mode with the ":vi" command.
+     * Can also be done with the "-e" argument [Option.ExMode]. See also [Type.ExIm]
      */
-    ex,
+    Ex,
 
     /**
-     * The [vim], but started in improved Ex mode. Go to Normal mode with the ":vi" command.
+     * The [Vim], but started in improved Ex mode. Go to Normal mode with the ":vi" command.
      * Allows for more advanced commands than the vi-compatible Ex mode, and behaves more like typing :commands in Vim.
-     * Can also be done with the "-E" argument [Option.ExImMode]. See also [Type.ex]
+     * Can also be done with the "-E" argument [Option.ExImMode]. See also [Type.Ex]
      */
     @DelicateApi("Normally not installed. Use vim -E instead. See [Option.ExImMode].")
-    exim,
+    ExIm,
 
     /**
-     * The [vim], but started in read-only mode. You will be protected from writing the files.
+     * The [Vim], but started in read-only mode. You will be protected from writing the files.
      * Can also be done with the "-R" argument [Option.ReadOnly].
      */
-    view,
+    View,
 
-    /** Graphical mode of [view], so also read-only. */
-    gview,
+    /** Graphical mode of [View], so also read-only. */
+    GView,
 
-    /** Graphical mode of [ex]. */
+    /** Graphical mode of [Ex]. */
     @DelicateApi("Usually not installed. Use vim -e -g instead. See [Option.ExMode] [Option.GuiMode].")
-    gex,
+    GEx,
 
     /**
-     * Easy mode of [gvim]. Graphical, starts new window, behave like click-and-type editor.
+     * Easy mode of [GVim]. Graphical, starts new window, behave like click-and-type editor.
      * Can also be done with the "-y" argument [Option.EasyMode].
      */
-    evim,
+    EVim,
 
     /**
-     * Easy mode of [gview]. Graphical, starts new window, behave like click-and-type editor, read-only
+     * Easy mode of [GView]. Graphical, starts new window, behave like click-and-type editor, read-only
      * Can also be done with the "-y" argument [Option.EasyMode].
      */
-    eview,
+    EView,
 
-    /** [vim] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
-    rvim,
+    /** [Vim] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
+    RVim,
 
-    /** [view] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
-    rview,
+    /** [View] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
+    RView,
 
-    /** [gvim] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
-    rgvim,
+    /** [GVim] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
+    RGVim,
 
-    /** [gview] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
-    rgview,
+    /** [GView] with restrictions. Can also be done with the "-Z" argument [Option.RestrictedMode]. */
+    RGView,
 
-    /** Start [vim] in diff mode. Can also be done with the "-d" argument [Option.DiffMode]. */
-    vimdiff,
+    /** Start [Vim] in diff mode. Can also be done with the "-d" argument [Option.DiffMode]. */
+    VimDiff,
 
-    /** Start [gvim] in diff mode. Can also be done with the "-d" argument [Option.DiffMode]. */
-    gvimdiff,
+    /** Start [GVim] in diff mode. Can also be done with the "-d" argument [Option.DiffMode]. */
+    GVimDiff,
   }
 
-  override val name get() = type.name
-  override val args get() = options.flatMap { it.str } + files
+  override val name get() = type.namelowords("")
+  override val args get() = options.flatMap { it.str } + files.map { it.strf }
 
   // TODO_someday: Go through all :h starting.txt in NVim, and make sure, we have all options here
   // (I skipped some for now) (annotate which are NotPortableApi)
@@ -353,11 +354,11 @@ data class XVim(
     /** Go to debugging mode when executing the first command from a script. */
     data object DebugMode : Option("-D")
 
-    /** Start in Ex-mode. Just like executable was called "ex" [Type.ex]. See also [ExImMode] */
+    /** Start in Ex-mode. Just like executable was called "ex" [Type.Ex]. See also [ExImMode] */
     data object ExMode : Option("-e")
 
     /**
-     * Improved Ex-mode, just like the executable was called "exim" [Type.exim]. See also [ExMode].
+     * Improved Ex-mode, just like the executable was called "exim" [Type.ExIm]. See also [ExMode].
      * Allows for more advanced commands than the Ex-mode, and behaves more like typing :commands in Vim.
      * All command line editing, completion etc. is available.
      */
@@ -402,13 +403,13 @@ data class XVim(
     data class LuaWorkerMode(val luaFile: String) : Option("-ll", luaFile)
 
     /**
-     * Start in vi-compatible mode, just like the executable was called "vi" [Type.vi].
-     * This only has effect when the executable is called "ex" [Type.ex].
+     * Start in vi-compatible mode, just like the executable was called "vi" [Type.Vi].
+     * This only has effect when the executable is called "ex" [Type.Ex].
      */
     data object ViMode : Option("-v")
 
     /**
-     * Start Vim in easy mode, just like the executable was called "evim" [Type.evim] or "eview" [Type.eview].
+     * Start Vim in easy mode, just like the executable was called "evim" [Type.EVim] or "eview" [Type.EView].
      * Makes Vim behave like a click-and-type editor.
      */
     data object EasyMode : Option("-y")
@@ -438,8 +439,8 @@ data class XVim(
 
 
     /**
-     * The GUI mode. Supported only in original [vim] and only if compiled with GUI support. Like [Type.gvim]
-     * Note: the [Type.nvim] does NOT support it, but better solution is to run [Type.nvim] inside kitty terminal.
+     * The GUI mode. Supported only in original [vim] and only if compiled with GUI support. Like [Type.GVim]
+     * Note: the [Type.NVim] does NOT support it, but better solution is to run [Type.NVim] inside kitty terminal.
      */
     data object GuiMode : Option("-g")
 
@@ -531,7 +532,7 @@ data class XVim(
      * Script (aka Silent) mode. Delicate because tricky differences between vim an nvim. Use [ExScriptMode] instead.
      * See :h -s-ex in both vim and nvim, also see :h vim-differences /Startup in nvim.
      * Only when started as "ex" (or "exim") or when the "-e" (or "-E") option was given BEFORE the "-s" option.
-     * See also: [Type.ex]; [Type.exim]; [ExMode]; [ExImMode]
+     * See also: [Type.Ex]; [Type.ExIm]; [ExMode]; [ExImMode]
      */
     @DelicateApi("Tricky to get always right with other options. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
     @NotPortableApi("Supported differently in vim and nvim. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
@@ -544,7 +545,7 @@ data class XVim(
      * If the end of the file is reached before the editor exits, further characters are read from the keyboard.
      * It might be good idea to use [CleanMode] too. Does NOT work with -es or -Es ([ExScriptMode] or [ExImScriptMode]).
      */
-    data class KeysScriptIn(val inKeysFile: String) : Option("-s", inKeysFile)
+    data class KeysScriptIn(val inKeysFile: Path) : Option("-s", inKeysFile.strf)
     // yes, the same letter "-s" as ScriptMode, but with argument.
 
     /**
@@ -561,8 +562,8 @@ data class XVim(
      * or file is overwritten (when [overwrite] == true).
      */
     @DelicateApi("To avoid garbage it's best to use CleanMode (and nvim works better even if then replaying with vim)")
-    data class KeysScriptOut(val outKeysFile: String, val overwrite: Boolean = false)
-      : Option(if (overwrite) "-W" else "-w", outKeysFile) {
+    data class KeysScriptOut(val outKeysFile: Path, val overwrite: Boolean = false)
+      : Option(if (overwrite) "-W" else "-w", outKeysFile.strf) {
       val append: Boolean get() = !overwrite
     }
 
@@ -580,7 +581,7 @@ data class XVim(
      * Give messages about which files are sourced and for reading and writing a viminfo file.
      * The default [verbosity] (when null) is the is 10.
      */
-    data class Verbose(val verbosity: Int? = null) : Option("-V" + verbosity?.toString().orEmpty())
+    data class Verbose(val verbosity: Int? = null) : Option("-V" + verbosity?.strf.orEmpty())
 
     /**
      * Connect to a Vim server and make it edit the files given in the rest of the arguments.
@@ -664,7 +665,7 @@ data class XVim(
        * maybe it first try to read whole stdin "file", but /dev/stdin is never closing/ending?
        */
       @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't and tries to open the \"-\" file.")
-      val KeysScriptStdInForNVim = KeysScriptIn("-")
+      val KeysScriptStdInForNVim = KeysScriptIn("-".pth)
 
 
         /**
@@ -675,7 +676,7 @@ data class XVim(
          */
         @DelicateApi("Provided keys have to quit vim at the end (if no GuiMode). Or Vim will do sth, show error and output some additional garbage.")
         @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't. So /dev/stdin might work better in Vim.")
-      val KeysScriptStdInForVim = KeysScriptIn("/dev/stdin")
+      val KeysScriptStdInForVim = KeysScriptIn("/dev/stdin".pth)
     }
   }
 

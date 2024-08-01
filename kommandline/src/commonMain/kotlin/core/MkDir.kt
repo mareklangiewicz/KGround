@@ -1,12 +1,14 @@
 package pl.mareklangiewicz.kommand.core
 
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.MkDirOpt.*
+import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
-fun mkdir(dir: String, withParents: Boolean = false) =
-  mkdir { if (withParents) -Parents; +dir }.reducedOutToUnit()
+fun mkdir(dir: Path, withParents: Boolean = false) =
+  mkdir { if (withParents) -Parents; +dir.strf }.reducedOutToUnit()
 
 @DelicateApi
 fun mkdir(init: MkDir.() -> Unit = {}) = MkDir().apply(init)

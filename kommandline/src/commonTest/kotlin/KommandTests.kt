@@ -2,6 +2,9 @@
 
 package pl.mareklangiewicz.kommand
 
+import okio.Path
+import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.udata.strf
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.absoluteValue
 import kotlin.random.Random
@@ -58,33 +61,33 @@ class KommandTests {
       "On real file system on tmp dir" so {
 
         "On mktemp kommand" so {
-          var tmpFile = "/tmp/fake"
+          var tmpFile = "/tmp/fake".pth
           try {
-            tmpFile = mktemp(path = "/tmp", prefix = "tmpFile").ax()
-            "name is fine" so { tmpFile.chkThis { startsWith("/tmp/tmpFile") && endsWith(".tmp") } }
+            tmpFile = mktemp(path = "/tmp".pth, prefix = "tmpFile").ax()
+            "name is fine" so { tmpFile.chkThis { strf.startsWith("/tmp/tmpFile") && strf.endsWith(".tmp") } }
             "file is there" so {
-              lsRegFiles("/tmp").ax().chkThis { any { "/tmp/$it" == tmpFile } }
+              lsRegFiles("/tmp".pth).ax().chkThis { any { "/tmp/$it" == tmpFile.strf } }
             }
           } finally {
             rmFileIfExists(tmpFile).ax()
           }
         }
 
-        // Note: random dir name can't be in test name bc uspek would loop infinitely finding new "branches"
-        val dir = "testDirTmp" + Random.nextLong().absoluteValue
-        val tmpDir = "/tmp/$dir"
-        val tmpDirBla = "$tmpDir/bla"
-        val tmpDirBlaBle = "$tmpDirBla/ble"
+        // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
+        val dirName = "testDirTmp" + Random.nextLong().absoluteValue
+        val tmpDir = "/tmp".pth / dirName
+        val tmpDirBla = tmpDir / "bla"
+        val tmpDirBlaBle = tmpDirBla / "ble"
 
         "On mkdir with parents" so {
           try {
             mkdir(tmpDirBlaBle, withParents = true).chkLineRaw("mkdir -p $tmpDirBlaBle").ax()
 
             "check created dirs with ls" so {
-              lsSubDirs("/tmp").chkLineRaw("ls --indicator-style=slash /tmp")
-                .ax().chkThis { contains(dir) }
+              lsSubDirs("/tmp".pth).chkLineRaw("ls --indicator-style=slash /tmp")
+                .ax().chkThis { strf.contains(dirName) }
             }
-            "ls tmp dir is not file" so { lsRegFiles("/tmp").ax().chkThis { !contains(dir) } }
+            "ls tmp dir is not file" so { lsRegFiles("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
 
             "On rm empty ble" so {
               rmDirIfEmpty(tmpDirBlaBle).ax()
@@ -93,49 +96,49 @@ class KommandTests {
             }
 
             "On touchy blu file" so {
-              val blu = "blu.touchy"
-              val fullBlu = "$tmpDirBlaBle/$blu"
-              touch(fullBlu).ax()
+              val bluName = "blu.touchy"
+              val bluPath = tmpDirBlaBle / bluName
+              touch(bluPath).ax()
 
-              "ls blu is there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { contains(blu) } }
+              "ls blu is there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { strf.contains(bluName) } }
 
               "On blu file content" so {
-                "it is empty" so { readFileWithCat(fullBlu).ax().chkEmpty() }
+                "it is empty" so { readFileWithCat(bluPath).ax().chkEmpty() }
                 "On write poem" so {
                   val poem = listOf("NOTHING IS FAIR IN THIS WORLD OF MADNESS!")
-                  writeFileWithDD(poem, fullBlu).ax()
-                  "poem is there" so { readFileWithCat(fullBlu).ax() chkEq poem }
+                  writeFileWithDD(poem, bluPath).ax()
+                  "poem is there" so { readFileWithCat(bluPath).ax() chkEq poem }
                   "On write empty list of lines" so {
-                    writeFileWithDD(emptyList<String>(), fullBlu).ax()
-                    "it is empty again" so { readFileWithCat(fullBlu).ax().chkEmpty() }
+                    writeFileWithDD(emptyList<String>(), bluPath).ax()
+                    "it is empty again" so { readFileWithCat(bluPath).ax().chkEmpty() }
                   }
                 }
               }
 
               "On rm blu" so {
-                rm(fullBlu).ax()
+                rm(bluPath).ax()
 
-                "ls blu is NOT there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { !contains(blu) } }
+                "ls blu is NOT there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { !strf.contains(bluName) } }
               }
 
               "On rm wrong file name" so {
                 "using nice wrapper outputs File not found" so {
-                  rmFileIfExists("$fullBlu.wrong").ax().chkEq(listOf("File not found"))
+                  rmFileIfExists("$bluPath.wrong".pth).ax().chkEq(listOf("File not found"))
                 }
                 "using plain rm throws BadExitStateErr".soThrows<BadExitStateErr> {
-                  rm("$fullBlu.wrong").ax()
+                  rm("$bluPath.wrong".pth).ax()
                 }
               }
             }
 
             "On rmTreeWithForce" so {
-              rmTreeWithForce(tmpDir) { path -> path.startsWith("/tmp/testDirTmp") }.ax()
+              rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
 
-              "tmp does not contain our dir" so { lsSubDirs("/tmp").ax().chkThis { !contains(dir) } }
+              "tmp does not contain our dir" so { lsSubDirs("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
             }
 
             "On konfig in tmpDir" so {
-              val konfigNewDir = "$tmpDir/tmpKonfigForTests"
+              val konfigNewDir = tmpDir / "tmpKonfigForTests"
               val konfig = konfigInDir(konfigNewDir, localCLI())
 
               testGivenNewKonfigInDir(konfig, konfigNewDir)
@@ -144,7 +147,7 @@ class KommandTests {
           } finally {
             // Clean up. Notice: The "On rmTreeWithForce" above is only for specific test branch,
             // but here we always make sure we clean up in all uspek cases.
-            rmTreeWithForce(tmpDir) { path -> path.startsWith("/tmp/testDirTmp") }.ax()
+            rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
           }
         }
       }
@@ -154,7 +157,7 @@ class KommandTests {
 }
 
 
-suspend fun testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
+suspend fun testGivenNewKonfigInDir(konfig: IKonfig, dir: Path) {
   "is empty" so { konfig.keys.len chkEq 0 }
   "dir is created" so { testIfFileIsDirectory(dir).ax() chkEq true }
   "dir is empty" so { ls(dir, wHidden = true).ax().size chkEq 0 }
@@ -163,10 +166,10 @@ suspend fun testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
     konfig["somekey1"] = "somevalue1"
 
     "get returns stored value" so { konfig["somekey1"] chkEq "somevalue1" }
-    "file is created" so { testIfFileIsRegular("$dir/somekey1").ax() chkEq true }
+    "file is created" so { testIfFileIsRegular(dir / "somekey1").ax() chkEq true }
     "no other files there" so { ls(dir, wHidden = true).ax() chkEq listOf("somekey1") }
     "file for somekey1 contains correct content" so {
-      val content = readFileWithCat("$dir/somekey1").ax().joinToString("\n")
+      val content = readFileWithCat(dir / "somekey1").ax().joinToString("\n")
       content chkEq "somevalue1"
     }
 
@@ -174,12 +177,12 @@ suspend fun testGivenNewKonfigInDir(konfig: IKonfig, dir: String) {
       konfig["somekey1"] = null
 
       "get returns null" so { konfig["somekey1"] chkEq null }
-      "file is removed" so { testIfFileExists("$dir/somekey1").ax() chkEq false }
+      "file is removed" so { testIfFileExists(dir / "somekey1").ax() chkEq false }
       "no files in konfig dir" so { ls(dir, wHidden = true).ax().size chkEq 0 }
 
       "On touch removed file again" so {
-        touch("$dir/somekey1").ax()
-        "file is there again" so { testIfFileExists("$dir/somekey1").ax() chkEq true }
+        touch(dir / "somekey1").ax()
+        "file is there again" so { testIfFileExists(dir / "somekey1").ax() chkEq true }
         "get returns not null but empty value" so { konfig["somekey1"] chkEq "" }
       }
     }

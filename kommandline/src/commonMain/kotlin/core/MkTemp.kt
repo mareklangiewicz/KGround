@@ -1,19 +1,21 @@
 package pl.mareklangiewicz.kommand.core
 
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 
 @OptIn(DelicateApi::class)
 fun mktemp(
   vararg useNamedArgs: Unit,
-  path: String = ".",
+  path: Path = ".".pth,
   prefix: String = "tmp.",
   suffix: String = ".tmp",
-) = mktemp("$path/${prefix}XXXXXX${suffix}").reducedOut { single() }
+): ReducedKommand<Path> = mktemp("$path/${prefix}XXXXXX${suffix}").reducedOut { single().pth }
 
 @DelicateApi
-fun mktemp(template: String, init: MkTemp.() -> Unit = {}) = mktemp { +template; init() }
+fun mktemp(template: String, init: MkTemp.() -> Unit = {}): MkTemp = mktemp { +template; init() }
 
 @DelicateApi
 fun mktemp(init: MkTemp.() -> Unit) = MkTemp().apply(init)
