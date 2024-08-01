@@ -20,8 +20,23 @@ infix fun CoroutineContext.plusIfNN(that: CoroutineContext?) = if (that == null)
 infix fun CoroutineContext.prependIfNN(that: CoroutineContext?) = if (that == null) this else that + this
 
 
+@Deprecated("Use classlowords")
 fun Any.classSimpleWords() = this::class.simpleName!!
   .split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
+
+
+val CharSequence.lowords get() = split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
+
+fun CharSequence.lowords(joint: CharSequence = "-") = lowords.joinToString(joint)
+
+val Any.classlowords get() = this::class.simpleName!!.lowords
+
+fun Any.classlowords(joint: CharSequence = "-") = classlowords.joinToString(joint)
+
+val Enum<*>.namelowords get() = name.lowords
+
+fun Enum<*>.namelowords(joint: CharSequence = "-") = name.lowords.joinToString(joint)
+
 
 
 inline fun <T> Iterator<T>.logEach(log: ULog, level: ULogLevel = ULogLevel.INFO, timed: Boolean = true) {
@@ -61,4 +76,3 @@ suspend inline fun <T> Flow<T>.onEachLog(level: ULogLevel = ULogLevel.INFO, full
 
 suspend inline fun <T> Flow<T>.logEach(level: ULogLevel = ULogLevel.INFO, full: Boolean = true) =
   onEachLog(level, full).collect()
-

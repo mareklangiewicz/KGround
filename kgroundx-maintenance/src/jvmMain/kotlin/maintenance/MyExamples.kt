@@ -20,7 +20,6 @@ import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.udata.str
-import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
@@ -47,9 +46,10 @@ object MyBasicExamples {
   suspend fun justSomeIdeDiff() {
     val log = localULog()
     log.w("Let's try some ideDiff...")
+    val kp = PathToKotlinProjects
     ideDiff(
-      "/home/marek/code/kotlin/KGround/template-full/build.gradle.kts",
-      "/home/marek/code/kotlin/AbcdK/build.gradle.kts",
+      kp / "KGround/template-full/build.gradle.kts",
+      kp / "AbcdK/build.gradle.kts",
     ).ax()
   }
 
@@ -142,7 +142,7 @@ object MyWeirdExamples {
           log.i(msgDiff)
           val question = "Try opening diff in IDE?\n$msgDiff"
           val answer = zenityAskIf(question).ax()
-          if (answer) ideDiff(pathLeft.strf, pathRight.strf).ax()
+          if (answer) ideDiff(pathLeft, pathRight).ax()
         }
         else zenityShowWarning("No settings file: $pathRight").ax()
         zenityAskIf("Continue diffing? (No -> cancel/abort/throw)").ax() || bad { "User cancelled" }

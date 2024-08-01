@@ -47,9 +47,9 @@ suspend fun tryInjectMyTemplatesToProject(
         !askInteractively -> inject()
         zenityAskIf("Automatically inject template [[$label]]? to file:\n$path").ax() -> inject()
         zenityAskIf("Try opening diff with [[$label]] in IDE? (put to tmp.notes) with file:\n$path").ax() -> {
-          val notes = localUFileSys().pathToTmpNotes.strf // FIXME_later: use Path type everywhere
+          val notes = localUFileSys().pathToTmpNotes
           writeFileWithDD(templateRegion.lines(), notes).ax()
-          ideDiff(notes, path.strf).ax()
+          ideDiff(notes, path).ax()
         }
       }
       if (askInteractively)
@@ -99,8 +99,8 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
   val templatesSrc = mutableMapOf<String, Path>()
   fs.findAllFiles(PathToKGroundProject).filterExt("kts") // TODO_someday: support future templates in .kt files
     .collectSpecialRegionsTo(templates, templatesSrc) { path, label, content, region -> // onConflict
-      val oldPath = fs.canonicalize(templatesSrc[label]!!).strf
-      val newPath = fs.canonicalize(path).strf
+      val oldPath = fs.canonicalize(templatesSrc[label]!!)
+      val newPath = fs.canonicalize(path)
       val warning = "Conflicting   region [[$label]] in files:" // aligned spaces with other logs
       log.w(warning)
       log.w(oldPath)
