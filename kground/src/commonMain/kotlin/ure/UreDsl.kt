@@ -6,6 +6,7 @@ package pl.mareklangiewicz.ure
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.ure.core.*
+import pl.mareklangiewicz.udata.strf
 
 
 // region [Ure Basic Stuff]
@@ -120,7 +121,7 @@ fun ureText(text: String) = UreText(text)
 fun ch(str: String) = UreCharExact(str)
 
 // this one is portable, because it never ends up being a surrogate pair.
-@OptIn(NotPortableApi::class) fun ch(chr: Char) = ch(chr.toString())
+@OptIn(NotPortableApi::class) fun ch(chr: Char) = ch(chr.strf)
 
 @DelicateApi fun chPreDef(name: Char) = UreCharClassPreDef(name)
 

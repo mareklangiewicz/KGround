@@ -14,6 +14,7 @@ import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.Type.*
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.zenity.*
+import pl.mareklangiewicz.udata.strf
 
 
 // TODO: probably most of examples here should rather be in KommandLine/kommandsamples
@@ -37,7 +38,7 @@ object MyZenityExamples {
 
   // https://help.gnome.org/users/zenity/stable/progress.html.en
   suspend fun showSomeLongProgress1() {
-    val inLineS = (1..10).asFlow().map { delay(1000); (it * 10).toString() }
+    val inLineS = (1..10).asFlow().map { delay(1000); (it * 10).strf }
     zenity(Progress) { -Text("Some long progress") }
       .ax(inLineS = inLineS).logEach()
   }
@@ -47,7 +48,7 @@ object MyZenityExamples {
   suspend fun showSomeLongProgress2() {
     val inLineS = (1..10).asFlow().transform {
       delay(500)
-      emit((it * 10).toString())
+      emit((it * 10).strf)
       // zenity interprets lines with only numbers as update of progress percentage
       delay(500)
       emit("# Some lo${"o".repeat(it)}ng progress")

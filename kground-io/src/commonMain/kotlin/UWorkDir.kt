@@ -27,4 +27,16 @@ suspend inline fun <R> cd(dir: Path, noinline block: suspend CoroutineScope.() -
   return uctx(UWorkDir(localUFileSys().canonicalize(p)), block = block)
 }
 
-suspend inline fun <R> cd(dir: String, noinline block: suspend CoroutineScope.() -> R): R = cd(dir.toPath(), block)
+suspend inline fun <R> cd(dir: String, noinline block: suspend CoroutineScope.() -> R): R = cd(dir.pth, block)
+
+
+
+// Alternative names. I can't decide now which convention makes better "DSL" (someday I'll choose which to deprecate)
+
+suspend inline fun localDir(): UWorkDir = localUWorkDir()
+
+suspend inline fun localDirOrNull(): UWorkDir? = localUWorkDirOrNull()
+
+suspend inline fun <R> changeDir(dir: Path, noinline block: suspend CoroutineScope.() -> R): R = cd(dir, block)
+
+suspend inline fun <R> changeDir(dir: String, noinline block: suspend CoroutineScope.() -> R): R = cd(dir, block)

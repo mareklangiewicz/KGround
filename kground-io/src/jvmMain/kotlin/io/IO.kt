@@ -5,9 +5,9 @@ import kotlin.random.*
 import okio.*
 import okio.FileSystem.Companion.SYSTEM
 import okio.FileSystem.Companion.SYSTEM_TEMPORARY_DIRECTORY
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.localUFileSys
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.ulog.*
 
 // FIXME NOW: this file is moved from DepsKt as is temporarily.
@@ -33,7 +33,7 @@ suspend fun findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Pa
   localUFileSys().findAllFiles(path, maxDepth)
 
 fun Path.withName(getNewName: (oldName: String) -> String) =
-  parent?.let { it / getNewName(name) } ?: getNewName(name).toPath()
+  parent?.let { it / getNewName(name) } ?: getNewName(name).pth
 
 fun Sequence<Path>.filterExt(ext: String) = filter { it.name.endsWith(".$ext") }
 
@@ -61,8 +61,8 @@ fun Path.asRelativeTo(path: Path): Path {
   req(this.isAbsolute)
   req(path.isAbsolute)
   return when {
-    this == path -> ".".toPath()
-    parent == path -> this.name.toPath()
+    this == path -> ".".pth
+    parent == path -> this.name.pth
     parent == null -> bad { "Can not find $path in $this" }
     else -> parent!!.asRelativeTo(path) / name
   }

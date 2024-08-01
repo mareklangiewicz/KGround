@@ -10,10 +10,8 @@ import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kground.io.UWorkDir
 import pl.mareklangiewicz.kground.io.cd
 import pl.mareklangiewicz.kground.io.localUFileSys
-import pl.mareklangiewicz.kground.io.localUWorkDir
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
@@ -22,6 +20,7 @@ import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.udata.str
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
@@ -39,9 +38,8 @@ object MyBasicExamples {
     log.w("Let's play with kground and kommand integration...")
     ls { -LsOpt.LongFormat; -LsOpt.All }.ax().logEach()
     cd("/home/marek/tmp") {
-      val workDir: UWorkDir = localUWorkDir()
       ls { -LsOpt.LongFormat; -LsOpt.All }
-        .ax(dir = workDir.dir.toString()) // TODO: kommandline: make .ax() actually use localUWorkDir()
+        .ax()
         .logEach()
     }
   }
@@ -144,7 +142,7 @@ object MyWeirdExamples {
           log.i(msgDiff)
           val question = "Try opening diff in IDE?\n$msgDiff"
           val answer = zenityAskIf(question).ax()
-          if (answer) ideDiff(pathLeft.toString(), pathRight.toString()).ax()
+          if (answer) ideDiff(pathLeft.strf, pathRight.strf).ax()
         }
         else zenityShowWarning("No settings file: $pathRight").ax()
         zenityAskIf("Continue diffing? (No -> cancel/abort/throw)").ax() || bad { "User cancelled" }
@@ -164,7 +162,7 @@ object MyWeirdExamples {
       .collect { tryToUpdateMyRepoOrigin(it) }
 
   @OptIn(DelicateApi::class, NotPortableApi::class)
-  private suspend fun tryToUpdateMyRepoOrigin(dir: Path) {
+  private suspend fun tryToUpdateMyRepoOrigin(repoDir: Path) = cd(repoDir) {
     val log = localULog()
     val ureRepoUrl = ure {
       +ureText("git@github.com:")
@@ -176,20 +174,20 @@ object MyWeirdExamples {
     val kget = kommand("git", "remote", "get-url", "origin")
     fun kset(url: String) = kommand("git", "remote", "set-url", "origin", url)
 
-    log.i(dir)
-    val url = kget.ax(dir = dir.toString()).single()
-    log.i(url)
-    val result = ureRepoUrl.matchEntireOrThrow(url)
+    log.i(repoDir)
+    val repoUrl = kget.ax().single()
+    log.i(repoUrl)
+    val result = ureRepoUrl.matchEntireOrThrow(repoUrl)
     val vals = result.namedValues
     val user = vals["user"]!!
     val project = vals["project"]!!
     if (user == "mareklangiewicz") {
       log.i("User is already mareklangiewicz.")
-      return
+      return@cd
     }
     user chkEq "langara"
     val newUrl = "git@github.com:mareklangiewicz/$project.git"
     log.w("setting origin -> $newUrl")
-    kset(newUrl).ax(dir = dir.toString())
+    kset(newUrl).ax()
   }
 }

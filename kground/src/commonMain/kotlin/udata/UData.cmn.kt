@@ -8,6 +8,22 @@ import kotlinx.coroutines.CoroutineName
 import pl.mareklangiewicz.ulog.ULogEntry
 
 /*
+ * These cryptic short fun names like unt, tru, fls, strf (str too) are kind of experiment.
+ * Experiment with treating some opinionated set of extensions/utils as DSL/keywords,
+ * that should be short and memorized by user (instead of long and descriptive).
+ * I'm very much aware it's against any normal coding convention. :)
+ */
+
+inline val Any?.unt get() = Unit
+inline val Any?.tru get() = true
+inline val Any?.fls get() = false
+
+/** Full default string representation, as opposed to shortening str(...) flavors */
+inline val Any?.strf get() = toString()
+// mostly to have same prefix as str(..), and not to have to READ and write so many parentheses everywhere
+
+
+/*
  * Micro string representations of common data types.
  * Doesn't have to be unique, doesn't have to be maximally precise.
  * Have to be consistent, short. Used mostly for logging (so short), but also in tests, so str representation
@@ -36,7 +52,7 @@ inline fun CharSequence.str(
   vararg useNamedArgs: Unit,
   maxLength: Int = STR_DEFAULT_MAX_LENGTH,
   maxIndicator: String = STR_DEFAULT_MAX_INDICATOR,
-): String = if (length > maxLength) substring(0, maxLength - maxIndicator.length) + maxIndicator else this.toString()
+): String = if (length > maxLength) substring(0, maxLength - maxIndicator.length) + maxIndicator else strf
 
 expect inline fun Number.str(
   vararg useNamedArgs: Unit,
@@ -84,7 +100,7 @@ inline fun Any?.str(
   is Number -> str(maxLength = maxLength, maxIndicator = maxIndicator, precision = precision)
   is Boolean? -> str(strTrue = strTrue, strFalse = strFalse, strNull = strNull)
   is ULogEntry -> str(maxLength = maxLength, maxIndicator = maxIndicator)
-  else -> toString().str(maxLength = maxLength, maxIndicator = maxIndicator)
+  else -> strf.str(maxLength = maxLength, maxIndicator = maxIndicator)
 }
 
 

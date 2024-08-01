@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.RESOURCES
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
@@ -13,6 +12,7 @@ import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.*
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.UReplacement
 
 
@@ -38,7 +38,7 @@ suspend fun updateGradlewFilesInProject(fullPath: Path) =
     val fs = localUFileSys()
     val targetPath = fullPath / gradlewRelPath
     val oldContent = fs.readByteString(targetPath)
-    val newContent = RESOURCES.readByteString("/templates".toPath() / gradlewRelPath.withName { "$it.tmpl" })
+    val newContent = RESOURCES.readByteString("/templates".pth / gradlewRelPath.withName { "$it.tmpl" })
     if (oldContent == newContent) log.i("Skipping already updated gradlew file: $targetPath")
     else {
       val action = if (fs.exists(targetPath)) "Updating" else "Creating new"
@@ -50,18 +50,18 @@ suspend fun updateGradlewFilesInProject(fullPath: Path) =
 
 @OptIn(DelicateApi::class)
 private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
-  findTypeRegex(path.toString(), "f", ".*/settings.gradle\\(.kts\\)?")
+  findTypeRegex(path.strf, "f", ".*/settings.gradle\\(.kts\\)?")
     .reducedOutToFlow()
     .reducedMap {
       // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl
       val regex = Regex("/settings\\.gradle(\\.kts)?\$")
-      map { regex.replaceSingle(it, UReplacement.Empty).toPath() }
+      map { regex.replaceSingle(it, UReplacement.Empty).pth }
     }
     .ax()
 
 val gradlewRelPaths =
-  listOf("", ".bat").map { "gradlew$it".toPath() } +
-    listOf("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".toPath() }
+  listOf("", ".bat").map { "gradlew$it".pth } +
+    listOf("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".pth }
 
 /** @return Full pathS of my gradle rootProjectS (dirs with settings.gradle[.kts] files) */
 @OptIn(ExperimentalCoroutinesApi::class)

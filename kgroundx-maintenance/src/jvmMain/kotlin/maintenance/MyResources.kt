@@ -5,10 +5,11 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.localUFileSys
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.ulog.*
 
 
-private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".toPath()
+private val resourcesRelPath = "kgroundx-maintenance/src/jvmMain/resources".pth
 private val templatesRelPath = resourcesRelPath / "templates"
 private val resourcesAbsPath = PathToKGroundProject / resourcesRelPath
 private val templatesAbsPath = PathToKGroundProject / templatesRelPath
@@ -46,7 +47,7 @@ suspend fun updateKGroundTemplatesSymLinks() {
     val linkRel = templatesRelPath / srcRel.withName { "$it.tmpl" }
     val linkAbs = PathToKGroundProject / linkRel
     val targetDots = linkRel.parent!!.segments.joinToString("/") { ".." }
-    val target = targetDots.toPath() / srcRel
+    val target = targetDots.pth / srcRel
     log.i("symlink $linkAbs -> $target")
     fs.createDirectories(linkAbs.parent!!)
     fs.createSymlink(linkAbs, target)

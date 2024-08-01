@@ -8,18 +8,20 @@ import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.localUFileSys
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.reducedOutToFlow
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.core.Ure
 
 
-var PathToKotlinProjects = "/home/marek/code/kotlin".toPath()
+var PathToKotlinProjects = "/home/marek/code/kotlin".pth
 
 var PathToKGroundProject = PathToKotlinProjects / "KGround"
 
@@ -41,17 +43,17 @@ var PathToDepsKtProject = PathToKotlinProjects / "DepsKt"
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
     .collect { projectPath ->
       log.i("Searching in project: $projectPath")
-      val listKt = findMyKotlinCode(projectPath.toString()).ax()
+      val listKt = findMyKotlinCode(projectPath.strf).ax()
       val listKts =
         if (alsoGradleKts)
           findMyKotlinCode(
-            projectPath.toString(),
+            projectPath.strf,
             withNameBase = "*.gradle.kts",
             withNameFull = null,
           ).ax()
         else emptyList()
       (listKt + listKts).forEach { ktFilePathStr ->
-        val ktFilePath = ktFilePathStr.toPath()
+        val ktFilePath = ktFilePathStr.pth
         val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
         val result = readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
         result?.value?.let {

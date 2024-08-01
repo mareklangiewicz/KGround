@@ -5,6 +5,7 @@ import pl.mareklangiewicz.kground.getCurrentPlatformKind
 import pl.mareklangiewicz.kground.getCurrentPlatformName
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
@@ -62,8 +63,8 @@ fun Ure.tstMatchCorrectChars(
   alsoCheckNegation: Boolean = true,
   verbose: Boolean = false,
 ) = tstMatchCorrectInputs(
-  match.toList().map { it.toString() },
-  matchNot.toList().map { it.toString() },
+  match.toList().map { it.strf },
+  matchNot.toList().map { it.strf },
   alsoCheckNegation = alsoCheckNegation,
   verbose = verbose,
 )

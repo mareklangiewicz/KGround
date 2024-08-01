@@ -9,11 +9,12 @@ import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
+import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
 import pl.mareklangiewicz.uctx.uctx
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 
@@ -46,9 +47,9 @@ suspend fun tryInjectMyTemplatesToProject(
         !askInteractively -> inject()
         zenityAskIf("Automatically inject template [[$label]]? to file:\n$path").ax() -> inject()
         zenityAskIf("Try opening diff with [[$label]] in IDE? (put to tmp.notes) with file:\n$path").ax() -> {
-          val notes = localUFileSys().pathToTmpNotes.toString() // FIXME_later: use Path type everywhere
+          val notes = localUFileSys().pathToTmpNotes.strf // FIXME_later: use Path type everywhere
           writeFileWithDD(templateRegion.lines(), notes).ax()
-          ideDiff(notes, path.toString()).ax()
+          ideDiff(notes, path.strf).ax()
         }
       }
       if (askInteractively)
@@ -98,8 +99,8 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
   val templatesSrc = mutableMapOf<String, Path>()
   fs.findAllFiles(PathToKGroundProject).filterExt("kts") // TODO_someday: support future templates in .kt files
     .collectSpecialRegionsTo(templates, templatesSrc) { path, label, content, region -> // onConflict
-      val oldPath = fs.canonicalize(templatesSrc[label]!!).toString()
-      val newPath = fs.canonicalize(path).toString()
+      val oldPath = fs.canonicalize(templatesSrc[label]!!).strf
+      val newPath = fs.canonicalize(path).strf
       val warning = "Conflicting   region [[$label]] in files:" // aligned spaces with other logs
       log.w(warning)
       log.w(oldPath)
@@ -120,10 +121,10 @@ suspend fun collectMyTemplates(): Map<String, String> {
   val log = localULog()
   val fsres = UFileSys(RESOURCES)
   uctx(fsres) {
-    findAllFiles("templates".toPath()).filterExt("kts.tmpl")
+    findAllFiles("templates".pth).filterExt("kts.tmpl")
       .collectSpecialRegionsTo(templates, templatesRes) { path, label, content, region -> // onConflict
-        val oldPath = fsres.canonicalize(templatesRes[label]!!).toString()
-        val newPath = fsres.canonicalize(path).toString()
+        val oldPath = fsres.canonicalize(templatesRes[label]!!).strf
+        val newPath = fsres.canonicalize(path).strf
         log.w("Conflicting [[$label]] in resources:")
         log.w(oldPath)
         log.w(newPath)

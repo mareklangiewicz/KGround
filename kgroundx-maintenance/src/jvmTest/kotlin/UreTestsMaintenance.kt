@@ -24,7 +24,7 @@ class UreTestsMaintenance {
     @Disabled("Has side effects in other project. Or rather assumes existence of UWidgets sources.")
     fun testsOnUWidgetsFiles() = uspekTestFactory {
         "On UWidgetsCmnKt" o {
-            val path = "/home/marek/code/kotlin/UWidgets/uwidgets/src/commonMain/kotlin/uwidgets/UWidgets.cmn.kt".toPath()
+            val path = "/home/marek/code/kotlin/UWidgets/uwidgets/src/commonMain/kotlin/uwidgets/UWidgets.cmn.kt".pth
             val content = SYSTEM.readUtf8(path)
             val output = content.commentOutMultiplatformFun()
             println(output) // TODO_later: better tests
@@ -37,7 +37,7 @@ class UreTestsMaintenance {
         val dir = "/home/marek/code/kotlin/uspek-painters/lib/src"
         "On dir: $dir" o {
             "comment out multiplatform stuff inside" o {
-                SYSTEM.commentOutMultiplatformFunInEachKtFile(dir.toPath())
+                SYSTEM.commentOutMultiplatformFunInEachKtFile(dir.pth)
             }
         }
     }
@@ -48,7 +48,7 @@ class UreTestsMaintenance {
         val dir = "/home/marek/code/kotlin/uspek-painters/lib/src"
         "On dir: $dir" o {
             "undo comment out multiplatform stuff inside" o {
-                SYSTEM.undoCommentOutMultiplatformFunInEachKtFile(dir.toPath())
+                SYSTEM.undoCommentOutMultiplatformFunInEachKtFile(dir.pth)
             }
         }
     }

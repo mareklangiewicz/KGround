@@ -15,6 +15,7 @@ import kotlinx.cinterop.convert
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.udata.strf
 import platform.posix.getcwd
 import platform.posix.size_t
 import platform.posix.uint8_tVar
@@ -23,7 +24,7 @@ import platform.posix.uint8_tVar
 actual fun getCurrentTimeMs(): Long = getTimeMillis()
 
 // FIXME_later: The format should be user-friendly and short. And similar to other platforms (the same??)
-actual fun getCurrentTimeStr(): String = getCurrentTimeMs().toString()
+actual fun getCurrentTimeStr(): String = getCurrentTimeMs().strf
 
 // See KT-60932 KT-54702
 @OptIn(ObsoleteWorkersApi::class)

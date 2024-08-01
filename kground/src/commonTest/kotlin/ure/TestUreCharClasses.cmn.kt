@@ -7,6 +7,7 @@ import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.tuplek.fo
 import pl.mareklangiewicz.tuplek.tre
+import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.ure.core.IR
 import pl.mareklangiewicz.ure.core.Ure
@@ -370,8 +371,8 @@ fun testSomeWeirdCharClasses() {
 
         onUreClass(
           "ure weird", ureWeird,
-          match = if (fakeJS || wrongLinux) emptyList() else row.c.condensed.toList().map { it.toString() },
-          matchNot = if (fakeJS || wrongLinux) emptyList() else row.d.condensed.toList().map { it.toString() },
+          match = if (fakeJS || wrongLinux) emptyList() else row.c.condensed.toList().map { it.strf },
+          matchNot = if (fakeJS || wrongLinux) emptyList() else row.d.condensed.toList().map { it.strf },
           onPlatforms = if (fakeJS) listOf("JVM", "LINUX", "JS") else listOf("JVM", "LINUX"),
           alsoCheckNegation = false, // disabled because practically all negated fail on linux. jvm is fine.
           verbose = false, // try true to see tons of independent micro tests generated in the uspek tree :)

@@ -12,6 +12,11 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.plusIfNN
 import pl.mareklangiewicz.uctx.uctx
+import pl.mareklangiewicz.udata.strf
+
+
+inline val String.pth get() = toPath(normalize = false)
+inline val String.pthn get() = toPath(normalize = true)
 
 // Note: it should pop up as alternative autocompletion to okio deleteRecursively.
 // I think it's good idea to always double-check some specific part of rootPath
@@ -22,7 +27,7 @@ fun FileSystem.deleteTreeWithDoubleChk(
   mustBeDir: Boolean = true,
   doubleChk: (rootPathString: String) -> Boolean, // mandatory on purpose
 ) {
-  val rootPathString = rootPath.toString()
+  val rootPathString = rootPath.strf
   val md = metadataOrNull(rootPath) ?: run {
     mustExist.chkFalse { "Tree rootPath: $rootPathString does NOT exist."}
     return // So it doesn't exist and it's fine; nothing to delete.
@@ -69,10 +74,10 @@ fun getSysPlatformInfo() = "${getSysPlatformType()}:${getSysPlatformArch()}:${ge
 @OptIn(NotPortableApi::class) fun getSysPathToUserName(): String? = getSysProp("user.name")
 
 // TODO_later: implement some default value for key "user.home" on different platforms
-@OptIn(NotPortableApi::class) fun getSysPathToUserHome(): Path? = getSysProp("user.home")?.toPath()
+@OptIn(NotPortableApi::class) fun getSysPathToUserHome(): Path? = getSysProp("user.home")?.pth
 
 // TODO_later: Add and use some custom MPP key returning sane values on different platforms ("kground.io.tmpdir"??)
-@OptIn(NotPortableApi::class) fun getSysPathToSysTmp(): Path? = getSysProp("java.io.tmpdir")?.toPath()
+@OptIn(NotPortableApi::class) fun getSysPathToSysTmp(): Path? = getSysProp("java.io.tmpdir")?.pth
 
 // FIXME_maybe: other paths for specific systems?
 fun getSysPathToUserTmp(): Path? = getSysPathToUserHome()?.let { it / "tmp" }
@@ -85,7 +90,7 @@ expect fun getSysDispatcherForIO(): CoroutineDispatcher
 expect fun getSysUFileSys(): UFileSys
 
 /** The working directory with which the current process was started. */
-fun UFileSys.getSysWorkingDir(): Path = canonicalize(".".toPath())
+fun UFileSys.getSysWorkingDir(): Path = canonicalize(".".pth)
 
 
 /** Setting some param explicitly to null means we don't add any (even default) to context. */
@@ -95,6 +100,6 @@ suspend inline fun <R> uctxWithIO(
   name: String? = null,
   dispatcher: CoroutineDispatcher? = getSysDispatcherForIO(),
   fs: UFileSys? = getSysUFileSys(),
-  cwd: UWorkDir? = fs?.getSysWorkingDir()?.let(::UWorkDir),
+  wd: UWorkDir? = fs?.getSysWorkingDir()?.let(::UWorkDir),
   noinline block: suspend CoroutineScope.() -> R,
-) = uctx(context plusIfNN dispatcher plusIfNN fs plusIfNN cwd, name = name, block)
+) = uctx(context plusIfNN dispatcher plusIfNN fs plusIfNN wd, name = name, block)
