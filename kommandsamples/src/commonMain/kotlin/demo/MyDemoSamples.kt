@@ -39,6 +39,7 @@ import pl.mareklangiewicz.kommand.samples.s
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
 import pl.mareklangiewicz.kommand.term.inTermKitty
+import pl.mareklangiewicz.kommand.vim.XVimOpt
 import pl.mareklangiewicz.kommand.vim.gvim
 import pl.mareklangiewicz.kommand.vim.gvimLines
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
@@ -150,7 +151,7 @@ data object MyDemoSamples {
     gvimLines(lines).ax()
   }
 
-  val gvimServerDDDDOpenHomeDir = gvim("/home".pth) { -XVim.XVimOpt.ServerName("DDDD") } s "gvim --servername DDDD /home"
+  val gvimServerDDDDOpenHomeDir = gvim("/home".pth) { -XVimOpt.ServerName("DDDD") } s "gvim --servername DDDD /home"
 
 
   @OptIn(DelicateApi::class)

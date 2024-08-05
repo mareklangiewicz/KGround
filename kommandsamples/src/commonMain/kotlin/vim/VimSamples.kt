@@ -15,11 +15,11 @@ import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
 import pl.mareklangiewicz.kommand.term.inTermKitty
-import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.*
-import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.CursorLineLast
-import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.CursorPos
-import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.KeysScriptStdInForNVim
-import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.KeysScriptStdInForVim
+import pl.mareklangiewicz.kommand.vim.XVimOpt.*
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorLineLast
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorPos
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForNVim
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForVim
 
 val blas = listOf("bla", "ble", "blu", "bli", "blo")
 val blaS = blas.asFlow()
