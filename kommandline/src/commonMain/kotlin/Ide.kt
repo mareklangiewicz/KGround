@@ -10,7 +10,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Ide.*
 import pl.mareklangiewicz.kommand.admin.psAllFull
 import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
-import pl.mareklangiewicz.kommand.vim.gvim
+import pl.mareklangiewicz.kommand.vim.gvimOpen
 import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
@@ -25,11 +25,17 @@ fun ideOpen(
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
 @OptIn(DelicateApi::class)
-fun ideOrGVimOpen(path: Path) = ReducedScript {
+fun ideOrGVimOpen(
+  path1: Path,
+  path2: Path? = null,
+  path3: Path? = null,
+  line: Int? = null,
+  column: Int? = null,
+) = ReducedScript {
   try {
-    ideOpen(path).ax()
+    ideOpen(path1, path2, path3, line, column).ax() // throws BadStateErr when no Ide is running
   } catch (_: BadStateErr) {
-    gvim(path).ax()
+    gvimOpen(path1, path2, path3, line, column).ax()
   }
 }
 

@@ -12,9 +12,26 @@ import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.vim.XVimType.*
 import pl.mareklangiewicz.kommand.vim.XVimOpt.*
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorPos
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForVim
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.VimRcNONE
 import pl.mareklangiewicz.udata.strf
+
+
+
+@OptIn(DelicateApi::class)
+fun gvimOpen(
+  path1: Path,
+  path2: Path? = null,
+  path3: Path? = null,
+  line: Int? = null,
+  column: Int? = null,
+) = gvim(path1, path2, path3) {
+  when {
+    column != null -> -CursorPos(line ?: 1, column)
+    line != null -> -CursorLine(line) // column IS null in this case
+  }
+}
 
 /**
  * When opening stdin content, Vim expects commands from stderr.
@@ -53,17 +70,17 @@ fun gvimContent(inContent: String, init: XVim.() -> Unit = {}): ReducedScript<Li
   gvimLines(inContent.lines(), init)
 
 @DelicateApi
-fun xvim(type: XVimType, vararg files: Path, init: XVim.() -> Unit = {}) =
-  XVim(type, nonopts = files.map { it.strf }.toMutableList()).apply(init)
+fun xvim(type: XVimType, vararg files: Path?, init: XVim.() -> Unit = {}) =
+  XVim(type, nonopts = files.mapNotNull { it?.strf }.toMutableList()).apply(init)
 
 @DelicateApi
-fun vim(vararg files: Path, init: XVim.() -> Unit = {}) = xvim(Vim, *files, init = init)
+fun vim(vararg files: Path?, init: XVim.() -> Unit = {}) = xvim(Vim, *files, init = init)
 
 @DelicateApi
-fun nvim(vararg files: Path, init: XVim.() -> Unit = {}) = xvim(NVim, *files, init = init)
+fun nvim(vararg files: Path?, init: XVim.() -> Unit = {}) = xvim(NVim, *files, init = init)
 
 @DelicateApi
-fun gvim(vararg files: Path, init: XVim.() -> Unit = {}) = xvim(GVim, *files, init = init)
+fun gvim(vararg files: Path?, init: XVim.() -> Unit = {}) = xvim(GVim, *files, init = init)
 // TODO NOW: NVim, opening specific lines, opening in existing editor (is servername same as in Vim?),
 //  combine with Ide as in kolib openInIdeOrGVim but better selecting (with NVim too)
 

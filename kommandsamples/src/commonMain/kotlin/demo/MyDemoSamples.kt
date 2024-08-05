@@ -25,6 +25,7 @@ import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.github.GhSamples
 import pl.mareklangiewicz.kommand.ideDiff
 import pl.mareklangiewicz.kommand.ideOpen
+import pl.mareklangiewicz.kommand.ideOrGVimOpen
 import pl.mareklangiewicz.kommand.iproute2.ssTulpn
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr
@@ -137,9 +138,9 @@ data object MyDemoSamples {
     ideOpen(pathToTmpNotes).ax()
   }
 
-  val ideOpenBashExports = InteractiveScript {
+  val ideOrGvimOpenBashExports = InteractiveScript {
     bashGetExportsToFile(pathToTmpNotes.strf).ax()
-    ideOpen(pathToTmpNotes).ax()
+    ideOrGVimOpen(pathToTmpNotes).ax()
   }
 
   val gvimShowBashExportsForLC = InteractiveScript {
