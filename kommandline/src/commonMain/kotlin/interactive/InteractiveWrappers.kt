@@ -46,6 +46,8 @@ fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockin
   if (isInteractiveCodeEnabled()) code()
 }
 
+// FIXME NOW: why it doesn't return some process?
+// FIXME NOW: why do I even need it? sth like axInteractiveTry seems more useful (awaiting; taking work dir from context).
 @DelicateApi("API for manual interactive experimentation; can ignore the this kommand.")
 suspend fun Kommand.lxInteractiveTry(
   confirmation: String = "Start ::${line()}::?",

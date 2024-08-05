@@ -16,9 +16,6 @@ import pl.mareklangiewicz.kommand.vim.XVim
 import pl.mareklangiewicz.kommand.adb
 import pl.mareklangiewicz.kommand.admin.btop
 import pl.mareklangiewicz.kommand.ax
-import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.core.Ls
-import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.shell.*
 import pl.mareklangiewicz.kommand.core.cat
 import pl.mareklangiewicz.kommand.find.findBoringCodeDirsAndReduceAsExcludedFoldersXml
@@ -153,7 +150,7 @@ data object MyDemoSamples {
     gvimLines(lines).ax()
   }
 
-  val gvimServerDDDDOpenHomeDir = gvim("/home".pth) { -XVim.Option.ServerName("DDDD") } s "gvim --servername DDDD /home"
+  val gvimServerDDDDOpenHomeDir = gvim("/home".pth) { -XVim.XVimOpt.ServerName("DDDD") } s "gvim --servername DDDD /home"
 
 
   @OptIn(DelicateApi::class)

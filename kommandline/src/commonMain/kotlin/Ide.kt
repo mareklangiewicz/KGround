@@ -15,8 +15,6 @@ import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
-// FIXME NOW: use Path everywhere
-
 fun ideOpen(
   path1: Path,
   path2: Path? = null,
@@ -26,6 +24,7 @@ fun ideOpen(
   ifNoIdeRunningStart: Type? = null,
 ) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
 
+@OptIn(DelicateApi::class)
 fun ideOrGVimOpen(path: Path) = ReducedScript {
   try {
     ideOpen(path).ax()

@@ -15,9 +15,11 @@ import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
 import pl.mareklangiewicz.kommand.term.inTermKitty
-import pl.mareklangiewicz.kommand.vim.XVim.Option.*
-import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForNVim
-import pl.mareklangiewicz.kommand.vim.XVim.Option.Companion.KeysScriptStdInForVim
+import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.*
+import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.CursorLineLast
+import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.CursorPos
+import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.KeysScriptStdInForNVim
+import pl.mareklangiewicz.kommand.vim.XVim.XVimOpt.Companion.KeysScriptStdInForVim
 
 val blas = listOf("bla", "ble", "blu", "bli", "blo")
 val blaS = blas.asFlow()
@@ -57,6 +59,9 @@ data object VimBasicSamples {
   val gvimBlaSCursorLine2 = gvimLineS(blaS) { -CursorLine(2) }
 
   val gvimBlaSCursorLineLast = gvimLineS(blaS) { -CursorLineLast }
+
+  /** Lines and columns are numbered from 1 */
+  val gvimBlaSCursorPos32 = gvimLineS(blaS) { -CursorPos(3,2) }
 }
 
 

@@ -6,9 +6,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.io.pth
 import pl.mareklangiewicz.kommand.*
 
-fun isKommandAvailable(kommand: Kommand) = isCommandAvailable(kommand.name)
+fun isKommandAvailable(kommand: Kommand): ReducedKommand<Boolean> = isCommandAvailable(kommand.name)
 
-fun isCommandAvailable(command: String) = whichFirstOrNull(command).reducedMap { this != null }
+fun isCommandAvailable(command: String): ReducedKommand<Boolean> = whichFirstOrNull(command).reducedMap { this != null }
 
 @OptIn(DelicateApi::class)
 fun whichFirstOrNull(command: String): ReducedKommand<Path?> = which(command).reducedOut { firstOrNull()?.pth }
