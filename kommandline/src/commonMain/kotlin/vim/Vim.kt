@@ -21,12 +21,13 @@ import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
 fun gvimOpen(
-  path1: Path,
+  path1: Path? = null,
   path2: Path? = null,
   path3: Path? = null,
+  vararg useNamedArgs: Unit,
   line: Int? = null,
   column: Int? = null,
-) = gvim(path1, path2, path3) {
+): XVim = gvim(path1, path2, path3) {
   when {
     column != null -> -CursorPos(line ?: 1, column)
     line != null -> -CursorLine(line) // column IS null in this case

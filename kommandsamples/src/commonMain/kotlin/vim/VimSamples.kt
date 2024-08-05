@@ -62,6 +62,10 @@ data object VimBasicSamples {
 
   /** Lines and columns are numbered from 1 */
   val gvimBlaSCursorPos32 = gvimLineS(blaS) { -CursorPos(3,2) }
+
+  // Note: nulls as files are ignored
+  val gvimOpenBashRcAndVimRcCursorPos32 = gvimOpen("~/.bashrc".pth, null, "~/.vimrc".pth, line = 3, column = 2) s
+    "gvim -c call cursor(3,2) ~/.bashrc ~/.vimrc"
 }
 
 

@@ -16,26 +16,28 @@ import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
 fun ideOpen(
-  path1: Path,
+  path1: Path? = null,
   path2: Path? = null,
   path3: Path? = null,
+  vararg useNamedArgs: Unit,
   line: Int? = null,
   column: Int? = null,
   ifNoIdeRunningStart: Type? = null,
-) = ide(Cmd.Open(path1, path2, path3, line, column), ifNoIdeRunningStart)
+) = ide(Cmd.Open(path1, path2, path3, line = line, column = column), ifNoIdeRunningStart)
 
 @OptIn(DelicateApi::class)
 fun ideOrGVimOpen(
-  path1: Path,
+  path1: Path? = null,
   path2: Path? = null,
   path3: Path? = null,
+  vararg useNamedArgs: Unit,
   line: Int? = null,
   column: Int? = null,
 ) = ReducedScript {
   try {
-    ideOpen(path1, path2, path3, line, column).ax() // throws BadStateErr when no Ide is running
+    ideOpen(path1, path2, path3, line = line, column = column).ax() // throws BadStateErr when no Ide is running
   } catch (_: BadStateErr) {
-    gvimOpen(path1, path2, path3, line, column).ax()
+    gvimOpen(path1, path2, path3, line = line, column = column).ax()
   }
 }
 
@@ -93,6 +95,7 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
         path1: Path? = null,
         path2: Path? = null,
         path3: Path? = null,
+        vararg useNamedArgs: Unit,
         line: Int? = null,
         column: Int? = null,
       ) : this(
