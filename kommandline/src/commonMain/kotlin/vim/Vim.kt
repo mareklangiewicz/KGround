@@ -409,7 +409,6 @@ interface XVimOpt : KOptTypical {
   data object ExImMode : XVimOpt, KOptS("E")
 
 
-  // FIXME NOW: check what if I put filename afterwards. Will it misinterpret it as KeysScriptIn?? (check both Vim and NVim)
   /**
    * Ex Script (aka Ex Silent) mode, aka "batch mode". No UI, disables most prompts and messages.
    * Remember to quit Vim at the end of the Ex-mode script (which is read from stdin).
@@ -421,7 +420,6 @@ interface XVimOpt : KOptTypical {
    */
   data object ExScriptMode : XVimOpt, KOptS("es")
 
-  // FIXME NOW: check what if I put filename afterwards. Will it misinterpret it as ScriptIn?? (check both Vim and NVim)
   /**
    * Ex Im Script (aka Ex Im Silent) mode. Delicate because tricky differences between Vim an NVim. Use [ExScriptMode] instead.
    * See :h -s-ex in both Vim and NVim, also see :h vim-differences /Startup in NVim.

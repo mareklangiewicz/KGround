@@ -102,14 +102,17 @@ data object VimAdvancedSamples {
    * The last ":execute" / ":exe" [ExCmd] is needed because the problem with entering <C-A> in vim cmd-line
    */
   val gvimBumpVerImpl1ExSc =
-    gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)"); -ExCmd("norm t)"); -ExCmd("exe \"norm \\<C-A>\"") }
+    gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)"); -ExCmd("norm t)"); -ExCmd("exe \"norm \\<C-A>\"") } s
+      "gvim +/version = Ver(.*) -c norm t) -c exe \"norm \\<C-A>\" $myBuildFile"
     // Note: this :exe (:execute) complication is there only due to the problem with entering <C-A> key in commandline
 
-  /** Better impl of [gvimBumpVerImpl1] */
-  val gvimBumpVerImpl2ExSc = gvim(myBuildFile) { -ExCmd("g/version = Ver(.*)/exe \"norm t)\\<C-A>\"") }
+  /** Better impl of [gvimBumpVerImpl1ExSc] */
+  val gvimBumpVerImpl2ExSc = gvim(myBuildFile) { -ExCmd("g/version = Ver(.*)/exe \"norm t)\\<C-A>\"") } s
+    "gvim -c g/version = Ver(.*)/exe \"norm t)\\<C-A>\" $myBuildFile"
 
   /** Pretty good impl of bumping versions in scripts using ex-script (but keys-scripts are more awesome). */
-  val vimBumpVerImpl3ExSc = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myBuildFile)
+  val vimBumpVerImpl3ExSc = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myBuildFile) rs
+    "vim -N --clean -es $myBuildFile"
 
   private const val keyCtrlA = '\u0001' // to increase number at cursor in vim
 
