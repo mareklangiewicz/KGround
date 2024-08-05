@@ -25,10 +25,10 @@ import pl.mareklangiewicz.udata.strf
 @DelicateApi("When opening stdin content, Vim expects commands from (redirected) stderr!")
 fun vimStdIn(init: XVim.() -> Unit = {}): XVim = vim("-".pth, init = init)
 
-@OptIn(DelicateApi::class)
+@DelicateApi
 fun gvimStdIn(init: XVim.() -> Unit = {}): XVim = gvim("-".pth, init = init)
 
-@OptIn(DelicateApi::class)
+@DelicateApi
 fun nvimStdIn(init: XVim.() -> Unit = {}): XVim = nvim("-".pth, init = init)
 
 @OptIn(DelicateApi::class)
@@ -38,28 +38,32 @@ fun nvimMan(manpage: String, section: ManSection? = null): XVim = nvim {
 }
 
 /** GVim can display 'reading from stdin...' until it reads full [inLineS] flow and only then show the full content */
-@OptIn(DelicateApi::class)
+@DelicateApi
 // TODO_later: Use reducedManually instead, so it's ReducedKommand, and expected lines can be tested in samples (rs)
 fun gvimLineS(inLineS: Flow<String>, init: XVim.() -> Unit = {}) = ReducedScript {
   gvimStdIn(init).ax(inLineS = inLineS)
 }
 
-@OptIn(DelicateApi::class)
+@DelicateApi
 fun gvimLines(inLines: List<String>, init: XVim.() -> Unit = {}): ReducedScript<List<String>> =
   gvimLineS(inLines.asFlow(), init)
 
-@OptIn(DelicateApi::class)
+@DelicateApi
 fun gvimContent(inContent: String, init: XVim.() -> Unit = {}): ReducedScript<List<String>> =
   gvimLines(inContent.lines(), init)
 
-@OptIn(DelicateApi::class)
-fun vim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(Vim, files.toMutableList()).apply(init)
+@DelicateApi
+fun xvim(type: XVimType, vararg files: Path, init: XVim.() -> Unit = {}) =
+  XVim(type, nonopts = files.map { it.strf }.toMutableList()).apply(init)
 
-@OptIn(DelicateApi::class)
-fun nvim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(NVim, files.toMutableList()).apply(init)
+@DelicateApi
+fun vim(vararg files: Path, init: XVim.() -> Unit = {}) = xvim(Vim, *files, init = init)
 
-@OptIn(DelicateApi::class)
-fun gvim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(GVim, files.toMutableList()).apply(init)
+@DelicateApi
+fun nvim(vararg files: Path, init: XVim.() -> Unit = {}) = xvim(NVim, *files, init = init)
+
+@DelicateApi
+fun gvim(vararg files: Path, init: XVim.() -> Unit = {}) = xvim(GVim, *files, init = init)
 // TODO NOW: NVim, opening specific lines, opening in existing editor (is servername same as in Vim?),
 //  combine with Ide as in kolib openInIdeOrGVim but better selecting (with NVim too)
 
@@ -68,7 +72,7 @@ fun gvim(vararg files: Path, init: XVim.() -> Unit = {}) = XVim(GVim, files.toMu
  * [vimExScriptStdIn] or [vimExScriptContent] or [vimExScriptFile]
  * Note: there is :vi (:visual) command available to switch to normal (visual) mode.
  */
-@OptIn(DelicateApi::class)
+@DelicateApi
 fun vimEx(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExMode; init() }
 
 /**
@@ -78,7 +82,7 @@ fun vimEx(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { 
  * but still can be useful playground before creating ex-mode script.
  * Note: there is :vi (:visual) command available to switch to normal (visual) mode.
  */
-@OptIn(DelicateApi::class)
+@DelicateApi
 fun vimExIm(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExImMode; init() }
 
 @OptIn(DelicateApi::class)
@@ -228,19 +232,10 @@ fun vimKeysScriptContent(
 @Suppress("unused")
 data class XVim(
   val type: XVimType = Vim,
-  val files: MutableList<Path> = mutableListOf(),
-  val options: MutableList<XVimOpt> = mutableListOf(),
-) : Kommand {
-
-
+  override val opts: MutableList<XVimOpt> = mutableListOf(),
+  override val nonopts: MutableList<String> = mutableListOf(),
+) : KommandTypical<XVimOpt> {
   override val name get() = type.namelowords("")
-  override val args get() = options.toArgsFlat() + files.map { it.strf }
-
-  // TODO_someday: Go through all :h starting.txt in NVim, and make sure, we have all options here
-  // (I skipped some for now) (annotate which are NotPortableApi)
-
-
-  operator fun XVimOpt.unaryMinus() = options.add(this)
 }
 
 
@@ -325,6 +320,9 @@ enum class XVimType {
 
 @DelicateApi
 interface XVimOpt : KOptTypical {
+
+  // TODO_someday: Go through all :h starting.txt in NVim, and make sure, we have all options here
+  // (I skipped some for now) (annotate which are NotPortableApi)
 
   /**
    * For the first file the cursor will be positioned on given line.

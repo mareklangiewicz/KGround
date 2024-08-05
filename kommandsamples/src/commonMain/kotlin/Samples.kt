@@ -2,6 +2,7 @@
 
 package pl.mareklangiewicz.kommand.samples
 
+import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kommand.*
 
@@ -30,12 +31,15 @@ internal infix fun <ReducedOut> ReducedKommand<ReducedOut>.rs(expectedLineRaw: S
   ReducedSample(this, expectedLineRaw = expectedLineRaw)
 
 
+@OptIn(DelicateApi::class)
 data object Samples {
   @ExampleApi val Demo = pl.mareklangiewicz.kommand.demo.MyDemoSamples
   val Core = pl.mareklangiewicz.kommand.core.CoreSamples
   val Find = pl.mareklangiewicz.kommand.find.FindSamples
   val Ssh = pl.mareklangiewicz.kommand.ssh.SshSamples
   val Admin = pl.mareklangiewicz.kommand.admin.AdminSamples
+  val VimBasic = pl.mareklangiewicz.kommand.vim.VimBasicSamples
+  val VimAdvanced = pl.mareklangiewicz.kommand.vim.VimAdvancedSamples
   val Debian = pl.mareklangiewicz.kommand.debian.DebianSamples
   val Git = pl.mareklangiewicz.kommand.git.GitSamples
   val GitHub = pl.mareklangiewicz.kommand.github.GhSamples

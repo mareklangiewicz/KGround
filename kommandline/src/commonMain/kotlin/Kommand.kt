@@ -158,6 +158,8 @@ open class KOptLN(
   override val name: String get() = classlowords("-")
 }
 
+// TODO_someday_maybe: second generic: KNonOptT, so it can be set to Path in kommands where all nonopts are files? (vim)
+// But maybe not? I don't think there is enough use-cases justifying complicating base classes/interfaces even more.
 @DelicateApi
 interface KommandTypical<KOptT : KOptTypical> : Kommand {
   val opts: MutableList<KOptT>

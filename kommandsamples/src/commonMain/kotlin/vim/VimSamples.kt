@@ -124,17 +124,18 @@ data object VimAdvancedSamples {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
     // Warning: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
-  }
+  } rs "vim -s /dev/stdin $myBuildFile"
 
   @NotPortableApi("Not for original Vim")
   val nvimBumpVerImpl6KeysSc = nvim(myBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
     // Warning: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
-  }
+  } rs "nvim -s - $myBuildFile"
 
 
   /** Pretty good impl of bumping versions in scripts using keys-script. */
   @NotPortableApi("Not for NVim")
-  val vimBumpVerImpl7KeysSc = vimKeysScriptContent("/version = Ver\nt)$keyCtrlA:wq\n", myBuildFile)
+  val vimBumpVerImpl7KeysSc = vimKeysScriptContent("/version = Ver\nt)$keyCtrlA:wq\n", myBuildFile)rs
+    "vim -N --clean -n -c set nomore -T dumb -s /dev/stdin $myBuildFile"
 }
