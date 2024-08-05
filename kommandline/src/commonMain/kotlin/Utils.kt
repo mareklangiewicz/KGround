@@ -18,15 +18,6 @@ import pl.mareklangiewicz.ulog.localULog
 
 
 
-// FIXME: use ones from kground after updating
-val CharSequence.lowords get() = split(Regex("(?<=\\w)(?=\\p{Upper})")).map { it.lowercase() }
-fun CharSequence.lowords(joint: CharSequence) = lowords.joinToString(joint)
-val Any.classlowords get() = this::class.simpleName!!.lowords
-fun Any.classlowords(joint: CharSequence) = classlowords.joinToString(joint)
-val Enum<*>.namelowords get() = name.lowords
-fun Enum<*>.namelowords(joint: CharSequence) = name.lowords.joinToString(joint)
-
-
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) {
   konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.strf

@@ -14,7 +14,7 @@ fun ghStatus(init: GhStatus.() -> Unit = {}) = GhStatus().apply(init)
 /** [gh manual](https://cli.github.com/manual/index) */
 abstract class GhKommand<KOptGhT : KOptGh> : Kommand {
 
-  val ghKommandNameWords get() = classSimpleWords().also { it.first().chkEq("gh") }
+  val ghKommandNameWords get() = classlowords.also { it.first().chkEq("gh") }
 
   val nonopts: MutableList<String> = mutableListOf()
   val opts: MutableList<KOptGhT> = mutableListOf()
@@ -36,7 +36,7 @@ class GhRepoView : GhKommand<KOptGhRepoView>()
 class GhRepoList : GhKommand<KOptGhRepoList>()
 
 abstract class GhOpt(val arg: String? = null) : KOptGh {
-  override fun toArgs(): List<String> = listOf("--" + classSimpleWords().joinToString("-")) plusIfNN arg
+  override fun toArgs(): List<String> = listOf("--" + classlowords("-")) plusIfNN arg
 }
 
 

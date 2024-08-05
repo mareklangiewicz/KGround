@@ -155,7 +155,7 @@ open class KOptLN(
     argsSeparator: String = ",",
   ) : this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
 
-  override val name: String get() = classSimpleWords().joinToString("-")
+  override val name: String get() = classlowords("-")
 }
 
 @DelicateApi

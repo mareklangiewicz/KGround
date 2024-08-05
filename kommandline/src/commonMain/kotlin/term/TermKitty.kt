@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.term
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
 
