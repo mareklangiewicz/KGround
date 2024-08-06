@@ -38,11 +38,11 @@ data class Dpkg(
 @DelicateApi
 interface DpkgAct : DpkgOpt {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), DpkgAct
   data object Version : KOptLN(), DpkgAct
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /**
    * Install the package.

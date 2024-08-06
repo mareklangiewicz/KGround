@@ -342,12 +342,12 @@ interface XVimOpt : KOptTypical {
   // TODO_someday: Go through all :h starting.txt in NVim, and make sure, we have all options here
   // (I skipped some for now) (annotate which are NotPortableApi)
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), XVimOpt
   data object Version : KOptLN(), XVimOpt
   data object EOOpt : KOptL(""), XVimOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /**
    * For the first file the cursor will be positioned on given line.

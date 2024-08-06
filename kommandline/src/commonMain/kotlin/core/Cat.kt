@@ -21,12 +21,12 @@ data class Cat(
 @DelicateApi
 interface CatOpt : KOptTypical {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), CatOpt
   data object Version : KOptLN(), CatOpt
   data object EOOpt : KOptL(""), CatOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /** Number all output lines, starting with 1. This option is ignored if -b is in effect. */
   data object NumberAll : KOptS("n"), CatOpt

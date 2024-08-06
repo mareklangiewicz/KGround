@@ -54,12 +54,12 @@ data class Ls(
 @OptIn(DelicateApi::class)
 interface LsOpt : KOptTypical {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), LsOpt
   data object Version : KOptLN(), LsOpt
   data object EOOpt : KOptL(""), LsOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /** list one file per line even when stdout is terminal */
   data object One : KOptS("1"), LsOpt

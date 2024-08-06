@@ -61,12 +61,12 @@ data class Bash(
 @DelicateApi
 interface BashOpt : KOptTypical {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), BashOpt
   data object Version : KOptLN(), BashOpt
   data object EOOpt : KOptL(""), BashOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /**
    * interpret first from nonopts as a command_string to run

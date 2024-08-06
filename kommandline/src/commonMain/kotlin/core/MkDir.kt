@@ -28,12 +28,12 @@ data class MkDir(
 @DelicateApi
 interface MkDirOpt : KOptTypical {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), MkDirOpt
   data object Version : KOptLN(), MkDirOpt
   data object EOOpt : KOptL(""), MkDirOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /** set file mode (as in chmod), not a=rwx - umask */
   data class Mode(val mode: String) : KOptS("m", mode), MkDirOpt

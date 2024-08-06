@@ -26,12 +26,12 @@ data class Touch(
 @DelicateApi
 interface TouchOpt : KOptTypical {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), TouchOpt
   data object Version : KOptLN(), TouchOpt
   data object EOOpt : KOptL(""), TouchOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   data object TimeOfAccessOnly : TouchOpt, KOptS("a")
   data object TimeOfChangeOnly : TouchOpt, KOptS("m")

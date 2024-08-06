@@ -247,14 +247,14 @@ interface FindExpr : KOpt {
 
 // region Find Expression Category: GLOBAL OPTIONS
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), FindExpr
   data object Version : KOptLN(), FindExpr
   /** See man find / A double dash */
   @Deprecated("Separating options from non-options with -- doesn't work here.", level = DeprecationLevel.ERROR)
   data object EOOpt : KOptL(""), FindExpr
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   /**
    * Process each directory's contents before the directory itself.

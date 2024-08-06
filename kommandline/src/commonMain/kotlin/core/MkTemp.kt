@@ -31,12 +31,12 @@ data class MkTemp(
 @DelicateApi
 interface MkTempOpt : KOptTypical {
 
-  // region [Common Options]
+  // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
   data object Help : KOptLN(), MkTempOpt
   data object Version : KOptLN(), MkTempOpt
   data object EOOpt : KOptL(""), MkTempOpt
-  // endregion [Common Options]
+  // endregion [GNU Common Opts]
 
   data object Directory : KOptS("d"), MkTempOpt
   data object DryRun : KOptS("u"), MkTempOpt
