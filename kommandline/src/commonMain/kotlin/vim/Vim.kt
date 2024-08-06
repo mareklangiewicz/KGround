@@ -342,6 +342,13 @@ interface XVimOpt : KOptTypical {
   // TODO_someday: Go through all :h starting.txt in NVim, and make sure, we have all options here
   // (I skipped some for now) (annotate which are NotPortableApi)
 
+  // region [Common Options]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), XVimOpt
+  data object Version : KOptLN(), XVimOpt
+  data object EOOpt : KOptL(""), XVimOpt
+  // endregion [Common Options]
+
   /**
    * For the first file the cursor will be positioned on given line.
    * Lines are numbered from 1. Null means last line.
@@ -487,8 +494,6 @@ interface XVimOpt : KOptTypical {
    */
   @NotPortableApi("Vim only (not NVim).")
   data object GuiMode : XVimOpt, KOptS("g")
-
-  data object Help : XVimOpt, KOptS("h")
 
   /**
    * Specifies  the filename to use when reading or writing the viminfo file, instead of the default "~/.viminfo".
@@ -673,15 +678,6 @@ interface XVimOpt : KOptTypical {
 
   /** During startup write timing messages to the [file]. */
   data class StartupTime(val file: Path) : XVimOpt, KOptL("startuptime", file.strf, nameSeparator = " ")
-
-  data object Version : XVimOpt, KOptL("version")
-
-  /**
-   * Denotes the end of the options. Arguments after this will be handled as a file name.
-   * This can be used to edit a filename that starts with a '-'.
-   */
-  @Suppress("GrazieInspection")
-  data object EOOpt : XVimOpt, KOptL("") // note: default namePrefix is "--", so it's all just "--"
 
   @Suppress("FunctionName")
   companion object {

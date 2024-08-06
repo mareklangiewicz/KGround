@@ -40,8 +40,14 @@ data class Git(
 
 @OptIn(DelicateApi::class)
 interface GitOpt : KOptTypical {
-  data object Help : GitOpt, KOptLN()
-  data object Version : GitOpt, KOptLN()
+
+  // region [Common Options]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), GitOpt
+  data object Version : KOptLN(), GitOpt
+  data object EOOpt : KOptL(""), GitOpt
+  // endregion [Common Options]
+
   data object Paginate : GitOpt, KOptLN()
   data object Bare : GitOpt, KOptLN()
 

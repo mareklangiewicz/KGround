@@ -54,34 +54,41 @@ data class Ls(
 @OptIn(DelicateApi::class)
 interface LsOpt : KOptTypical {
 
+  // region [Common Options]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), LsOpt
+  data object Version : KOptLN(), LsOpt
+  data object EOOpt : KOptL(""), LsOpt
+  // endregion [Common Options]
+
   /** list one file per line even when stdout is terminal */
   data object One : KOptS("1"), LsOpt
 
   /** end each output line with NUL, not newline */
-  data object Zero : KOptL("zero"), LsOpt
+  data object Zero : KOptLN(), LsOpt
 
   /** do not ignore entries starting with "." */
   data object All : KOptS("a"), LsOpt
   /** do not list implied "." and ".." */
   data object AlmostAll : KOptS("A"), LsOpt
 
-  data object Author : KOptL("author"), LsOpt
+  data object Author : KOptLN(), LsOpt
 
-  data object Escape : KOptL("escape"), LsOpt
+  data object Escape : KOptLN(), LsOpt
 
-  data class BlockSize(val size: String) : KOptL("block-size", size), LsOpt
+  data class BlockSize(val size: String) : KOptLN(size), LsOpt
 
-  data object IgnoreBackups : KOptL("ignore-backups"), LsOpt
+  data object IgnoreBackups : KOptLN(), LsOpt
 
   data object ListByColumns : KOptS("C"), LsOpt
   data object ListByLines : KOptS("x"), LsOpt
 
-  data class Color(val type: ColorType) : KOptL("color", type.namelowords("")), LsOpt
+  data class Color(val type: ColorType) : KOptLN(type.namelowords("")), LsOpt
   enum class ColorType { Always, Auto, Never }
 
   data object Directory : KOptS("d"), LsOpt
 
-  data object Dired : KOptL("dired"), LsOpt
+  data object Dired : KOptLN(), LsOpt
 
   /** do not sort, enable -aU, disable -ls --color */
   data object Raw : KOptS("f"), LsOpt
@@ -92,11 +99,11 @@ interface LsOpt : KOptTypical {
   /** like classify, except do not add * symbol */
   data object ClassifyFileType : KOptL("file-type"), LsOpt
 
-  data class Format(val type: FormatType) : KOptL("--format=" + type.namelowords("")), LsOpt
+  data class Format(val type: FormatType) : KOptLN(type.namelowords("")), LsOpt
   enum class FormatType { Across, Commas, Horizontal, Long, SingleColumn, Verbose, Vertical }
 
   /** like -l --time-style=full-iso */
-  data object FullTime : KOptL("full-time"), LsOpt
+  data object FullTime : KOptLN(), LsOpt
 
   data object DirsFirst : KOptL("group-directories-first"), LsOpt
 
@@ -109,17 +116,17 @@ interface LsOpt : KOptTypical {
   data object HumanReadable : KOptS("h"), LsOpt
   data object HumanReadableSI : KOptL("si"), LsOpt
 
-  data object Dereference : KOptL("dereference"), LsOpt
-  data object DereferenceCommandLine : KOptL("dereference-command-line"), LsOpt
-  data object DereferenceCommandLineSymlinkToDir : KOptL("dereference-command-line-symlink-to-dir"), LsOpt
+  data object Dereference : KOptLN(), LsOpt
+  data object DereferenceCommandLine : KOptLN(), LsOpt
+  data object DereferenceCommandLineSymlinkToDir : KOptLN(), LsOpt
 
-  data class Hide(val pattern: String) : KOptL("hide", pattern), LsOpt
+  data class Hide(val pattern: String) : KOptLN(pattern), LsOpt
   /** print ? instead of nongraphic characters */
-  data object HideControlChars : KOptL("hide-control-chars"), LsOpt
+  data object HideControlChars : KOptLN(), LsOpt
   /** show nongraphic characters as-is (the default, unless program is 'ls' and output is a terminal) */
-  data object ShowControlChars : KOptL("show-control-chars"), LsOpt
+  data object ShowControlChars : KOptLN(), LsOpt
 
-  data class Hyperlink(val type: HyperlinkType) : KOptL("hyperlink", type.namelowords("")), LsOpt
+  data class Hyperlink(val type: HyperlinkType) : KOptLN(type.namelowords("")), LsOpt
   enum class HyperlinkType { Always, Auto, Never }
 
   data class Indicator(val style: IndicatorStyle) : KOptL("indicator-style", style.namelowords("-")), LsOpt
@@ -129,17 +136,17 @@ interface LsOpt : KOptTypical {
 
   data object INode : KOptL("inode"), LsOpt
 
-  data class Ignore(val pattern: String) : KOptL("ignore", pattern), LsOpt
+  data class Ignore(val pattern: String) : KOptLN(pattern), LsOpt
 
-  data object Kibibytes : KOptL("kibibytes"), LsOpt
+  data object Kibibytes : KOptLN(), LsOpt
 
   data object Commas : KOptS("m"), LsOpt
 
-  data object NumericUidGid : KOptL("numeric-uid-gid"), LsOpt
+  data object NumericUidGid : KOptLN(), LsOpt
 
-  data object Literal : KOptL("literal"), LsOpt
+  data object Literal : KOptLN(), LsOpt
 
-  data object QuoteName : KOptL("quote-name"), LsOpt
+  data object QuoteName : KOptLN(), LsOpt
 
   data class Quoting(val style: QuotingStyle) : KOptL("quoting-style", style.namelowords("-")), LsOpt
   enum class QuotingStyle { Literal, Locale, Shell, ShellAlways, ShellEscape, ShellEscapeAlways, C, Escape }
@@ -150,7 +157,7 @@ interface LsOpt : KOptTypical {
 
   data object Size : KOptS("s"), LsOpt
 
-  data class Sort(val type: SortType) : KOptL("sort", type.namelowords("")), LsOpt
+  data class Sort(val type: SortType) : KOptLN(type.namelowords("")), LsOpt
   enum class SortType { None, Size, Time, Version, Extension }
   /** largest first */
   data object SortBySize : KOptS("S"), LsOpt
@@ -161,7 +168,7 @@ interface LsOpt : KOptTypical {
   data object SortByVersion : KOptS("v"), LsOpt
   data object SortByExtension : KOptS("X"), LsOpt
 
-  data class Time(val type: TimeType) : KOptL("time", type.namelowords("")), LsOpt
+  data class Time(val type: TimeType) : KOptLN(type.namelowords("")), LsOpt
 
   /**
    * There are duplicates:
@@ -175,14 +182,11 @@ interface LsOpt : KOptTypical {
   data object TimeOfChange : KOptS("c"), LsOpt
   data object TimeOfBirth : KOptL("time", "birth"), LsOpt
 
-  data class TimeStyle(val style: String) : KOptL("time-style", style), LsOpt
+  data class TimeStyle(val style: String) : KOptLN(style), LsOpt
 
   data class TabSize(val size: Int) : KOptL("tabsize", "$size"), LsOpt
 
-  data class Width(val columns: Int) : KOptL("width", "$columns"), LsOpt
+  data class Width(val columns: Int) : KOptLN("$columns"), LsOpt
 
   data object PrintContext : KOptL("context"), LsOpt
-
-  data object Help : KOptL("help"), LsOpt
-  data object Version : KOptL("version"), LsOpt
 }

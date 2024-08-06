@@ -60,6 +60,14 @@ data class Bash(
 
 @DelicateApi
 interface BashOpt : KOptTypical {
+
+  // region [Common Options]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), BashOpt
+  data object Version : KOptLN(), BashOpt
+  data object EOOpt : KOptL(""), BashOpt
+  // endregion [Common Options]
+
   /**
    * interpret first from nonopts as a command_string to run
    * If more nonopts present, they are used to override env variables $0 $1 $2...
@@ -77,8 +85,6 @@ interface BashOpt : KOptTypical {
    */
   data object Stdin : BashOpt, KOptS("s")
   data object Posix : BashOpt, KOptL("posix")
-  data object Help : BashOpt, KOptL("help")
-  data object Version : BashOpt, KOptL("version")
 
   /** Print shell input lines as they are read. */
   data object PrintInput : BashOpt, KOptS("v")

@@ -67,8 +67,14 @@ data class Sudo(
 
 @DelicateApi
 interface SudoOpt : KOptTypical {
-  data object Help : KOptLN(), SudoOpt // there is also short -h but it does NOT always mean help
+
+  // region [Common Options]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), SudoOpt // there is also short -h, but it does NOT always mean help
   data object Version : KOptLN(), SudoOpt
+  data object EOOpt : KOptL(""), SudoOpt
+  // endregion [Common Options]
+
   data object SetHome : KOptLN(), SudoOpt
   data class Host(val host: String) : KOptLN(host), SudoOpt
   data object Login : KOptLN(), SudoOpt
@@ -90,5 +96,4 @@ interface SudoOpt : KOptTypical {
   data object NoUpdate : KOptLN(), SudoOpt
   data object RemoveTimestamp : KOptLN(), SudoOpt
   data object ResetTimestamp : KOptLN(), SudoOpt
-  data object EOOpt : KOptL(""), SudoOpt
 }

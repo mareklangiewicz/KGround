@@ -70,7 +70,7 @@ data object VimBasicSamples {
 
 
 
-@DelicateApi("Many are changing files, like KommandLine:build.gradle.kts (f.e. to bump version automatically)")
+@DelicateApi("Many are changing files, like KommandLine:build.gradle.kts (e.g. to bump version automatically)")
 data object VimAdvancedSamples {
 
   // FIXME_later: use UFileSys.pathXXX
