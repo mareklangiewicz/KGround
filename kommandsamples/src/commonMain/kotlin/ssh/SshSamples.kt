@@ -5,7 +5,6 @@ package pl.mareklangiewicz.kommand.ssh
 import pl.mareklangiewicz.annotations.DelicateApi
 import okio.Path
 import pl.mareklangiewicz.kground.io.pth
-import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.samples.*
@@ -22,7 +21,7 @@ data object SshSamples {
 
   val sshPimLsInTermKitty = ssh("pim", "ls").inTermKitty(hold = true) s "kitty --detach --hold -- ssh pim ls"
 
-  val sshPimLsLAH = ssh("pim", ls { -LongFormat; -All; -HumanReadable }) s "ssh pim ls -l -a -h"
+  val sshPimLsLAH = ssh("pim", ls { -LongFormat; -All; -BlockHuman }) s "ssh pim ls -l -a -h"
 }
 
 // TODO NOW: Continue, it's first experiment based on:

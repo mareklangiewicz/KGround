@@ -37,7 +37,7 @@ data object LsSamples {
     "ls --indicator-style=slash .."
 
   val lsALotNicely = ls("/home/marek".pth, "/usr".pth, wHidden = true, wColor = Always) {
-    -Author; -LongFormat; -HumanReadable; -Sort(SortType.Time)
+    -Author; -LongFormat; -BlockHuman; -Sort(SortType.Time)
   } s
     "ls -A --color=always --author -l -h --sort=time /home/marek /usr"
 

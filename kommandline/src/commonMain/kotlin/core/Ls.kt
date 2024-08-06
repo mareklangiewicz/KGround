@@ -61,6 +61,14 @@ interface LsOpt : KOptTypical {
   data object EOOpt : KOptL(""), LsOpt
   // endregion [GNU Common Opts]
 
+  // region [GNU Block Size Opts]
+  /** https://www.gnu.org/software/coreutils/manual/html_node/Block-size.html */
+  data class Block(val size: String) : KOptLN(size), LsOpt
+  data object Block1K : KOptS("k"), LsOpt
+  data object BlockHuman : KOptS("h"), LsOpt
+  data object BlockHumanSI : KOptL("si"), LsOpt
+  // endregion [GNU Block Size Opts]
+
   /** list one file per line even when stdout is terminal */
   data object One : KOptS("1"), LsOpt
 
@@ -75,8 +83,6 @@ interface LsOpt : KOptTypical {
   data object Author : KOptLN(), LsOpt
 
   data object Escape : KOptLN(), LsOpt
-
-  data class BlockSize(val size: String) : KOptLN(size), LsOpt
 
   data object IgnoreBackups : KOptLN(), LsOpt
 
@@ -113,9 +119,6 @@ interface LsOpt : KOptTypical {
   data object LongWithoutOwner : KOptS("g"), LsOpt
   data object LongWithoutGroup : KOptS("o"), LsOpt
 
-  data object HumanReadable : KOptS("h"), LsOpt
-  data object HumanReadableSI : KOptL("si"), LsOpt
-
   data object Dereference : KOptLN(), LsOpt
   data object DereferenceCommandLine : KOptLN(), LsOpt
   data object DereferenceCommandLineSymlinkToDir : KOptLN(), LsOpt
@@ -137,8 +140,6 @@ interface LsOpt : KOptTypical {
   data object INode : KOptL("inode"), LsOpt
 
   data class Ignore(val pattern: String) : KOptLN(pattern), LsOpt
-
-  data object Kibibytes : KOptLN(), LsOpt
 
   data object Commas : KOptS("m"), LsOpt
 

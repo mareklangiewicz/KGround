@@ -86,7 +86,7 @@ class ZenityTest {
   }.tryInteractivelyCheckBlockingOrErr()
 
   @Test fun testZenityListFromLs() = ifInteractiveCodeEnabledBlockingOrErr {
-    val lines = ls { -All; -LongFormat; -HumanReadable }.ax()
+    val lines = ls { -All; -LongFormat; -BlockHuman }.ax()
     zenity(List) {
       -Text("ls output")
       -Column("ls output")
