@@ -48,6 +48,14 @@ data class Rm(
 @DelicateApi
 interface RmOpt : KOptTypical {
 
+  // region [GNU Common Opts]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), RmOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), RmOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
+  data object EOOpt : KOptL(""), RmOpt
+  // endregion [GNU Common Opts]
+
+
   /** ignore nonexistent files and arguments, never prompt */
   data object Force : RmOpt, KOptS("f")
 
@@ -66,8 +74,4 @@ interface RmOpt : KOptTypical {
 
   /** explain what is being done */
   data object Verbose : RmOpt, KOptS("v")
-
-  data object Help : RmOpt, KOptL("help")
-
-  data object Version : RmOpt, KOptL("version")
 }

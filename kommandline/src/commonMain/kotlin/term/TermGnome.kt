@@ -28,8 +28,14 @@ data class TermGnome(
 
 @OptIn(DelicateApi::class)
 interface TermGnomeOpt : KOptTypical {
-  data class Title(val title: String) : KOptL("title", title), TermGnomeOpt
-  data object Help : KOptS("h"), TermGnomeOpt
-  data object Verbose : KOptS("v"), TermGnomeOpt
+
+  // region [GNU Common Opts]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), TermGnomeOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), TermGnomeOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), TermGnomeOpt
+  // endregion [GNU Common Opts]
+
+  data class Title(val title: String) : KOptL("title", title), TermGnomeOpt
+  data object Verbose : KOptS("v"), TermGnomeOpt
 }

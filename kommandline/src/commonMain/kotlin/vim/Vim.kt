@@ -344,8 +344,8 @@ interface XVimOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), XVimOpt
-  data object Version : KOptLN(), XVimOpt
+  data object Help : KOptLN(), XVimOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), XVimOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), XVimOpt
   // endregion [GNU Common Opts]
 

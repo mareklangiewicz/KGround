@@ -15,8 +15,8 @@ data class DConfEditor(
   override val args get() = options.map { it.str } + nonopts
 
   sealed class Option(val str: String) {
-    data object Help : Option("--help")
-    data object Version : Option("--version")
+    data object Help : Option("--help") // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+    data object Version : Option("--version") // Don't risk short -v (ambiguity with "verbose" for many commands)
     data object RelocatableSchemas : Option("--list-relocatable-schemas")
     data object SkipWarning : Option("--I-understand-that-changing-options-can-break-applications")
   }

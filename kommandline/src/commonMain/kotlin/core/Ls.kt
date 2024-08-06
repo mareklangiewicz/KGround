@@ -56,8 +56,8 @@ interface LsOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), LsOpt
-  data object Version : KOptLN(), LsOpt
+  data object Help : KOptLN(), LsOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), LsOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), LsOpt
   // endregion [GNU Common Opts]
 

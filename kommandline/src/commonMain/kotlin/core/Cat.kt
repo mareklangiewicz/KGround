@@ -23,8 +23,8 @@ interface CatOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), CatOpt
-  data object Version : KOptLN(), CatOpt
+  data object Help : KOptLN(), CatOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), CatOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), CatOpt
   // endregion [GNU Common Opts]
 

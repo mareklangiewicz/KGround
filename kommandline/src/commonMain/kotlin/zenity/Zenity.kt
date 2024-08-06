@@ -164,8 +164,8 @@ interface ZenityOpt : KOptTypical {
     data object Scale : Type()
   }
 
-  data object Help : ZenityOpt, KOptLN()
-  data object Version : ZenityOpt, KOptLN()
+  data object Help : ZenityOpt, KOptLN() // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : ZenityOpt, KOptLN() // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object About : ZenityOpt, KOptLN()
   data class Title(val t: String) : ZenityOpt, KOptLN(t)
   /** icon path or one of keywords: info, warning, question, error */

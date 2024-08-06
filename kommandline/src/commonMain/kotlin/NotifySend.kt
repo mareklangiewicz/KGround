@@ -18,8 +18,8 @@ data class NotifySend(
   sealed class Option(val str: String) {
     /** Specifies the urgency level (low, normal, critical). */ // TODO_later: enum for level
     data class Urgency(val level: String) : Option("--urgency=$level")
-    data object Help : Option("--help")
-    data object Version : Option("--version")
+    data object Help : Option("--help") // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+    data object Version : Option("--version") // Don't risk short -v (ambiguity with "verbose" for many commands)
     // TODO_someday: other options like icon, category, hint..
   }
 

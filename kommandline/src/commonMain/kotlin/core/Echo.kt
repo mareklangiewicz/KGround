@@ -44,7 +44,7 @@ interface EchoOpt : KOptTypical {
   data object NoNewLine : KOptS("n"), EchoOpt
   data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt
   @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")
-  data object Help : KOptLN(), EchoOpt
+  data object Help : KOptLN(), EchoOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
   @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")
-  data object Version : KOptLN(), EchoOpt
+  data object Version : KOptLN(), EchoOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
 }

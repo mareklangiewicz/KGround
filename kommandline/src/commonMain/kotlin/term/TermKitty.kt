@@ -62,6 +62,14 @@ data class TermKitty(
 
 @OptIn(DelicateApi::class)
 interface TermKittyOpt : KOptTypical {
+
+  // region [GNU Common Opts]
+  // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
+  data object Help : KOptLN(), TermKittyOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), TermKittyOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
+  data object EOOpt : KOptL(""), TermKittyOpt
+  // endregion [GNU Common Opts]
+
   data class Title(val title: String) : KOptS("T", title), TermKittyOpt
   data class Config(val file: String) : KOptS("c", file), TermKittyOpt
   data class Directory(val directory: String) : KOptS("d", directory), TermKittyOpt
@@ -93,8 +101,4 @@ interface TermKittyOpt : KOptTypical {
   data class StartAs(val type: StartAsType = StartAsType.Normal) :
     KOptL("start-as", type.namelowords(""), nameSeparator = " "), TermKittyOpt
   enum class StartAsType { Normal, FullScreen, Maximized, Minimized }
-
-  data object Help : KOptS("h"), TermKittyOpt
-  data object Version : KOptS("v"), TermKittyOpt
-  data object EOOpt : KOptL(""), TermKittyOpt
 }

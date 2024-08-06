@@ -33,8 +33,8 @@ interface MkTempOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), MkTempOpt
-  data object Version : KOptLN(), MkTempOpt
+  data object Help : KOptLN(), MkTempOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), MkTempOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), MkTempOpt
   // endregion [GNU Common Opts]
 

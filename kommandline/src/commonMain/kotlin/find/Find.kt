@@ -249,8 +249,8 @@ interface FindExpr : KOpt {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), FindExpr
-  data object Version : KOptLN(), FindExpr
+  data object Help : KOptLN(), FindExpr // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), FindExpr // Don't risk short -v (ambiguity with "verbose" for many commands)
   /** See man find / A double dash */
   @Deprecated("Separating options from non-options with -- doesn't work here.", level = DeprecationLevel.ERROR)
   data object EOOpt : KOptL(""), FindExpr

@@ -28,8 +28,8 @@ interface TouchOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), TouchOpt
-  data object Version : KOptLN(), TouchOpt
+  data object Help : KOptLN(), TouchOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), TouchOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), TouchOpt
   // endregion [GNU Common Opts]
 

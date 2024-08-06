@@ -20,8 +20,8 @@ data class DBusRunSession(
 
     data class ConfigFile(val filename: String) : Option("--config-file", filename)
     data class DbusDaemon(val binary: String) : Option("--dbus-daemon", binary)
-    data object Help : Option("--help")
-    data object Version : Option("--version")
+    data object Help : Option("--help") // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+    data object Version : Option("--version") // Don't risk short -v (ambiguity with "verbose" for many commands)
   }
 
   operator fun Option.unaryMinus() = options.add(this)

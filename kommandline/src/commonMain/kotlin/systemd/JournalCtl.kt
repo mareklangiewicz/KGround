@@ -25,8 +25,8 @@ data class JournalCtl(
      * a timestamp.
      */
     data object Cat : Option("-ocat") // FIXME_later: separate -o and type
-    data object Help : Option("--help")
-    data object Version : Option("--version")
+    data object Help : Option("--help") // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+    data object Version : Option("--version") // Don't risk short -v (ambiguity with "verbose" for many commands)
   }
 
   operator fun String.unaryPlus() = matches.add(this)

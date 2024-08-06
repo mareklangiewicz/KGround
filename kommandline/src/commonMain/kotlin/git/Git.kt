@@ -43,8 +43,8 @@ interface GitOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), GitOpt
-  data object Version : KOptLN(), GitOpt
+  data object Help : KOptLN(), GitOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), GitOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), GitOpt
   // endregion [GNU Common Opts]
 

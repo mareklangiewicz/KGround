@@ -70,9 +70,9 @@ interface ManOpt : KOptTypical {
 
   data object NamesOnly : KOptLN(), ManOpt
 
-  data object Help : KOptLN(), ManOpt
+  data object Help : KOptLN(), ManOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
 
   data object Usage : KOptLN(), ManOpt
 
-  data object Version : KOptLN(), ManOpt
+  data object Version : KOptLN(), ManOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
 }

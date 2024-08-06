@@ -63,8 +63,8 @@ interface BashOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), BashOpt
-  data object Version : KOptLN(), BashOpt
+  data object Help : KOptLN(), BashOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), BashOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), BashOpt
   // endregion [GNU Common Opts]
 

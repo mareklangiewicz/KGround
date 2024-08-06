@@ -30,8 +30,8 @@ interface MkDirOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), MkDirOpt
-  data object Version : KOptLN(), MkDirOpt
+  data object Help : KOptLN(), MkDirOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), MkDirOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), MkDirOpt
   // endregion [GNU Common Opts]
 

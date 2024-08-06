@@ -10,14 +10,14 @@ data class Audacious(
   override val args get() = options.map { it.str } + files
 
   sealed class Option(val str: String) {
-    data object Help : Option("--help")
+    data object Help : Option("--help") // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
     data object Enqueue : Option("--enqueue")
     data object Play : Option("--play")
     data object Pause : Option("--pause")
     data object Stop : Option("--stop")
     data object Rew : Option("--rew")
     data object Fwd : Option("--fwd")
-    data object Version : Option("--version")
+    data object Version : Option("--version") // Don't risk short -v (ambiguity with "verbose" for many commands)
     data object Verbose : Option("--verbose")
   }
 

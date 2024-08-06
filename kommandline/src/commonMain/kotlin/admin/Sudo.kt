@@ -70,8 +70,8 @@ interface SudoOpt : KOptTypical {
 
   // region [GNU Common Opts]
   // https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html
-  data object Help : KOptLN(), SudoOpt // there is also short -h, but it does NOT always mean help
-  data object Version : KOptLN(), SudoOpt
+  data object Help : KOptLN(), SudoOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
+  data object Version : KOptLN(), SudoOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
   data object EOOpt : KOptL(""), SudoOpt
   // endregion [GNU Common Opts]
 
