@@ -28,7 +28,7 @@ val blaSlowS = blaS.map { delay(1000); it }
 @OptIn(DelicateApi::class)
 data object VimBasicSamples {
 
-  val vimHelp = vim { -Help } s "vim -h"
+  val vimHelp = vim { -Help } s "vim --help"
 
   val vimVersion = vim { -Version } s "vim --version"
 
