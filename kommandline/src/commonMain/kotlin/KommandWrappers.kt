@@ -6,6 +6,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.localUWorkDirOrNull
 
 /**
@@ -139,6 +140,9 @@ fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
   is ReducedKommandMap<*, *> -> reducedKommand.lineRawOrNull()
   else -> null
 }
+
+@DelicateApi
+fun ReducedKommand<*>.lineRaw(): String = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
 
 
 /** Note: Manually means: user is responsible for collecting all necessary streams and awaiting and checking exit. */

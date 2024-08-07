@@ -4,11 +4,7 @@ import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.core.MvOpt.Exchange
-import pl.mareklangiewicz.kommand.core.MvOpt.Force
-import pl.mareklangiewicz.kommand.core.MvOpt.NoCopy
-import pl.mareklangiewicz.kommand.core.MvOpt.TargetDir
-import pl.mareklangiewicz.kommand.core.MvOpt.TargetDirNone
+import pl.mareklangiewicz.kommand.core.MvOpt.*
 import pl.mareklangiewicz.udata.strf
 
 /**
@@ -17,20 +13,34 @@ import pl.mareklangiewicz.udata.strf
  * Details: [gnu mv invocation](https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html)
  */
 @OptIn(DelicateApi::class)
-fun mvSingle(src: Path, dst: Path, withForce: Boolean = false) =
-  mv(src, dst, withForce = withForce) { -TargetDirNone }
+fun mvSingle(
+  src: Path,
+  dst: Path,
+  vararg useNamedArgs: Unit,
+  force: Boolean = false,
+  verbose: Boolean = false,
+) = mv(src, dst, force = force, verbose = verbose) { -TargetDirNone }
 
 /**
  * Move/rename each [srcPaths] into the specified [targetDir], using the sources names.
  * Details: [gnu mv invocation](https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html)
  */
 @OptIn(DelicateApi::class)
-fun mvInto(targetDir: Path, vararg srcPaths: Path?, withForce: Boolean = false) =
-  mv(*srcPaths, withForce = withForce) { -TargetDir(targetDir) }
+fun mvInto(
+  targetDir: Path,
+  vararg srcPaths: Path?,
+  force: Boolean = false,
+  verbose: Boolean = false,
+) = mv(*srcPaths, force = force, verbose = verbose) { -TargetDir(targetDir) }
 
 @OptIn(DelicateApi::class)
-fun mvExchange(first: Path, second: Path, withForce: Boolean = false) =
-  mv(first, second, withForce = withForce) { -TargetDirNone; -NoCopy; -Exchange }
+fun mvExchange(
+  first: Path,
+  second: Path,
+  vararg useNamedArgs: Unit,
+  force: Boolean = false,
+  verbose: Boolean = false,
+) = mv(first, second, force = force, verbose = verbose) { -TargetDirNone; -NoCopy; -Exchange }
 
 /**
  * Note1: As [Path] kdoc says: The only path that ends with "/" is the file system root "/".
@@ -43,8 +53,13 @@ fun mvExchange(first: Path, second: Path, withForce: Boolean = false) =
  * Make sure to use option [MvOpt.TargetDir] / [mvInto] / [mvSingle] to avoid potential issues.
  */
 @DelicateApi
-fun mv(vararg paths: Path?, withForce: Boolean = false, init: Mv.() -> Unit) =
-  Mv(nonopts = paths.mapNotNull { it.strf }.toMutableList()).apply { if (withForce) -Force; init() }
+fun mv(
+  vararg paths: Path?,
+  force: Boolean = false,
+  verbose: Boolean = false,
+  init: Mv.() -> Unit,
+) = Mv(nonopts = paths.mapNotNull { it.strf }.toMutableList())
+  .apply { if (force) -Force; if (verbose) -Verbose; init() }
 
 
 /**

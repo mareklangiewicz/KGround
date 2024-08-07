@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import okio.Path
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.*
@@ -36,11 +35,26 @@ fun getUserFlagFullStr(cli: CLI, key: String) = "User flag: $key is " + getUserF
 
 
 
+fun <K : Kommand> K.chkEqLineRaw(expectedLineRaw: String): K = apply {
+  val lineRaw = lineRaw()
+  lineRaw.chkEq(expectedLineRaw) { "bad Kommand.lineRaw(): $lineRaw != $expectedLineRaw" }
+}
+
 @OptIn(DelicateApi::class)
-fun <ReducedOut> ReducedKommand<ReducedOut>.chkLineRaw(expectedLineRaw: String): ReducedKommand<ReducedOut> {
-  val lineRaw = lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
-  lineRaw.chkEq(expectedLineRaw)
-  return this
+fun <ReducedOut> ReducedKommand<ReducedOut>.chkEqLineRaw(expectedLineRaw: String) = apply {
+  val lineRaw = lineRaw()
+  lineRaw.chkEq(expectedLineRaw) { "bad ReducedKommand.lineRaw(): $lineRaw != $expectedLineRaw" }
+}
+
+fun <K : Kommand> K.chkThisLineRaw(thisLineRawIsFine: String.() -> Boolean): K = apply {
+  val lineRaw = lineRaw()
+  lineRaw.chkThis({ "this is bad Kommand.lineRaw(): $lineRaw" }, thisLineRawIsFine)
+}
+
+@OptIn(DelicateApi::class)
+fun <ReducedOut> ReducedKommand<ReducedOut>.chkThisLineRaw(thisLineRawIsFine: String.() -> Boolean) = apply {
+  val lineRaw = lineRaw()
+  lineRaw.chkThis({ "this is bad ReducedKommand.lineRaw(): $lineRaw" }, thisLineRawIsFine)
 }
 
 /** @param stderr null means unknown/not-saved (emptyList should represent known empty stderr) */

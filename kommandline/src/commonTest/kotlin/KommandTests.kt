@@ -2,7 +2,6 @@
 
 package pl.mareklangiewicz.kommand
 
-import kotlin.math.*
 import kotlin.random.*
 import kotlin.test.*
 import okio.*
@@ -60,16 +59,16 @@ class KommandTests {
 private suspend fun onMkDirWithParents() {
   "On mkdir with parents" so {
     // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
-    val dirName = "testDirTmp" + Random.nextLong().absoluteValue
+    val dirName = "testDirTmp$rndLarge"
     val tmpDir = "/tmp".pth / dirName
     val tmpDirBla = tmpDir / "bla"
     val tmpDirBlaBle = tmpDirBla / "ble"
 
     try {
-      mkdir(tmpDirBlaBle, withParents = true).chkLineRaw("mkdir -p $tmpDirBlaBle").ax()
+      mkdir(tmpDirBlaBle, withParents = true).chkEqLineRaw("mkdir -p $tmpDirBlaBle").ax()
 
       "check created dirs with ls" so {
-        lsSubDirs("/tmp".pth).chkLineRaw("ls --indicator-style=slash /tmp")
+        lsSubDirs("/tmp".pth).chkEqLineRaw("ls --indicator-style=slash /tmp")
           .ax().chkThis { strf.contains(dirName) }
       }
       "ls tmp dir is not file" so { lsRegFiles("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
@@ -103,6 +102,7 @@ private suspend fun onMkDirWithParents() {
   }
 }
 
+@OptIn(DelicateApi::class)
 private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
 
   "On touchy blu file" so {
@@ -119,9 +119,10 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
         writeFileWithDD(poem, bluPath).ax()
         "poem is there" so { readFileWithCat(bluPath).ax() chkEq poem }
         "On write empty list of lines" so {
-          writeFileWithDD(emptyList<String>(), bluPath).ax()
+          writeFileWithDD(emptyList(), bluPath).ax()
           "it is empty again" so { readFileWithCat(bluPath).ax().chkEmpty() }
         }
+        onMvLonelyTmpFileAround(bluPath)
       }
     }
 
@@ -142,3 +143,37 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
   }
 }
 
+private suspend fun onMvLonelyTmpFileAround(fileP: Path) {
+  val dirP = fileP.parent!!
+  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
+  "On mv file around" so {
+    val file2P = dirP / "2rnd$rndLarge"
+    val file3P = dirP / "3rnd$rndLarge"
+    "On mv to file2" so {
+      mvSingle(fileP, file2P)
+        .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
+        .ax()
+      "moved to file2" so {
+        lsRegFiles(dirP).ax().chkThis { single() == file2P.name.pth }
+      }
+      "On mv to file3" so {
+        mvSingle(file2P, file3P)
+          .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
+          .ax()
+        "moved to file3" so {
+          lsRegFiles(dirP).ax().chkThis { single() == file3P.name.pth }
+        }
+        "On mv to original file" so {
+          mvSingle(file3P, fileP)
+            .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
+            .ax()
+          "moved to original file" so {
+            lsRegFiles(dirP).ax().chkThis { single() == fileP.name.pth }
+          }
+        }
+      }
+    }
+  }
+}
+
+private val rndLarge get() = Random.nextLong(100_000L, Long.MAX_VALUE - 10_000L)
