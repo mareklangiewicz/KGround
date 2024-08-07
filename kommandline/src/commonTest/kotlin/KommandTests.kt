@@ -2,39 +2,19 @@
 
 package pl.mareklangiewicz.kommand
 
-import okio.Path
-import pl.mareklangiewicz.kground.io.pth
-import pl.mareklangiewicz.udata.strf
-import kotlin.coroutines.CoroutineContext
-import kotlin.math.absoluteValue
-import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
-import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.ExperimentalApi
-import pl.mareklangiewicz.annotations.NotPortableApi
-import pl.mareklangiewicz.bad.chkEmpty
-import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.bad.chkThis
-import pl.mareklangiewicz.bad.chkThrows
+import kotlin.math.*
+import kotlin.random.*
+import kotlin.test.*
+import okio.*
+import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
+import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.shell.bashQuoteMetaChars
-import pl.mareklangiewicz.kommand.konfig.IKonfig
-import pl.mareklangiewicz.kommand.konfig.konfigInDir
-import pl.mareklangiewicz.uctx.uctx
-import pl.mareklangiewicz.udata.str
-import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
-import pl.mareklangiewicz.uspek.USpekContext
-import pl.mareklangiewicz.uspek.USpekTree
-import pl.mareklangiewicz.uspek.failed
-import pl.mareklangiewicz.uspek.so
-import pl.mareklangiewicz.uspek.suspek
-import pl.mareklangiewicz.uspek.ucontext
+import pl.mareklangiewicz.kommand.konfig.*
+import pl.mareklangiewicz.kommand.shell.*
+import pl.mareklangiewicz.udata.*
+import pl.mareklangiewicz.uspek.*
 
 
 @OptIn(DelicateApi::class)
@@ -95,41 +75,7 @@ class KommandTests {
               "bla does not contain ble" so { lsSubDirs(tmpDirBla).ax().chkEmpty() }
             }
 
-            "On touchy blu file" so {
-              val bluName = "blu.touchy"
-              val bluPath = tmpDirBlaBle / bluName
-              touch(bluPath).ax()
-
-              "ls blu is there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { strf.contains(bluName) } }
-
-              "On blu file content" so {
-                "it is empty" so { readFileWithCat(bluPath).ax().chkEmpty() }
-                "On write poem" so {
-                  val poem = listOf("NOTHING IS FAIR IN THIS WORLD OF MADNESS!")
-                  writeFileWithDD(poem, bluPath).ax()
-                  "poem is there" so { readFileWithCat(bluPath).ax() chkEq poem }
-                  "On write empty list of lines" so {
-                    writeFileWithDD(emptyList<String>(), bluPath).ax()
-                    "it is empty again" so { readFileWithCat(bluPath).ax().chkEmpty() }
-                  }
-                }
-              }
-
-              "On rm blu" so {
-                rm(bluPath).ax()
-
-                "ls blu is NOT there" so { lsRegFiles(tmpDirBlaBle).ax().chkThis { !strf.contains(bluName) } }
-              }
-
-              "On rm wrong file name" so {
-                "using nice wrapper outputs File not found" so {
-                  rmFileIfExists("$bluPath.wrong".pth).ax().chkEq(listOf("File not found"))
-                }
-                "using plain rm throws BadExitStateErr".soThrows<BadExitStateErr> {
-                  rm("$bluPath.wrong".pth).ax()
-                }
-              }
-            }
+            onTouchyBluFile(tmpDirBlaBle)
 
             "On rmTreeWithForce" so {
               rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
@@ -150,6 +96,47 @@ class KommandTests {
             rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
           }
         }
+      }
+    }
+  }
+}
+
+
+@OptIn(DelicateApi::class)
+suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
+
+  "On touchy blu file" so {
+    val bluName = "blu.touchy"
+    val bluPath = tmpDirForBlu / bluName
+    touch(bluPath).ax()
+
+    "ls blu is there" so { lsRegFiles(tmpDirForBlu).ax().chkThis { strf.contains(bluName) } }
+
+    "On blu file content" so {
+      "it is empty" so { readFileWithCat(bluPath).ax().chkEmpty() }
+      "On write poem" so {
+        val poem = listOf("NOTHING IS FAIR IN THIS WORLD OF MADNESS!")
+        writeFileWithDD(poem, bluPath).ax()
+        "poem is there" so { readFileWithCat(bluPath).ax() chkEq poem }
+        "On write empty list of lines" so {
+          writeFileWithDD(emptyList<String>(), bluPath).ax()
+          "it is empty again" so { readFileWithCat(bluPath).ax().chkEmpty() }
+        }
+      }
+    }
+
+    "On rm blu" so {
+      rm(bluPath).ax()
+
+      "ls blu is NOT there" so { lsRegFiles(tmpDirForBlu).ax().chkThis { !strf.contains(bluName) } }
+    }
+
+    "On rm wrong file name" so {
+      "using nice wrapper outputs File not found" so {
+        rmFileIfExists("$bluPath.wrong".pth).ax().chkEq(listOf("File not found"))
+      }
+      "using plain rm throws BadExitStateErr".soThrows<BadExitStateErr> {
+        rm("$bluPath.wrong".pth).ax()
       }
     }
   }
