@@ -45,5 +45,5 @@ interface MkDirOpt : KOptTypical {
   data object Parents : KOptS("p"), MkDirOpt
 
   /** print a message for each created directory */
-  data object Verbose : KOptS("v"), MkDirOpt
+  data object Verbose : MkDirOpt, KOptLN() // Don't risk short -v (ambiguity with "version")
 }

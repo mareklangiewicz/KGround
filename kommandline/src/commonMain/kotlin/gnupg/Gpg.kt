@@ -82,7 +82,7 @@ open class GpgCmd : GpgOpt, KOptLN() {
 @DelicateApi
 interface GpgOpt : KOptTypical {
 
-  data object Verbose : GpgOpt, KOptLN()
+  data object Verbose : GpgOpt, KOptLN() // Don't risk short -v (ambiguity with "version")
 
   /** Don't make any changes (this is not completely implemented). */
   data object DryRun : GpgOpt, KOptLN()

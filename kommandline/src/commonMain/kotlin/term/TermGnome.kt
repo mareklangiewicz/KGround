@@ -36,6 +36,6 @@ interface TermGnomeOpt : KOptTypical {
   data object EOOpt : KOptL(""), TermGnomeOpt
   // endregion [GNU Common Opts]
 
-  data class Title(val title: String) : KOptL("title", title), TermGnomeOpt
-  data object Verbose : KOptS("v"), TermGnomeOpt
+  data class Title(val title: String) : KOptLN(title), TermGnomeOpt
+  data object Verbose : TermGnomeOpt, KOptLN() // Don't risk short -v (ambiguity with "version")
 }

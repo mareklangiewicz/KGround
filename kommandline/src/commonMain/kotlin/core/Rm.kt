@@ -57,7 +57,7 @@ interface RmOpt : KOptTypical {
 
 
   /** ignore nonexistent files and arguments, never prompt */
-  data object Force : RmOpt, KOptS("f")
+  data object Force : RmOpt, KOptLN() // Don't risk short -f (better to be explicit with FORCE)
 
   /** prompt before every removal */
   data object PromptAlways : RmOpt, KOptS("i")
@@ -65,13 +65,13 @@ interface RmOpt : KOptTypical {
   /** prompt once before removing more than three files, or when removing  recursively */
   data object PromptOnce : RmOpt, KOptS("I")
 
-  data object OneFileSystem : RmOpt, KOptL("one-file-system")
+  data object OneFileSystem : RmOpt, KOptLN()
 
-  data object Recursive : RmOpt, KOptS("r")
+  data object Recursive : RmOpt, KOptLN() // Don't risk short -r or -R (better to be explicit RECURSIVE removal)
 
   /** remove empty directories */
   data object Dir : RmOpt, KOptS("d")
 
   /** explain what is being done */
-  data object Verbose : RmOpt, KOptS("v")
+  data object Verbose : RmOpt, KOptLN() // Don't risk short -v (ambiguity with "version")
 }
