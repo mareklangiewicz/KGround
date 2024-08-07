@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalApi::class)
+@file:OptIn(DelicateApi::class)
 
 package pl.mareklangiewicz.kommand
 
@@ -17,7 +17,6 @@ import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.uspek.*
 
 
-@OptIn(DelicateApi::class)
 class KommandTests {
 
   init {
@@ -52,59 +51,59 @@ class KommandTests {
             rmFileIfExists(tmpFile).ax()
           }
         }
-
-
-        "On mkdir with parents" so {
-          // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
-          val dirName = "testDirTmp" + Random.nextLong().absoluteValue
-          val tmpDir = "/tmp".pth / dirName
-          val tmpDirBla = tmpDir / "bla"
-          val tmpDirBlaBle = tmpDirBla / "ble"
-
-          try {
-            mkdir(tmpDirBlaBle, withParents = true).chkLineRaw("mkdir -p $tmpDirBlaBle").ax()
-
-            "check created dirs with ls" so {
-              lsSubDirs("/tmp".pth).chkLineRaw("ls --indicator-style=slash /tmp")
-                .ax().chkThis { strf.contains(dirName) }
-            }
-            "ls tmp dir is not file" so { lsRegFiles("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
-
-            "On rm empty ble" so {
-              rmDirIfEmpty(tmpDirBlaBle).ax()
-
-              "bla does not contain ble" so { lsSubDirs(tmpDirBla).ax().chkEmpty() }
-            }
-
-            onTouchyBluFile(tmpDirBlaBle)
-
-            "On rmTreeWithForce" so {
-              rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
-
-              "tmp does not contain our dir" so { lsSubDirs("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
-            }
-
-            "On konfig in tmpDir" so {
-              val konfigNewDir = tmpDir / "tmpKonfigForTests"
-              val konfig = konfigInDir(konfigNewDir, localCLI())
-
-              testGivenNewKonfigInDir(konfig, konfigNewDir)
-            }
-
-          } finally {
-            // Clean up. Notice: The "On rmTreeWithForce" above is only for specific test branch,
-            // but here we always make sure we clean up in all uspek cases.
-            rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
-          }
-        }
+        onMkDirWithParents()
       }
     }
   }
 }
 
+private suspend fun onMkDirWithParents() {
+  "On mkdir with parents" so {
+    // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
+    val dirName = "testDirTmp" + Random.nextLong().absoluteValue
+    val tmpDir = "/tmp".pth / dirName
+    val tmpDirBla = tmpDir / "bla"
+    val tmpDirBlaBle = tmpDirBla / "ble"
 
-@OptIn(DelicateApi::class)
-suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
+    try {
+      mkdir(tmpDirBlaBle, withParents = true).chkLineRaw("mkdir -p $tmpDirBlaBle").ax()
+
+      "check created dirs with ls" so {
+        lsSubDirs("/tmp".pth).chkLineRaw("ls --indicator-style=slash /tmp")
+          .ax().chkThis { strf.contains(dirName) }
+      }
+      "ls tmp dir is not file" so { lsRegFiles("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
+
+      "On rm empty ble" so {
+        rmDirIfEmpty(tmpDirBlaBle).ax()
+
+        "bla does not contain ble" so { lsSubDirs(tmpDirBla).ax().chkEmpty() }
+      }
+
+      onTouchyBluFile(tmpDirBlaBle)
+
+      "On rmTreeWithForce" so {
+        rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
+
+        "tmp does not contain our dir" so { lsSubDirs("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
+      }
+
+      "On konfig in tmpDir" so {
+        val konfigNewDir = tmpDir / "tmpKonfigForTests"
+        val konfig = konfigInDir(konfigNewDir, localCLI())
+
+        testGivenNewKonfigInDir(konfig, konfigNewDir)
+      }
+
+    } finally {
+      // Clean up. Notice: The "On rmTreeWithForce" above is only for specific test branch,
+      // but here we always make sure we clean up in all uspek cases.
+      rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
+    }
+  }
+}
+
+private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
 
   "On touchy blu file" so {
     val bluName = "blu.touchy"
