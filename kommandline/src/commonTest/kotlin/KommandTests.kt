@@ -53,13 +53,14 @@ class KommandTests {
           }
         }
 
-        // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
-        val dirName = "testDirTmp" + Random.nextLong().absoluteValue
-        val tmpDir = "/tmp".pth / dirName
-        val tmpDirBla = tmpDir / "bla"
-        val tmpDirBlaBle = tmpDirBla / "ble"
 
         "On mkdir with parents" so {
+          // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
+          val dirName = "testDirTmp" + Random.nextLong().absoluteValue
+          val tmpDir = "/tmp".pth / dirName
+          val tmpDirBla = tmpDir / "bla"
+          val tmpDirBlaBle = tmpDirBla / "ble"
+
           try {
             mkdir(tmpDirBlaBle, withParents = true).chkLineRaw("mkdir -p $tmpDirBlaBle").ax()
 
