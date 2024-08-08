@@ -42,7 +42,10 @@ fun ls(
 }
 
 
-/** [linux man](https://man7.org/linux/man-pages/man1/ls.1.html) */
+/**
+ * [linux man](https://man7.org/linux/man-pages/man1/ls.1.html)
+ * Details: [gnu ls invocation](https://www.gnu.org/software/coreutils/manual/html_node/ls-invocation.html)
+ */
 @OptIn(DelicateApi::class)
 data class Ls(
   override val opts: MutableList<LsOpt> = mutableListOf(),
@@ -99,10 +102,15 @@ interface LsOpt : KOptTypical {
   /** do not sort, enable -aU, disable -ls --color */
   data object Raw : KOptS("f"), LsOpt
 
-  /** append indicator (one of *=/>@|) to entries */
+  /**
+   * Append indicator (one of *=/>@|) to entries.
+   * The file type indicators are ‘/’ for directories, ‘@’ for symbolic links,
+   * ‘|’ for FIFOs, ‘=’ for sockets, ‘>’ for doors, and nothing for regular files.
+   * Also, for regular files that are executable, append ‘*’.
+   */
   data object Classify : KOptS("F"), LsOpt
 
-  /** like classify, except do not add * symbol */
+  /** Like [Classify], except do not add the `*` for executable files. */
   data object ClassifyFileType : KOptL("file-type"), LsOpt
 
   data class Format(val type: FormatType) : KOptLN(type.namelowords("")), LsOpt

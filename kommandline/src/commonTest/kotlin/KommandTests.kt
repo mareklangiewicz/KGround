@@ -10,6 +10,7 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.core.*
+import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.konfig.*
 import pl.mareklangiewicz.kommand.shell.*
 import pl.mareklangiewicz.udata.*
@@ -124,6 +125,7 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
         }
         onMvLonelyTmpFileAround(bluPath)
         onCpLonelyLittleTmpFileAround(bluPath)
+        onLnLonelyTmpFileAround(bluPath)
       }
     }
 
@@ -208,8 +210,36 @@ private suspend fun onCpLonelyLittleTmpFileAround(fileP: Path) {
   }
 }
 
+
+private suspend fun onLnLonelyTmpFileAround(fileP: Path) {
+  val dirP = fileP.parent!!
+  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
+  "On ln file around" so {
+    val file2P = dirP / "2rnd$rndBigLong"
+    val file3P = dirP / "3rnd$rndBigLong"
+    "On lnSymSingle as file2" so {
+      lnSymSingle(fileP, file2P)
+        .chkThisLineRaw { split(' ').chkSize(5, 5).drop(3).all { it.startsWith("/tmp/") } }
+        .ax()
+      "linked softly as file2" so {
+        ls(dirP, wIndicator = IndicatorStyle.FileType).ax().chkThis { contains(file2P.name + "@") }
+      }
+      "On lnSymSingle as file3" so {
+        lnSymSingle(file2P, file3P)
+          .chkThisLineRaw { split(' ').chkSize(5, 5).drop(3).all { it.startsWith("/tmp/") } }
+          .ax()
+        "linked softly as file3" so {
+          ls(dirP, wIndicator = IndicatorStyle.FileType).ax().chkThis { contains(file3P.name + "@") }
+        }
+      }
+    }
+  }
+}
+
+
 // TODO_later: use public ones from kground after publishing new kground
 private val rndBigLong get() = Random.nextLong(100_000L, Long.MAX_VALUE - 10_000L)
 private val rndBigLongStr get() = rndBigLong.strf
 private val rndBigInt get() = Random.nextInt(100_000, Int.MAX_VALUE - 1000)
 private val rndBigIntStr get() = rndBigInt.strf
+
