@@ -36,6 +36,9 @@ data object LsSamples {
   val lsParentRegFiles = lsRegFiles("..".pth) rs
     "ls --indicator-style=slash .."
 
+  val lsALot1KSizes = ls("/home/marek".pth, "/usr".pth, wHidden = true) { -Size; -Block1K } s
+    "ls -A -s -k /home/marek /usr"
+
   val lsALotNicely = ls("/home/marek".pth, "/usr".pth, wHidden = true, wColor = Always) {
     -Author; -LongFormat; -BlockHuman; -Sort(SortType.Time)
   } s

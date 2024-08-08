@@ -59,7 +59,7 @@ class KommandTests {
 private suspend fun onMkDirWithParents() {
   "On mkdir with parents" so {
     // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
-    val dirName = "testDirTmp$rndLarge"
+    val dirName = "testDirTmp$rndBigLong"
     val tmpDir = "/tmp".pth / dirName
     val tmpDirBla = tmpDir / "bla"
     val tmpDirBlaBle = tmpDirBla / "ble"
@@ -123,6 +123,7 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
           "it is empty again" so { readFileWithCat(bluPath).ax().chkEmpty() }
         }
         onMvLonelyTmpFileAround(bluPath)
+        onCpLonelyLittleTmpFileAround(bluPath)
       }
     }
 
@@ -147,8 +148,8 @@ private suspend fun onMvLonelyTmpFileAround(fileP: Path) {
   val dirP = fileP.parent!!
   lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
   "On mv file around" so {
-    val file2P = dirP / "2rnd$rndLarge"
-    val file3P = dirP / "3rnd$rndLarge"
+    val file2P = dirP / "2rnd$rndBigLong"
+    val file3P = dirP / "3rnd$rndBigLong"
     "On mv to file2" so {
       mvSingle(fileP, file2P)
         .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
@@ -176,4 +177,39 @@ private suspend fun onMvLonelyTmpFileAround(fileP: Path) {
   }
 }
 
-private val rndLarge get() = Random.nextLong(100_000L, Long.MAX_VALUE - 10_000L)
+private suspend fun onCpLonelyLittleTmpFileAround(fileP: Path) {
+  val dirP = fileP.parent!!
+  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
+  val fileSize = statFileSizeBytes(fileP).ax()
+  fileSize.chkIn(max = 1_000_000L) { "file $fileP is too fat!" }
+  "On cp file around" so {
+    val file2P = dirP / "2rnd$rndBigLong"
+    val file3P = dirP / "3rnd$rndBigLong"
+    "On cp to file2" so {
+      cpSingle(fileP, file2P)
+        .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
+        .ax()
+      "copied to file2" so {
+        lsRegFiles(dirP).ax().chkThis { toSet() == setOf(fileP.name.pth, file2P.name.pth) }
+      }
+      "On cp to file3" so {
+        cpSingle(file2P, file3P)
+          .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
+          .ax()
+        "copied to file3" so {
+          lsRegFiles(dirP).ax().chkThis { toSet() == setOf(fileP.name.pth, file2P.name.pth, file3P.name.pth) }
+        }
+        "all three same size" so {
+          statFileSizeBytes(file2P).ax().chkEq(fileSize)
+          statFileSizeBytes(file3P).ax().chkEq(fileSize)
+        }
+      }
+    }
+  }
+}
+
+// TODO_later: use public ones from kground after publishing new kground
+private val rndBigLong get() = Random.nextLong(100_000L, Long.MAX_VALUE - 10_000L)
+private val rndBigLongStr get() = rndBigLong.strf
+private val rndBigInt get() = Random.nextInt(100_000, Int.MAX_VALUE - 1000)
+private val rndBigIntStr get() = rndBigInt.strf
