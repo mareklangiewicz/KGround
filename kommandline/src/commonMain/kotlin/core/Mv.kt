@@ -218,7 +218,7 @@ interface MvOpt : KOptTypical {
   data object StripTrailingSlashes : KOptLN(), MvOpt
 
   /**
-   * Set SELinux security context of destination file to default type
+   * Set SELinux security context of destination files (and created dirs) to default type.
    * This option functions similarly to the `restorecon` command, by adjusting the SELinux security context
    * according to the system default type for destination files and each created directory.
    */

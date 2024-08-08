@@ -143,7 +143,7 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
       sealed class Opt(name: String, args: List<String> = emptyList()) : KOptS(name, args, argsSeparator = ",") {
         data object Help : Opt("h")
         data object Dry : Opt("d")
-        data object Recursive : Opt("r")
+        data object Recursive : Opt("R") // Note: long flavor: --recursive is NOT supported.
         data object AllowDefaults : Opt("allowDefaults")
         class Mask(vararg patterns: String) : Opt("m", patterns.toList())
         class Settings(path: String) : Opt("s", listOf(path))

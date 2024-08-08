@@ -67,7 +67,7 @@ interface RmOpt : KOptTypical {
 
   data object OneFileSystem : RmOpt, KOptLN()
 
-  data object Recursive : RmOpt, KOptLN() // Don't risk short -r or -R (better to be explicit RECURSIVE removal)
+  data object Recursive : RmOpt, KOptLN() // Don't risk short -r or -R (better to be explicit about RECURSIVE)
 
   /** remove empty directories */
   data object Dir : RmOpt, KOptS("d")

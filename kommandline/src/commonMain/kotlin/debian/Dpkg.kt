@@ -46,13 +46,13 @@ interface DpkgAct : DpkgOpt {
 
   /**
    * Install the package.
-   * @param debFileOrDir Single .deb file, or directory when the Recursive option enabled
+   * @param debFileOrDir Single .deb file, or directory when the [Recursive] option enabled
    */
   data class Install(val debFileOrDir: String) : KOptS("i", debFileOrDir), DpkgAct
 
   /**
    * Unpack the package, but don't configure it.
-   * @param debFileOrDir Single .deb file, or directory when the Recursive option enabled.
+   * @param debFileOrDir Single .deb file, or directory when the [Recursive] option enabled.
    */
   data class Unpack(val debFileOrDir: String) : KOptLN(debFileOrDir), DpkgAct
 
@@ -95,7 +95,7 @@ interface DpkgAct : DpkgOpt {
 
 @DelicateApi
 interface DpkgOpt : KOpt {
-  data object Recursive : KOptS("R"), DpkgOpt
+  data object Recursive : KOptLN(), DpkgOpt // Don't risk short -r or -R (better to be explicit about RECURSIVE)
   data object Pending : KOptLN(), DpkgOpt
   data object DryRun : KOptLN(), DpkgOpt
   data object RefuseDowngrade : KOptLN(), DpkgOpt

@@ -154,7 +154,7 @@ interface LsOpt : KOptTypical {
 
   data object Reverse : KOptS("r"), LsOpt
 
-  data object Recursive : KOptS("R"), LsOpt
+  data object Recursive : RmOpt, KOptLN() // Don't risk short -r or -R (better to be explicit about RECURSIVE)
 
   data object Size : KOptS("s"), LsOpt
 
