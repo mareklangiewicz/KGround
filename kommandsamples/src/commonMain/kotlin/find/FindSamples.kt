@@ -20,6 +20,7 @@ val myHomePath = "/home/marek".P
 val myTmpPath = myHomePath / "tmp"
 val myKotlinPath = myHomePath/ "code/kotlin"
 val myDepsKtPath = myKotlinPath/ "DepsKt"
+val myAbcdKPath = myKotlinPath/ "AbcdK"
 val myKGroundPath = myKotlinPath / "KGround"
 val myKommandLinePath = myKotlinPath / "KommandLine"
 
@@ -27,12 +28,12 @@ val myKommandLinePath = myKotlinPath / "KommandLine"
 data object FindSamples {
 
   val findAbcIgnoreCase =
-    find(PRel, NameBase("*abc*", ignoreCase = true)) s
-      "find . -iname *abc*"
+    find(myAbcdKPath, NameBase("*abc*", ignoreCase = true)) s
+      "find $myAbcdKPath -iname *abc*"
 
   val findAbcWithFollowSymLinksAndOptimisation2 =
-    find(PRel, NameBase("*abc*")) { -SymLinkFollowAlways; -Optimisation(2) } s
-      "find -L -O2 . -name *abc*"
+    find(myAbcdKPath, NameBase("*abc*")) { -SymLinkFollowAlways; -Optimisation(2) } s
+      "find -L -O2 $myAbcdKPath -name *abc*"
 
   val findSomeSamples =
     findRegularNameBase(myKommandLinePath, "*Samples.kt") s
@@ -43,8 +44,8 @@ data object FindSamples {
       "find . -size +100M"
 
   val findAndPrint0AbcFilesAndTheirSizes =
-    findTypeNameBase(PRel, "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
-      "find . -name *abc* -type f -printf %p\\0%s\\0"
+    findTypeNameBase(myAbcdKPath, "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
+      "find $myAbcdKPath -name *abc* -type f -printf %p\\0%s\\0"
 
   val findSymLinksToKtsFilesInKGround =
     find(myKGroundPath, SymLinkTo("*.kts")) s

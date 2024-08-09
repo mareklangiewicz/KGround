@@ -2,25 +2,18 @@ package pl.mareklangiewicz.interactive
 
 import kotlinx.coroutines.CoroutineScope
 import okio.Path
-import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.NotPortableApi
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kground.io.getSysPlatformType
-import pl.mareklangiewicz.kground.io.localUFileSys
-import pl.mareklangiewicz.kground.io.pathToTmpNotes
+import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.shell.*
 import pl.mareklangiewicz.kommand.vim.*
 import pl.mareklangiewicz.kommand.term.*
 import pl.mareklangiewicz.uctx.uctx
-import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.usubmit.*
 import pl.mareklangiewicz.usubmit.xd.*
-
-// TODO: Make these interactive wrappers suspendable (or delete if when needed at all) and use: localULog()
-private val log: ULog = UHackySharedFlowLog()
 
 val isJvm: Boolean = getSysPlatformType()?.startsWith("JVM") == true
 
@@ -46,26 +39,24 @@ fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockin
   if (isInteractiveCodeEnabled()) code()
 }
 
-// FIXME NOW: why it doesn't return some process?
-// FIXME NOW: why do I even need it? sth like axInteractiveTry seems more useful (awaiting; taking work dir from context).
+@OptIn(ExperimentalApi::class)
 @DelicateApi("API for manual interactive experimentation; can ignore the this kommand.")
-suspend fun Kommand.lxInteractiveTry(
+suspend fun Kommand.axInteractiveTry(
   confirmation: String = "Start ::${line()}::?",
   insideBash: Boolean = this !is TermKommand,
   insideTerm: Boolean = this !is TermKommand,
   pauseBeforeExit: Boolean = insideBash,
-  workDir: Path? = null,
   optTermWrap: (innerKommand: Kommand) -> Kommand = { termXDefault(it) },
 ) = ifInteractiveCodeEnabled {
   val submit = localUSubmit()
   if (submit.askIf(confirmation)) {
-    val k = when {
+    var kommand = when {
       insideBash -> inBash(pauseBeforeExit)
       pauseBeforeExit -> bad { "Can not pause before exit if not using bash shell" }
       else -> this
     }
-    val cli = localCLI()
-    cli.lx(if (insideTerm) optTermWrap(k) else k, workDir = workDir)
+    if (insideTerm) kommand = optTermWrap(kommand)
+    kommand.ax()
   }
 }
 
@@ -79,16 +70,16 @@ inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend () -> ReducedO
 //   rethink this
 @DelicateApi("API for manual interactive experimentation. Conditionally skips.")
 @Deprecated("Better to use Samples with InteractiveScript s")
-suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null, workDir: Path? = null) {
-  if (isJvm) toInteractiveCheck(expectedLineRaw, workDir = workDir).ax()
+suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null) {
+  if (isJvm) toInteractiveCheck(expectedLineRaw).ax()
   // ifology just to avoid NotImplementedError on nonjvm. this extension fun will be deleted anyway (execb too)
 }
 
 @NotPortableApi
 @DelicateApi
-fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null, workDir: Path? = null) {
+fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null) {
   runBlockingWithCLIAndULogOnJvmOnly {
-    tryInteractivelyCheck(expectedLineRaw, workDir = workDir)
+    tryInteractivelyCheck(expectedLineRaw)
   }
 }
 
@@ -104,11 +95,11 @@ internal fun runBlockingWithCLIAndULogOnJvmOnly(
 
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null, workDir: Path? = null): ReducedScript<Unit> =
+fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null): ReducedScript<Unit> =
   InteractiveScript {
-    log.i(lineRaw())
+    localULog().i(lineRaw())
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw
-    lxInteractiveTry(workDir = workDir)
+    axInteractiveTry()
   }
 
 

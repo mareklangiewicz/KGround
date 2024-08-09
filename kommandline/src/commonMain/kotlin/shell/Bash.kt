@@ -18,10 +18,12 @@ fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
 fun Kommand.inBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(this, pause, init)
 
 @DelicateApi
-fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.line(), pause, init)
-// FIXME_someday: I assumed kommand.line() is correct script and will not interfere with surrounding stuff
+fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.lineBash(), pause, init)
+// FIXME: I assumed kommand.lineBash() is correct script and will not interfere with surrounding stuff
 
-fun bashQuoteMetaChars(script: String) = script.replace(Regex("([|&;<>() \\\\\"\\t\\n])"), "\\\\$1")
+// TODO: I just quickly added "*" to quoted chars to fix FindSamples.findSymLinksToKtsFilesInKGround,
+//  and it works, but this whole quoting have to be analyzed again!
+fun bashQuoteMetaChars(script: String) = script.replace(Regex("""([*|&;<>() \\"\t\n])"""), """\\$1""")
 
 @OptIn(DelicateApi::class)
 fun bashEchoEnv(envName: String) = bash("echo \"$$envName\"")

@@ -30,6 +30,7 @@ class JvmCLI : CLI {
     JvmExecProcess(
       ProcessBuilder()
         .apply {
+          // println(kommand.lineRaw(separator = "·")) // sometimes useful for debugging
           command(kommand.toArgs())
           directory(workDir?.toFile())
           inFile?.toFile()?.let(::redirectInput)

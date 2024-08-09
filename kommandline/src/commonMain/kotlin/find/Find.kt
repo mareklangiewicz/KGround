@@ -181,11 +181,30 @@ fun findTypeRegex(
     }
   }
 
+
 @DelicateApi
-fun find(path: String, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
-fun find(path: Path, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
+fun findAndDeleteAllEmptyDirs(
+  path: Path,
+  vararg useNamedArgs: Unit,
+  depthMin: Int? = null, // might be useful when don't want to remove root dir itself but all empty sub dirs
+  depthMax: Int? = null, // might be useful when too deep tree suggest incorrect path (but it does NOT abort whole find)
+  whenFoundPrintBeforeDelete: Boolean = false,
+): Find = find(
+  path, FileType("d"), depthMin?.let(::DepthMin), depthMax?.let(::DepthMax), IsEmpty,
+  ActPrint.takeIf { whenFoundPrintBeforeDelete }, ActDelete,
+)
+
+
+// Will leave it here, to maybe hint user when typing rm... that he might want to use findAndDelete... instead
+@DelicateApi
+@Deprecated("Use findAndDeleteAllEmptyDirs", ReplaceWith("findAndDeleteAllEmptyDirs"))
+fun rmAllEmptyDirs(path: Path) = findAndDeleteAllEmptyDirs(path)
+
+/** null expressions are ignored */
+@DelicateApi
+fun find(path: Path, vararg ex: FindExpr?, init: Find.() -> Unit = {}) = find {
   +path
-  for (e in ex) expr.add(e)
+  expr.addAll(ex.filterNotNull())
   init()
 }
 

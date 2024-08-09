@@ -21,8 +21,9 @@ class GnomeTest {
     termGnome(kommand("vim")) { -TermGnomeOpt.Verbose; -TermGnomeOpt.Title("strange terminal title") }
       .tryInteractivelyCheckBlockingOrErr("gnome-terminal -v --title=strange terminal title -- vim")
 
-  @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
-    .tryInteractivelyCheckBlockingOrErr("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext".P)
+  // FIXME_later
+  // @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
+  //   .tryInteractivelyCheckBlockingOrErr("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext".P)
 
   @Test fun testNotify() = notify("aa", "some longer body") { -Urgency("critical") }
     .tryInteractivelyCheckBlockingOrErr("notify-send --urgency=critical aa some longer body")
