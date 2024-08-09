@@ -56,6 +56,7 @@ suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
 // TODO NOW implement it in KommandLine
 //  (wrapper to sth like: find /path/to/dir -type d -empty -delete)
 //  (also optional -mindepth? maxdepth?(too deep hierarchy is suspicious in most use-cases))
+@DelicateApi
 private fun rmDirTreeIfAllEmpty(rootP: Path): Find = TODO()
 
 
