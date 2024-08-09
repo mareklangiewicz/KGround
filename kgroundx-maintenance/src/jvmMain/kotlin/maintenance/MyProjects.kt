@@ -49,7 +49,7 @@ suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
   val newP = rootOrPRel / segmentsBytes.take(srcIdx + 1) / newSegment / segmentsBytes.drop(srcIdx + 2)
   mkdir(newP.parent!!, withParents = true).ax()
   mvSingle(this, newP).ax()
-  // TODO NOW rmDirTreeIfAllEmpty(this.parent!!)
+  // TODO NOW findAndRmAllEmptyDirs(this.parent!!)
 }
 
 
@@ -57,7 +57,7 @@ suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
 //  (wrapper to sth like: find /path/to/dir -type d -empty -delete)
 //  (also optional -mindepth? maxdepth?(too deep hierarchy is suspicious in most use-cases))
 @DelicateApi
-private fun rmDirTreeIfAllEmpty(rootP: Path): Find = TODO()
+private fun findAndRmAllEmptyDirs(rootP: Path): Find = TODO()
 
 
 // TODO_later: refactor this little experiment fun

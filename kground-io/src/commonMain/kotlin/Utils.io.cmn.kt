@@ -16,6 +16,12 @@ import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.udata.strf
 
 
+@Deprecated("Use .P", ReplaceWith("P"))
+inline val String.pth get() = P
+
+@Deprecated("Use .PNorm", ReplaceWith("PNorm"))
+inline val String.pthn get() = PNorm
+
 inline val String.P get() = toPath(normalize = false)
 inline val String.PNorm get() = toPath(normalize = true)
 
