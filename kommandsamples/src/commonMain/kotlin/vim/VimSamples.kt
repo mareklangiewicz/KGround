@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.find.myKommandLinePath
@@ -64,7 +64,7 @@ data object VimBasicSamples {
   val gvimBlaSCursorPos32 = gvimLineS(blaS) { -CursorPos(3,2) }
 
   // Note: nulls as files are ignored
-  val gvimOpenBashRcAndVimRcCursorPos32 = gvimOpen("~/.bashrc".pth, null, "~/.vimrc".pth, line = 3, column = 2) s
+  val gvimOpenBashRcAndVimRcCursorPos32 = gvimOpen("~/.bashrc".P, null, "~/.vimrc".P, line = 3, column = 2) s
     "gvim -c call cursor(3,2) ~/.bashrc ~/.vimrc"
 }
 
@@ -74,8 +74,8 @@ data object VimBasicSamples {
 data object VimAdvancedSamples {
 
   // FIXME_later: use UFileSys.pathXXX
-  private val myBuildFile = "$myKommandLinePath/build.gradle.kts".pth
-  private val myTmpKeysFile = "$myTmpPath/tmp.keys.vim".pth
+  private val myBuildFile = "$myKommandLinePath/build.gradle.kts".P
+  private val myTmpKeysFile = "$myTmpPath/tmp.keys.vim".P
 
   val gvimBuildGradleCursorFindVer = gvim(myBuildFile) { -CursorLineFind("version = Ver(.*)") }
 
@@ -83,7 +83,7 @@ data object VimAdvancedSamples {
   val gvimBlaSlowSCleanMode = gvimLineS(blaSlowS) { -CleanMode }
 
   // TODO_someday: better kitty integration (starting in existing kitty in new window/tab/etc..)
-  val nvimInKittyBashRc = nvim("/home/marek/.bashrc".pth).inTermKitty()
+  val nvimInKittyBashRc = nvim("/home/marek/.bashrc".P).inTermKitty()
 
 
 

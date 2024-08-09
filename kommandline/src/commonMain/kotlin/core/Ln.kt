@@ -66,7 +66,7 @@ fun ln(
   force: Boolean = false,
   verbose: Boolean = false,
   init: Ln.() -> Unit,
-) = Ln(nonopts = paths.mapNotNull { it.strf }.toMutableList()).apply {
+) = Ln(nonopts = paths.mapNotNull { it?.strf }.toMutableList()).apply {
   if (symbolic) -Symbolic
   if (relative) -Relative
   if (force) -Force

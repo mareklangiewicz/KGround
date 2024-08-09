@@ -8,7 +8,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.chk
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.vim.XVimType.*
 import pl.mareklangiewicz.kommand.vim.XVimOpt.*
@@ -41,13 +41,13 @@ fun gvimOpen(
  * so in that case, it's great default behavior, that Vim tries to use stderr as input when stdin is used for content.
  */
 @DelicateApi("When opening stdin content, Vim expects commands from (redirected) stderr!")
-fun vimStdIn(init: XVim.() -> Unit = {}): XVim = vim("-".pth, init = init)
+fun vimStdIn(init: XVim.() -> Unit = {}): XVim = vim("-".P, init = init)
 
 @DelicateApi
-fun gvimStdIn(init: XVim.() -> Unit = {}): XVim = gvim("-".pth, init = init)
+fun gvimStdIn(init: XVim.() -> Unit = {}): XVim = gvim("-".P, init = init)
 
 @DelicateApi
-fun nvimStdIn(init: XVim.() -> Unit = {}): XVim = nvim("-".pth, init = init)
+fun nvimStdIn(init: XVim.() -> Unit = {}): XVim = nvim("-".P, init = init)
 
 @OptIn(DelicateApi::class)
 fun nvimMan(manpage: String, section: ManSection? = null): XVim = nvim {
@@ -732,7 +732,7 @@ interface XVimOpt : KOptTypical {
      * maybe it first try to read whole stdin "file", but /dev/stdin is never closing/ending?
      */
     @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't and tries to open the \"-\" file.")
-    val KeysScriptStdInForNVim = KeysScriptIn("-".pth)
+    val KeysScriptStdInForNVim = KeysScriptIn("-".P)
 
 
     /**
@@ -743,6 +743,6 @@ interface XVimOpt : KOptTypical {
      */
     @DelicateApi("Provided keys have to quit Vim at the end (if no GuiMode). Or Vim will do sth, show error and output some additional garbage.")
     @NotPortableApi("NVim interprets the \"-\" as stdin, but Vim doesn't. So /dev/stdin might work better in Vim.")
-    val KeysScriptStdInForVim = KeysScriptIn("/dev/stdin".pth)
+    val KeysScriptStdInForVim = KeysScriptIn("/dev/stdin".P)
   }
 }

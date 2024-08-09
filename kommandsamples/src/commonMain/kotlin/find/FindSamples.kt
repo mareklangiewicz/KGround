@@ -3,31 +3,35 @@
 package pl.mareklangiewicz.kommand.find
 
 import kotlinx.coroutines.flow.*
+import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.io.P
+import pl.mareklangiewicz.kground.io.PRel
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
 import pl.mareklangiewicz.kommand.find.FindOpt.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.text.*
+import pl.mareklangiewicz.udata.strf
 
 // FIXME_later: use UFileSys.pathToUserHome, and generally use Path type
-val myHomePath = "/home/marek"
-val myTmpPath = "$myHomePath/tmp"
-val myKotlinPath = "$myHomePath/code/kotlin"
-val myDepsKtPath = "$myKotlinPath/DepsKt"
-val myKGroundPath = "$myKotlinPath/KGround"
-val myKommandLinePath = "$myKotlinPath/KommandLine"
+val myHomePath = "/home/marek".P
+val myTmpPath = myHomePath / "tmp"
+val myKotlinPath = myHomePath/ "code/kotlin"
+val myDepsKtPath = myKotlinPath/ "DepsKt"
+val myKGroundPath = myKotlinPath / "KGround"
+val myKommandLinePath = myKotlinPath / "KommandLine"
 
 @OptIn(DelicateApi::class)
 data object FindSamples {
 
   val findAbcIgnoreCase =
-    find(".", NameBase("*abc*", ignoreCase = true)) s
+    find(PRel, NameBase("*abc*", ignoreCase = true)) s
       "find . -iname *abc*"
 
   val findAbcWithFollowSymLinksAndOptimisation2 =
-    find(".", NameBase("*abc*")) { -SymLinkFollowAlways; -Optimisation(2) } s
+    find(PRel, NameBase("*abc*")) { -SymLinkFollowAlways; -Optimisation(2) } s
       "find -L -O2 . -name *abc*"
 
   val findSomeSamples =
@@ -35,11 +39,11 @@ data object FindSamples {
       "find $myKommandLinePath -name *Samples.kt -type f"
 
   val findBigFiles =
-    find(".", FileSize(NumArg.MoreThan(100), 'M')) s
+    find(PRel, FileSize(NumArg.MoreThan(100), 'M')) s
       "find . -size +100M"
 
   val findAndPrint0AbcFilesAndTheirSizes =
-    findTypeNameBase(".", "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
+    findTypeNameBase(PRel, "f", "*abc*", whenFoundPrintF = "%p\\0%s\\0") s
       "find . -name *abc* -type f -printf %p\\0%s\\0"
 
   val findSymLinksToKtsFilesInKGround =
@@ -81,7 +85,7 @@ data object FindSamples {
       "find $myKotlinPath ( ( -name build -type d -prune -false ) -o ( -path */src/*/kotlin/* -name *.kt -type f -mtime -8 -print ) )"
 
   val findTypicalDetailsTableInParentDir =
-    findTypicalDetailsTable("..") ts
+    findTypicalDetailsTable("..".P) ts
       """find .. -name * -type f -printf """ +
       """%A+\0\0%C+\0\0%T+\0\0%B+\0\0%d\0\0%s\0\0%h\0\0%f\0\0%p\0\0%g\0\0%u\0\0%m\0\0%M\0\n"""
   // Note: this expected lineRaw was just copied and pasted from actual result (somewhat bad practice),
@@ -92,7 +96,7 @@ data object FindSamples {
 /** Usually to exclude from some indexing. */
 @OptIn(DelicateApi::class)
 fun findBoringCodeDirs(
-  path: String,
+  path: Path,
   boringCodeDirRegexes: List<String> = listOf("build", "node_modules", "\\.gradle"),
   // order is important build before node_modules, because usually node_modules are inside build,
   // so no need to search for it it as it will be marked as boring anyway (whole build pruned) in such case
@@ -104,14 +108,14 @@ fun findBoringCodeDirs(
 
 @OptIn(DelicateApi::class)
 fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
-  path: String = myKotlinPath,
+  path: Path = myKotlinPath,
   indent: String = "      ",
   urlPrefix: String = "file://\$MODULE_DIR\$",
   withOnEachLog: Boolean = false,
 ) =
   findBoringCodeDirs(path).reducedOut {
     this
-      .map { it.removeReqPrefix(path) }
+      .map { it.removeReqPrefix(path.strf) }
       .map { "$indent<excludeFolder url=\"$urlPrefix$it\" />" }
       .let { if (withOnEachLog) it.onEachLog() else it }
       .toList()
@@ -127,7 +131,7 @@ fun findBoringCodeDirsAndReduceAsExcludedFoldersXml(
  */
 @OptIn(DelicateApi::class)
 fun findMyKotlinCode(
-  kotlinCodePath: String = myKotlinPath,
+  kotlinCodePath: Path = myKotlinPath,
   vararg useNamedArgs: Unit,
   withGrepRE: String? = null,
   withNameRegex: String? = null,
@@ -152,7 +156,7 @@ fun findMyKotlinCode(
 private fun fexprActExecGrepPrintIfMatched(grepRE: String?) =
   if (grepRE == null) ActPrint
   else OpParent(
-    ActExec(grepQuietly(grepRE, "{}")), ActPrint,
+    ActExec(grepQuietly(grepRE, "{}".P)), ActPrint,
   )
 
 /**
@@ -174,10 +178,10 @@ private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr?
 
 // TODO_later: full grep kommand wrapper class+funs.
 @OptIn(DelicateApi::class)
-private fun grepQuietly(regexp: String, vararg files: String) =
-  kommand("grep", "-q", regexp, *files)
+private fun grepQuietly(regexp: String, vararg files: Path) =
+  kommand("grep", "-q", regexp, *files.map { it.strf }.toTypedArray())
 
 @OptIn(DelicateApi::class)
-private fun grepWithDetails(regexp: String, vararg files: String) =
-  kommand("grep", "-H", "-n", "-T", "-e", regexp, *files)
+private fun grepWithDetails(regexp: String, vararg files: Path) =
+  kommand("grep", "-H", "-n", "-T", "-e", regexp, *files.map { it.strf }.toTypedArray())
 

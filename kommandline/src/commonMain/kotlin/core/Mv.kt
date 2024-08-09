@@ -58,7 +58,7 @@ fun mv(
   force: Boolean = false,
   verbose: Boolean = false,
   init: Mv.() -> Unit,
-) = Mv(nonopts = paths.mapNotNull { it.strf }.toMutableList())
+) = Mv(nonopts = paths.mapNotNull { it?.strf }.toMutableList())
   .apply { if (force) -Force; if (verbose) -Verbose; init() }
 
 

@@ -5,7 +5,7 @@ package pl.mareklangiewicz.kommand.gnupg
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
@@ -18,7 +18,7 @@ fun gpgDecrypt(inFile: Path, outFile: Path = inFile.removeRequiredSuffix(".gpg")
   gpg(Decrypt) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile.strf }
 
 @OptIn(DelicateApi::class)
-fun gpgEncryptSym(inFile: Path, outFile: Path = "$inFile.gpg".pth, cacheSymKey: Boolean = true) =
+fun gpgEncryptSym(inFile: Path, outFile: Path = "$inFile.gpg".P, cacheSymKey: Boolean = true) =
   gpg(Symmetric) { if (!cacheSymKey) -NoSymkeyCache; -OutputFile(outFile); +inFile.strf }
 
 @DelicateApi
@@ -30,11 +30,11 @@ fun gpgDecryptPass(password: String, inFile: Path, outFile: Path = inFile.remove
 @DelicateApi
 @Suppress("DEPRECATION")
 @Deprecated("Be careful with password in command line - see man gpg")
-fun gpgEncryptPass(password: String, inFile: Path, outFile: Path = "$inFile.gpg".pth) =
+fun gpgEncryptPass(password: String, inFile: Path, outFile: Path = "$inFile.gpg".P) =
   gpg(Symmetric) { -PassPhrase(password); -Batch; Pinentry(LoopBack); -OutputFile(outFile); +inFile.strf }
 
 private fun Path.removeRequiredSuffix(suffix: CharSequence): Path =
-  strf.removeSuffix(suffix).also { req(strf.length == it.strf.length - suffix.length) }.pth
+  strf.removeSuffix(suffix).also { req(strf.length == it.strf.length - suffix.length) }.P
 
 @DelicateApi
 fun gpg(cmd: GpgCmd? = null, init: Gpg.() -> Unit = {}) = Gpg().apply { cmd?.let { -it }; init() }

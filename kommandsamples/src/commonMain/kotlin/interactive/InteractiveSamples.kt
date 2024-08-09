@@ -6,6 +6,7 @@ import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.udata.strfon
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ureflect.*
@@ -107,7 +108,7 @@ suspend fun Any?.tryOpenDataInIDEOrGVim(question: String? = null): Any {
     this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
     !submit.askIf(question ?: "Open $about in tmp.notes in IDE (if running) or in GVim ?") -> log.i("Not opening.")
     else -> {
-      val lines = if (this is Collection<*>) map { it.strf } else strf.lines()
+      val lines = if (this is Collection<*>) map { it.strfon } else strf.lines()
       val notes = fs.pathToTmpNotes
       writeFileWithDD(lines, notes).ax()
       ideOrGVimOpen(notes).ax()

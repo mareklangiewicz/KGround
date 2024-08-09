@@ -48,7 +48,7 @@ fun cp(
   force: Boolean = false,
   verbose: Boolean = false,
   init: Cp.() -> Unit,
-) = Cp(nonopts = paths.mapNotNull { it.strf }.toMutableList())
+) = Cp(nonopts = paths.mapNotNull { it?.strf }.toMutableList())
   .apply { if (force) -Force; if (verbose) -Verbose; init() }
 
 

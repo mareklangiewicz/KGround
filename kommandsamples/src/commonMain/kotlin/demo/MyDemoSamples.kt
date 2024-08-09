@@ -8,7 +8,7 @@ import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kground.io.getSysUFileSys
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.Adb
 import pl.mareklangiewicz.kommand.ManOpt
 import pl.mareklangiewicz.kommand.ReducedScript
@@ -122,13 +122,13 @@ data object MyDemoSamples {
   val adbShell = adb(Adb.Command.Shell) s "adb shell"
 
   val ideOpen = InteractiveScript {
-    val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc").pth
+    val path = getEntry("open file in IDE", suggested = "/home/marek/.bashrc").P
     ideOpen(path).ax()
   }
 
   val ideDiff = InteractiveScript {
-    val path1 = getEntry("first file to open in IDE Diff", suggested = "/home/marek/.vimrc").pth
-    val path2 = getEntry("second file to open in IDE Diff", suggested = "/home/marek/.ideavimrc").pth
+    val path1 = getEntry("first file to open in IDE Diff", suggested = "/home/marek/.vimrc").P
+    val path2 = getEntry("second file to open in IDE Diff", suggested = "/home/marek/.ideavimrc").P
     ideDiff(path1, path2).ax()
   }
 
@@ -152,24 +152,24 @@ data object MyDemoSamples {
     gvimLines(lines).ax()
   }
 
-  val gvimServerDDDDOpenHomeDir = gvim("/home".pth) { -XVimOpt.ServerName("DDDD") } s "gvim --servername DDDD /home"
+  val gvimServerDDDDOpenHomeDir = gvim("/home".P) { -XVimOpt.ServerName("DDDD") } s "gvim --servername DDDD /home"
 
 
   @OptIn(DelicateApi::class)
   suspend fun showMyRepoMarkdownListInGVim() = InteractiveScript {
     val reposMdContent = GhSamples.myPublicRepoMarkdownList.ax()
-    val tmpReposFileMd = "$pathToUserTmp/tmp.repos.md".pth // also to have syntax highlighting
+    val tmpReposFileMd = "$pathToUserTmp/tmp.repos.md".P // also to have syntax highlighting
     writeFileAndStartInGVim(reposMdContent, filePath = tmpReposFileMd).ax()
   }
 
   @OptIn(DelicateApi::class)
   suspend fun prepareMyExcludeFolderInKotlinMultiProject() = InteractiveScript {
     val out = findBoringCodeDirsAndReduceAsExcludedFoldersXml(myKotlinPath, withOnEachLog = true).ax()
-    val boringFileXml = "$pathToUserTmp/tmp.boring.xml".pth // also to have syntax highlighting
+    val boringFileXml = "$pathToUserTmp/tmp.boring.xml".P // also to have syntax highlighting
     writeFileAndStartInGVim(out, filePath = boringFileXml).ax()
     // TODO_someday: use URE to inject it into /code/kotlin/kotlin.iml (and/or: /code/kotlin/.idea/kotlin.iml)
-    SYS.lx(gvim("/home/marek/code/kotlin/kotlin.iml".pth))
-    SYS.lx(gvim("/home/marek/code/kotlin/.idea/kotlin.iml".pth))
+    SYS.lx(gvim("/home/marek/code/kotlin/kotlin.iml".P))
+    SYS.lx(gvim("/home/marek/code/kotlin/.idea/kotlin.iml".P))
   }
 
 
@@ -199,7 +199,7 @@ data object MyDemoSamples {
 
   val playWithKonfigExamples = InteractiveScript {
     val log = localULog()
-    val k = konfigInDir("/home/marek/tmp/konfig_examples".pth, checkForDangerousValues = false)
+    val k = konfigInDir("/home/marek/tmp/konfig_examples".P, checkForDangerousValues = false)
     log.i("before adding anything:")
     k.logEachKeyVal()
     k["tmpExampleInteger1"] = 111.strf
@@ -218,10 +218,10 @@ data object MyDemoSamples {
     k.logEachKeyVal()
   }
 
-  suspend fun readVimrcHead() = readFileHead("/home/marek/.vimrc".pth).ax()
+  suspend fun readVimrcHead() = readFileHead("/home/marek/.vimrc".P).ax()
 
   // Should fail; if called inside withLogBadStreams -> should log sth like: kl E STDERR: head: cannot open...
-  suspend fun readNonExistentHead() = readFileHead("/home/marek/non-existent-file-46578563".pth).ax()
+  suspend fun readNonExistentHead() = readFileHead("/home/marek/non-existent-file-46578563".P).ax()
 }
 
 

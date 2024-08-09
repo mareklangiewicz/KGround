@@ -7,6 +7,7 @@ package pl.mareklangiewicz.kommand.find
 // https://savannah.gnu.org/projects/findutils/
 
 import kotlinx.coroutines.flow.*
+import okio.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
@@ -29,7 +30,7 @@ typealias FindDetailsDef = Collection<Pair<FindColumnName, FindPrintFormat>>
 
 @OptIn(DelicateApi::class)
 fun findDetailsTable(
-  path: String,
+  path: Path,
   vararg useNamedArgs: Unit,
   details: FindDetailsDef,
   baseNamePattern: String = "*",
@@ -48,7 +49,7 @@ private fun FindDetailsDef.detailsPrintFormat(): FindPrintFormat =
 
 private fun FindDetailsDef.detailsParseLine(line: String): List<String> {
   chk(line.endsWith("\u0000")) { "Looks like there was some file with forbidden character (line break)" }
-  // Not actually forbidden in unix but it's weird and dangerous to have multiline file names, so better fail fast.
+  // Not actually forbidden in unix, but it's weird and dangerous to have multiline file names, so better fail fast.
   val list = line.removeSuffix("\u0000").split("\u0000\u0000")
   list.size.chkEq(size) { "Wrong number of columns found: ${list.size} (expected: ${size})" }
   return list
@@ -73,22 +74,22 @@ private val typicalDetails: FindDetailsDef = listOf(
 )
 
 @OptIn(DelicateApi::class)
-fun findTypicalDetailsTable(path: String) =
+fun findTypicalDetailsTable(path: Path) =
   findDetailsTable(path, details = typicalDetails)
 
 @OptIn(DelicateApi::class)
-fun findTypicalDetailsTableToList(path: String) =
+fun findTypicalDetailsTableToList(path: Path) =
   findDetailsTable(path, details = typicalDetails).reducedOutToList()
 
 
 /**
  * Most typical find invocation with default param values.
- * @param useNamedArgs requires named args if nondefault used; avoids name clash with base / low level find fun.
+ * @param useNamedArgs requires to be named args if non-default used; avoids name clash with base / low level find fun.
  * @param whenFoundPrintF null means using ActPrint, non-null means ActPrintF(whenFoundPrintF!!)
  */
 @OptIn(DelicateApi::class)
 fun find(
-  path: String,
+  path: Path,
   vararg useNamedArgs: Unit,
   fileType: String = "f",
   baseNamePattern: String = "*",
@@ -101,20 +102,20 @@ fun find(
 )
 
 @OptIn(DelicateApi::class)
-fun findNameFull(path: String, pattern: String, ignoreCase: Boolean = false) =
+fun findNameFull(path: Path, pattern: String, ignoreCase: Boolean = false) =
   find(path, NameFull(pattern, ignoreCase))
 
 @OptIn(DelicateApi::class)
-fun findNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
+fun findNameBase(path: Path, pattern: String, ignoreCase: Boolean = false) =
   find(path, NameBase(pattern, ignoreCase))
 
 @OptIn(DelicateApi::class)
-fun findRegularNameBase(path: String, pattern: String, ignoreCase: Boolean = false) =
+fun findRegularNameBase(path: Path, pattern: String, ignoreCase: Boolean = false) =
   findTypeNameBase(path, "f", pattern, ignoreCase)
 
 @OptIn(DelicateApi::class)
 fun findDirNameBase(
-  path: String,
+  path: Path,
   pattern: String,
   ignoreCase: Boolean = false,
   whenFoundPrintF: FindPrintFormat? = null,
@@ -124,7 +125,7 @@ fun findDirNameBase(
 
 @OptIn(DelicateApi::class)
 fun findTypeNameBase(
-  path: String,
+  path: Path,
   fileType: String,
   pattern: String,
   ignoreCase: Boolean = false,
@@ -148,7 +149,7 @@ fun findTypeNameBase(
 
 @OptIn(DelicateApi::class)
 fun findDirRegex(
-  path: String,
+  path: Path,
   nameRegex: String,
   ignoreCase: Boolean = false,
   whenFoundPrintF: FindPrintFormat? = null,
@@ -158,7 +159,7 @@ fun findDirRegex(
 
 @OptIn(DelicateApi::class)
 fun findTypeRegex(
-  path: String,
+  path: Path,
   fileType: String,
   nameRegex: String,
   ignoreCase: Boolean = false,
@@ -182,6 +183,7 @@ fun findTypeRegex(
 
 @DelicateApi
 fun find(path: String, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
+fun find(path: Path, vararg ex: FindExpr, init: Find.() -> Unit = {}) = find {
   +path
   for (e in ex) expr.add(e)
   init()
@@ -199,13 +201,13 @@ fun find(init: Find.() -> Unit = {}) = Find().apply(init)
 @DelicateApi
 data class Find(
   val opts: MutableList<FindOpt> = mutableListOf(),
-  val paths: MutableList<String> = mutableListOf(),
+  val paths: MutableList<Path> = mutableListOf(),
   val expr: MutableList<FindExpr> = mutableListOf(),
 ) : Kommand {
   override val name get() = "find"
-  override val args get() = opts.toArgsFlat() + paths + expr.toArgsFlat()
+  override val args get() = opts.toArgsFlat() + paths.map { it.strf } + expr.toArgsFlat()
   operator fun FindOpt.unaryMinus() = opts.add(this)
-  operator fun String.unaryPlus() = paths.add(this)
+  operator fun Path.unaryPlus() = paths.add(this)
 }
 
 private fun String.iff(condition: Boolean) = if (condition) this else ""
@@ -358,7 +360,7 @@ interface FindExpr : KOpt {
     KOptS("newer$xy", referenceFile), FindExpr
   // TODO_someday: better typed structure for -newerXY;
   // and generally more structured data classes for all time related tests
-  // (enum for type of timestamp and collapse all those tests above to less cases with more params)
+  // (enum for type of timestamp and collapse all those tests above to fewer cases with more params)
 
 
   /** The file is empty and is either a regular file or a directory. */
@@ -497,7 +499,7 @@ interface FindExpr : KOpt {
 
   /**
    * Execute kommand; true if 0 status is returned. Special arg ";" is used after all kommand args,
-   * so no kommand arg can start with ";" Any kommand argument containing string `{}' is replaced
+   * so no kommand arg can start with ";" Any kommand argument containing string '{}' is replaced
    * by the current file name being processed everywhere it occurs in the arguments to the kommand,
    * not just in arguments where it is alone, as in some versions of find. The specified kommand
    * is run once for each matched file.

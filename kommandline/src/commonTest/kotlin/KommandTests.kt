@@ -40,12 +40,12 @@ class KommandTests {
       "On real file system on tmp dir" so {
 
         "On mktemp kommand" so {
-          var tmpFile = "/tmp/fake".pth
+          var tmpFile = "/tmp/fake".P
           try {
-            tmpFile = mktemp(path = "/tmp".pth, prefix = "tmpFile").ax()
+            tmpFile = mktemp(path = "/tmp".P, prefix = "tmpFile").ax()
             "name is fine" so { tmpFile.chkThis { strf.startsWith("/tmp/tmpFile") && strf.endsWith(".tmp") } }
             "file is there" so {
-              lsRegFiles("/tmp".pth).ax().chkThis { any { "/tmp/$it" == tmpFile.strf } }
+              lsRegFiles("/tmp".P).ax().chkThis { any { "/tmp/$it" == tmpFile.strf } }
             }
           } finally {
             rmFileIfExists(tmpFile).ax()
@@ -61,7 +61,7 @@ private suspend fun onMkDirWithParents() {
   "On mkdir with parents" so {
     // Note: random dirName can't be in test name bc uspek would loop infinitely finding new "branches"
     val dirName = "testDirTmp$rndBigLong"
-    val tmpDir = "/tmp".pth / dirName
+    val tmpDir = "/tmp".P / dirName
     val tmpDirBla = tmpDir / "bla"
     val tmpDirBlaBle = tmpDirBla / "ble"
 
@@ -69,10 +69,10 @@ private suspend fun onMkDirWithParents() {
       mkdir(tmpDirBlaBle, withParents = true).chkEqLineRaw("mkdir -p $tmpDirBlaBle").ax()
 
       "check created dirs with ls" so {
-        lsSubDirs("/tmp".pth).chkEqLineRaw("ls --indicator-style=slash /tmp")
+        lsSubDirs("/tmp".P).chkEqLineRaw("ls --indicator-style=slash /tmp")
           .ax().chkThis { strf.contains(dirName) }
       }
-      "ls tmp dir is not file" so { lsRegFiles("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
+      "ls tmp dir is not file" so { lsRegFiles("/tmp".P).ax().chkThis { !strf.contains(dirName) } }
 
       "On rm empty ble" so {
         rmDirIfEmpty(tmpDirBlaBle).ax()
@@ -85,7 +85,7 @@ private suspend fun onMkDirWithParents() {
       "On rmTreeWithForce" so {
         rmTreeWithForce(tmpDir) { path -> path.strf.startsWith("/tmp/testDirTmp") }.ax()
 
-        "tmp does not contain our dir" so { lsSubDirs("/tmp".pth).ax().chkThis { !strf.contains(dirName) } }
+        "tmp does not contain our dir" so { lsSubDirs("/tmp".P).ax().chkThis { !strf.contains(dirName) } }
       }
 
       "On konfig in tmpDir" so {
@@ -137,10 +137,10 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
 
     "On rm wrong file name" so {
       "using nice wrapper outputs File not found" so {
-        rmFileIfExists("$bluPath.wrong".pth).ax().chkEq(listOf("File not found"))
+        rmFileIfExists("$bluPath.wrong".P).ax().chkEq(listOf("File not found"))
       }
       "using plain rm throws BadExitStateErr".soThrows<BadExitStateErr> {
-        rm("$bluPath.wrong".pth).ax()
+        rm("$bluPath.wrong".P).ax()
       }
     }
   }
@@ -148,7 +148,7 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
 
 private suspend fun onMvLonelyTmpFileAround(fileP: Path) {
   val dirP = fileP.parent!!
-  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
+  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.P }
   "On mv file around" so {
     val file2P = dirP / "2rnd$rndBigLong"
     val file3P = dirP / "3rnd$rndBigLong"
@@ -157,21 +157,21 @@ private suspend fun onMvLonelyTmpFileAround(fileP: Path) {
         .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
         .ax()
       "moved to file2" so {
-        lsRegFiles(dirP).ax().chkThis { single() == file2P.name.pth }
+        lsRegFiles(dirP).ax().chkThis { single() == file2P.name.P }
       }
       "On mv to file3" so {
         mvSingle(file2P, file3P)
           .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
           .ax()
         "moved to file3" so {
-          lsRegFiles(dirP).ax().chkThis { single() == file3P.name.pth }
+          lsRegFiles(dirP).ax().chkThis { single() == file3P.name.P }
         }
         "On mv to original file" so {
           mvSingle(file3P, fileP)
             .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
             .ax()
           "moved to original file" so {
-            lsRegFiles(dirP).ax().chkThis { single() == fileP.name.pth }
+            lsRegFiles(dirP).ax().chkThis { single() == fileP.name.P }
           }
         }
       }
@@ -181,7 +181,7 @@ private suspend fun onMvLonelyTmpFileAround(fileP: Path) {
 
 private suspend fun onCpLonelyLittleTmpFileAround(fileP: Path) {
   val dirP = fileP.parent!!
-  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
+  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.P }
   val fileSize = statFileSizeBytes(fileP).ax()
   fileSize.chkIn(max = 1_000_000L) { "file $fileP is too fat!" }
   "On cp file around" so {
@@ -192,14 +192,14 @@ private suspend fun onCpLonelyLittleTmpFileAround(fileP: Path) {
         .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
         .ax()
       "copied to file2" so {
-        lsRegFiles(dirP).ax().chkThis { toSet() == setOf(fileP.name.pth, file2P.name.pth) }
+        lsRegFiles(dirP).ax().chkThis { toSet() == setOf(fileP.name.P, file2P.name.P) }
       }
       "On cp to file3" so {
         cpSingle(file2P, file3P)
           .chkThisLineRaw { split(' ').chkSize(4, 4).drop(2).all { it.startsWith("/tmp/") } }
           .ax()
         "copied to file3" so {
-          lsRegFiles(dirP).ax().chkThis { toSet() == setOf(fileP.name.pth, file2P.name.pth, file3P.name.pth) }
+          lsRegFiles(dirP).ax().chkThis { toSet() == setOf(fileP.name.P, file2P.name.P, file3P.name.P) }
         }
         "all three same size" so {
           statFileSizeBytes(file2P).ax().chkEq(fileSize)
@@ -213,7 +213,7 @@ private suspend fun onCpLonelyLittleTmpFileAround(fileP: Path) {
 
 private suspend fun onLnLonelyTmpFileAround(fileP: Path) {
   val dirP = fileP.parent!!
-  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.pth }
+  lsRegFiles(dirP).ax().chkThis({ "file $fileP is not lonely in it's dir"}) { single() == fileP.name.P }
   "On ln file around" so {
     val file2P = dirP / "2rnd$rndBigLong"
     val file3P = dirP / "3rnd$rndBigLong"

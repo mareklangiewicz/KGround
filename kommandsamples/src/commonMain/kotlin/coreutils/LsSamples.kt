@@ -20,26 +20,26 @@ data object LsSamples {
   val lsVersion = ls { -Version } s
     "ls --version"
 
-  val lsEtcDir = ls("/etc".pth) s
+  val lsEtcDir = ls("/etc".P) s
     "ls /etc"
 
-  val lsWithHidden = ls(".".pth, wHidden = true) s
+  val lsWithHidden = ls(".".P, wHidden = true) s
     "ls -A ."
 
-  val lsParentWithSlashes = ls("..".pth, wIndicator = Slash) s
+  val lsParentWithSlashes = ls("..".P, wIndicator = Slash) s
     "ls --indicator-style=slash .."
 
-  val lsParentSubDirs = lsSubDirs("..".pth) rs
+  val lsParentSubDirs = lsSubDirs("..".P) rs
     "ls --indicator-style=slash .."
 
   // same kommand line as above because difference is only in postprocessing: the "reduce" lambda
-  val lsParentRegFiles = lsRegFiles("..".pth) rs
+  val lsParentRegFiles = lsRegFiles("..".P) rs
     "ls --indicator-style=slash .."
 
-  val lsALot1KSizes = ls("/home/marek".pth, "/usr".pth, wHidden = true) { -Size; -Block1K } s
+  val lsALot1KSizes = ls("/home/marek".P, "/usr".P, wHidden = true) { -Size; -Block1K } s
     "ls -A -s -k /home/marek /usr"
 
-  val lsALotNicely = ls("/home/marek".pth, "/usr".pth, wHidden = true, wColor = Always) {
+  val lsALotNicely = ls("/home/marek".P, "/usr".P, wHidden = true, wColor = Always) {
     -Author; -LongFormat; -BlockHuman; -Sort(SortType.Time)
   } s
     "ls -A --color=always --author -l -h --sort=time /home/marek /usr"

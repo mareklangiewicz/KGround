@@ -4,7 +4,7 @@ import kotlin.test.Test
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.interactive.tryInteractivelyCheckBlockingOrErr
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.NotifySend.Option.*
 import pl.mareklangiewicz.kommand.systemd.*
@@ -22,7 +22,7 @@ class GnomeTest {
       .tryInteractivelyCheckBlockingOrErr("gnome-terminal -v --title=strange terminal title -- vim")
 
   @Test fun testGLibCompileSchemas() = kommand("glib-compile-schemas", "schemas/")
-    .tryInteractivelyCheckBlockingOrErr("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext".pth)
+    .tryInteractivelyCheckBlockingOrErr("glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext".P)
 
   @Test fun testNotify() = notify("aa", "some longer body") { -Urgency("critical") }
     .tryInteractivelyCheckBlockingOrErr("notify-send --urgency=critical aa some longer body")

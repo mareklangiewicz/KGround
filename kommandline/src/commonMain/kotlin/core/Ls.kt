@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kommand.core
 import kotlinx.coroutines.flow.*
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
@@ -11,11 +11,11 @@ import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
 import pl.mareklangiewicz.udata.strf
 
 fun lsRegFiles(dir: Path, wHidden: Boolean = false): ReducedKommand<List<Path>> =
-  ls(dir, wHidden = wHidden, wIndicator = Slash).reducedOut { toList().filter { !it.endsWith('/') }.map { it.pth } }
+  ls(dir, wHidden = wHidden, wIndicator = Slash).reducedOut { toList().filter { !it.endsWith('/') }.map { it.P } }
 
 fun lsSubDirs(dir: Path, wHidden: Boolean = false): ReducedKommand<List<Path>> =
   ls(dir, wHidden = wHidden, wIndicator = Slash).reducedOut {
-    toList().filter { it.endsWith('/') }.map { it.dropLast(1).pth }
+    toList().filter { it.endsWith('/') }.map { it.dropLast(1).P }
   }
 
 /**
