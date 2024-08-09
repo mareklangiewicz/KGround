@@ -19,9 +19,13 @@ inline val Any?.tru get() = true
 inline val Any?.fls get() = false
 
 /** Full default string representation, as opposed to shortening str(...) flavors */
-inline val Any?.strf get() = toString()
+inline val Any.strf get() = toString()
 // mostly to have same prefix as str(..), and not to have to READ and write so many parentheses everywhere
 
+/** Full default string representation if not null. Null becomes empty string. */
+inline val Any?.strfoe get() = this?.strf ?: ""
+/** Full default string representation if not null. Null becomes short default representation "n". */
+inline val Any?.strfon get() = this?.strf ?: STR_DEFAULT_NULL
 
 /*
  * Micro string representations of common data types.

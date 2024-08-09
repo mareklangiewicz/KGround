@@ -7,7 +7,7 @@ import okio.FileSystem.Companion.SYSTEM
 import okio.FileSystem.Companion.SYSTEM_TEMPORARY_DIRECTORY
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.localUFileSys
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.ulog.*
 
 // FIXME NOW: this file is moved from DepsKt as is temporarily.
@@ -33,7 +33,7 @@ suspend fun findAllFiles(path: Path, maxDepth: Int = Int.MAX_VALUE): Sequence<Pa
   localUFileSys().findAllFiles(path, maxDepth)
 
 fun Path.withName(getNewName: (oldName: String) -> String) =
-  parent?.let { it / getNewName(name) } ?: getNewName(name).pth
+  parent?.let { it / getNewName(name) } ?: getNewName(name).P
 
 fun Sequence<Path>.filterExt(ext: String) = filter { it.name.endsWith(".$ext") }
 
@@ -56,17 +56,8 @@ suspend fun processEachFile(
   }
 }
 
-@Deprecated("Use okio fun Path.relativeTo")
-fun Path.asRelativeTo(path: Path): Path {
-  req(this.isAbsolute)
-  req(path.isAbsolute)
-  return when {
-    this == path -> ".".pth
-    parent == path -> this.name.pth
-    parent == null -> bad { "Can not find $path in $this" }
-    else -> parent!!.asRelativeTo(path) / name
-  }
-}
+@Deprecated("Use okio fun Path.relativeTo", ReplaceWith("relativeTo(path)"))
+fun Path.asRelativeTo(path: Path): Path = relativeTo(path)
 
 tailrec fun Path?.commonPartWith(that: Path?): Path? = when {
   this == that -> this

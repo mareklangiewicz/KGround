@@ -30,7 +30,7 @@ import pl.mareklangiewicz.ure.UReplacement
   }
 
 @ExampleApi suspend fun updateGradlewFilesInKotlinProject(projectName: String) =
-  updateGradlewFilesInProject(PathToKotlinProjects / projectName)
+  updateGradlewFilesInProject(PCodeKt / projectName)
 
 suspend fun updateGradlewFilesInProject(fullPath: Path) =
   gradlewRelPaths.forEach { gradlewRelPath ->
@@ -38,7 +38,7 @@ suspend fun updateGradlewFilesInProject(fullPath: Path) =
     val fs = localUFileSys()
     val targetPath = fullPath / gradlewRelPath
     val oldContent = fs.readByteString(targetPath)
-    val newContent = RESOURCES.readByteString("/templates".pth / gradlewRelPath.withName { "$it.tmpl" })
+    val newContent = RESOURCES.readByteString("/templates".P / gradlewRelPath.withName { "$it.tmpl" })
     if (oldContent == newContent) log.i("Skipping already updated gradlew file: $targetPath")
     else {
       val action = if (fs.exists(targetPath)) "Updating" else "Creating new"
@@ -55,13 +55,13 @@ private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
     .reducedMap {
       // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl
       val regex = Regex("/settings\\.gradle(\\.kts)?\$")
-      map { regex.replaceSingle(it, UReplacement.Empty).pth }
+      map { regex.replaceSingle(it, UReplacement.Empty).P }
     }
     .ax()
 
 val gradlewRelPaths =
-  listOf("", ".bat").map { "gradlew$it".pth } +
-    listOf("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".pth }
+  listOf("", ".bat").map { "gradlew$it".P } +
+    listOf("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".P }
 
 /** @return Full pathS of my gradle rootProjectS (dirs with settings.gradle[.kts] files) */
 @OptIn(ExperimentalCoroutinesApi::class)

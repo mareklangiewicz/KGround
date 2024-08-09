@@ -4,6 +4,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CoroutineScope
+import okio.ByteString
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -15,8 +16,25 @@ import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.udata.strf
 
 
-inline val String.pth get() = toPath(normalize = false)
-inline val String.pthn get() = toPath(normalize = true)
+inline val String.P get() = toPath(normalize = false)
+inline val String.PNorm get() = toPath(normalize = true)
+
+
+/** Starting point for absolute unix paths. PAbs / "abc" / "de" == "/abc/de".P */
+val PAbs = "/".P
+
+/** Starting point for relative paths. PRel / "abc" / "de" == "abc/de".P (leading dot is removed which is good) */
+val PRel = ".".P
+
+inline val Path.rootOrPRel get() = root ?: PRel
+
+
+// JVM signature clash :(
+// operator fun Path.div(newSegments: Iterable<String>): Path =
+  // newSegments.fold(this) { path, segment -> path / segment }
+
+operator fun Path.div(newSegments: Iterable<ByteString>): Path =
+  newSegments.fold(this) { path, segment -> path / segment }
 
 // Note: it should pop up as alternative autocompletion to okio deleteRecursively.
 // I think it's good idea to always double-check some specific part of rootPath
@@ -74,10 +92,10 @@ fun getSysPlatformInfo() = "${getSysPlatformType()}:${getSysPlatformArch()}:${ge
 @OptIn(NotPortableApi::class) fun getSysPathToUserName(): String? = getSysProp("user.name")
 
 // TODO_later: implement some default value for key "user.home" on different platforms
-@OptIn(NotPortableApi::class) fun getSysPathToUserHome(): Path? = getSysProp("user.home")?.pth
+@OptIn(NotPortableApi::class) fun getSysPathToUserHome(): Path? = getSysProp("user.home")?.P
 
 // TODO_later: Add and use some custom MPP key returning sane values on different platforms ("kground.io.tmpdir"??)
-@OptIn(NotPortableApi::class) fun getSysPathToSysTmp(): Path? = getSysProp("java.io.tmpdir")?.pth
+@OptIn(NotPortableApi::class) fun getSysPathToSysTmp(): Path? = getSysProp("java.io.tmpdir")?.P
 
 // FIXME_maybe: other paths for specific systems?
 fun getSysPathToUserTmp(): Path? = getSysPathToUserHome()?.let { it / "tmp" }
@@ -90,7 +108,7 @@ expect fun getSysDispatcherForIO(): CoroutineDispatcher
 expect fun getSysUFileSys(): UFileSys
 
 /** The working directory with which the current process was started. */
-fun UFileSys.getSysWorkingDir(): Path = canonicalize(".".pth)
+fun UFileSys.getSysWorkingDir(): Path = canonicalize(PRel)
 
 
 /** Setting some param explicitly to null means we don't add any (even default) to context. */

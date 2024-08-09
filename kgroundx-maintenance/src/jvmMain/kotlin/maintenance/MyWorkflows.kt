@@ -64,7 +64,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
       usesAddAndCommitFile("plugins/dependencies/src/test/resources/objects-for-deps.txt")
     }
   }
-  workflow.write("generate-deps.yml", PathToRefreshDepsProject)
+  workflow.write("generate-deps.yml", PProjRefreshDeps)
 }
 
 
@@ -89,7 +89,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
       usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
     }
   }
-  workflow.write("update-generated-deps.yml", PathToDepsKtProject)
+  workflow.write("update-generated-deps.yml", PProjDepsKt)
 }
 
 
@@ -138,7 +138,7 @@ suspend fun checkMyDWorkflowsInProject(
 }
 
 @ExampleApi suspend fun injectDWorkflowsToKotlinProject(projectName: String) =
-  injectDWorkflowsToProject(PathToKotlinProjects / projectName)
+  injectDWorkflowsToProject(PCodeKt / projectName)
 
 suspend fun injectDWorkflowsToProject(
   projectPath: Path,

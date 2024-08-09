@@ -46,14 +46,19 @@ object MyBasicExamples {
   suspend fun justSomeIdeDiff() {
     val log = localULog()
     log.w("Let's try some ideDiff...")
-    val kp = PathToKotlinProjects
     ideDiff(
-      kp / "KGround/template-full/build.gradle.kts",
-      kp / "AbcdK/build.gradle.kts",
+      PCodeKt / "KGround/template-full/build.gradle.kts",
+      PCodeKt / "AbcdK/build.gradle.kts",
     ).ax()
   }
 
   suspend fun searchAllMyKotlinCode() = searchKotlinCodeInMyProjects(ureText("UReports"))
+
+  private val PTemplateBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-app/src"
+
+  suspend fun disableKtFile() = (PTemplateBasicJvmAppSrc / "main" / "kotlin/App.jvm.kt").myKotlinFileDisable()
+
+  suspend fun enableKtFile() = (PTemplateBasicJvmAppSrc / "mainDisabled" / "kotlin/App.jvm.kt").myKotlinFileEnable()
 }
 
 
@@ -65,13 +70,9 @@ object MyTemplatesExamples {
     tryDiffMyConflictingTemplatesSrc()
   }
 
-  suspend fun tryInjectOneProject() {
-    tryInjectMyTemplatesToProject(PathToKotlinProjects / "AbcdK")
-  }
+  suspend fun tryInjectOneProject() = tryInjectMyTemplatesToProject(PCodeKt / "AbcdK")
 
-  suspend fun tryInjectToItSelf() {
-    tryInjectMyTemplatesToProject(PathToKotlinProjects / "KGround")
-  }
+  suspend fun tryInjectToItSelf() = tryInjectMyTemplatesToProject(PCodeKt / "KGround")
 
   suspend fun tryInjectAllMyProjects() {
     tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = true)
@@ -132,7 +133,7 @@ object MyWeirdExamples {
   suspend fun tryToDiffMySettingsKtsFiles() {
     val log = localULog()
     val fs = localUFileSys()
-    val pathLeft = PathToKotlinProjects / "KGround" / "settings.gradle.kts"
+    val pathLeft = PProjKGround / "settings.gradle.kts"
     fetchMyProjectsNameS(onlyPublic = false)
       .mapFilterLocalKotlinProjectsPathS()
       .collect {
@@ -158,7 +159,7 @@ object MyWeirdExamples {
   @OptIn(DelicateApi::class, NotPortableApi::class)
   suspend fun tryToUpdateMyReposOrigins() =
     fetchMyProjectsNameS(onlyPublic = false)
-      .map { PathToKotlinProjects / it }
+      .map { PCodeKt / it }
       .collect { tryToUpdateMyRepoOrigin(it) }
 
   @OptIn(DelicateApi::class, NotPortableApi::class)

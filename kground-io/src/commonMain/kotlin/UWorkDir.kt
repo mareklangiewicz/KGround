@@ -5,7 +5,6 @@ import kotlin.coroutines.coroutineContext
 import kotlin.jvm.JvmInline
 import kotlinx.coroutines.CoroutineScope
 import okio.Path
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.uctx.UCtx
 import pl.mareklangiewicz.uctx.uctx
@@ -27,7 +26,7 @@ suspend inline fun <R> cd(dir: Path, noinline block: suspend CoroutineScope.() -
   return uctx(UWorkDir(localUFileSys().canonicalize(p)), block = block)
 }
 
-suspend inline fun <R> cd(dir: String, noinline block: suspend CoroutineScope.() -> R): R = cd(dir.pth, block)
+suspend inline fun <R> cd(dir: String, noinline block: suspend CoroutineScope.() -> R): R = cd(dir.P, block)
 
 
 

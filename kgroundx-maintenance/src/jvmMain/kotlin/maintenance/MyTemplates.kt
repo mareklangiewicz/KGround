@@ -2,14 +2,13 @@ package pl.mareklangiewicz.kgroundx.maintenance
 
 import okio.*
 import okio.FileSystem.Companion.RESOURCES
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.UFileSys
 import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
-import pl.mareklangiewicz.kground.io.pth
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
@@ -97,7 +96,7 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
   val fs = localUFileSys()
   val templates = mutableMapOf<String, String>()
   val templatesSrc = mutableMapOf<String, Path>()
-  fs.findAllFiles(PathToKGroundProject).filterExt("kts") // TODO_someday: support future templates in .kt files
+  fs.findAllFiles(PProjKGround).filterExt("kts") // TODO_someday: support future templates in .kt files
     .collectSpecialRegionsTo(templates, templatesSrc) { path, label, content, region -> // onConflict
       val oldPath = fs.canonicalize(templatesSrc[label]!!)
       val newPath = fs.canonicalize(path)
@@ -121,7 +120,7 @@ suspend fun collectMyTemplates(): Map<String, String> {
   val log = localULog()
   val fsres = UFileSys(RESOURCES)
   uctx(fsres) {
-    findAllFiles("templates".pth).filterExt("kts.tmpl")
+    findAllFiles("templates".P).filterExt("kts.tmpl")
       .collectSpecialRegionsTo(templates, templatesRes) { path, label, content, region -> // onConflict
         val oldPath = fsres.canonicalize(templatesRes[label]!!).strf
         val newPath = fsres.canonicalize(path).strf

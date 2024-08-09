@@ -4,30 +4,60 @@ package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.flow.*
 import okio.*
-import okio.Path.Companion.toPath
 import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
-import pl.mareklangiewicz.kground.io.localUFileSys
-import pl.mareklangiewicz.kground.io.pth
-import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.kommand.ax
+import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.io.*
+import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
-import pl.mareklangiewicz.kommand.reducedOutToFlow
-import pl.mareklangiewicz.kommand.zenity.zenityAskIf
-import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.kommand.zenity.*
+import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
-import pl.mareklangiewicz.ure.core.Ure
+import pl.mareklangiewicz.ure.core.*
 
 
-var PathToKotlinProjects = "/home/marek/code/kotlin".pth
+var PCodeKt = "/home/marek/code/kotlin".P
 
-var PathToKGroundProject = PathToKotlinProjects / "KGround"
+var PProjKGround = PCodeKt / "KGround"
 
-var PathToRefreshDepsProject = PathToKotlinProjects / "refreshDeps"
+var PProjRefreshDeps = PCodeKt / "refreshDeps"
 
-var PathToDepsKtProject = PathToKotlinProjects / "DepsKt"
+var PProjDepsKt = PCodeKt / "DepsKt"
+
+
+
+suspend fun Path.myKotlinFileDisable() = myKotlinFileToggleDisabled(true)
+suspend fun Path.myKotlinFileEnable() = myKotlinFileToggleDisabled(false)
+
+/** @param disable null will check if provided (existing) file looks like disabled and toggle it accordingly. */
+@OptIn(DelicateApi::class)
+suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
+  req(name.endsWith(".kt")) { "Doesn't look like kotlin (*.kt) file: $this" }
+  val srcIdx = segments.indices.last { segments[it] == "src" }
+  segments[srcIdx + 2].reqEq("kotlin") { "Unknown directory structure: $this" }
+  testIfFileIsRegular(this).ax().reqTrue { "File (regular) not found: $this" }
+  val looksDisabled = segments[srcIdx + 1].endsWith("Disabled")
+  when (disable to looksDisabled) {
+    true to true -> badArg { "Looks like already disabled." }
+    false to false -> badArg { "Looks like NOT disabled." }
+  }
+  val newSegment = segments[srcIdx + 1].removeSuffix("Disabled") + if (looksDisabled) "" else "Disabled"
+  val newP = rootOrPRel / segmentsBytes.take(srcIdx + 1) / newSegment / segmentsBytes.drop(srcIdx + 2)
+  mkdir(newP.parent!!, withParents = true).ax()
+  mvSingle(this, newP).ax()
+  // TODO NOW rmDirTreeIfAllEmpty(this.parent!!)
+}
+
+
+// TODO NOW implement it in KommandLine
+//  (wrapper to sth like: find /path/to/dir -type d -empty -delete)
+//  (also optional -mindepth? maxdepth?(too deep hierarchy is suspicious in most use-cases))
+private fun rmDirTreeIfAllEmpty(rootP: Path): Find = TODO()
+
 
 // TODO_later: refactor this little experiment fun
 @OptIn(DelicateApi::class)
@@ -53,7 +83,7 @@ var PathToDepsKtProject = PathToKotlinProjects / "DepsKt"
           ).ax()
         else emptyList()
       (listKt + listKts).forEach { ktFilePathStr ->
-        val ktFilePath = ktFilePathStr.pth
+        val ktFilePath = ktFilePathStr.P
         val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()
         val result = readAndFindUreLineContentWithSomeLinesAround(ktFilePath, lineContentUre)
         result?.value?.let {
@@ -124,7 +154,7 @@ private fun Ure.withSomeLinesAround(
 @ExampleApi internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
   alsoFilter: suspend (Path) -> Boolean = { true },
 ): Flow<Path> {
-  return map { PathToKotlinProjects / it }
+  return map { PCodeKt / it }
     .filter { localUFileSys().exists(it) }
     .filter { alsoFilter(it) }
 }
