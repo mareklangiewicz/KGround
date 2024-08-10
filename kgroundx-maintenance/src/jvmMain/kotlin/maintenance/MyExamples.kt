@@ -54,11 +54,11 @@ object MyBasicExamples {
 
   suspend fun searchAllMyKotlinCode() = searchKotlinCodeInMyProjects(ureText("UReports"))
 
-  private val PTemplateBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-app/src"
+  private val PTemplBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-app/src"
 
-  suspend fun disableBasicKtFile() = (PTemplateBasicJvmAppSrc / "main" / "kotlin/App.jvm.kt").myKotlinFileDisable()
+  suspend fun disableBasicKtFile() = (PTemplBasicJvmAppSrc / "main" / "kotlin/App.jvm.kt").myKotlinFileDisable()
 
-  suspend fun enableBasicKtFile() = (PTemplateBasicJvmAppSrc / "mainDisabled" / "kotlin/App.jvm.kt").myKotlinFileEnable()
+  suspend fun enableBasicKtFile() = (PTemplBasicJvmAppSrc / "mainDisabled" / "kotlin/App.jvm.kt").myKotlinFileEnable()
 }
 
 
