@@ -50,7 +50,7 @@ suspend fun updateGradlewFilesInProject(fullPath: Path) =
 
 @OptIn(DelicateApi::class)
 private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
-  findTypeRegex(path.strf, "f", ".*/settings.gradle\\(.kts\\)?")
+  findTypeRegex(path, "f", ".*/settings.gradle\\(.kts\\)?")
     .reducedOutToFlow()
     .reducedMap {
       // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl

@@ -31,6 +31,9 @@ val PAbs = "/".P
 
 /** Starting point for relative paths. PRel / "abc" / "de" == "abc/de".P (leading dot is removed which is good) */
 val PRel = ".".P
+val PRelUp = "..".P
+val PRelUpUp = PRelUp / ".."
+val PRelUpUpUp = PRelUpUp / ".."
 
 inline val Path.rootOrPRel get() = root ?: PRel
 

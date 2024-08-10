@@ -56,9 +56,9 @@ object MyBasicExamples {
 
   private val PTemplateBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-app/src"
 
-  suspend fun disableKtFile() = (PTemplateBasicJvmAppSrc / "main" / "kotlin/App.jvm.kt").myKotlinFileDisable()
+  suspend fun disableBasicKtFile() = (PTemplateBasicJvmAppSrc / "main" / "kotlin/App.jvm.kt").myKotlinFileDisable()
 
-  suspend fun enableKtFile() = (PTemplateBasicJvmAppSrc / "mainDisabled" / "kotlin/App.jvm.kt").myKotlinFileEnable()
+  suspend fun enableBasicKtFile() = (PTemplateBasicJvmAppSrc / "mainDisabled" / "kotlin/App.jvm.kt").myKotlinFileEnable()
 }
 
 

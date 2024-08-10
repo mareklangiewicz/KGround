@@ -14,7 +14,6 @@ import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.zenity.*
-import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.core.*
@@ -38,27 +37,23 @@ suspend fun Path.myKotlinFileEnable() = myKotlinFileToggleDisabled(false)
 suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
   req(name.endsWith(".kt")) { "Doesn't look like kotlin (*.kt) file: $this" }
   val srcIdx = segments.indices.last { segments[it] == "src" }
+  val srcP = rootOrPRel / segmentsBytes.take(srcIdx + 1)
+  val srcChild = segments[srcIdx + 1] // this should be gradle "source set"
   segments[srcIdx + 2].reqEq("kotlin") { "Unknown directory structure: $this" }
   testIfFileIsRegular(this).ax().reqTrue { "File (regular) not found: $this" }
-  val looksDisabled = segments[srcIdx + 1].endsWith("Disabled")
-  when (disable to looksDisabled) {
+  val wasDisabled = srcChild.endsWith("Disabled")
+  val srcChildNew: String = when (wasDisabled to (disable ?: !wasDisabled)) {
     true to true -> badArg { "Looks like already disabled." }
     false to false -> badArg { "Looks like NOT disabled." }
+    false to true -> srcChild + "Disabled"
+    else -> srcChild.removeSuffix("Disabled")
   }
-  val newSegment = segments[srcIdx + 1].removeSuffix("Disabled") + if (looksDisabled) "" else "Disabled"
-  val newP = rootOrPRel / segmentsBytes.take(srcIdx + 1) / newSegment / segmentsBytes.drop(srcIdx + 2)
-  mkdir(newP.parent!!, withParents = true).ax()
-  mvSingle(this, newP).ax()
-  // TODO NOW findAndRmAllEmptyDirs(this.parent!!)
+  val fullPNew = srcP / srcChildNew / segmentsBytes.drop(srcIdx + 2)
+  mkdir(fullPNew.parent!!, withParents = true).ax()
+  mvSingle(this, fullPNew).ax()
+  if (wasDisabled) // it was disabled, and we already moved the file away from ...src/sthDisabled
+    findAndDeleteAllEmptyDirs(srcP / srcChild).ax() // clear up ...src/sthDisabled (only what's already empty).
 }
-
-
-// TODO NOW implement it in KommandLine
-//  (wrapper to sth like: find /path/to/dir -type d -empty -delete)
-//  (also optional -mindepth? maxdepth?(too deep hierarchy is suspicious in most use-cases))
-@DelicateApi
-private fun findAndRmAllEmptyDirs(rootP: Path): Find = TODO()
-
 
 // TODO_later: refactor this little experiment fun
 @OptIn(DelicateApi::class)
@@ -74,11 +69,11 @@ private fun findAndRmAllEmptyDirs(rootP: Path): Find = TODO()
     .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
     .collect { projectPath ->
       log.i("Searching in project: $projectPath")
-      val listKt = findMyKotlinCode(projectPath.strf).ax()
+      val listKt = findMyKotlinCode(projectPath).ax()
       val listKts =
         if (alsoGradleKts)
           findMyKotlinCode(
-            projectPath.strf,
+            projectPath,
             withNameBase = "*.gradle.kts",
             withNameFull = null,
           ).ax()
