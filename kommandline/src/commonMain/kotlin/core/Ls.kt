@@ -18,6 +18,13 @@ fun lsSubDirs(dir: Path, wHidden: Boolean = false): ReducedKommand<List<Path>> =
     toList().filter { it.endsWith('/') }.map { it.dropLast(1).P }
   }
 
+/** It always skips special "." and ".." (as it should) even if wHidden = true */
+fun lsCountChildren(path: Path, wHidden: Boolean): ReducedKommand<Int> =
+  ls(path, wHidden = wHidden).reducedOut { count() }
+
+fun lsIsEmpty(path: Path): ReducedKommand<Boolean> = lsCountChildren(path, true)
+  .reducedOut { it == 0 }
+
 /**
  * Generally null values mean: default, so it depends on the underlying system (not necessarily "none").
  * For example, on my machine "man ls" says that default indicator-style is "none",
