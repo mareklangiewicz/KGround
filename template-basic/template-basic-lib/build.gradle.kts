@@ -332,4 +332,3 @@ fun KotlinMultiplatformExtension.jsDefault(
 }
 
 // endregion [[MPP Module Build Template]]
-

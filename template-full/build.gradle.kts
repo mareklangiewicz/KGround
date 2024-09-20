@@ -19,14 +19,14 @@ plugins {
 
 val enableJs = true
 val enableNative = false
-val enableAndro = true
+val enableAndro = false
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
     name = "TemplateFull",
     description = "Template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-full",
-    version = Ver(0, 0, 30),
+    version = Ver(0, 0, 32),
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,

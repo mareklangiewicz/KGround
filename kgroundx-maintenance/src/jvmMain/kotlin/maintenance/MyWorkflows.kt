@@ -2,17 +2,21 @@
 
 package pl.mareklangiewicz.kgroundx.maintenance
 
-import io.github.typesafegithub.workflows.actions.actions.*
-import io.github.typesafegithub.workflows.actions.endbug.AddAndCommitV9
-import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradleV3
+import io.github.typesafegithub.workflows.actions.actions.Checkout
+import io.github.typesafegithub.workflows.actions.actions.SetupJava
+import io.github.typesafegithub.workflows.actions.endbug.AddAndCommit
 import io.github.typesafegithub.workflows.domain.JobOutputs
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.Workflow
+import io.github.typesafegithub.workflows.domain.actions.RegularAction
+import io.github.typesafegithub.workflows.domain.actions.Action
 import io.github.typesafegithub.workflows.domain.triggers.*
 import io.github.typesafegithub.workflows.dsl.JobBuilder
+import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
+import kotlin.collections.LinkedHashMap
 import okio.*
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.*
@@ -33,63 +37,66 @@ private val mySecretsEnv = listOf(
 
 // Github cron is UTC so about 2 hours behind Warsaw.
 // https://www.timeanddate.com/worldclock/timezone/utc
-// Github can delay or even drop sheduled events depending on
+// Github can delay or even drop scheduled events depending on
 // high load times (like full hours), repo usage, and many different things.
 // https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
 private val everydayAfter5amUTC = Cron(hour = "5", minute = "37")
 // BTW refreshDeps should take less than 10min
 private val everydayBefore6amUTC = Cron(hour = "5", minute = "53")
 
-// FIXME: something less hacky/hardcoded
-@Suppress("IdentifierGrammar")
-fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() {
-  val workflow = workflow(
-    name = "Generate Deps",
-    on = listOf(Schedule(listOf(everydayAfter5amUTC)), WorkflowDispatch()),
-  ) {
-    job(
-      id = "generate-deps",
-      runsOn = RunnerType.UbuntuLatest,
-      _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
-    ) {
-      uses(action = CheckoutV4())
-      usesJdk()
-      usesGradle(
-        name = "MyExperiments.generateDeps",
-        env = linkedMapOf("GENERATE_DEPS" to "true"),
-        gradleVersion = "8.6", // FIXME_someday: I have errors when null (when trying to use wrapper)
-        arguments = "--info :refreshVersions:test --tests MyExperiments.generateDeps",
-        buildRootDirectory = "plugins",
-      )
-      usesAddAndCommitFile("plugins/dependencies/src/test/resources/objects-for-deps.txt")
-    }
-  }
-  workflow.write("generate-deps.yml", PProjRefreshDeps)
+
+fun myWorkflow(
+  name: String,
+  on: List<Trigger>,
+  block: WorkflowBuilder.() -> Unit,
+): Workflow {
+  lateinit var result: Workflow
+  workflow(name = name, on = on, block = block, useWorkflow = { result = it })
+  return result
 }
+
+// FIXME_maybe: something less hacky/hardcoded
+fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() = myWorkflow(
+  "Generate Deps", listOf(Schedule(listOf(everydayAfter5amUTC)), WorkflowDispatch()),
+) {
+  job(
+    id = "generate-deps",
+    runsOn = RunnerType.UbuntuLatest,
+    _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
+  ) {
+    uses(action = Checkout())
+    usesJdk()
+    usesGradle(gradleVersion = "8.10.1") // FIXME_someday: I had errors when null (when trying to use wrapper)
+    run(
+      name = "MyExperiments.generateDeps",
+      env = linkedMapOf("GENERATE_DEPS" to "true"),
+      workingDirectory = "plugins",
+      command = "gradle --info :refreshVersions:test --tests MyExperiments.generateDeps"
+    )
+    usesAddAndCommitFile("plugins/dependencies/src/test/resources/objects-for-deps.txt")
+  }
+}.write("generate-deps.yml", PProjRefreshDeps)
 
 
 // FIXME: something less hacky/hardcoded/repetitive
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
-  val workflow = workflow(
-    name = "Update Generated Deps",
-    on = listOf(Schedule(listOf(everydayBefore6amUTC)), WorkflowDispatch()),
-  ) {
+  myWorkflow("Update Generated Deps", listOf(Schedule(listOf(everydayBefore6amUTC)), WorkflowDispatch())) {
     job(
       id = "update-generated-deps",
       runsOn = RunnerType.UbuntuLatest,
       env = mySecretsEnv,
       _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
     ) {
-      uses(action = CheckoutV4())
+      uses(action = Checkout())
       usesJdk()
-      usesGradle(
+      usesGradle()
+      run(
         name = "updateGeneratedDeps",
-        arguments = "updateGeneratedDeps",
+        command = "./gradlew updateGeneratedDeps --no-configuration-cache --no-parallel"
       )
       usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
     }
-  }
-  workflow.write("update-generated-deps.yml", PProjDepsKt)
+  }.write("update-generated-deps.yml", PProjDepsKt)
 }
 
 
@@ -120,7 +127,7 @@ suspend fun checkMyDWorkflowsInProject(
   for (file in yamlFiles) {
     val dname = file.name.substringBeforeLast('.')
     val contentExpected = try {
-      defaultWorkflow(dname).generateYaml()
+      myDefaultWorkflow(dname).generateYaml()
     } catch (e: IllegalStateException) {
       if (failIfUnknownWorkflowFound) throw e
       else {
@@ -155,7 +162,7 @@ suspend fun injectDWorkflowsToProject(
     } catch (e: FileNotFoundException) {
       ""
     }
-    val contentNew = defaultWorkflow(dname).generateYaml()
+    val contentNew = myDefaultWorkflow(dname).generateYaml()
     fs.writeUtf8(file, contentNew, createParentDir = true)
     val summary =
       if (contentNew == contentOld) "No changes."
@@ -170,20 +177,14 @@ suspend fun injectDWorkflowsToProject(
  * hacky "d" prefix in all recognized names is mostly to avoid clashing with other workflows.
  * (if I add it to existing repos/forks) (and it means "default")
  */
-internal fun defaultWorkflow(dname: String) = when (dname) {
-  "dbuild" -> defaultBuildWorkflow()
-  "drelease" -> defaultReleaseWorkflow()
+internal fun myDefaultWorkflow(dname: String) = when (dname) {
+  "dbuild" -> myDefaultBuildWorkflow()
+  "drelease" -> myDefaultReleaseWorkflow()
   else -> bad { "Unknown default workflow dname: $dname" }
 }
 
-private fun defaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.UbuntuLatest)) =
-  workflow(
-    name = "dbuild",
-    on = listOf(
-      Push(branches = listOf("master", "main")),
-      PullRequest(),
-      WorkflowDispatch(),
-    ),
+private fun myDefaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.UbuntuLatest)) =
+  myWorkflow("dbuild", listOf(Push(branches = listOf("master", "main")), PullRequest(), WorkflowDispatch()),
   ) {
     runners.forEach { runnerType ->
       job(
@@ -191,26 +192,25 @@ private fun defaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.U
         runsOn = runnerType,
         env = mySecretsEnv,
       ) {
-        uses(action = CheckoutV4())
+        uses(action = Checkout())
         usesJdk()
-        usesGradleBuild()
+        usesGradle()
+        run(name = "Build", command = "./gradlew build --no-configuration-cache --no-parallel")
       }
     }
   }
 
-private fun defaultReleaseWorkflow() =
-  workflow(
-    name = "drelease",
-    on = listOf(Push(tags = listOf("v*.*.*"))),
-  ) {
+private fun myDefaultReleaseWorkflow() =
+  myWorkflow("drelease", listOf(Push(tags = listOf("v*.*.*")))) {
     job(
       id = "release",
       env = mySecretsEnv,
       runsOn = RunnerType.UbuntuLatest,
     ) {
-      uses(action = CheckoutV4())
+      uses(action = Checkout())
       usesJdk()
-      usesGradleBuild()
+      usesGradle()
+      run(name = "Build", command = "./gradlew build --no-configuration-cache --no-parallel")
       run(
         name = "Publish to Sonatype",
         command = "./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel",
@@ -225,10 +225,10 @@ private fun defaultReleaseWorkflow() =
 fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   name: String? = "Set up JDK",
   version: String? = "22", // fixme_maybe: somehow take from DepsKt:Vers:JvmDefaultVer ?
-  distribution: SetupJavaV4.Distribution = SetupJavaV4.Distribution.Zulu, // fixme_later: which dist?
+  distribution: SetupJava.Distribution = SetupJava.Distribution.Zulu, // fixme_later: which dist?
 ) = uses(
   name = name,
-  action = SetupJavaV4(
+  action = SetupJava(
     javaVersion = version,
     distribution = distribution,
   ),
@@ -239,37 +239,36 @@ fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   name: String? = null,
   env: Map<String, String> = mapOf(),
   gradleVersion: String? = null, // null means it should try to use wrapper
-  arguments: String? = null,
-  buildRootDirectory: String? = null,
 ) = uses(
   name = name,
-  action = ActionsSetupGradleV3(
-    gradleVersion = gradleVersion,
-    arguments = arguments,
-    buildRootDirectory = buildRootDirectory,
-  ),
+  // action = ActionsSetupGradle(
+  //   gradleVersion = gradleVersion,
+  // ),
+  // Workaround for issue with dependency: implementation("gradle:actions__setup-gradle:v4") (see build.gradle.kts)
+  action = MyActionsSetupGradle(gradleVersion),
   env = env,
 )
 
-fun JobBuilder<JobOutputs.EMPTY>.usesGradleBuild(
-  name: String? = "Build",
-  env: Map<String, String> = mapOf(),
-  gradleVersion: String? = null, // null means it should try to use wrapper
-  buildRootDirectory: String? = null,
-) = usesGradle(
-  name = name,
-  env = env,
-  gradleVersion = gradleVersion,
-  arguments = "build",
-  buildRootDirectory = buildRootDirectory,
-)
+class MyActionsSetupGradle(
+  private val gradleVersion: String? = null, // null means it should try to use wrapper
+) : RegularAction<Action.Outputs>("gradle", "actions/setup-gradle", "v4") {
+  override fun toYamlArguments() = linkedMapOfNotNull(
+    "gradle-version" to gradleVersion,
+  )
+  override fun buildOutputObject(stepId: String) = Outputs(stepId)
+}
+
+
+@Suppress("UNCHECKED_CAST")
+fun <K: Any, V: Any> linkedMapOfNotNull(vararg pairs: Pair<K, V?>): LinkedHashMap<K, V> =
+  linkedMapOf(*pairs.mapNotNull { if (it.second == null) null else (it as Pair<K, V>) }.toTypedArray())
 
 fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") =
   uses(
     name = name,
-    action = AddAndCommitV9(
+    action = AddAndCommit(
       add = filePath,
-      defaultAuthor = AddAndCommitV9.DefaultAuthor.UserInfo,
+      defaultAuthor = AddAndCommit.DefaultAuthor.UserInfo,
       // without it, I get commits authored with my old username: langara
     ),
   )

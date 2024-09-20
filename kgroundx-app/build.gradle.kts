@@ -20,6 +20,10 @@ defaultBuildTemplateForBasicJvmApp {
   implementation(project(":kgroundx-jupyter"))
 }
 
+repositories {
+  maven("https://bindings.krzeminski.it")
+}
+
 setMyWeirdSubstitutions(
   "kommandline" to rootExtString["verKommand"],
   "kommandsamples" to rootExtString["verKommand"],
