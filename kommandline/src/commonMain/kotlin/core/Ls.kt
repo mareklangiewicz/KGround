@@ -23,7 +23,7 @@ fun lsCountChildren(path: Path, wHidden: Boolean): ReducedKommand<Int> =
   ls(path, wHidden = wHidden).reducedOut { count() }
 
 fun lsIsEmpty(path: Path): ReducedKommand<Boolean> = lsCountChildren(path, true)
-  .reducedOut { it == 0 }
+  .reducedMap { this == 0 }
 
 /**
  * Generally null values mean: default, so it depends on the underlying system (not necessarily "none").
