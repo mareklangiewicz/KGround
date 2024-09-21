@@ -33,6 +33,10 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-maintenance"))
 }
 
+repositories {
+  maven("https://bindings.krzeminski.it")
+}
+
 setMyWeirdSubstitutions(
   "kommandline" to rootExtString["verKommand"],
   "kommandsamples" to rootExtString["verKommand"],
@@ -352,4 +356,3 @@ fun KotlinMultiplatformExtension.jsDefault(
 }
 
 // endregion [[MPP Module Build Template]]
-
