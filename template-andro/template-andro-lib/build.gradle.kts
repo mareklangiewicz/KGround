@@ -356,8 +356,6 @@ fun Project.defaultBuildTemplateForAndroLib(
   }
   extensions.configure<LibraryExtension> {
     defaultAndroLib(details)
-    if (andro.publishAllVariants) defaultAndroLibPublishAllVariants()
-    if (andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
   }
   dependencies {
     defaultAndroDeps(details.settings)
@@ -378,6 +376,7 @@ fun Project.defaultBuildTemplateForAndroLib(
 fun LibraryExtension.defaultAndroLib(
   details: LibDetails = rootExtLibDetails,
   ignoreCompose: Boolean = false,
+  ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
@@ -386,6 +385,8 @@ fun LibraryExtension.defaultAndroLib(
   defaultBuildTypes()
   details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
   defaultPackagingOptions()
+  if (!ignoreAndroPublish && andro.publishAllVariants) defaultAndroLibPublishAllVariants()
+  if (!ignoreAndroPublish && andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
 }
 
 fun LibraryExtension.defaultDefaultConfig(details: LibDetails) = defaultConfig {

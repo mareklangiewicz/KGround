@@ -22,7 +22,7 @@ defaultBuildTemplateForRootProject(
     name = "TemplateAndro",
     description = "Template for android projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 15),
+    version = Ver(0, 0, 16),
     settings = LibSettings(
       withTestJUnit4 = true,
       withTestJUnit5 = false,
