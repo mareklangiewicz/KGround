@@ -1,5 +1,5 @@
 
-// region [Custom MPP Lib Build Imports and Plugs]
+// region [[Basic MPP Lib Build Imports and Plugs]]
 
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
@@ -12,11 +12,10 @@ plugins {
     plugs.KotlinMulti,
     plugs.MavenPublish,
     plugs.Signing,
-    plugs.KotlinJupyter,
   )
 }
 
-// endregion [Custom MPP Lib Build Imports and Plugs]
+// endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 val settings = rootExtLibDetails.settings.copy(
   withJs = false,
@@ -25,23 +24,42 @@ val settings = rootExtLibDetails.settings.copy(
 
 val details = rootExtLibDetails.copy(settings = settings)
 
-// Note: I tried to use Jvm only templates for kground-jupyter module, but it's way worse approach.
-// I'd have to use java plugin for source jar generation (and had problems with that; sources are required by sonatype),
-// also it's better to rely on modern kotlin mpp plugin (even if only jvm target is enabled),
-// to generate all needed gradle metadata so it's all compatible when other mpp projects depend on this module.
 defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-maintenance"))
 }
+
+// Note: this module (kotlinx-workflows) had to be separated from kotlinx-maintenance,
+// because I don't want to propagate requirement to add third party maven repo https://bindings.krzeminski.it
+// to every project/consumer of kotlinx-maintenance (SourceFun, kokpit, kotlinx-jupyter, ...).
+
+repositories {
+  maven("https://bindings.krzeminski.it")
+}
+
+
+kotlin {
+  sourceSets {
+    jvmMain {
+      dependencies {
+        implementation(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
+        implementation("actions:checkout:v4")
+        implementation("actions:setup-java:v4")
+        implementation("EndBug:add-and-commit:v9")
+
+        // implementation("gradle:actions__setup-gradle:v4")
+        // FIXME: report issue - this doesn't work  Could not resolve gradle:actions__setup-gradle:v4.
+        // (but this action works when using .main.kts scripts - which I don't want to use)
+      }
+    }
+  }
+}
+
 
 setMyWeirdSubstitutions(
   "kommandline" to rootExtString["verKommand"],
   "kommandsamples" to rootExtString["verKommand"],
   "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
 )
-
-tasks.processJupyterApiResources {
-  libraryProducers = listOf("pl.mareklangiewicz.kgroundx.jupyter.Integration")
-}
 
 // region [[Kotlin Module Build Template]]
 

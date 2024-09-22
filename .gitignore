@@ -9,6 +9,7 @@
 /kground-io/build
 /kgroundx-io/build
 /kgroundx-maintenance/build
+/kgroundx-workflows/build
 /kgroundx-jupyter/build
 /kgroundx-jupyter/src/jvmMain/kotlin/gitignored
 /kgroundx-app/build

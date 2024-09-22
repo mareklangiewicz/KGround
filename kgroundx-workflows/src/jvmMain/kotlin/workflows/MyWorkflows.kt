@@ -1,6 +1,6 @@
 @file:Suppress("unused", "PackageDirectoryMismatch")
 
-package pl.mareklangiewicz.kgroundx.maintenance
+package pl.mareklangiewicz.kgroundx.workflows
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
@@ -17,12 +17,39 @@ import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
 import kotlin.collections.LinkedHashMap
+import kotlinx.coroutines.flow.Flow
 import okio.*
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.localUFileSys
+import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.ulog.*
+
+
+@ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean) =
+  fetchMyProjectsNameS(onlyPublic)
+    .mapFilterLocalDWorkflowsProjectsPathS()
+    .collect { checkMyDWorkflowsInProject(it) }
+
+
+@ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean) =
+  fetchMyProjectsNameS(onlyPublic)
+    .mapFilterLocalDWorkflowsProjectsPathS()
+    .collect { injectDWorkflowsToProject(it) }
+
+@ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS() =
+  mapFilterLocalKotlinProjectsPathS {
+    val log = localULog()
+    val fs = localUFileSys()
+    val isGradleRootProject = fs.exists(it / "settings.gradle.kts") || fs.exists(it / "settings.gradle")
+    if (!isGradleRootProject) {
+      log.w("Ignoring dworkflows in non-gradle project: $it")
+    }
+    // FIXME_maybe: Change when I have dworkflows for non-gradle projects
+    isGradleRootProject
+  }
+
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 

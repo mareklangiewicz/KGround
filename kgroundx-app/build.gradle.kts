@@ -18,6 +18,7 @@ plugins {
 
 defaultBuildTemplateForBasicJvmApp {
   implementation(project(":kgroundx-jupyter"))
+  implementation(project(":kgroundx-workflows"))
 }
 
 repositories {

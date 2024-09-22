@@ -123,31 +123,8 @@ private fun Ure.withSomeLinesAround(
   0..maxLinesAfter of ureAnyLine()
 }
 
-@ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean) =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalDWorkflowsProjectsPathS()
-    .collect { checkMyDWorkflowsInProject(it) }
-
-
-@ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean) =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalDWorkflowsProjectsPathS()
-    .collect { injectDWorkflowsToProject(it) }
-
-@ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS() =
-  mapFilterLocalKotlinProjectsPathS {
-    val log = localULog()
-    val fs = localUFileSys()
-    val isGradleRootProject = fs.exists(it / "settings.gradle.kts") || fs.exists(it / "settings.gradle")
-    if (!isGradleRootProject) {
-      log.w("Ignoring dworkflows in non-gradle project: $it")
-    }
-    // FIXME_maybe: Change when I have dworkflows for non-gradle projects
-    isGradleRootProject
-  }
-
 /** @receiver Flow of projects names. */
-@ExampleApi internal fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
+@ExampleApi fun Flow<String>.mapFilterLocalKotlinProjectsPathS(
   alsoFilter: suspend (Path) -> Boolean = { true },
 ): Flow<Path> {
   return map { PCodeKt / it }
@@ -202,4 +179,3 @@ private fun Ure.withSomeLinesAround(
 
 @ExampleApi suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
   fetchMyProjectsNameS(onlyPublic).toList().let { if (sorted) it.sorted() else it }
-

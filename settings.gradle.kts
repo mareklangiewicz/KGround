@@ -54,6 +54,7 @@ include(":kgroundx")
 include(":kground-io")
 include(":kgroundx-io")
 include(":kgroundx-maintenance")
+include(":kgroundx-workflows")
 include(":kgroundx-jupyter")
 include(":kgroundx-app")
 

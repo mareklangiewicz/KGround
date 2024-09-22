@@ -78,25 +78,17 @@ object MyTemplatesExamples {
     tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = true)
   }
 }
-
+@OptIn(ExperimentalApi::class)
 @ExampleApi
-object MyWorkflowsExamples {
-
-  suspend fun checkAllMDW() = checkMyDWorkflowsInMyProjects(onlyPublic = false)
-
-  suspend fun injectMDWToMyProjects() = injectMyDWorkflowsToMyProjects(onlyPublic = false)
-
-  suspend fun injectDWToExampleProject() = injectDWorkflowsToKotlinProject(projectName = "AbcdK")
-
-  suspend fun injectGenerateDepsWToRefreshDepsRepo() = injectHackyGenerateDepsWorkflowToRefreshDepsRepo()
-
-  suspend fun injectUpdateGeneratedDepsToDepsKtRepo() = injectUpdateGeneratedDepsWorkflowToDepsKtRepo()
+object MyOtherExamples {
 
   suspend fun updateKGroundTmplSymLinks() = updateKGroundTemplatesSymLinks()
 
   suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")
 
   suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false, skipReproducers = true)
+
+  // See also kotlinx-workflows:MyWorkflowsExamples.kt
 }
 
 @OptIn(ExperimentalApi::class)

@@ -26,29 +26,6 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-io"))
 }
 
-repositories {
-  maven("https://bindings.krzeminski.it")
-}
-
-
-kotlin {
-  sourceSets {
-    jvmMain {
-      dependencies {
-        implementation(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
-        implementation("actions:checkout:v4")
-        implementation("actions:setup-java:v4")
-        implementation("EndBug:add-and-commit:v9")
-
-        // implementation("gradle:actions__setup-gradle:v4")
-        // FIXME: report issue - this doesn't work  Could not resolve gradle:actions__setup-gradle:v4.
-        // (but this action works when using .main.kts scripts - which I don't want to use)
-      }
-    }
-  }
-}
-
-
 setMyWeirdSubstitutions(
   "kommandline" to rootExtString["verKommand"],
   "kommandsamples" to rootExtString["verKommand"],
