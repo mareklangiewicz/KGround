@@ -22,7 +22,7 @@ val enablePublishing = findProject(":kommandline") == null && findProject(":komm
 // exception: publishToMavenLocal for debugging
 
 rootExtString["verKommand"] = "0.0.83" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-rootExtString["verKGround"] = "0.0.78" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+rootExtString["verKGround"] = "0.0.79" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 // Note: verKGround needed too because if we include local kommandline, then that build can look for it.
 
 
