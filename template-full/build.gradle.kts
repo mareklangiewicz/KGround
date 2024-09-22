@@ -19,7 +19,7 @@ plugins {
 
 val enableJs = true
 val enableNative = false
-val enableAndro = false
+val enableAndro = true
 
 defaultBuildTemplateForRootProject(
   myLibDetails(

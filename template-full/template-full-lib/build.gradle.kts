@@ -47,12 +47,19 @@ fun Project.defaultBuildTemplateForFullMppLib(
   defaultBuildTemplateForComposeMppLib(
     details = details,
     ignoreAndroConfig = true, // andro configured below
+    ignoreAndroPublish = true, // andro publishing configured below (or ignored again, but below in defaultAndroLib)
     addCommonMainDependencies = addCommonMainDependencies,
   )
 
   if (details.settings.withAndro) {
     extensions.configure<LibraryExtension> {
-      defaultAndroLib(details, ignoreCompose = true) // compose mpp configured already
+      defaultAndroLib(
+        details,
+        ignoreCompose = true, // compose mpp configured already
+        ignoreAndroPublish = true,
+          // FIXME: maybe it's fine to publish in andro way here too (full mpp lib case),
+          //  but let's analyze/test publications more before doing that (commiting to: ignoreAndroPublish = false).
+      )
     }
 
     // this is "single platform way" / "android way" to declare deps,
@@ -623,8 +630,6 @@ fun Project.defaultBuildTemplateForAndroLib(
   }
   extensions.configure<LibraryExtension> {
     defaultAndroLib(details)
-    if (andro.publishAllVariants) defaultAndroLibPublishAllVariants()
-    if (andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
   }
   dependencies {
     defaultAndroDeps(details.settings)
@@ -645,6 +650,7 @@ fun Project.defaultBuildTemplateForAndroLib(
 fun LibraryExtension.defaultAndroLib(
   details: LibDetails = rootExtLibDetails,
   ignoreCompose: Boolean = false,
+  ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
@@ -653,6 +659,8 @@ fun LibraryExtension.defaultAndroLib(
   defaultBuildTypes()
   details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
   defaultPackagingOptions()
+  if (!ignoreAndroPublish && andro.publishAllVariants) defaultAndroLibPublishAllVariants()
+  if (!ignoreAndroPublish && andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
 }
 
 fun LibraryExtension.defaultDefaultConfig(details: LibDetails) = defaultConfig {
