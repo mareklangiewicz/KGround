@@ -38,23 +38,29 @@ fun Path.withName(getNewName: (oldName: String) -> String) =
 fun Sequence<Path>.filterExt(ext: String) = filter { it.name.endsWith(".$ext") }
 
 /**
- * @param inputRoot path of input root dir
+ * @param this path of input root dir
  * @param outputRoot path of output root dir - can be the same as inputRootDir;
  * nothing is written to file system if it's null;
  * @param process file content transformation; if it returns null - output file is not even touched
  */
+suspend fun Path.processWholeTree(
+  outputRoot: Path? = null,
+  process: suspend (input: Path, output: Path?, content: String) -> String?,
+) {
+  req(isAbsolute)
+  req(outputRoot?.isAbsolute != false)
+  findAllFiles(this).forEach { inputPath ->
+    val outputPath = if (outputRoot == null) null else outputRoot / inputPath.asRelativeTo(this)
+    processFile(inputPath, outputPath) { content -> process(inputPath, outputPath, content) }
+  }
+}
+
+@Deprecated("Use fun Path.processWholeTree", ReplaceWith("inputRoot.processWholeTree(outputRoot, process)"))
 suspend fun processEachFile(
   inputRoot: Path,
   outputRoot: Path? = null,
   process: suspend (input: Path, output: Path?, content: String) -> String?,
-) {
-  req(inputRoot.isAbsolute)
-  req(outputRoot?.isAbsolute != false)
-  findAllFiles(inputRoot).forEach { inputPath ->
-    val outputPath = if (outputRoot == null) null else outputRoot / inputPath.asRelativeTo(inputRoot)
-    processFile(inputPath, outputPath) { content -> process(inputPath, outputPath, content) }
-  }
-}
+) = inputRoot.processWholeTree(outputRoot, process)
 
 @Deprecated("Use okio fun Path.relativeTo", ReplaceWith("relativeTo(path)"))
 fun Path.asRelativeTo(path: Path): Path = relativeTo(path)
@@ -87,15 +93,15 @@ fun FileSystem.writeByteString(file: Path, content: ByteString, createParentDir:
 }
 
 /**
- * @param inputPath path of input file
+ * @param this path of input file
  * @param outputPath path of output file - can be the same as inputPath;
  * nothing is written to file system if it's null;
  * @param process file content transformation; if it returns null - outputPath is not even touched
  */
-suspend fun processFile(inputPath: Path, outputPath: Path? = null, process: suspend (String) -> String?) {
+suspend fun Path.processSingleFile(outputPath: Path? = null, process: suspend (String) -> String?) {
   val fs = localUFileSys()
   val log = localULog()
-  val input = fs.readUtf8(inputPath)
+  val input = fs.readUtf8(this)
   val output = process(input)
   if (outputPath == null) {
     if (output != null) log.d("Ignoring non-null output because outputPath is null")
@@ -107,6 +113,11 @@ suspend fun processFile(inputPath: Path, outputPath: Path? = null, process: susp
   }
   fs.createDirectories(outputPath.parent!!)
   fs.writeUtf8(outputPath, output)
+}
+
+@Deprecated("Use fun Path.processSingleFile", ReplaceWith("inputPath.processSingleFile(outputPath, process)"))
+suspend fun processFile(inputPath: Path, outputPath: Path? = null, process: suspend (String) -> String?) {
+  inputPath.processSingleFile(outputPath, process)
 }
 
 fun FileSystem.withTempDir(tempDirPrefix: String, code: FileSystem.(tempDir: Path) -> Unit) {

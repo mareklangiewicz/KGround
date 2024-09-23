@@ -10,6 +10,7 @@ import pl.mareklangiewicz.annotations.ExperimentalApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkEq
+import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kground.io.cd
 import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kground.logEach
@@ -25,6 +26,8 @@ import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
 import pl.mareklangiewicz.ulog.w
 import pl.mareklangiewicz.ure.*
+import pl.mareklangiewicz.ure.logseq.Card
+import pl.mareklangiewicz.ure.logseq.processAllCardsInLogseqGraph
 import pl.mareklangiewicz.usubmit.localUSubmit
 import pl.mareklangiewicz.usubmit.xd.*
 
@@ -81,6 +84,11 @@ object MyTemplatesExamples {
 @OptIn(ExperimentalApi::class)
 @ExampleApi
 object MyOtherExamples {
+
+  @OptIn(DelicateApi::class, NotPortableApi::class)
+  suspend fun collectGabrysCards() = buildList<Pair<Path, Card>> {
+    "/home/marek/gtdgabrys".P.processAllCardsInLogseqGraph { file, card -> add(file to card) }
+  }
 
   suspend fun updateKGroundTmplSymLinks() = updateKGroundTemplatesSymLinks()
 
