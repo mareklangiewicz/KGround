@@ -55,7 +55,11 @@ object MyBasicExamples {
     ).ax()
   }
 
-  suspend fun searchAllMyKotlinCode() = searchKotlinCodeInMyProjects(ureText("UReports"))
+  suspend fun searchAllMyKotlinCode() = searchKotlinCodeInMyProjects(
+    codeInLineUre = ureText("verKGround"),
+    onlyPublic = false,
+    alsoGradleKts = true,
+  )
 
   private val PTemplBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-app/src"
 
