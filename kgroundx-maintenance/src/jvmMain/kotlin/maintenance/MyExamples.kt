@@ -81,9 +81,8 @@ object MyTemplatesExamples {
 
   suspend fun tryInjectToItSelf() = tryInjectMyTemplatesToProject(PCodeKt / "KGround")
 
-  suspend fun tryInjectAllMyProjects() {
-    tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = true)
-  }
+  suspend fun tryInjectAllMyProjects() =
+    tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = false)
 }
 @OptIn(ExperimentalApi::class)
 @ExampleApi
