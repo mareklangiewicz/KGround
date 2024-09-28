@@ -93,7 +93,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() = myWorkflow(
   ) {
     uses(action = Checkout())
     usesJdk()
-    usesGradle(gradleVersion = "8.10.1") // FIXME_someday: I had errors when null (when trying to use wrapper)
+    usesGradle(gradleVersion = "8.10.2") // FIXME_someday: I had errors when null (when trying to use wrapper)
     run(
       name = "MyExperiments.generateDeps",
       env = linkedMapOf("GENERATE_DEPS" to "true"),
