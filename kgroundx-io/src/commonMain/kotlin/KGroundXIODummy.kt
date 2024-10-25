@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.kgroundx.io
 
-import pl.mareklangiewicz.kground.tee
+import pl.mareklangiewicz.kground.tee.tee
 
 // TODO_later:
 // Some dummy code is needed in kotlinx module, so we don't have issues with maven publications.

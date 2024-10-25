@@ -93,6 +93,14 @@ object MyOtherExamples {
     "/home/marek/gtdgabrys".P.processAllCardsInLogseqGraph { file, card -> add(file to card) }
   }
 
+  suspend fun collectSomeGabrysProgress() = collectGabrysCards()
+    .map { (path, card) ->
+      val q = card.question
+      val l = card.props["card-last-reviewed"]
+      val s = card.props["card-last-score"]
+      "$l :: score: $s question: $q"
+    }
+
   suspend fun updateKGroundTmplSymLinks() = updateKGroundTemplatesSymLinks()
 
   suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")

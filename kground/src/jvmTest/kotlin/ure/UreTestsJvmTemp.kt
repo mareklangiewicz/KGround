@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.ure
 
 import org.junit.jupiter.api.TestFactory
-import pl.mareklangiewicz.kground.teePP
+import pl.mareklangiewicz.kground.tee.teePP
 import pl.mareklangiewicz.uspek.*
 
 /**

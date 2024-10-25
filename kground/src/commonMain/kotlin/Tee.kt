@@ -1,5 +1,7 @@
-package pl.mareklangiewicz.kground
+package pl.mareklangiewicz.kground.tee
 
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.*
@@ -28,7 +30,7 @@ fun <T> T.tee(
   withValue: Boolean = true,
 ): T {
   val p1 = if (withCurrentThread) " [${getCurrentThreadName().str().padEnd(32)}]" else ""
-  val p2 = if (withCurrentTime) " [${getCurrentTimeStr()}]" else ""
+  val p2 = if (withCurrentTime) " [${getRunningTimeMs()}]" else ""
   val p3 = if (withCurrentPlatform) " [${getCurrentPlatformName().str().padEnd(32)}]" else ""
   val p4 = if (withCurrentPath) " [${getCurrentAbsolutePath()}]" else ""
   val p5 = if (withValue) " $this" else ""
@@ -49,10 +51,14 @@ private val TeeDefaultLog = ULogPrintLn(prefix = "tee")
 //   (I need it all in kground right now, so this is temporary implementation)
 //   UPDATE: Think what should be in kground-io
 
+private val TeeStartTimeMark = TimeSource.Monotonic.markNow()
+
 @Deprecated("")
-expect fun getCurrentTimeMs(): Long
+fun getStartTimeMark() = TeeStartTimeMark
 @Deprecated("")
-expect fun getCurrentTimeStr(): String
+fun getRunningTime(): Duration = TimeSource.Monotonic.markNow() - getStartTimeMark()
+@Deprecated("")
+fun getRunningTimeMs(): Long = getRunningTime().inWholeMilliseconds
 @Deprecated("")
 expect fun getCurrentThreadName(): String
 @Deprecated("")

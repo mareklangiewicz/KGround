@@ -1,15 +1,9 @@
-package pl.mareklangiewicz.kground
+package pl.mareklangiewicz.kground.tee
 
 import kotlinx.browser.*
 import org.w3c.dom.Window
 import kotlin.js.*
 import pl.mareklangiewicz.udata.strf
-
-actual fun getCurrentTimeMs(): Long = Date().getMilliseconds().toLong()
-
-// FIXME_later: The format should be user-friendly and short. And similar to other platforms (the same??)
-actual fun getCurrentTimeStr(): String = getCurrentTimeMs().strf
-
 
 // FIXME_someday: maybe other name - saying sth more about platform? browser/node/??
 actual fun getCurrentThreadName(): String = "JS Thread"

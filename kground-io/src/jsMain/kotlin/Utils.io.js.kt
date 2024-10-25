@@ -3,7 +3,7 @@ package pl.mareklangiewicz.kground.io
 import kotlinx.coroutines.*
 import okio.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kground.windowOrNull
+import pl.mareklangiewicz.kground.tee.windowOrNull
 
 
 actual fun getSysEnv(name: String): String? = js("globalThis.process.env[name]") as String?

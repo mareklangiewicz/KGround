@@ -1,8 +1,8 @@
 package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kground.getCurrentPlatformKind
-import pl.mareklangiewicz.kground.getCurrentPlatformName
+import pl.mareklangiewicz.kground.tee.getCurrentPlatformKind
+import pl.mareklangiewicz.kground.tee.getCurrentPlatformName
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
 import pl.mareklangiewicz.udata.strf

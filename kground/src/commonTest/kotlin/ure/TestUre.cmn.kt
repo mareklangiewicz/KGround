@@ -2,7 +2,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.bad.NotEqStateErr
 import pl.mareklangiewicz.bad.chkEq
-import pl.mareklangiewicz.kground.teePP
+import pl.mareklangiewicz.kground.tee.teePP
 import pl.mareklangiewicz.uspek.*
 import kotlin.test.Test
 import pl.mareklangiewicz.ulog.ULog

@@ -1,13 +1,7 @@
-package pl.mareklangiewicz.kground
+package pl.mareklangiewicz.kground.tee
 
 import java.nio.file.*
-import java.util.*
 import pl.mareklangiewicz.udata.strf
-
-actual fun getCurrentTimeMs(): Long = System.currentTimeMillis()
-
-// The format should be user-friendly and short
-actual fun getCurrentTimeStr(): String = getCurrentTimeMs().let { String.format(Locale.US, "%tT:%tL", it, it) }
 
 actual fun getCurrentThreadName(): String = Thread.currentThread().name
 
