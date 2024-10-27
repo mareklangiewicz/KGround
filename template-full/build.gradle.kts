@@ -19,7 +19,9 @@ plugins {
 
 val enableJs = true
 val enableNative = false
-val enableAndro = false
+val enableAndro = true
+// Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
+// Use Android Studio or disable andro target temporarily (or compile only with CLI).
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
