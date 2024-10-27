@@ -173,9 +173,6 @@ suspend fun checkMyDWorkflowsInProject(
   }
 }
 
-@ExampleApi suspend fun injectDWorkflowsToKotlinProject(projectName: String) =
-  injectDWorkflowsToProject(PCodeKt / projectName)
-
 suspend fun injectDWorkflowsToProject(
   projectPath: Path,
   yamlFilesPath: Path = projectPath / ".github" / "workflows",
