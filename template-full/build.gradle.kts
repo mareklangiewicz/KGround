@@ -26,7 +26,7 @@ defaultBuildTemplateForRootProject(
     name = "TemplateFull",
     description = "Template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-full",
-    version = Ver(0, 0, 32),
+    version = Ver(0, 0, 33),
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,
