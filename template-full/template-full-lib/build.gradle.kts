@@ -23,11 +23,6 @@ plugins {
 // endregion [[Full MPP Lib Build Imports and Plugs]]
 
 
-// workaround for crazy gradle bugs like this one or similar:
-// https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
-repositories { maven(repos.composeJbDev) }
-
-
 defaultBuildTemplateForFullMppLib {
 // workaround for crazy gradle bugs like this one or similar:
 // https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
