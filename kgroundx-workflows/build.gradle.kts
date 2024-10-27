@@ -28,27 +28,19 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-maintenance"))
 }
 
-// Note: this module (kotlinx-workflows) had to be separated from kotlinx-maintenance,
-// because I don't want to propagate requirement to add third party maven repo https://bindings.krzeminski.it
-// to every project/consumer of kotlinx-maintenance (SourceFun, kokpit, kotlinx-jupyter, ...).
-
-repositories {
-  maven("https://bindings.krzeminski.it")
-}
-
-
 kotlin {
   sourceSets {
     jvmMain {
       dependencies {
-        implementation(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
-        implementation("actions:checkout:v4")
-        implementation("actions:setup-java:v4")
-        implementation("EndBug:add-and-commit:v9")
+        api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
 
-        // implementation("gradle:actions__setup-gradle:v4")
-        // FIXME: report issue - this doesn't work  Could not resolve gradle:actions__setup-gradle:v4.
-        // (but this action works when using .main.kts scripts - which I don't want to use)
+        api(Io.GitHub.TypeSafeGitHub.action_binding_generator)
+        api(Io.GitHub.TypeSafeGitHub.action_updates_checker)
+        api(Io.GitHub.TypeSafeGitHub.shared_internal)
+        // Note: I add these for easier experimenting in consuming code/libs. Not strictly needed here.
+        // Both modules: kotlinx-workflows and even kotlinx-maintenance are mostly for my own experiments,
+        // so users won't be usually consuming any of that (kotlinx-workflows even less often than kotlinx-maintenance)
+        // so it's fine that kotlinx-workflows comes with a "price" (kinda heavy dependencies)
       }
     }
   }

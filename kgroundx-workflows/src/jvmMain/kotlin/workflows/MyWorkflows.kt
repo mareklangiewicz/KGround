@@ -5,6 +5,8 @@ package pl.mareklangiewicz.kgroundx.workflows
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.endbug.AddAndCommit
+import io.github.typesafegithub.workflows.actions.gradle.ActionsDependencySubmission_Untyped
+import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
 import io.github.typesafegithub.workflows.domain.JobOutputs
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.Workflow
@@ -127,7 +129,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
 }
 
 
-private val MyDWorkflowNames = listOf("dbuild", "drelease")
+private val MyDWorkflowNames = listOf("dbuild", "drelease", "ddepsub")
 
 
 suspend fun checkMyDWorkflowsInProject(
@@ -207,6 +209,7 @@ suspend fun injectDWorkflowsToProject(
 internal fun myDefaultWorkflow(dname: String) = when (dname) {
   "dbuild" -> myDefaultBuildWorkflow()
   "drelease" -> myDefaultReleaseWorkflow()
+  "ddepsub" -> myDefaultDependencySubmissionWorkflow()
   else -> bad { "Unknown default workflow dname: $dname" }
 }
 
@@ -249,6 +252,20 @@ private fun myDefaultReleaseWorkflow() =
     }
   }
 
+private fun myDefaultDependencySubmissionWorkflow(runner: RunnerType = RunnerType.UbuntuLatest) =
+  myWorkflow("ddepsub", listOf(Push(branches = listOf("master", "main")), WorkflowDispatch()),
+  ) {
+    job(
+      id = "dependency-submission-on-${runner::class.simpleName}",
+      runsOn = runner,
+      env = mySecretsEnv,
+    ) {
+      uses(action = Checkout())
+      usesJdk()
+      uses(action = ActionsDependencySubmission_Untyped())
+    }
+  }
+
 fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   name: String? = "Set up JDK",
   version: String? = "22", // fixme_maybe: somehow take from DepsKt:Vers:JvmDefaultVer ?
@@ -268,14 +285,14 @@ fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   gradleVersion: String? = null, // null means it should try to use wrapper
 ) = uses(
   name = name,
-  // action = ActionsSetupGradle(
-  //   gradleVersion = gradleVersion,
-  // ),
-  // Workaround for issue with dependency: implementation("gradle:actions__setup-gradle:v4") (see build.gradle.kts)
-  action = MyActionsSetupGradle(gradleVersion),
+  action = ActionsSetupGradle(
+    gradleVersion = gradleVersion,
+  ),
   env = env,
 )
 
+// Not deleting for a while.
+@Deprecated("Use generated: bindings/generated/ActionsSetupGradle.kt")
 class MyActionsSetupGradle(
   private val gradleVersion: String? = null, // null means it should try to use wrapper
 ) : RegularAction<Action.Outputs>("gradle", "actions/setup-gradle", "v4") {
