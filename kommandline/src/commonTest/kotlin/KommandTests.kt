@@ -8,6 +8,7 @@ import okio.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kground.tee.*
 import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
@@ -242,4 +243,3 @@ private val rndBigLong get() = Random.nextLong(100_000L, Long.MAX_VALUE - 10_000
 private val rndBigLongStr get() = rndBigLong.strf
 private val rndBigInt get() = Random.nextInt(100_000, Int.MAX_VALUE - 1000)
 private val rndBigIntStr get() = rndBigInt.strf
-
