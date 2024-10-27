@@ -8,6 +8,8 @@ import io.github.typesafegithub.workflows.actions.endbug.AddAndCommit
 import io.github.typesafegithub.workflows.actions.gradle.ActionsDependencySubmission_Untyped
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
 import io.github.typesafegithub.workflows.domain.JobOutputs
+import io.github.typesafegithub.workflows.domain.Mode
+import io.github.typesafegithub.workflows.domain.Permission
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.Workflow
 import io.github.typesafegithub.workflows.domain.actions.RegularAction
@@ -91,7 +93,7 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() = myWorkflow(
   job(
     id = "generate-deps",
     runsOn = RunnerType.UbuntuLatest,
-    _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
+    permissions = mapOf(Permission.Contents to Mode.Write),
   ) {
     uses(action = Checkout())
     usesJdk()
@@ -114,7 +116,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
       id = "update-generated-deps",
       runsOn = RunnerType.UbuntuLatest,
       env = mySecretsEnv,
-      _customArguments = mapOf("permissions" to mapOf("contents" to "write")),
+      permissions = mapOf(Permission.Contents to Mode.Write),
     ) {
       uses(action = Checkout())
       usesJdk()
@@ -256,6 +258,7 @@ private fun myDefaultDependencySubmissionWorkflow(runner: RunnerType = RunnerTyp
       id = "dependency-submission-on-${runner::class.simpleName}",
       runsOn = runner,
       env = mySecretsEnv,
+      permissions = mapOf(Permission.Contents to Mode.Write),
     ) {
       uses(action = Checkout())
       usesJdk()
