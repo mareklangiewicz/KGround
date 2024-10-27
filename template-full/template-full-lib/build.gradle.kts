@@ -23,11 +23,7 @@ plugins {
 // endregion [[Full MPP Lib Build Imports and Plugs]]
 
 
-defaultBuildTemplateForFullMppLib {
-// workaround for crazy gradle bugs like this one or similar:
-// https://youtrack.jetbrains.com/issue/KT-43500/KJS-IR-Failed-to-resolve-Kotlin-library-on-attempting-to-resolve-compileOnly-transitive-dependency-from-direct-dependency
-  implementation(KotlinX.coroutines_core)
-}
+defaultBuildTemplateForFullMppLib()
 
 // region [[Full MPP Lib Build Template]]
 
