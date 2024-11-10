@@ -35,7 +35,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.3.56" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.3.57" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "3.18.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -54,6 +54,7 @@ include(":kgroundx")
 include(":kground-io")
 include(":kgroundx-io")
 include(":kgroundx-maintenance")
+include(":kgroundx-experiments")
 include(":kgroundx-workflows")
 include(":kgroundx-jupyter")
 include(":kgroundx-app")
