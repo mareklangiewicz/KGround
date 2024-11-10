@@ -268,7 +268,7 @@ private fun myDefaultDependencySubmissionWorkflow(runner: RunnerType = RunnerTyp
 
 fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
   name: String? = "Set up JDK",
-  version: String? = "22", // fixme_maybe: somehow take from DepsKt:Vers:JvmDefaultVer ?
+  version: String? = "23", // fixme_maybe: somehow take from DepsKt:Vers:JvmDefaultVer ?
   distribution: SetupJava.Distribution = SetupJava.Distribution.Zulu, // fixme_later: which dist?
 ) = uses(
   name = name,
