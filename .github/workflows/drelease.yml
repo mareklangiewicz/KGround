@@ -32,5 +32,9 @@ jobs:
       name: 'Build'
       run: './gradlew build --no-configuration-cache --no-parallel'
     - id: 'step-4'
+      uses: 'actions/upload-artifact@v4'
+      with:
+        path: 'kgroundx-app/build/distributions/'
+    - id: 'step-5'
       name: 'Publish to Sonatype'
       run: './gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel'

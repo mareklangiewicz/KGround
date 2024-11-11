@@ -163,7 +163,7 @@ suspend fun checkMyDWorkflowsInProject(
   for (file in yamlFiles) {
     val dname = file.name.substringBeforeLast('.')
     val contentExpected = try {
-      myDefaultWorkflowForProject(dname, projectPath).generateYaml()
+      myDefaultWorkflowForProject(dname, projectPath.name).generateYaml()
     } catch (e: IllegalStateException) {
       if (failIfUnknownWorkflowFound) throw e
       else {
@@ -195,7 +195,7 @@ suspend fun injectDWorkflowsToProject(
     } catch (e: FileNotFoundException) {
       ""
     }
-    val contentNew = myDefaultWorkflowForProject(dname, projectPath).generateYaml()
+    val contentNew = myDefaultWorkflowForProject(dname, projectPath.name).generateYaml()
     fs.writeUtf8(file, contentNew, createParentDir = true)
     val summary =
       if (contentNew == contentOld) "No changes."
@@ -205,13 +205,13 @@ suspend fun injectDWorkflowsToProject(
 }
 
 @OptIn(ExampleApi::class)
-private suspend fun myDefaultWorkflowForProject(dname: String, projectPath: Path) = myDefaultWorkflow(
+private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
   dname = dname,
-  dreleaseUpload = when(projectPath.name) {
-    "KGround" -> listOf(projectPath / "kgroundx-app/build/distributions/")
+  dreleaseUpload = when(projectName) {
+    "KGround" -> listOf("kgroundx-app/build/distributions/")
     else -> emptyList()
   },
-  dreleaseOssPublish = projectPath.name in getMyPublicProjectsNames()
+  dreleaseOssPublish = projectName in getMyPublicProjectsNames()
 )
 
 /**
@@ -221,7 +221,7 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectPath: Path
  */
 private fun myDefaultWorkflow(
   dname: String,
-  dreleaseUpload: List<Path> = emptyList(),
+  dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) = when (dname) {
   "dbuild" -> myDefaultBuildWorkflow()
@@ -243,7 +243,7 @@ private fun myDefaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType
   }
 
 private fun myDefaultReleaseWorkflow(
-  dreleaseUpload: List<Path> = emptyList(),
+  dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) =
   myWorkflow("drelease", listOf(Push(tags = listOf("v*.*.*")))) {
@@ -253,7 +253,7 @@ private fun myDefaultReleaseWorkflow(
       runsOn = RunnerType.UbuntuLatest,
     ) {
       usesDefaultSetupBuild()
-      if (dreleaseUpload.isNotEmpty()) uses(action = UploadArtifact(path = dreleaseUpload.map { it.toString() }))
+      if (dreleaseUpload.isNotEmpty()) uses(action = UploadArtifact(path = dreleaseUpload))
       if (dreleaseOssPublish) run(
         name = "Publish to Sonatype",
         command = "./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel",
