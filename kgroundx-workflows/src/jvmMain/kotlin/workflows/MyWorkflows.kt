@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kgroundx.workflows
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
+import io.github.typesafegithub.workflows.actions.actions.UploadArtifact
 import io.github.typesafegithub.workflows.actions.endbug.AddAndCommit
 import io.github.typesafegithub.workflows.actions.gradle.ActionsDependencySubmission_Untyped
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
@@ -21,7 +22,6 @@ import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
 import kotlin.collections.LinkedHashMap
-import kotlinx.coroutines.flow.Flow
 import okio.*
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.*
@@ -32,18 +32,18 @@ import pl.mareklangiewicz.ulog.*
 
 
 @ExampleApi suspend fun checkMyDWorkflowsInMyProjects(onlyPublic: Boolean) =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalDWorkflowsProjectsPathS()
-    .collect { checkMyDWorkflowsInProject(it) }
+  getMyProjectsNames(onlyPublic)
+    .mapFilterLocalDWorkflowsProjectsPaths()
+    .forEach { checkMyDWorkflowsInProject(it) }
 
 
 @ExampleApi suspend fun injectMyDWorkflowsToMyProjects(onlyPublic: Boolean) =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalDWorkflowsProjectsPathS()
-    .collect { injectDWorkflowsToProject(it) }
+  getMyProjectsNames(onlyPublic)
+    .mapFilterLocalDWorkflowsProjectsPaths()
+    .forEach { injectDWorkflowsToProject(it) }
 
-@ExampleApi private fun Flow<String>.mapFilterLocalDWorkflowsProjectsPathS() =
-  mapFilterLocalKotlinProjectsPathS {
+@ExampleApi private suspend fun Iterable<String>.mapFilterLocalDWorkflowsProjectsPaths() =
+  mapFilterLocalKotlinProjectsPaths {
     val log = localULog()
     val fs = localUFileSys()
     val isGradleRootProject = fs.exists(it / "settings.gradle.kts") || fs.exists(it / "settings.gradle")
@@ -131,6 +131,11 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
 }
 
 
+/**
+ * Each name is the name of both: workflow, and file name in .github/workflows (without .yml extension)
+ * hacky "d" prefix in all recognized names is mostly to avoid clashing with other workflows.
+ * (if I add it to existing repos/forks) (and it means "default")
+ */
 private val MyDWorkflowNames = listOf("dbuild", "drelease", "ddepsub")
 
 
@@ -158,7 +163,7 @@ suspend fun checkMyDWorkflowsInProject(
   for (file in yamlFiles) {
     val dname = file.name.substringBeforeLast('.')
     val contentExpected = try {
-      myDefaultWorkflow(dname).generateYaml()
+      myDefaultWorkflowForProject(dname, projectPath).generateYaml()
     } catch (e: IllegalStateException) {
       if (failIfUnknownWorkflowFound) throw e
       else {
@@ -190,7 +195,7 @@ suspend fun injectDWorkflowsToProject(
     } catch (e: FileNotFoundException) {
       ""
     }
-    val contentNew = myDefaultWorkflow(dname).generateYaml()
+    val contentNew = myDefaultWorkflowForProject(dname, projectPath).generateYaml()
     fs.writeUtf8(file, contentNew, createParentDir = true)
     val summary =
       if (contentNew == contentOld) "No changes."
@@ -199,15 +204,28 @@ suspend fun injectDWorkflowsToProject(
   }
 }
 
+@OptIn(ExampleApi::class)
+private suspend fun myDefaultWorkflowForProject(dname: String, projectPath: Path) = myDefaultWorkflow(
+  dname = dname,
+  dreleaseUpload = when(projectPath.name) {
+    "KGround" -> listOf(projectPath / "kgroundx-app/build/distributions/")
+    else -> emptyList()
+  },
+  dreleaseOssPublish = projectPath.name in getMyPublicProjectsNames()
+)
 
 /**
  * @dname name of both: workflow, and file name in .github/workflows (without .yml extension)
  * hacky "d" prefix in all recognized names is mostly to avoid clashing with other workflows.
  * (if I add it to existing repos/forks) (and it means "default")
  */
-internal fun myDefaultWorkflow(dname: String) = when (dname) {
+private fun myDefaultWorkflow(
+  dname: String,
+  dreleaseUpload: List<Path> = emptyList(),
+  dreleaseOssPublish: Boolean = false,
+) = when (dname) {
   "dbuild" -> myDefaultBuildWorkflow()
-  "drelease" -> myDefaultReleaseWorkflow()
+  "drelease" -> myDefaultReleaseWorkflow(dreleaseUpload, dreleaseOssPublish)
   "ddepsub" -> myDefaultDependencySubmissionWorkflow()
   else -> bad { "Unknown default workflow dname: $dname" }
 }
@@ -220,27 +238,23 @@ private fun myDefaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType
         id = "build-for-${runnerType::class.simpleName}",
         runsOn = runnerType,
         env = mySecretsEnv,
-      ) {
-        uses(action = Checkout())
-        usesJdk()
-        usesGradle()
-        run(name = "Build", command = "./gradlew build --no-configuration-cache --no-parallel")
-      }
+      ) { usesDefaultSetupBuild() }
     }
   }
 
-private fun myDefaultReleaseWorkflow() =
+private fun myDefaultReleaseWorkflow(
+  dreleaseUpload: List<Path> = emptyList(),
+  dreleaseOssPublish: Boolean = false,
+) =
   myWorkflow("drelease", listOf(Push(tags = listOf("v*.*.*")))) {
     job(
       id = "release",
       env = mySecretsEnv,
       runsOn = RunnerType.UbuntuLatest,
     ) {
-      uses(action = Checkout())
-      usesJdk()
-      usesGradle()
-      run(name = "Build", command = "./gradlew build --no-configuration-cache --no-parallel")
-      run(
+      usesDefaultSetupBuild()
+      if (dreleaseUpload.isNotEmpty()) uses(action = UploadArtifact(path = dreleaseUpload.map { it.toString() }))
+      if (dreleaseOssPublish) run(
         name = "Publish to Sonatype",
         command = "./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel",
       )
@@ -277,6 +291,12 @@ fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
     distribution = distribution,
   ),
 )
+fun JobBuilder<JobOutputs.EMPTY>.usesDefaultSetupBuild() {
+  uses(action = Checkout())
+  usesJdk()
+  usesGradle()
+  run(name = "Build", command = "./gradlew build --no-configuration-cache --no-parallel")
+}
 
 fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   vararg useNamedArgs: Unit,

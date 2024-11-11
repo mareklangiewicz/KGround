@@ -1,7 +1,6 @@
 package pl.mareklangiewicz.kgroundx.maintenance
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import okio.*
 import okio.FileSystem.Companion.RESOURCES
 import pl.mareklangiewicz.ulog.*
@@ -12,7 +11,6 @@ import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.*
-import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.UReplacement
 
 
@@ -21,7 +19,7 @@ import pl.mareklangiewicz.ure.UReplacement
  * but sometimes they depend on gradle version, so each update have to be checked/reproduced, before commiting/pushing.
  */
 @ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, skipReproducers: Boolean) =
-  getMyGradleProjectsPathS(onlyPublic).collect {
+  getMyGradleProjectsPaths(onlyPublic).forEach {
     val log = localULog()
     when {
       skipReproducers && it.segments.any { it == "reproducers" } -> log.i("Skipping reproducer $it")
@@ -49,9 +47,9 @@ suspend fun updateGradlewFilesInProject(fullPath: Path) =
 
 
 @OptIn(DelicateApi::class)
-private suspend fun findGradleRootProjectS(path: Path): Flow<Path> =
+private suspend fun findGradleRootProjects(path: Path): List<Path> =
   findTypeRegex(path, "f", ".*/settings.gradle\\(.kts\\)?")
-    .reducedOutToFlow()
+    .reducedOutToList()
     .reducedMap {
       // $ at the end of regex is important to avoid matching generated resource like: settings.gradle.kts.tmpl
       val regex = Regex("/settings\\.gradle(\\.kts)?\$")
@@ -63,11 +61,11 @@ val gradlewRelPaths =
   listOf("", ".bat").map { "gradlew$it".P } +
     listOf("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".P }
 
-/** @return Full pathS of my gradle rootProjectS (dirs with settings.gradle[.kts] files) */
+/** @return Full paths of my gradle rootProjects (dirs with settings.gradle[.kts] files) */
 @OptIn(ExperimentalCoroutinesApi::class)
-@ExampleApi private suspend fun getMyGradleProjectsPathS(onlyPublic: Boolean = true): Flow<Path> =
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalKotlinProjectsPathS()
-    .flatMapConcat(::findGradleRootProjectS)
+@ExampleApi private suspend fun getMyGradleProjectsPaths(onlyPublic: Boolean = true): List<Path> =
+  getMyProjectsNames(onlyPublic)
+    .mapFilterLocalKotlinProjectsPaths()
+    .flatMap { findGradleRootProjects(it) }
 
 

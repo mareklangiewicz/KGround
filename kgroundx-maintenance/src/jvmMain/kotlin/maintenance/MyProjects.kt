@@ -65,9 +65,9 @@ suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
 ) {
   val log = localULog()
   var foundCount = 0
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalKotlinProjectsPathS(alsoFilter = alsoFilterProjectPath)
-    .collect { projectPath ->
+  getMyProjectsNames(onlyPublic)
+    .mapFilterLocalKotlinProjectsPaths(alsoFilter = alsoFilterProjectPath)
+    .forEach { projectPath ->
       log.i("Searching in project: $projectPath")
       val listKt = findMyKotlinCode(projectPath).ax()
       val listKts =
@@ -132,6 +132,15 @@ private fun Ure.withSomeLinesAround(
     .filter { alsoFilter(it) }
 }
 
+/** @receiver Iterable of projects names. */
+@ExampleApi suspend fun Iterable<String>.mapFilterLocalKotlinProjectsPaths(
+  alsoFilter: suspend (Path) -> Boolean = { true },
+): List<Path> {
+  return map { PCodeKt / it }
+    .filter { localUFileSys().exists(it) }
+    .filter { alsoFilter(it) }
+}
+
 
 @ExampleApi suspend fun tryToInjectMyTemplatesToAllMyProjects(
   onlyPublic: Boolean = false,
@@ -139,37 +148,18 @@ private fun Ure.withSomeLinesAround(
 ) {
   val log = localULog()
   val templates = collectMyTemplates()
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalKotlinProjectsPathS()
-    .collect { path ->
+  fetchMyProjectsNames(onlyPublic)
+    .mapFilterLocalKotlinProjectsPaths()
+    .forEach { path ->
       suspend fun inject() {
         log.i("Injecting my templates to project: $path")
         tryInjectMyTemplatesToProject(path, templates, askInteractively)
       }
-      !askInteractively || zenityAskIf("Try to inject my templates to project: $path ?").ax() || return@collect
+      !askInteractively || zenityAskIf("Try to inject my templates to project: $path ?").ax() || return@forEach
       inject()
     }
 }
 
-@Deprecated("Temporary fun to fix templates from single to double square brackets marks")
-@ExampleApi suspend fun tryFixMyTemplatesInAllMyProjects(
-  onlyPublic: Boolean = false,
-  askInteractively: Boolean = true,
-) {
-  val log = localULog()
-  fetchMyProjectsNameS(onlyPublic)
-    .mapFilterLocalKotlinProjectsPathS()
-    .collect { path ->
-      suspend fun fix() {
-        log.i("Fixing my templates in project: $path")
-        tryFixMyTemplatesInProject(path, askInteractively)
-      }
-      !askInteractively || zenityAskIf("Try to fix my templates in project: $path ?").ax() || return@collect
-      fix()
-    }
-}
-
-@Suppress("IdentifierGrammar")
 @ExampleApi suspend fun fetchMyProjectsNameS(onlyPublic: Boolean = true): Flow<String> =
   ghMyRepoList(onlyPublic = onlyPublic)
     .outputFields("name")
@@ -179,3 +169,22 @@ private fun Ure.withSomeLinesAround(
 
 @ExampleApi suspend fun fetchMyProjectsNames(onlyPublic: Boolean = true, sorted: Boolean = true): List<String> =
   fetchMyProjectsNameS(onlyPublic).toList().let { if (sorted) it.sorted() else it }
+
+@ExampleApi suspend fun getMyProjectsNames(onlyPublic: Boolean = true) =
+  if (onlyPublic) getMyPublicProjectsNames() else getMyAllProjectsNames()
+
+@ExampleApi suspend fun getMyPublicProjectsNames() =
+  MyCachedPublicProjectsNames ?:
+  fetchMyProjectsNames(onlyPublic = true)
+    .also { MyCachedPublicProjectsNames = it }
+
+@ExampleApi suspend fun getMyAllProjectsNames() =
+  MyCachedAllProjectsNames ?:
+  fetchMyProjectsNames(onlyPublic = false)
+    .also { MyCachedAllProjectsNames = it }
+
+@ExampleApi suspend fun getMyPrivateProjectsNames() = getMyAllProjectsNames() - getMyPublicProjectsNames()
+
+@Volatile private var MyCachedPublicProjectsNames: List<String>? = null
+@Volatile private var MyCachedAllProjectsNames: List<String>? = null
+

@@ -129,9 +129,9 @@ object MyWeirdExamples {
     val log = localULog()
     val fs = localUFileSys()
     val pathLeft = PProjKGround / "settings.gradle.kts"
-    fetchMyProjectsNameS(onlyPublic = false)
-      .mapFilterLocalKotlinProjectsPathS()
-      .collect {
+    getMyProjectsNames(onlyPublic = false)
+      .mapFilterLocalKotlinProjectsPaths()
+      .forEach {
         val pathRight = it / "settings.gradle.kts"
         if (fs.exists(pathRight)) {
           val msgDiff = "ideDiff(\n  \"$pathLeft\",\n  \"$pathRight\"\n)"
@@ -153,9 +153,9 @@ object MyWeirdExamples {
    */
   @OptIn(DelicateApi::class, NotPortableApi::class)
   suspend fun tryToUpdateMyReposOrigins() =
-    fetchMyProjectsNameS(onlyPublic = false)
+    fetchMyProjectsNames(onlyPublic = false)
       .map { PCodeKt / it }
-      .collect { tryToUpdateMyRepoOrigin(it) }
+      .forEach { tryToUpdateMyRepoOrigin(it) }
 
   @OptIn(DelicateApi::class, NotPortableApi::class)
   private suspend fun tryToUpdateMyRepoOrigin(repoDir: Path) = cd(repoDir) {
