@@ -57,7 +57,7 @@ import pl.mareklangiewicz.ulog.*
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 
-private val mySecretsEnv = listOf(
+private val myOssSecretsEnv = listOf(
   "signing_keyId", "signing_password", "signing_key",
   "ossrhUsername", "ossrhPassword", "sonatypeStagingProfileId",
 )
@@ -79,10 +79,11 @@ private val everydayBefore6amUTC = Cron(hour = "5", minute = "53")
 fun myWorkflow(
   name: String,
   on: List<Trigger>,
+  env: Map<String, String> = mapOf(),
   block: WorkflowBuilder.() -> Unit,
 ): Workflow {
   lateinit var result: Workflow
-  workflow(name = name, on = on, block = block, useWorkflow = { result = it })
+  workflow(name = name, on = on, env = env, block = block, useWorkflow = { result = it })
   return result
 }
 
@@ -111,11 +112,14 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() = myWorkflow(
 
 // FIXME: something less hacky/hardcoded/repetitive
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
-  myWorkflow("Update Generated Deps", listOf(Schedule(listOf(everydayBefore6amUTC)), WorkflowDispatch())) {
+  myWorkflow(
+    name = "Update Generated Deps",
+    on = listOf(Schedule(listOf(everydayBefore6amUTC)), WorkflowDispatch()),
+    env = myOssSecretsEnv
+  ) {
     job(
       id = "update-generated-deps",
       runsOn = RunnerType.UbuntuLatest,
-      env = mySecretsEnv,
       permissions = mapOf(Permission.Contents to Mode.Write),
     ) {
       uses(action = Checkout())
@@ -207,8 +211,27 @@ suspend fun injectDWorkflowsToProject(
 @OptIn(ExampleApi::class)
 private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
   dname = dname,
+  env = if (projectName in getMyPublicProjectsNames()) myOssSecretsEnv else mapOf(),
   dreleaseUpload = when(projectName) {
-    "KGround" -> listOf("kgroundx-app/build/distributions/")
+    "KGround" -> listOf(
+      "kgroundx-app/build/distributions/*.zip"
+    ) // let's ignore tars (zips better for normies)
+    "KommandLine" -> listOf(
+      "kommandapp/build/distributions/*.zip"
+    ) // TODO_later: remove after merging KommandLine with KGround
+    "UWidgets" -> listOf(
+      "uwidgets-udemo-app/build/compose/binaries/main/deb/*.deb",
+      "uwidgets-udemo-app/build/outputs/debug/*.apk",
+    )
+    "AreaKim" -> listOf(
+      "areakim-demo-app/build/compose/binaries/main/deb/*.deb",
+      "areakim-demo-app/build/outputs/debug/*.apk",
+    )
+    "kokpit667" -> listOf(
+      "kodeskapp/build/compose/binaries/main/deb/*.deb",
+      "kodrapp/build/outputs/debug/*.apk",
+      "kmd/build/distributions/*.zip"
+    )
     else -> emptyList()
   },
   dreleaseOssPublish = projectName in getMyPublicProjectsNames()
@@ -221,39 +244,49 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
  */
 private fun myDefaultWorkflow(
   dname: String,
+  env: Map<String, String> = mapOf(),
   dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) = when (dname) {
-  "dbuild" -> myDefaultBuildWorkflow()
-  "drelease" -> myDefaultReleaseWorkflow(dreleaseUpload, dreleaseOssPublish)
-  "ddepsub" -> myDefaultDependencySubmissionWorkflow()
+  "dbuild" -> myDefaultBuildWorkflow(env = env)
+  "drelease" -> myDefaultReleaseWorkflow(env = env, dreleaseUpload = dreleaseUpload, dreleaseOssPublish = dreleaseOssPublish)
+  "ddepsub" -> myDefaultDependencySubmissionWorkflow(env = env)
   else -> bad { "Unknown default workflow dname: $dname" }
 }
 
-private fun myDefaultBuildWorkflow(runners: List<RunnerType> = listOf(RunnerType.UbuntuLatest)) =
-  myWorkflow("dbuild", listOf(Push(branches = listOf("master", "main")), PullRequest(), WorkflowDispatch()),
-  ) {
-    runners.forEach { runnerType ->
-      job(
-        id = "build-for-${runnerType::class.simpleName}",
-        runsOn = runnerType,
-        env = mySecretsEnv,
-      ) { usesDefaultSetupBuild() }
-    }
+private fun myDefaultBuildWorkflow(
+  runners: List<RunnerType> = listOf(RunnerType.UbuntuLatest),
+  env: Map<String, String> = mapOf(),
+) = myWorkflow(
+  name = "dbuild",
+  on = listOf(Push(branches = listOf("master", "main")), PullRequest(), WorkflowDispatch()),
+  env = env,
+) {
+  runners.forEach { runnerType ->
+    job(
+      id = "build-for-${runnerType::class.simpleName}",
+      runsOn = runnerType,
+    ) { usesDefaultSetupBuild() }
   }
+}
 
 private fun myDefaultReleaseWorkflow(
+  runner: RunnerType = RunnerType.UbuntuLatest,
+  env: Map<String, String> = mapOf(),
   dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) =
-  myWorkflow("drelease", listOf(Push(tags = listOf("v*.*.*")))) {
+  myWorkflow(
+    name = "drelease",
+    on = listOf(Push(tags = listOf("v*.*.*"))),
+    env = env,
+  ) {
     job(
       id = "release",
-      env = mySecretsEnv,
-      runsOn = RunnerType.UbuntuLatest,
+      runsOn = runner,
     ) {
       usesDefaultSetupBuild()
-      if (dreleaseUpload.isNotEmpty()) uses(action = UploadArtifact(path = dreleaseUpload))
+      for (dru in dreleaseUpload) uses(action = UploadArtifact(path = listOf(dru)))
       if (dreleaseOssPublish) run(
         name = "Publish to Sonatype",
         command = "./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel",
@@ -265,13 +298,18 @@ private fun myDefaultReleaseWorkflow(
     }
   }
 
-private fun myDefaultDependencySubmissionWorkflow(runner: RunnerType = RunnerType.UbuntuLatest) =
-  myWorkflow("ddepsub", listOf(Push(branches = listOf("master", "main")), WorkflowDispatch()),
+private fun myDefaultDependencySubmissionWorkflow(
+  runner: RunnerType = RunnerType.UbuntuLatest,
+  env: Map<String, String> = mapOf(),
+) =
+  myWorkflow(
+    name = "ddepsub",
+    on = listOf(Push(branches = listOf("master", "main")), WorkflowDispatch()),
+    env = env,
   ) {
     job(
       id = "dependency-submission-on-${runner::class.simpleName}",
       runsOn = runner,
-      env = mySecretsEnv,
       permissions = mapOf(Permission.Contents to Mode.Write),
     ) {
       uses(action = Checkout())
