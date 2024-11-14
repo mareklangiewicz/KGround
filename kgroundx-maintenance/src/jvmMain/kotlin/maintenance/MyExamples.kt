@@ -74,9 +74,9 @@ object MyTemplatesExamples {
     tryDiffMyConflictingTemplatesSrc()
   }
 
-  suspend fun tryInjectOneProject() = tryInjectMyTemplatesToProject(PCodeKt / "AbcdK")
+  suspend fun tryInjectAbcdK() = tryInjectMyTemplatesToProject(PCodeKt / "AbcdK")
 
-  suspend fun tryInjectToItSelf() = tryInjectMyTemplatesToProject(PCodeKt / "KGround")
+  suspend fun tryInjectToKGround() = tryInjectMyTemplatesToProject(PCodeKt / "KGround")
 
   suspend fun tryInjectAllMyProjects() =
     tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = false)
