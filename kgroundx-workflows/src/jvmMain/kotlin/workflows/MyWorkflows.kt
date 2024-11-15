@@ -125,10 +125,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
       uses(action = Checkout())
       usesJdk()
       usesGradle()
-      run(
-        name = "updateGeneratedDeps",
-        command = "./gradlew updateGeneratedDeps --no-configuration-cache --no-parallel"
-      )
+      runGradleW("updateGeneratedDeps")
       usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
     }
   }.write("update-generated-deps.yml", PProjDepsKt)
@@ -212,6 +209,12 @@ suspend fun injectDWorkflowsToProject(
 private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
   dname = dname,
   env = if (projectName in getMyPublicProjectsNames()) myOssSecretsEnv else mapOf(),
+  dreleasePackage = when(projectName) {
+    "UWidgets" -> "packageDeb"
+    "AreaKim" -> "packageDeb"
+    "kokpit667" -> "packageDeb"
+    else -> null
+  },
   dreleaseUpload = when(projectName) {
     "KGround" -> listOf(
       "kgroundx-app/build/distributions/*.zip"
@@ -221,15 +224,18 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
     ) // TODO_later: remove after merging KommandLine with KGround
     "UWidgets" -> listOf(
       "uwidgets-udemo-app/build/compose/binaries/main/deb/*.deb",
-      "uwidgets-udemo-app/build/outputs/debug/*.apk",
+      "uwidgets-udemo-app/build/outputs/apk/debug/*.apk",
+      "uwidgets-udemo-app/build/outputs/apk/release/*.apk",
     )
     "AreaKim" -> listOf(
       "areakim-demo-app/build/compose/binaries/main/deb/*.deb",
-      "areakim-demo-app/build/outputs/debug/*.apk",
+      "areakim-demo-app/build/outputs/apk/debug/*.apk",
+      "areakim-demo-app/build/outputs/apk/release/*.apk",
     )
     "kokpit667" -> listOf(
       "kodeskapp/build/compose/binaries/main/deb/*.deb",
-      "kodrapp/build/outputs/debug/*.apk",
+      "kodrapp/build/outputs/apk/debug/*.apk",
+      "kodrapp/build/outputs/apk/release/*.apk",
       "kmd/build/distributions/*.zip"
     )
     else -> emptyList()
@@ -245,11 +251,17 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
 private fun myDefaultWorkflow(
   dname: String,
   env: Map<String, String> = mapOf(),
+  dreleasePackage: String? = null,
   dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) = when (dname) {
   "dbuild" -> myDefaultBuildWorkflow(env = env)
-  "drelease" -> myDefaultReleaseWorkflow(env = env, dreleaseUpload = dreleaseUpload, dreleaseOssPublish = dreleaseOssPublish)
+  "drelease" -> myDefaultReleaseWorkflow(
+    env = env,
+    dreleasePackage = dreleasePackage,
+    dreleaseUpload = dreleaseUpload,
+    dreleaseOssPublish = dreleaseOssPublish,
+  )
   "ddepsub" -> myDefaultDependencySubmissionWorkflow(env = env)
   else -> bad { "Unknown default workflow dname: $dname" }
 }
@@ -266,13 +278,14 @@ private fun myDefaultBuildWorkflow(
     job(
       id = "build-for-${runnerType::class.simpleName}",
       runsOn = runnerType,
-    ) { usesDefaultSetupBuild() }
+    ) { usesDefaultBuild() }
   }
 }
 
 private fun myDefaultReleaseWorkflow(
   runner: RunnerType = RunnerType.UbuntuLatest,
   env: Map<String, String> = mapOf(),
+  dreleasePackage: String? = null,
   dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) =
@@ -285,12 +298,10 @@ private fun myDefaultReleaseWorkflow(
       id = "release",
       runsOn = runner,
     ) {
-      usesDefaultSetupBuild()
+      usesDefaultBuild()
+      dreleasePackage?.let { runGradleW(it) }
       for (dru in dreleaseUpload) uses(action = UploadArtifact(path = listOf(dru)))
-      if (dreleaseOssPublish) run(
-        name = "Publish to Sonatype",
-        command = "./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache --no-parallel",
-      )
+      if (dreleaseOssPublish) runGradleW("publishToSonatype closeAndReleaseSonatypeStagingRepository")
       // TODO_someday: consider sth like: https://github.com/ansman/sonatype-publish-fix
       // TODO_someday: something more like
       // github-workflows-kt/.github/workflows/release.main.kts
@@ -329,11 +340,11 @@ fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
     distribution = distribution,
   ),
 )
-fun JobBuilder<JobOutputs.EMPTY>.usesDefaultSetupBuild() {
+fun JobBuilder<JobOutputs.EMPTY>.usesDefaultBuild() {
   uses(action = Checkout())
   usesJdk()
   usesGradle()
-  run(name = "Build", command = "./gradlew build --no-configuration-cache --no-parallel")
+  runGradleW("build")
 }
 
 fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
@@ -348,6 +359,9 @@ fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   ),
   env = env,
 )
+
+fun JobBuilder<JobOutputs.EMPTY>.runGradleW(tasks: String) =
+  run(name = tasks, command = "./gradlew $tasks --no-configuration-cache --no-parallel")
 
 // Not deleting for a while.
 @Deprecated("Use generated: bindings/generated/ActionsSetupGradle.kt")
