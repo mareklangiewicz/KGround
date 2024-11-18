@@ -38,7 +38,7 @@ kotlin {
         api(Io.GitHub.TypeSafeGitHub.action_updates_checker)
         api(Io.GitHub.TypeSafeGitHub.shared_internal)
         // Note: I add these for easier experimenting in consuming code/libs. Not strictly needed here.
-        // Both modules: kotlinx-workflows and even kotlinx-maintenance are mostly for my own experiments,
+        // All: kotlinx-workflows, kotlinx-experiments and even kotlinx-maintenance are mostly for my own experiments,
         // so users won't be usually consuming any of that (kotlinx-workflows even less often than kotlinx-maintenance)
         // so it's fine that kotlinx-workflows comes with a "price" (kinda heavy dependencies)
       }
