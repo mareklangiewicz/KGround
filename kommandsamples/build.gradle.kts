@@ -30,14 +30,8 @@ defaultBuildTemplateForBasicMppLib {
   implementation(Kotlin.reflect)
 }
 
-// Note: kground substitutions also needed for KGround project, so kommandsamples module finds local kground modules
-setMyWeirdSubstitutions(
-  "kground" to rootExtString["verKGround"],
-  "kground-io" to rootExtString["verKGround"],
-)
-
-
-kotlin { js(IR) { nodejs() } }
+// FIXME NOW: do I need it?
+// kotlin { js(IR) { nodejs() } }
 
 // region [[Kotlin Module Build Template]]
 

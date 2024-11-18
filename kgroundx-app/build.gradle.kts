@@ -26,12 +26,6 @@ repositories {
   maven("https://bindings.krzeminski.it")
 }
 
-setMyWeirdSubstitutions(
-  "kommandline" to rootExtString["verKommand"],
-  "kommandsamples" to rootExtString["verKommand"],
-  "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
-)
-
 // region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,

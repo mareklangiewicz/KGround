@@ -34,12 +34,6 @@ defaultBuildTemplateForBasicMppLib(details) {
   // implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }
 
-setMyWeirdSubstitutions(
-  "kommandline" to rootExtString["verKommand"],
-  "kommandsamples" to rootExtString["verKommand"],
-  "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
-)
-
 // region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,

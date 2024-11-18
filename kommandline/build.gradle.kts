@@ -23,17 +23,12 @@ val details = rootExtLibDetails.copy(
 )
 
 defaultBuildTemplateForBasicMppLib(details) {
-  api(Langiewicz.kground)
-  api(Langiewicz.kground_io)
+  api(project(":kground"))
+  api(project(":kground-io"))
 }
 
-// Note: kground substitutions also needed for KGround project, so kommandline module finds local kground modules
-setMyWeirdSubstitutions(
-  "kground" to rootExtString["verKGround"],
-  "kground-io" to rootExtString["verKGround"],
-)
-
-kotlin { js(IR) { nodejs() } }
+// FIXME NOW: do I need it?
+// kotlin { js(IR) { nodejs() } }
 
 // region [[Kotlin Module Build Template]]
 

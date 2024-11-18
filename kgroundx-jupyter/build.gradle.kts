@@ -33,12 +33,6 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-maintenance"))
 }
 
-setMyWeirdSubstitutions(
-  "kommandline" to rootExtString["verKommand"],
-  "kommandsamples" to rootExtString["verKommand"],
-  "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
-)
-
 tasks.processJupyterApiResources {
   libraryProducers = listOf("pl.mareklangiewicz.kgroundx.jupyter.Integration")
 }

@@ -20,15 +20,9 @@ plugins {
 defaultBuildTemplateForBasicMppLib {
   api(project(":kgroundx"))
   api(project(":kground-io"))
-  api(Langiewicz.kommandline)
-  api(Langiewicz.kommandsamples)
+  api(project(":kommandline"))
+  api(project(":kommandsamples"))
 }
-
-setMyWeirdSubstitutions(
-  "kommandline" to rootExtString["verKommand"],
-  "kommandsamples" to rootExtString["verKommand"],
-  "kground" to "ALWAYS_LOCAL", // to avoid issues with trans deps from kommandline
-)
 
 // kotlin { js(IR) { nodejs() } }
 
