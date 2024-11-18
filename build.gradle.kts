@@ -20,14 +20,14 @@ val enablePublishing = findProject(":kground") == null
 // (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
 // exception: publishToMavenLocal for debugging
 
-rootExtString["verKGround"] = "0.0.85" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
+rootExtString["verKGround"] = "0.0.87" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
     name = "KommandLine",
     description = "Kotlin DSL for popular CLI commands.",
     githubUrl = "https://github.com/mareklangiewicz/KommandLine",
-    version = Ver(0, 0, 87),
+    version = Ver(0, 0, 88),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
     // https://github.com/mareklangiewicz/KommandLine/releases
     settings = LibSettings(
