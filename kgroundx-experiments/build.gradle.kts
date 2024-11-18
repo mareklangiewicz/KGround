@@ -28,6 +28,8 @@ defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-maintenance"))
   implementation("org.hildan.chrome:chrome-devtools-kotlin:6.4.1-1347815")
   implementation("io.ktor:ktor-client-cio:2.3.12")
+    // FIXME_later: update after new release of chrome-devtools-kotlin!
+    // (need old ktor for current devtools-kotlin, but sonatype reports medium thread in old ktor)
   implementation("org.slf4j:slf4j-simple:2.0.16")
   // implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }
