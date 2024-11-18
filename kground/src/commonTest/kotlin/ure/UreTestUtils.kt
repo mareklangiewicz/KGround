@@ -6,6 +6,7 @@ import pl.mareklangiewicz.kground.tee.getCurrentPlatformName
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
 import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.tta
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
@@ -76,11 +77,11 @@ fun Ure.tstMatchCorrectInputs(
   alsoCheckNegation: Boolean = true,
   verbose: Boolean = false,
 ) = "matches correct inputs" o {
-  tstMatchAll(*match.toTypedArray(), verbose = verbose)
-  tstMatchNone(*matchNot.toTypedArray(), verbose = verbose)
+  tstMatchAll(*match.tta, verbose = verbose)
+  tstMatchNone(*matchNot.tta, verbose = verbose)
   if (alsoCheckNegation) {
-    not().tstMatchAll(*matchNot.toTypedArray(), verbose = verbose)
-    not().tstMatchNone(*match.toTypedArray(), verbose = verbose)
+    not().tstMatchAll(*matchNot.tta, verbose = verbose)
+    not().tstMatchNone(*match.tta, verbose = verbose)
   }
 }
 
@@ -107,4 +108,3 @@ internal fun USpekTree.assertAllGood() {
   if (failed) throw end!!.cause!!
   branches.values.forEach { it.assertAllGood() }
 }
-

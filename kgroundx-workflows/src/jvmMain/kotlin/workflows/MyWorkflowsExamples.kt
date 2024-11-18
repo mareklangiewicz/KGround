@@ -7,11 +7,10 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.kommand.*
-
+import pl.mareklangiewicz.udata.tta
 
 @ExampleApi
 object MyWorkflowsExamples {
-
   suspend fun checkAllMDW() = checkMyDWorkflowsInMyProjects(onlyPublic = false)
 
   suspend fun injectMDWToMyProjects() = injectMyDWorkflowsToMyProjects(onlyPublic = false)
@@ -38,7 +37,6 @@ object MyWorkflowsExamples {
     }
   }
 }
-
 
 // TODO: implement it in kommandline; see "gh browse --help"; "gh workflow --help" and add more features/flags
 
@@ -71,4 +69,4 @@ fun ghWorkflowView(workflowNameOrId: String, web: Boolean = false, yaml: Boolean
 fun ghWorkflowRun(workflowNameOrId: String) = kommand("gh", "workflow", "run", workflowNameOrId)
 
 fun kommand(name: String, buildArgs: MutableList<String>.() -> Unit) =
-  kommand(name, *buildList(buildArgs).toTypedArray())
+  kommand(name, *buildList(buildArgs).tta)

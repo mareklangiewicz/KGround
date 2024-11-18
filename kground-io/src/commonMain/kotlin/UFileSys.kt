@@ -7,6 +7,7 @@ import okio.ForwardingFileSystem
 import okio.Path
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.uctx.UCtx
+import pl.mareklangiewicz.udata.lONN
 
 
 open class UFileSys(delegate: FileSystem) : UCtx, ForwardingFileSystem(delegate) {
@@ -22,7 +23,7 @@ open class UFileSys(delegate: FileSystem) : UCtx, ForwardingFileSystem(delegate)
   open val pathToSysTmp: Path? = null
 }
 
-val UFileSys.pathToSomeTmpOrHome get() = listOfNotNull(pathToUserTmp, pathToSysTmp, pathToUserHome).first()
+val UFileSys.pathToSomeTmpOrHome get() = lONN(pathToUserTmp, pathToSysTmp, pathToUserHome).first()
 
 /**
  * Just some convention I like; additional "tmp" in name is there to emphasize that
@@ -41,4 +42,3 @@ suspend inline fun localUFileSys(): UFileSys =
   localUFileSysOrNull() ?: bad { "No UFileSys provided in coroutine context." }
 
 suspend inline fun localUFileSysOrNull(): UFileSys? = coroutineContext[UFileSys]
-

@@ -28,6 +28,9 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.io.*
 import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kgroundx.maintenance.*
+import pl.mareklangiewicz.udata.lMO
+import pl.mareklangiewicz.udata.lMONN
+import pl.mareklangiewicz.udata.lO
 import pl.mareklangiewicz.ulog.*
 
 
@@ -57,9 +60,8 @@ import pl.mareklangiewicz.ulog.*
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 
-private val myOssSecretsEnv = listOf(
-  "signing_keyId", "signing_password", "signing_key",
-  "ossrhUsername", "ossrhPassword", "sonatypeStagingProfileId",
+private val myOssSecretsEnv = lO(
+  "signing_keyId", "signing_password", "signing_key", "ossrhUsername", "ossrhPassword", "sonatypeStagingProfileId",
 )
   .map { "MYKOTLIBS_$it" }
   .associateWith { expr("secrets.$it") } as LinkedHashMap<String, String>
@@ -79,7 +81,7 @@ private val everydayBefore6amUTC = Cron(hour = "5", minute = "53")
 fun myWorkflow(
   name: String,
   on: List<Trigger>,
-  env: Map<String, String> = mapOf(),
+  env: Map<String, String> = lMO(),
   block: WorkflowBuilder.() -> Unit,
 ): Workflow {
   lateinit var result: Workflow
@@ -89,19 +91,19 @@ fun myWorkflow(
 
 // FIXME_maybe: something less hacky/hardcoded
 fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() = myWorkflow(
-  "Generate Deps", listOf(Schedule(listOf(everydayAfter5amUTC)), WorkflowDispatch()),
+  "Generate Deps", lO(Schedule(lO(everydayAfter5amUTC)), WorkflowDispatch()),
 ) {
   job(
     id = "generate-deps",
     runsOn = RunnerType.UbuntuLatest,
-    permissions = mapOf(Permission.Contents to Mode.Write),
+    permissions = lMO(Permission.Contents to Mode.Write),
   ) {
     uses(action = Checkout())
     usesJdk()
-    usesGradle(gradleVersion = "8.10.2") // FIXME_someday: I had errors when null (when trying to use wrapper)
+    usesGradle(gradleVersion = "8.11") // FIXME_someday: I had errors when null (when trying to use wrapper)
     run(
       name = "MyExperiments.generateDeps",
-      env = linkedMapOf("GENERATE_DEPS" to "true"),
+      env = lMO("GENERATE_DEPS" to "true"),
       workingDirectory = "plugins",
       command = "gradle --info :refreshVersions:test --tests MyExperiments.generateDeps"
     )
@@ -114,13 +116,13 @@ fun injectHackyGenerateDepsWorkflowToRefreshDepsRepo() = myWorkflow(
 fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
   myWorkflow(
     name = "Update Generated Deps",
-    on = listOf(Schedule(listOf(everydayBefore6amUTC)), WorkflowDispatch()),
+    on = lO(Schedule(lO(everydayBefore6amUTC)), WorkflowDispatch()),
     env = myOssSecretsEnv
   ) {
     job(
       id = "update-generated-deps",
       runsOn = RunnerType.UbuntuLatest,
-      permissions = mapOf(Permission.Contents to Mode.Write),
+      permissions = lMO(Permission.Contents to Mode.Write),
     ) {
       uses(action = Checkout())
       usesJdk()
@@ -137,7 +139,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
  * hacky "d" prefix in all recognized names is mostly to avoid clashing with other workflows.
  * (if I add it to existing repos/forks) (and it means "default")
  */
-private val MyDWorkflowNames = listOf("dbuild", "drelease", "ddepsub")
+private val MyDWorkflowNames = lO("dbuild", "drelease", "ddepsub")
 
 
 suspend fun checkMyDWorkflowsInProject(
@@ -208,7 +210,7 @@ suspend fun injectDWorkflowsToProject(
 @OptIn(ExampleApi::class)
 private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
   dname = dname,
-  env = if (projectName in getMyPublicProjectsNames()) myOssSecretsEnv else mapOf(),
+  env = if (projectName in getMyPublicProjectsNames()) myOssSecretsEnv else lMO(),
   dreleasePackage = when(projectName) {
     "UWidgets" -> "packageDeb"
     "AreaKim" -> "packageDeb"
@@ -216,23 +218,23 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
     else -> null
   },
   dreleaseUpload = when(projectName) {
-    "KGround" -> listOf(
+    "KGround" -> lO(
       "kgroundx-app/build/distributions/*.zip"
     ) // let's ignore tars (zips better for normies)
-    "KommandLine" -> listOf(
+    "KommandLine" -> lO(
       "kommandapp/build/distributions/*.zip"
     ) // TODO_later: remove after merging KommandLine with KGround
-    "UWidgets" -> listOf(
+    "UWidgets" -> lO(
       "uwidgets-udemo-app/build/compose/binaries/main/deb/*.deb",
       "uwidgets-udemo-app/build/outputs/apk/debug/*.apk",
       "uwidgets-udemo-app/build/outputs/apk/release/*.apk",
     )
-    "AreaKim" -> listOf(
+    "AreaKim" -> lO(
       "areakim-demo-app/build/compose/binaries/main/deb/*.deb",
       "areakim-demo-app/build/outputs/apk/debug/*.apk",
       "areakim-demo-app/build/outputs/apk/release/*.apk",
     )
-    "kokpit667" -> listOf(
+    "kokpit667" -> lO(
       "kodeskapp/build/compose/binaries/main/deb/*.deb",
       "kodrapp/build/outputs/apk/debug/*.apk",
       "kodrapp/build/outputs/apk/release/*.apk",
@@ -250,7 +252,7 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
  */
 private fun myDefaultWorkflow(
   dname: String,
-  env: Map<String, String> = mapOf(),
+  env: Map<String, String> = lMO(),
   dreleasePackage: String? = null,
   dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
@@ -267,11 +269,11 @@ private fun myDefaultWorkflow(
 }
 
 private fun myDefaultBuildWorkflow(
-  runners: List<RunnerType> = listOf(RunnerType.UbuntuLatest),
-  env: Map<String, String> = mapOf(),
+  runners: List<RunnerType> = lO(RunnerType.UbuntuLatest),
+  env: Map<String, String> = lMO(),
 ) = myWorkflow(
   name = "dbuild",
-  on = listOf(Push(branches = listOf("master", "main")), PullRequest(), WorkflowDispatch()),
+  on = lO(Push(branches = lO("master", "main")), PullRequest(), WorkflowDispatch()),
   env = env,
 ) {
   runners.forEach { runnerType ->
@@ -284,14 +286,14 @@ private fun myDefaultBuildWorkflow(
 
 private fun myDefaultReleaseWorkflow(
   runner: RunnerType = RunnerType.UbuntuLatest,
-  env: Map<String, String> = mapOf(),
+  env: Map<String, String> = lMO(),
   dreleasePackage: String? = null,
   dreleaseUpload: List<String> = emptyList(),
   dreleaseOssPublish: Boolean = false,
 ) =
   myWorkflow(
     name = "drelease",
-    on = listOf(Push(tags = listOf("v*.*.*"))),
+    on = lO(Push(tags = lO("v*.*.*"))),
     env = env,
   ) {
     job(
@@ -300,7 +302,7 @@ private fun myDefaultReleaseWorkflow(
     ) {
       usesDefaultBuild()
       dreleasePackage?.let { runGradleW(it) }
-      for (dru in dreleaseUpload) uses(action = UploadArtifact(path = listOf(dru)))
+      for (dru in dreleaseUpload) uses(action = UploadArtifact(path = lO(dru)))
       if (dreleaseOssPublish) runGradleW("publishToSonatype closeAndReleaseSonatypeStagingRepository")
       // TODO_someday: consider sth like: https://github.com/ansman/sonatype-publish-fix
       // TODO_someday: something more like
@@ -311,17 +313,17 @@ private fun myDefaultReleaseWorkflow(
 
 private fun myDefaultDependencySubmissionWorkflow(
   runner: RunnerType = RunnerType.UbuntuLatest,
-  env: Map<String, String> = mapOf(),
+  env: Map<String, String> = lMO(),
 ) =
   myWorkflow(
     name = "ddepsub",
-    on = listOf(Push(branches = listOf("master", "main")), WorkflowDispatch()),
+    on = lO(Push(branches = lO("master", "main")), WorkflowDispatch()),
     env = env,
   ) {
     job(
       id = "dependency-submission-on-${runner::class.simpleName}",
       runsOn = runner,
-      permissions = mapOf(Permission.Contents to Mode.Write),
+      permissions = lMO(Permission.Contents to Mode.Write),
     ) {
       uses(action = Checkout())
       usesJdk()
@@ -350,7 +352,7 @@ fun JobBuilder<JobOutputs.EMPTY>.usesDefaultBuild() {
 fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   vararg useNamedArgs: Unit,
   name: String? = null,
-  env: Map<String, String> = mapOf(),
+  env: Map<String, String> = lMO(),
   gradleVersion: String? = null, // null means it should try to use wrapper
 ) = uses(
   name = name,
@@ -368,16 +370,9 @@ fun JobBuilder<JobOutputs.EMPTY>.runGradleW(tasks: String) =
 class MyActionsSetupGradle(
   private val gradleVersion: String? = null, // null means it should try to use wrapper
 ) : RegularAction<Action.Outputs>("gradle", "actions/setup-gradle", "v4") {
-  override fun toYamlArguments() = linkedMapOfNotNull(
-    "gradle-version" to gradleVersion,
-  )
+  override fun toYamlArguments() = lMONN("gradle-version" to gradleVersion)
   override fun buildOutputObject(stepId: String) = Outputs(stepId)
 }
-
-
-@Suppress("UNCHECKED_CAST")
-fun <K: Any, V: Any> linkedMapOfNotNull(vararg pairs: Pair<K, V?>): LinkedHashMap<K, V> =
-  linkedMapOf(*pairs.mapNotNull { if (it.second == null) null else (it as Pair<K, V>) }.toTypedArray())
 
 fun JobBuilder<JobOutputs.EMPTY>.usesAddAndCommitFile(filePath: String, name: String? = "Add and commit file") =
   uses(

@@ -86,8 +86,8 @@ fun ULogEntry.str(
   //   maybe even optional logging of job hierarchy?? nah...
   val name = context?.get(CoroutineName)?.name
   val elapsed: Duration? = if (startTime == null || time == null) null else time - startTime
-  return listOf(elapsed, name, data.str(maxLength = maxLength, maxIndicator = maxIndicator))
-    .filterNotNull().joinToString(" ") // FIXME_later: joined str can be longer than maxLength
+  return lONN(elapsed, name, data.str(maxLength = maxLength, maxIndicator = maxIndicator))
+    .joinToString(" ") // FIXME_later: joined str can be longer than maxLength
 }
 
 
@@ -116,5 +116,25 @@ inline fun Any?.strIfNullOrNot(
 
 
 
-inline fun <reified E> mutableListOfNulls(size: Int) = MutableList<E?>(size) { null }
+/*
+ * Some shortcuts for most common lists/maps creation.
+ * Might be changed/removed when we finally get proper collections literals in kotlin.
+ * Naming:
+ * Common prefix "l", so I don't pollute global namespace more than I have to.
+ * Then upper letters, so it's clearer it's a shortcut (and less similar to USpek "o" and "so").
+ * Concrete LinkedHashMap return type, so it's more useful most of the times in practice.
+ * Note: lMO(..) / linkedMapOf(..) / LinkedHashMap is mutable.
+ */
 
+inline fun <T> lO(vararg elements: T): List<T> = listOf(*elements)
+inline fun <T> lONN(vararg elements: T?): List<T> = listOfNotNull(*elements)
+
+inline fun <T> lOMutN(size: Int) = MutableList<T?>(size) { null }
+
+inline fun <K, V> lMO(vararg pairs: Pair<K, V>): LinkedHashMap<K, V> = linkedMapOf(*pairs)
+
+@Suppress("UNCHECKED_CAST")
+inline fun <K, V: Any> lMONN(vararg pairs: Pair<K, V?>): LinkedHashMap<K, V> =
+  lMO(*pairs.mapNotNull { it.takeIf { it.second != null } as Pair<K, V>? }.tta)
+
+inline val <reified T> Collection<T>.tta get() = toTypedArray()

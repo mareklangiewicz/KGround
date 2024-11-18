@@ -7,6 +7,7 @@ import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.tuplek.fo
 import pl.mareklangiewicz.tuplek.tre
+import pl.mareklangiewicz.udata.lO
 import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.ure.core.IR
@@ -38,7 +39,7 @@ fun testSomeBasicCharClasses() {
       ureRaw("[a-d[^x-z]]").tstCompilesOnlyOn("JVM", "LINUX", alsoCheckNegation = false)
     }
     "all ready to use char class unions compile everywhere" o {
-      listOf(
+      lO(
         chAlpha, chHexDigit, chAlnum, chGraph, chWhiteSpaceInLine, chPrint,
         chAnyAtAll, chWordFirst, chWordOrDot, chWordOrDash, chWordOrDotOrDash, chPunct,
       ).forEachIndexed { i, u -> "union nr $i ${u.toIR().str}" o { u.tstCompiles() } }
@@ -81,8 +82,8 @@ fun testSomeBasicCharClasses() {
         onUreClass(
           name = "copy right",
           ure = ure,
-          match = listOf(copyRight),
-          matchNot = listOf("a", "0", " ", "⛔", "✅", "❌"),
+          match = lO(copyRight),
+          matchNot = lO("a", "0", " ", "⛔", "✅", "❌"),
         )
       }
     }
@@ -103,8 +104,8 @@ fun testSomeBasicCharClasses() {
         onUreClass(
           name = "bitcoin",
           ure = ure,
-          match = listOf(bitcoin),
-          matchNot = listOf("a", "0", " ", "⛔", "✅", "❌"),
+          match = lO(bitcoin),
+          matchNot = lO("a", "0", " ", "⛔", "✅", "❌"),
         )
       }
     }
@@ -126,9 +127,9 @@ fun testSomeBasicCharClasses() {
         onUreClass(
           name = "devil",
           ure = ure,
-          match = listOf(devil),
-          matchNot = listOf("a", "0", " ", "⛔", "✅", "❌", "🛑"),
-          onPlatforms = listOf("JVM"),
+          match = lO(devil),
+          matchNot = lO("a", "0", " ", "⛔", "✅", "❌", "🛑"),
+          onPlatforms = lO("JVM"),
         )
       }
     }
@@ -138,96 +139,96 @@ fun testSomeBasicCharClasses() {
 fun testSomeUreCharClassPairsEtc() {
   onUreClassPair(
     "chLower", "chPLower", chLower, chPLower,
-    match = listOf("a", "b", "x"), // on JS (only!) also matches letters like: "λ", "ξ", etc.
-    matchNot = listOf("A", "B", "Z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
+    match = lO("a", "b", "x"), // on JS (only!) also matches letters like: "λ", "ξ", etc.
+    matchNot = lO("A", "B", "Z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
     // verbose = true,
   )
   onUreClassPair(
     "chUpper", "chPUpper", chUpper, chPUpper,
-    match = listOf("A", "B", "X"), // on JS (only!) also matches letters like: "Λ", "Ξ", "Ż", etc.
-    matchNot = listOf("a", "b", "z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
+    match = lO("A", "B", "X"), // on JS (only!) also matches letters like: "Λ", "Ξ", "Ż", etc.
+    matchNot = lO("a", "b", "z", "@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
   )
   onUreClassPair(
     "chAlpha", "chPAlpha", chAlpha, chPAlpha,
-    match = listOf("A", "B", "X", "c", "d"), // on JS (only!) also matches letters like: "ą", "ć", "Λ", "Ξ", "Ż", etc.
-    matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
+    match = lO("A", "B", "X", "c", "d"), // on JS (only!) also matches letters like: "ą", "ć", "Λ", "Ξ", "Ż", etc.
+    matchNot = lO("@", "#", ":", "-", ")", "¥", "₿", "₤", "2", "😈"),
   )
   onUreClassPair(
     "chDigit", "chPDigit", chDigit, chPDigit,
-    match = listOf("1", "2", "3", "8", "9"),
-    matchNot = listOf("A", "b", "c", "@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO("1", "2", "3", "8", "9"),
+    matchNot = lO("A", "b", "c", "@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   onUreClassPair(
     "chHexDigit", "chPHexDigit", chHexDigit, chPHexDigit,
-    match = listOf("1", "2", "3", "8", "9", "a", "A", "c", "E", "F"),
-    matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO("1", "2", "3", "8", "9", "a", "A", "c", "E", "F"),
+    matchNot = lO("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   onUreClassPair(
     "chAlnum", "chPAlnum", chAlnum, chPAlnum,
-    match = listOf("A", "B", "X", "c", "d", "1", "2", "8", "9", "0"),
-    matchNot = listOf("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈", "ε", "β", "δ", "Λ", "Ξ", "ξ"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO("A", "B", "X", "c", "d", "1", "2", "8", "9", "0"),
+    matchNot = lO("@", "#", ":", "-", ")", "¥", "₿", "₤", "😈", "ε", "β", "δ", "Λ", "Ξ", "ξ"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   onUreClassPair(
     "chPunct", "chPPunct", chPunct, chPPunct,
-    match = listOf(".", ",", ":", "@", "#"), // on LINUX, it also matches numbers like "2", "3", etc. Why??
-    matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "😈"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO(".", ",", ":", "@", "#"), // on LINUX, it also matches numbers like "2", "3", etc. Why??
+    matchNot = lO("A", "a", "x", "¥", "₿", "₤", "😈"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   onUreClassPair(
     "chGraph", "chPGraph", chGraph, chPGraph,
-    match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B"),
-    matchNot = listOf("¥", "₿", "₤", "😈"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO(".", ",", ":", "@", "#", "2", "3", "a", "B"),
+    matchNot = lO("¥", "₿", "₤", "😈"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   // TODO_later: chPPrint is broken on LINUX. Doesn't match anything I tried. Report it, but for now it's deprecated.
   // onUreClassPair("chPrint", "chPPrint", chPrint, chPPrint,
-  //     match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
-  //     matchNot = listOf("¥", "₿", "₤", "😈", "\t"),
-  //     onPlatforms = listOf("JVM", "LINUX"),
+  //     match = lO(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
+  //     matchNot = lO("¥", "₿", "₤", "😈", "\t"),
+  //     onPlatforms = lO("JVM", "LINUX"),
   // )
   // So let's just test portable version for now.
   onUreClass(
     "chPrint", chPrint,
-    match = listOf(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
-    matchNot = listOf("¥", "₿", "₤", "😈", "\t"),
+    match = lO(".", ",", ":", "@", "#", "2", "3", "a", "B", " "),
+    matchNot = lO("¥", "₿", "₤", "😈", "\t"),
   )
   onUreClassPair(
     "chWhiteSpaceInLine", "chPBlank", chWhiteSpaceInLine, chPBlank,
-    match = listOf(" ", "\t"),
-    matchNot = listOf("\n", "\r", "\u000B", "A", "a", "x", "¥", "₿", "₤", "2", "😈"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO(" ", "\t"),
+    matchNot = lO("\n", "\r", "\u000B", "A", "a", "x", "¥", "₿", "₤", "2", "😈"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   onUreClassPair(
     "chSpace", "chPSpace", chWhiteSpace, chPWhiteSpace,
-    match = listOf(" ", "\t", "\n", "\r", "\u000B"),
-    matchNot = listOf("A", "a", "x", "¥", "₿", "₤", "2", "😈"),
-    onPlatforms = listOf("JVM", "LINUX"),
+    match = lO(" ", "\t", "\n", "\r", "\u000B"),
+    matchNot = lO("A", "a", "x", "¥", "₿", "₤", "2", "😈"),
+    onPlatforms = lO("JVM", "LINUX"),
   )
   onUreClass(
     name = "chPCurrency", ure = chPCurrency,
-    match = listOf("¥", "₿", "₤"),
-    matchNot = listOf("@", "#", ":", "-", ")", "a", "Y", "😀", "1", "2", "😈"),
+    match = lO("¥", "₿", "₤"),
+    matchNot = lO("@", "#", ":", "-", ")", "a", "Y", "😀", "1", "2", "😈"),
   )
   onUreClass(
     name = "chPLatin", ure = chPLatin,
-    match = listOf("a", "B", "Ż", "ó", "ł", "Ź"),
-    matchNot = listOf("@", "#", ":", "-", ")", "ε", "β", "δ", "Λ", "Ξ", "ξ", "😈"),
-    onPlatforms = listOf("JVM", "JS"),
+    match = lO("a", "B", "Ż", "ó", "ł", "Ź"),
+    matchNot = lO("@", "#", ":", "-", ")", "ε", "β", "δ", "Λ", "Ξ", "ξ", "😈"),
+    onPlatforms = lO("JVM", "JS"),
   )
   onUreClass(
     name = "chPGreek", ure = chPGreek,
-    match = listOf("ε", "β", "δ", "Λ", "Ξ", "ξ"),
-    matchNot = listOf("@", "#", ":", "-", ")", "a", "B", "Ż", "ó", "ł", "Ź", "😈"),
-    onPlatforms = listOf("JVM", "JS"),
+    match = lO("ε", "β", "δ", "Λ", "Ξ", "ξ"),
+    matchNot = lO("@", "#", ":", "-", ")", "a", "B", "Ż", "ó", "ł", "Ź", "😈"),
+    onPlatforms = lO("JVM", "JS"),
   )
   onUreClass(
     name = "chPExtPict", ure = chPExtPict,
-    match = listOf("😀", "🫠", "🥶", "😈"),
-    matchNot = listOf("@", "#", ":", "-", ")", "a", "b", "X", "Y", "1", "2"),
-    onPlatforms = listOf("JS"),
+    match = lO("😀", "🫠", "🥶", "😈"),
+    matchNot = lO("@", "#", ":", "-", ")", "a", "b", "X", "Y", "1", "2"),
+    onPlatforms = lO("JS"),
   )
 }
 
@@ -236,9 +237,9 @@ private fun onUreClass(
   name: String,
   ure: Ure,
   match: List<String>,
-  matchNot: List<String> = listOf(),
+  matchNot: List<String> = lO(),
   vararg useNamedArgs: Unit,
-  onPlatforms: List<String> = listOf("JVM", "JS", "LINUX"),
+  onPlatforms: List<String> = lO("JVM", "JS", "LINUX"),
   alsoCheckNegation: Boolean = true,
   verbose: Boolean = false,
 ) {
@@ -258,7 +259,7 @@ private fun onUreClassPair(
   urePlatform: Ure,
   match: List<String>,
   matchNot: List<String>,
-  onPlatforms: List<String> = listOf("JVM", "JS", "LINUX"),
+  onPlatforms: List<String> = lO("JVM", "JS", "LINUX"),
   verbose: Boolean = false,
 ) {
   "On ure class pair $namePortable and $namePlatform" o {
@@ -281,9 +282,9 @@ fun testSomeWeirdCharClasses() {
 
     onUreClass(
       "ure workaround", ureWorkaround, // ureReproducer should work the same way
-      match = listOf("1"),
-      matchNot = listOf("a", "B", "*", "0", "3", "4", "7", "9"),
-      onPlatforms = listOf("JVM", "LINUX"),
+      match = lO("1"),
+      matchNot = lO("a", "B", "*", "0", "3", "4", "7", "9"),
+      onPlatforms = lO("JVM", "LINUX"),
       alsoCheckNegation = false,
     )
     when (platform) {
@@ -305,9 +306,9 @@ fun testSomeWeirdCharClasses() {
 
     onUreClass(
       "ure suspicious", ureSuspicious,
-      match = listOf("1", "2", "5", "6"),
-      matchNot = listOf("a", "B", "*", "0", "3", "4", "7", "9"),
-      onPlatforms = listOf("JVM", "LINUX"),
+      match = lO("1", "2", "5", "6"),
+      matchNot = lO("a", "B", "*", "0", "3", "4", "7", "9"),
+      onPlatforms = lO("JVM", "LINUX"),
       alsoCheckNegation = false,
     )
   }
@@ -335,7 +336,7 @@ fun testSomeWeirdCharClasses() {
   // Using full kotlin language to dynamically generate matrix of tests.
 
   "On weird char class variants" o {
-    val data = listOf(
+    val data = lO(
       // starts with 0: intersection outside (no need to wrap intersection in [..])
       "0000" to "[ [^A-C]   [^E-Z]    &&   [^G-K]   ]" tre "0129 ABCDEF     LMNZ *+-&" fo "           GHIJK         ",
       "0001" to "[ [^A-C]   [^E-Z]    &&     G-K    ]" tre "           GHIJK         " fo "0129 ABCDEF     LMNZ *+-&",
@@ -359,7 +360,7 @@ fun testSomeWeirdCharClasses() {
       val variant = row.a
       // Note: The one without any negation will compile on JS, but incorrectly (JS treats & chars literally).
       val fakeJS = platform == "JS" && variant == "0111"
-      val wrongLinux = platform == "LINUX" && variant in listOf("0010", "0011")
+      val wrongLinux = platform == "LINUX" && variant in lO("0010", "0011")
 
       "On variant $variant on $platform" o {
         val ureWeird = ureWeirdCharClass(variant)
@@ -373,7 +374,7 @@ fun testSomeWeirdCharClasses() {
           "ure weird", ureWeird,
           match = if (fakeJS || wrongLinux) emptyList() else row.c.condensed.toList().map { it.strf },
           matchNot = if (fakeJS || wrongLinux) emptyList() else row.d.condensed.toList().map { it.strf },
-          onPlatforms = if (fakeJS) listOf("JVM", "LINUX", "JS") else listOf("JVM", "LINUX"),
+          onPlatforms = if (fakeJS) lO("JVM", "LINUX", "JS") else lO("JVM", "LINUX"),
           alsoCheckNegation = false, // disabled because practically all negated fail on linux. jvm is fine.
           verbose = false, // try true to see tons of independent micro tests generated in the uspek tree :)
         )

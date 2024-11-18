@@ -5,9 +5,8 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.ure.core.*
 import pl.mareklangiewicz.udata.strf
-
+import pl.mareklangiewicz.ure.core.*
 
 // region [Ure Basic Stuff]
 
@@ -40,7 +39,6 @@ fun Ure.withOptionsEnabled(vararg options: RegexOption) = withOptions(enable = o
 @NotPortableApi("Some options work only on some platforms. Check docs for each used platform.")
 fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable = options.toSet())
 
-
 /**
  * Changes regex options ([RegexOption]) from this point ahead. Very problematic construct.
  * It is much safer to use [withOptions] instead of [ureWithOptionsAhead].
@@ -52,15 +50,13 @@ fun Ure.withOptionsDisabled(vararg options: RegexOption) = withOptions(disable =
 fun ureWithOptionsAhead(enable: Set<RegexOption> = emptySet(), disable: Set<RegexOption> = emptySet()) =
   UreChangeOptionsAhead(enable, disable)
 
-
 fun Ure.withWordBoundaries(boundaryBefore: Boolean = true, boundaryAfter: Boolean = true) =
   withBoundaries(atWordBoundary.takeIf { boundaryBefore }, atWordBoundary.takeIf { boundaryAfter })
 
 @SecondaryApi @NotPortableApi fun Ure.withBOEOWordBoundaries(
   boundaryBefore: Boolean = true,
   boundaryAfter: Boolean = true,
-) =
-  withBoundaries(atBOWord.takeIf { boundaryBefore }, atEOWord.takeIf { boundaryAfter })
+) = withBoundaries(atBOWord.takeIf { boundaryBefore }, atEOWord.takeIf { boundaryAfter })
 
 fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) =
   if (boundaryBefore == null && boundaryAfter == null) this else ure {
@@ -72,7 +68,6 @@ fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) 
 infix fun Ure.or(that: Ure) = UreAlternation(this, that)
 infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
 // Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
-
 
 @OptIn(NotPortableApi::class, DelicateApi::class) // not portable only if the receiver was already not portable.
 operator fun Ure.not(): Ure = when (this) {
@@ -114,7 +109,6 @@ fun ureText(text: String) = UreText(text)
 
 // endregion [Ure Basic Stuff]
 
-
 // region [Ure Character Related Stuff]
 
 @NotPortableApi("Only surrogate pairs compiling is not portable (IR with \\x{hhhhh})", ReplaceWith("ch(chr: Char)"))
@@ -125,10 +119,8 @@ fun ch(str: String) = UreCharExact(str)
 
 @DelicateApi fun chPreDef(name: Char) = UreCharClassPreDef(name)
 
-
 // Ure constants matching one char (special chars; common categories). All names start with ch.
 // Note from experience: It's really more important to have a common prefix than to be a bit shorter.
-
 
 // just private shortcuts
 @OptIn(DelicateApi::class) private inline val Char.ce get() = ch(this)
@@ -146,8 +138,10 @@ val chEsc = '\u001B'.ce
 
 /** [a-z] */
 val chLower = chOf('a'..'z')
+
 /** [A-Z] */
 val chUpper = chOf('A'..'Z')
+
 /** [a-zA-Z] */
 @OptIn(NotPortableApi::class)
 val chAlpha = chOfAny(chLower, chUpper) // Note: "chLower or chUpper" is worse, because UreAlternation can't be negated.
@@ -170,6 +164,7 @@ val chGraph = chOfAny(chAlnum, chPunct)
 
 val chSpace = ' '.ce
 val chWhiteSpace = 's'.cpd
+
 @OptIn(NotPortableApi::class)
 val chWhiteSpaceInLine =
   chOfAny(chSpace, chTab) // Note: "chSpace or chTab" is worse, because UreAlternation can't be negated.
@@ -210,8 +205,6 @@ val chAnyAtAll = chOfAny(chWhiteSpace, !chWhiteSpace) // should work everywhere 
 // Note: following impl would not work on JS: ureIR("(?s:.)")
 //   see details: https://www.regular-expressions.info/dot.html
 
-
-
 /** Same as [a-zA-Z0-9_] */
 val chWord = 'w'.cpd
 
@@ -225,6 +218,7 @@ val chNonWord = 'W'.cpd
 
 @OptIn(NotPortableApi::class)
 val chWordOrDot = chOfAny(chWord, chDot)
+
 @OptIn(NotPortableApi::class)
 val chWordOrDash = chOfAny(chWord, chDash) // also hints (when typing chWo) that chWord doesn't match dash.
 @OptIn(NotPortableApi::class)
@@ -242,7 +236,6 @@ val chNonWordNorDash = !chWordOrDash
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chWordOrDotOrDash"))
 val chNonWordNorDotNorDash = !chWordOrDotOrDash
-
 
 /**
  * Predefined char set with some property.
@@ -266,7 +259,6 @@ fun chProp(prop: String, positive: Boolean = true) = UreCharClassProp(prop, posi
 @NotPortableApi
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chProp(prop)"))
 fun chpPropNot(prop: String) = !chProp(prop)
-
 
 // Some of the more popular char props available on (probably) all platforms:
 
@@ -352,7 +344,6 @@ val chPGreek = chProp("sc=Greek")
 @NotPortableApi @DelicateApi fun chCtrl(letter: Char) = ureRaw("\\c$letter").also { req(letter in 'A'..'Z') }
 // https://www.regular-expressions.info/nonprint.html
 
-
 @NotPortableApi("Some unions do NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
 fun chOfAny(charClasses: List<UreCharClass>) = UreCharClassUnion(charClasses)
 
@@ -384,7 +375,6 @@ fun chOf(range: CharRange) = chOfRange(ch(range.start), ch(range.endInclusive))
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOf(range)"))
 fun chOfNot(range: CharRange) = !chOf(range)
 
-
 /**
  * This is not only not-portable, but also VERY DELICATE.
  * Please always write unit tests to make sure it behaves as expected on platforms you're using.
@@ -415,7 +405,6 @@ fun chOfAll(vararg charClasses: UreCharClass?) = chOfAll(charClasses.toList().fi
 fun chOfNotAll(vararg charClasses: UreCharClass?) = !chOfAll(*charClasses)
 
 // endregion [Ure Character Related Stuff]
-
 
 // region [Ure Anchors Related Stuff]
 
@@ -463,7 +452,6 @@ val ureLineBreak = ureLineBreakBasic
 
 // endregion [Ure Anchors Related Stuff]
 
-
 // region [Ure Groups Related Stuff]
 
 fun Ure.group(capture: Boolean = true, name: String? = null) = when {
@@ -484,9 +472,9 @@ fun Ure.groupAtomic() = UreAtomicGroup(this)
 @OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
 fun Ure.lookAhead(positive: Boolean = true) = UreLookGroup(this, true, positive)
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Lookbehind_assertion#description
 @DelicateApi("Can be suprisingly slow for some ures. Or even can throw on some platforms, when looking behind for non-fixed length ure.")
 @NotPortableApi("Behavior can differ on different platforms. Read docs for each used platform.")
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Lookbehind_assertion#description
 fun Ure.lookBehind(positive: Boolean = true) = UreLookGroup(this, false, positive)
 
 @OptIn(NotPortableApi::class, DelicateApi::class) // lookAhead should be safe; lookBehind is delicate/non-portable.
@@ -501,7 +489,6 @@ fun ureLookBehind(positive: Boolean = true, init: UreConcatenation.() -> Unit) =
 fun ureRef(nr: Int? = null, name: String? = null) = UreGroupRef(nr, name)
 
 // endregion [Ure Groups Related Stuff]
-
 
 // region [Ure Quantifiers Related Stuff]
 
@@ -527,7 +514,6 @@ fun Ure.timesMax(max: Int, reluctant: Boolean = false, possessive: Boolean = fal
 fun Ure.timesAny(reluctant: Boolean = false, possessive: Boolean = false) =
   times(0..MAX, reluctant, possessive)
 
-
 @Deprecated("Let's try to use .times instead", ReplaceWith("content.times(times, reluctant, possessive)"))
 fun quantify(content: Ure, times: IntRange, reluctant: Boolean = false, possessive: Boolean = false) =
   content.times(times, reluctant, possessive)
@@ -538,9 +524,6 @@ fun quantify(
   reluctant: Boolean = false,
   possessive: Boolean = false,
   init: UreConcatenation.() -> Unit,
-) =
-  ure(init = init).times(times, reluctant, possessive)
+) = ure(init = init).times(times, reluctant, possessive)
 
 // endregion [Ure Quantifiers Related Stuff]
-
-

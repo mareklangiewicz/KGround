@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.*
+import pl.mareklangiewicz.udata.lO
 import pl.mareklangiewicz.ure.UReplacement
 
 
@@ -58,8 +59,8 @@ private suspend fun findGradleRootProjects(path: Path): List<Path> =
     .ax()
 
 val gradlewRelPaths =
-  listOf("", ".bat").map { "gradlew$it".P } +
-    listOf("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".P }
+  lO("", ".bat").map { "gradlew$it".P } +
+    lO("jar", "properties").map { "gradle/wrapper/gradle-wrapper.$it".P }
 
 /** @return Full paths of my gradle rootProjects (dirs with settings.gradle[.kts] files) */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -67,5 +68,3 @@ val gradlewRelPaths =
   getMyProjectsNames(onlyPublic)
     .mapFilterLocalKotlinProjectsPaths()
     .flatMap { findGradleRootProjects(it) }
-
-

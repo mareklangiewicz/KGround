@@ -2,22 +2,15 @@
 
 package pl.mareklangiewicz.kgroundx.experiments
 
-import kotlinx.coroutines.delay
 import okio.Path
 import org.hildan.chrome.devtools.domains.dom.Node
-import org.w3c.dom.Node as W3CNode
-import org.hildan.chrome.devtools.protocol.ChromeDPClient
 import org.hildan.chrome.devtools.protocol.ExperimentalChromeApi
-import org.hildan.chrome.devtools.sessions.goto
-import org.hildan.chrome.devtools.sessions.newPage
-import org.hildan.chrome.devtools.sessions.use
+import org.w3c.dom.Node as W3CNode
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
-import pl.mareklangiewicz.io.writeUtf8
 import pl.mareklangiewicz.kground.io.P
-import pl.mareklangiewicz.kground.io.localUFileSys
-import pl.mareklangiewicz.kground.logEach
+import pl.mareklangiewicz.udata.lO
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.logseq.Card
 import pl.mareklangiewicz.ure.logseq.processAllCardsInLogseqGraph
@@ -25,7 +18,6 @@ import pl.mareklangiewicz.ure.logseq.processAllCardsInLogseqGraph
 @OptIn(ExperimentalChromeApi::class)
 @ExampleApi
 object MyExperiments {
-
   @OptIn(DelicateApi::class, NotPortableApi::class)
   suspend fun collectGabrysCards() = buildList<Pair<Path, Card>> {
     "/home/marek/gtdgabrys".P.processAllCardsInLogseqGraph { file, card -> add(file to card) }
@@ -48,7 +40,7 @@ object MyExperiments {
 
 
       // val infos = it.target.getTargets{
-      //   filter = listOf(FilterEntry(type = "page"))
+      //   filter = lO(FilterEntry(type = "page"))
       // }.targetInfos
       //
       // println(infos)
@@ -97,14 +89,14 @@ fun Node.toTextLines(
   linePrefix: String = "  ".repeat(depth) + "- ",
 ): List<String> = when {
   depth > depthMax -> emptyList()
-  nodeType == W3CNode.TEXT_NODE.toInt() -> listOf(linePrefix + nodeValue)
+  nodeType == W3CNode.TEXT_NODE.toInt() -> lO(linePrefix + nodeValue)
   nodeType == W3CNode.ELEMENT_NODE.toInt() -> when {
     looksLikeAnyTagOf("script", "style", "meta", "link", "<style>")
-      // -> listOf(linePrefix + nodeName)
+      // -> lO(linePrefix + nodeName)
       -> emptyList()
     children.isNullOrEmpty() -> emptyList()
     children?.size == 1 -> toChildrenTextLines(depth, depthMax) // so flattening tags with one child
-    else -> listOf(linePrefix + nodeName) + toChildrenTextLines(depth + 1, depthMax)
+    else -> lO(linePrefix + nodeName) + toChildrenTextLines(depth + 1, depthMax)
   }
   else -> toChildrenTextLines(depth, depthMax)
   // so, flattening unknown tags (not increasing depth)
@@ -117,4 +109,4 @@ private fun Node.toChildrenTextLines(
 ): List<String> = children.orEmpty().flatMap { it.toTextLines(depth, depthMax, linePrefix) }
 
 fun Node.looksLikeAnyTagOf(vararg tagNames: String): Boolean =
-  tagNames.any { tagName -> tagName.lowercase() in listOf(nodeName, localName).map { it.lowercase() } }
+  tagNames.any { tagName -> tagName.lowercase() in lO(nodeName, localName).map { it.lowercase() } }

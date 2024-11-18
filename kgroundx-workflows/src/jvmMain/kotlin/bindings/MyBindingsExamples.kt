@@ -5,12 +5,12 @@ import io.github.typesafegithub.workflows.actionbindinggenerator.domain.NewestFo
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.kgroundx.maintenance.PProjKGround
+import pl.mareklangiewicz.udata.lO
 
 @OptIn(DelicateApi::class)
 @ExampleApi
 object MyBindingsExamples {
-
-  suspend fun tryGenerateOwnBindings() = listOf(
+  suspend fun tryGenerateOwnBindings() = lO(
     ActionCoords("actions", "checkout", "v4"),
     ActionCoords("actions", "setup-java", "v4"),
     ActionCoords("EndBug", "add-and-commit", "v9"),
