@@ -1,4 +1,3 @@
-
 // region [[Basic Root Build Imports and Plugs]]
 
 import pl.mareklangiewicz.defaults.*
@@ -16,29 +15,19 @@ plugins {
 val enableJs = true
 val enableNative = true
 
-val enablePublishing = findProject(":kommandline") == null && findProject(":kommandsamples") == null
-// don't publish to sonatype from my machine, because I include local kommandline and kommandsample
-// modules (see settings.gradle.kts) so it would also publish these with wrong description and ver etc.
-// exception: publishToMavenLocal for debugging
-
-rootExtString["verKommand"] = "0.0.87" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kommandline/
-rootExtString["verKGround"] = "0.0.87" // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
-// Note: verKGround needed too because if we include local kommandline, then that build can look for it.
-
-
 defaultBuildTemplateForRootProject(
   myLibDetails(
     name = "KGround",
     description = "Kotlin Common Ground.",
     githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 87),
+    version = Ver(0, 1, 1),
     // https://s01.oss.sonatype.org/content/repositories/releases/pl/mareklangiewicz/kground/
     // https://github.com/mareklangiewicz/KGround/releases
     settings = LibSettings(
       withJs = enableJs,
       withNativeLinux64 = enableNative,
       compose = null,
-      withSonatypeOssPublishing = enablePublishing,
+      withSonatypeOssPublishing = true,
     ),
   ),
 )

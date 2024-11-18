@@ -15,4 +15,11 @@
 /kgroundx-jupyter/src/jvmMain/kotlin/gitignored
 /kgroundx-app/build
 /kgroundx-app/src/main/kotlin/gitignored
+/kommandline/build
+/kommandsamples/build
+/kommandsamples/src/test/kotlin/demos/*REPL.kt
+/kommandjupyter/build
+/kommandapp/build
+/kommandapp/src/main/kotlin/gitignored
 my.gradle.log
+tags

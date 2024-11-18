@@ -7,10 +7,6 @@ val buildScanPublishingAllowed =
   // true
   // false
 
-val kommandModulesLocalAllowed =
-  // true
-  false
-
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../DepsKt"<~~
 // endregion [[My Settings Stuff <~~]]
@@ -59,17 +55,5 @@ include(":kgroundx-workflows")
 include(":kgroundx-jupyter")
 include(":kgroundx-app")
 
-
-val kommandlineDir = File(rootDir, "../KommandLine/kommandline").normalize()
-if (kommandModulesLocalAllowed && kommandlineDir.exists()) {
-  logger.warn("Adding local kommandline module.")
-  include(":kommandline")
-  project(":kommandline").projectDir = kommandlineDir
-}
-
-val kommandsamplesDir = File(rootDir, "../KommandLine/kommandsamples").normalize()
-if (kommandModulesLocalAllowed && kommandsamplesDir.exists()) {
-  logger.warn("Adding local kommandsamples module.")
-  include(":kommandsamples")
-  project(":kommandsamples").projectDir = kommandsamplesDir
-}
+include(":kommandline")
+include(":kommandsamples")
