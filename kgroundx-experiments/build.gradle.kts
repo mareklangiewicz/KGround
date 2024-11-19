@@ -26,12 +26,10 @@ val details = rootExtLibDetails.copy(settings = settings)
 defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kgroundx-io"))
   api(project(":kgroundx-maintenance"))
-  implementation("org.hildan.chrome:chrome-devtools-kotlin:6.4.1-1347815")
-  implementation("io.ktor:ktor-client-cio:2.3.12")
-    // FIXME_later: update after new release of chrome-devtools-kotlin!
-    // I need old ktor for current devtools-kotlin, but sonatype reports (medium) threat in old ktor.
-  implementation("org.slf4j:slf4j-simple:2.0.16")
-  // implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+  implementation(Org.Hildan.Chrome.devtools_kotlin)
+  implementation(Io.Ktor.client_cio)
+  implementation(Org.Slf4j.simple)
+  // implementation(KotlinX.serialization_json)
 }
 
 // region [[Kotlin Module Build Template]]

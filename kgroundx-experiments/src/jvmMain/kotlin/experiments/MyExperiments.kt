@@ -2,14 +2,20 @@
 
 package pl.mareklangiewicz.kgroundx.experiments
 
+import kotlinx.coroutines.delay
 import okio.Path
 import org.hildan.chrome.devtools.domains.dom.Node
+import org.hildan.chrome.devtools.protocol.ChromeDPClient
 import org.hildan.chrome.devtools.protocol.ExperimentalChromeApi
+import org.hildan.chrome.devtools.sessions.goto
+import org.hildan.chrome.devtools.sessions.newPage
+import org.hildan.chrome.devtools.sessions.use
 import org.w3c.dom.Node as W3CNode
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.kground.io.P
+import pl.mareklangiewicz.kground.logEach
 import pl.mareklangiewicz.udata.lO
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.logseq.Card
@@ -31,7 +37,6 @@ object MyExperiments {
       "$l :: score: $s question: $q"
     }
 
-/*
   suspend fun playWithBrowser() {
     delay(1000)
     ChromeDPClient("http://localhost:9222").webSocket().use {
@@ -80,7 +85,6 @@ object MyExperiments {
     }
   }
 
-*/
 }
 
 fun Node.toTextLines(

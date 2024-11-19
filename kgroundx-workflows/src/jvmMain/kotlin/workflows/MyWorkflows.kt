@@ -219,15 +219,12 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
   },
   dreleaseUpload = when(projectName) {
     "KGround" -> lO(
-      "kgroundx-app/build/distributions/*.zip"
-    ) // let's ignore tars (zips better for normies)
-    "KommandLine" -> lO(
-      "kommandapp/build/distributions/*.zip"
-    ) // TODO_later: remove after merging KommandLine with KGround
+      "kgroundx-app/build/distributions/*.zip" // let's ignore tars (zips better for normies)
+    )
     "UWidgets" -> lO(
-      "uwidgets-udemo-app/build/compose/binaries/main/deb/*.deb",
-      "uwidgets-udemo-app/build/outputs/apk/debug/*.apk",
-      "uwidgets-udemo-app/build/outputs/apk/release/*.apk",
+      "uwidgets-demo-app/build/compose/binaries/main/deb/*.deb",
+      "uwidgets-demo-app/build/outputs/apk/debug/*.apk",
+      "uwidgets-demo-app/build/outputs/apk/release/*.apk",
     )
     "AreaKim" -> lO(
       "areakim-demo-app/build/compose/binaries/main/deb/*.deb",
