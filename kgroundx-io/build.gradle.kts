@@ -20,8 +20,8 @@ plugins {
 defaultBuildTemplateForBasicMppLib {
   api(project(":kgroundx"))
   api(project(":kground-io"))
-  api(project(":kommandline"))
-  api(project(":kommandsamples"))
+  api(project(":kommand-line"))
+  api(project(":kommand-samples"))
 }
 
 // kotlin { js(IR) { nodejs() } }

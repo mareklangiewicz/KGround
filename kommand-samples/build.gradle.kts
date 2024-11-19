@@ -18,13 +18,13 @@ plugins {
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 val details = rootExtLibDetails.copy(
-  name = "KommandSamples",
+  name = "Kommand Samples",
   description = "Additional samples for KommandLine."
 )
 
 
 defaultBuildTemplateForBasicMppLib {
-  api(project(":kommandline"))
+  api(project(":kommand-line"))
 
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later
   implementation(Kotlin.reflect)

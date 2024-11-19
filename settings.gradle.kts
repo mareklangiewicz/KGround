@@ -55,5 +55,5 @@ include(":kgroundx-workflows")
 include(":kgroundx-jupyter")
 include(":kgroundx-app")
 
-include(":kommandline")
-include(":kommandsamples")
+include(":kommand-line")
+include(":kommand-samples")

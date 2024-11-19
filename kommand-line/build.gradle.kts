@@ -18,7 +18,7 @@ plugins {
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 val details = rootExtLibDetails.copy(
-  name = "KommandLine",
+  name = "Kommand Line",
   description = "Kotlin DSL for popular CLI commands."
 )
 
