@@ -285,7 +285,7 @@ fun KotlinMultiplatformExtension.allDefault(
     }
     val commonTest by getting {
       dependencies {
-        implementation(kotlin("test"))
+        implementation(Kotlin.test)
         if (withTestUSpekX) implementation(Langiewicz.uspekx)
       }
     }

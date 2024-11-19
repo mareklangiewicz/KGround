@@ -259,7 +259,7 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   dependencies {
     if (withKotlinxHtml) implementation(KotlinX.html)
-    testImplementation(kotlin("test"))
+    testImplementation(Kotlin.test)
     if (withTestUSpekX) testImplementation(Langiewicz.uspekx)
     if (withTestJUnit4) testImplementation(JUnit.junit)
     if (withTestJUnit5) testImplementation(Org.JUnit.Jupiter.junit_jupiter_engine)
