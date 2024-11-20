@@ -299,7 +299,7 @@ private fun myDefaultReleaseWorkflow(
     ) {
       usesDefaultBuild()
       dreleasePackage?.let { runGradleW(it) }
-      uses(action = UploadArtifact(path = dreleaseUpload))
+      if (dreleaseUpload.isNotEmpty()) uses(action = UploadArtifact(path = dreleaseUpload))
       if (dreleaseOssPublish) runGradleW("publishToSonatype closeAndReleaseSonatypeStagingRepository")
       // TODO_someday: consider sth like: https://github.com/ansman/sonatype-publish-fix
       // TODO_someday: something more like
