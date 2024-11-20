@@ -212,7 +212,7 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
   dname = dname,
   env = if (projectName in getMyPublicProjectsNames()) myOssSecretsEnv else lMO(),
   dreleasePackage = when(projectName) {
-    "UWidgets" -> "packageDeb"
+    "UWidgets" -> "packageDeb" // I can't do packageReleaseDeb because proguard only supports jvm18 and fails.
     "AreaKim" -> "packageDeb"
     "kokpit667" -> "packageDeb"
     else -> null
@@ -299,7 +299,7 @@ private fun myDefaultReleaseWorkflow(
     ) {
       usesDefaultBuild()
       dreleasePackage?.let { runGradleW(it) }
-      for (dru in dreleaseUpload) uses(action = UploadArtifact(path = lO(dru)))
+      uses(action = UploadArtifact(path = dreleaseUpload))
       if (dreleaseOssPublish) runGradleW("publishToSonatype closeAndReleaseSonatypeStagingRepository")
       // TODO_someday: consider sth like: https://github.com/ansman/sonatype-publish-fix
       // TODO_someday: something more like
