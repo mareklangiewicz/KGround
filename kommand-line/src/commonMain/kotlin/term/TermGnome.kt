@@ -5,6 +5,7 @@ package pl.mareklangiewicz.kommand.term
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.TermGnomeOpt.*
+import pl.mareklangiewicz.udata.MutLO
 
 @OptIn(DelicateApi::class)
 fun Kommand.inTermGnome(): TermGnome = termGnome(this)
@@ -20,8 +21,8 @@ fun termGnome(kommand: Kommand? = null, init: TermGnome.() -> Unit = {}): TermGn
 /** [gnome-terminal ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-terminal.1.html) */
 @DelicateApi
 data class TermGnome(
-  override val opts: MutableList<TermGnomeOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<TermGnomeOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<TermGnomeOpt>, TermKommand {
   override val name get() = "gnome-terminal"
 }

@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.udata.toL
 import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.uspek.*
 
@@ -16,7 +17,7 @@ import pl.mareklangiewicz.uspek.*
 fun testUreWithNames() {
 
   "Sanity check for ure without named groups" o {
-    val found = ureBOLaBcD.compile().findAll(exampleABCDEx3).toList()
+    val found = ureBOLaBcD.compile().findAll(exampleABCDEx3).toL
 
     "found twice in correct places" o {
       found.size chkEq 2
@@ -51,7 +52,7 @@ fun testUreWithNames() {
       val re3 = ure3.compile()
       val re4 = ure4.compile()
       "On matching re1" o {
-        val found: List<MatchResult> = re1.findAll(exampleABCDEx3).toList()
+        val found: List<MatchResult> = re1.findAll(exampleABCDEx3).toL
         "found twice in correct places" o {
           found.size chkEq 2
           found[0].value chkEq found[1].value chkEq "aBcD"
@@ -72,7 +73,7 @@ fun testUreWithNames() {
         }
       }
       "On matching re2" o {
-        val found: List<MatchResult> = re2.findAll(exampleABCDEx3).toList()
+        val found: List<MatchResult> = re2.findAll(exampleABCDEx3).toL
         "found twice in correct places" o {
           found.size chkEq 2
           found[0].value chkEq found[1].value chkEq "BcDe"
@@ -91,7 +92,7 @@ fun testUreWithNames() {
         }
       }
       "On matching re3" o {
-        val found: List<MatchResult> = re3.findAll(exampleABCDEx3).toList()
+        val found: List<MatchResult> = re3.findAll(exampleABCDEx3).toL
         "found once in correct place" o {
           val result = found.single()
           result.value chkEq "aBcDe\naBcDe"
@@ -116,7 +117,7 @@ fun testUreWithNames() {
         }
       }
       "On matching re4" o {
-        val found: List<MatchResult> = re4.findAll(exampleABCDEx3).toList()
+        val found: List<MatchResult> = re4.findAll(exampleABCDEx3).toL
         "found twice in correct places" o {
           found.size chkEq 2
           found[0].value chkEq found[1].value chkEq "aBcD"
@@ -145,7 +146,7 @@ fun testUreWithNames() {
         }
       }
       "On matching re4 with overlap" o {
-        val found: List<MatchResult> = re4.findAllWithOverlap(exampleABCDEx3).toList()
+        val found: List<MatchResult> = re4.findAllWithOverlap(exampleABCDEx3).toL
         "found 4 times in correct places" o {
           found.size chkEq 4
           found[0].value chkEq found[2].value chkEq "aBcD"

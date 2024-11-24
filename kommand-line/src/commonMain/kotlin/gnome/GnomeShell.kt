@@ -4,14 +4,16 @@ package pl.mareklangiewicz.kommand.gnome
 
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.gnome.GnomeShell.Option
+import pl.mareklangiewicz.udata.MutLO
+import pl.mareklangiewicz.udata.toMutL
 
 /**[gnome-shell ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-shell.1.html) */
 fun gnomeshell(vararg options: Option, init: GnomeShell.() -> Unit = {}) =
-  GnomeShell(options.toMutableList()).apply(init)
+  GnomeShell(options.toMutL).apply(init)
 
 /**[gnome-shell ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-shell.1.html) */
 data class GnomeShell(
-  val options: MutableList<Option> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
 ) : Kommand {
   override val name get() = "gnome-shell"
   override val args get() = options.map { it.str }

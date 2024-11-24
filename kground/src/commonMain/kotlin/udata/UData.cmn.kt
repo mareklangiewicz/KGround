@@ -9,9 +9,18 @@ import pl.mareklangiewicz.ulog.ULogEntry
 
 /*
  * These cryptic short fun names like unt, tru, fls, strf (str too) are kind of experiment.
+ * (same for collections shortcuts at the bottom.. LO, MO, MutLO, toL, toMutL, toA, ...)
  * Experiment with treating some opinionated set of extensions/utils as DSL/keywords,
  * that should be short and memorized by user (instead of long and descriptive).
  * I'm very much aware it's against any normal coding convention. :)
+ * My attempt to justify it: It's VERY tempting in kotlin to "extend" the language,
+ * with sweet short extension functions.. SOO easy to do it, thanks to amazing kotlin design.
+ * Normally we shouldn't do it (unless developing stdlib "DSL" like constructs f.e. "to" for constructing pairs)
+ * because shortcuts tend to quickly become overused and unreadable by others (who can't memorize it all).
+ * But here: The KGround is meant to be "experimental stdlib-like ground".
+ * Also, I'm kinda "extending" the language here all the time anyway ("DSLs" like Ure, CLI, etc).
+ * So decided to give in to temptation more in this "KGround" project/"platform"/"ground".
+ * (Maybe there should be some warning about it in README?)
  */
 
 inline val Any?.unt get() = Unit
@@ -86,7 +95,7 @@ fun ULogEntry.str(
   //   maybe even optional logging of job hierarchy?? nah...
   val name = context?.get(CoroutineName)?.name
   val elapsed: Duration? = if (startTime == null || time == null) null else time - startTime
-  return lONN(elapsed, name, data.str(maxLength = maxLength, maxIndicator = maxIndicator))
+  return LONN(elapsed, name, data.str(maxLength = maxLength, maxIndicator = maxIndicator))
     .joinToString(" ") // FIXME_later: joined str can be longer than maxLength
 }
 
@@ -117,24 +126,39 @@ inline fun Any?.strIfNullOrNot(
 
 
 /*
- * Some shortcuts for most common lists/maps creation.
+ * Some shortcuts for most common lists/arrays/maps creation/conversion.
  * Might be changed/removed when we finally get proper collections literals in kotlin.
  * Naming:
- * Common prefix "l", so I don't pollute global namespace more than I have to.
- * Then upper letters, so it's clearer it's a shortcut (and less similar to USpek "o" and "so").
- * Concrete LinkedHashMap return type, so it's more useful most of the times in practice.
- * Note: lMO(..) / linkedMapOf(..) / LinkedHashMap is mutable.
+ * Common prefix "LO" (and "MO" for maps), so I don't pollute global namespace more than I have to.
+ * Uppercase letters, so it's clearer it's a shortcut (and less similar to USpek "o" and "so").
+ * Concrete LinkedHashMap return type, so it's more useful most of the time in practice.
+ * Note: MO(..) / linkedMapOf(..) / LinkedHashMap is mutable.
+ * Also: shortcuts for most common collection conversions as properties "to.."
+ * .toList() -> .toL ; .toMutableList() -> .toMutL ; .toTypedArray() -> .toA
  */
 
-inline fun <T> lO(vararg elements: T): List<T> = listOf(*elements)
-inline fun <T> lONN(vararg elements: T?): List<T> = listOfNotNull(*elements)
+inline fun <T> LO(vararg elements: T): List<T> = listOf(*elements)
+inline fun <T> LONN(vararg elements: T?): List<T> = listOfNotNull(*elements)
 
-inline fun <T> lOMutN(size: Int) = MutableList<T?>(size) { null }
+inline fun <T> MutLO(vararg elements: T) = mutableListOf(*elements)
+inline fun <T> MutLONs(size: Int) = MutableList<T?>(size) { null }
+inline fun <T> MutLONN(vararg elements: T?) = elements.filterNotNull().toMutL
 
-inline fun <K, V> lMO(vararg pairs: Pair<K, V>): LinkedHashMap<K, V> = linkedMapOf(*pairs)
+inline fun <K, V> MO(vararg pairs: Pair<K, V>): LinkedHashMap<K, V> = linkedMapOf(*pairs)
 
 @Suppress("UNCHECKED_CAST")
-inline fun <K, V: Any> lMONN(vararg pairs: Pair<K, V?>): LinkedHashMap<K, V> =
-  lMO(*pairs.mapNotNull { it.takeIf { it.second != null } as Pair<K, V>? }.tta)
+inline fun <K, V: Any> MONN(vararg pairs: Pair<K, V?>): LinkedHashMap<K, V> =
+  MO(*pairs.mapNotNull { it.takeIf { it.second != null } as Pair<K, V>? }.toA)
 
-inline val <reified T> Collection<T>.tta get() = toTypedArray()
+inline val <T> Array<out T>.toL: List<T> get() = toList()
+inline val <T> Array<out T>.toMutL: MutableList<T> get() = toMutableList()
+inline val <T> Iterable<T>.toL: List<T> get() = toList()
+inline val <T> Iterable<T>.toMutL: MutableList<T> get() = toMutableList()
+inline val <T> Sequence<T>.toL: List<T> get() = toList()
+inline val <T> Sequence<T>.toMutL: MutableList<T> get() = toMutableList()
+inline val <reified T> Collection<T>.toA: Array<T> get() = toTypedArray()
+
+// Note: I decided NOT to do similar shortcuts for Flows (Flow.toL, ...)
+// because it's less common, and it the operation does a lot (collection of a flow)
+
+inline val CharSequence.toL: List<Char> get() = toList()

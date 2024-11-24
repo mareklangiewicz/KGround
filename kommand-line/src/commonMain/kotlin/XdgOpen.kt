@@ -1,12 +1,13 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.udata.MutLO
 
 fun xdgopen(file: String, init: XdgOpen.() -> Unit = {}) = XdgOpen(file).apply(init)
 
 data class XdgOpen(
   var file: String? = null,
-  val options: MutableList<Option> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
 ) : Kommand {
   override val name get() = "xdg-open"
   override val args get() = options.map { it.str } plusIfNN file

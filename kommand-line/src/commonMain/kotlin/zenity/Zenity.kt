@@ -7,6 +7,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.chkThis
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class) fun zenityShowError(
@@ -140,8 +141,8 @@ fun zenity(type: Type, init: Zenity.() -> Unit = {}) = Zenity().apply { -type; i
 */
 @OptIn(DelicateApi::class)
 data class Zenity(
-  override val opts: MutableList<ZenityOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<ZenityOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<ZenityOpt> {
   override val name get() = "zenity"
 }

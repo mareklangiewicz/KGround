@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.git.GitCmd.*
+import pl.mareklangiewicz.udata.MutLO
 
 /** @return single line with hash of given revision/commit */
 @OptIn(DelicateApi::class)
@@ -32,8 +33,8 @@ fun git(cmd: GitCmd? = null, init: Git.() -> Unit = {}) = Git().apply {
 /** https://git-scm.com/docs/user-manual.html */
 @DelicateApi
 data class Git(
-  override val opts: MutableList<GitOpt> = mutableListOf(), // last GitOpt should always be GitCmd
-  override val nonopts: MutableList<String> = mutableListOf(), // here is all stuff local for given GitCmd
+  override val opts: MutableList<GitOpt> = MutLO(), // last GitOpt should always be GitCmd
+  override val nonopts: MutableList<String> = MutLO(), // here is all stuff local for given GitCmd
 ) : KommandTypical<GitOpt> {
   override val name get() = "git"
 }

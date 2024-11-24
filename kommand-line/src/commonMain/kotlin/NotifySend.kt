@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.udata.MutLO
 
 /** [notify-send ubuntu manpage](https://manpages.ubuntu.com/manpages/impish/man1/notify-send.1.html) */
 fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Unit = {}) =
@@ -10,7 +11,7 @@ fun notify(summary: String = "", body: String? = null, init: NotifySend.() -> Un
 data class NotifySend(
   var summary: String = "",
   var body: String? = null,
-  val options: MutableList<Option> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
 ) : Kommand {
   override val name get() = "notify-send"
   override val args get() = options.map { it.str } + summary plusIfNN body

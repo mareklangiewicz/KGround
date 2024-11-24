@@ -4,7 +4,9 @@ import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LnOpt.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.toMutL
 
 
 @OptIn(DelicateApi::class)
@@ -66,7 +68,7 @@ fun ln(
   force: Boolean = false,
   verbose: Boolean = false,
   init: Ln.() -> Unit,
-) = Ln(nonopts = paths.mapNotNull { it?.strf }.toMutableList()).apply {
+) = Ln(nonopts = paths.mapNotNull { it?.strf }.toMutL).apply {
   if (symbolic) -Symbolic
   if (relative) -Relative
   if (force) -Force
@@ -82,8 +84,8 @@ fun ln(
  */
 @DelicateApi
 data class Ln(
-  override val opts: MutableList<LnOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<LnOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<LnOpt> {
   override val name get() = "ln"
 }

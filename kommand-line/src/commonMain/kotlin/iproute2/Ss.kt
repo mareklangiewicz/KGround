@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand.iproute2
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.iproute2.SsOpt.*
+import pl.mareklangiewicz.udata.MutLO
 
 @OptIn(DelicateApi::class)
   /**
@@ -20,8 +21,8 @@ fun ss(init: Ss.() -> Unit = {}) = Ss().apply(init)
 
 @DelicateApi
 data class Ss(
-  override val opts: MutableList<SsOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<SsOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<SsOpt> {
   override val name get() = "ss"
 }

@@ -4,7 +4,8 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.udata.lO
+import pl.mareklangiewicz.udata.LO
+import pl.mareklangiewicz.udata.toL
 import pl.mareklangiewicz.ure.bad.chkIR
 import pl.mareklangiewicz.ure.bad.chkMatchEntire
 import pl.mareklangiewicz.ure.core.Ure
@@ -25,7 +26,7 @@ fun testUreQuantifiersAndAtomicGroups() {
 
       // This is kinda fine these don't compile on some platforms, these can always be simplified.
       "dangling quantifiers compile only on JVM" o {
-        lO("a{4}{3}", "b*{3}", "c+{3}").forEachIndexed { i, u ->
+        LO("a{4}{3}", "b*{3}", "c+{3}").forEachIndexed { i, u ->
           "ure $i: \"$u\"" o { ureRaw(u).tstCompilesOnlyOn("JVM", alsoCheckNegation = false) }
         }
       }
@@ -63,37 +64,37 @@ fun testUreQuantifiersAndAtomicGroups() {
     "ure t 2..7 greedy any-middle-part ir ok" o { ureT27GrAMP chkIR "[BD][\\s\\S]{2,7}[BD]" }
 
     //  expExample list is mostly for sanity check and to align visually with the expected results below
-    val expExample = lO("            aBcDe\\naBcDe\\nABCDE   ",
+    val expExample = LO("            aBcDe\\naBcDe\\nABCDE   ",
       "                              a....\\n.....\\n....E   ",
       "                              .B...\\n.....\\n...D.   ",
     )
-    val expReluctantAMPFA = lO("      B.D                    " to 1..3,
+    val expReluctantAMPFA = LO("      B.D                    " to 1..3,
       "                                       B.D            " to 7..9,
       "                                               B.D    " to 13..15,
     )
-    val expReluctantAMPFAWO = lO("    B.D                    " to 1..3,
+    val expReluctantAMPFAWO = LO("    B.D                    " to 1..3,
       "                                 D.\\n.B              " to 3..7,
       "                                       B.D            " to 7..9,
       "                                         D.\\n.B      " to 9..13,
       "                                               B.D    " to 13..15,
     )
-    val expGreedyAMPFA = lO("         B...\\n.....\\n...D    " to 1..15)
-    val expGreedyAMPFAWO = lO("       B...\\n.....\\n...D    " to 1..15,
+    val expGreedyAMPFA = LO("         B...\\n.....\\n...D    " to 1..15)
+    val expGreedyAMPFAWO = LO("       B...\\n.....\\n...D    " to 1..15,
       "                                 D.\\n.....\\n...D    " to 3..15,
       "                                       B...\\n...D    " to 7..15,
       "                                         D.\\n...D    " to 9..15,
       "                                               B.D    " to 13..15,
     )
-    val expT27RelAMPFA = lO("         B...\\n.B              " to 1..7,
+    val expT27RelAMPFA = LO("         B...\\n.B              " to 1..7,
       "                                         D.\\n.B      " to 9..13,
     )
-    val expT27RelAMPFAWO = lO("       B...\\n.B              " to 1..7,
+    val expT27RelAMPFAWO = LO("       B...\\n.B              " to 1..7,
       "                                 D.\\n.B              " to 3..7,
       "                                       B...\\n.B      " to 7..13,
       "                                         D.\\n.B      " to 9..13,
     )
-    val expT27GrAMPFA = lO("          B...\\n...D            " to 1..9)
-    val expT27GrAMPFAWO = lO("        B...\\n...D            " to 1..9,
+    val expT27GrAMPFA = LO("          B...\\n...D            " to 1..9)
+    val expT27GrAMPFAWO = LO("        B...\\n...D            " to 1..9,
       "                                 D.\\n...D            " to 3..9,
       "                                       B...\\n...D    " to 7..15,
       "                                         D.\\n...D    " to 9..15,
@@ -137,7 +138,7 @@ private fun Sequence<MatchResult>.chkEachResultRaw(exps: List<Pair<String, IntRa
 }
 
 internal fun Sequence<MatchResult>.chkEachResult(vararg exps: Pair<IntRange?, Ure?>) {
-  chkEachResult(exps.toList())
+  chkEachResult(exps.toL)
 }
 
 internal fun Sequence<MatchResult>.chkEachResult(exps: List<Pair<IntRange?, Ure?>>) {
@@ -164,7 +165,7 @@ internal fun MatchResult.chkResult(
 private val MatchResult.str get() = "$range:\"${value.preview}\""
 
 private val String.preview
-  get() = toList().joinToString("", limit = 30) {
+  get() = toL.joinToString("", limit = 30) {
     when (it) {
       '\n' -> "\\n"; '\r' -> "\\r"; '\t' -> "\\t"; else -> "$it"
     }

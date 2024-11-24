@@ -7,7 +7,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.udata.tta
+import pl.mareklangiewicz.udata.toA
 
 @ExampleApi
 object MyWorkflowsExamples {
@@ -69,4 +69,4 @@ fun ghWorkflowView(workflowNameOrId: String, web: Boolean = false, yaml: Boolean
 fun ghWorkflowRun(workflowNameOrId: String) = kommand("gh", "workflow", "run", workflowNameOrId)
 
 fun kommand(name: String, buildArgs: MutableList<String>.() -> Unit) =
-  kommand(name, *buildList(buildArgs).tta)
+  kommand(name, *buildList(buildArgs).toA)

@@ -5,7 +5,10 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.CpOpt.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.toL
+import pl.mareklangiewicz.udata.toMutL
 
 /**
  * Copy single [src] to [dst].
@@ -48,7 +51,7 @@ fun cp(
   force: Boolean = false,
   verbose: Boolean = false,
   init: Cp.() -> Unit,
-) = Cp(nonopts = paths.mapNotNull { it?.strf }.toMutableList())
+) = Cp(nonopts = paths.mapNotNull { it?.strf }.toMutL)
   .apply { if (force) -Force; if (verbose) -Verbose; init() }
 
 
@@ -89,8 +92,8 @@ fun cp(
  */
 @DelicateApi
 data class Cp(
-  override val opts: MutableList<CpOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<CpOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<CpOpt> {
   override val name get() = "cp"
 }
@@ -286,7 +289,7 @@ interface CpOpt : KOptTypical {
    * Details: [gnu cp invocation](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html)
    */
   data class Preserve(val attrs: List<FileAttrs>) : KOptLN(attrs.joinToString(",") { it.namelowords() }), CpOpt {
-    constructor(vararg attrs: FileAttrs) : this(attrs.toList())
+    constructor(vararg attrs: FileAttrs) : this(attrs.toL)
   }
 
   /** Works the same as Preserve(Mode, Ownership, Timestamp), but uses short notation. [Preserve] */
@@ -297,7 +300,7 @@ interface CpOpt : KOptTypical {
    * Details: [gnu cp invocation](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html)
    */
   data class NoPreserve(val attrs: List<FileAttrs>) : KOptLN(attrs.joinToString(",") { it.namelowords() }), CpOpt {
-    constructor(vararg attrs: FileAttrs) : this(attrs.toList())
+    constructor(vararg attrs: FileAttrs) : this(attrs.toL)
   }
 
   enum class FileAttrs { Mode, Ownership, Timestamps, Links, Context, Xattr, All }

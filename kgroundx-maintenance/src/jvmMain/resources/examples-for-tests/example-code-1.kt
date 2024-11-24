@@ -111,7 +111,7 @@ private val LocalUChildrenMod = staticCompositionLocalOf<(Mod.() -> Mod)?> { nul
 @Composable fun UTabs(mod: Mod, vararg contents: Pair<String, @Composable () -> Unit>) {
   var selectedTabIndex by ustate(0)
   UColumn(mod) {
-    UTabs(*contents.map { it.first }.toTypedArray()) { idx, tab -> selectedTabIndex = idx }
+    UTabs(*contents.map { it.first }.toA) { idx, tab -> selectedTabIndex = idx }
     contents[selectedTabIndex].second()
   }
 }
@@ -157,7 +157,7 @@ private val LocalUChildrenMod = staticCompositionLocalOf<(Mod.() -> Mod)?> { nul
 }
 
 @Composable inline fun <reified E : Enum<E>> USwitchEnum(state: MutableState<E>) =
-  USwitch(state, *(enumValues<E>().map { it.name to it }.toTypedArray()))
+  USwitch(state, *(enumValues<E>().map { it.name to it }.toA))
 
 @Composable fun UProgress(
   pos: Double,

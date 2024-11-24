@@ -5,7 +5,7 @@ package pl.mareklangiewicz.ure
 
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ure.core.*
 
 // region [Ure Basic Stuff]
@@ -66,7 +66,7 @@ fun Ure.withBoundaries(boundaryBefore: Ure? = null, boundaryAfter: Ure? = null) 
   }
 
 infix fun Ure.or(that: Ure) = UreAlternation(this, that)
-infix fun Ure.then(that: Ure) = UreConcatenation(mutableListOf(this, that))
+infix fun Ure.then(that: Ure) = UreConcatenation(MutLO(this, that))
 // Do not rename "then" to "and". The "and" would suggest sth more like a special lookahead/lookbehind group
 
 @OptIn(NotPortableApi::class, DelicateApi::class) // not portable only if the receiver was already not portable.
@@ -157,7 +157,7 @@ val chHexDigit = chOfAny(chDigit, chOf('a'..'f'), chOf('A'..'F'))
 @OptIn(NotPortableApi::class)
 val chAlnum = chOfAny(chAlpha, chDigit)
 
-val chPunct = chOfAnyExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""".toList())
+val chPunct = chOfAnyExact("""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""".toL)
 
 @OptIn(NotPortableApi::class)
 val chGraph = chOfAny(chAlnum, chPunct)
@@ -358,7 +358,7 @@ fun chOfNotAny(vararg charClasses: UreCharClass?) = !chOfAny(*charClasses)
 fun chOfAnyExact(exactChars: List<Char>) = chOfAny(exactChars.map(::ch))
 
 @OptIn(DelicateApi::class)
-fun chOfAnyExact(vararg exactChars: Char?) = chOfAnyExact(exactChars.toList().filterNotNull())
+fun chOfAnyExact(vararg exactChars: Char?) = chOfAnyExact(exactChars.toL.filterNotNull())
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAnyExact(exactChars)"))
 fun chOfNotAnyExact(exactChars: List<Char>) = !chOfAnyExact(exactChars)
@@ -397,7 +397,7 @@ fun chOfAll(charClasses: List<UreCharClass>) = UreCharClassIntersect(charClasses
  */
 @DelicateApi("Very delicate! Expect inconsistent matching behavior between platforms. Always write unit tests.")
 @NotPortableApi("Does NOT compile on JS. Kotlin/JS uses 'unicode'(u) mode but not 'unicodeSets'(v) mode.")
-fun chOfAll(vararg charClasses: UreCharClass?) = chOfAll(charClasses.toList().filterNotNull())
+fun chOfAll(vararg charClasses: UreCharClass?) = chOfAll(charClasses.toL.filterNotNull())
 
 @SecondaryApi("Use operator fun Ure.not()", ReplaceWith("!chOfAll(charClasses)"))
 @DelicateApi("Very delicate! Expect inconsistent matching behavior between platforms. Always write unit tests.")

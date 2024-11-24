@@ -1,6 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.annotations.DelicateApi
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
@@ -12,8 +13,8 @@ fun man(sectionNumber: Int?, init: Man.() -> Unit = {}) =
 
 @DelicateApi
 data class Man(
-  override val opts: MutableList<ManOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<ManOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<ManOpt> {
   override val name get() = "man"
 }

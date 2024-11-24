@@ -14,6 +14,7 @@ import pl.mareklangiewicz.kommand.find.FindOpt.*
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.toA
 
 // FIXME_later: use UFileSys.pathToUserHome, and generally use Path type
 val myHomePath = "/home/marek".P
@@ -180,9 +181,9 @@ private fun fexprWithPrunedDirs(prunedDirsNamed: String?, vararg expr: FindExpr?
 // TODO_later: full grep kommand wrapper class+funs.
 @OptIn(DelicateApi::class)
 private fun grepQuietly(regexp: String, vararg files: Path) =
-  kommand("grep", "-q", regexp, *files.map { it.strf }.toTypedArray())
+  kommand("grep", "-q", regexp, *files.map { it.strf }.toA)
 
 @OptIn(DelicateApi::class)
 private fun grepWithDetails(regexp: String, vararg files: Path) =
-  kommand("grep", "-H", "-n", "-T", "-e", regexp, *files.map { it.strf }.toTypedArray())
+  kommand("grep", "-H", "-n", "-T", "-e", regexp, *files.map { it.strf }.toA)
 

@@ -8,6 +8,7 @@ import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt.*
 import pl.mareklangiewicz.kommand.core.LsOpt.IndicatorStyle.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 fun lsRegFiles(dir: Path, wHidden: Boolean = false): ReducedKommand<List<Path>> =
@@ -55,8 +56,8 @@ fun ls(
  */
 @OptIn(DelicateApi::class)
 data class Ls(
-  override val opts: MutableList<LsOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<LsOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<LsOpt> {
   override val name get() = "ls"
 }

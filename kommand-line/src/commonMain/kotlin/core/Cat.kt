@@ -2,6 +2,7 @@ package pl.mareklangiewicz.kommand.core
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 
 
 @DelicateApi
@@ -12,8 +13,8 @@ fun cat(init: Cat.() -> Unit = {}) = Cat().apply(init)
  */
 @DelicateApi
 data class Cat(
-  override val opts: MutableList<CatOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<CatOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<CatOpt> {
   override val name get() = "cat"
 }

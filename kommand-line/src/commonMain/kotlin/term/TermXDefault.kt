@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.term
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 
 /**
  * Marker for [Kommand] that starts new terminal emulator.
@@ -24,8 +25,8 @@ fun termXDefault(kommand: Kommand? = null, init: TermXDefault.() -> Unit = {}): 
 /** [debian packages providing x-terminal-emulator](https://packages.debian.org/stable/virtual/x-terminal-emulator) */
 @DelicateApi("Requires x-terminal-emulator; different terminals accept different options.")
 data class TermXDefault(
-  override val opts: MutableList<KOptTypical> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<KOptTypical> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<KOptTypical>, TermKommand {
   override val name get() = "x-terminal-emulator"
 }

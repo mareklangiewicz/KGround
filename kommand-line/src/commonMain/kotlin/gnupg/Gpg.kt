@@ -11,6 +11,7 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
 import pl.mareklangiewicz.kommand.gnupg.GpgOpt.PinentryMode.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
@@ -42,8 +43,8 @@ fun gpg(cmd: GpgCmd? = null, init: Gpg.() -> Unit = {}) = Gpg().apply { cmd?.let
 /** [gnupg manual](https://gnupg.org/documentation/manuals/gnupg/Invoking-GPG.html#Invoking-GPG) */
 @OptIn(DelicateApi::class)
 data class Gpg(
-  override val opts: MutableList<GpgOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<GpgOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<GpgOpt> {
   override val name get() = "gpg"
 }

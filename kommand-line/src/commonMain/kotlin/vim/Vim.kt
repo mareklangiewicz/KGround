@@ -15,7 +15,7 @@ import pl.mareklangiewicz.kommand.vim.XVimOpt.*
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorPos
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForVim
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.VimRcNONE
-import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.*
 
 
 
@@ -72,7 +72,7 @@ fun gvimContent(inContent: String, init: XVim.() -> Unit = {}): ReducedScript<Li
 
 @DelicateApi
 fun xvim(type: XVimType, vararg files: Path?, init: XVim.() -> Unit = {}) =
-  XVim(type, nonopts = files.mapNotNull { it?.strf }.toMutableList()).apply(init)
+  XVim(type, nonopts = files.mapNotNull { it?.strf }.toMutL).apply(init)
 
 @DelicateApi
 fun vim(vararg files: Path?, init: XVim.() -> Unit = {}) = xvim(Vim, *files, init = init)
@@ -250,8 +250,8 @@ fun vimKeysScriptContent(
 @Suppress("unused")
 data class XVim(
   val type: XVimType = Vim,
-  override val opts: MutableList<XVimOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<XVimOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<XVimOpt> {
   override val name get() = type.namelowords("")
 }

@@ -12,6 +12,8 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.ax
 import pl.mareklangiewicz.kommand.zenity.*
 import pl.mareklangiewicz.kommand.zenity.ZenityOpt.*
+import pl.mareklangiewicz.udata.LONN
+import pl.mareklangiewicz.udata.toA
 import pl.mareklangiewicz.udata.unt
 import pl.mareklangiewicz.usubmit.xd.XD.*
 import pl.mareklangiewicz.usubmit.*
@@ -58,7 +60,7 @@ class ZenitySupervisor(val promptPrefix: String? = null): USubmit {
             if (ok) data.accept else data.decline
           }
           is AskForAction -> {
-            zenityAskForOneOf(*data.actions.map { it.name }.toTypedArray(), prompt = prompt, title = title)
+            zenityAskForOneOf(*data.actions.map { it.name }.toA, prompt = prompt, title = title)
               .ax()?.let { DoAction(Action(it)) }
           }
           is AskAndShow -> { invoke(data.toShow); invoke(data.toAsk) }
@@ -70,7 +72,7 @@ class ZenitySupervisor(val promptPrefix: String? = null): USubmit {
   }
 }
 
-private val ShowProgress.str get() = listOfNotNull("progress", pos?.let { "$pos of $min..$max" }, details).joinToString(" ")
+private val ShowProgress.str get() = LONN("progress", pos?.let { "$pos of $min..$max" }, details).joinToString(" ")
 
 // TODO_later: more public similar DSL (and use it more)? What similar do I have in kground already?
 private fun joinLinesNN(vararg lines: String?) = lines.filterNotNull().joinToString("\n")

@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.SecondaryApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.EchoOpt.*
+import pl.mareklangiewicz.udata.MutLO
 
 /**
  * @param withNewLine adds trailing newline at the end of [line].
@@ -33,8 +34,8 @@ fun echo(init: Echo.() -> Unit = {}) = Echo().apply(init)
  */
 @DelicateApi
 data class Echo(
-  override val opts: MutableList<EchoOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<EchoOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<EchoOpt> {
   override val name get() = "echo"
 }

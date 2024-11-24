@@ -7,7 +7,7 @@ import okio.ForwardingFileSystem
 import okio.Path
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.uctx.UCtx
-import pl.mareklangiewicz.udata.lONN
+import pl.mareklangiewicz.udata.LONN
 
 
 open class UFileSys(delegate: FileSystem) : UCtx, ForwardingFileSystem(delegate) {
@@ -23,7 +23,7 @@ open class UFileSys(delegate: FileSystem) : UCtx, ForwardingFileSystem(delegate)
   open val pathToSysTmp: Path? = null
 }
 
-val UFileSys.pathToSomeTmpOrHome get() = lONN(pathToUserTmp, pathToSysTmp, pathToUserHome).first()
+val UFileSys.pathToSomeTmpOrHome get() = LONN(pathToUserTmp, pathToSysTmp, pathToUserHome).first()
 
 /**
  * Just some convention I like; additional "tmp" in name is there to emphasize that

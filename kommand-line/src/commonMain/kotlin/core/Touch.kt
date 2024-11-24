@@ -3,6 +3,7 @@ package pl.mareklangiewicz.kommand.core
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 /** Update the access and modification times of each file to the current time. Create empty files if necessary. */
@@ -15,8 +16,8 @@ fun touch(init: Touch.() -> Unit) = Touch().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/touch.1.html) */
 @DelicateApi
 data class Touch(
-  override val opts: MutableList<TouchOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<TouchOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<TouchOpt> {
   override val name get() = "touch"
 }

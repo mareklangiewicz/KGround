@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.*
+import pl.mareklangiewicz.udata.MutLO
 
 
 @OptIn(DelicateApi::class)
@@ -54,8 +55,8 @@ fun termKitty(kommand: Kommand?, init: TermKitty.() -> Unit) =
  */
 @DelicateApi
 data class TermKitty(
-  override val opts: MutableList<TermKittyOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<TermKittyOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<TermKittyOpt>, TermKommand {
   override val name get() = "kitty"
 }

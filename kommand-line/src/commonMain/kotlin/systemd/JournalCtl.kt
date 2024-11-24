@@ -1,14 +1,15 @@
 package pl.mareklangiewicz.kommand.systemd
 
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 
 /** [journalctl linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 fun journalctl(init: JournalCtl.() -> Unit = {}) = JournalCtl().apply(init)
 
 /** [journalctl linux man](https://man7.org/linux/man-pages/man1/journalctl.1.html) */
 data class JournalCtl(
-  val options: MutableList<Option> = mutableListOf(),
-  val matches: MutableList<String> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
+  val matches: MutableList<String> = MutLO(),
 ) : Kommand {
   override val name get() = "journalctl"
   override val args get() = options.map { it.str } + matches

@@ -14,6 +14,7 @@ import pl.mareklangiewicz.kommand.core.*
 import pl.mareklangiewicz.kommand.find.*
 import pl.mareklangiewicz.kommand.github.*
 import pl.mareklangiewicz.kommand.zenity.*
+import pl.mareklangiewicz.udata.LO
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.core.*
@@ -77,7 +78,7 @@ suspend fun Path.myKotlinFileToggleDisabled(disable: Boolean? = null) {
             withNameBase = "*.gradle.kts",
             withNameFull = null,
           ).ax()
-        else emptyList()
+        else LO()
       (listKt + listKts).forEach { ktFilePathStr ->
         val ktFilePath = ktFilePathStr.P
         val lineContentUre = codeInLineUre.withOptWhatevaAroundInLine()

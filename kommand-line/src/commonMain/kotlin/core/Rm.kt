@@ -5,6 +5,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.RmOpt.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
@@ -39,8 +40,8 @@ fun rm(init: Rm.() -> Unit): Rm = Rm().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/rm.1.html) */
 @DelicateApi
 data class Rm(
-  override val opts: MutableList<RmOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<RmOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<RmOpt> {
   override val name get() = "rm"
 }

@@ -6,7 +6,8 @@ import pl.mareklangiewicz.kground.tee.getCurrentPlatformName
 import pl.mareklangiewicz.regex.bad.chkMatchEntire
 import pl.mareklangiewicz.regex.bad.chkNotMatchEntire
 import pl.mareklangiewicz.udata.strf
-import pl.mareklangiewicz.udata.tta
+import pl.mareklangiewicz.udata.toA
+import pl.mareklangiewicz.udata.toL
 import pl.mareklangiewicz.ulog.d
 import pl.mareklangiewicz.ure.core.Ure
 import pl.mareklangiewicz.uspek.*
@@ -64,8 +65,8 @@ fun Ure.tstMatchCorrectChars(
   alsoCheckNegation: Boolean = true,
   verbose: Boolean = false,
 ) = tstMatchCorrectInputs(
-  match.toList().map { it.strf },
-  matchNot.toList().map { it.strf },
+  match.toL.map { it.strf },
+  matchNot.toL.map { it.strf },
   alsoCheckNegation = alsoCheckNegation,
   verbose = verbose,
 )
@@ -77,11 +78,11 @@ fun Ure.tstMatchCorrectInputs(
   alsoCheckNegation: Boolean = true,
   verbose: Boolean = false,
 ) = "matches correct inputs" o {
-  tstMatchAll(*match.tta, verbose = verbose)
-  tstMatchNone(*matchNot.tta, verbose = verbose)
+  tstMatchAll(*match.toA, verbose = verbose)
+  tstMatchNone(*matchNot.toA, verbose = verbose)
   if (alsoCheckNegation) {
-    not().tstMatchAll(*matchNot.tta, verbose = verbose)
-    not().tstMatchNone(*match.tta, verbose = verbose)
+    not().tstMatchAll(*matchNot.toA, verbose = verbose)
+    not().tstMatchNone(*match.toA, verbose = verbose)
   }
 }
 

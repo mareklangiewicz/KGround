@@ -7,6 +7,7 @@ import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.admin.SudoOpt.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 /**
@@ -59,8 +60,8 @@ fun sudo(init: Sudo.() -> Unit = {}) = Sudo().apply(init)
  * [linux man](https://www.sudo.ws/docs/man/sudo.man/) */
 @DelicateApi
 data class Sudo(
-  override val opts: MutableList<SudoOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<SudoOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<SudoOpt> {
   override val name get() = "sudo"
 }

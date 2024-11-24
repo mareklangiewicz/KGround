@@ -11,7 +11,7 @@ import pl.mareklangiewicz.kommand.Ide.*
 import pl.mareklangiewicz.kommand.admin.psAllFull
 import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
 import pl.mareklangiewicz.kommand.vim.gvimOpen
-import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
 
@@ -88,8 +88,8 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
   sealed class Cmd(val name: String?) : ToArgs {
 
     data class Open(
-      val opts: MutableList<Opt> = mutableListOf(),
-      val paths: MutableList<Path> = mutableListOf(),
+      val opts: MutableList<Opt> = MutLO(),
+      val paths: MutableList<Path> = MutLO(),
     ) : Cmd(null) {
       constructor(
         path1: Path? = null,
@@ -99,8 +99,8 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
         line: Int? = null,
         column: Int? = null,
       ) : this(
-        listOfNotNull(line?.let(Opt::Line), column?.let(Opt::Column)).toMutableList(),
-        listOfNotNull(path1, path2, path3).toMutableList(),
+        LONN(line?.let(Opt::Line), column?.let(Opt::Column)).toMutL,
+        LONN(path1, path2, path3).toMutL,
       )
 
       override fun toArgs() = opts.flatMap { it.toArgs() } + paths.map { it.strf }
@@ -121,11 +121,11 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
     }
 
     data class Diff(var path1: Path, var path2: Path, var path3: Path? = null) : Cmd("diff") {
-      override fun toArgs() = listOfNotNull(name, path1.strf, path2.strf, path3?.strf)
+      override fun toArgs() = LONN(name, path1.strf, path2.strf, path3?.strf)
     }
 
     data class Merge(var path1: Path, var path2: Path, var pathOut: Path, var pathBase: Path? = null) : Cmd("merge") {
-      override fun toArgs() = listOfNotNull(name, path1.strf, path2.strf, pathBase?.strf, pathOut.strf)
+      override fun toArgs() = LONN(name, path1.strf, path2.strf, pathBase?.strf, pathOut.strf)
     }
 
     /**
@@ -134,18 +134,18 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
      * See: https://www.jetbrains.com/help/idea/command-line-formatter.html
      */
     data class Format(
-      val opts: MutableList<Opt> = mutableListOf(),
-      val paths: MutableList<String> = mutableListOf(),
+      val opts: MutableList<Opt> = MutLO(),
+      val paths: MutableList<String> = MutLO(),
     ) : Cmd("format") {
       override fun toArgs() = listOf(name!!) + opts.flatMap { it.toArgs() } + paths
 
       @OptIn(DelicateApi::class)
-      sealed class Opt(name: String, args: List<String> = emptyList()) : KOptS(name, args, argsSeparator = ",") {
+      sealed class Opt(name: String, args: List<String> = LO()) : KOptS(name, args, argsSeparator = ",") {
         data object Help : Opt("h")
         data object Dry : Opt("d")
         data object Recursive : Opt("R") // Note: long flavor: --recursive is NOT supported.
         data object AllowDefaults : Opt("allowDefaults")
-        class Mask(vararg patterns: String) : Opt("m", patterns.toList())
+        class Mask(vararg patterns: String) : Opt("m", patterns.toL)
         class Settings(path: String) : Opt("s", listOf(path))
         class Charset(charset: String) : Opt("charset", listOf(charset))
       }
@@ -163,7 +163,7 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
       var project: String,
       var profile: String,
       var output: String,
-      val opts: MutableList<Opt> = mutableListOf(),
+      val opts: MutableList<Opt> = MutLO(),
     ) : Cmd("inspect") {
       override fun toArgs() = listOf(name!!, project, profile, output) + opts.flatMap { it.toArgs() }
 
@@ -180,8 +180,8 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
 
     /** https://www.jetbrains.com/help/idea/install-plugins-from-the-command-line.html */
     data class Install(
-      val plugins: MutableList<String> = mutableListOf(),
-      val repos: MutableList<String> = mutableListOf(),
+      val plugins: MutableList<String> = MutLO(),
+      val repos: MutableList<String> = MutLO(),
     ) : Cmd("installPlugins") {
       override fun toArgs() = listOf(name!!) + plugins + repos
       operator fun String.unaryPlus() = plugins.add(this)

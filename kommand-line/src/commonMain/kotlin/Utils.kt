@@ -16,10 +16,6 @@ import pl.mareklangiewicz.ulog.e
 import pl.mareklangiewicz.ulog.localULog
 
 
-// FIXME_later: use one from kground after update
-inline val Any?.strfoe get() = this?.strf.orEmpty() // notice calling strf only if not null.
-
-
 // the ".enabled" suffix is important, so it's clear the user explicitly enabled a boolean "flag"
 fun setUserFlag(cli: CLI, key: String, enabled: Boolean) {
   konfigInUserHomeConfigDir(cli)["$key.enabled"] = enabled.strf

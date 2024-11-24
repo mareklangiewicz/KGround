@@ -5,6 +5,7 @@ package pl.mareklangiewicz.kommand
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.kommand.shell.bashQuoteMetaChars
 
 /**
@@ -16,11 +17,11 @@ import pl.mareklangiewicz.kommand.shell.bashQuoteMetaChars
  * or at least they try to "fail fast" in runtime instead of running some suspicious kommands on CLI.
  */
 @DelicateApi
-fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toList())
+fun kommand(name: String, vararg args: String): Kommand = AKommand(name, args.toL)
 
 @DelicateApi
 fun String.toKommand() = split(" ").run {
-  kommand(first(), *drop(1).toTypedArray())
+  kommand(first(), *drop(1).toA)
 }
 
 // TODO_someday_maybe: full documentation in kdoc (all commands, options, etc.)
@@ -119,7 +120,7 @@ open class KOptS(
     namePrefix: String = "-",
     nameSeparator: String = " ",
     argsSeparator: String = " ",
-  ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+  ) : this(name, LONN(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Long form of an option */
@@ -137,7 +138,7 @@ open class KOptL(
     namePrefix: String = "--",
     nameSeparator: String = "=",
     argsSeparator: String = ",",
-  ) : this(name, listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+  ) : this(name, LONN(arg), namePrefix, nameSeparator, argsSeparator)
 }
 
 /** Special form of an option, with automatically derived name as class name lowercase words separated by one hyphen */
@@ -153,7 +154,7 @@ open class KOptLN(
     namePrefix: String = "--",
     nameSeparator: String = "=",
     argsSeparator: String = ",",
-  ) : this(listOfNotNull(arg), namePrefix, nameSeparator, argsSeparator)
+  ) : this(LONN(arg), namePrefix, nameSeparator, argsSeparator)
 
   override val name: String get() = classlowords("-")
 }
@@ -173,12 +174,12 @@ interface KommandTypical<KOptT : KOptTypical> : Kommand {
 @DelicateApi
 data class AKommandTypical(
   override val name: String,
-  override val opts: MutableList<KOptTypical> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<KOptTypical> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<KOptTypical>
 
 @DelicateApi
 fun kommandTypical(name: String, vararg opts: KOptTypical, init: AKommandTypical.() -> Unit) =
-  AKommandTypical(name, opts.toMutableList()).apply(init)
+  AKommandTypical(name, opts.toMutL).apply(init)
 
 // TODO_later: update implementations to use (where appropriate): KOptTypical, KommandTypical, DelicateApi,

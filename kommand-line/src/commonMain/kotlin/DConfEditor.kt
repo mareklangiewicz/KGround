@@ -1,15 +1,16 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kommand.DConfEditor.Option
+import pl.mareklangiewicz.udata.*
 
 /** [dconf-editor ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/dconf-editor.1.html) */
 fun dconfedit(vararg options: Option, init: DConfEditor.() -> Unit = {}) =
-  DConfEditor(options.toMutableList()).apply(init)
+  DConfEditor(options.toMutL).apply(init)
 
 /** [dconf-editor ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/dconf-editor.1.html) */
 data class DConfEditor(
-  val options: MutableList<Option> = mutableListOf(),
-  val nonopts: MutableList<String> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
+  val nonopts: MutableList<String> = MutLO(),
 ) : Kommand {
   override val name get() = "dconf-editor"
   override val args get() = options.map { it.str } + nonopts

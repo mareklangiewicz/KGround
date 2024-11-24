@@ -6,6 +6,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd
 import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd.*
+import pl.mareklangiewicz.udata.MutLO
 
 /** [gnome-extensions ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-extensions.1.html) */
 fun gnomeext(cmd: Cmd, init: GnomeExt.() -> Unit = {}) = GnomeExt(cmd).apply(init)
@@ -13,7 +14,7 @@ fun gnomeext(cmd: Cmd, init: GnomeExt.() -> Unit = {}) = GnomeExt(cmd).apply(ini
 /** [gnome-extensions ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gnome-extensions.1.html) */
 data class GnomeExt(
   var cmd: Cmd = Help(),
-  val options: MutableList<Option> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
 ) : Kommand {
   override val name get() = "gnome-extensions"
   override val args get() = cmd.str + options.map { it.str } plusIfNN (cmd as? Install)?.pack

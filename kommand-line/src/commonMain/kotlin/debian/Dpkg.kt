@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.debian
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 /**
@@ -28,7 +29,7 @@ fun dpkg(init: Dpkg.() -> Unit = {}) = Dpkg().apply(init)
 /** [linux man](https://man7.org/linux/man-pages/man1/dpkg.1.html) */
 @DelicateApi
 data class Dpkg(
-  val opts: MutableList<DpkgOpt> = mutableListOf(),
+  val opts: MutableList<DpkgOpt> = MutLO(),
 ) : Kommand {
   override val name get() = "dpkg"
   override val args get() = opts.flatMap { it.toArgs() }

@@ -5,7 +5,9 @@ package pl.mareklangiewicz.kommand.github
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.toL
 
 fun ghHelp(init: GhHelp.() -> Unit = {}) = GhHelp().apply(init)
 fun ghVersion(init: GhVersion.() -> Unit = {}) = GhVersion().apply(init)
@@ -16,8 +18,8 @@ abstract class GhKommand<KOptGhT : KOptGh> : Kommand {
 
   val ghKommandNameWords get() = classlowords.also { it.first().chkEq("gh") }
 
-  val nonopts: MutableList<String> = mutableListOf()
-  val opts: MutableList<KOptGhT> = mutableListOf()
+  val nonopts: MutableList<String> = MutLO()
+  val opts: MutableList<KOptGhT> = MutLO()
 
   override val name get() = ghKommandNameWords.first()
   override val args get() = ghKommandNameWords.drop(1) + nonopts + opts.toArgsFlat()
@@ -80,7 +82,7 @@ data class Visibility(val vis: String) : GhOpt(vis), KOptGhSecretSet, KOptGhRepo
 
 /** @param repos list of repos to exclude in owner/name format */
 data class Exclude(val repos: List<String>) : GhOpt(repos.joinToString(",")), KOptGhStatus {
-  constructor(vararg repos: String) : this(repos.toList())
+  constructor(vararg repos: String) : this(repos.toL)
 }
 
 data object Web : GhOpt(), KOptGhRepoView

@@ -7,6 +7,7 @@ import pl.mareklangiewicz.text.*
 import pl.mareklangiewicz.ure.*
 import kotlin.jvm.JvmInline
 import kotlin.text.RegexOption.*
+import pl.mareklangiewicz.udata.MutLO
 
 
 /** IR is the traditional regular expression - no human should read - kind of "intermediate representation" */
@@ -105,7 +106,7 @@ sealed interface UreCharClass : UreAtomic {
 }
 
 @JvmInline
-value class UreConcatenation internal constructor(val tokens: MutableList<Ure> = mutableListOf()) : UreNonCapturing {
+value class UreConcatenation internal constructor(val tokens: MutableList<Ure> = MutLO()) : UreNonCapturing {
   // TODO_someday: make tokens publicly List<Ure>, when kotlin have this feature:
   // https://youtrack.jetbrains.com/issue/KT-14663/Support-having-a-public-and-a-private-type-for-the-same-property
 

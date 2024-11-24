@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.ssh
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 
@@ -20,8 +21,8 @@ fun sshKeygen(init: SshKeygen.() -> Unit = {}) = SshKeygen().apply(init)
  */
 @DelicateApi
 data class SshKeygen(
-  override val opts: MutableList<SshKeygenOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<SshKeygenOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<SshKeygenOpt> {
   override val name get() = "ssh-keygen"
 }

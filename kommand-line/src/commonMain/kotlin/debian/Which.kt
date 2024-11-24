@@ -5,6 +5,7 @@ import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 
 fun isKommandAvailable(kommand: Kommand): ReducedKommand<Boolean> = isCommandAvailable(kommand.name)
 
@@ -24,8 +25,8 @@ fun which(init: Which.() -> Unit) = Which().apply(init)
 /** [linux man](https://linux.die.net/man/1/which) */
 @DelicateApi
 data class Which(
-  override val opts: MutableList<WhichOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<WhichOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<WhichOpt> {
   override val name get() = "which"
 }

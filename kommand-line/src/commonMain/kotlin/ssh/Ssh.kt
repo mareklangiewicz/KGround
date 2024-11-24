@@ -4,6 +4,7 @@ package pl.mareklangiewicz.kommand.ssh
 
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 
@@ -30,8 +31,8 @@ fun sshVersion() = Ssh().apply { -SshOpt.Version }
  */
 @DelicateApi
 data class Ssh(
-  override val opts: MutableList<SshOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<SshOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<SshOpt> {
   override val name get() = "ssh"
 }

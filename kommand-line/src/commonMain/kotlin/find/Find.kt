@@ -12,7 +12,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.find.FindExpr.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.toL
 
 
 /**
@@ -219,9 +221,9 @@ fun find(init: Find.() -> Unit = {}) = Find().apply(init)
  */
 @DelicateApi
 data class Find(
-  val opts: MutableList<FindOpt> = mutableListOf(),
-  val paths: MutableList<Path> = mutableListOf(),
-  val expr: MutableList<FindExpr> = mutableListOf(),
+  val opts: MutableList<FindOpt> = MutLO(),
+  val paths: MutableList<Path> = MutLO(),
+  val expr: MutableList<FindExpr> = MutLO(),
 ) : Kommand {
   override val name get() = "find"
   override val args get() = opts.toArgsFlat() + paths.map { it.strf } + expr.toArgsFlat()
@@ -556,7 +558,7 @@ interface FindExpr : KOpt {
 // region Find Expression Category: OPERATORS
 
   data class OpParent(val children: List<FindExpr>) : FindExpr {
-    constructor(vararg ex: FindExpr) : this(ex.toList())
+    constructor(vararg ex: FindExpr) : this(ex.toL)
 
     override fun toArgs(): List<String> = listOf("(") + children.flatMap { it.toArgs() } + ")"
   }
@@ -597,7 +599,7 @@ interface FindOpt : KOpt {
   data object SymLinkFollowCmdArg : KOptS("H"), FindOpt
 
   data class Debug(val dopts: List<String>) : KOptS("D", dopts.joinToString(",")), FindOpt {
-    constructor(vararg o: String) : this(o.toList())
+    constructor(vararg o: String) : this(o.toL)
 
     init {
       chk(dopts.all { it.all { it.isLetter() } })

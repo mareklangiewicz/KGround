@@ -5,7 +5,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.namelowords
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.MvOpt.*
-import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.*
 
 /**
  * Move/rename single [src] to [dst]. If possible it just renames, but if not (dst on different file system etc),
@@ -58,7 +58,7 @@ fun mv(
   force: Boolean = false,
   verbose: Boolean = false,
   init: Mv.() -> Unit,
-) = Mv(nonopts = paths.mapNotNull { it?.strf }.toMutableList())
+) = Mv(nonopts = paths.mapNotNull { it?.strf }.toMutL)
   .apply { if (force) -Force; if (verbose) -Verbose; init() }
 
 
@@ -69,8 +69,8 @@ fun mv(
  */
 @DelicateApi
 data class Mv(
-  override val opts: MutableList<MvOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<MvOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<MvOpt> {
   override val name get() = "mv"
 }

@@ -6,6 +6,7 @@ import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.Kommand
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.Help
+import pl.mareklangiewicz.udata.MutLO
 
 /** [gapplication ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gapplication.1.html) */
 fun gnomeapp(cmd: Cmd, init: GnomeApp.() -> Unit = {}) = GnomeApp(cmd).apply(init)
@@ -13,7 +14,7 @@ fun gnomeapp(cmd: Cmd, init: GnomeApp.() -> Unit = {}) = GnomeApp(cmd).apply(ini
 /** [gapplication ubuntu manpage](http://manpages.ubuntu.com/manpages/impish/man1/gapplication.1.html) */
 data class GnomeApp(
   var cmd: Cmd = Help(),
-  val addons: MutableList<String> = mutableListOf(),
+  val addons: MutableList<String> = MutLO(),
 ) : Kommand {
   override val name get() = "gapplication"
   override val args get() = cmd.str + addons

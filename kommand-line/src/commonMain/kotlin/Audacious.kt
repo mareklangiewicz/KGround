@@ -1,10 +1,13 @@
 package pl.mareklangiewicz.kommand
 
-fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutableList()).apply(init)
+import pl.mareklangiewicz.udata.MutLO
+import pl.mareklangiewicz.udata.toMutL
+
+fun audacious(vararg files: String, init: Audacious.() -> Unit = {}) = Audacious(files.toMutL).apply(init)
 
 data class Audacious(
-  val files: MutableList<String> = mutableListOf(),
-  val options: MutableList<Option> = mutableListOf(),
+  val files: MutableList<String> = MutLO(),
+  val options: MutableList<Option> = MutLO(),
 ) : Kommand {
   override val name get() = "audacious"
   override val args get() = options.map { it.str } + files

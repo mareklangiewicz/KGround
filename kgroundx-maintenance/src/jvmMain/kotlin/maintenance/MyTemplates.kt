@@ -13,7 +13,7 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
 import pl.mareklangiewicz.uctx.uctx
-import pl.mareklangiewicz.udata.lMO
+import pl.mareklangiewicz.udata.MO
 import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
@@ -61,8 +61,8 @@ suspend fun tryInjectMyTemplatesToProject(
 suspend fun tryDiffMyConflictingTemplatesSrc() {
   val log = localULog()
   val fs = localUFileSys()
-  val templates = lMO<String, String>()
-  val templatesSrc = lMO<String, Path>()
+  val templates = MO<String, String>()
+  val templatesSrc = MO<String, Path>()
   fs.findAllFiles(PProjKGround).filterExt("kts") // TODO_someday: support future templates in .kt files
     .collectSpecialRegionsTo(templates, templatesSrc) { path, label, content, region -> // onConflict
       val oldPath = fs.canonicalize(templatesSrc[label]!!)
@@ -82,8 +82,8 @@ suspend fun tryDiffMyConflictingTemplatesSrc() {
 suspend fun collectMyTemplates(): Map<String, String> {
   val preferred1 = "template-full-lib" // in case of conflict
   val preferred2 = "template-full" // in case of conflict
-  val templates = lMO<String, String>()
-  val templatesRes = lMO<String, Path>()
+  val templates = MO<String, String>()
+  val templatesRes = MO<String, Path>()
   val log = localULog()
   val fsres = UFileSys(RESOURCES)
   uctx(fsres) {

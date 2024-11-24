@@ -3,6 +3,7 @@
 package pl.mareklangiewicz.kommand.dbus
 
 import pl.mareklangiewicz.kommand.Kommand
+import pl.mareklangiewicz.udata.MutLO
 
 /** [dbus-run-session freedesktop man](https://dbus.freedesktop.org/doc/dbus-run-session.1.html) */
 fun dbusrunsession(program: Kommand? = null, init: DBusRunSession.() -> Unit = {}) = DBusRunSession(program).apply(init)
@@ -10,7 +11,7 @@ fun dbusrunsession(program: Kommand? = null, init: DBusRunSession.() -> Unit = {
 /** [dbus-run-session freedesktop man](https://dbus.freedesktop.org/doc/dbus-run-session.1.html) */
 data class DBusRunSession(
   var kommand: Kommand? = null,
-  val options: MutableList<Option> = mutableListOf(),
+  val options: MutableList<Option> = MutLO(),
 ) : Kommand {
   override val name get() = "dbus-run-session"
   override val args get() = options.map { it.str } + kommand?.let { listOf("--", it.name) + it.args }.orEmpty()

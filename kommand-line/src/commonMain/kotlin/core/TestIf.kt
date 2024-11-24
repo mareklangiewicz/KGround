@@ -5,6 +5,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.TestIfFile.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.udata.strf
 
@@ -84,7 +85,7 @@ fun testIf(init: TestIf.() -> Unit) = TestIf().apply(init)
 
 /** [linux man](https://man7.org/linux/man-pages/man1/test.1.html) */
 @DelicateApi
-data class TestIf(val tokens: MutableList<String> = mutableListOf()) : Kommand {
+data class TestIf(val tokens: MutableList<String> = MutLO()) : Kommand {
   // no --help and --version options by design. (not always supported anyway - can lead to difficult bugs)
   override val name get() = "test"
   override val args get() = tokens

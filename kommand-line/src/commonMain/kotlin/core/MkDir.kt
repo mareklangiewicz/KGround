@@ -4,6 +4,7 @@ import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.MkDirOpt.*
+import pl.mareklangiewicz.udata.MutLO
 import pl.mareklangiewicz.udata.strf
 
 @OptIn(DelicateApi::class)
@@ -19,8 +20,8 @@ fun mkdir(init: MkDir.() -> Unit = {}) = MkDir().apply(init)
  */
 @DelicateApi
 data class MkDir(
-  override val opts: MutableList<MkDirOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<MkDirOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<MkDirOpt> {
   override val name get() = "mkdir"
 }

@@ -121,7 +121,7 @@ private suspend fun onTouchyBluFile(tmpDirForBlu: Path) {
         writeFileWithDD(poem, bluPath).ax()
         "poem is there" so { readFileWithCat(bluPath).ax() chkEq poem }
         "On write empty list of lines" so {
-          writeFileWithDD(emptyList(), bluPath).ax()
+          writeFileWithDD(LO(), bluPath).ax()
           "it is empty again" so { readFileWithCat(bluPath).ax().chkEmpty() }
         }
         onMvLonelyTmpFileAround(bluPath)

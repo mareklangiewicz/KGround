@@ -5,6 +5,7 @@ package pl.mareklangiewicz.kommand.shell
 import kotlinx.coroutines.flow.*
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 
 @DelicateApi
 fun bash(script: String, pause: Boolean = false, init: Bash.() -> Unit = {}) =
@@ -53,9 +54,9 @@ fun bashGetExportsToFile(outFile: String) =
 //  - generally all direct manipulation of Kommand classes should be marked as @DelicateApi!
 @DelicateApi
 data class Bash(
-  override val opts: MutableList<BashOpt> = mutableListOf(),
+  override val opts: MutableList<BashOpt> = MutLO(),
   /** Normally just one command string (with or without spaces) or a file (when no -c option provided) */
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<BashOpt> {
   override val name get() = "bash"
 }

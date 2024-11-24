@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kground.io.PRel
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.udata.MutLO
 
 @OptIn(DelicateApi::class)
 fun mktemp(
@@ -23,8 +24,8 @@ fun mktemp(init: MkTemp.() -> Unit) = MkTemp().apply(init)
 
 @DelicateApi
 data class MkTemp(
-  override val opts: MutableList<MkTempOpt> = mutableListOf(),
-  override val nonopts: MutableList<String> = mutableListOf(),
+  override val opts: MutableList<MkTempOpt> = MutLO(),
+  override val nonopts: MutableList<String> = MutLO(),
 ) : KommandTypical<MkTempOpt> {
   override val name get() = "mktemp"
 }

@@ -16,7 +16,7 @@ import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kground.logEach
-import pl.mareklangiewicz.udata.lO
+import pl.mareklangiewicz.udata.LO
 import pl.mareklangiewicz.ure.MAX
 import pl.mareklangiewicz.ure.logseq.Card
 import pl.mareklangiewicz.ure.logseq.processAllCardsInLogseqGraph
@@ -92,15 +92,15 @@ fun Node.toTextLines(
   depthMax: Int = MAX,
   linePrefix: String = "  ".repeat(depth) + "- ",
 ): List<String> = when {
-  depth > depthMax -> emptyList()
-  nodeType == W3CNode.TEXT_NODE.toInt() -> lO(linePrefix + nodeValue)
+  depth > depthMax -> LO()
+  nodeType == W3CNode.TEXT_NODE.toInt() -> LO(linePrefix + nodeValue)
   nodeType == W3CNode.ELEMENT_NODE.toInt() -> when {
     looksLikeAnyTagOf("script", "style", "meta", "link", "<style>")
-      // -> lO(linePrefix + nodeName)
-      -> emptyList()
-    children.isNullOrEmpty() -> emptyList()
+      // -> LO(linePrefix + nodeName)
+      -> LO()
+    children.isNullOrEmpty() -> LO()
     children?.size == 1 -> toChildrenTextLines(depth, depthMax) // so flattening tags with one child
-    else -> lO(linePrefix + nodeName) + toChildrenTextLines(depth + 1, depthMax)
+    else -> LO(linePrefix + nodeName) + toChildrenTextLines(depth + 1, depthMax)
   }
   else -> toChildrenTextLines(depth, depthMax)
   // so, flattening unknown tags (not increasing depth)
@@ -113,4 +113,4 @@ private fun Node.toChildrenTextLines(
 ): List<String> = children.orEmpty().flatMap { it.toTextLines(depth, depthMax, linePrefix) }
 
 fun Node.looksLikeAnyTagOf(vararg tagNames: String): Boolean =
-  tagNames.any { tagName -> tagName.lowercase() in lO(nodeName, localName).map { it.lowercase() } }
+  tagNames.any { tagName -> tagName.lowercase() in LO(nodeName, localName).map { it.lowercase() } }
