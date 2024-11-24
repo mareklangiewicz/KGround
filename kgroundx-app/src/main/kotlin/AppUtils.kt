@@ -1,5 +1,7 @@
 package pl.mareklangiewicz.interactive
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
@@ -25,23 +27,31 @@ import pl.mareklangiewicz.usubmit.xd.*
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 @ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-internal suspend fun mainCodeExperiments(args: Array<String>) {
-  val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
-  val submit = ZenitySupervisor()
-  val cli = getSysCLI()
+internal fun mainCodeExperiments(args: Array<String>) {
   val a0 = args.getOrNull(0).orEmpty()
   val a1 = args.getOrNull(1).orEmpty()
   val a2 = args.getOrNull(2).orEmpty()
-  // uctxWithIO(log + submit + cli, dispatcher = null) { // FIXME_later: rethink default dispatcher..
-  uctxWithIO(log + submit + cli, name = a0) {
-      when {
-        args.size == 2 && a0 == "try-code" -> tryInteractivelyCodeRefWithLogging(a1)
-        args.size == 2 && a0 == "get-user-flag" -> log.i(getUserFlagFullStr(cli, a1))
-        args.size == 3 && a0 == "set-user-flag" -> setUserFlag(cli, a1, a2.toBoolean())
-        else -> bad { "Incorrect args. See KommandLine -> InteractiveSamples.kt -> mainCodeExperiments" }
-      }
+  runBlockingMain(a0) {
+    when {
+      args.size == 2 && a0 == "try-code" -> tryInteractivelyCodeRefWithLogging(a1)
+      // Note: get and set flag can't use interactive features, because it should work even if disabled.
+      args.size == 2 && a0 == "get-user-flag" -> localULog().i(getUserFlagFullStr(localCLI(), a1))
+      args.size == 3 && a0 == "set-user-flag" -> setUserFlag(localCLI(), a1, a2.toBoolean())
+      else -> bad { "Incorrect args. See KommandLine -> InteractiveSamples.kt -> mainCodeExperiments" }
+    }
   }
 }
+
+private fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
+  runBlocking {
+    val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
+    uctxWithIO(
+      context = log + ZenitySupervisor() + getSysCLI(),
+      name = name,
+      // dispatcher = null, // FIXME_later: rethink default dispatcher
+      block = block,
+    )
+  }
 
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")

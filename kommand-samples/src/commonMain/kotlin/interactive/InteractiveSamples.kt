@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalApi::class)
+
 package pl.mareklangiewicz.interactive
 
 import pl.mareklangiewicz.annotations.*
