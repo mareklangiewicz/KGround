@@ -25,7 +25,7 @@ import pl.mareklangiewicz.usubmit.xd.*
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 @ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-suspend fun mainCodeExperiments(args: Array<String>) {
+internal suspend fun mainCodeExperiments(args: Array<String>) {
   val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
   val submit = ZenitySupervisor()
   val cli = getSysCLI()
@@ -46,7 +46,7 @@ suspend fun mainCodeExperiments(args: Array<String>) {
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 @ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
+private suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
   val log = localULog()
   try {
     log.w("try-code $reference starting")
