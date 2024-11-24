@@ -14,49 +14,11 @@ import pl.mareklangiewicz.ulog.hack.*
 import pl.mareklangiewicz.usubmit.*
 import pl.mareklangiewicz.usubmit.xd.*
 
-/**
- * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
- * So this fun (called from main fun) allows invoking any code pointed by reference or clipboard (containing reference)
- * (see also IntelliJ action: CopyReference)
- * Usually it will be from samples/examples/demos, or from gitignored playground, like:
- * pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop
- * pl.mareklangiewicz.kommand.app.Playground#play
- * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
- * The gradle kommandapp:run task is set up to run the mainCodeExperiments fun here.
- */
-@NotPortableApi
-@DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
-@ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-internal fun mainCodeExperiments(args: Array<String>) {
-  val a0 = args.getOrNull(0).orEmpty()
-  val a1 = args.getOrNull(1).orEmpty()
-  val a2 = args.getOrNull(2).orEmpty()
-  runBlockingMain(a0) {
-    when {
-      args.size == 2 && a0 == "try-code" -> tryInteractivelyCodeRefWithLogging(a1)
-      // Note: get and set flag can't use interactive features, because it should work even if disabled.
-      args.size == 2 && a0 == "get-user-flag" -> localULog().i(getUserFlagFullStr(localCLI(), a1))
-      args.size == 3 && a0 == "set-user-flag" -> setUserFlag(localCLI(), a1, a2.toBoolean())
-      else -> bad { "Incorrect args. See KommandLine -> InteractiveSamples.kt -> mainCodeExperiments" }
-    }
-  }
-}
-
-private fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
-  runBlocking {
-    val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
-    uctxWithIO(
-      context = log + ZenitySupervisor() + getSysCLI(),
-      name = name,
-      // dispatcher = null, // FIXME_later: rethink default dispatcher
-      block = block,
-    )
-  }
 
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 @ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-private suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
+internal suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
   val log = localULog()
   try {
     log.w("try-code $reference starting")
