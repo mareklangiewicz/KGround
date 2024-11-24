@@ -1,19 +1,14 @@
 package pl.mareklangiewicz.kommand.samples
 
-import kotlin.reflect.KClass
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.declaredMemberFunctions
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.isAccessible
-import org.junit.jupiter.api.TestFactory
-import pl.mareklangiewicz.annotations.DelicateApi
+import org.junit.jupiter.api.*
+import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.ulog.ULog
+import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.d
-import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
-import pl.mareklangiewicz.uspek.o
-import pl.mareklangiewicz.uspek.uspekTestFactory
+import pl.mareklangiewicz.ulog.hack.*
+import pl.mareklangiewicz.ureflect.*
+import pl.mareklangiewicz.uspek.*
 
 
 // TODO_someday: all my tests should be suspendable, and log should be injected to context and received by implictx
@@ -27,6 +22,7 @@ class SamplesLinesTests {
   }
 }
 
+@OptIn(DelicateApi::class, NotPortableApi::class)
 fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
   val objSimpleName = obj::class.simpleName ?: bad { "Unexpected samples obj without name" }
   if (depthLimit < 1) {
@@ -35,7 +31,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
   chk(objSimpleName.endsWith("Samples")) { "Unexpected obj name in samples: $objSimpleName" }
   obj::class.objectInstance.chkNN { "Unexpected obj in samples which is NOT singleton: $objSimpleName" }
   chk(obj::class.isData) { "Unexpected obj in samples which is NOT data object: $objSimpleName" }
-  val props = obj.getNamedPropsValues()
+  val props = obj.getReflectNamedPropsValues()
   for ((name, prop) in props) when {
     prop is Sample -> "On sample $name" o { testSample(prop) }
     prop is TypedSample<*, *, *, *> -> "On typed sample $name" o { testTypedSample(prop) }
@@ -45,7 +41,7 @@ fun testSamplesObject(obj: Any, depthLimit: Int = 30) {
     prop == null -> bad { "prop is null! name: $name" }
     else -> "On $name" o { testSamplesObject(prop, depthLimit - 1) }
   }
-  obj.logIgnoredFunctions()
+  obj.getReflectSomeMemberFunctions().forEach { log.d("Ignoring fun ${it.name}") }
 }
 
 @OptIn(DelicateApi::class)
@@ -71,19 +67,3 @@ fun testReducedSample(sample: ReducedSample<*>) = "check reduced kommand lineRaw
   else lineRaw chkEq sample.expectedLineRaw
   log.d("Actual reduced kommand lineRaw is: $lineRaw")
 }
-
-// Copied and pasted from Kokpit (for now)
-// TODO_someday: micro open source library for common reflection based browsing (multiplatform?)
-@Suppress("UNCHECKED_CAST")
-private fun <T : Any> T.getNamedPropsValues(): List<Pair<String, Any?>> {
-  return (this::class as KClass<T>).declaredMemberProperties
-    .filter { it.visibility == KVisibility.PUBLIC }
-    .map { it.getter.isAccessible = true; it.name to it(this) }
-}
-
-@Suppress("UNCHECKED_CAST")
-private fun <T : Any> T.logIgnoredFunctions() =
-  (this::class as KClass<T>).declaredMemberFunctions
-    .filter { it.name !in setOf("equals", "hashCode", "toString") }
-    .forEach { log.d("Ignoring fun ${it.name}") }
-
