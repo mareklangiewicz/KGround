@@ -1,12 +1,8 @@
 package pl.mareklangiewicz.interactive
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kground.io.*
-import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ulog.*
@@ -18,7 +14,7 @@ import pl.mareklangiewicz.usubmit.xd.*
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 @ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-internal suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
+suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
   val log = localULog()
   try {
     log.w("try-code $reference starting")
