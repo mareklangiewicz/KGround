@@ -1,8 +1,16 @@
+@file:OptIn(NotPortableApi::class, DelicateApi::class, ExperimentalApi::class)
+
 package pl.mareklangiewicz.kground
 
+import com.github.ajalt.clikt.completion.CompletionCommand
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.main
+import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.types.boolean
 import kotlinx.coroutines.*
 import pl.mareklangiewicz.annotations.*
-import pl.mareklangiewicz.bad.BadStateErr
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kground.io.uctxWithIO
@@ -16,31 +24,6 @@ import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
 
-@OptIn(DelicateApi::class, NotPortableApi::class, ExperimentalApi::class)
-fun main(args: Array<String>) {
-  try {
-    mainCodeExperiments(args)
-      // FIXME_later: better messages inside (probably use some args parsing library)
-      // (after merging KommandLine with KGround)
-  }
-  catch (e: BadStateErr) {
-    if (e.message?.startsWith("Incorrect args") == true) {
-      println(e.message)
-      println("For example:")
-      println("kgroundx get-user-flag code.interactive")
-      println("kgroundx set-user-flag code.interactive true")
-      println("kgroundx set-user-flag code.interactive false")
-      println("kgroundx try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToAbcdK")
-      println("kgroundx try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToKGround")
-      println("kgroundx try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectAllMyProjects")
-      println("kgroundx try-code pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples#updateGradlewInMyProjects")
-      println("kgroundx try-code pl.mareklangiewicz.kgroundx.experiments.MyExperiments#collectGabrysCards")
-    }
-    else throw e
-  }
-}
-
-
 /**
  * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
  * So this fun (called from main fun) allows invoking any code pointed by reference or clipboard (containing reference)
@@ -48,30 +31,18 @@ fun main(args: Array<String>) {
  * Usually it will be from samples/examples/demos, or from gitignored playground, like:
  * pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop
  * pl.mareklangiewicz.kommand.app.Playground#play
- * So way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
- * The gradle kommandapp:run task is set up to run the mainCodeExperiments fun here.
+ * So this way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
  */
+fun main(args: Array<String>) = kgroundx(args)
+
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
-@ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
-private fun mainCodeExperiments(args: Array<String>) {
-  val a0 = args.getOrNull(0).orEmpty()
-  val a1 = args.getOrNull(1).orEmpty()
-  val a2 = args.getOrNull(2).orEmpty()
-  runBlockingMain(a0) {
-    when {
-      args.size == 2 && a0 == "try-code" -> tryInteractivelyCodeRefWithLogging(a1)
-      // Note: get and set flag can't use interactive features, because it should work even if disabled.
-      args.size == 2 && a0 == "get-user-flag" -> localULog().i(getUserFlagFullStr(localCLI(), a1))
-      args.size == 3 && a0 == "set-user-flag" -> setUserFlag(localCLI(), a1, a2.toBoolean())
-      else -> bad { "Incorrect args. See KommandLine -> InteractiveSamples.kt -> mainCodeExperiments" }
-    }
-  }
-}
+fun kgroundx(args: Array<String>) = KGroundXCommand().main(args)
 
 private fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
   runBlocking {
     val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
+    // FIXME_later: Maybe I should log with Clikt "echo"? is it thread-safe??
     uctxWithIO(
       context = log + ZenitySupervisor() + getSysCLI(),
       name = name,
@@ -81,15 +52,69 @@ private fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Un
   }
 
 
-//
-// class KGroundXApp() : CliktCommand(name = "kgroundx") {
-//   override fun run() {
-//     TODO("Not yet implemented")
-//   }
-// }
-//
-// class GetUserFlag() : CliktCommand() {
-//   override fun run() {
-//     TODO("Not yet implemented")
-//   }
-// }
+
+private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
+  init {
+    subcommands(
+      GetUserFlagCommand(),
+      SetUserFlagCommand(),
+      TryCodeXclipCommand(),
+      TryCodeCommand(),
+      CompletionCommand(),
+        // use it like: kground generate-completion zsh/bash/fish > ~/.config/myshell/kground-completion-zsh
+        // and then set up sourcing generated file in some zsh/bash/fish init script
+        // (jvm is too slow to regenerate it each time the shell is starting)
+    )
+  }
+
+  override fun run() = Unit
+
+  override fun helpEpilog(context: Context): String {
+    return super.helpEpilog(context) + """
+      Examples:
+        $commandName get-user-flag code.interactive
+        $commandName set-user-flag code.interactive true
+        $commandName set-user-flag code.interactive false
+        $commandName try-code-xclip
+        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToAbcdK
+        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToKGround
+        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectAllMyProjects
+        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples#updateGradlewInMyProjects
+        $commandName try-code pl.mareklangiewicz.kgroundx.experiments.MyExperiments#collectGabrysCards
+    """.trimIndent().replace('\n', '\u0085')
+      // have to use special "manual" line-breaks
+      // see: https://ajalt.github.io/clikt/documenting/#manual-line-breaks
+
+    // TODO: support short coderefs for special/common places/examples/samples/classes
+    //   clikt has "aliases" and "transformToken", but better to just use my own "universal" method,
+    //   that searches provided coderef in some predefined classes.
+  }
+}
+
+private class GetUserFlagCommand() : CliktCommand() {
+  val flag by argument(help = "user flag name")
+  override fun run() = runBlockingMain(commandName) {
+    localULog().i(getUserFlagFullStr(localCLI(), flag))
+  }
+}
+
+private class SetUserFlagCommand() : CliktCommand() {
+  val flag by argument(help = "user flag name")
+  val value by argument(help = "user flag value").boolean()
+  override fun run() = runBlockingMain(commandName) {
+    setUserFlag(localCLI(), flag, value)
+  }
+}
+
+private class TryCodeCommand() : CliktCommand() {
+  val codeRef by argument(help = "code reference")
+  override fun run() = runBlockingMain(commandName) {
+    tryInteractivelyCodeRefWithLogging(codeRef)
+  }
+}
+
+private class TryCodeXclipCommand() : CliktCommand() {
+  override fun run() = runBlockingMain(commandName) {
+    tryInteractivelyCodeRefWithLogging("xclip")
+  }
+}
