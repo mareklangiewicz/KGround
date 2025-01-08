@@ -53,7 +53,7 @@ object MyBasicExamples {
   }
 
   suspend fun searchAllMyKotlinCode() = searchKotlinCodeInMyProjects(
-    codeInLineUre = ureText("verKGround"),
+    codeInLineUre = ureText("SourceFun"),
     onlyPublic = false,
     alsoGradleKts = true,
   )
