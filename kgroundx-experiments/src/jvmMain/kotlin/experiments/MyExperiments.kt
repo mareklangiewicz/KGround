@@ -24,6 +24,7 @@ import pl.mareklangiewicz.ure.logseq.processAllCardsInLogseqGraph
 @OptIn(ExperimentalChromeApi::class)
 @ExampleApi
 object MyExperiments {
+
   @OptIn(DelicateApi::class, NotPortableApi::class)
   suspend fun collectGabrysCards() = buildList<Pair<Path, Card>> {
     "/home/marek/gtdgabrys".P.processAllCardsInLogseqGraph { file, card -> add(file to card) }
