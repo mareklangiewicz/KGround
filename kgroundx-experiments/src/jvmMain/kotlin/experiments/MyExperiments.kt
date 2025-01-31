@@ -5,6 +5,8 @@ package pl.mareklangiewicz.kgroundx.experiments
 import kotlinx.coroutines.delay
 import okio.Path
 import org.hildan.chrome.devtools.domains.dom.Node
+import org.hildan.chrome.devtools.domains.input.KeyEventType
+import org.hildan.chrome.devtools.extensions.clickOnElement
 import org.hildan.chrome.devtools.protocol.ChromeDPClient
 import org.hildan.chrome.devtools.protocol.ExperimentalChromeApi
 import org.hildan.chrome.devtools.sessions.goto
@@ -63,6 +65,9 @@ object MyExperiments {
 
       pageSession.use {
         it.goto("http://x.com")
+        // it.input.dispatchKeyEvent(KeyEventType.char) {
+        // // how to press keyboard shortcut to launch obsidian webclipper extension (and maybe save file immediately?)
+        // }
         delay(4000)
         // This page session has access to many useful protocol domains (e.g. dom, page...)
         val doc = it.dom.getDocument {
