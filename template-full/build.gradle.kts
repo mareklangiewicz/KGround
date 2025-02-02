@@ -9,7 +9,7 @@ plugins {
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false
-  plug(plugs.ComposeJbStable) apply false // ComposeJb(Edge) is very slow to sync, clean, build (jb dev repo issue)
+  plug(plugs.ComposeJb) apply false // ComposeJb(Edge) is very slow to sync, clean, build (jb dev repo issue)
   plug(plugs.AndroLib) apply false
   plug(plugs.AndroApp) apply false
   plug(plugs.NexusPublish)
