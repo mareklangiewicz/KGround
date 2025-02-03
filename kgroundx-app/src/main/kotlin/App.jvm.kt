@@ -20,6 +20,7 @@ import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.localCLI
 import pl.mareklangiewicz.kommand.setUserFlag
 import pl.mareklangiewicz.udata.str
+import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
@@ -41,7 +42,10 @@ fun kgroundx(args: Array<String>) = KGroundXCommand().main(args)
 
 private fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
   runBlocking {
-    val log = UHackySharedFlowLog { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
+    val log = UHackySharedFlowLog(
+      minLevel = ULogLevel.INFO,
+      // minLevel = ULogLevel.DEBUG,
+    ) { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
     // FIXME_later: Maybe I should log with Clikt "echo"? is it thread-safe??
     uctxWithIO(
       context = log + ZenitySupervisor() + getSysCLI(),
