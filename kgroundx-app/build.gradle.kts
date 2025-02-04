@@ -20,7 +20,7 @@ defaultBuildTemplateForBasicJvmApp {
   implementation(project(":kgroundx-jupyter"))
   implementation(project(":kgroundx-workflows"))
   implementation(project(":kgroundx-experiments"))
-  implementation("com.github.ajalt.clikt:clikt:5.0.1") // FIXME_later: use deps after updating
+  implementation(Com.GitHub.Ajalt.Clikt.clikt)
 }
 
 // region [[Kotlin Module Build Template]]
