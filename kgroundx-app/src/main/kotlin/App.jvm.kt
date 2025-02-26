@@ -40,7 +40,8 @@ fun main(args: Array<String>) = kgroundx(args)
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 fun kgroundx(args: Array<String>) = KGroundXCommand().main(args)
 
-private fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
+@DelicateApi("Very opinionated setup for launching main stuff. Usually better to copy and adjust to own needs.")
+fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
   runBlocking {
     val log = UHackySharedFlowLog(
       minLevel = ULogLevel.INFO,
