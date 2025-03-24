@@ -156,11 +156,8 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("maven-publish")) {
-    defaultPublishing(details)
-    if (plugins.hasPlugin("signing")) defaultSigning()
-    else println("MPP Module ${name}: signing disabled")
-  } else println("MPP Module ${name}: publishing (and signing) disabled")
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
+  else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
 /**
