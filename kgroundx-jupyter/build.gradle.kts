@@ -10,8 +10,8 @@ import pl.mareklangiewicz.utils.*
 plugins {
   plugAll(
     plugs.KotlinMulti,
-    plugs.MavenPublish,
-    plugs.Signing,
+    // plugs.MavenPublish,
+    // plugs.Signing,
     plugs.KotlinJupyter,
   )
 }

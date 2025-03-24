@@ -14,8 +14,8 @@ plugins {
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
-    plugs.MavenPublish,
-    plugs.Signing,
+    // plugs.MavenPublish,
+    // plugs.Signing,
   )
   plug(plugs.AndroLibNoVer) apply false // will be applied conditionally depending on LibSettings
 }

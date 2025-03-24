@@ -14,8 +14,8 @@ plugins {
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
     plugs.AndroLibNoVer,
-    plugs.MavenPublish,
-    plugs.Signing
+    // plugs.MavenPublish,
+    // plugs.Signing
   )
 }
 
