@@ -34,16 +34,11 @@ defaultBuildTemplateForRootProject(
 
 // region [[Root Build Template]]
 
-/** Publishing to Sonatype OSSRH has to be explicitly allowed here, by setting withSonatypeOssPublishing to true. */
 fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
   details?.let {
     rootExtLibDetails = it
     defaultGroupAndVerAndDescription(it)
   }
-
-  // kinda workaround for kinda issue with kotlin native
-  // https://youtrack.jetbrains.com/issue/KT-48410/Sync-failed.-Could-not-determine-the-dependencies-of-task-commonizeNativeDistribution.#focus=Comments-27-5144160.0-0
-  repositories { mavenCentral() }
 }
 
 // endregion [[Root Build Template]]
