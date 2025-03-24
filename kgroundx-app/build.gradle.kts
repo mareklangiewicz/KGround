@@ -155,9 +155,8 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun jvmDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("maven-publish")) {
-    defaultPublishing(details)
-  } else println("JVM Module ${name}: publishing (and signing) disabled")
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
+  else println("JVM Module ${name}: publishing (and signing) disabled")
 }
 
 /**
