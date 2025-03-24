@@ -11,6 +11,7 @@ plugins {
   plugAll(
     plugs.KotlinJvm,
     plugs.JvmApp,
+    plugs.VannikPublish,
   )
 }
 

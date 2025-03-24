@@ -10,6 +10,7 @@ import pl.mareklangiewicz.utils.*
 plugins {
   plugAll(
     plugs.KotlinMulti,
+    plugs.VannikPublish,
   )
 }
 
