@@ -12,7 +12,6 @@ plugins {
   plug(plugs.ComposeJb) apply false // ComposeJb(Edge) is very slow to sync, clean, build (jb dev repo issue)
   plug(plugs.AndroLib) apply false
   plug(plugs.AndroApp) apply false
-  plug(plugs.NexusPublish)
 }
 
 // endregion [[Full Root Build Imports and Plugs]]
