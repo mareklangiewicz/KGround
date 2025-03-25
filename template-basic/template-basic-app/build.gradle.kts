@@ -8,10 +8,7 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 
 plugins {
-  plugAll(
-    plugs.KotlinMulti,
-    plugs.VannikPublish,
-  )
+  plugAll(plugs.KotlinMulti, plugs.VannikPublish)
 }
 
 // endregion [[Basic MPP App Build Imports and Plugs]]
