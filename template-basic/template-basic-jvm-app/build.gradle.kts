@@ -176,7 +176,10 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
     testImplementation(Kotlin.test)
     if (withTestUSpekX) testImplementation(Langiewicz.uspekx)
     if (withTestJUnit4) testImplementation(JUnit.junit)
-    if (withTestJUnit5) testImplementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+    if (withTestJUnit5) {
+      testImplementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+      testRuntimeOnly(Org.JUnit.Platform.junit_platform_launcher)
+    }
     if (withTestUSpekX) {
       testImplementation(Langiewicz.uspekx)
       if (withTestJUnit4) testImplementation(Langiewicz.uspekx_junit4)
