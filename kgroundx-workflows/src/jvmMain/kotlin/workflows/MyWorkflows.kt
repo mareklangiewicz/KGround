@@ -21,7 +21,6 @@ import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.*
-import kotlin.collections.LinkedHashMap
 import okio.*
 import pl.mareklangiewicz.annotations.ExampleApi
 import pl.mareklangiewicz.bad.*
@@ -60,7 +59,7 @@ import pl.mareklangiewicz.ulog.*
 
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 
-private val myOssSecretsEnv = LO(
+private val myOssPublishingSecretsEnv = LO(
   "signingInMemoryKey",
   "signingInMemoryKeyId",
   "signingInMemoryKeyPassword",
@@ -120,7 +119,6 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
   myWorkflow(
     name = "Update Generated Deps",
     on = LO(Schedule(LO(everydayBefore6amUTC)), WorkflowDispatch()),
-    env = myOssSecretsEnv
   ) {
     job(
       id = "update-generated-deps",
@@ -213,7 +211,6 @@ suspend fun injectDWorkflowsToProject(
 @OptIn(ExampleApi::class)
 private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
   dname = dname,
-  env = if (projectName in getMyPublicProjectsNames()) myOssSecretsEnv else MO(),
   dreleasePackage = when(projectName) {
     "UWidgets" -> "packageDeb" // I can't do packageReleaseDeb because proguard only supports jvm18 and fails.
     "AreaKim" -> "packageDeb"
@@ -252,19 +249,18 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
  */
 private fun myDefaultWorkflow(
   dname: String,
-  env: Map<String, String> = MO(),
   dreleasePackage: String? = null,
   dreleaseUpload: List<String> = LO(),
   dreleaseOssPublish: Boolean = false,
 ) = when (dname) {
-  "dbuild" -> myDefaultBuildWorkflow(env = env)
+  "dbuild" -> myDefaultBuildWorkflow()
   "drelease" -> myDefaultReleaseWorkflow(
-    env = env,
+    env = if (dreleaseOssPublish) myOssPublishingSecretsEnv else MO(),
     dreleasePackage = dreleasePackage,
     dreleaseUpload = dreleaseUpload,
     dreleaseOssPublish = dreleaseOssPublish,
   )
-  "ddepsub" -> myDefaultDependencySubmissionWorkflow(env = env)
+  "ddepsub" -> myDefaultDependencySubmissionWorkflow()
   else -> bad { "Unknown default workflow dname: $dname" }
 }
 
