@@ -61,10 +61,13 @@ import pl.mareklangiewicz.ulog.*
 private val myFork = expr { "${github.repository_owner} == 'mareklangiewicz'" }
 
 private val myOssSecretsEnv = LO(
-  "signing_keyId", "signing_password", "signing_key", "ossrhUsername", "ossrhPassword", "sonatypeStagingProfileId",
+  "signingInMemoryKey",
+  "signingInMemoryKeyId",
+  "signingInMemoryKeyPassword",
+  "mavenCentralUsername",
+  "mavenCentralPassword",
 )
-  .map { "MYKOTLIBS_$it" }
-  .associateWith { expr("secrets.$it") } as LinkedHashMap<String, String>
+  .associate { "ORG_GRADLE_PROJECT_$it" to expr("secrets.KL_" + it.uppercase()) }
 
 
 
@@ -300,7 +303,7 @@ private fun myDefaultReleaseWorkflow(
       usesDefaultBuild()
       dreleasePackage?.let { runGradleW(it) }
       if (dreleaseUpload.isNotEmpty()) uses(action = UploadArtifact(path = dreleaseUpload))
-      if (dreleaseOssPublish) runGradleW("publishToSonatype closeAndReleaseSonatypeStagingRepository")
+      if (dreleaseOssPublish) runGradleW("publishAndReleaseToMavenCentral")
       // TODO_someday: consider sth like: https://github.com/ansman/sonatype-publish-fix
       // TODO_someday: something more like
       // github-workflows-kt/.github/workflows/release.main.kts
