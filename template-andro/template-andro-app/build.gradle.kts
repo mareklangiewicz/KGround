@@ -4,6 +4,7 @@
 import com.android.build.api.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
@@ -254,7 +255,7 @@ fun Project.defaultPublishingOfAndroLib(
     extensions.configure<PublishingExtension> {
       publications.register<MavenPublication>(componentName) {
         from(components[componentName])
-        defaultPOM(lib)
+        pom { defaultPOM(lib) }
       }
     }
   }
@@ -299,7 +300,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   defaultGroupAndVerAndDescription(details)
   variant?.let {
     defaultPublishingOfAndroApp(details, it)
-    defaultSigning()
+    // defaultSigning()
   }
 }
 

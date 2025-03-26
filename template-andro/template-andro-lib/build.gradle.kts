@@ -4,6 +4,7 @@
 import com.android.build.api.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
@@ -14,8 +15,7 @@ plugins {
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
     plugs.AndroLibNoVer,
-    // plugs.MavenPublish,
-    // plugs.Signing
+    plugs.VannikPublish,
   )
 }
 
@@ -251,7 +251,7 @@ fun Project.defaultPublishingOfAndroLib(
     extensions.configure<PublishingExtension> {
       publications.register<MavenPublication>(componentName) {
         from(components[componentName])
-        defaultPOM(lib)
+        pom { defaultPOM(lib) }
       }
     }
   }
@@ -293,7 +293,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   defaultGroupAndVerAndDescription(details)
   if (andro.publishAllVariants) defaultPublishingOfAndroLib(details, "default")
   if (andro.publishOneVariant) defaultPublishingOfAndroLib(details, andro.publishVariant)
-  if (!andro.publishNoVariants) defaultSigning()
+  // if (!andro.publishNoVariants) defaultSigning()
 }
 
 fun LibraryExtension.defaultAndroLib(
