@@ -23,7 +23,10 @@ val myKotlinPath = myHomePath/ "code/kotlin"
 val myDepsKtPath = myKotlinPath/ "DepsKt"
 val myAbcdKPath = myKotlinPath/ "AbcdK"
 val myKGroundPath = myKotlinPath / "KGround"
-val myKommandLinePath = myKotlinPath / "KommandLine"
+val myKommandSamplesPath = myKGroundPath / "kommand-samples"
+
+@Deprecated("Currently kommand-line and kommand-samples are part of KGround repo")
+val myOldKommandLinePath = myKotlinPath / "KommandLine"
 
 @OptIn(DelicateApi::class)
 data object FindSamples {
@@ -37,8 +40,8 @@ data object FindSamples {
       "find -L -O2 $myAbcdKPath -name *abc*"
 
   val findSomeSamples =
-    findRegularNameBase(myKommandLinePath, "*Samples.kt") s
-      "find $myKommandLinePath -name *Samples.kt -type f"
+    findRegularNameBase(myKommandSamplesPath, "*Samples.kt") s
+      "find $myKommandSamplesPath -name *Samples.kt -type f"
 
   val findBigFiles =
     find(PRel, FileSize(NumArg.MoreThan(100), 'M')) s

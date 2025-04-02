@@ -5,6 +5,7 @@ import com.android.build.api.dsl.*
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
@@ -14,6 +15,7 @@ plugins {
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
+    plugs.VannikPublish,
   )
   plug(plugs.AndroAppNoVer) apply false // will be applied conditionally depending on LibSettings
 }
@@ -600,7 +602,7 @@ fun Project.defaultPublishingOfAndroLib(
     extensions.configure<PublishingExtension> {
       publications.register<MavenPublication>(componentName) {
         from(components[componentName])
-        defaultPOM(lib)
+        pom { defaultPOM(lib) }
       }
     }
   }
