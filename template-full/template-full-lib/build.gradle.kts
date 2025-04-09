@@ -515,7 +515,7 @@ fun Project.defaultPublishingOfAndroLib(
     extensions.configure<PublishingExtension> {
       publications.register<MavenPublication>(componentName) {
         from(components[componentName])
-        defaultPOM(lib)
+        pom { defaultPOM(lib) }
       }
     }
   }
