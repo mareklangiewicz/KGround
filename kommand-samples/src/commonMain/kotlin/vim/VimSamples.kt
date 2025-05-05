@@ -140,6 +140,10 @@ data object VimAdvancedSamples {
     awaitAndChkExit(firstCollectErr = true)
   } rs "nvim -s - $myKGroundRootBuildFile"
 
+  // TODO: support awesome new nvim options like -l !! Allows to use nvim as superpowered lua interpreter!
+  //   https://neovim.io/doc/user/starting.html#-l
+  //   see also Folke comment: https://www.reddit.com/r/neovim/comments/1dr5152/testing_your_neovim_plugins_with_busted_and/
+
 
   /** Pretty good impl of bumping versions in scripts using keys-script. */
   @NotPortableApi("Not for NVim")

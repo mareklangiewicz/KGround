@@ -260,7 +260,7 @@ data class XVim(
 /** Type of Vim binary. Names (when lowercased) are actual binary file/kommand names. */
 enum class XVimType {
 
-  /** Neo Vim */
+  /** NeoVim */
   NVim,
 
   /** Base/official/original Vim. Started in normal way. */
