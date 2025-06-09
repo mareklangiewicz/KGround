@@ -22,6 +22,10 @@ fun Kommand.inBash(pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(th
 fun bash(kommand: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) = bash(kommand.lineBash(), pause, init)
 // FIXME: I assumed kommand.lineBash() is correct script and will not interfere with surrounding stuff
 
+@DelicateApi("Just quick hacky impl for most common case; redesign it later!") // FIXME: rethink/redesign pipes etc!
+fun bashPipe(vararg kommands: Kommand, pause: Boolean = false, init: Bash.() -> Unit = {}) =
+  bash(kommands.joinToString(" | ") { it.lineBash() }, pause, init)
+
 // TODO: I just quickly added "*" to quoted chars to fix FindSamples.findSymLinksToKtsFilesInKGround,
 //  and it works, but this whole quoting have to be analyzed again!
 fun bashQuoteMetaChars(script: String) = script.replace(Regex("""([*|&;<>() \\"\t\n])"""), """\\$1""")

@@ -9,10 +9,12 @@ import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.ReducedScript
+import pl.mareklangiewicz.kommand.core.echo
 import pl.mareklangiewicz.kommand.find.myKGroundPath
 import pl.mareklangiewicz.kommand.find.myTmpPath
 import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.kommand.shell.bashPipe
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
 import pl.mareklangiewicz.kommand.term.inTermKitty
 import pl.mareklangiewicz.kommand.vim.XVimOpt.*
@@ -147,6 +149,25 @@ data object VimAdvancedSamples {
 
   /** Pretty good impl of bumping versions in scripts using keys-script. */
   @NotPortableApi("Not for NVim")
-  val vimBumpVerImpl7KeysSc = vimKeysScriptContent("/version = Ver\nt)$keyCtrlA:wq\n", myKGroundRootBuildFile)rs
+  val vimBumpVerImpl7KeysSc = vimKeysScriptContent("/version = Ver\nt)$keyCtrlA:wq\n", myKGroundRootBuildFile) rs
     "vim -N --clean -n -c set nomore -T dumb -s /dev/stdin $myKGroundRootBuildFile"
+
+  /**
+   * Example of using -Es in nvim (see in NVim :h vim_diff.txt/Startup)
+   * Usually I don't recommend -Es (ExImScriptMode), but in NeoVim it's useful when you know what you're doing.
+   * Other example/explanation is in youtube: "We can have nice things" presentation by Justin M Keyes at 39:40
+   */
+  @NotPortableApi("Only for nvim.")
+  val nvimStyleProcessor = nvim {
+    -ExImScriptMode // In NeoVim this mode have good modern defaults for using inside shell pipes.
+    -ExCmd("%s/nvim/NVim")
+    -ExCmd("%s/\\<Vim/vim")
+    // we can use vim style regular expressions obviously
+    // we can also use whole nvim power obviously
+    -ExCmd("%p") // print it all to stdout
+    // Note: no explicit quitting (-c "qa!") needed here in neovim
+  } s "nvim -Es -c %s/nvim/NVim -c %s/\\<Vim/vim -c %p"
+
+  @NotPortableApi
+  val bashPipeWithNvimProcessor = bashPipe(echo("Vim vim nvim NVim"), nvimStyleProcessor) s "bash -c echo Vim\\ vim\\ nvim\\ NVim | nvim -Es -c %s/nvim/NVim -c %s/\\\\\\<Vim/vim -c %p"
 }
