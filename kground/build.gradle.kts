@@ -20,13 +20,7 @@ defaultBuildTemplateForBasicMppLib(
   api(Langiewicz.abcdk)
   api(Langiewicz.tuplek)
   api(Langiewicz.upue)
-
-  // api(KotlinX.datetime)
-  api(KotlinX.datetime.withVer("0.5.0"))
-  // FIXME: track:assemble fails on native in new 0.6.0-RC.2 version:
-  // KLIB resolver: Could not find "org.jetbrains.kotlinx:kotlinx-datetime-cinterop-date"
-  // https://youtrack.jetbrains.com/issue/KT-60874/KLIB-Resolve-Dont-save-transitive-dependencies-in-manifests-depends-property#focus=Comments-27-7983307.0-0
-
+  api(KotlinX.datetime)
   api(KotlinX.coroutines_core)
   implementation(Kotlin.reflect)
 }
