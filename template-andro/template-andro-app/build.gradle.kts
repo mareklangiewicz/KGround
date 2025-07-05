@@ -298,10 +298,7 @@ fun Project.defaultBuildTemplateForAndroApp(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  variant?.let {
-    defaultPublishingOfAndroApp(details, it)
-    // defaultSigning()
-  }
+  variant?.let { defaultPublishingOfAndroApp(details, it) }
 }
 
 fun ApplicationExtension.defaultAndroApp(
