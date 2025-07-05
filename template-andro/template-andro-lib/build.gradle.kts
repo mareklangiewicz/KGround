@@ -324,7 +324,7 @@ fun LibraryExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnable
 fun LibraryExtension.defaultAndroLibPublishVariant(
   variant: String = "debug",
   withSources: Boolean = true,
-  withJavadoc: Boolean = true,
+  withJavadoc: Boolean = false,
 ) {
   publishing {
     singleVariant(variant) {
@@ -336,7 +336,7 @@ fun LibraryExtension.defaultAndroLibPublishVariant(
 
 fun LibraryExtension.defaultAndroLibPublishAllVariants(
   withSources: Boolean = true,
-  withJavadoc: Boolean = true,
+  withJavadoc: Boolean = false,
 ) {
   publishing {
     multipleVariants {

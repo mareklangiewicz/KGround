@@ -9,7 +9,7 @@ class SomeBasicUnitTests {
   @USpekTestTree(2)
   fun uspekTest() {
     "On some list" o {
-      val list = LO(4, 5, 6)
+      val list = listOf(4, 5, 6)
 
       "list is not empty" o { assertNotEquals(0, list.size) }
     }
