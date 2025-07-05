@@ -2,6 +2,7 @@
 // region [[Full MPP Lib Build Imports and Plugs]]
 
 import com.android.build.api.dsl.*
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
