@@ -38,7 +38,7 @@ defaultBuildTemplateForRootProject(
         withComposeHtmlSvg = enableJs,
         withComposeTestHtmlUtils = enableJs,
       ),
-      andro = if (enableAndro) LibAndroSettings(sdkCompile = 36, sdkTarget = 36) else null,
+      andro = if (enableAndro) LibAndroSettings() else null,
     ),
   ),
 )

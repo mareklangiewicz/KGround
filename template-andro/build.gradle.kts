@@ -26,11 +26,7 @@ defaultBuildTemplateForRootProject(
     settings = LibSettings(
       withTestJUnit4 = true,
       withTestJUnit5 = false,
-      andro = LibAndroSettings(
-        sdkCompile = 36,
-        sdkTarget = 36,
-        publishVariant = "debug",
-      ),
+      andro = LibAndroSettings( publishVariant = "debug"),
     ),
   ),
 )
