@@ -51,7 +51,7 @@ fun ideMerge(path1: Path, path2: Path, pathOut: Path, pathBase: Path? = null, if
 
 fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
   ReducedScript {
-    val type = getFirstRunningIdeType() ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
+    val type = ideFindFirstRunning() ?: ifNoIdeRunningStart ?: bad { "No known IDE is running." }
     ide(type, cmd, init).ax()
   }
 
@@ -191,7 +191,7 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
 
 
 @OptIn(NotPortableApi::class, DelicateApi::class)
-private suspend fun getFirstRunningIdeType(): Type? {
+suspend fun ideFindFirstRunning(): Type? {
 
   val ureToolboxApp = ure {
     +ureText("Toolbox/apps/")
