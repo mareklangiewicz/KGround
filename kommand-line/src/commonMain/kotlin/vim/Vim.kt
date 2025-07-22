@@ -366,6 +366,8 @@ interface XVimOpt : KOptTypical {
 
   /** Ex [cmd] will be executed after the first file has been read. Can be used up to 10 times. */
   data class ExCmd(val cmd: String) : XVimOpt, KOptS("c", cmd)
+  // Note: The '+cmd' works kinda the same as '-c cmd', but it's more confusing notation,
+  // because it's similar to +num and to +/pattern (see [CursorLine] and [CursorLineFind])
 
   /** Ex [cmd] will be executed BEFORE processing any vimrc file. Can be used up to 10 times. */
   data class ExCmdBeforeRc(val cmd: String) : XVimOpt, KOptL("cmd", cmd, nameSeparator = " ")
@@ -582,7 +584,7 @@ interface XVimOpt : KOptTypical {
    * See :h -s-ex in both Vim and NVim, also see :h vim-differences /Startup in NVim.
    * Only when started as "ex" (or "exim") or when the "-e" (or "-E") option was given BEFORE the "-s" option.
    * See also: [Ex]; [ExIm]; [ExMode]; [ExImMode]
-   * Generally "vim -e -s" is kinda like poor man's "vim -es", so just use -es ([ExScriptMode])
+   * Generally in vim "-e -s" is like "-es", but confusing (see [KeysScriptIn]), so just use -es ([ExScriptMode])
    */
   @DelicateApi("Tricky to get always right with other options. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
   @NotPortableApi("Supported differently in Vim and NVim. Use ExScriptMode instead.", ReplaceWith("ExScriptMode"))
