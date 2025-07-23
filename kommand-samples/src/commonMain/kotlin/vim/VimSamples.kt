@@ -155,7 +155,11 @@ data object VimAdvancedSamples {
   /**
    * Example of using -Es in nvim (see in NVim :h vim_diff.txt/Startup)
    * Usually I don't recommend -Es (ExImScriptMode), but in NeoVim it's useful when you know what you're doing.
-   * Other example/explanation is in youtube: "We can have nice things" presentation by Justin M Keyes at 39:40
+   *
+   * BTW simplest example/explanation on youtube: "We can have nice things" by Justin M Keyes at 39:40:
+   * https://youtu.be/Bt-vmPC_-Ho?si=1lBmf5NhJ3juoi25&t=2390
+   * $ echo foo | nvim -Es +"%p" | tr o x
+   * fxx
    */
   @NotPortableApi("Only for nvim.")
   val nvimStyleProcessor = nvim {
