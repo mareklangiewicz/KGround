@@ -2,7 +2,6 @@ package pl.mareklangiewicz.kommand.vim
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.toList
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
@@ -103,34 +102,41 @@ fun vimEx(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { 
 @DelicateApi
 fun vimExIm(vararg files: Path, init: XVim.() -> Unit = {}): XVim = vim(*files) { -ExImMode; init() }
 
-@OptIn(DelicateApi::class)
+@OptIn(DelicateApi::class, NotPortableApi::class)
 fun vimExScriptStdIn(
   vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
-): XVim = vim(*files) {
-  -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW NVim is always nocompatible
-  if (isCleanMode) -CleanMode
-  -ExScriptMode // BTW initialization should be skipped in this mode
-}
+): XVim = xvimExScriptStdIn(
+  Vim, *files, isViCompat = isViCompat, isCleanMode = isCleanMode
+)
+
+@OptIn(DelicateApi::class, NotPortableApi::class)
+fun nvimExScriptStdIn(vararg files: Path, isCleanMode: Boolean = true): XVim = xvimExScriptStdIn(
+  NVim, *files, isCleanMode = isCleanMode
+  // BTW NVim is never ViCompat anyway (but accepts and ignores -N so default isViCompat = false is fine)
+)
 
 /**
  * Normally should not be needed, but in case of problems it can be useful to experiment with these settings
+ * All flags are false by default except [isCleanMode] and other wrappers depend on that!
  * Proposed settings are inspired by answers/flags from SO (which can be incorrect or redundant):
  * https://stackoverflow.com/questions/18860020/executing-vim-commands-in-a-shell-script
  */
-@OptIn(NotPortableApi::class, DelicateApi::class)
-fun vimExScriptStdInWithExplicitSettings(
+@DelicateApi
+@NotPortableApi
+fun xvimExScriptStdIn(
+  type: XVimType,
   vararg files: Path,
   isViCompat: Boolean = false,
   isDebugMode: Boolean = false,
   isCleanMode: Boolean = true,
   isNoPluginMode: Boolean = false,
-  isVimRcNONE: Boolean = true,
+  isVimRcNONE: Boolean = false,
   isSwapNONE: Boolean = false, // in NVim swap is disabled in ExScriptMode anyway (not sure about original Vim)
   isSetNoMore: Boolean = false, // I guess it shouldn't be needed because ExScriptMode is not TUI, but I'm not sure.
   isTermDumb: Boolean = false, // I guess it shouldn't be needed because ExScriptMode is not TUI, but I'm not sure.
-): XVim = vim(*files) {
+): XVim = xvim(type, *files) {
   -ViCompat(isViCompat) // setting explicitly in scripts (not rely on .vimrc presence). BTW NVim is always nocompatible
   if (isDebugMode) -DebugMode
   if (isCleanMode) -CleanMode
@@ -142,6 +148,7 @@ fun vimExScriptStdInWithExplicitSettings(
   -ExScriptMode
 }
 
+@Deprecated("Use .reducedToLines directly")
 @OptIn(DelicateApi::class)
 fun vimExScriptContent(
   exScriptContent: String,
@@ -149,12 +156,7 @@ fun vimExScriptContent(
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
 ): ReducedKommand<List<String>> = vimExScriptStdIn(files = files, isViCompat = isViCompat, isCleanMode = isCleanMode)
-  .reducedManually {
-    stdin.collect(exScriptContent.lineSequence().asFlow())
-    val out = stdout.toList() // ex-commands can print stuff (like :list, :number, :print, :set, also see :verbose)
-    awaitAndChkExit(firstCollectErr = true)
-    out
-  }
+  .reducedToLines(*exScriptContent.lines().toA)
 
 /**
  * This version uses [Session] for [exScriptFile].

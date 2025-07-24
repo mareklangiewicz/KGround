@@ -114,14 +114,19 @@ data object VimAdvancedSamples {
   val gvimBumpVerImpl2ExSc = gvim(myKGroundRootBuildFile) { -ExCmd("g/version = Ver(.*)/exe \"norm t)\\<C-A>\"") } s
     "gvim -c g/version = Ver(.*)/exe \"norm t)\\<C-A>\" $myKGroundRootBuildFile"
 
-  /** Pretty good impl of bumping versions in scripts using ex-script (but keys-scripts are more awesome). */
-  val vimBumpVerImpl3ExSc = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myKGroundRootBuildFile) rs
-    "vim -N --clean -es $myKGroundRootBuildFile" // BTW ReducedKommand is pushing exScriptContent to stdin
-  // BTW nvim would also work here (-es also takes script in stdin) (should I also implement nvimExScriptContent ??)
-  // (BTW -Es in nvim flips stuff and takes buffer content as stdin; BTW in nvim both -es and -Es are Ex-IMPROVED mode)
+  /** Pretty good impl of bumping versions in scripts using ex-script (but keys-scripts are even more awesome?). */
+  val vimBumpVerImpl3ExSc =
+    vimExScriptStdIn(myKGroundRootBuildFile).reducedToLines("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"") rs
+    "vim -N --clean -es $myKGroundRootBuildFile" // BTW reducedToLines puts ex-script line to stdin
+  // BTW nvim would also work here (-es also takes script in stdin)
+  // (But -Es in nvim flips stuff and takes buffer content as stdin; BTW in nvim both -es and -Es are Ex-IMPROVED mode)
   // To run this sample manually in terminal (from KGround working dir) (-V just to see more):
   // printf 'g/version = Ver(.*)/exe "norm t)\<C-A>ZZ"\n' | vim -V -N --clean -es build.gradle.kts
   // printf 'g/version = Ver(.*)/exe "norm t)\<C-A>ZZ"\n' | nvim -V -N --clean -es build.gradle.kts
+  // Update: nvim version of the same:
+  val nvimBumpVerImpl3ExSc =
+    nvimExScriptStdIn(myKGroundRootBuildFile).reducedToLines("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"") rs
+      "nvim -N --clean -es $myKGroundRootBuildFile"
 
   private const val keyCtrlA = '\u0001' // to increase number at cursor in vim
 
