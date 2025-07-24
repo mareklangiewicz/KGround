@@ -154,13 +154,12 @@ data object VimAdvancedSamples {
         ignoreOut = true, // normally outputs file content with color codes, so garbage.
       ) rs "vim --clean -n -T dumb -s /dev/stdin $myKGroundRootBuildFile"
 
-  /** More stable impl of bumping versions in scripts using keys-script in NVim. */
+  /**
+   * More stable impl of bumping versions in scripts using keys-script in NVim.
+   * WARN: Also make sure there is no build.gradle.kts swap file left in ~/.local/state/nvim/swap/
+   * left after some old crash, or it can fail weirdly.. (doing wrong things because of some notif or sth)
+   */
   @NotPortableApi("Not for original Vim")
-  val nvimBumpVerImpl6KeysSc = nvim(myKGroundRootBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
-    stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
-    // WARN: collect always ends with \n (by default), so it WILL do :wq
-    awaitAndChkExit(firstCollectErr = true)
-  } rs "nvim -s - $myKGroundRootBuildFile"
   val nvimBumpVerImpl6KeysSc =
     nvim(myKGroundRootBuildFile) { -CleanMode; -SwapNONE; -KeysScriptStdInForNVim }
       .reducedToLists(
