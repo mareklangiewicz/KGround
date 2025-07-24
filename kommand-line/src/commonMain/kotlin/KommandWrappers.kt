@@ -204,9 +204,13 @@ fun <In, OutItem> TypedKommand<*, In, Flow<OutItem>, Flow<String>>.reducedOutToF
 // TODO_someday: Is it actually most common? Try to use it in more places except vim wrappers.
 //   (but carefully test all cases because I assume here firstCollectErr is fine, etc.)
 /** Most common reduction from list of lines to list of lines */
-fun <K : Kommand> K.reducedToLines(vararg inLines: String): ReducedKommand<List<String>> = reducedManually {
+fun <K : Kommand> K.reducedToLists(
+  vararg inLines: String,
+  ignoreErr: Boolean = false,
+  ignoreOut: Boolean = false,
+): ReducedKommand<List<String>?> = reducedManually {
   stdin.collect(inLines.asFlow())
-  val out = stdout.toList()
-  awaitAndChkExit(firstCollectErr = true)
+  val out = if (ignoreOut) null else stdout.toList()
+  awaitAndChkExit(firstCollectErr = !ignoreErr)
   out
 }

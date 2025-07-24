@@ -8,11 +8,9 @@ import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.annotations.NotPortableApi
 import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
-import pl.mareklangiewicz.kommand.ReducedScript
 import pl.mareklangiewicz.kommand.core.echo
 import pl.mareklangiewicz.kommand.find.myKGroundPath
 import pl.mareklangiewicz.kommand.find.myTmpPath
-import pl.mareklangiewicz.kommand.reducedManually
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.shell.bashPipe
 import pl.mareklangiewicz.kommand.term.TermKittyOpt.StartAsType
@@ -22,6 +20,7 @@ import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorLineLast
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorPos
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForNVim
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForVim
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.VimTermDumb
 
 val blas = listOf("bla", "ble", "blu", "bli", "blo")
 val blaS = blas.asFlow()
@@ -116,7 +115,7 @@ data object VimAdvancedSamples {
 
   /** Pretty good impl of bumping versions in scripts using ex-script (but keys-scripts are even more awesome?). */
   val vimBumpVerImpl3ExSc =
-    vimExScriptStdIn(myKGroundRootBuildFile).reducedToLines("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"") rs
+    vimExScriptStdIn(myKGroundRootBuildFile).reducedToLists("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"") rs
     "vim -N --clean -es $myKGroundRootBuildFile" // BTW reducedToLines puts ex-script line to stdin
   // BTW nvim would also work here (-es also takes script in stdin)
   // (But -Es in nvim flips stuff and takes buffer content as stdin; BTW in nvim both -es and -Es are Ex-IMPROVED mode)
@@ -125,33 +124,52 @@ data object VimAdvancedSamples {
   // printf 'g/version = Ver(.*)/exe "norm t)\<C-A>ZZ"\n' | nvim -V -N --clean -es build.gradle.kts
   // Update: nvim version of the same:
   val nvimBumpVerImpl3ExSc =
-    nvimExScriptStdIn(myKGroundRootBuildFile).reducedToLines("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"") rs
+    nvimExScriptStdIn(myKGroundRootBuildFile).reducedToLists("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"") rs
       "nvim -N --clean -es $myKGroundRootBuildFile"
 
   private const val keyCtrlA = '\u0001' // to increase number at cursor in vim
 
   /** Impl for experiments with KeysScripts with gvim */
   @NotPortableApi("Not for NVim")
-  val gvimBumpVerImpl4KeysSc = ReducedScript {
-    val inContent = "/version = Ver\nt)$keyCtrlA" // no :wq so I can inspect result in gvim visually/manually
-    // val inContent = "/version = Ver\nt)$keyCtrlA:wq" // WARN: ax ends inContent with \n, so it WILL do :wq
-    gvim(myKGroundRootBuildFile) { -KeysScriptStdInForVim }.ax(inContent = inContent)
-  }
+  val gvimBumpVerImpl4KeysSc = gvim(myKGroundRootBuildFile) { -KeysScriptStdInForVim }.reducedToLists(
+    "/version = Ver",
+    "t)$keyCtrlA", // no :wq so I can inspect result in gvim visually/manually
+    // "t)$keyCtrlA:wq", // WARN: each input line ends with \n, so this version WILL do :wq
+  ) rs "gvim -s /dev/stdin $myKGroundRootBuildFile"
 
-  /** Pretty good impl of bumping versions in scripts using keys-script. */
+  /**
+   * Kinda fragile impl of bumping versions in scripts using keys-script in original Vim.
+   * -T dumb is needed (I tried many experiments and it helps; BTW --not-a-term makes it worse)
+   * Looks like -V breaks stuff, so don't try it (vim confused about terminal or sth)
+   * WARN: Also make sure there is no .build.gradle.kts.swp left after some old crash,
+   * or it will fail again mysteriously..
+   */
   @NotPortableApi("Not for NVim")
-  val vimBumpVerImpl5KeysSc = vim(myKGroundRootBuildFile) { -KeysScriptStdInForVim }.reducedManually {
-    stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
-    // WARN: collect always ends with \n (by default), so it WILL do :wq
-    awaitAndChkExit(firstCollectErr = true)
-  } rs "vim -s /dev/stdin $myKGroundRootBuildFile"
+  val vimBumpVerImpl5KeysSc =
+    vim(myKGroundRootBuildFile) { -CleanMode; -SwapNONE; -VimTermDumb; -KeysScriptStdInForVim }
+      .reducedToLists(
+        "/version = Ver",
+        // "t)$keyCtrlA", // WARN: This is WRONG! no :wq so it expects terminal and CRASHES
+        "t)$keyCtrlA:wq", // WARN: Each input line ends with \n, so this version WILL do :wq (which is needed for it to work at all)
+        ignoreOut = true, // normally outputs file content with color codes, so garbage.
+      ) rs "vim --clean -n -T dumb -s /dev/stdin $myKGroundRootBuildFile"
 
+  /** More stable impl of bumping versions in scripts using keys-script in NVim. */
   @NotPortableApi("Not for original Vim")
   val nvimBumpVerImpl6KeysSc = nvim(myKGroundRootBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
     // WARN: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
   } rs "nvim -s - $myKGroundRootBuildFile"
+  val nvimBumpVerImpl6KeysSc =
+    nvim(myKGroundRootBuildFile) { -CleanMode; -SwapNONE; -KeysScriptStdInForNVim }
+      .reducedToLists(
+        "/version = Ver",
+        // "t)$keyCtrlA", // WARN: This is WRONG! no :wq so nvim hangs! (waiting for user, but I run it in context without terminal)
+        "t)$keyCtrlA:wq", // WARN: Each input line ends with \n, so this version WILL do :wq (which is needed for it to work at all)
+        ignoreOut = true, // I think NVim does NOT output garbage in this case, but let's ignore unwanted output anyway.
+      )  rs "nvim --clean -n -s - $myKGroundRootBuildFile"
+
 
   // TODO: support awesome new nvim options like -l !! Allows to use nvim as superpowered lua interpreter!
   //   https://neovim.io/doc/user/starting.html#-l

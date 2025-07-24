@@ -14,6 +14,7 @@ import pl.mareklangiewicz.kommand.vim.XVimOpt.*
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.CursorPos
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.KeysScriptStdInForVim
 import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.VimRcNONE
+import pl.mareklangiewicz.kommand.vim.XVimOpt.Companion.VimTermDumb
 import pl.mareklangiewicz.udata.*
 
 
@@ -144,7 +145,7 @@ fun xvimExScriptStdIn(
   if (isVimRcNONE) -VimRcNONE // although initialization should be skipped anyway in ExScriptMode
   if (isSwapNONE) -SwapNONE
   if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
-  if (isTermDumb) -TermName("dumb") // BTW NVim does not support it
+  if (isTermDumb) -VimTermDumb // BTW NVim does not support it
   -ExScriptMode
 }
 
@@ -155,8 +156,8 @@ fun vimExScriptContent(
   vararg files: Path,
   isViCompat: Boolean = false,
   isCleanMode: Boolean = true,
-): ReducedKommand<List<String>> = vimExScriptStdIn(files = files, isViCompat = isViCompat, isCleanMode = isCleanMode)
-  .reducedToLines(*exScriptContent.lines().toA)
+): ReducedKommand<List<String>?> = vimExScriptStdIn(files = files, isViCompat = isViCompat, isCleanMode = isCleanMode)
+  .reducedToLists(*exScriptContent.lines().toA)
 
 /**
  * This version uses [Session] for [exScriptFile].
@@ -190,7 +191,7 @@ fun vimKeysScriptFile(
   if (isCleanMode) -CleanMode
   if (isSwapNONE) -SwapNONE
   if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
-  if (isTermDumb) -TermName("dumb") // BTW NVim does not support it
+  if (isTermDumb) -VimTermDumb // BTW NVim does not support it
   -KeysScriptIn(keysScriptFile)
 } // BTW stdout should not be used as Vim will unfortunately print screen content there
 
@@ -212,7 +213,7 @@ fun vimKeysScriptStdIn(
   if (isCleanMode) -CleanMode
   if (isSwapNONE) -SwapNONE
   if (isSetNoMore) -ExCmd("set nomore") // avoids blocking/pausing when some output/listing fills whole screen
-  if (isTermDumb) -TermName("dumb") // BTW NVim does not support it
+  if (isTermDumb) -VimTermDumb // BTW NVim does not support it
   -KeysScriptStdInForVim // BTW waiting for answer if it's a good approach: https://github.com/vim/vim/discussions/15315
 } // BTW stdout should not be used as Vim will unfortunately print screen content there
 
@@ -629,7 +630,10 @@ interface XVimOpt : KOptTypical {
    * Should be a terminal known to Vim (builtin) or defined in the termcap or terminfo file.
    */
   @NotPortableApi("Vim only (not NVim).")
-  data class TermName(val term: String) : XVimOpt, KOptS("T", term)
+  data class VimTermName(val term: String) : XVimOpt, KOptS("T", term)
+
+  @NotPortableApi("Vim only (not NVim).")
+  data object VimTermNOT : XVimOpt, KOptL("not-a-term")
 
   /**
    * Give messages about which files are sourced and for reading and writing a viminfo file.
@@ -696,9 +700,12 @@ interface XVimOpt : KOptTypical {
     fun CursorPos(line: Int, column: Int) = ExCmd("call cursor($line,$column)")
 
 
+    /** Special case of [VimTermName] */
+    @NotPortableApi("Vim only (not NVim).")
+    val VimTermDumb = VimTermName("dumb")
+
     /** Special case of [VimInfo] */
     val VimInfoNONE = VimInfo("NONE")
-
 
     /** Special case of [VimRc] */
     val VimRcNONE = VimRc("NONE")
