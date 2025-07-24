@@ -217,7 +217,7 @@ fun vimKeysScriptStdIn(
 /**
  * Note: current impl adds \n at the end of the [keysScriptContent].
  * It's because internal details of [StdinCollector.collect], [Kommand.ax], etc..
- * generally KommandLine currently treats input as flow of lines.
+ * Generally Kommands currently treat input as flow of lines.
  */
 @OptIn(NotPortableApi::class, DelicateApi::class)
 fun vimKeysScriptContent(

@@ -93,14 +93,16 @@ data object VimAdvancedSamples {
   // (especially when recording but CleanMode when replying is also recommended)
   // TODO: I can use nvim because my setup run kommands in kitty terminal anyway, but it's implicit and it can change;
   //   so better to use other more explicit method (some proper nvim kitty wrapper fun knvim??)
-  val nvimBuildGradleRecord = nvim(myKGroundRootBuildFile) { -CleanMode; -KeysScriptOut(myTmpKeysFile, overwrite = true) }
+  val nvimBuildGradleRecord = nvim(myKGroundRootBuildFile) { -CleanMode; -KeysScriptOut(myTmpKeysFile, overwrite = true) } s
+    "nvim --clean -W $myTmpKeysFile $myKGroundRootBuildFile"
 
   val nvimShowRecord = nvim(myTmpKeysFile)
 
-  val nvimBuildGradleReplay = nvim(myKGroundRootBuildFile) { -KeysScriptIn(myTmpKeysFile) }
+  val nvimBuildGradleReplay = nvim(myKGroundRootBuildFile) { -KeysScriptIn(myTmpKeysFile) } s
+    "nvim -s $myTmpKeysFile $myKGroundRootBuildFile"
 
   /**
-   * Bumps version in KGround:build.gradle.kts using gvim, and leave gvim open without saving, to inspect
+   * Bumps version in KGround:build.gradle.kts using gvim, and leave gvim open without saving, to inspect.
    * The last ":execute" / ":exe" [ExCmd] is needed because the problem with entering <C-A> in vim cmd-line
    */
   val gvimBumpVerImpl1ExSc =
@@ -114,16 +116,20 @@ data object VimAdvancedSamples {
 
   /** Pretty good impl of bumping versions in scripts using ex-script (but keys-scripts are more awesome). */
   val vimBumpVerImpl3ExSc = vimExScriptContent("g/version = Ver(.*)/exe \"norm t)\\<C-A>ZZ\"", myKGroundRootBuildFile) rs
-    "vim -N --clean -es $myKGroundRootBuildFile"
+    "vim -N --clean -es $myKGroundRootBuildFile" // BTW ReducedKommand is pushing exScriptContent to stdin
+  // BTW nvim would also work here (-es also takes script in stdin) (should I also implement nvimExScriptContent ??)
+  // (BTW -Es in nvim flips stuff and takes buffer content as stdin; BTW in nvim both -es and -Es are Ex-IMPROVED mode)
+  // To run this sample manually in terminal (from KGround working dir) (-V just to see more):
+  // printf 'g/version = Ver(.*)/exe "norm t)\<C-A>ZZ"\n' | vim -V -N --clean -es build.gradle.kts
+  // printf 'g/version = Ver(.*)/exe "norm t)\<C-A>ZZ"\n' | nvim -V -N --clean -es build.gradle.kts
 
   private const val keyCtrlA = '\u0001' // to increase number at cursor in vim
 
   /** Impl for experiments with KeysScripts with gvim */
   @NotPortableApi("Not for NVim")
   val gvimBumpVerImpl4KeysSc = ReducedScript {
-    val inContent = "/version = Ver\nt)$keyCtrlA"
-    // val inContent = "/version = Ver\nt)$keyCtrlA:wq"
-    // Warning: ax always ends inContent with \n, so it WILL do :wq
+    val inContent = "/version = Ver\nt)$keyCtrlA" // no :wq so I can inspect result in gvim visually/manually
+    // val inContent = "/version = Ver\nt)$keyCtrlA:wq" // WARN: ax ends inContent with \n, so it WILL do :wq
     gvim(myKGroundRootBuildFile) { -KeysScriptStdInForVim }.ax(inContent = inContent)
   }
 
@@ -131,14 +137,14 @@ data object VimAdvancedSamples {
   @NotPortableApi("Not for NVim")
   val vimBumpVerImpl5KeysSc = vim(myKGroundRootBuildFile) { -KeysScriptStdInForVim }.reducedManually {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
-    // Warning: collect always ends with \n (by default), so it WILL do :wq
+    // WARN: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
   } rs "vim -s /dev/stdin $myKGroundRootBuildFile"
 
   @NotPortableApi("Not for original Vim")
   val nvimBumpVerImpl6KeysSc = nvim(myKGroundRootBuildFile) { -KeysScriptStdInForNVim }.reducedManually {
     stdin.collect(flowOf("/version = Ver\nt)$keyCtrlA:wq"))
-    // Warning: collect always ends with \n (by default), so it WILL do :wq
+    // WARN: collect always ends with \n (by default), so it WILL do :wq
     awaitAndChkExit(firstCollectErr = true)
   } rs "nvim -s - $myKGroundRootBuildFile"
 
