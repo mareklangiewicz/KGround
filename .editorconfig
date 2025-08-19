@@ -1,7 +1,7 @@
 root = true
 
-# Let's keep it short/minimal, with comments, so it's clear what is enforced in .editorconfig and why.
-
+# My common .editorconfig to be reused in (almost?) all my repositories/projects.
+# Try to keep it short, but with comments, so it's clear what is enforced here and why.
 
 [*]
 
@@ -13,8 +13,11 @@ indent_size = 2
 
 indent_style = space
 
-# simpler adhoc regular expressions search/replace
+# Important! Simpler regular expressions search/replace, simpler concatenation of source files;
+# simpler git diffs, less conflicts, POSIX compliance! unix (line based) tools friendly, etc.
 insert_final_newline = true
+# See also: https://dev.to/documendous/why-you-should-end-your-source-files-with-a-new-line-156g
+# BTW there is (are?) exception below but only for very specific files!
 
 max_line_length = 120
 tab_width = 2

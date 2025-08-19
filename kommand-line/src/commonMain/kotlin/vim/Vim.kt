@@ -120,9 +120,9 @@ fun nvimExScriptStdIn(vararg files: Path, isCleanMode: Boolean = true): XVim = x
 
 /**
  * Normally should not be needed, but in case of problems it can be useful to experiment with these settings
- * All flags are false by default except [isCleanMode] and other wrappers depend on that!
  * Proposed settings are inspired by answers/flags from SO (which can be incorrect or redundant):
  * https://stackoverflow.com/questions/18860020/executing-vim-commands-in-a-shell-script
+ * BTW All flags are false by default by design, so other wrappers depend on that and enable only what needed.
  */
 @DelicateApi
 @NotPortableApi
@@ -131,7 +131,7 @@ fun xvimExScriptStdIn(
   vararg files: Path,
   isViCompat: Boolean = false,
   isDebugMode: Boolean = false,
-  isCleanMode: Boolean = true,
+  isCleanMode: Boolean = false, // it usually should be true, but this (low-level) fun has all flags false
   isNoPluginMode: Boolean = false,
   isVimRcNONE: Boolean = false,
   isSwapNONE: Boolean = false, // in NVim swap is disabled in ExScriptMode anyway (not sure about original Vim)
