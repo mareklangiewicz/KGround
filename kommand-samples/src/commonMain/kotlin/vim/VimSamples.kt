@@ -169,6 +169,8 @@ data object VimAdvancedSamples {
         ignoreOut = true, // I think NVim does NOT output garbage in this case, but let's ignore unwanted output anyway.
       )  rs "nvim --clean -n -s - $myKGroundRootBuildFile"
 
+  // TODO NOW: Impl 4, 5, 6 should use improved version of wrapper similarly as nvimBumpVerImpl3ExSc, etc.
+  // TODO NOW: continue updating with new wrappers from here!
 
   // TODO: support awesome new nvim options like -l !! Allows to use nvim as superpowered lua interpreter!
   //   https://neovim.io/doc/user/starting.html#-l
@@ -203,3 +205,15 @@ data object VimAdvancedSamples {
   @NotPortableApi
   val bashPipeWithNvimProcessor = bashPipe(echo("Vim vim nvim NVim"), nvimStyleProcessor) s "bash -c echo Vim\\ vim\\ nvim\\ NVim | nvim -Es -c %s/nvim/NVim -c %s/\\\\\\<Vim/vim -c %p"
 }
+
+/*
+ * TODO Present nicely Justin M Keyes example using vim from bashrc
+ * if nvim -es +'if has("nvim-0.3.2")|0cq|else|1cq|endif' ; then
+ *   ...
+ * fi
+ * UPDATE: do wrappers for nvim for any vim wrapper (with proper nvim defaults)
+ * also above example have to be based on maximally universal/useful wrappers
+ * same with nvimStyleProcessor example above that.
+ * nice-to-have: actual tests for it all? and mirror tests in mysh (shellspec) ?? it would be AWESOME!
+ * Then use it all in my projects like MyStolenPlaygrounds!
+ */

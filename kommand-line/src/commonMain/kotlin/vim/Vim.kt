@@ -159,6 +159,9 @@ fun vimExScriptContent(
 ): ReducedKommand<List<String>?> = vimExScriptStdIn(files = files, isViCompat = isViCompat, isCleanMode = isCleanMode)
   .reducedToLists(*exScriptContent.lines().toA)
 
+
+
+// TODO can I rewrite wrappers ..File for more composition similarly as others xvim..
 /**
  * This version uses [Session] for [exScriptFile].
  * @param exScriptFile can not start with "-" (or be empty).
@@ -200,6 +203,7 @@ fun vimKeysScriptFile(
  * It's because internal details of [StdinCollector.collect], [Kommand.ax], etc..
  * generally KommandLine currently treats input as flow of lines.
  */
+// TODO NOW: rewrite it for xvim similarly as above (ex-script) and reuse in other wrappers
 @OptIn(NotPortableApi::class, DelicateApi::class)
 fun vimKeysScriptStdIn(
   vararg files: Path,
