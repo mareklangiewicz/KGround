@@ -15,13 +15,13 @@ data object SshSamples {
 
   val version = sshVersion() s "ssh -V"
 
-  val sshPimInTermGnome = ssh("pim").inTermGnome() s "gnome-terminal -- ssh pim"
+  val sshPimInTermGnome = ssh("mypi").inTermGnome() s "gnome-terminal -- ssh mypi"
 
-  val sshPimInTermKitty = ssh("pim").inTermKitty() s "kitty --detach -- ssh pim"
+  val sshPimInTermKitty = ssh("mypi").inTermKitty() s "kitty --detach -- ssh mypi"
 
-  val sshPimLsInTermKitty = ssh("pim", "ls").inTermKitty(hold = true) s "kitty --detach --hold -- ssh pim ls"
+  val sshPimLsInTermKitty = ssh("mypi", "ls").inTermKitty(hold = true) s "kitty --detach --hold -- ssh mypi ls"
 
-  val sshPimLsLAH = ssh("pim", ls { -LongFormat; -All; -BlockHuman }) s "ssh pim ls -l -a -h"
+  val sshPimLsLAH = ssh("mypi", ls { -LongFormat; -All; -BlockHuman }) s "ssh mypi ls -l -a -h"
 }
 
 // TODO NOW: Continue, it's first experiment based on:
