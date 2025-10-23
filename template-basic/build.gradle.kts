@@ -13,7 +13,7 @@ plugins {
 // endregion [[Basic Root Build Imports and Plugs]]
 
 val enableJs = true
-val enableNative = true
+val enableLinux = true
 
 defaultBuildTemplateForRootProject(
   myLibDetails(
@@ -23,7 +23,7 @@ defaultBuildTemplateForRootProject(
     version = Ver(0, 0, 1),
     settings = LibSettings(
       withJs = enableJs,
-      withNativeLinux64 = enableNative,
+      withNativeLinux64 = enableLinux,
       withKotlinxHtml = true, // also used in common code
       compose = null,
       andro = null,
