@@ -7,6 +7,7 @@ import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.ide.ideOrGVimOpen
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.udata.strfon
 import pl.mareklangiewicz.ulog.*

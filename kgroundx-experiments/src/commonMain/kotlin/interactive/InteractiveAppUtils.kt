@@ -4,6 +4,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.ide.ideOrGVimOpen
 import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ulog.hack.*

@@ -10,6 +10,7 @@ import pl.mareklangiewicz.kground.io.localUFileSys
 import pl.mareklangiewicz.kground.io.pathToTmpNotes
 import pl.mareklangiewicz.kground.io.P
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.ide.ideDiff
 import pl.mareklangiewicz.kommand.zenity.zenityAskIf
 import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
 import pl.mareklangiewicz.uctx.uctx

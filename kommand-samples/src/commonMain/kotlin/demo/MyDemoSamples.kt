@@ -23,9 +23,9 @@ import pl.mareklangiewicz.kommand.find.myKotlinPath
 import pl.mareklangiewicz.kommand.getSysCLI
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.github.GhSamples
-import pl.mareklangiewicz.kommand.ideDiff
-import pl.mareklangiewicz.kommand.ideOpen
-import pl.mareklangiewicz.kommand.ideOrGVimOpen
+import pl.mareklangiewicz.kommand.ide.ideDiff
+import pl.mareklangiewicz.kommand.ide.ideOpen
+import pl.mareklangiewicz.kommand.ide.ideOrGVimOpen
 import pl.mareklangiewicz.kommand.iproute2.ssTulpn
 import pl.mareklangiewicz.kommand.kommand
 import pl.mareklangiewicz.kommand.konfig.getKeyValStr

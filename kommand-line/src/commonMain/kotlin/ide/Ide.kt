@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.kommand
+package pl.mareklangiewicz.kommand.ide
 
 import okio.Path
 import pl.mareklangiewicz.annotations.DelicateApi
@@ -7,9 +7,11 @@ import pl.mareklangiewicz.bad.BadStateErr
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.bad.chkNN
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.kommand.Ide.*
+import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.ide.Ide.*
 import pl.mareklangiewicz.kommand.admin.psAllFull
 import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
+import pl.mareklangiewicz.kommand.ide.Ide.Cmd.Open.Opt
 import pl.mareklangiewicz.kommand.vim.gvimOpen
 import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ure.*
@@ -48,6 +50,32 @@ fun ideDiff(path1: Path, path2: Path, path3: Path? = null, ifNoIdeRunningStart: 
 /** https://www.jetbrains.com/help/idea/command-line-merge-tool.html */
 fun ideMerge(path1: Path, path2: Path, pathOut: Path, pathBase: Path? = null, ifNoIdeRunningStart: Type? = null) =
   ide(Cmd.Merge(path1, path2, pathOut, pathBase), ifNoIdeRunningStart)
+
+fun ideHelp(type: Type) = ideOpen(type) { -Opt.Help }
+
+fun ideVersion(type: Type) = ideOpen(type) { -Opt.Version }
+
+/**
+ * https://www.jetbrains.com/help/idea/command-line-merge-tool.html
+ * BTW If Ide of given type is not running, it will start it.
+ */
+fun ideMerge(type: Type, path1: Path, path2: Path, pathOut: Path, pathBase: Path? = null) =
+  ide(type,Cmd.Merge(path1, path2, pathOut, pathBase))
+
+/**
+ * https://www.jetbrains.com/help/idea/command-line-differences-viewer.html
+ * BTW If Ide of given type is not running, it will start it.
+ */
+fun ideDiff(type: Type, path1: Path, path2: Path, path3: Path? = null) = ide(type, Cmd.Diff(path1, path2, path3))
+
+/** BTW If Ide of given type is not running, it will start it (unless -Opt.Help or -Opt.Version (and no paths)). */
+fun ideOpen(
+  type: Type,
+  path1: Path? = null,
+  path2: Path? = null,
+  path3: Path? = null,
+  init: Cmd.Open.() -> Unit = {}
+): Ide = ide(type, Cmd.Open(path1, path2, path3).apply(init))
 
 fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
   ReducedScript {
@@ -112,6 +140,8 @@ data class Ide(var type: Type, var cmd: Cmd) : Kommand {
         data object NoProjects : Opt("dontReopenProjects")
         data object NoPlugins : Opt("disableNonBundledPlugins")
         data object Wait : Opt("--wait")
+        data object Help : Opt("--help") // not really "Open" cmd (paths should be empty)
+        data object Version : Opt("--version") // not really "Open" cmd (paths should be empty)
         data class Line(val l: Int) : Opt("--line", l.strf)
         data class Column(val c: Int) : Opt("--column", c.strf)
       }
