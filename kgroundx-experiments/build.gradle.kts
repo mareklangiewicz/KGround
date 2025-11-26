@@ -16,7 +16,7 @@ plugins {
 
 val settings = rootExtLibDetails.settings.copy(
   withJs = false,
-  withNativeLinux64 = false,
+  withLinuxX64 = false,
   withKotlinxHtml = true,
 )
 val details = rootExtLibDetails.copy(settings = settings)
