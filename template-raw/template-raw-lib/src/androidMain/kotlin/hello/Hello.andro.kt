@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templatefull
+package pl.mareklangiewicz.templateraw
 
 import android.util.*
 

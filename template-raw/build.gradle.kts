@@ -9,7 +9,7 @@ plugins {
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false
-  plug(plugs.ComposeJb) apply false // ComposeJb(Edge) is very slow to sync, clean, build (jb dev repo issue)
+  plug(plugs.ComposeJb) apply false // ComposeJbEdge can be very slow to sync, clean, build (jb dev repo issue)
   plug(plugs.AndroKmp) apply false
   plug(plugs.AndroApp) apply false
   plug(plugs.VannikPublish) apply false
@@ -31,7 +31,7 @@ defaultBuildTemplateForRootProject(
     version = Ver(0, 0, 33),
     settings = LibSettings(
       withJs = enableJs,
-      withNativeLinux64 = enableLinux,
+      withLinuxX64 = enableLinux,
       withKotlinxHtml = true, // also used in common code
       compose = LibComposeSettings(
         withComposeHtmlCore = enableJs,

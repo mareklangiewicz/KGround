@@ -127,7 +127,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
     // inlined fun allDefault:
     if (settings.withJvm) jvm()
     if (settings.withJs) jsDefault()
-    if (settings.withNativeLinux64) linuxX64()
+    if (settings.withLinuxX64) linuxX64()
     settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
     sourceSets {
       commonMain {
@@ -203,7 +203,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           }
         }
       }
-      if (settings.withNativeLinux64) {
+      if (settings.withLinuxX64) {
         linuxX64Main
         linuxX64Test
       }

@@ -1,4 +1,4 @@
-import pl.mareklangiewicz.templatefull.*
+import pl.mareklangiewicz.templateraw.*
 import pl.mareklangiewicz.uspek.*
 import kotlin.test.*
 

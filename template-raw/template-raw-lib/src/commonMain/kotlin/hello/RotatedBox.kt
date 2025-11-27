@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templatefull
+package pl.mareklangiewicz.templateraw
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box

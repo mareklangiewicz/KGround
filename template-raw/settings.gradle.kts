@@ -33,7 +33,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.3.98" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.3.99" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.2.2" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -50,5 +50,5 @@ develocity {
 rootProject.name = "template-raw"
 
 include(":template-raw-lib")
-// include(":template-raw-app")
+include(":template-raw-app")
 // include(":template-raw-jvm-cli-app")

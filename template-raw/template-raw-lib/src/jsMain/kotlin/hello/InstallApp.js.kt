@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templatefull
+package pl.mareklangiewicz.templateraw
 
 import androidx.compose.runtime.*
 import org.jetbrains.compose.web.*
@@ -8,9 +8,9 @@ import org.w3c.dom.*
 
 fun tryToInstallAppIn(rootElement: Element?) {
   when (rootElement as? HTMLElement) {
-    null -> console.warn("TemplateFullWebApp: Incorrect rootElement")
+    null -> console.warn("TemplateRawWebApp: Incorrect rootElement")
     else -> renderComposable(root = rootElement) {
-      H1 { Text("Template Full Web App") }
+      H1 { Text("Template Raw Web App") }
       P { Text(remember { helloCommon() }) }
       P { Text(remember { helloPlatform() }) }
       P { Text(remember { helloSomeHtml() }) }

@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templatefull
+package pl.mareklangiewicz.templateraw
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
