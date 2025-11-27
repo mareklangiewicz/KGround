@@ -38,6 +38,9 @@ val details = rootExtLibDetails
 val settings = details.settings
 val settpose = settings.compose ?: error("Compose settings not set.")
 
+@Deprecated("Will be separate setting in new DepsKt")
+private val LibComposeSettings.withComposeTestUi get() = withComposeTestUiJUnit4
+
 defaultBuildTemplateForRawMppLib()
 
 
@@ -174,8 +177,8 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         jvmTest {
           dependencies {
             if (settings.withTestJUnit4) implementation(JUnit.junit)
-            @OptIn(ExperimentalComposeLibrary::class)
-            if (settpose.withComposeTestUiJUnit4) implementation(compose.uiTestJUnit4)
+            if (settpose.withComposeTestUi) implementation(compose.uiTest)
+            if (settpose.withComposeTestUiJUnit4) implementation(compose.desktop.uiTestJUnit4)
             if (settings.withTestJUnit5) {
               implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
               runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
