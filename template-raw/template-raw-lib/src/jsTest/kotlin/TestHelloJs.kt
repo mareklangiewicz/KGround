@@ -2,7 +2,7 @@ import pl.mareklangiewicz.uspek.*
 import kotlin.test.*
 
 
-class HelloTestJs {
+class TestHelloJs {
 
   // now it's the same configuration as in commonTest (using just uspek fun)
   // but maybe I will provide some uspek wrapper for better integration with some js testing framework
@@ -10,6 +10,6 @@ class HelloTestJs {
   // gutter play icon is not here probably because gradle "jsTest" task doesn't have --tests option.
   @Test
   fun testHelloJs() = uspek {
-    OnHelloStuff()
+    "On testHelloJs" o { onHelloStuff() }
   }
 }

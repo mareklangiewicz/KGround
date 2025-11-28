@@ -1,10 +1,10 @@
 import org.junit.jupiter.api.TestFactory
 import pl.mareklangiewicz.uspek.*
 
-class HelloTestJvm {
+class TestHelloJvm {
 
   @TestFactory
   fun testHelloJvm() = uspekTestFactory {
-    OnHelloStuff()
+    "On testHelloJvm" o { onHelloStuff() }
   }
 }
