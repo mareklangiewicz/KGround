@@ -41,7 +41,7 @@ fun helloAllTogetherForFullCli(hint: String) {
 
 
 /** Wrapped with full screen surface as background (so it obeys the theme color) */
-@Composable fun HelloComposableFull(name: String) =
+@Composable fun HelloComposableRaw(name: String) =
   Surface(Mod.fillMaxSize()) { HelloComposable(name) }
 
 @Composable fun HelloComposable(name: String) {

@@ -17,7 +17,7 @@ fun mainComposeApp() = application {
       // default isSystemInDarkTheme doesn't work for me yet
       // (there was some issue about linux support)
     ) {
-      HelloComposableFull("JVM Desktop")
+      HelloComposableRaw("JVM Desktop")
     }
   }
 }
