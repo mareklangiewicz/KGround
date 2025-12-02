@@ -10,8 +10,17 @@ class SomeBasicAndroidHostTests {
   init {
     "INIT ${this::class.simpleName}".teePP
     "INIT ${Build.MODEL} ${Build.DEVICE}".teePP
+    // Note: it should be just two nulls, because host tests have stubbed andro api.
   }
 
-  @TestFactory fun microCalcJUnit5Test() = uspekTestFactory { testSomeMicroCalc() }
-  @TestFactory fun loggingTest() = uspekTestFactory { testSomeLogging() }
+  @TestFactory fun microCalcTest() = uspekTestFactory {
+    "In Andro Host microCalcTest factory" o {
+      testSomeMicroCalc()
+    }
+  }
+  @TestFactory fun loggingTest() = uspekTestFactory {
+    "In Andro Host loggingTest factory" o {
+      testSomeLogging()
+    }
+  }
 }
