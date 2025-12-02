@@ -17,7 +17,7 @@ plugins {
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
-    // plugs.AndroKmpNoVer,
+    plugs.AndroKmpNoVer,
     plugs.VannikPublish,
   )
 }
@@ -37,9 +37,6 @@ plugins {
 val details = rootExtLibDetails
 val settings = details.settings
 val settpose = settings.compose ?: error("Compose settings not set.")
-
-@Deprecated("Will be separate setting in new DepsKt")
-private val LibComposeSettings.withComposeTestUi get() = withComposeTestUiJUnit4
 
 defaultBuildTemplateForRawMppLib()
 
@@ -83,6 +80,7 @@ fun TaskCollection<Task>.defaultTestsOptions(
     showStandardStreams = printStandardStreams
     showStackTraces = printStackTraces
   }
+  // println("TC dTO task $name:${this::class.qualifiedName}")
   if (onJvmUseJUnitPlatform) (this as? Test)?.useJUnitPlatform()
 }
 
@@ -131,6 +129,21 @@ fun Project.defaultBuildTemplateForRawMppLib() {
     if (settings.withJvm) jvm()
     if (settings.withJs) jsDefault()
     if (settings.withLinuxX64) linuxX64()
+    if (settings.withAndro) androidLibrary {
+      val andro = settings.andro!!
+      minSdk { version = release(andro.sdkMin) }
+      compileSdk {
+        version = andro.sdkCompilePreview?.let { preview(it) } ?: release(andro.sdkCompile)
+      }
+      namespace = details.namespace
+      withHostTestBuilder {
+      }
+      withDeviceTestBuilder {
+        sourceSetTreeName = "test"
+      }.configure {
+        instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+      }
+    }
     settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
     sourceSets {
       commonMain {
@@ -139,6 +152,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           implementation(compose.runtime)
           if (settpose.withComposeUi) {
             implementation(compose.ui)
+            implementation(compose.components.resources)
           }
           if (settpose.withComposeFoundation) implementation(compose.foundation)
           if (settpose.withComposeFullAnimation) {
@@ -210,6 +224,47 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         linuxX64Main
         linuxX64Test
       }
+      if (settings.withAndro) {
+        androidMain
+        val androidHostTest by getting {
+          dependencies {
+            if (settings.withTestJUnit4) implementation(JUnit.junit)
+            if (settings.withTestJUnit5) {
+              implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+              runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
+            }
+            if (settings.withTestUSpekX) {
+              implementation(Langiewicz.uspekx)
+              if (settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+              if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+            }
+          }
+        }
+        // NOTE: The `val androidDeviceTest by getting {...} works differently than
+        // `androidInstrumentedTest {...}` and it is needed for on device tests.
+        val androidDeviceTest by getting {
+          dependencies {
+            if (settings.withTestJUnit4OnAndroidDevice) {
+              implementation(JUnit.junit)
+              implementation(AndroidX.Test.core)
+              implementation(AndroidX.Test.core_ktx)
+              implementation(AndroidX.Test.runner)
+              implementation(AndroidX.Test.Ext.junit)
+              implementation(AndroidX.Test.Ext.junit_ktx)
+            }
+            else if (settings.withTestJUnit5) {
+              error("JUnit5 is NOT yet supported on android device tests.")
+              // implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
+              // runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
+            }
+            if (settings.withTestUSpekX) {
+              implementation(Langiewicz.uspekx)
+              if (settings.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
+              // else if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+            }
+          }
+        }
+      }
     }
   }
   configurations.checkVerSync(warnOnly = true)
@@ -218,6 +273,14 @@ fun Project.defaultBuildTemplateForRawMppLib() {
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
+tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
+  .configureEach { enabled = false }
+
+// compose.resources {
+//   // generateResClass = always
+//   generateResClass = never
+//
+// }
 
 fun KotlinMultiplatformExtension.jsDefault(
   withBrowser: Boolean = true,
@@ -241,4 +304,3 @@ fun KotlinMultiplatformExtension.jsDefault(
 }
 
 // TODO: NOW continue based on /home/marek/code/kotlin/KGround/template-full/template-full-lib/build.gradle.kts
-
