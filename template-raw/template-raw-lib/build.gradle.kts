@@ -137,6 +137,10 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       }
       namespace = details.namespace
       withHostTestBuilder {
+        sourceSetTreeName = "test"
+      }.configure {
+        // isIncludeAndroidResources = true
+        // isReturnDefaultValues = true
       }
       withDeviceTestBuilder {
         sourceSetTreeName = "test"
