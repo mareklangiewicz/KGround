@@ -23,7 +23,7 @@ defaultBuildTemplateForRootProject(
     version = Ver(0, 0, 1),
     settings = LibSettings(
       withJs = enableJs,
-      withNativeLinux64 = enableLinux,
+      withLinuxX64 = enableLinux,
       withKotlinxHtml = true, // also used in common code
       compose = null,
       andro = null,
