@@ -50,7 +50,7 @@ develocity {
 rootProject.name = "template-raw"
 
 include(":template-raw-lib")
-// include(":template-raw-app")
+include(":template-raw-app")
 
 // include(":template-raw-jvm-cli-app")
 
