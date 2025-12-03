@@ -40,6 +40,18 @@ val settpose = settings.compose ?: error("Compose settings not set.")
 
 defaultBuildTemplateForRawMppLib()
 
+kotlin {
+  sourceSets {
+    androidMain {
+      dependencies {
+        implementation(AndroidX.Core.ktx)
+        implementation(AndroidX.Activity.activity)
+        implementation(AndroidX.Activity.ktx)
+        implementation(AndroidX.Activity.compose)
+      }
+    }
+  }
+}
 
 fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   @Suppress("DEPRECATION")
@@ -229,7 +241,9 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         linuxX64Test
       }
       if (settings.withAndro) {
-        androidMain
+        androidMain {
+          // TODO_maybe: some minimal default deps??
+        }
         val androidHostTest by getting {
           dependencies {
             if (settings.withTestJUnit4) implementation(JUnit.junit)

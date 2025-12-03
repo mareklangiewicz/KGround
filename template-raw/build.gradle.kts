@@ -10,8 +10,8 @@ plugins {
   plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false
 
-  // plug(plugs.ComposeJb) apply false // ComposeJbEdge can be very slow to sync, clean, build (jb dev repo issue)
-  id("org.jetbrains.compose") version "1.10.0-beta02"
+  plug(plugs.ComposeJbStable) apply false // ComposeJbEdge can be very slow to sync, clean, build (jb dev repo issue)
+  // id("org.jetbrains.compose") version "1.10.0-beta02" apply false
   // TODO_later: Check again after compose update, because now default version fails with:
   // Cannot determine the version of Skiko for Compose '1.10.0-rc01'
 
@@ -33,7 +33,7 @@ defaultBuildTemplateForRootProject(
     name = "TemplateRaw",
     description = "Raw template for multi platform projects.",
     githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-raw",
-    version = Ver(0, 0, 34),
+    version = Ver(0, 0, 35),
     settings = LibSettings(
       withJs = enableJs,
       withLinuxX64 = enableLinux,

@@ -18,13 +18,12 @@ plugins {
 
 // endregion [[Andro App Build Imports and Plugs]]
 
-val settings = rootExtLibDetails.settings.copy(
-  compose = null,
-)
-val details = rootExtLibDetails.copy(settings = settings)
+var details = rootExtLibDetails
+val settings = details.settings.copy(compose = null)
+details = details.copy(settings = settings, namespace = "pl.mareklangiewicz.templateraw.androapp")
 
 defaultBuildTemplateForAndroApp(details) {
-  // implementation(project(":template-raw-lib"))
+  implementation(project(":template-raw-lib"))
 }
 
 
