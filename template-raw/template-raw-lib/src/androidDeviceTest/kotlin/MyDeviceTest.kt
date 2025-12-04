@@ -15,7 +15,7 @@ class MyDeviceTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("pl.mareklangiewicz.templateraw.androapp", appContext.packageName)
+        assertEquals("pl.mareklangiewicz.templateraw.test", appContext.packageName)
     }
 
     @Test
