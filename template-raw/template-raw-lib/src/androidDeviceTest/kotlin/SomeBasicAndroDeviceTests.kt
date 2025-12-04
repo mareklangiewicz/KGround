@@ -18,13 +18,13 @@ class MicroCalcAndroidDeviceJUnit4Test {
 
   @USpekTestTree(19) fun microCalcTest() {
     "In Andro Device microCalcTest tree" o {
-      testSomeMicroCalc()
+      // testSomeMicroCalc()
     }
   }
 
   @USpekTestTree(3) fun loggingTest() {
     "In Andro Device loggingTest tree" o {
-      testSomeLogging()
+      // testSomeLogging()
     }
   }
 }

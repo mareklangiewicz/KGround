@@ -1,13 +1,9 @@
 
 // region [[Raw MPP Lib Build Imports and Plugs]]
 
-import com.android.build.api.dsl.*
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
-import com.android.build.api.variant.KotlinMultiplatformAndroidComponentsExtension
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
-import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
@@ -66,21 +62,19 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withJitpack) maven(repos.jitpack)
 }
 
-// TODO_maybe: doc says it could be now also applied globally instead for each task (and it works for andro too)
-//   But it's only for jvm+andro, so probably this is better:
-//   https://kotlinlang.org/docs/gradle-compiler-options.html#for-all-kotlin-compilation-tasks
-fun TaskCollection<Task>.defaultKotlinCompileOptions(
-  apiVer: KotlinVersion = KotlinVersion.KOTLIN_2_3,
-  jvmTargetVer: String? = null, // it's better to use jvmToolchain (normally done in fun allDefault)
+fun KotlinMultiplatformExtension.defaultCompiler(
+  kotlinVer: KotlinVersion = KotlinVersion.KOTLIN_2_3,
+  jvmVer: Int? = null,
   renderInternalDiagnosticNames: Boolean = false,
-) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+) {
   compilerOptions {
-    apiVersion.set(apiVer)
-    jvmTargetVer?.let { jvmTarget = JvmTarget.fromTarget(it) }
+    languageVersion.set(kotlinVer)
+    apiVersion.set(kotlinVer)
     if (renderInternalDiagnosticNames) freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
     // useful, for example, to suppress some errors when accessing internal code from some library, like:
     // @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "EXPOSED_PARAMETER_TYPE", "EXPOSED_PROPERTY_TYPE", "CANNOT_OVERRIDE_INVISIBLE_MEMBER")
   }
+  jvmVer?.let(::jvmToolchain)
 }
 
 fun TaskCollection<Task>.defaultTestsOptions(
@@ -136,8 +130,10 @@ fun Project.defaultBuildTemplateForRawMppLib() {
 
   repositories { addRepos(settings.repos) }
   defaultGroupAndVerAndDescription(details)
+
   kotlin {
-    // inlined fun allDefault:
+    defaultCompiler(jvmVer = settings.withJvmVer?.toInt())
+
     if (settings.withJvm) jvm()
     if (settings.withJs) jsDefault()
     if (settings.withLinuxX64) linuxX64()
@@ -148,19 +144,15 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         version = andro.sdkCompilePreview?.let { preview(it) } ?: release(andro.sdkCompile)
       }
       namespace = details.namespace
-      withHostTestBuilder {
-        sourceSetTreeName = "test"
-      }.configure {
+      withHostTest {
         // isIncludeAndroidResources = true
         // isReturnDefaultValues = true
       }
-      withDeviceTestBuilder {
-        sourceSetTreeName = "test"
-      }.configure {
-        instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+      withDeviceTest {
+        instrumentationRunner = andro.withTestRunner
       }
     }
-    settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
+
     sourceSets {
       commonMain {
         dependencies {
@@ -199,7 +191,6 @@ fun Project.defaultBuildTemplateForRawMppLib() {
               implementation(compose.desktop.currentOs)
             }
             if (settpose.withComposeDesktopComponents) {
-              @OptIn(ExperimentalComposeLibrary::class)
               implementation(compose.desktop.components.splitPane)
             }
           }
@@ -262,6 +253,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         // `androidInstrumentedTest {...}` and it is needed for on device tests.
         val androidDeviceTest by getting {
           dependencies {
+            implementation(Kotlin.test) // by default device tests don't get common tests sourceSet (unlike host tests)
             if (settings.withTestJUnit4OnAndroidDevice) {
               implementation(JUnit.junit)
               implementation(AndroidX.Test.core)
@@ -286,7 +278,6 @@ fun Project.defaultBuildTemplateForRawMppLib() {
     }
   }
   configurations.checkVerSync(warnOnly = true)
-  tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
   else println("MPP Module ${name}: publishing (and signing) disabled")
