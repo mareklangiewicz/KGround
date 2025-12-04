@@ -1,5 +1,6 @@
 package com.example.template_raw_lib
 
+import android.content.pm.ApplicationInfo
 import android.os.*
 import android.util.*
 import androidx.test.ext.junit.runners.*
@@ -28,6 +29,7 @@ class MyDeviceTest {
   @Test
   fun logDetailedDeviceInfo() {
     // Example of logging detailed device information for easy filtering in Logcat.
+    "--- Device Info ---".teeI
     "Manufacturer: ${Build.MANUFACTURER}".teeI
     "Model: ${Build.MODEL}".teeI
     "Brand: ${Build.BRAND}".teeI
@@ -41,5 +43,19 @@ class MyDeviceTest {
     Build.SUPPORTED_ABIS.forEachIndexed { index, abi ->
       "ABI ${index + 1}: $abi".teeI
     }
+  }
+
+  @Test
+  fun logTargetContextInfo() {
+    val context = InstrumentationRegistry.getInstrumentation().targetContext
+    "--- Target Context Info ---".teeI
+    "Package Name: ${context.packageName}".teeI
+    "Data Directory: ${context.applicationInfo.dataDir}".teeI
+    "Cache Directory: ${context.cacheDir.path}".teeI
+    "Files Directory: ${context.filesDir.path}".teeI
+    "APK File Path: ${context.packageCodePath}".teeI
+    "Target SDK Version: ${context.applicationInfo.targetSdkVersion}".teeI
+    val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    "Is App Debuggable: $isDebuggable".teeI
   }
 }
