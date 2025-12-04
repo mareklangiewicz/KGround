@@ -16,15 +16,15 @@ class MicroCalcAndroidDeviceJUnit4Test {
     "INIT ${Build.MODEL} ${Build.DEVICE}".teePP
   }
 
-  @USpekTestTree(19) fun microCalcTest() {
-    "In Andro Device microCalcTest tree" o {
-      // testSomeMicroCalc()
-    }
-  }
-
-  @USpekTestTree(3) fun loggingTest() {
-    "In Andro Device loggingTest tree" o {
-      // testSomeLogging()
-    }
-  }
+  // @USpekTestTree(19) fun microCalcTest() {
+  //   "In Andro Device microCalcTest tree" o {
+  //     testSomeMicroCalc()
+  //   }
+  // }
+  //
+  // @USpekTestTree(3) fun loggingTest() {
+  //   "In Andro Device loggingTest tree" o {
+  //     testSomeLogging()
+  //   }
+  // }
 }
