@@ -30,12 +30,20 @@ plugins {
 //    - compose Tests (check JUnit5 current support? JUnit6??)
 //    - android Tests (both kinds)
 //
+// TODO: SOMEDAY:
+//  - move my logic to "convention plugin" and use "context parameters"
+//    - instead of file-global details, settings, settpose
+//      - BTW this plan avoids ever adding explicit parameters (that's why I use file-globals for now)
+//      - BTW I also avoid adding flags like ignoreCompose, ignoreAndroTarget, etc (from old templates)
+//        - just copy/modify these globals before executing defaultBuildTemplate...
 
 val details = rootExtLibDetails
 val settings = details.settings
 val settpose = settings.compose ?: error("Compose settings not set.")
 
 defaultBuildTemplateForRawMppLib()
+// BTW I also removed addCommonMainDependencies lambda parameter, just add deps normally if needed.
+// (it's almost always needed to add sth not just to commonMain, so default explicit dsl is better)
 
 kotlin {
   sourceSets {
@@ -124,9 +132,7 @@ fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPubli
 }
 
 @OptIn(ExperimentalComposeLibrary::class)
-fun Project.defaultBuildTemplateForRawMppLib(
-  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+fun Project.defaultBuildTemplateForRawMppLib() {
 
   if (settpose.withComposeTestUiJUnit5)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
@@ -172,7 +178,6 @@ fun Project.defaultBuildTemplateForRawMppLib(
           }
           if (settpose.withComposeMaterial2) implementation(compose.material)
           if (settpose.withComposeMaterial3) implementation(compose.material3)
-          addCommonMainDependencies()
         }
       }
       commonTest {
@@ -238,6 +243,17 @@ fun Project.defaultBuildTemplateForRawMppLib(
       if (settings.withAndro) {
         androidMain {
           // TODO_maybe: some minimal default deps??
+
+          // FIXME: Is this needed?, maybe I should use jetbrains based artifacts here too?
+          // well, maybe preview is needed? will it work with the rest from jetbrains??
+          dependencies {
+            if (settpose.withComposeUi) {
+              implementation(AndroidX.Compose.Ui.ui)
+              implementation(AndroidX.Compose.Ui.util)
+              implementation(AndroidX.Compose.Ui.tooling)
+              implementation(AndroidX.Compose.Ui.tooling_preview)
+            }
+          }
         }
         val androidHostTest by getting {
           dependencies {
@@ -276,6 +292,9 @@ fun Project.defaultBuildTemplateForRawMppLib(
               if (settings.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
               // else if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
+            // FIXME: based on code added by Gemini, but maybe jetbrains based artifacts would work too?/better?
+            if (settpose.withComposeTestUi) implementation(AndroidX.Compose.Ui.test)
+            if (settpose.withComposeTestUiJUnit4) implementation(AndroidX.Compose.Ui.test_junit4)
           }
         }
       }
@@ -286,8 +305,8 @@ fun Project.defaultBuildTemplateForRawMppLib(
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
-tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
-  .configureEach { enabled = false }
+// tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
+//   .configureEach { enabled = false }
 
 // compose.resources {
 //   // generateResClass = always

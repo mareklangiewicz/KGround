@@ -16,15 +16,12 @@ import org.junit.runner.*
  */
 private val <T> T.teeI get(): T = apply { Log.i("teeI", this.toString()) }
 
+// Note: Use Android Studio play buttons below, to run these tests with better UI
+// (instead of ./gradlew connectedAndroidDeviceTest), so it forwards logs from device to nice AS tool window.
+// But if using ./gradlew connectedAndroidDeviceTest: filter logcat with "package:mine tag:tee"
+
 @RunWith(AndroidJUnit4::class)
 class MyDeviceTest {
-
-  @Test
-  fun useAppContext() {
-    // Context of the app under test.
-    val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    assertEquals("pl.mareklangiewicz.templateraw.test", appContext.packageName)
-  }
 
   @Test
   fun logDetailedDeviceInfo() {
@@ -57,5 +54,12 @@ class MyDeviceTest {
     "Target SDK Version: ${context.applicationInfo.targetSdkVersion}".teeI
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     "Is App Debuggable: $isDebuggable".teeI
+  }
+
+  @Test
+  fun testTargetContextPackage() {
+    // Context of the app under test.
+    val context = InstrumentationRegistry.getInstrumentation().targetContext
+    assertEquals("pl.mareklangiewicz.templateraw.test", context.packageName)
   }
 }
