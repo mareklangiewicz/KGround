@@ -4,6 +4,7 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
+import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
@@ -123,7 +124,9 @@ fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPubli
 }
 
 @OptIn(ExperimentalComposeLibrary::class)
-fun Project.defaultBuildTemplateForRawMppLib() {
+fun Project.defaultBuildTemplateForRawMppLib(
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+) {
 
   if (settpose.withComposeTestUiJUnit5)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
@@ -169,7 +172,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           }
           if (settpose.withComposeMaterial2) implementation(compose.material)
           if (settpose.withComposeMaterial3) implementation(compose.material3)
-          // addCommonMainDependencies()
+          addCommonMainDependencies()
         }
       }
       commonTest {
@@ -183,6 +186,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           dependencies {
             if (settpose.withComposeUi) {
               implementation(compose.uiTooling)
+              implementation(compose.uiUtil)
               implementation(compose.preview)
             }
             if (settpose.withComposeMaterialIconsExtended) implementation(compose.materialIconsExtended)

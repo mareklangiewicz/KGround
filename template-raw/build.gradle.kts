@@ -44,6 +44,9 @@ defaultBuildTemplateForRootProject(
         withComposeHtmlCore = enableJs,
         withComposeHtmlSvg = enableJs,
         withComposeTestHtmlUtils = enableJs,
+        withComposeTestUi = true,
+        withComposeTestUiJUnit4 = true,
+        // withComposeTestUiJUnit5 = true, // What about this??
       ),
       andro = if (enableAndro) LibAndroSettings() else null,
     ),
