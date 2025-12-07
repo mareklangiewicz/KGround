@@ -1,20 +1,19 @@
 
 // region [[Raw MPP Lib Build Imports and Plugs]]
 
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
-import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
   plugAll(
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
-    plugs.AndroKmpNoVer,
     plugs.VannikPublish,
   )
 }
@@ -38,7 +37,7 @@ defaultBuildTemplateForRawMppLib()
 
 kotlin {
   sourceSets {
-    androidMain {
+    if (settings.withAndro) androidMain {
       dependencies {
         implementation(AndroidX.Core.ktx)
         implementation(AndroidX.Activity.activity)
@@ -125,6 +124,9 @@ fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPubli
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForRawMppLib() {
 
+  if (settings.withAndro) {
+    apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
+  }
   if (settpose.withComposeTestUiJUnit5)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
@@ -137,7 +139,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
     if (settings.withJvm) jvm()
     if (settings.withJs) jsDefault()
     if (settings.withLinuxX64) linuxX64()
-    if (settings.withAndro) androidLibrary {
+    if (settings.withAndro) extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
       val andro = settings.andro!!
       minSdk { version = release(andro.sdkMin) }
       compileSdk {
