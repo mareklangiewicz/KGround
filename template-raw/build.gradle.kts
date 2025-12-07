@@ -23,7 +23,8 @@ plugins {
 // endregion [[Full Root Build Imports and Plugs]]
 
 val enableJs = true
-val enableLinux = false
+val enableLinux = false // has to be false until JetBrains implements Compose UI for linuxX64..
+val enableCompose = true // has to be true at least for now (too keep template-raw logic simple)
 val enableAndro = true
 // Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
 // Use Android Studio or disable andro target temporarily (or compile only with CLI).
@@ -47,8 +48,8 @@ defaultBuildTemplateForRootProject(
         withComposeTestUi = true,
         withComposeTestUiJUnit4 = true,
         // withComposeTestUiJUnit5 = true, // What about this??
-      ),
-      andro = if (enableAndro) LibAndroSettings() else null,
+      ).takeIf { enableCompose },
+      andro = LibAndroSettings().takeIf { enableAndro },
     ),
   ),
 )

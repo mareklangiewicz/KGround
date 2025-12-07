@@ -21,16 +21,7 @@ plugins {
 
 // endregion [[Raw MPP Lib Build Imports and Plugs]]
 
-// TODO: ADD LATER:
-//  - enable js flag (main build.gradle.kts)
-//  - enable linuxX64 flag (same)
-//  - enable android and add configuration code (apply plugin conditionally?)
-//  - maybe compose could also be applied and configured conditionally here? (only if not too complex)
-//  - Tests
-//    - compose Tests (check JUnit5 current support? JUnit6??)
-//    - android Tests (both kinds)
-//
-// TODO: SOMEDAY:
+// TODO_someday_maybe:
 //  - move my logic to "convention plugin" and use "context parameters"
 //    - instead of file-global details, settings, settpose
 //      - BTW this plan avoids ever adding explicit parameters (that's why I use file-globals for now)
