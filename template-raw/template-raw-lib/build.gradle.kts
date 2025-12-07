@@ -205,6 +205,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           }
         }
         jvmTest {
+          kotlin.srcDir("src/commonUiTest/kotlin")
           dependencies {
             if (settings.withTestJUnit4) implementation(JUnit.junit)
             if (settpose.withComposeTestUi) implementation(compose.uiTest)
@@ -214,7 +215,6 @@ fun Project.defaultBuildTemplateForRawMppLib() {
               runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
             }
             if (settings.withTestUSpekX) {
-              implementation(Langiewicz.uspekx)
               if (settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
               if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
@@ -263,7 +263,6 @@ fun Project.defaultBuildTemplateForRawMppLib() {
               runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
             }
             if (settings.withTestUSpekX) {
-              implementation(Langiewicz.uspekx)
               if (settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
               if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
@@ -272,6 +271,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         // NOTE: The `val androidDeviceTest by getting {...} works differently than
         // `androidInstrumentedTest {...}` and it is needed for on device tests.
         val androidDeviceTest by getting {
+          kotlin.srcDir("src/commonUiTest/kotlin")
           dependencies {
             implementation(Kotlin.test) // by default device tests don't get common tests sourceSet (unlike host tests)
             if (settings.withTestJUnit4OnAndroidDevice) {
@@ -288,7 +288,6 @@ fun Project.defaultBuildTemplateForRawMppLib() {
               // runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
             }
             if (settings.withTestUSpekX) {
-              implementation(Langiewicz.uspekx)
               if (settings.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
               // else if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
@@ -308,11 +307,11 @@ fun Project.defaultBuildTemplateForRawMppLib() {
 // tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
 //   .configureEach { enabled = false }
 
-// compose.resources {
-//   // generateResClass = always
-//   generateResClass = never
-//
-// }
+compose.resources {
+  // generateResClass = always
+  generateResClass = never
+
+}
 
 fun KotlinMultiplatformExtension.jsDefault(
   withBrowser: Boolean = true,
