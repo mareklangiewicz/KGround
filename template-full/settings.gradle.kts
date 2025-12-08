@@ -50,5 +50,5 @@ develocity {
 rootProject.name = "template-full"
 
 include(":template-full-lib")
-include(":template-full-app")
-include(":template-full-jvm-cli-app")
+// include(":template-full-app")
+// include(":template-full-jvm-cli-app")
