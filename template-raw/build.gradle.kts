@@ -14,8 +14,14 @@ plugins {
   // TODO_later: Check again after compose update, because now default version fails with:
   // Cannot determine the version of Skiko for Compose '1.10.0-rc01'
 
-  plug(plugs.AndroKmp) apply false
-  plug(plugs.AndroApp) apply false
+  // Temporary fix for sync error:
+  // The project is using an incompatible version (AGP 9.0.0-beta04) of the Android Gradle plugin.
+  // Latest supported version is AGP 9.0.0-beta03
+  // plug(plugs.AndroKmp) apply false
+  // plug(plugs.AndroApp) apply false
+  id("com.android.kotlin.multiplatform.library") version "9.0.0-beta03" apply false
+  id("com.android.application") version "9.0.0-beta03" apply false
+
   plug(plugs.VannikPublish) apply false
 }
 

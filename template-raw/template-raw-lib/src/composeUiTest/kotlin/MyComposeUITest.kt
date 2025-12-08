@@ -6,17 +6,17 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class)
-class CommonUITest {
+class MyComposeUITest {
 
     @Test
     fun testHelloComposableRawInCommon() = runComposeUiTest {
         setContent {
-            HelloComposableRaw("Common UI")
+            HelloComposableRaw("Compose UI kinda common")
         }
 
         // Check that the greeting text exists and is displayed.
         // Using a substring match to ignore the dynamic rotation value.
-        onNodeWithText("Hello Common UI!", substring = true).assertExists()
+        onNodeWithText("Hello Compose UI", substring = true).assertExists()
         // onNodeWithText("Hello Common!", substring = true).assertIsEnabled()
     }
 }

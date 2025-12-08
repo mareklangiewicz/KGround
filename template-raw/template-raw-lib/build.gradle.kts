@@ -29,7 +29,6 @@ plugins {
 
 val details = gradle.extLibDetails
 val settings = details.settings
-val settpose = settings.compose ?: error("Compose settings not set.")
 
 defaultBuildTemplateForRawMppLib()
 // BTW I also removed addCommonMainDependencies lambda parameter, just add deps normally if needed.
@@ -127,7 +126,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
   if (settings.withAndro) {
     apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
   }
-  if (settpose.withComposeTestUiJUnit5)
+  if (settings.compose?.withComposeTestUiJUnit5 == true)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
   repositories { addRepos(settings.repos) }
@@ -141,11 +140,26 @@ fun Project.defaultBuildTemplateForRawMppLib() {
     if (settings.withJs) jsDefault()
     if (settings.withAndro) androDefault()
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
       commonMain {
         dependencies {
           if (settings.withKotlinxHtml) implementation(KotlinX.html)
-          implementation(compose.runtime)
+          if (settings.withCompose) implementation(compose.runtime)
+        }
+      }
+      commonTest {
+        dependencies {
+          implementation(Kotlin.test)
+          if (settings.withTestUSpekX) implementation(Langiewicz.uspekx)
+        }
+      }
+
+      val composeUiMain by creating {
+        dependsOn(commonMain.get())
+        dependencies {
+          val settpose = settings.compose ?: return@dependencies
           if (settpose.withComposeUi) {
             implementation(compose.ui)
             implementation(compose.components.resources)
@@ -159,15 +173,22 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           if (settpose.withComposeMaterial3) implementation(compose.material3)
         }
       }
-      commonTest {
+
+      val composeUiTest by creating {
+        // dependsOn(composeUiMain) looks like not it's not needed and it even generates warnings!
+          // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
+        dependsOn(commonTest.get())
         dependencies {
-          implementation(Kotlin.test)
-          if (settings.withTestUSpekX) implementation(Langiewicz.uspekx)
+          val settpose = settings.compose ?: return@dependencies
+          if (settpose.withComposeTestUi) implementation(compose.uiTest)
         }
       }
+
       if (settings.withJvm) {
         jvmMain {
+          dependsOn(composeUiMain)
           dependencies {
+            val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeUi) {
               implementation(compose.uiTooling)
               implementation(compose.uiUtil)
@@ -184,11 +205,9 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           }
         }
         jvmTest {
-          kotlin.srcDir("src/commonUiTest/kotlin")
+          dependsOn(composeUiTest)
           dependencies {
             if (settings.withTestJUnit4) implementation(JUnit.junit)
-            if (settpose.withComposeTestUi) implementation(compose.uiTest)
-            if (settpose.withComposeTestUiJUnit4) implementation(compose.desktop.uiTestJUnit4)
             if (settings.withTestJUnit5) {
               implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
               runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
@@ -199,18 +218,24 @@ fun Project.defaultBuildTemplateForRawMppLib() {
             }
             if (settings.withTestGoogleTruth) implementation(Com.Google.Truth.truth)
             if (settings.withTestMockitoKotlin) implementation(Org.Mockito.Kotlin.mockito_kotlin)
+
+            val settpose = settings.compose ?: return@dependencies
+            if (settpose.withComposeTestUiJUnit4) implementation(compose.desktop.uiTestJUnit4)
           }
         }
       }
+      // TODO NOW: webMain, jsMain and wasmJsMain (depends on composeUiMain)
       if (settings.withJs) {
         jsMain {
           dependencies {
+            val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeHtmlCore) implementation(compose.html.core)
             if (settpose.withComposeHtmlSvg) implementation(compose.html.svg)
           }
         }
         jsTest {
           dependencies {
+            val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeTestHtmlUtils) implementation(compose.html.testUtils)
           }
         }
@@ -221,11 +246,9 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       }
       if (settings.withAndro) {
         androidMain {
-          // TODO_maybe: some minimal default deps??
-
-          // FIXME: Is this needed?, maybe I should use jetbrains based artifacts here too?
-          // well, maybe preview is needed? will it work with the rest from jetbrains??
+          dependsOn(composeUiMain)
           dependencies {
+            val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeUi) {
               implementation(AndroidX.Compose.Ui.ui)
               implementation(AndroidX.Compose.Ui.util)
@@ -250,7 +273,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         // NOTE: The `val androidDeviceTest by getting {...} works differently than
         // `androidInstrumentedTest {...}` and it is needed for on device tests.
         val androidDeviceTest by getting {
-          kotlin.srcDir("src/commonUiTest/kotlin")
+          // dependsOn(composeUiTest) // FIXME: Invalid Source Set Dependency Across Trees
           dependencies {
             implementation(Kotlin.test) // by default device tests don't get common tests sourceSet (unlike host tests)
             if (settings.withTestJUnit4OnAndroidDevice) {
@@ -270,6 +293,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
               if (settings.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
               // else if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
+            val settpose = settings.compose ?: return@dependencies
             // FIXME: based on code added by Gemini, but maybe jetbrains based artifacts would work too?/better?
             if (settpose.withComposeTestUi) implementation(AndroidX.Compose.Ui.test)
             if (settpose.withComposeTestUiJUnit4) implementation(AndroidX.Compose.Ui.test_junit4)
@@ -298,7 +322,7 @@ fun KotlinMultiplatformExtension.jsDefault(
   testWithChrome: Boolean = true,
   testHeadless: Boolean = true,
 ) {
-  js(IR) {
+  js {
     if (withBrowser) browser {
       testTask {
         useKarma {
@@ -314,6 +338,7 @@ fun KotlinMultiplatformExtension.jsDefault(
 }
 
 fun KotlinMultiplatformExtension.androDefault() {
+  // Instead of androidLibrary {..} syntax because andro plugin is not always enabled (enableAndro in settings)
   extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
     val andro = settings.andro!!
     minSdk { version = release(andro.sdkMin) }
