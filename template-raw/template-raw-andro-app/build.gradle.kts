@@ -18,7 +18,7 @@ plugins {
 
 // endregion [[Andro App Build Imports and Plugs]]
 
-var details = rootExtLibDetails
+var details = gradle.extLibDetails
 val settings = details.settings.copy(compose = null)
 details = details.copy(settings = settings, namespace = "pl.mareklangiewicz.templateraw.androapp")
 

@@ -1,5 +1,5 @@
 
-// region [[Raw MPP Lib Build Imports and Plugs]]
+// region [[KMP Lib Build Imports and Plugs]]
 
 import org.jetbrains.compose.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -18,7 +18,7 @@ plugins {
   )
 }
 
-// endregion [[Raw MPP Lib Build Imports and Plugs]]
+// endregion [[KMP Lib Build Imports and Plugs]]
 
 // TODO_someday_maybe:
 //  - move my logic to "convention plugin" and use "context parameters"
@@ -27,7 +27,7 @@ plugins {
 //      - BTW I also avoid adding flags like ignoreCompose, ignoreAndroTarget, etc (from old templates)
 //        - just copy/modify these globals before executing defaultBuildTemplate...
 
-val details = rootExtLibDetails
+val details = gradle.extLibDetails
 val settings = details.settings
 val settpose = settings.compose ?: error("Compose settings not set.")
 
@@ -137,23 +137,9 @@ fun Project.defaultBuildTemplateForRawMppLib() {
     defaultCompiler(jvmVer = settings.withJvmVer?.toInt())
 
     if (settings.withJvm) jvm()
-    if (settings.withJs) jsDefault()
     if (settings.withLinuxX64) linuxX64()
-    if (settings.withAndro) extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
-      val andro = settings.andro!!
-      minSdk { version = release(andro.sdkMin) }
-      compileSdk {
-        version = andro.sdkCompilePreview?.let { preview(it) } ?: release(andro.sdkCompile)
-      }
-      namespace = details.namespace
-      withHostTest {
-        // isIncludeAndroidResources = true
-        // isReturnDefaultValues = true
-      }
-      withDeviceTest {
-        instrumentationRunner = andro.withTestRunner
-      }
-    }
+    if (settings.withJs) jsDefault()
+    if (settings.withAndro) androDefault()
 
     sourceSets {
       commonMain {
@@ -324,6 +310,24 @@ fun KotlinMultiplatformExtension.jsDefault(
       }
     }
     if (withNode) nodejs()
+  }
+}
+
+fun KotlinMultiplatformExtension.androDefault() {
+  extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
+    val andro = settings.andro!!
+    minSdk { version = release(andro.sdkMin) }
+    compileSdk {
+      version = andro.sdkCompilePreview?.let { preview(it) } ?: release(andro.sdkCompile)
+    }
+    namespace = details.namespace
+    withHostTest {
+      // isIncludeAndroidResources = true
+      // isReturnDefaultValues = true
+    }
+    withDeviceTest {
+      instrumentationRunner = andro.withTestRunner
+    }
   }
 }
 

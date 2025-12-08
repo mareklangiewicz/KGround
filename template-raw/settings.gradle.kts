@@ -1,13 +1,55 @@
 @file:Suppress("UnstableApiUsage")
 
+import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.extLibDetails
+
+rootProject.name = "template-raw"
+
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
-// Careful with auto publishing fails/stack traces
-val buildScanPublishingAllowed = true &&
-  System.getenv("GITHUB_ACTIONS") == "true" &&
-  // System.getenv("GITHUB_ACTIONS") != "true" &&
-  true
-// false
+// WARNING: Careful with auto publishing fails/stack traces (also on github after each push or sth)
+val isCI = System.getenv("GITHUB_ACTIONS") == "true"
+val allowBuildScanPublish = isCI
+// val allowBuildScanPublish = !isCI
+// val allowBuildScanPublish = false
+
+val enableJs = true
+val enableLinux = false // has to be false until JetBrains implements Compose UI for linuxX64..
+val enableCompose = true // has to be true at least for now (too keep template-raw logic simple)
+val enableAndro = true
+// Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
+// Use Android Studio or disable andro target temporarily (or compile only with CLI).
+
+gradle.extLibDetails = myLibDetails(
+  name = "TemplateRaw",
+  description = "Raw template for multi platform projects.",
+  githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-raw",
+  version = Ver(0, 0, 35),
+  settings = LibSettings(
+    withJs = enableJs,
+    withLinuxX64 = enableLinux,
+    withKotlinxHtml = true, // also used in common code
+    withTestJUnit5 = true,
+    withTestJUnit4OnAndroidDevice = true,
+    compose = LibComposeSettings(
+      withComposeHtmlCore = enableJs,
+      withComposeHtmlSvg = enableJs,
+      withComposeTestHtmlUtils = enableJs,
+      withComposeTestUi = true,
+      withComposeTestUiJUnit4 = true,
+      // withComposeTestUiJUnit5 = true, // What about this??
+    ).takeIf { enableCompose },
+    andro = LibAndroSettings().takeIf { enableAndro },
+  ),
+)
+
+
+include(":template-raw-lib")
+include(":template-raw-app")
+
+// include(":template-raw-jvm-cli-app")
+
+include(":template-raw-andro-app")
 
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
@@ -41,17 +83,8 @@ develocity {
   buildScan {
     termsOfUseUrl = "https://gradle.com/terms-of-service"
     termsOfUseAgree = "yes"
-    publishing.onlyIf { buildScanPublishingAllowed && it.buildResult.failures.isNotEmpty() }
+    publishing.onlyIf { allowBuildScanPublish && it.buildResult.failures.isNotEmpty() }
   }
 }
 
 // endregion [[My Settings Stuff]]
-
-rootProject.name = "template-raw"
-
-include(":template-raw-lib")
-include(":template-raw-app")
-
-// include(":template-raw-jvm-cli-app")
-
-include(":template-raw-andro-app")

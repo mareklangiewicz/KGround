@@ -1,9 +1,8 @@
 
-// region [[Full Root Build Imports and Plugs]]
+// region [[KMP Root Build Template]]
 
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.deps.*
 
 plugins {
   plug(plugs.KotlinMulti) apply false
@@ -20,49 +19,8 @@ plugins {
   plug(plugs.VannikPublish) apply false
 }
 
-// endregion [[Full Root Build Imports and Plugs]]
+val details = gradle.extLibDetails
 
-val enableJs = true
-val enableLinux = false // has to be false until JetBrains implements Compose UI for linuxX64..
-val enableCompose = true // has to be true at least for now (too keep template-raw logic simple)
-val enableAndro = true
-// Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
-// Use Android Studio or disable andro target temporarily (or compile only with CLI).
+defaultGroupAndVerAndDescription(details)
 
-defaultBuildTemplateForRootProject(
-  myLibDetails(
-    name = "TemplateRaw",
-    description = "Raw template for multi platform projects.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-raw",
-    version = Ver(0, 0, 35),
-    settings = LibSettings(
-      withJs = enableJs,
-      withLinuxX64 = enableLinux,
-      withKotlinxHtml = true, // also used in common code
-      withTestJUnit5 = true,
-      withTestJUnit4OnAndroidDevice = true,
-      compose = LibComposeSettings(
-        withComposeHtmlCore = enableJs,
-        withComposeHtmlSvg = enableJs,
-        withComposeTestHtmlUtils = enableJs,
-        withComposeTestUi = true,
-        withComposeTestUiJUnit4 = true,
-        // withComposeTestUiJUnit5 = true, // What about this??
-      ).takeIf { enableCompose },
-      andro = LibAndroSettings().takeIf { enableAndro },
-    ),
-  ),
-)
-
-
-
-// region [[Root Build Template]]
-
-fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
-  details?.let {
-    rootExtLibDetails = it
-    defaultGroupAndVerAndDescription(it)
-  }
-}
-
-// endregion [[Root Build Template]]
+// endregion [[KMP Root Build Template]]

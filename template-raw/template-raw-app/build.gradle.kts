@@ -21,7 +21,7 @@ plugins {
 // endregion [[Full MPP App Build Imports and Plugs]]
 
 
-defaultBuildTemplateForFullMppApp {
+defaultBuildTemplateForFullMppApp(gradle.extLibDetails) {
   implementation(project(":template-raw-lib"))
 }
 
@@ -476,5 +476,3 @@ fun Project.defaultBuildTemplateForComposeMppApp(
 }
 
 // endregion [[Compose MPP App Build Template]]
-
-
