@@ -146,7 +146,6 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       commonMain {
         dependencies {
           if (settings.withKotlinxHtml) implementation(KotlinX.html)
-          if (settings.withCompose) implementation(compose.runtime)
         }
       }
       commonTest {
@@ -156,8 +155,25 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         }
       }
 
-      val composeUiMain by creating {
+      val composeMain by creating {
         dependsOn(commonMain.get())
+        dependencies {
+          if (settings.withCompose) implementation(compose.runtime)
+        }
+      }
+
+      val composeTest by creating {
+        // dependsOn(composeMain) check if it's not needed and it even generates warnings!
+        // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
+        dependsOn(commonTest.get())
+        dependencies {
+          val settpose = settings.compose ?: return@dependencies
+          // TODO_later anything here? any compose testing util not related to compose ui?
+        }
+      }
+
+      val composeUiMain by creating {
+        dependsOn(composeMain)
         dependencies {
           val settpose = settings.compose ?: return@dependencies
           if (settpose.withComposeUi) {
@@ -177,7 +193,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       val composeUiTest by creating {
         // dependsOn(composeUiMain) looks like not it's not needed and it even generates warnings!
           // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
-        dependsOn(commonTest.get())
+        dependsOn(composeTest)
         dependencies {
           val settpose = settings.compose ?: return@dependencies
           if (settpose.withComposeTestUi) implementation(compose.uiTest)
@@ -307,8 +323,9 @@ fun Project.defaultBuildTemplateForRawMppLib() {
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
-// tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
-//   .configureEach { enabled = false }
+
+tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
+  .configureEach { enabled = false }
 
 compose.resources {
   // generateResClass = always

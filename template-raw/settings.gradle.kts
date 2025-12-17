@@ -13,6 +13,10 @@ val allowBuildScanPublish = isCI
 // val allowBuildScanPublish = !isCI
 // val allowBuildScanPublish = false
 
+val enableMppApp = true
+val enableJvmCliApp = false
+val enableAndroApp = true
+
 val enableJs = true
 val enableLinux = false // has to be false until JetBrains implements Compose UI for linuxX64..
 val enableCompose = true // has to be true at least for now (too keep template-raw logic simple)
@@ -40,16 +44,19 @@ gradle.extLibDetails = myLibDetails(
       // withComposeTestUiJUnit5 = true, // What about this??
     ).takeIf { enableCompose },
     andro = LibAndroSettings().takeIf { enableAndro },
+    repos = LibReposSettings(
+      withComposeJbDev = true,
+        // TODO: remove after update when new stable compose is published.
+        //   BTW it's very slow, use gradle offline mode after syncing to run tasks faster
+    ),
   ),
 )
 
 
 include(":template-raw-lib")
-include(":template-raw-app")
-
-// include(":template-raw-jvm-cli-app")
-
-include(":template-raw-andro-app")
+if (enableMppApp) include(":template-raw-app")
+if (enableJvmCliApp) include(":template-raw-jvm-cli-app")
+if (enableAndroApp) include(":template-raw-andro-app")
 
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
