@@ -25,6 +25,8 @@ import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
 
+fun main(args: Array<String>) = kgroundx(args)
+
 /**
  * Experimenting directly in kotlin notebooks would be ideal, but the IDE support it's still not great...
  * So this fun (called from main fun) allows invoking any code pointed by reference or clipboard (containing reference)
@@ -34,8 +36,6 @@ import pl.mareklangiewicz.ulog.localULog
  * pl.mareklangiewicz.kommand.app.Playground#play
  * So this way we have the IDE support, and later we can C&P working code snippets into notebooks or whateva.
  */
-fun main(args: Array<String>) = kgroundx(args)
-
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
 fun kgroundx(args: Array<String>) = KGroundXCommand().main(args)

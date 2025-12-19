@@ -116,4 +116,3 @@ fun writeFileAndStartInGVim(inLines: List<String>, vararg useNamedArgs: Unit, fi
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 fun writeFileAndStartInGVim(inContent: String, vararg useNamedArgs: Unit, filePath: Path? = null) =
   writeFileAndStartInGVim(listOf(inContent), filePath = filePath)
-

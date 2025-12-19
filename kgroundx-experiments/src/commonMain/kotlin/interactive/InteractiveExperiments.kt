@@ -28,6 +28,7 @@ suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
   log.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
     xclipOut(XClipSelection.Clipboard).ax().singleOrNull()
+      ?: kommand("wl-paste").ax().singleOrNull()
       ?: bad { "Clipboard has to have code reference in single line." }
   else reference
   val ure = ure {

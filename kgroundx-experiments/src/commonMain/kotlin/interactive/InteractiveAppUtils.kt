@@ -30,7 +30,8 @@ suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
   tryInteractivelyOpenLogCache()
 }
 
-@OptIn(DelicateApi::class, ExperimentalApi::class) suspend fun tryInteractivelyOpenLogCache() {
+@OptIn(DelicateApi::class, ExperimentalApi::class)
+suspend fun tryInteractivelyOpenLogCache() {
   val lines = localULogAsOrNull<UHackySharedFlowLog>()?.flow?.replayCache ?: return
   val fs = localUFileSys()
   val submit = localUSubmit()
