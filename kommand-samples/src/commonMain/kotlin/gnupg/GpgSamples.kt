@@ -13,7 +13,7 @@ data object GpgSamples {
 
   val testGpgListKeys = gpg(ListPublicKeys) s "gpg --list-public-keys"
 
-  val testGpgListKeysVerbose = gpg(ListPublicKeys) { -Verbose } s "gpg --list-public-keys --verbosee"
+  val testGpgListKeysVerbose = gpg(ListPublicKeys) { -Verbose } s "gpg --list-public-keys --verbose"
 
   val testGpgListSecretKeysVerbose = gpg(ListSecretKeys) { -Verbose } s "gpg --list-secret-keys --verbose"
 }
