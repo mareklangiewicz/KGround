@@ -41,8 +41,8 @@ data object Samples {
   val VimBasic = pl.mareklangiewicz.kommand.vim.VimBasicSamples
   val VimAdvanced = pl.mareklangiewicz.kommand.vim.VimAdvancedSamples
   val Debian = pl.mareklangiewicz.kommand.debian.DebianSamples
+  val Gpg = pl.mareklangiewicz.kommand.gnupg.GpgSamples
   val Git = pl.mareklangiewicz.kommand.git.GitSamples
   val GitHub = pl.mareklangiewicz.kommand.github.GhSamples
   val Gnome = pl.mareklangiewicz.kommand.gnome.GnomeSamples
 }
-

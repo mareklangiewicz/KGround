@@ -1,35 +1,15 @@
 package pl.mareklangiewicz.kommand.gnupg
 
 import kotlin.test.*
-import kotlin.test.Test
-import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.NotPortableApi
-import pl.mareklangiewicz.interactive.runBlockingWithCLIAndULogOnJvmOnly
-import pl.mareklangiewicz.interactive.tryInteractivelyCheckBlockingOrErr
-import pl.mareklangiewicz.kground.io.P
+import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.interactive.*
+import pl.mareklangiewicz.kground.io.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.*
-import pl.mareklangiewicz.kommand.gnupg.GpgCmd.*
-import pl.mareklangiewicz.kommand.gnupg.GpgOpt.*
-import pl.mareklangiewicz.udata.strf
+import pl.mareklangiewicz.udata.*
 
-
-// FIXME NOW: refactor as samples
-
-@OptIn(DelicateApi::class, NotPortableApi::class)
+@OptIn(DelicateApi::class)
 class GpgTest {
-  @Test fun testGpgHelp() = gpg { -Help }
-    .tryInteractivelyCheckBlockingOrErr("gpg --help")
-
-  @Test fun testGpgListKeys() = gpg(ListPublicKeys)
-    .tryInteractivelyCheckBlockingOrErr("gpg --list-public-keys")
-
-  @Test fun testGpgListKeysVerbose() = gpg(ListPublicKeys) { -Verbose }
-    .tryInteractivelyCheckBlockingOrErr("gpg --list-public-keys --verbose")
-
-  @Test fun testGpgListSecretKeysVerbose() = gpg(ListSecretKeys) { -Verbose }
-    .tryInteractivelyCheckBlockingOrErr("gpg --list-secret-keys --verbose")
-
   @Suppress("DEPRECATION")
   @Test fun testGpgEncryptDecrypt() {
     runBlockingWithCLIAndULogOnJvmOnly {
