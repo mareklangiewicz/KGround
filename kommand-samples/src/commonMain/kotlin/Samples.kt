@@ -45,4 +45,5 @@ data object Samples {
   val Git = pl.mareklangiewicz.kommand.git.GitSamples
   val GitHub = pl.mareklangiewicz.kommand.github.GhSamples
   val Gnome = pl.mareklangiewicz.kommand.gnome.GnomeSamples
+  val DBus = pl.mareklangiewicz.kommand.dbus.DBusSamples
 }
