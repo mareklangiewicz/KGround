@@ -6,6 +6,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
+import pl.mareklangiewicz.kommand.gnome.GnomeExt.Cmd
 import pl.mareklangiewicz.kommand.samples.*
 import pl.mareklangiewicz.kommand.systemd.*
 import pl.mareklangiewicz.kommand.term.*
@@ -61,4 +62,16 @@ data object GnomeSamples {
     -NotifySend.Option.Urgency("critical")
   } s "notify-send --urgency=critical aa some longer body"
 
+
+  val gnomeExtList = gnomeext(Cmd.List) s "gnome-extensions list"
+
+  val gnomeExtListDisabled = gnomeext(Cmd.List) { -GnomeExt.Option.Disabled } s "gnome-extensions list --disabled"
+
+  val gnomeExtPrefs = gnomeext(Cmd.Prefs("mygnomeext@mareklangiewicz.pl")) s "gnome-extensions prefs mygnomeext@mareklangiewicz.pl"
+
+  val gnomeExtEnable = gnomeext(Cmd.Enable("mygnomeext@mareklangiewicz.pl")) s "gnome-extensions enable mygnomeext@mareklangiewicz.pl"
+
+  val gnomeExtDisable = gnomeext(Cmd.Disable("mygnomeext@mareklangiewicz.pl")) s "gnome-extensions disable mygnomeext@mareklangiewicz.pl"
+
+  val gnomeExtCreateInteractive = gnomeext(Cmd.Create) { -GnomeExt.Option.Interactive } s "gnome-extensions create --interactive"
 }
