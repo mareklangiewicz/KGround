@@ -44,8 +44,10 @@ data class Echo(
 interface EchoOpt : KOptTypical {
   data object NoNewLine : KOptS("n"), EchoOpt
   data class Escapes(val enable: Boolean = false) : KOptS(if (enable) "e" else "E"), EchoOpt
-  @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")
+
+  // Keeping these two below mostly as documentation showing that echo is a bit unusual command/builtin.
+  @Deprecated("Usually will NOT work f.e. if shell builtin echo is used instead of actual /usr/bin/echo")
   data object Help : KOptLN(), EchoOpt // Don't risk short -h (ambiguity: sudo -h host; ls -h (human-readable), etc.)
-  @SecondaryApi("May not work if shell builtin echo is used instead of actual /usr/bin/echo")
+  @Deprecated("Usually will NOT work f.e. if shell builtin echo is used instead of actual /usr/bin/echo")
   data object Version : KOptLN(), EchoOpt // Don't risk short -v (ambiguity with "verbose" for many commands)
 }
