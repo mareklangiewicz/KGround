@@ -1,19 +1,18 @@
 package pl.mareklangiewicz.kommand.gnome
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
-import pl.mareklangiewicz.kground.onEachLog
-import pl.mareklangiewicz.kommand.ReducedScript
-import pl.mareklangiewicz.kommand.ax
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.kground.*
+import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.gnome.GnomeApp.Cmd.*
-import pl.mareklangiewicz.kommand.reducedOutToFlow
 import pl.mareklangiewicz.kommand.samples.*
-import pl.mareklangiewicz.ulog.i
-import pl.mareklangiewicz.ulog.localULog
+import pl.mareklangiewicz.kommand.systemd.*
+import pl.mareklangiewicz.kommand.term.*
+import pl.mareklangiewicz.kommand.vim.*
+import pl.mareklangiewicz.ulog.*
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, DelicateApi::class)
 data object GnomeSamples {
 
   val help = gnomeapp(Help()) s "gapplication help"
@@ -42,4 +41,24 @@ data object GnomeSamples {
       consoleNewTab.ax()
     }
   }
+
+
+  val journalCtlFollowGnomeShell = journalctl {
+    -JournalCtl.Option.Follow
+    -JournalCtl.Option.Cat
+    +"/usr/bin/gnome-shell"
+  } s "journalctl -f -ocat /usr/bin/gnome-shell"
+
+  val termGnomeVim = termGnome(vim()) {
+    -TermGnomeOpt.Verbose
+    -TermGnomeOpt.Title("strange terminal title")
+  } s "gnome-terminal --verbose --title=strange terminal title -- vim"
+
+  // FIXME_later
+  // val testGLibCompileSchemas = kommand("glib-compile-schemas", "schemas/") s "glib-compile-schemas schemas/", "/home/marek/code/kotlin/kokpit667/mygnomeext".P
+
+  val notifySomeCriticalStuff = notify("aa", "some longer body") {
+    -NotifySend.Option.Urgency("critical")
+  } s "notify-send --urgency=critical aa some longer body"
+
 }

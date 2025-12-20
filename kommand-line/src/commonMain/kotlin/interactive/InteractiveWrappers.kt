@@ -77,6 +77,7 @@ suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null) {
 
 @NotPortableApi
 @DelicateApi
+@Deprecated("Better to use Samples with InteractiveScript s")
 fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null) {
   runBlockingWithCLIAndULogOnJvmOnly {
     tryInteractivelyCheck(expectedLineRaw)
