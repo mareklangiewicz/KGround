@@ -23,13 +23,11 @@ import pl.mareklangiewicz.usubmit.xd.*
  */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
+suspend fun tryInteractivelySomethingRef(reference: String) {
   val log = localULog()
   log.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
-    xclipOut(XClipSelection.Clipboard).ax().singleOrNull()
-      ?: kommand("wl-paste").ax().singleOrNull()
-      ?: bad { "Clipboard has to have code reference in single line." }
+    clipOut().ax().singleOrNull() ?: bad { "Clipboard has to have code reference in single line." }
   else reference
   val ure = ure {
     +ure("className") {
@@ -40,7 +38,7 @@ suspend fun tryInteractivelySomethingRef(reference: String = "xclip") {
     +ch('#')
     +ureIdent().withName("methodName")
   }
-  val result = ure.matchEntireOrThrow(ref)
+  val result = ure.matchEntireOrNull(ref) ?: bad { "This ref doesn't match method reference pattern" }
   val className by result.namedValues
   val methodName by result.namedValues
   tryInteractivelyClassMember(className!!, methodName!!)

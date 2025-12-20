@@ -1,7 +1,7 @@
 package pl.mareklangiewicz.kommand
 
 import pl.mareklangiewicz.kground.*
-import pl.mareklangiewicz.udata.MutLO
+import pl.mareklangiewicz.udata.*
 
 fun xdgopen(file: String, init: XdgOpen.() -> Unit = {}) = XdgOpen(file).apply(init)
 
