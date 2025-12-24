@@ -74,6 +74,10 @@ internal fun runBlockingWithCLIAndULogOnJvmOnly(
 }
 
 
+/**
+ * If interactive then generated script runs the kommand, but only after user confirmation to run specific kommand line.
+ * If NOT interactive then script just logs warning instead (about code.interactive disabled or unsupported platform)
+ */
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 fun Kommand.toInteractiveScript(expectedLineRaw: String? = null): ReducedScript<Unit> =
   InteractiveScript {
