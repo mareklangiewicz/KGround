@@ -17,6 +17,7 @@ import pl.mareklangiewicz.usubmit.xd.*
 
 val isJvm: Boolean = getSysPlatformType()?.startsWith("JVM") == true
 
+/** If not it also logs appropriate warning (about code.interactive disabled or unsupported platform) */
 @DelicateApi("API for manual interactive experimentation.")
 suspend fun isInteractiveCodeEnabled(): Boolean {
   val cli = localCLI()
@@ -28,14 +29,9 @@ suspend fun isInteractiveCodeEnabled(): Boolean {
   }
 }
 
+/** If not it just logs appropriate warning (about code.interactive disabled or unsupported platform) */
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 suspend inline fun ifInteractiveCodeEnabled(code: suspend () -> Unit) {
-  if (isInteractiveCodeEnabled()) code()
-}
-
-@NotPortableApi
-@DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
-fun ifInteractiveCodeEnabledBlockingOrErr(code: suspend () -> Unit) = runBlockingWithCLIAndULogOnJvmOnly {
   if (isInteractiveCodeEnabled()) code()
 }
 
@@ -61,28 +57,11 @@ suspend fun Kommand.axInteractiveTry(
 }
 
 
+/** If not interactive then just log warning instead (about code.interactive disabled or unsupported platform) */
 @Suppress("FunctionName")
 @DelicateApi("API for manual interactive experimentation. Can ignore all code leaving only some logs.")
 inline fun <ReducedOut> InteractiveScript(crossinline ax: suspend () -> ReducedOut): ReducedScript<Unit> =
   ReducedScript { ifInteractiveCodeEnabled { ax() } }
-
-// FIXME NOW: I want more InteractiveScripts in Samples instead of "tests" with weird logic when to skip them
-//   rethink this
-@DelicateApi("API for manual interactive experimentation. Conditionally skips.")
-@Deprecated("Better to use Samples with InteractiveScript s")
-suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null) {
-  if (isJvm) toInteractiveCheck(expectedLineRaw).ax()
-  // ifology just to avoid NotImplementedError on nonjvm. this extension fun will be deleted anyway (execb too)
-}
-
-@NotPortableApi
-@DelicateApi
-@Deprecated("Better to use Samples with InteractiveScript s")
-fun Kommand.tryInteractivelyCheckBlockingOrErr(expectedLineRaw: String? = null) {
-  runBlockingWithCLIAndULogOnJvmOnly {
-    tryInteractivelyCheck(expectedLineRaw)
-  }
-}
 
 @OptIn(DelicateApi::class, NotPortableApi::class)
 internal fun runBlockingWithCLIAndULogOnJvmOnly(
@@ -96,7 +75,7 @@ internal fun runBlockingWithCLIAndULogOnJvmOnly(
 
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-fun Kommand.toInteractiveCheck(expectedLineRaw: String? = null): ReducedScript<Unit> =
+fun Kommand.toInteractiveScript(expectedLineRaw: String? = null): ReducedScript<Unit> =
   InteractiveScript {
     localULog().i(lineRaw())
     if (expectedLineRaw != null) lineRaw() chkEq expectedLineRaw

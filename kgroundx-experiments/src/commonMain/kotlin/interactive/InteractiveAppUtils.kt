@@ -14,7 +14,9 @@ import pl.mareklangiewicz.usubmit.xd.*
 
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Careful because it an easily call ANY code with reflection.")
-@ExperimentalApi("Will be removed someday. Temporary solution for running some code parts fast. Like examples/samples.")
+@ExperimentalApi("Fast solution for running some code parts. Like examples/samples.")
+// BTW Maybe better final solution could be more like compose based browser/picker for classes/methods to run?
+//   Not only graphical but also automatically TUI (UWidgets/mordant) and automatically some plain CLI too.
 suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
   val log = localULog()
   try {

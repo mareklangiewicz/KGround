@@ -67,7 +67,7 @@ suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 suspend fun Any?.tryInteractivelyAnything() = when (this) {
   is Sample -> tryInteractivelyCheckSample()
-  is Kommand -> toInteractiveCheck().ax()
+  is Kommand -> tryInteractivelyCheck()
   is ReducedSample<*> -> tryInteractivelyCheckReducedSample() // Note: ReducedSample is also ReducedScript
   is ReducedScript<*> -> tryInteractivelyCheckReducedScript()
   else -> tryOpenDataInIDEOrGVim()
@@ -75,8 +75,12 @@ suspend fun Any?.tryInteractivelyAnything() = when (this) {
 
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-suspend fun Sample.tryInteractivelyCheckSample() =
-  kommand.toInteractiveCheck(expectedLineRaw).ax()
+suspend fun Sample.tryInteractivelyCheckSample() = kommand.tryInteractivelyCheck(expectedLineRaw)
+// BTW name suffix because conflict: Sample is also Kommand
+
+@DelicateApi("API for manual interactive experimentation. Conditionally skips.")
+suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null) = toInteractiveScript(expectedLineRaw).ax()
+
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample() {
