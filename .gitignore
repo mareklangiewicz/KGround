@@ -10,11 +10,10 @@
 /kgroundx-io/build
 /kgroundx-maintenance/build
 /kgroundx-experiments/build
+/kgroundx-experiments/src/jvmMain/kotlin/gitignored
 /kgroundx-workflows/build
 /kgroundx-jupyter/build
-/kgroundx-jupyter/src/jvmMain/kotlin/gitignored
 /kgroundx-app/build
-/kgroundx-app/src/main/kotlin/gitignored
 /kommand-line/build
 /kommand-samples/build
 /kommand-samples/src/test/kotlin/demos/*REPL.kt

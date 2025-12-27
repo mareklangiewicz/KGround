@@ -189,4 +189,3 @@ private fun grepQuietly(regexp: String, vararg files: Path) =
 @OptIn(DelicateApi::class)
 private fun grepWithDetails(regexp: String, vararg files: Path) =
   kommand("grep", "-H", "-n", "-T", "-e", regexp, *files.map { it.strf }.toA)
-

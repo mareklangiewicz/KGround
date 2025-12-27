@@ -9,6 +9,7 @@ import pl.mareklangiewicz.udata.strf
 import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.ide.ideOrGVimOpen
 import pl.mareklangiewicz.kommand.samples.*
+import pl.mareklangiewicz.udata.LO
 import pl.mareklangiewicz.udata.strfon
 import pl.mareklangiewicz.ulog.*
 import pl.mareklangiewicz.ure.*
@@ -18,8 +19,14 @@ import pl.mareklangiewicz.usubmit.xd.*
 
 
 /**
- * @param reference Either "xclip", or reference in format like from IntelliJ:CopyReference action.
- *   For example, "pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop"
+ * @param reference Either "xclip",
+ * or reference in format like from IntelliJ:CopyReference action,
+ * for example, "pl.mareklangiewicz.kommand.demo.MyDemoSamples#getBtop",
+ * or short format without class, like someMember,
+ * (will try to match with a few known classes/objects),
+ * but it always tries to run at most one (first) found code.
+ * BTW also works for kotlin global functions/properties where class is synthetic "file facade",
+ * f.e. "pl.mareklangiewicz.kommand.find.FindSamplesKt#getMyAbcdKPath"
  */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
@@ -29,6 +36,24 @@ suspend fun tryInteractivelySomethingRef(reference: String) {
   val ref = if (reference == "xclip")
     clipOut().ax().singleOrNull() ?: bad { "Clipboard has to have code reference in single line." }
   else reference
+  var (className, methodName) = parseSomethingRef(ref)
+  // BTW We will try to call only the first actually found code (className#methodName)
+  if (className.isEmpty()) className = LO(
+    "pl.mareklangiewicz.kgroundx.maintenance.MyBasicExamples",
+    "pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples",
+    "pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples",
+    "pl.mareklangiewicz.kgroundx.maintenance.MyWeirdExamples",
+    "pl.mareklangiewicz.kgroundx.experiments.MyExperiments",
+    "pl.mareklangiewicz.kgroundx.experiments.MyGitIgnored",
+    // "pl.mareklangiewicz.kommand.demo.MyDemoSamples",
+    // BTW not adding any different kommand samples, etc., user can use full "path" format for all that.
+  ).firstOrNull { getReflectCallOrNull(it, methodName) != null }.reqNN { "The $methodName not found in any known class." }
+  tryInteractivelyClassMember(className, methodName)
+}
+
+@NotPortableApi
+private fun parseSomethingRef(ref: String): Pair<String, String> {
+  if (ureIdent().matchEntireOrNull(ref) != null) return "" to ref // just methodName (empty class name)
   val ure = ure {
     +ure("className") {
       +chWordFirst
@@ -41,18 +66,21 @@ suspend fun tryInteractivelySomethingRef(reference: String) {
   val result = ure.matchEntireOrNull(ref) ?: bad { "This ref doesn't match method reference pattern" }
   val className by result.namedValues
   val methodName by result.namedValues
-  tryInteractivelyClassMember(className!!, methodName!!)
+  return className!! to methodName!!
 }
 
+/**
+ * BTW also works for kotlin global functions where className is synthetic "file facade" class,
+ * f.e. "pl.mareklangiewicz.kommand.find.FindSamplesKt"
+ */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
   val log = localULog()
   log.i("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
   val call = getReflectCallOrNull(className, memberName) ?: return
-  // Note: prepareCallFor fails early if member not found,
-  // before we start to interact with the user,
-  // but the code is never called without confirmation.
+  // BTW it returns early if member not found, before we start to interact with the user,
+  // but the invariant holds: the actual code is never run without user confirmation.
   ifInteractiveCodeEnabled {
     val submit = localUSubmit()
     submit.askIf("Call member $memberName\nfrom class $className?") || return

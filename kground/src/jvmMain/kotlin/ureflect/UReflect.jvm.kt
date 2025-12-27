@@ -20,10 +20,10 @@ actual fun getReflectCallOrNull(className: String, memberName: String): (suspend
   val objectOrNull: Any? = kClass.objectInstance
   val kMember: KCallable<*>? = kClass.members.firstOrNull { it.name == memberName }
   when {
-    kMember == null -> {
+    kMember == null -> try {
       val jMethod: Method = kClass.java.getDeclaredMethod(memberName)
       return { jMethod.invoke((objectOrNull)) }
-    }
+    } catch (_: NoSuchMethodException) { return null }
     kMember.isSuspend -> return { kMember.callSuspend(objectOrNull) }
     else -> return { kMember.call(objectOrNull) }
   }
@@ -42,4 +42,3 @@ actual fun <T : Any> T.getReflectNamedPropsValues(): List<Pair<String, Any?>> {
 @NotPortableApi("Only JVM supported; empty list will be returned on other platforms")
 actual fun <T : Any> T.getReflectSomeMemberFunctions(except: Set<String>): List<KFunction<*>> =
   (this::class as KClass<T>).declaredMemberFunctions.filter { it.name !in except }
-
