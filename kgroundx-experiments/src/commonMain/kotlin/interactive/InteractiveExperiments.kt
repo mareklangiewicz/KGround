@@ -30,7 +30,17 @@ import pl.mareklangiewicz.usubmit.xd.*
  */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-suspend fun tryInteractivelySomethingRef(reference: String) {
+suspend fun tryInteractivelySomethingRef(reference: String, defaultClasses: List<String> = LO(
+  "pl.mareklangiewicz.kgroundx.maintenance.MyBasicExamples",
+  "pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples",
+  "pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples",
+  "pl.mareklangiewicz.kgroundx.maintenance.MyWeirdExamples",
+  "pl.mareklangiewicz.kgroundx.workflows.MyWorkflowsExamples",
+  "pl.mareklangiewicz.kgroundx.experiments.MyExperiments",
+  "pl.mareklangiewicz.kgroundx.experiments.MyGitIgnored",
+  // "pl.mareklangiewicz.kommand.demo.MyDemoSamples",
+  // BTW not adding any different kommand samples, etc., user can use full "path" format for all that.
+)) {
   val log = localULog()
   log.i("tryInteractivelySomethingRef(\"$reference\")")
   val ref = if (reference == "xclip")
@@ -38,17 +48,9 @@ suspend fun tryInteractivelySomethingRef(reference: String) {
   else reference
   var (className, methodName) = parseSomethingRef(ref)
   // BTW We will try to call only the first actually found code (className#methodName)
-  if (className.isEmpty()) className = LO(
-    "pl.mareklangiewicz.kgroundx.maintenance.MyBasicExamples",
-    "pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples",
-    "pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples",
-    "pl.mareklangiewicz.kgroundx.maintenance.MyWeirdExamples",
-    "pl.mareklangiewicz.kgroundx.workflows.MyWorkflowsExamples",
-    "pl.mareklangiewicz.kgroundx.experiments.MyExperiments",
-    "pl.mareklangiewicz.kgroundx.experiments.MyGitIgnored",
-    // "pl.mareklangiewicz.kommand.demo.MyDemoSamples",
-    // BTW not adding any different kommand samples, etc., user can use full "path" format for all that.
-  ).firstOrNull { getReflectCallOrNull(it, methodName) != null }.reqNN { "The $methodName not found in any known class." }
+  if (className.isEmpty()) className = defaultClasses
+    .firstOrNull { getReflectCallOrNull(it, methodName) != null }
+    .reqNN { "The $methodName not found in any known class." }
   tryInteractivelyClassMember(className, methodName)
 }
 
