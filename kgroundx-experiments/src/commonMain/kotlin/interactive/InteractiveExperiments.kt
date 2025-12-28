@@ -43,6 +43,7 @@ suspend fun tryInteractivelySomethingRef(reference: String) {
     "pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples",
     "pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples",
     "pl.mareklangiewicz.kgroundx.maintenance.MyWeirdExamples",
+    "pl.mareklangiewicz.kgroundx.workflows.MyWorkflowsExamples",
     "pl.mareklangiewicz.kgroundx.experiments.MyExperiments",
     "pl.mareklangiewicz.kgroundx.experiments.MyGitIgnored",
     // "pl.mareklangiewicz.kommand.demo.MyDemoSamples",

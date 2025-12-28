@@ -86,6 +86,8 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
         $commandName try-code tryInjectAllMyProjects
         $commandName try-code updateGradlewInExampleProject
         $commandName try-code updateGradlewInMyProjects
+        $commandName try-code checkAllMDW
+        $commandName try-code injectMDWToMyProjects
         $commandName try-code collectGabrysCards
       Also using full "paths", f.e.:
         $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToAbcdK
