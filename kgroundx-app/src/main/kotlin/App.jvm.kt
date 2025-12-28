@@ -81,10 +81,14 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
         $commandName set-user-flag code.interactive true
         $commandName set-user-flag code.interactive false
         $commandName try-code-xclip
+        $commandName try-code tryInjectToAbcdK
+        $commandName try-code tryInjectToKGround
+        $commandName try-code tryInjectAllMyProjects
+        $commandName try-code updateGradlewInExampleProject
+        $commandName try-code updateGradlewInMyProjects
+        $commandName try-code collectGabrysCards
+      Also using full "paths", f.e.:
         $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToAbcdK
-        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToKGround
-        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectAllMyProjects
-        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples#updateGradlewInMyProjects
         $commandName try-code pl.mareklangiewicz.kgroundx.experiments.MyExperiments#collectGabrysCards
     """.trimIndent().replace('\n', '\u0085')
       // have to use special "manual" line-breaks
