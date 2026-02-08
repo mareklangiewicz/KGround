@@ -75,11 +75,11 @@ object MyTemplatesExamples {
     tryDiffMyConflictingTemplatesSrc()
   }
 
-  suspend fun tryInjectAbcdK() = tryInjectMyTemplatesToProject(PCodeKt / "AbcdK")
+  suspend fun tryInjectToAbcdK() = tryInjectMyTemplatesToProject(PCodeKt / "AbcdK")
 
   suspend fun tryInjectToKGround() = tryInjectMyTemplatesToProject(PCodeKt / "KGround")
 
-  suspend fun tryInjectAllMyProjects() =
+  suspend fun tryInjectToAllMyProjects() =
     tryToInjectMyTemplatesToAllMyProjects(onlyPublic = false, askInteractively = false)
 }
 @OptIn(ExperimentalApi::class)

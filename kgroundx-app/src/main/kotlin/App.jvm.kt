@@ -83,7 +83,7 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
         $commandName try-code-xclip
         $commandName try-code tryInjectToAbcdK
         $commandName try-code tryInjectToKGround
-        $commandName try-code tryInjectAllMyProjects
+        $commandName try-code tryInjectToAllMyProjects
         $commandName try-code updateGradlewInExampleProject
         $commandName try-code updateGradlewInMyProjects
         $commandName try-code checkAllMDW
