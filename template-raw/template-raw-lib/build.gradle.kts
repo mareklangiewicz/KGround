@@ -243,6 +243,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       // TODO NOW: webMain, jsMain and wasmJsMain (depends on composeUiMain)
       if (settings.withJs) {
         jsMain {
+          dependsOn(composeMain)
           dependencies {
             val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeHtmlCore) implementation(compose.html.core)
@@ -250,6 +251,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
           }
         }
         jsTest {
+          dependsOn(composeTest)
           dependencies {
             val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeTestHtmlUtils) implementation(compose.html.testUtils)
