@@ -1,6 +1,6 @@
 package pl.mareklangiewicz.ure
 
-import pl.mareklangiewicz.bad.NotEqStateErr
+import pl.mareklangiewicz.bad.BadEqStateErr
 import pl.mareklangiewicz.bad.chkEq
 import pl.mareklangiewicz.kground.tee.teePP
 import pl.mareklangiewicz.uspek.*
@@ -34,7 +34,7 @@ fun testUreCmn() = "On testUreCmn on $platform" o {
 
 /** https://youtrack.jetbrains.com/issue/KT-65531/Regex-content-can-change-Regex.options */
 fun testStdLibRegexIssueJvm() {
-  if (platform == "JVM") "test std lib regex issue on JVM".oThrows<NotEqStateErr> {
+  if (platform == "JVM") "test std lib regex issue on JVM".oThrows<BadEqStateErr> {
     val pattern = "\\s+(?m)$" // the original in stdlib was: "\\s+$" (I changed it to reproduce the issue in stdlib)
     val regex1 = Regex(pattern, RegexOption.IGNORE_CASE)
     regex1.pattern chkEq pattern

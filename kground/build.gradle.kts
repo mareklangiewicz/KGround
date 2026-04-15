@@ -68,7 +68,7 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
 //   But it's only for jvm+andro, so probably this is better:
 //   https://kotlinlang.org/docs/gradle-compiler-options.html#for-all-kotlin-compilation-tasks
 fun TaskCollection<Task>.defaultKotlinCompileOptions(
-  apiVer: KotlinVersion = KotlinVersion.KOTLIN_2_1,
+  apiVer: KotlinVersion = KotlinVersion.KOTLIN_2_3,
   jvmTargetVer: String? = null, // it's better to use jvmToolchain (normally done in fun allDefault)
   renderInternalDiagnosticNames: Boolean = false,
 ) = withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -197,20 +197,20 @@ fun KotlinMultiplatformExtension.allDefault(
   }
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   sourceSets {
-    val commonMain by getting {
+    commonMain {
       dependencies {
         if (withKotlinxHtml) implementation(KotlinX.html)
         addCommonMainDependencies()
       }
     }
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(Kotlin.test)
         if (withTestUSpekX) implementation(Langiewicz.uspekx)
       }
     }
     if (withJvm) {
-      val jvmTest by getting {
+      jvmTest {
         dependencies {
           if (withTestJUnit4) implementation(JUnit.junit)
           if (withTestJUnit5) {
@@ -228,8 +228,8 @@ fun KotlinMultiplatformExtension.allDefault(
       }
     }
     if (withLinuxX64) {
-      val linuxX64Main by getting
-      val linuxX64Test by getting
+      linuxX64Main
+      linuxX64Test
     }
   }
 }

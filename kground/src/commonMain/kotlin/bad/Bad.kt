@@ -76,56 +76,56 @@ inline fun <T : Any> T?.reqNN(lazyMessage: () -> String = { "this null arg is ba
   return this ?: badArg(lazyMessage)
 }
 
-open class NotEqStateErr(val exp: Any?, val act: Any?, message: String? = null) : BadStateErr(message)
+open class BadEqStateErr(val exp: Any?, val act: Any?, message: String? = null) : BadStateErr(message)
 
-open class NotEqArgErr(val exp: Any?, val act: Any?, message: String? = null) : BadArgErr(message)
+open class BadEqArgErr(val exp: Any?, val act: Any?, message: String? = null) : BadArgErr(message)
 
 
-open class NotSameStateErr(val exp: Any?, val act: Any?, message: String? = null) : BadStateErr(message)
+open class BadEqRawStateErr(val exp: Any?, val act: Any?, message: String? = null) : BadStateErr(message)
 
-open class NotSameArgErr(val exp: Any?, val act: Any?, message: String? = null) : BadArgErr(message)
+open class BadEqRawArgErr(val exp: Any?, val act: Any?, message: String? = null) : BadArgErr(message)
 
 inline fun <T> T.chkEq(exp: Any?, lazyMessage: () -> String): T =
-  apply { this == exp || throw NotEqStateErr(exp, this, lazyMessage()) }
+  apply { this == exp || throw BadEqStateErr(exp, this, lazyMessage()) }
 
 inline fun <T> T.reqEq(exp: Any?, lazyMessage: () -> String): T =
-  apply { this == exp || throw NotEqArgErr(exp, this, lazyMessage()) }
+  apply { this == exp || throw BadEqArgErr(exp, this, lazyMessage()) }
 
-inline fun <T> T.chkSame(exp: Any?, lazyMessage: () -> String): T =
-  apply { this === exp || throw NotSameStateErr(exp, this, lazyMessage()) }
+inline fun <T> T.chkEqRaw(exp: Any?, lazyMessage: () -> String): T =
+  apply { this === exp || throw BadEqRawStateErr(exp, this, lazyMessage()) }
 
-inline fun <T> T.reqSame(exp: Any?, lazyMessage: () -> String): T =
-  apply { this === exp || throw NotEqArgErr(exp, this, lazyMessage()) }
+inline fun <T> T.reqEqRaw(exp: Any?, lazyMessage: () -> String): T =
+  apply { this === exp || throw BadEqRawArgErr(exp, this, lazyMessage()) }
 
 inline infix fun <T> T.chkEq(exp: Any?): T = chkEq(exp) { "bad $this != $exp" }
 inline infix fun <T> T.reqEq(exp: Any?): T = reqEq(exp) { "bad arg $this != $exp" }
 
-inline infix fun <T> T.chkSame(exp: Any?): T = chkSame(exp) { "bad $this !== $exp" }
-inline infix fun <T> T.reqSame(exp: Any?): T = reqSame(exp) { "bad arg $this !== $exp" }
+inline infix fun <T> T.chkEqRaw(exp: Any?): T = chkEqRaw(exp) { "bad $this !== $exp" }
+inline infix fun <T> T.reqEqRaw(exp: Any?): T = reqEqRaw(exp) { "bad arg $this !== $exp" }
 
 inline fun Any?.chkNull(lazyMessage: () -> String = { "this non-null is bad" }): Nothing? {
   contract { returns() implies (this@chkNull == null) }
-  this == null || throw NotSameStateErr(null, this, lazyMessage())
+  this == null || throw BadEqRawStateErr(null, this, lazyMessage())
   return null
 }
 
 inline fun Any?.reqNull(lazyMessage: () -> String = { "this non-null arg is bad" }): Nothing? {
   contract { returns() implies (this@reqNull == null) }
-  this == null || throw NotSameArgErr(null, this, lazyMessage())
+  this == null || throw BadEqRawArgErr(null, this, lazyMessage())
   return null
 }
 
 inline fun Boolean?.chkTrue(lazyMessage: () -> String = { "this is not true: $this" }): Boolean =
-  chkSame(true, lazyMessage)!!
+  chkEqRaw(true, lazyMessage)!!
 
 inline fun Boolean?.reqTrue(lazyMessage: () -> String = { "this arg is not true: $this" }): Boolean =
-  reqSame(true, lazyMessage)!!
+  reqEqRaw(true, lazyMessage)!!
 
 inline fun Boolean?.chkFalse(lazyMessage: () -> String = { "this is not false: $this" }): Boolean =
-  chkSame(false, lazyMessage)!!
+  chkEqRaw(false, lazyMessage)!!
 
 inline fun Boolean?.reqFalse(lazyMessage: () -> String = { "this arg is not false: $this" }): Boolean =
-  reqSame(false, lazyMessage)!!
+  reqEqRaw(false, lazyMessage)!!
 
 
 inline fun <reified T : Throwable> chkThrows(

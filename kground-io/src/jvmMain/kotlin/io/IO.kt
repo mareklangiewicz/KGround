@@ -130,7 +130,7 @@ fun FileSystem.withTempDir(tempDirPrefix: String, code: FileSystem.(tempDir: Pat
 }
 
 fun FileSystem.createTempDir(tempDirPrefix: String): Path {
-  reqSame(SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
+  reqEqRaw(SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
   return createUniqueDir(SYSTEM_TEMPORARY_DIRECTORY, tempDirPrefix)
 }
 
@@ -138,7 +138,7 @@ fun FileSystem.createUniqueDir(parentDir: Path, namePrefix: String = "", nameSuf
   (parentDir / Random.name(namePrefix, nameSuffix)).also { createDirectory(it, mustCreate = true) }
 
 fun FileSystem.openTempFile(namePrefix: String = "", nameSuffix: String = ""): FileHandle {
-  reqSame(SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
+  reqEqRaw(SYSTEM) { "SYSTEM_TEMPORARY_DIRECTORY is available only on FileSystem.SYSTEM" }
   return openUniqueFile(SYSTEM_TEMPORARY_DIRECTORY, namePrefix, nameSuffix)
 }
 

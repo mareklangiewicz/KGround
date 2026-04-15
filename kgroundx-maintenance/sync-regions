@@ -1,0 +1,8 @@
+#!/bin/bash
+# Convenience wrapper for sync-regions.kts
+# Requires kotlinc to be installed
+
+KOTLINC="${KOTLINC:-$(which kotlinc 2>/dev/null || echo ~/.sdkman/candidates/kotlin/current/bin/kotlinc)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+exec "$KOTLINC" -script "$SCRIPT_DIR/sync-regions.kts" -- "$@"

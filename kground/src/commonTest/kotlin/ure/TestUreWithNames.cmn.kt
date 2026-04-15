@@ -26,8 +26,8 @@ fun testUreWithNames() {
       found[1].range chkEq 6..9
     }
     "result .groups and .named returns the same object on $platform" o {
-      found[0].groups chkSame found[0].named
-      found[1].groups chkSame found[1].named
+      found[0].groups chkEqRaw found[0].named
+      found[1].groups chkEqRaw found[1].named
     }
   }
 
@@ -60,14 +60,14 @@ fun testUreWithNames() {
           found[1].range chkEq 6..9
         }
         "captured groups by first result as expected" o {
-          val gs = found[0].named chkSame found[0].groups
+          val gs = found[0].named chkEqRaw found[0].groups
           gs.size chkEq 2 // note: gs[0] is always an entire match
           "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"] }
           // can't access range, because MatchGroup.range is not available on JS (so not in common)
           // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-match-group/range.html
         }
         "captured groups by second result as expected" o {
-          val gs = found[1].named chkSame found[1].groups
+          val gs = found[1].named chkEqRaw found[1].groups
           gs.size chkEq 2 // note: gs[0] is always an entire match
           "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"] }
         }
@@ -81,12 +81,12 @@ fun testUreWithNames() {
           found[1].range chkEq 7..10
         }
         "captured groups by first result as expected" o {
-          val gs = found[0].named chkSame found[0].groups
+          val gs = found[0].named chkEqRaw found[0].groups
           gs.size chkEq 2 // note: gs[0] is always an entire match
           "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm2"] }
         }
         "captured groups by second result as expected" o {
-          val gs = found[1].named chkSame found[1].groups
+          val gs = found[1].named chkEqRaw found[1].groups
           gs.size chkEq 2 // note: gs[0] is always an entire match
           "numbered and named groups are eq" o { gs[0].chkNN() chkEq gs[1] chkEq gs["nm2"] }
         }
@@ -125,7 +125,7 @@ fun testUreWithNames() {
           found[1].range chkEq 6..9
         }
         "captured groups by first result as expected" o {
-          val gs = found[0].named chkSame found[0].groups
+          val gs = found[0].named chkEqRaw found[0].groups
           gs.size chkEq 3 // note: gs[0] is always an entire match
           "numbered and named groups are as expected" o {
             gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
@@ -135,7 +135,7 @@ fun testUreWithNames() {
           }
         }
         "captured groups by second result as expected" o {
-          val gs = found[1].named chkSame found[1].groups
+          val gs = found[1].named chkEqRaw found[1].groups
           gs.size chkEq 3 // note: gs[0] is always an entire match
           "numbered and named groups are as expected" o {
             gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
@@ -157,7 +157,7 @@ fun testUreWithNames() {
           found[3].range chkEq 7..10
         }
         "captured groups by first result as expected" o {
-          val gs = found[0].named chkSame found[0].groups
+          val gs = found[0].named chkEqRaw found[0].groups
           gs.size chkEq 3 // note: gs[0] is always an entire match
           "numbered and named groups are as expected" o {
             gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
@@ -167,7 +167,7 @@ fun testUreWithNames() {
           }
         }
         "captured groups by second result as expected" o {
-          val gs = found[1].named chkSame found[1].groups
+          val gs = found[1].named chkEqRaw found[1].groups
           gs.size chkEq 3 // note: gs[0] is always an entire match
           "numbered and named groups are as expected" o {
             gs[0].chkNN() chkEq gs[2] chkEq gs["nm2"]
@@ -177,7 +177,7 @@ fun testUreWithNames() {
           }
         }
         "captured groups by third result as expected" o { // just like first
-          val gs = found[2].named chkSame found[2].groups
+          val gs = found[2].named chkEqRaw found[2].groups
           gs.size chkEq 3 // note: gs[0] is always an entire match
           "numbered and named groups are as expected" o {
             gs[0].chkNN() chkEq gs[1] chkEq gs["nm1"]
@@ -187,7 +187,7 @@ fun testUreWithNames() {
           }
         }
         "captured groups by fourth result as expected" o { // just like second
-          val gs = found[3].named chkSame found[3].groups
+          val gs = found[3].named chkEqRaw found[3].groups
           gs.size chkEq 3 // note: gs[0] is always an entire match
           "numbered and named groups are as expected" o {
             gs[0].chkNN() chkEq gs[2] chkEq gs["nm2"]
