@@ -16,6 +16,5 @@
 /kgroundx-app/build
 /kommand-line/build
 /kommand-samples/build
-/kommand-samples/src/test/kotlin/demos/*REPL.kt
 my.gradle.log
 tags
