@@ -17,8 +17,7 @@ import pl.mareklangiewicz.kommand.*
 import pl.mareklangiewicz.kommand.core.LsOpt
 import pl.mareklangiewicz.kommand.core.ls
 import pl.mareklangiewicz.kommand.ide.ideDiff
-import pl.mareklangiewicz.kommand.zenity.zenityAskIf
-import pl.mareklangiewicz.kommand.zenity.zenityShowWarning
+import pl.mareklangiewicz.kommand.zenity.*
 import pl.mareklangiewicz.uctx.uctx
 import pl.mareklangiewicz.udata.str
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog

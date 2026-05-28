@@ -7,12 +7,12 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.*
 import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.*
-import pl.mareklangiewicz.kgroundx.maintenance.*
 import pl.mareklangiewicz.regex.*
 import pl.mareklangiewicz.uctx.*
 import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ulog.hack.*
 import pl.mareklangiewicz.uspek.*
+import pl.mareklangiewicz.kommand.zenity.*
 
 class UtilsTest {
   @Test fun findSingleTest() {

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalApi::class)
 
-package pl.mareklangiewicz.kgroundx.maintenance
+package pl.mareklangiewicz.kommand.zenity
 
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineName

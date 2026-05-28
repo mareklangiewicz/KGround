@@ -14,7 +14,7 @@ import pl.mareklangiewicz.annotations.*
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.interactive.*
 import pl.mareklangiewicz.kground.io.uctxWithIO
-import pl.mareklangiewicz.kgroundx.maintenance.ZenitySupervisor
+import pl.mareklangiewicz.kommand.zenity.*
 import pl.mareklangiewicz.kommand.getSysCLI
 import pl.mareklangiewicz.kommand.getUserFlagFullStr
 import pl.mareklangiewicz.kommand.localCLI
