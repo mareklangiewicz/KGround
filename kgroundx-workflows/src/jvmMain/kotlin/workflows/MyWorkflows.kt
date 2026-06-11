@@ -75,8 +75,8 @@ private val myOssPublishingSecretsEnv = LO(
 // Github can delay or even drop scheduled events depending on
 // high load times (like full hours), repo usage, and many different things.
 // https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-private val everydayAfter5amUTC = Cron(hour = "5", minute = "37")
-// BTW refreshDeps should take less than 10min
+private val everydayAfter5amUTC = Cron(hour = "5", minute = "17")
+// BTW refreshDeps should take less than 10min - but I guess not always, let's start earlier at 5:17
 private val everydayBefore6amUTC = Cron(hour = "5", minute = "53")
 
 
