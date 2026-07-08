@@ -42,7 +42,7 @@ import pl.mareklangiewicz.usubmit.xd.XD.*
   data class Entry(val entry: String = "", val hidden: Boolean = false) : XD
 
   /**
-   * The worker provides [UIssue] to [USubmit.invoke] in some [ToAsk] to ask the supervisor/user about some issue,
+   * The worker provides [Issue] to [USubmit.invoke] in some [ToAsk] to ask the supervisor/user about some issue,
    * Or in some [ToShow] to show/inform the supervisor/user about some issue.
    * These issues are meant to be "recoverable", so worker should be able to continue
    * if the supervisor returns normally from [USubmit.invoke].
