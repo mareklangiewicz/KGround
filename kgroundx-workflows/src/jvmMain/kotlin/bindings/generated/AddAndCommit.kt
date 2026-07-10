@@ -31,55 +31,39 @@ import kotlin.collections.toTypedArray
  * @param authorName The name of the user that will be displayed as the author of the commit
  * @param authorName_Untyped The name of the user that will be displayed as the author of the commit
  * @param authorEmail The email of the user that will be displayed as the author of the commit
- * @param authorEmail_Untyped The email of the user that will be displayed as the author of the
- * commit
+ * @param authorEmail_Untyped The email of the user that will be displayed as the author of the commit
  * @param commit Additional arguments for the git commit command
  * @param commit_Untyped Additional arguments for the git commit command
  * @param committerName The name of the custom committer you want to use
  * @param committerName_Untyped The name of the custom committer you want to use
  * @param committerEmail The email of the custom committer you want to use
  * @param committerEmail_Untyped The email of the custom committer you want to use
- * @param cwd The directory where your repository is located. You should use actions/checkout first
- * to set it up
- * @param cwd_Untyped The directory where your repository is located. You should use
- * actions/checkout first to set it up
+ * @param cwd The directory where your repository is located. You should use actions/checkout first to set it up
+ * @param cwd_Untyped The directory where your repository is located. You should use actions/checkout first to set it up
  * @param defaultAuthor How the action should fill missing author name or email.
  * @param defaultAuthor_Untyped How the action should fill missing author name or email.
  * @param fetch Arguments for the git fetch command (if 'false', the action won't fetch the repo)
- * @param fetch_Untyped Arguments for the git fetch command (if 'false', the action won't fetch the
- * repo)
+ * @param fetch_Untyped Arguments for the git fetch command (if 'false', the action won't fetch the repo)
  * @param message The message for the commit
  * @param message_Untyped The message for the commit
  * @param newBranch The name of the branch to create.
  * @param newBranch_Untyped The name of the branch to create.
- * @param pathspecErrorHandling The way the action should handle pathspec errors from the add and
- * remove commands.
- * @param pathspecErrorHandling_Untyped The way the action should handle pathspec errors from the
- * add and remove commands.
+ * @param pathspecErrorHandling The way the action should handle pathspec errors from the add and remove commands.
+ * @param pathspecErrorHandling_Untyped The way the action should handle pathspec errors from the add and remove commands.
  * @param pull Arguments for the git pull command. By default, the action does not pull.
  * @param pull_Untyped Arguments for the git pull command. By default, the action does not pull.
- * @param push Whether to push the commit and, if any, its tags to the repo. It can also be used to
- * set the git push arguments (more info in the README)
- * @param push_Untyped Whether to push the commit and, if any, its tags to the repo. It can also be
- * used to set the git push arguments (more info in the README)
+ * @param push Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (more info in the README)
+ * @param push_Untyped Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (more info in the README)
  * @param remove Arguments for the git rm command
  * @param remove_Untyped Arguments for the git rm command
- * @param tag Arguments for the git tag command (the tag name always needs to be the first word not
- * preceded by a hyphen)
- * @param tag_Untyped Arguments for the git tag command (the tag name always needs to be the first
- * word not preceded by a hyphen)
- * @param tagPush Arguments for the git push --tags command (any additional argument will be added
- * after --tags)
- * @param tagPush_Untyped Arguments for the git push --tags command (any additional argument will be
- * added after --tags)
- * @param githubToken The token used to make requests to the GitHub API. It's NOT used to make
- * commits and should not be changed.
- * @param githubToken_Untyped The token used to make requests to the GitHub API. It's NOT used to
- * make commits and should not be changed.
- * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by
- * the binding
- * @param _customVersion Allows overriding action's version, for example to use a specific minor
- * version, or a newer version that the binding doesn't yet know about
+ * @param tag Arguments for the git tag command (the tag name always needs to be the first word not preceded by a hyphen)
+ * @param tag_Untyped Arguments for the git tag command (the tag name always needs to be the first word not preceded by a hyphen)
+ * @param tagPush Arguments for the git push --tags command (any additional argument will be added after --tags)
+ * @param tagPush_Untyped Arguments for the git push --tags command (any additional argument will be added after --tags)
+ * @param githubToken The token used to make requests to the GitHub API. It's NOT used to make commits and should not be changed.
+ * @param githubToken_Untyped The token used to make requests to the GitHub API. It's NOT used to make commits and should not be changed.
+ * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by the binding
+ * @param _customVersion Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
  */
 @ExposedCopyVisibility
 public data class AddAndCommit private constructor(
@@ -132,13 +116,11 @@ public data class AddAndCommit private constructor(
      */
     public val committerEmail_Untyped: String? = null,
     /**
-     * The directory where your repository is located. You should use actions/checkout first to set
-     * it up
+     * The directory where your repository is located. You should use actions/checkout first to set it up
      */
     public val cwd: String? = null,
     /**
-     * The directory where your repository is located. You should use actions/checkout first to set
-     * it up
+     * The directory where your repository is located. You should use actions/checkout first to set it up
      */
     public val cwd_Untyped: String? = null,
     /**
@@ -190,13 +172,11 @@ public data class AddAndCommit private constructor(
      */
     public val pull_Untyped: String? = null,
     /**
-     * Whether to push the commit and, if any, its tags to the repo. It can also be used to set the
-     * git push arguments (more info in the README)
+     * Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (more info in the README)
      */
     public val push: String? = null,
     /**
-     * Whether to push the commit and, if any, its tags to the repo. It can also be used to set the
-     * git push arguments (more info in the README)
+     * Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (more info in the README)
      */
     public val push_Untyped: String? = null,
     /**
@@ -208,33 +188,27 @@ public data class AddAndCommit private constructor(
      */
     public val remove_Untyped: String? = null,
     /**
-     * Arguments for the git tag command (the tag name always needs to be the first word not
-     * preceded by a hyphen)
+     * Arguments for the git tag command (the tag name always needs to be the first word not preceded by a hyphen)
      */
     public val tag: String? = null,
     /**
-     * Arguments for the git tag command (the tag name always needs to be the first word not
-     * preceded by a hyphen)
+     * Arguments for the git tag command (the tag name always needs to be the first word not preceded by a hyphen)
      */
     public val tag_Untyped: String? = null,
     /**
-     * Arguments for the git push --tags command (any additional argument will be added
-     * after --tags)
+     * Arguments for the git push --tags command (any additional argument will be added after --tags)
      */
     public val tagPush: String? = null,
     /**
-     * Arguments for the git push --tags command (any additional argument will be added
-     * after --tags)
+     * Arguments for the git push --tags command (any additional argument will be added after --tags)
      */
     public val tagPush_Untyped: String? = null,
     /**
-     * The token used to make requests to the GitHub API. It's NOT used to make commits and should
-     * not be changed.
+     * The token used to make requests to the GitHub API. It's NOT used to make commits and should not be changed.
      */
     public val githubToken: String? = null,
     /**
-     * The token used to make requests to the GitHub API. It's NOT used to make commits and should
-     * not be changed.
+     * The token used to make requests to the GitHub API. It's NOT used to make commits and should not be changed.
      */
     public val githubToken_Untyped: String? = null,
     /**
@@ -242,11 +216,10 @@ public data class AddAndCommit private constructor(
      */
     public val _customInputs: Map<String, String> = mapOf(),
     /**
-     * Allows overriding action's version, for example to use a specific minor version, or a newer
-     * version that the binding doesn't yet know about
+     * Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
      */
     public val _customVersion: String? = null,
-) : RegularAction<AddAndCommit.Outputs>("EndBug", "add-and-commit", _customVersion ?: "v9") {
+) : RegularAction<AddAndCommit.Outputs>("EndBug", "add-and-commit", _customVersion ?: "v10") {
     init {
         require(!((add != null) && (add_Untyped != null))) {
             "Only add or add_Untyped must be set, but not both"
@@ -361,21 +334,7 @@ public data class AddAndCommit private constructor(
         githubToken_Untyped: String? = null,
         _customInputs: Map<String, String> = mapOf(),
         _customVersion: String? = null,
-    ) : this(add = add, add_Untyped = add_Untyped, authorName = authorName, authorName_Untyped =
-            authorName_Untyped, authorEmail = authorEmail, authorEmail_Untyped =
-            authorEmail_Untyped, commit = commit, commit_Untyped = commit_Untyped, committerName =
-            committerName, committerName_Untyped = committerName_Untyped, committerEmail =
-            committerEmail, committerEmail_Untyped = committerEmail_Untyped, cwd = cwd, cwd_Untyped
-            = cwd_Untyped, defaultAuthor = defaultAuthor, defaultAuthor_Untyped =
-            defaultAuthor_Untyped, fetch = fetch, fetch_Untyped = fetch_Untyped, message = message,
-            message_Untyped = message_Untyped, newBranch = newBranch, newBranch_Untyped =
-            newBranch_Untyped, pathspecErrorHandling = pathspecErrorHandling,
-            pathspecErrorHandling_Untyped = pathspecErrorHandling_Untyped, pull = pull, pull_Untyped
-            = pull_Untyped, push = push, push_Untyped = push_Untyped, remove = remove,
-            remove_Untyped = remove_Untyped, tag = tag, tag_Untyped = tag_Untyped, tagPush =
-            tagPush, tagPush_Untyped = tagPush_Untyped, githubToken = githubToken,
-            githubToken_Untyped = githubToken_Untyped, _customInputs = _customInputs, _customVersion
-            = _customVersion)
+    ) : this(add = add, add_Untyped = add_Untyped, authorName = authorName, authorName_Untyped = authorName_Untyped, authorEmail = authorEmail, authorEmail_Untyped = authorEmail_Untyped, commit = commit, commit_Untyped = commit_Untyped, committerName = committerName, committerName_Untyped = committerName_Untyped, committerEmail = committerEmail, committerEmail_Untyped = committerEmail_Untyped, cwd = cwd, cwd_Untyped = cwd_Untyped, defaultAuthor = defaultAuthor, defaultAuthor_Untyped = defaultAuthor_Untyped, fetch = fetch, fetch_Untyped = fetch_Untyped, message = message, message_Untyped = message_Untyped, newBranch = newBranch, newBranch_Untyped = newBranch_Untyped, pathspecErrorHandling = pathspecErrorHandling, pathspecErrorHandling_Untyped = pathspecErrorHandling_Untyped, pull = pull, pull_Untyped = pull_Untyped, push = push, push_Untyped = push_Untyped, remove = remove, remove_Untyped = remove_Untyped, tag = tag, tag_Untyped = tag_Untyped, tagPush = tagPush, tagPush_Untyped = tagPush_Untyped, githubToken = githubToken, githubToken_Untyped = githubToken_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
 
     @Suppress("SpreadOperator")
     override fun toYamlArguments(): LinkedHashMap<String, String> = linkedMapOf(
@@ -425,11 +384,11 @@ public data class AddAndCommit private constructor(
     public sealed class DefaultAuthor(
         public val stringValue: String,
     ) {
+        public object GithubActions : AddAndCommit.DefaultAuthor("github_actions")
+
         public object GithubActor : AddAndCommit.DefaultAuthor("github_actor")
 
         public object UserInfo : AddAndCommit.DefaultAuthor("user_info")
-
-        public object GithubActions : AddAndCommit.DefaultAuthor("github_actions")
 
         public class Custom(
             customStringValue: String,
@@ -439,11 +398,11 @@ public data class AddAndCommit private constructor(
     public sealed class PathspecErrorHandling(
         public val stringValue: String,
     ) {
-        public object Ignore : AddAndCommit.PathspecErrorHandling("ignore")
+        public object ExitAtEnd : AddAndCommit.PathspecErrorHandling("exitAtEnd")
 
         public object ExitImmediately : AddAndCommit.PathspecErrorHandling("exitImmediately")
 
-        public object ExitAtEnd : AddAndCommit.PathspecErrorHandling("exitAtEnd")
+        public object Ignore : AddAndCommit.PathspecErrorHandling("ignore")
 
         public class Custom(
             customStringValue: String,

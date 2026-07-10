@@ -36,6 +36,7 @@ suspend fun tryInteractivelySomethingRef(reference: String, defaultClasses: List
   "pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples",
   "pl.mareklangiewicz.kgroundx.maintenance.MyWeirdExamples",
   "pl.mareklangiewicz.kgroundx.workflows.MyWorkflowsExamples",
+  "pl.mareklangiewicz.kgroundx.bindings.MyBindingsExamples",
   "pl.mareklangiewicz.kgroundx.experiments.MyExperiments",
   "pl.mareklangiewicz.kgroundx.experiments.MyGitIgnored",
   // "pl.mareklangiewicz.kommand.demo.MyDemoSamples",

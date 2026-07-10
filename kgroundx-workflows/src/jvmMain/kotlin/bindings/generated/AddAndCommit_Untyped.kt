@@ -49,34 +49,24 @@ import kotlin.collections.toTypedArray
  *
  * @param add_Untyped Arguments for the git add command
  * @param authorName_Untyped The name of the user that will be displayed as the author of the commit
- * @param authorEmail_Untyped The email of the user that will be displayed as the author of the
- * commit
+ * @param authorEmail_Untyped The email of the user that will be displayed as the author of the commit
  * @param commit_Untyped Additional arguments for the git commit command
  * @param committerName_Untyped The name of the custom committer you want to use
  * @param committerEmail_Untyped The email of the custom committer you want to use
- * @param cwd_Untyped The directory where your repository is located. You should use
- * actions/checkout first to set it up
+ * @param cwd_Untyped The directory where your repository is located. You should use actions/checkout first to set it up
  * @param defaultAuthor_Untyped How the action should fill missing author name or email.
- * @param fetch_Untyped Arguments for the git fetch command (if 'false', the action won't fetch the
- * repo)
+ * @param fetch_Untyped Arguments for the git fetch command (if 'false', the action won't fetch the repo)
  * @param message_Untyped The message for the commit
  * @param newBranch_Untyped The name of the branch to create.
- * @param pathspecErrorHandling_Untyped The way the action should handle pathspec errors from the
- * add and remove commands.
+ * @param pathspecErrorHandling_Untyped The way the action should handle pathspec errors from the add and remove commands.
  * @param pull_Untyped Arguments for the git pull command. By default, the action does not pull.
- * @param push_Untyped Whether to push the commit and, if any, its tags to the repo. It can also be
- * used to set the git push arguments (more info in the README)
+ * @param push_Untyped Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (more info in the README)
  * @param remove_Untyped Arguments for the git rm command
- * @param tag_Untyped Arguments for the git tag command (the tag name always needs to be the first
- * word not preceded by a hyphen)
- * @param tagPush_Untyped Arguments for the git push --tags command (any additional argument will be
- * added after --tags)
- * @param githubToken_Untyped The token used to make requests to the GitHub API. It's NOT used to
- * make commits and should not be changed.
- * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by
- * the binding
- * @param _customVersion Allows overriding action's version, for example to use a specific minor
- * version, or a newer version that the binding doesn't yet know about
+ * @param tag_Untyped Arguments for the git tag command (the tag name always needs to be the first word not preceded by a hyphen)
+ * @param tagPush_Untyped Arguments for the git push --tags command (any additional argument will be added after --tags)
+ * @param githubToken_Untyped The token used to make requests to the GitHub API. It's NOT used to make commits and should not be changed.
+ * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by the binding
+ * @param _customVersion Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
  */
 @Deprecated(
     "Use the typed class instead",
@@ -109,8 +99,7 @@ public data class AddAndCommit_Untyped private constructor(
      */
     public val committerEmail_Untyped: String? = null,
     /**
-     * The directory where your repository is located. You should use actions/checkout first to set
-     * it up
+     * The directory where your repository is located. You should use actions/checkout first to set it up
      */
     public val cwd_Untyped: String? = null,
     /**
@@ -138,8 +127,7 @@ public data class AddAndCommit_Untyped private constructor(
      */
     public val pull_Untyped: String? = null,
     /**
-     * Whether to push the commit and, if any, its tags to the repo. It can also be used to set the
-     * git push arguments (more info in the README)
+     * Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (more info in the README)
      */
     public val push_Untyped: String? = null,
     /**
@@ -147,18 +135,15 @@ public data class AddAndCommit_Untyped private constructor(
      */
     public val remove_Untyped: String? = null,
     /**
-     * Arguments for the git tag command (the tag name always needs to be the first word not
-     * preceded by a hyphen)
+     * Arguments for the git tag command (the tag name always needs to be the first word not preceded by a hyphen)
      */
     public val tag_Untyped: String? = null,
     /**
-     * Arguments for the git push --tags command (any additional argument will be added
-     * after --tags)
+     * Arguments for the git push --tags command (any additional argument will be added after --tags)
      */
     public val tagPush_Untyped: String? = null,
     /**
-     * The token used to make requests to the GitHub API. It's NOT used to make commits and should
-     * not be changed.
+     * The token used to make requests to the GitHub API. It's NOT used to make commits and should not be changed.
      */
     public val githubToken_Untyped: String? = null,
     /**
@@ -166,12 +151,10 @@ public data class AddAndCommit_Untyped private constructor(
      */
     public val _customInputs: Map<String, String> = mapOf(),
     /**
-     * Allows overriding action's version, for example to use a specific minor version, or a newer
-     * version that the binding doesn't yet know about
+     * Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
      */
     public val _customVersion: String? = null,
-) : RegularAction<AddAndCommit_Untyped.Outputs>("EndBug", "add-and-commit", _customVersion ?: "v9")
-        {
+) : RegularAction<AddAndCommit_Untyped.Outputs>("EndBug", "add-and-commit", _customVersion ?: "v10") {
     public constructor(
         vararg pleaseUseNamedArguments: Unit,
         add_Untyped: String? = null,
@@ -194,15 +177,7 @@ public data class AddAndCommit_Untyped private constructor(
         githubToken_Untyped: String? = null,
         _customInputs: Map<String, String> = mapOf(),
         _customVersion: String? = null,
-    ) : this(add_Untyped = add_Untyped, authorName_Untyped = authorName_Untyped, authorEmail_Untyped
-            = authorEmail_Untyped, commit_Untyped = commit_Untyped, committerName_Untyped =
-            committerName_Untyped, committerEmail_Untyped = committerEmail_Untyped, cwd_Untyped =
-            cwd_Untyped, defaultAuthor_Untyped = defaultAuthor_Untyped, fetch_Untyped =
-            fetch_Untyped, message_Untyped = message_Untyped, newBranch_Untyped = newBranch_Untyped,
-            pathspecErrorHandling_Untyped = pathspecErrorHandling_Untyped, pull_Untyped =
-            pull_Untyped, push_Untyped = push_Untyped, remove_Untyped = remove_Untyped, tag_Untyped
-            = tag_Untyped, tagPush_Untyped = tagPush_Untyped, githubToken_Untyped =
-            githubToken_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
+    ) : this(add_Untyped = add_Untyped, authorName_Untyped = authorName_Untyped, authorEmail_Untyped = authorEmail_Untyped, commit_Untyped = commit_Untyped, committerName_Untyped = committerName_Untyped, committerEmail_Untyped = committerEmail_Untyped, cwd_Untyped = cwd_Untyped, defaultAuthor_Untyped = defaultAuthor_Untyped, fetch_Untyped = fetch_Untyped, message_Untyped = message_Untyped, newBranch_Untyped = newBranch_Untyped, pathspecErrorHandling_Untyped = pathspecErrorHandling_Untyped, pull_Untyped = pull_Untyped, push_Untyped = push_Untyped, remove_Untyped = remove_Untyped, tag_Untyped = tag_Untyped, tagPush_Untyped = tagPush_Untyped, githubToken_Untyped = githubToken_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
 
     @Suppress("SpreadOperator")
     override fun toYamlArguments(): LinkedHashMap<String, String> = linkedMapOf(

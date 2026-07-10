@@ -34,51 +34,40 @@ import kotlin.collections.toTypedArray
  * @param bodyPath_Untyped Path to load note-worthy description of changes in release from
  * @param name Gives the release a custom name. Defaults to tag name
  * @param name_Untyped Gives the release a custom name. Defaults to tag name
- * @param tagName Gives a tag name. Defaults to github.GITHUB_REF
- * @param tagName_Untyped Gives a tag name. Defaults to github.GITHUB_REF
- * @param draft Creates a draft release. Defaults to false
- * @param draft_Untyped Creates a draft release. Defaults to false
+ * @param tagName Gives a tag name. Defaults to github.ref_name. refs/tags/&lt;name&gt; values are normalized to &lt;name&gt;.
+ * @param tagName_Untyped Gives a tag name. Defaults to github.ref_name. refs/tags/&lt;name&gt; values are normalized to &lt;name&gt;.
+ * @param draft Keeps the release as a draft. Defaults to false. When reusing an existing draft release, set this to true to keep it draft; omit it to publish after upload. On immutable-release repositories, use this for prereleases that upload assets and publish the draft later.
+ * @param draft_Untyped Keeps the release as a draft. Defaults to false. When reusing an existing draft release, set this to true to keep it draft; omit it to publish after upload. On immutable-release repositories, use this for prereleases that upload assets and publish the draft later.
  * @param prerelease Identify the release as a prerelease. Defaults to false
  * @param prerelease_Untyped Identify the release as a prerelease. Defaults to false
- * @param files Newline-delimited list of path globs for asset files to upload
- * @param files_Untyped Newline-delimited list of path globs for asset files to upload
+ * @param preserveOrder Upload artifacts sequentially in the provided order. This does not control the final display order GitHub uses for release assets.
+ * @param preserveOrder_Untyped Upload artifacts sequentially in the provided order. This does not control the final display order GitHub uses for release assets.
+ * @param files Newline-delimited list of path globs for asset files to upload. Escape glob metacharacters when matching literal filenames that contain them. `~/...` expands to the runner home directory. On Windows, both \ and / path separators are accepted. GitHub may normalize raw asset filenames that contain special characters; the action restores the asset label when possible, but the final download name remains GitHub-controlled.
+ * @param files_Untyped Newline-delimited list of path globs for asset files to upload. Escape glob metacharacters when matching literal filenames that contain them. `~/...` expands to the runner home directory. On Windows, both \ and / path separators are accepted. GitHub may normalize raw asset filenames that contain special characters; the action restores the asset label when possible, but the final download name remains GitHub-controlled.
+ * @param workingDirectory Base directory to resolve 'files' globs against. Defaults to the workspace root used by the action step.
+ * @param workingDirectory_Untyped Base directory to resolve 'files' globs against. Defaults to the workspace root used by the action step.
+ * @param overwriteFiles Overwrite existing files with the same name. Defaults to true
+ * @param overwriteFiles_Untyped Overwrite existing files with the same name. Defaults to true
  * @param failOnUnmatchedFiles Fails if any of the `files` globs match nothing. Defaults to false
- * @param failOnUnmatchedFiles_Untyped Fails if any of the `files` globs match nothing. Defaults to
- * false
+ * @param failOnUnmatchedFiles_Untyped Fails if any of the `files` globs match nothing. Defaults to false
  * @param repository Repository to make releases against, in &lt;owner&gt;/&lt;repo&gt; format
- * @param repository_Untyped Repository to make releases against, in &lt;owner&gt;/&lt;repo&gt;
- * format
- * @param token Authorized secret GitHub Personal Access Token. Defaults to github.token
- * @param token_Untyped Authorized secret GitHub Personal Access Token. Defaults to github.token
- * @param targetCommitish Commitish value that determines where the Git tag is created from. Can be
- * any branch or commit SHA.
- * @param targetCommitish_Untyped Commitish value that determines where the Git tag is created from.
- * Can be any branch or commit SHA.
- * @param discussionCategoryName If specified, a discussion of the specified category is created and
- * linked to the release. The value must be a category that already exists in the repository. If there
- * is already a discussion linked to the release, this parameter is ignored.
- * @param discussionCategoryName_Untyped If specified, a discussion of the specified category is
- * created and linked to the release. The value must be a category that already exists in the
- * repository. If there is already a discussion linked to the release, this parameter is ignored.
- * @param generateReleaseNotes Whether to automatically generate the name and body for this release.
- * If name is specified, the specified name will be used; otherwise, a name will be automatically
- * generated. If body is specified, the body will be pre-pended to the automatically generated notes.
- * @param generateReleaseNotes_Untyped Whether to automatically generate the name and body for this
- * release. If name is specified, the specified name will be used; otherwise, a name will be
- * automatically generated. If body is specified, the body will be pre-pended to the automatically
- * generated notes.
+ * @param repository_Untyped Repository to make releases against, in &lt;owner&gt;/&lt;repo&gt; format
+ * @param token Authorized GitHub token or PAT. Defaults to github.token when omitted. A non-empty explicit token overrides GITHUB_TOKEN. Passing an empty string treats the token as unset.
+ * @param token_Untyped Authorized GitHub token or PAT. Defaults to github.token when omitted. A non-empty explicit token overrides GITHUB_TOKEN. Passing an empty string treats the token as unset.
+ * @param targetCommitish Commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. When creating a new tag for an older commit, `github.token` may not have permission to create the ref; use a PAT or another token with sufficient contents permissions if you hit 403 `Resource not accessible by integration`.
+ * @param targetCommitish_Untyped Commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. When creating a new tag for an older commit, `github.token` may not have permission to create the ref; use a PAT or another token with sufficient contents permissions if you hit 403 `Resource not accessible by integration`.
+ * @param discussionCategoryName If specified, a discussion of the specified category is created and linked to the release. The value must be a category that already exists in the repository. If there is already a discussion linked to the release, this parameter is ignored.
+ * @param discussionCategoryName_Untyped If specified, a discussion of the specified category is created and linked to the release. The value must be a category that already exists in the repository. If there is already a discussion linked to the release, this parameter is ignored.
+ * @param generateReleaseNotes Whether to automatically generate the name and body for this release. If name is specified, the specified name will be used; otherwise, a name will be automatically generated. If body is specified, the body will be pre-pended to the automatically generated notes.
+ * @param generateReleaseNotes_Untyped Whether to automatically generate the name and body for this release. If name is specified, the specified name will be used; otherwise, a name will be automatically generated. If body is specified, the body will be pre-pended to the automatically generated notes.
+ * @param previousTag Optional. When generate_release_notes is enabled, use this tag as GitHub's previous_tag_name comparison base. If omitted, GitHub chooses the comparison base automatically.
+ * @param previousTag_Untyped Optional. When generate_release_notes is enabled, use this tag as GitHub's previous_tag_name comparison base. If omitted, GitHub chooses the comparison base automatically.
  * @param appendBody Append to existing body instead of overwriting it. Default is false.
  * @param appendBody_Untyped Append to existing body instead of overwriting it. Default is false.
- * @param makeLatest Specifies whether this release should be set as the latest release for the
- * repository. Drafts and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`.
- * Uses GitHub api default if not provided
- * @param makeLatest_Untyped Specifies whether this release should be set as the latest release for
- * the repository. Drafts and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`.
- * Uses GitHub api default if not provided
- * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by
- * the binding
- * @param _customVersion Allows overriding action's version, for example to use a specific minor
- * version, or a newer version that the binding doesn't yet know about
+ * @param makeLatest Specifies whether this release should be set as the latest release for the repository. Drafts and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`. Uses GitHub api default if not provided
+ * @param makeLatest_Untyped Specifies whether this release should be set as the latest release for the repository. Drafts and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`. Uses GitHub api default if not provided
+ * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by the binding
+ * @param _customVersion Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
  */
 @ExposedCopyVisibility
 public data class ActionGhRelease private constructor(
@@ -107,19 +96,19 @@ public data class ActionGhRelease private constructor(
      */
     public val name_Untyped: String? = null,
     /**
-     * Gives a tag name. Defaults to github.GITHUB_REF
+     * Gives a tag name. Defaults to github.ref_name. refs/tags/&lt;name&gt; values are normalized to &lt;name&gt;.
      */
     public val tagName: String? = null,
     /**
-     * Gives a tag name. Defaults to github.GITHUB_REF
+     * Gives a tag name. Defaults to github.ref_name. refs/tags/&lt;name&gt; values are normalized to &lt;name&gt;.
      */
     public val tagName_Untyped: String? = null,
     /**
-     * Creates a draft release. Defaults to false
+     * Keeps the release as a draft. Defaults to false. When reusing an existing draft release, set this to true to keep it draft; omit it to publish after upload. On immutable-release repositories, use this for prereleases that upload assets and publish the draft later.
      */
     public val draft: Boolean? = null,
     /**
-     * Creates a draft release. Defaults to false
+     * Keeps the release as a draft. Defaults to false. When reusing an existing draft release, set this to true to keep it draft; omit it to publish after upload. On immutable-release repositories, use this for prereleases that upload assets and publish the draft later.
      */
     public val draft_Untyped: String? = null,
     /**
@@ -131,13 +120,37 @@ public data class ActionGhRelease private constructor(
      */
     public val prerelease_Untyped: String? = null,
     /**
-     * Newline-delimited list of path globs for asset files to upload
+     * Upload artifacts sequentially in the provided order. This does not control the final display order GitHub uses for release assets.
+     */
+    public val preserveOrder: Boolean? = null,
+    /**
+     * Upload artifacts sequentially in the provided order. This does not control the final display order GitHub uses for release assets.
+     */
+    public val preserveOrder_Untyped: String? = null,
+    /**
+     * Newline-delimited list of path globs for asset files to upload. Escape glob metacharacters when matching literal filenames that contain them. `~/...` expands to the runner home directory. On Windows, both \ and / path separators are accepted. GitHub may normalize raw asset filenames that contain special characters; the action restores the asset label when possible, but the final download name remains GitHub-controlled.
      */
     public val files: List<String>? = null,
     /**
-     * Newline-delimited list of path globs for asset files to upload
+     * Newline-delimited list of path globs for asset files to upload. Escape glob metacharacters when matching literal filenames that contain them. `~/...` expands to the runner home directory. On Windows, both \ and / path separators are accepted. GitHub may normalize raw asset filenames that contain special characters; the action restores the asset label when possible, but the final download name remains GitHub-controlled.
      */
     public val files_Untyped: String? = null,
+    /**
+     * Base directory to resolve 'files' globs against. Defaults to the workspace root used by the action step.
+     */
+    public val workingDirectory: String? = null,
+    /**
+     * Base directory to resolve 'files' globs against. Defaults to the workspace root used by the action step.
+     */
+    public val workingDirectory_Untyped: String? = null,
+    /**
+     * Overwrite existing files with the same name. Defaults to true
+     */
+    public val overwriteFiles: Boolean? = null,
+    /**
+     * Overwrite existing files with the same name. Defaults to true
+     */
+    public val overwriteFiles_Untyped: String? = null,
     /**
      * Fails if any of the `files` globs match nothing. Defaults to false
      */
@@ -155,47 +168,45 @@ public data class ActionGhRelease private constructor(
      */
     public val repository_Untyped: String? = null,
     /**
-     * Authorized secret GitHub Personal Access Token. Defaults to github.token
+     * Authorized GitHub token or PAT. Defaults to github.token when omitted. A non-empty explicit token overrides GITHUB_TOKEN. Passing an empty string treats the token as unset.
      */
     public val token: String? = null,
     /**
-     * Authorized secret GitHub Personal Access Token. Defaults to github.token
+     * Authorized GitHub token or PAT. Defaults to github.token when omitted. A non-empty explicit token overrides GITHUB_TOKEN. Passing an empty string treats the token as unset.
      */
     public val token_Untyped: String? = null,
     /**
-     * Commitish value that determines where the Git tag is created from. Can be any branch or
-     * commit SHA.
+     * Commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. When creating a new tag for an older commit, `github.token` may not have permission to create the ref; use a PAT or another token with sufficient contents permissions if you hit 403 `Resource not accessible by integration`.
      */
     public val targetCommitish: String? = null,
     /**
-     * Commitish value that determines where the Git tag is created from. Can be any branch or
-     * commit SHA.
+     * Commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. When creating a new tag for an older commit, `github.token` may not have permission to create the ref; use a PAT or another token with sufficient contents permissions if you hit 403 `Resource not accessible by integration`.
      */
     public val targetCommitish_Untyped: String? = null,
     /**
-     * If specified, a discussion of the specified category is created and linked to the release.
-     * The value must be a category that already exists in the repository. If there is already a
-     * discussion linked to the release, this parameter is ignored.
+     * If specified, a discussion of the specified category is created and linked to the release. The value must be a category that already exists in the repository. If there is already a discussion linked to the release, this parameter is ignored.
      */
     public val discussionCategoryName: String? = null,
     /**
-     * If specified, a discussion of the specified category is created and linked to the release.
-     * The value must be a category that already exists in the repository. If there is already a
-     * discussion linked to the release, this parameter is ignored.
+     * If specified, a discussion of the specified category is created and linked to the release. The value must be a category that already exists in the repository. If there is already a discussion linked to the release, this parameter is ignored.
      */
     public val discussionCategoryName_Untyped: String? = null,
     /**
-     * Whether to automatically generate the name and body for this release. If name is specified,
-     * the specified name will be used; otherwise, a name will be automatically generated. If body is
-     * specified, the body will be pre-pended to the automatically generated notes.
+     * Whether to automatically generate the name and body for this release. If name is specified, the specified name will be used; otherwise, a name will be automatically generated. If body is specified, the body will be pre-pended to the automatically generated notes.
      */
     public val generateReleaseNotes: Boolean? = null,
     /**
-     * Whether to automatically generate the name and body for this release. If name is specified,
-     * the specified name will be used; otherwise, a name will be automatically generated. If body is
-     * specified, the body will be pre-pended to the automatically generated notes.
+     * Whether to automatically generate the name and body for this release. If name is specified, the specified name will be used; otherwise, a name will be automatically generated. If body is specified, the body will be pre-pended to the automatically generated notes.
      */
     public val generateReleaseNotes_Untyped: String? = null,
+    /**
+     * Optional. When generate_release_notes is enabled, use this tag as GitHub's previous_tag_name comparison base. If omitted, GitHub chooses the comparison base automatically.
+     */
+    public val previousTag: String? = null,
+    /**
+     * Optional. When generate_release_notes is enabled, use this tag as GitHub's previous_tag_name comparison base. If omitted, GitHub chooses the comparison base automatically.
+     */
+    public val previousTag_Untyped: String? = null,
     /**
      * Append to existing body instead of overwriting it. Default is false.
      */
@@ -205,15 +216,11 @@ public data class ActionGhRelease private constructor(
      */
     public val appendBody_Untyped: String? = null,
     /**
-     * Specifies whether this release should be set as the latest release for the repository. Drafts
-     * and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`. Uses GitHub api
-     * default if not provided
+     * Specifies whether this release should be set as the latest release for the repository. Drafts and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`. Uses GitHub api default if not provided
      */
     public val makeLatest: ActionGhRelease.MakeLatest? = null,
     /**
-     * Specifies whether this release should be set as the latest release for the repository. Drafts
-     * and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`. Uses GitHub api
-     * default if not provided
+     * Specifies whether this release should be set as the latest release for the repository. Drafts and prereleases cannot be set as latest. Can be `true`, `false`, or `legacy`. Uses GitHub api default if not provided
      */
     public val makeLatest_Untyped: String? = null,
     /**
@@ -221,12 +228,10 @@ public data class ActionGhRelease private constructor(
      */
     public val _customInputs: Map<String, String> = mapOf(),
     /**
-     * Allows overriding action's version, for example to use a specific minor version, or a newer
-     * version that the binding doesn't yet know about
+     * Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
      */
     public val _customVersion: String? = null,
-) : RegularAction<ActionGhRelease.Outputs>("softprops", "action-gh-release", _customVersion ?: "v2")
-        {
+) : RegularAction<ActionGhRelease.Outputs>("softprops", "action-gh-release", _customVersion ?: "v3") {
     init {
         require(!((body != null) && (body_Untyped != null))) {
             "Only body or body_Untyped must be set, but not both"
@@ -252,8 +257,20 @@ public data class ActionGhRelease private constructor(
             "Only prerelease or prerelease_Untyped must be set, but not both"
         }
 
+        require(!((preserveOrder != null) && (preserveOrder_Untyped != null))) {
+            "Only preserveOrder or preserveOrder_Untyped must be set, but not both"
+        }
+
         require(!((files != null) && (files_Untyped != null))) {
             "Only files or files_Untyped must be set, but not both"
+        }
+
+        require(!((workingDirectory != null) && (workingDirectory_Untyped != null))) {
+            "Only workingDirectory or workingDirectory_Untyped must be set, but not both"
+        }
+
+        require(!((overwriteFiles != null) && (overwriteFiles_Untyped != null))) {
+            "Only overwriteFiles or overwriteFiles_Untyped must be set, but not both"
         }
 
         require(!((failOnUnmatchedFiles != null) && (failOnUnmatchedFiles_Untyped != null))) {
@@ -273,12 +290,15 @@ public data class ActionGhRelease private constructor(
         }
 
         require(!((discussionCategoryName != null) && (discussionCategoryName_Untyped != null))) {
-           
-                "Only discussionCategoryName or discussionCategoryName_Untyped must be set, but not both"
+            "Only discussionCategoryName or discussionCategoryName_Untyped must be set, but not both"
         }
 
         require(!((generateReleaseNotes != null) && (generateReleaseNotes_Untyped != null))) {
             "Only generateReleaseNotes or generateReleaseNotes_Untyped must be set, but not both"
+        }
+
+        require(!((previousTag != null) && (previousTag_Untyped != null))) {
+            "Only previousTag or previousTag_Untyped must be set, but not both"
         }
 
         require(!((appendBody != null) && (appendBody_Untyped != null))) {
@@ -304,8 +324,14 @@ public data class ActionGhRelease private constructor(
         draft_Untyped: String? = null,
         prerelease: Boolean? = null,
         prerelease_Untyped: String? = null,
+        preserveOrder: Boolean? = null,
+        preserveOrder_Untyped: String? = null,
         files: List<String>? = null,
         files_Untyped: String? = null,
+        workingDirectory: String? = null,
+        workingDirectory_Untyped: String? = null,
+        overwriteFiles: Boolean? = null,
+        overwriteFiles_Untyped: String? = null,
         failOnUnmatchedFiles: Boolean? = null,
         failOnUnmatchedFiles_Untyped: String? = null,
         repository: String? = null,
@@ -318,25 +344,15 @@ public data class ActionGhRelease private constructor(
         discussionCategoryName_Untyped: String? = null,
         generateReleaseNotes: Boolean? = null,
         generateReleaseNotes_Untyped: String? = null,
+        previousTag: String? = null,
+        previousTag_Untyped: String? = null,
         appendBody: Boolean? = null,
         appendBody_Untyped: String? = null,
         makeLatest: ActionGhRelease.MakeLatest? = null,
         makeLatest_Untyped: String? = null,
         _customInputs: Map<String, String> = mapOf(),
         _customVersion: String? = null,
-    ) : this(body = body, body_Untyped = body_Untyped, bodyPath = bodyPath, bodyPath_Untyped =
-            bodyPath_Untyped, name = name, name_Untyped = name_Untyped, tagName = tagName,
-            tagName_Untyped = tagName_Untyped, draft = draft, draft_Untyped = draft_Untyped,
-            prerelease = prerelease, prerelease_Untyped = prerelease_Untyped, files = files,
-            files_Untyped = files_Untyped, failOnUnmatchedFiles = failOnUnmatchedFiles,
-            failOnUnmatchedFiles_Untyped = failOnUnmatchedFiles_Untyped, repository = repository,
-            repository_Untyped = repository_Untyped, token = token, token_Untyped = token_Untyped,
-            targetCommitish = targetCommitish, targetCommitish_Untyped = targetCommitish_Untyped,
-            discussionCategoryName = discussionCategoryName, discussionCategoryName_Untyped =
-            discussionCategoryName_Untyped, generateReleaseNotes = generateReleaseNotes,
-            generateReleaseNotes_Untyped = generateReleaseNotes_Untyped, appendBody = appendBody,
-            appendBody_Untyped = appendBody_Untyped, makeLatest = makeLatest, makeLatest_Untyped =
-            makeLatest_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
+    ) : this(body = body, body_Untyped = body_Untyped, bodyPath = bodyPath, bodyPath_Untyped = bodyPath_Untyped, name = name, name_Untyped = name_Untyped, tagName = tagName, tagName_Untyped = tagName_Untyped, draft = draft, draft_Untyped = draft_Untyped, prerelease = prerelease, prerelease_Untyped = prerelease_Untyped, preserveOrder = preserveOrder, preserveOrder_Untyped = preserveOrder_Untyped, files = files, files_Untyped = files_Untyped, workingDirectory = workingDirectory, workingDirectory_Untyped = workingDirectory_Untyped, overwriteFiles = overwriteFiles, overwriteFiles_Untyped = overwriteFiles_Untyped, failOnUnmatchedFiles = failOnUnmatchedFiles, failOnUnmatchedFiles_Untyped = failOnUnmatchedFiles_Untyped, repository = repository, repository_Untyped = repository_Untyped, token = token, token_Untyped = token_Untyped, targetCommitish = targetCommitish, targetCommitish_Untyped = targetCommitish_Untyped, discussionCategoryName = discussionCategoryName, discussionCategoryName_Untyped = discussionCategoryName_Untyped, generateReleaseNotes = generateReleaseNotes, generateReleaseNotes_Untyped = generateReleaseNotes_Untyped, previousTag = previousTag, previousTag_Untyped = previousTag_Untyped, appendBody = appendBody, appendBody_Untyped = appendBody_Untyped, makeLatest = makeLatest, makeLatest_Untyped = makeLatest_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
 
     @Suppress("SpreadOperator")
     override fun toYamlArguments(): LinkedHashMap<String, String> = linkedMapOf(
@@ -353,8 +369,14 @@ public data class ActionGhRelease private constructor(
             draft_Untyped?.let { "draft" to it },
             prerelease?.let { "prerelease" to it.toString() },
             prerelease_Untyped?.let { "prerelease" to it },
+            preserveOrder?.let { "preserve_order" to it.toString() },
+            preserveOrder_Untyped?.let { "preserve_order" to it },
             files?.let { "files" to it.joinToString("\n") },
             files_Untyped?.let { "files" to it },
+            workingDirectory?.let { "working_directory" to it },
+            workingDirectory_Untyped?.let { "working_directory" to it },
+            overwriteFiles?.let { "overwrite_files" to it.toString() },
+            overwriteFiles_Untyped?.let { "overwrite_files" to it },
             failOnUnmatchedFiles?.let { "fail_on_unmatched_files" to it.toString() },
             failOnUnmatchedFiles_Untyped?.let { "fail_on_unmatched_files" to it },
             repository?.let { "repository" to it },
@@ -367,6 +389,8 @@ public data class ActionGhRelease private constructor(
             discussionCategoryName_Untyped?.let { "discussion_category_name" to it },
             generateReleaseNotes?.let { "generate_release_notes" to it.toString() },
             generateReleaseNotes_Untyped?.let { "generate_release_notes" to it },
+            previousTag?.let { "previous_tag" to it },
+            previousTag_Untyped?.let { "previous_tag" to it },
             appendBody?.let { "append_body" to it.toString() },
             appendBody_Untyped?.let { "append_body" to it },
             makeLatest?.let { "make_latest" to it.stringValue },
@@ -380,11 +404,11 @@ public data class ActionGhRelease private constructor(
     public sealed class MakeLatest(
         public val stringValue: String,
     ) {
-        public object True : ActionGhRelease.MakeLatest("true")
-
         public object False : ActionGhRelease.MakeLatest("false")
 
         public object Legacy : ActionGhRelease.MakeLatest("legacy")
+
+        public object True : ActionGhRelease.MakeLatest("true")
 
         public class Custom(
             customStringValue: String,
@@ -410,9 +434,7 @@ public data class ActionGhRelease private constructor(
         public val uploadUrl: String = "steps.$stepId.outputs.upload_url"
 
         /**
-         * JSON array containing information about each uploaded asset, in the format given
-         * [here](https://docs.github.com/en/rest/reference/repos#upload-a-release-asset--code-samples)
-         * (minus the `uploader` field)
+         * JSON array containing information about each uploaded asset, in the format given [here](https://docs.github.com/en/rest/reference/repos#upload-a-release-asset--code-samples) (minus the `uploader` field)
          */
         public val assets: String = "steps.$stepId.outputs.assets"
     }

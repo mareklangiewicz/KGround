@@ -30,108 +30,68 @@ import kotlin.collections.toTypedArray
  *
  * @param repository Repository name with owner. For example, actions/checkout
  * @param repository_Untyped Repository name with owner. For example, actions/checkout
- * @param ref The branch, tag or SHA to checkout. When checking out the repository that triggered a
- * workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default branch.
- * @param ref_Untyped The branch, tag or SHA to checkout. When checking out the repository that
- * triggered a workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the
- * default branch.
- * @param token Personal access token (PAT) used to fetch the repository. The PAT is configured with
- * the local git config, which enables your scripts to run authenticated git commands. The post-job
- * step removes the PAT.
+ * @param ref The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default branch.
+ * @param ref_Untyped The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default branch.
+ * @param token Personal access token (PAT) used to fetch the repository. The PAT is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the PAT.
  *
- * We recommend using a service account with the least permissions necessary. Also when generating a
- * new PAT, select the least scopes necessary.
+ * We recommend using a service account with the least permissions necessary. Also when generating a new PAT, select the least scopes necessary.
  *
- * [Learn more about creating and using encrypted
- * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
- * @param token_Untyped Personal access token (PAT) used to fetch the repository. The PAT is
- * configured with the local git config, which enables your scripts to run authenticated git commands.
- * The post-job step removes the PAT.
+ * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+ * @param token_Untyped Personal access token (PAT) used to fetch the repository. The PAT is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the PAT.
  *
- * We recommend using a service account with the least permissions necessary. Also when generating a
- * new PAT, select the least scopes necessary.
+ * We recommend using a service account with the least permissions necessary. Also when generating a new PAT, select the least scopes necessary.
  *
- * [Learn more about creating and using encrypted
- * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
- * @param sshKey SSH key used to fetch the repository. The SSH key is configured with the local git
- * config, which enables your scripts to run authenticated git commands. The post-job step removes the
- * SSH key.
+ * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+ * @param sshKey SSH key used to fetch the repository. The SSH key is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the SSH key.
  *
  * We recommend using a service account with the least permissions necessary.
  *
- * [Learn more about creating and using encrypted
- * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
- * @param sshKey_Untyped SSH key used to fetch the repository. The SSH key is configured with the
- * local git config, which enables your scripts to run authenticated git commands. The post-job step
- * removes the SSH key.
+ * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+ * @param sshKey_Untyped SSH key used to fetch the repository. The SSH key is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the SSH key.
  *
  * We recommend using a service account with the least permissions necessary.
  *
- * [Learn more about creating and using encrypted
- * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
- * @param sshKnownHosts Known hosts in addition to the user and global host key database. The public
- * SSH keys for a host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan
- * github.com`. The public key for github.com is always implicitly added.
- * @param sshKnownHosts_Untyped Known hosts in addition to the user and global host key database.
- * The public SSH keys for a host may be obtained using the utility `ssh-keyscan`. For example,
- * `ssh-keyscan github.com`. The public key for github.com is always implicitly added.
- * @param sshStrict Whether to perform strict host key checking. When true, adds the options
- * `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input
- * `ssh-known-hosts` to configure additional hosts.
- * @param sshStrict_Untyped Whether to perform strict host key checking. When true, adds the options
- * `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input
- * `ssh-known-hosts` to configure additional hosts.
- * @param sshUser_Untyped The user to use when connecting to the remote SSH host. By default 'git'
- * is used.
+ * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+ * @param sshKnownHosts Known hosts in addition to the user and global host key database. The public SSH keys for a host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan github.com`. The public key for github.com is always implicitly added.
+ * @param sshKnownHosts_Untyped Known hosts in addition to the user and global host key database. The public SSH keys for a host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan github.com`. The public key for github.com is always implicitly added.
+ * @param sshStrict Whether to perform strict host key checking. When true, adds the options `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input `ssh-known-hosts` to configure additional hosts.
+ * @param sshStrict_Untyped Whether to perform strict host key checking. When true, adds the options `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input `ssh-known-hosts` to configure additional hosts.
+ * @param sshUser The user to use when connecting to the remote SSH host. By default 'git' is used.
+ * @param sshUser_Untyped The user to use when connecting to the remote SSH host. By default 'git' is used.
  * @param persistCredentials Whether to configure the token or SSH key with the local git config
- * @param persistCredentials_Untyped Whether to configure the token or SSH key with the local git
- * config
+ * @param persistCredentials_Untyped Whether to configure the token or SSH key with the local git config
  * @param path Relative path under $GITHUB_WORKSPACE to place the repository
  * @param path_Untyped Relative path under $GITHUB_WORKSPACE to place the repository
  * @param clean Whether to execute `git clean -ffdx && git reset --hard HEAD` before fetching
- * @param clean_Untyped Whether to execute `git clean -ffdx && git reset --hard HEAD` before
- * fetching
+ * @param clean_Untyped Whether to execute `git clean -ffdx && git reset --hard HEAD` before fetching
+ * @param filter Partially clone against a given filter. Overrides sparse-checkout if set.
  * @param filter_Untyped Partially clone against a given filter. Overrides sparse-checkout if set.
- * @param sparseCheckout Do a sparse checkout on given patterns. Each pattern should be separated
- * with new lines.
- * @param sparseCheckout_Untyped Do a sparse checkout on given patterns. Each pattern should be
- * separated with new lines.
+ * @param sparseCheckout Do a sparse checkout on given patterns. Each pattern should be separated with new lines.
+ * @param sparseCheckout_Untyped Do a sparse checkout on given patterns. Each pattern should be separated with new lines.
  * @param sparseCheckoutConeMode Specifies whether to use cone-mode when doing a sparse checkout.
- * @param sparseCheckoutConeMode_Untyped Specifies whether to use cone-mode when doing a sparse
- * checkout.
+ * @param sparseCheckoutConeMode_Untyped Specifies whether to use cone-mode when doing a sparse checkout.
  * @param fetchDepth Number of commits to fetch. 0 indicates all history for all branches and tags.
- * @param fetchDepth_Untyped Number of commits to fetch. 0 indicates all history for all branches
- * and tags.
+ * @param fetchDepth_Untyped Number of commits to fetch. 0 indicates all history for all branches and tags.
  * @param fetchTags Whether to fetch tags, even if fetch-depth &gt; 0.
  * @param fetchTags_Untyped Whether to fetch tags, even if fetch-depth &gt; 0.
  * @param showProgress Whether to show progress status output when fetching.
  * @param showProgress_Untyped Whether to show progress status output when fetching.
  * @param lfs Whether to download Git-LFS files
  * @param lfs_Untyped Whether to download Git-LFS files
- * @param submodules Whether to checkout submodules: `true` to checkout submodules or `recursive` to
- * recursively checkout submodules.
+ * @param submodules Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
  *
- * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted
- * to HTTPS.
- * @param submodules_Untyped Whether to checkout submodules: `true` to checkout submodules or
- * `recursive` to recursively checkout submodules.
+ * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
+ * @param submodules_Untyped Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
  *
- * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted
- * to HTTPS.
- * @param setSafeDirectory Add repository path as safe.directory for Git global config by running
- * `git config --global --add safe.directory &lt;path&gt;`
- * @param setSafeDirectory_Untyped Add repository path as safe.directory for Git global config by
- * running `git config --global --add safe.directory &lt;path&gt;`
- * @param githubServerUrl The base URL for the GitHub instance that you are trying to clone from,
- * will use environment defaults to fetch from the same instance that the workflow is running from
- * unless specified. Example URLs are https://github.com or https://my-ghes-server.example.com
- * @param githubServerUrl_Untyped The base URL for the GitHub instance that you are trying to clone
- * from, will use environment defaults to fetch from the same instance that the workflow is running
- * from unless specified. Example URLs are https://github.com or https://my-ghes-server.example.com
- * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by
- * the binding
- * @param _customVersion Allows overriding action's version, for example to use a specific minor
- * version, or a newer version that the binding doesn't yet know about
+ * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
+ * @param setSafeDirectory Add repository path as safe.directory for Git global config by running `git config --global --add safe.directory &lt;path&gt;`
+ * @param setSafeDirectory_Untyped Add repository path as safe.directory for Git global config by running `git config --global --add safe.directory &lt;path&gt;`
+ * @param githubServerUrl The base URL for the GitHub instance that you are trying to clone from, will use environment defaults to fetch from the same instance that the workflow is running from unless specified. Example URLs are https://github.com or https://my-ghes-server.example.com
+ * @param githubServerUrl_Untyped The base URL for the GitHub instance that you are trying to clone from, will use environment defaults to fetch from the same instance that the workflow is running from unless specified. Example URLs are https://github.com or https://my-ghes-server.example.com
+ * @param allowUnsafePrCheckout Required to check out fork pull request code from a workflow triggered by `pull_request_target` or `workflow_run`. These workflows run with the base repository's GITHUB_TOKEN, secrets, default-branch cache scope, and runner access; fetching and executing a fork's code in that trusted context commonly leads to "pwn request" vulnerabilities. Set to `true` only after reviewing the risks at https://gh.io/securely-using-pull_request_target.
+ * @param allowUnsafePrCheckout_Untyped Required to check out fork pull request code from a workflow triggered by `pull_request_target` or `workflow_run`. These workflows run with the base repository's GITHUB_TOKEN, secrets, default-branch cache scope, and runner access; fetching and executing a fork's code in that trusted context commonly leads to "pwn request" vulnerabilities. Set to `true` only after reviewing the risks at https://gh.io/securely-using-pull_request_target.
+ * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by the binding
+ * @param _customVersion Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
  */
 @ExposedCopyVisibility
 public data class Checkout private constructor(
@@ -144,87 +104,65 @@ public data class Checkout private constructor(
      */
     public val repository_Untyped: String? = null,
     /**
-     * The branch, tag or SHA to checkout. When checking out the repository that triggered a
-     * workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default
-     * branch.
+     * The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default branch.
      */
     public val ref: String? = null,
     /**
-     * The branch, tag or SHA to checkout. When checking out the repository that triggered a
-     * workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default
-     * branch.
+     * The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event.  Otherwise, uses the default branch.
      */
     public val ref_Untyped: String? = null,
     /**
-     * Personal access token (PAT) used to fetch the repository. The PAT is configured with the
-     * local git config, which enables your scripts to run authenticated git commands. The post-job
-     * step removes the PAT.
+     * Personal access token (PAT) used to fetch the repository. The PAT is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the PAT.
      *
-     * We recommend using a service account with the least permissions necessary. Also when
-     * generating a new PAT, select the least scopes necessary.
+     * We recommend using a service account with the least permissions necessary. Also when generating a new PAT, select the least scopes necessary.
      *
-     * [Learn more about creating and using encrypted
-     * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+     * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
      */
     public val token: String? = null,
     /**
-     * Personal access token (PAT) used to fetch the repository. The PAT is configured with the
-     * local git config, which enables your scripts to run authenticated git commands. The post-job
-     * step removes the PAT.
+     * Personal access token (PAT) used to fetch the repository. The PAT is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the PAT.
      *
-     * We recommend using a service account with the least permissions necessary. Also when
-     * generating a new PAT, select the least scopes necessary.
+     * We recommend using a service account with the least permissions necessary. Also when generating a new PAT, select the least scopes necessary.
      *
-     * [Learn more about creating and using encrypted
-     * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+     * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
      */
     public val token_Untyped: String? = null,
     /**
-     * SSH key used to fetch the repository. The SSH key is configured with the local git config,
-     * which enables your scripts to run authenticated git commands. The post-job step removes the SSH
-     * key.
+     * SSH key used to fetch the repository. The SSH key is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the SSH key.
      *
      * We recommend using a service account with the least permissions necessary.
      *
-     * [Learn more about creating and using encrypted
-     * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+     * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
      */
     public val sshKey: String? = null,
     /**
-     * SSH key used to fetch the repository. The SSH key is configured with the local git config,
-     * which enables your scripts to run authenticated git commands. The post-job step removes the SSH
-     * key.
+     * SSH key used to fetch the repository. The SSH key is configured with the local git config, which enables your scripts to run authenticated git commands. The post-job step removes the SSH key.
      *
      * We recommend using a service account with the least permissions necessary.
      *
-     * [Learn more about creating and using encrypted
-     * secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+     * [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
      */
     public val sshKey_Untyped: String? = null,
     /**
-     * Known hosts in addition to the user and global host key database. The public SSH keys for a
-     * host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan github.com`. The
-     * public key for github.com is always implicitly added.
+     * Known hosts in addition to the user and global host key database. The public SSH keys for a host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan github.com`. The public key for github.com is always implicitly added.
      */
     public val sshKnownHosts: String? = null,
     /**
-     * Known hosts in addition to the user and global host key database. The public SSH keys for a
-     * host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan github.com`. The
-     * public key for github.com is always implicitly added.
+     * Known hosts in addition to the user and global host key database. The public SSH keys for a host may be obtained using the utility `ssh-keyscan`. For example, `ssh-keyscan github.com`. The public key for github.com is always implicitly added.
      */
     public val sshKnownHosts_Untyped: String? = null,
     /**
-     * Whether to perform strict host key checking. When true, adds the options
-     * `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input
-     * `ssh-known-hosts` to configure additional hosts.
+     * Whether to perform strict host key checking. When true, adds the options `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input `ssh-known-hosts` to configure additional hosts.
      */
     public val sshStrict: Boolean? = null,
     /**
-     * Whether to perform strict host key checking. When true, adds the options
-     * `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input
-     * `ssh-known-hosts` to configure additional hosts.
+     * Whether to perform strict host key checking. When true, adds the options `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use the input `ssh-known-hosts` to configure additional hosts.
      */
     public val sshStrict_Untyped: String? = null,
+    /**
+     * The user to use when connecting to the remote SSH host. By default 'git' is used.
+     */
+    public val sshUser: String? = null,
     /**
      * The user to use when connecting to the remote SSH host. By default 'git' is used.
      */
@@ -253,6 +191,10 @@ public data class Checkout private constructor(
      * Whether to execute `git clean -ffdx && git reset --hard HEAD` before fetching
      */
     public val clean_Untyped: String? = null,
+    /**
+     * Partially clone against a given filter. Overrides sparse-checkout if set.
+     */
+    public val filter: String? = null,
     /**
      * Partially clone against a given filter. Overrides sparse-checkout if set.
      */
@@ -306,53 +248,50 @@ public data class Checkout private constructor(
      */
     public val lfs_Untyped: String? = null,
     /**
-     * Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively
-     * checkout submodules.
+     * Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
      *
-     * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are
-     * converted to HTTPS.
+     * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
      */
     public val submodules: Boolean? = null,
     /**
-     * Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively
-     * checkout submodules.
+     * Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
      *
-     * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are
-     * converted to HTTPS.
+     * When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
      */
     public val submodules_Untyped: String? = null,
     /**
-     * Add repository path as safe.directory for Git global config by running `git
-     * config --global --add safe.directory &lt;path&gt;`
+     * Add repository path as safe.directory for Git global config by running `git config --global --add safe.directory &lt;path&gt;`
      */
     public val setSafeDirectory: Boolean? = null,
     /**
-     * Add repository path as safe.directory for Git global config by running `git
-     * config --global --add safe.directory &lt;path&gt;`
+     * Add repository path as safe.directory for Git global config by running `git config --global --add safe.directory &lt;path&gt;`
      */
     public val setSafeDirectory_Untyped: String? = null,
     /**
-     * The base URL for the GitHub instance that you are trying to clone from, will use environment
-     * defaults to fetch from the same instance that the workflow is running from unless specified.
-     * Example URLs are https://github.com or https://my-ghes-server.example.com
+     * The base URL for the GitHub instance that you are trying to clone from, will use environment defaults to fetch from the same instance that the workflow is running from unless specified. Example URLs are https://github.com or https://my-ghes-server.example.com
      */
     public val githubServerUrl: String? = null,
     /**
-     * The base URL for the GitHub instance that you are trying to clone from, will use environment
-     * defaults to fetch from the same instance that the workflow is running from unless specified.
-     * Example URLs are https://github.com or https://my-ghes-server.example.com
+     * The base URL for the GitHub instance that you are trying to clone from, will use environment defaults to fetch from the same instance that the workflow is running from unless specified. Example URLs are https://github.com or https://my-ghes-server.example.com
      */
     public val githubServerUrl_Untyped: String? = null,
+    /**
+     * Required to check out fork pull request code from a workflow triggered by `pull_request_target` or `workflow_run`. These workflows run with the base repository's GITHUB_TOKEN, secrets, default-branch cache scope, and runner access; fetching and executing a fork's code in that trusted context commonly leads to "pwn request" vulnerabilities. Set to `true` only after reviewing the risks at https://gh.io/securely-using-pull_request_target.
+     */
+    public val allowUnsafePrCheckout: Boolean? = null,
+    /**
+     * Required to check out fork pull request code from a workflow triggered by `pull_request_target` or `workflow_run`. These workflows run with the base repository's GITHUB_TOKEN, secrets, default-branch cache scope, and runner access; fetching and executing a fork's code in that trusted context commonly leads to "pwn request" vulnerabilities. Set to `true` only after reviewing the risks at https://gh.io/securely-using-pull_request_target.
+     */
+    public val allowUnsafePrCheckout_Untyped: String? = null,
     /**
      * Type-unsafe map where you can put any inputs that are not yet supported by the binding
      */
     public val _customInputs: Map<String, String> = mapOf(),
     /**
-     * Allows overriding action's version, for example to use a specific minor version, or a newer
-     * version that the binding doesn't yet know about
+     * Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
      */
     public val _customVersion: String? = null,
-) : RegularAction<Checkout.Outputs>("actions", "checkout", _customVersion ?: "v4") {
+) : RegularAction<Checkout.Outputs>("actions", "checkout", _customVersion ?: "v7") {
     init {
         require(!((repository != null) && (repository_Untyped != null))) {
             "Only repository or repository_Untyped must be set, but not both"
@@ -378,6 +317,10 @@ public data class Checkout private constructor(
             "Only sshStrict or sshStrict_Untyped must be set, but not both"
         }
 
+        require(!((sshUser != null) && (sshUser_Untyped != null))) {
+            "Only sshUser or sshUser_Untyped must be set, but not both"
+        }
+
         require(!((persistCredentials != null) && (persistCredentials_Untyped != null))) {
             "Only persistCredentials or persistCredentials_Untyped must be set, but not both"
         }
@@ -390,13 +333,16 @@ public data class Checkout private constructor(
             "Only clean or clean_Untyped must be set, but not both"
         }
 
+        require(!((filter != null) && (filter_Untyped != null))) {
+            "Only filter or filter_Untyped must be set, but not both"
+        }
+
         require(!((sparseCheckout != null) && (sparseCheckout_Untyped != null))) {
             "Only sparseCheckout or sparseCheckout_Untyped must be set, but not both"
         }
 
         require(!((sparseCheckoutConeMode != null) && (sparseCheckoutConeMode_Untyped != null))) {
-           
-                "Only sparseCheckoutConeMode or sparseCheckoutConeMode_Untyped must be set, but not both"
+            "Only sparseCheckoutConeMode or sparseCheckoutConeMode_Untyped must be set, but not both"
         }
 
         require(!((fetchDepth != null) && (fetchDepth_Untyped != null))) {
@@ -426,6 +372,10 @@ public data class Checkout private constructor(
         require(!((githubServerUrl != null) && (githubServerUrl_Untyped != null))) {
             "Only githubServerUrl or githubServerUrl_Untyped must be set, but not both"
         }
+
+        require(!((allowUnsafePrCheckout != null) && (allowUnsafePrCheckout_Untyped != null))) {
+            "Only allowUnsafePrCheckout or allowUnsafePrCheckout_Untyped must be set, but not both"
+        }
     }
 
     public constructor(
@@ -442,6 +392,7 @@ public data class Checkout private constructor(
         sshKnownHosts_Untyped: String? = null,
         sshStrict: Boolean? = null,
         sshStrict_Untyped: String? = null,
+        sshUser: String? = null,
         sshUser_Untyped: String? = null,
         persistCredentials: Boolean? = null,
         persistCredentials_Untyped: String? = null,
@@ -449,6 +400,7 @@ public data class Checkout private constructor(
         path_Untyped: String? = null,
         clean: Boolean? = null,
         clean_Untyped: String? = null,
+        filter: String? = null,
         filter_Untyped: String? = null,
         sparseCheckout: Boolean? = null,
         sparseCheckout_Untyped: String? = null,
@@ -468,25 +420,11 @@ public data class Checkout private constructor(
         setSafeDirectory_Untyped: String? = null,
         githubServerUrl: String? = null,
         githubServerUrl_Untyped: String? = null,
+        allowUnsafePrCheckout: Boolean? = null,
+        allowUnsafePrCheckout_Untyped: String? = null,
         _customInputs: Map<String, String> = mapOf(),
         _customVersion: String? = null,
-    ) : this(repository = repository, repository_Untyped = repository_Untyped, ref = ref,
-            ref_Untyped = ref_Untyped, token = token, token_Untyped = token_Untyped, sshKey =
-            sshKey, sshKey_Untyped = sshKey_Untyped, sshKnownHosts = sshKnownHosts,
-            sshKnownHosts_Untyped = sshKnownHosts_Untyped, sshStrict = sshStrict, sshStrict_Untyped
-            = sshStrict_Untyped, sshUser_Untyped = sshUser_Untyped, persistCredentials =
-            persistCredentials, persistCredentials_Untyped = persistCredentials_Untyped, path =
-            path, path_Untyped = path_Untyped, clean = clean, clean_Untyped = clean_Untyped,
-            filter_Untyped = filter_Untyped, sparseCheckout = sparseCheckout, sparseCheckout_Untyped
-            = sparseCheckout_Untyped, sparseCheckoutConeMode = sparseCheckoutConeMode,
-            sparseCheckoutConeMode_Untyped = sparseCheckoutConeMode_Untyped, fetchDepth =
-            fetchDepth, fetchDepth_Untyped = fetchDepth_Untyped, fetchTags = fetchTags,
-            fetchTags_Untyped = fetchTags_Untyped, showProgress = showProgress, showProgress_Untyped
-            = showProgress_Untyped, lfs = lfs, lfs_Untyped = lfs_Untyped, submodules = submodules,
-            submodules_Untyped = submodules_Untyped, setSafeDirectory = setSafeDirectory,
-            setSafeDirectory_Untyped = setSafeDirectory_Untyped, githubServerUrl = githubServerUrl,
-            githubServerUrl_Untyped = githubServerUrl_Untyped, _customInputs = _customInputs,
-            _customVersion = _customVersion)
+    ) : this(repository = repository, repository_Untyped = repository_Untyped, ref = ref, ref_Untyped = ref_Untyped, token = token, token_Untyped = token_Untyped, sshKey = sshKey, sshKey_Untyped = sshKey_Untyped, sshKnownHosts = sshKnownHosts, sshKnownHosts_Untyped = sshKnownHosts_Untyped, sshStrict = sshStrict, sshStrict_Untyped = sshStrict_Untyped, sshUser = sshUser, sshUser_Untyped = sshUser_Untyped, persistCredentials = persistCredentials, persistCredentials_Untyped = persistCredentials_Untyped, path = path, path_Untyped = path_Untyped, clean = clean, clean_Untyped = clean_Untyped, filter = filter, filter_Untyped = filter_Untyped, sparseCheckout = sparseCheckout, sparseCheckout_Untyped = sparseCheckout_Untyped, sparseCheckoutConeMode = sparseCheckoutConeMode, sparseCheckoutConeMode_Untyped = sparseCheckoutConeMode_Untyped, fetchDepth = fetchDepth, fetchDepth_Untyped = fetchDepth_Untyped, fetchTags = fetchTags, fetchTags_Untyped = fetchTags_Untyped, showProgress = showProgress, showProgress_Untyped = showProgress_Untyped, lfs = lfs, lfs_Untyped = lfs_Untyped, submodules = submodules, submodules_Untyped = submodules_Untyped, setSafeDirectory = setSafeDirectory, setSafeDirectory_Untyped = setSafeDirectory_Untyped, githubServerUrl = githubServerUrl, githubServerUrl_Untyped = githubServerUrl_Untyped, allowUnsafePrCheckout = allowUnsafePrCheckout, allowUnsafePrCheckout_Untyped = allowUnsafePrCheckout_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
 
     @Suppress("SpreadOperator")
     override fun toYamlArguments(): LinkedHashMap<String, String> = linkedMapOf(
@@ -503,6 +441,7 @@ public data class Checkout private constructor(
             sshKnownHosts_Untyped?.let { "ssh-known-hosts" to it },
             sshStrict?.let { "ssh-strict" to it.toString() },
             sshStrict_Untyped?.let { "ssh-strict" to it },
+            sshUser?.let { "ssh-user" to it },
             sshUser_Untyped?.let { "ssh-user" to it },
             persistCredentials?.let { "persist-credentials" to it.toString() },
             persistCredentials_Untyped?.let { "persist-credentials" to it },
@@ -510,6 +449,7 @@ public data class Checkout private constructor(
             path_Untyped?.let { "path" to it },
             clean?.let { "clean" to it.toString() },
             clean_Untyped?.let { "clean" to it },
+            filter?.let { "filter" to it },
             filter_Untyped?.let { "filter" to it },
             sparseCheckout?.let { "sparse-checkout" to it.toString() },
             sparseCheckout_Untyped?.let { "sparse-checkout" to it },
@@ -529,6 +469,8 @@ public data class Checkout private constructor(
             setSafeDirectory_Untyped?.let { "set-safe-directory" to it },
             githubServerUrl?.let { "github-server-url" to it },
             githubServerUrl_Untyped?.let { "github-server-url" to it },
+            allowUnsafePrCheckout?.let { "allow-unsafe-pr-checkout" to it.toString() },
+            allowUnsafePrCheckout_Untyped?.let { "allow-unsafe-pr-checkout" to it },
             *_customInputs.toList().toTypedArray(),
         ).toTypedArray()
     )

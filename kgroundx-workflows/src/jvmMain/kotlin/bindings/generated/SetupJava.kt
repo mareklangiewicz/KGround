@@ -27,112 +27,81 @@ import kotlin.collections.toTypedArray
  *
  * [Action on GitHub](https://github.com/actions/setup-java)
  *
- * @param javaVersion The Java version to set up. Takes a whole or semver Java version. See examples
- * of supported syntax in README file
- * @param javaVersion_Untyped The Java version to set up. Takes a whole or semver Java version. See
- * examples of supported syntax in README file
- * @param javaVersionFile_Untyped The path to the `.java-version` file. See examples of supported
- * syntax in README file
- * @param distribution &lt;required&gt; Java distribution. See the list of supported distributions
- * in README file
- * @param distribution_Untyped &lt;required&gt; Java distribution. See the list of supported
- * distributions in README file
+ * @param javaVersion The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+ * @param javaVersion_Untyped The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+ * @param javaVersionFile The path to a file containing the Java version to set up (.java-version, .tool-versions, .sdkmanrc). Used when java-version is not set. See examples of supported syntax in README file
+ * @param javaVersionFile_Untyped The path to a file containing the Java version to set up (.java-version, .tool-versions, .sdkmanrc). Used when java-version is not set. See examples of supported syntax in README file
+ * @param distribution Java distribution. See the list of supported distributions in README file. This input is required except when java-version-file points to .sdkmanrc with a recognized distribution suffix (e.g., java=21.0.5-tem).
+ * @param distribution_Untyped Java distribution. See the list of supported distributions in README file. This input is required except when java-version-file points to .sdkmanrc with a recognized distribution suffix (e.g., java=21.0.5-tem).
  * @param javaPackage The package type (jdk, jre, jdk+fx, jre+fx)
  * @param javaPackage_Untyped The package type (jdk, jre, jdk+fx, jre+fx)
- * @param architecture The architecture of the package (defaults to the action runner's
- * architecture)
- * @param architecture_Untyped The architecture of the package (defaults to the action runner's
- * architecture)
+ * @param architecture The architecture of the package (defaults to the action runner's architecture)
+ * @param architecture_Untyped The architecture of the package (defaults to the action runner's architecture)
  * @param jdkFile Path to where the compressed JDK is located
  * @param jdkFile_Untyped Path to where the compressed JDK is located
- * @param checkLatest Set this option if you want the action to check for the latest available
- * version that satisfies the version spec
- * @param checkLatest_Untyped Set this option if you want the action to check for the latest
- * available version that satisfies the version spec
- * @param serverId ID of the distributionManagement repository in the pom.xml file. Default is
- * `github`
- * @param serverId_Untyped ID of the distributionManagement repository in the pom.xml file. Default
- * is `github`
- * @param serverUsername Environment variable name for the username for authentication to the Apache
- * Maven repository. Default is $GITHUB_ACTOR
- * @param serverUsername_Untyped Environment variable name for the username for authentication to
- * the Apache Maven repository. Default is $GITHUB_ACTOR
- * @param serverPassword Environment variable name for password or token for authentication to the
- * Apache Maven repository. Default is $GITHUB_TOKEN
- * @param serverPassword_Untyped Environment variable name for password or token for authentication
- * to the Apache Maven repository. Default is $GITHUB_TOKEN
+ * @param checkLatest Set this option if you want the action to check for the latest available version that satisfies the version spec
+ * @param checkLatest_Untyped Set this option if you want the action to check for the latest available version that satisfies the version spec
+ * @param setDefault Set this option to false if you want to install a JDK but not make it the default. When false, JAVA_HOME and PATH are not updated, but JAVA_HOME_&lt;major&gt;_&lt;arch&gt; is still set.
+ * @param setDefault_Untyped Set this option to false if you want to install a JDK but not make it the default. When false, JAVA_HOME and PATH are not updated, but JAVA_HOME_&lt;major&gt;_&lt;arch&gt; is still set.
+ * @param verifySignature Verify downloaded Java package signatures when supported by the selected distribution
+ * @param verifySignature_Untyped Verify downloaded Java package signatures when supported by the selected distribution
+ * @param verifySignaturePublicKey ASCII-armored GPG public key used to verify the downloaded package signature. Overrides the default bundled key for the selected distribution.
+ * @param verifySignaturePublicKey_Untyped ASCII-armored GPG public key used to verify the downloaded package signature. Overrides the default bundled key for the selected distribution.
+ * @param serverId ID of the distributionManagement repository in the pom.xml file. Default is `github`
+ * @param serverId_Untyped ID of the distributionManagement repository in the pom.xml file. Default is `github`
+ * @param serverUsername Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
+ * @param serverUsername_Untyped Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
+ * @param serverPassword Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
+ * @param serverPassword_Untyped Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
  * @param settingsPath Path to where the settings.xml file will be written. Default is ~/.m2.
- * @param settingsPath_Untyped Path to where the settings.xml file will be written. Default is
- * ~/.m2.
+ * @param settingsPath_Untyped Path to where the settings.xml file will be written. Default is ~/.m2.
  * @param overwriteSettings Overwrite the settings.xml file if it exists. Default is "true".
  * @param overwriteSettings_Untyped Overwrite the settings.xml file if it exists. Default is "true".
  * @param gpgPrivateKey GPG private key to import. Default is empty string.
  * @param gpgPrivateKey_Untyped GPG private key to import. Default is empty string.
- * @param gpgPassphrase Environment variable name for the GPG private key passphrase. Default is
- * $GPG_PASSPHRASE.
- * @param gpgPassphrase_Untyped Environment variable name for the GPG private key passphrase.
- * Default is $GPG_PASSPHRASE.
- * @param cache Name of the build platform to cache dependencies. It can be "maven", "gradle" or
- * "sbt".
- * @param cache_Untyped Name of the build platform to cache dependencies. It can be "maven",
- * "gradle" or "sbt".
- * @param cacheDependencyPath The path to a dependency file: pom.xml, build.gradle, build.sbt, etc.
- * This option can be used with the `cache` option. If this option is omitted, the action searches for
- * the dependency file in the entire repository. This option supports wildcards and a list of file
- * names for caching multiple dependencies.
- * @param cacheDependencyPath_Untyped The path to a dependency file: pom.xml, build.gradle,
- * build.sbt, etc. This option can be used with the `cache` option. If this option is omitted, the
- * action searches for the dependency file in the entire repository. This option supports wildcards and
- * a list of file names for caching multiple dependencies.
- * @param jobStatus Workaround to pass job status to post job step. This variable is not intended
- * for manual setting
- * @param jobStatus_Untyped Workaround to pass job status to post job step. This variable is not
- * intended for manual setting
- * @param token The token used to authenticate when fetching version manifests hosted on github.com,
- * such as for the Microsoft Build of OpenJDK. When running this action on github.com, the default
- * value is sufficient. When running on GHES, you can pass a personal access token for github.com if
- * you are experiencing rate limiting.
- * @param token_Untyped The token used to authenticate when fetching version manifests hosted on
- * github.com, such as for the Microsoft Build of OpenJDK. When running this action on github.com, the
- * default value is sufficient. When running on GHES, you can pass a personal access token for
- * github.com if you are experiencing rate limiting.
- * @param mvnToolchainId Name of Maven Toolchain ID if the default name of
- * "${distribution}_${java-version}" is not wanted. See examples of supported syntax in Advanced Usage
- * file
- * @param mvnToolchainId_Untyped Name of Maven Toolchain ID if the default name of
- * "${distribution}_${java-version}" is not wanted. See examples of supported syntax in Advanced Usage
- * file
- * @param mvnToolchainVendor Name of Maven Toolchain Vendor if the default name of "${distribution}"
- * is not wanted. See examples of supported syntax in Advanced Usage file
- * @param mvnToolchainVendor_Untyped Name of Maven Toolchain Vendor if the default name of
- * "${distribution}" is not wanted. See examples of supported syntax in Advanced Usage file
- * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by
- * the binding
- * @param _customVersion Allows overriding action's version, for example to use a specific minor
- * version, or a newer version that the binding doesn't yet know about
+ * @param gpgPassphrase Environment variable name for the GPG private key passphrase. Defaults to GPG_PASSPHRASE when gpg-private-key is set; ignored otherwise.
+ * @param gpgPassphrase_Untyped Environment variable name for the GPG private key passphrase. Defaults to GPG_PASSPHRASE when gpg-private-key is set; ignored otherwise.
+ * @param cache Name of the build platform to cache dependencies. It can be "maven", "gradle" or "sbt".
+ * @param cache_Untyped Name of the build platform to cache dependencies. It can be "maven", "gradle" or "sbt".
+ * @param cacheDependencyPath The path to a dependency file: pom.xml, build.gradle, build.sbt, etc. This option can be used with the `cache` option. If this option is omitted, the action searches for the dependency file in the entire repository. This option supports wildcards and a list of file names for caching multiple dependencies.
+ * @param cacheDependencyPath_Untyped The path to a dependency file: pom.xml, build.gradle, build.sbt, etc. This option can be used with the `cache` option. If this option is omitted, the action searches for the dependency file in the entire repository. This option supports wildcards and a list of file names for caching multiple dependencies.
+ * @param jobStatus Workaround to pass job status to post job step. This variable is not intended for manual setting
+ * @param jobStatus_Untyped Workaround to pass job status to post job step. This variable is not intended for manual setting
+ * @param token The token used to authenticate when fetching version manifests hosted on github.com, such as for the Microsoft Build of OpenJDK. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+ * @param token_Untyped The token used to authenticate when fetching version manifests hosted on github.com, such as for the Microsoft Build of OpenJDK. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+ * @param mvnToolchainId Name of Maven Toolchain ID if the default name of "${distribution}_${java-version}" is not wanted. See examples of supported syntax in Advanced Usage file
+ * @param mvnToolchainId_Untyped Name of Maven Toolchain ID if the default name of "${distribution}_${java-version}" is not wanted. See examples of supported syntax in Advanced Usage file
+ * @param mvnToolchainVendor Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See examples of supported syntax in Advanced Usage file
+ * @param mvnToolchainVendor_Untyped Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See examples of supported syntax in Advanced Usage file
+ * @param showDownloadProgress Whether Maven should print artifact download/transfer progress to the build log. When "false" (default) the action sets "-ntp" (--no-transfer-progress) in MAVEN_ARGS to produce cleaner logs. Set to "true" to keep the progress output. Has no effect on non-Maven builds.
+ * @param showDownloadProgress_Untyped Whether Maven should print artifact download/transfer progress to the build log. When "false" (default) the action sets "-ntp" (--no-transfer-progress) in MAVEN_ARGS to produce cleaner logs. Set to "true" to keep the progress output. Has no effect on non-Maven builds.
+ * @param _customInputs Type-unsafe map where you can put any inputs that are not yet supported by the binding
+ * @param _customVersion Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
  */
 @ExposedCopyVisibility
 public data class SetupJava private constructor(
     /**
-     * The Java version to set up. Takes a whole or semver Java version. See examples of supported
-     * syntax in README file
+     * The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
      */
     public val javaVersion: String? = null,
     /**
-     * The Java version to set up. Takes a whole or semver Java version. See examples of supported
-     * syntax in README file
+     * The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
      */
     public val javaVersion_Untyped: String? = null,
     /**
-     * The path to the `.java-version` file. See examples of supported syntax in README file
+     * The path to a file containing the Java version to set up (.java-version, .tool-versions, .sdkmanrc). Used when java-version is not set. See examples of supported syntax in README file
+     */
+    public val javaVersionFile: String? = null,
+    /**
+     * The path to a file containing the Java version to set up (.java-version, .tool-versions, .sdkmanrc). Used when java-version is not set. See examples of supported syntax in README file
      */
     public val javaVersionFile_Untyped: String? = null,
     /**
-     * &lt;required&gt; Java distribution. See the list of supported distributions in README file
+     * Java distribution. See the list of supported distributions in README file. This input is required except when java-version-file points to .sdkmanrc with a recognized distribution suffix (e.g., java=21.0.5-tem).
      */
     public val distribution: SetupJava.Distribution? = null,
     /**
-     * &lt;required&gt; Java distribution. See the list of supported distributions in README file
+     * Java distribution. See the list of supported distributions in README file. This input is required except when java-version-file points to .sdkmanrc with a recognized distribution suffix (e.g., java=21.0.5-tem).
      */
     public val distribution_Untyped: String? = null,
     /**
@@ -160,15 +129,37 @@ public data class SetupJava private constructor(
      */
     public val jdkFile_Untyped: String? = null,
     /**
-     * Set this option if you want the action to check for the latest available version that
-     * satisfies the version spec
+     * Set this option if you want the action to check for the latest available version that satisfies the version spec
      */
     public val checkLatest: Boolean? = null,
     /**
-     * Set this option if you want the action to check for the latest available version that
-     * satisfies the version spec
+     * Set this option if you want the action to check for the latest available version that satisfies the version spec
      */
     public val checkLatest_Untyped: String? = null,
+    /**
+     * Set this option to false if you want to install a JDK but not make it the default. When false, JAVA_HOME and PATH are not updated, but JAVA_HOME_&lt;major&gt;_&lt;arch&gt; is still set.
+     */
+    public val setDefault: Boolean? = null,
+    /**
+     * Set this option to false if you want to install a JDK but not make it the default. When false, JAVA_HOME and PATH are not updated, but JAVA_HOME_&lt;major&gt;_&lt;arch&gt; is still set.
+     */
+    public val setDefault_Untyped: String? = null,
+    /**
+     * Verify downloaded Java package signatures when supported by the selected distribution
+     */
+    public val verifySignature: Boolean? = null,
+    /**
+     * Verify downloaded Java package signatures when supported by the selected distribution
+     */
+    public val verifySignature_Untyped: String? = null,
+    /**
+     * ASCII-armored GPG public key used to verify the downloaded package signature. Overrides the default bundled key for the selected distribution.
+     */
+    public val verifySignaturePublicKey: String? = null,
+    /**
+     * ASCII-armored GPG public key used to verify the downloaded package signature. Overrides the default bundled key for the selected distribution.
+     */
+    public val verifySignaturePublicKey_Untyped: String? = null,
     /**
      * ID of the distributionManagement repository in the pom.xml file. Default is `github`
      */
@@ -178,23 +169,19 @@ public data class SetupJava private constructor(
      */
     public val serverId_Untyped: String? = null,
     /**
-     * Environment variable name for the username for authentication to the Apache Maven repository.
-     * Default is $GITHUB_ACTOR
+     * Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
      */
     public val serverUsername: String? = null,
     /**
-     * Environment variable name for the username for authentication to the Apache Maven repository.
-     * Default is $GITHUB_ACTOR
+     * Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
      */
     public val serverUsername_Untyped: String? = null,
     /**
-     * Environment variable name for password or token for authentication to the Apache Maven
-     * repository. Default is $GITHUB_TOKEN
+     * Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
      */
     public val serverPassword: String? = null,
     /**
-     * Environment variable name for password or token for authentication to the Apache Maven
-     * repository. Default is $GITHUB_TOKEN
+     * Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
      */
     public val serverPassword_Untyped: String? = null,
     /**
@@ -222,11 +209,11 @@ public data class SetupJava private constructor(
      */
     public val gpgPrivateKey_Untyped: String? = null,
     /**
-     * Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE.
+     * Environment variable name for the GPG private key passphrase. Defaults to GPG_PASSPHRASE when gpg-private-key is set; ignored otherwise.
      */
     public val gpgPassphrase: String? = null,
     /**
-     * Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE.
+     * Environment variable name for the GPG private key passphrase. Defaults to GPG_PASSPHRASE when gpg-private-key is set; ignored otherwise.
      */
     public val gpgPassphrase_Untyped: String? = null,
     /**
@@ -238,83 +225,73 @@ public data class SetupJava private constructor(
      */
     public val cache_Untyped: String? = null,
     /**
-     * The path to a dependency file: pom.xml, build.gradle, build.sbt, etc. This option can be used
-     * with the `cache` option. If this option is omitted, the action searches for the dependency file
-     * in the entire repository. This option supports wildcards and a list of file names for caching
-     * multiple dependencies.
+     * The path to a dependency file: pom.xml, build.gradle, build.sbt, etc. This option can be used with the `cache` option. If this option is omitted, the action searches for the dependency file in the entire repository. This option supports wildcards and a list of file names for caching multiple dependencies.
      */
     public val cacheDependencyPath: String? = null,
     /**
-     * The path to a dependency file: pom.xml, build.gradle, build.sbt, etc. This option can be used
-     * with the `cache` option. If this option is omitted, the action searches for the dependency file
-     * in the entire repository. This option supports wildcards and a list of file names for caching
-     * multiple dependencies.
+     * The path to a dependency file: pom.xml, build.gradle, build.sbt, etc. This option can be used with the `cache` option. If this option is omitted, the action searches for the dependency file in the entire repository. This option supports wildcards and a list of file names for caching multiple dependencies.
      */
     public val cacheDependencyPath_Untyped: String? = null,
     /**
-     * Workaround to pass job status to post job step. This variable is not intended for manual
-     * setting
+     * Workaround to pass job status to post job step. This variable is not intended for manual setting
      */
     public val jobStatus: String? = null,
     /**
-     * Workaround to pass job status to post job step. This variable is not intended for manual
-     * setting
+     * Workaround to pass job status to post job step. This variable is not intended for manual setting
      */
     public val jobStatus_Untyped: String? = null,
     /**
-     * The token used to authenticate when fetching version manifests hosted on github.com, such as
-     * for the Microsoft Build of OpenJDK. When running this action on github.com, the default value is
-     * sufficient. When running on GHES, you can pass a personal access token for github.com if you are
-     * experiencing rate limiting.
+     * The token used to authenticate when fetching version manifests hosted on github.com, such as for the Microsoft Build of OpenJDK. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
      */
     public val token: String? = null,
     /**
-     * The token used to authenticate when fetching version manifests hosted on github.com, such as
-     * for the Microsoft Build of OpenJDK. When running this action on github.com, the default value is
-     * sufficient. When running on GHES, you can pass a personal access token for github.com if you are
-     * experiencing rate limiting.
+     * The token used to authenticate when fetching version manifests hosted on github.com, such as for the Microsoft Build of OpenJDK. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
      */
     public val token_Untyped: String? = null,
     /**
-     * Name of Maven Toolchain ID if the default name of "${distribution}_${java-version}" is not
-     * wanted. See examples of supported syntax in Advanced Usage file
+     * Name of Maven Toolchain ID if the default name of "${distribution}_${java-version}" is not wanted. See examples of supported syntax in Advanced Usage file
      */
     public val mvnToolchainId: String? = null,
     /**
-     * Name of Maven Toolchain ID if the default name of "${distribution}_${java-version}" is not
-     * wanted. See examples of supported syntax in Advanced Usage file
+     * Name of Maven Toolchain ID if the default name of "${distribution}_${java-version}" is not wanted. See examples of supported syntax in Advanced Usage file
      */
     public val mvnToolchainId_Untyped: String? = null,
     /**
-     * Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See
-     * examples of supported syntax in Advanced Usage file
+     * Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See examples of supported syntax in Advanced Usage file
      */
     public val mvnToolchainVendor: String? = null,
     /**
-     * Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See
-     * examples of supported syntax in Advanced Usage file
+     * Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See examples of supported syntax in Advanced Usage file
      */
     public val mvnToolchainVendor_Untyped: String? = null,
+    /**
+     * Whether Maven should print artifact download/transfer progress to the build log. When "false" (default) the action sets "-ntp" (--no-transfer-progress) in MAVEN_ARGS to produce cleaner logs. Set to "true" to keep the progress output. Has no effect on non-Maven builds.
+     */
+    public val showDownloadProgress: Boolean? = null,
+    /**
+     * Whether Maven should print artifact download/transfer progress to the build log. When "false" (default) the action sets "-ntp" (--no-transfer-progress) in MAVEN_ARGS to produce cleaner logs. Set to "true" to keep the progress output. Has no effect on non-Maven builds.
+     */
+    public val showDownloadProgress_Untyped: String? = null,
     /**
      * Type-unsafe map where you can put any inputs that are not yet supported by the binding
      */
     public val _customInputs: Map<String, String> = mapOf(),
     /**
-     * Allows overriding action's version, for example to use a specific minor version, or a newer
-     * version that the binding doesn't yet know about
+     * Allows overriding action's version, for example to use a specific minor version, or a newer version that the binding doesn't yet know about
      */
     public val _customVersion: String? = null,
-) : RegularAction<SetupJava.Outputs>("actions", "setup-java", _customVersion ?: "v4") {
+) : RegularAction<SetupJava.Outputs>("actions", "setup-java", _customVersion ?: "v5") {
     init {
         require(!((javaVersion != null) && (javaVersion_Untyped != null))) {
             "Only javaVersion or javaVersion_Untyped must be set, but not both"
         }
 
+        require(!((javaVersionFile != null) && (javaVersionFile_Untyped != null))) {
+            "Only javaVersionFile or javaVersionFile_Untyped must be set, but not both"
+        }
+
         require(!((distribution != null) && (distribution_Untyped != null))) {
             "Only distribution or distribution_Untyped must be set, but not both"
-        }
-        require((distribution != null) || (distribution_Untyped != null)) {
-            "Either distribution or distribution_Untyped must be set, one of them is required"
         }
 
         require(!((javaPackage != null) && (javaPackage_Untyped != null))) {
@@ -331,6 +308,18 @@ public data class SetupJava private constructor(
 
         require(!((checkLatest != null) && (checkLatest_Untyped != null))) {
             "Only checkLatest or checkLatest_Untyped must be set, but not both"
+        }
+
+        require(!((setDefault != null) && (setDefault_Untyped != null))) {
+            "Only setDefault or setDefault_Untyped must be set, but not both"
+        }
+
+        require(!((verifySignature != null) && (verifySignature_Untyped != null))) {
+            "Only verifySignature or verifySignature_Untyped must be set, but not both"
+        }
+
+        require(!((verifySignaturePublicKey != null) && (verifySignaturePublicKey_Untyped != null))) {
+            "Only verifySignaturePublicKey or verifySignaturePublicKey_Untyped must be set, but not both"
         }
 
         require(!((serverId != null) && (serverId_Untyped != null))) {
@@ -384,12 +373,17 @@ public data class SetupJava private constructor(
         require(!((mvnToolchainVendor != null) && (mvnToolchainVendor_Untyped != null))) {
             "Only mvnToolchainVendor or mvnToolchainVendor_Untyped must be set, but not both"
         }
+
+        require(!((showDownloadProgress != null) && (showDownloadProgress_Untyped != null))) {
+            "Only showDownloadProgress or showDownloadProgress_Untyped must be set, but not both"
+        }
     }
 
     public constructor(
         vararg pleaseUseNamedArguments: Unit,
         javaVersion: String? = null,
         javaVersion_Untyped: String? = null,
+        javaVersionFile: String? = null,
         javaVersionFile_Untyped: String? = null,
         distribution: SetupJava.Distribution? = null,
         distribution_Untyped: String? = null,
@@ -401,6 +395,12 @@ public data class SetupJava private constructor(
         jdkFile_Untyped: String? = null,
         checkLatest: Boolean? = null,
         checkLatest_Untyped: String? = null,
+        setDefault: Boolean? = null,
+        setDefault_Untyped: String? = null,
+        verifySignature: Boolean? = null,
+        verifySignature_Untyped: String? = null,
+        verifySignaturePublicKey: String? = null,
+        verifySignaturePublicKey_Untyped: String? = null,
         serverId: String? = null,
         serverId_Untyped: String? = null,
         serverUsername: String? = null,
@@ -427,34 +427,18 @@ public data class SetupJava private constructor(
         mvnToolchainId_Untyped: String? = null,
         mvnToolchainVendor: String? = null,
         mvnToolchainVendor_Untyped: String? = null,
+        showDownloadProgress: Boolean? = null,
+        showDownloadProgress_Untyped: String? = null,
         _customInputs: Map<String, String> = mapOf(),
         _customVersion: String? = null,
-    ) : this(javaVersion = javaVersion, javaVersion_Untyped = javaVersion_Untyped,
-            javaVersionFile_Untyped = javaVersionFile_Untyped, distribution = distribution,
-            distribution_Untyped = distribution_Untyped, javaPackage = javaPackage,
-            javaPackage_Untyped = javaPackage_Untyped, architecture = architecture,
-            architecture_Untyped = architecture_Untyped, jdkFile = jdkFile, jdkFile_Untyped =
-            jdkFile_Untyped, checkLatest = checkLatest, checkLatest_Untyped = checkLatest_Untyped,
-            serverId = serverId, serverId_Untyped = serverId_Untyped, serverUsername =
-            serverUsername, serverUsername_Untyped = serverUsername_Untyped, serverPassword =
-            serverPassword, serverPassword_Untyped = serverPassword_Untyped, settingsPath =
-            settingsPath, settingsPath_Untyped = settingsPath_Untyped, overwriteSettings =
-            overwriteSettings, overwriteSettings_Untyped = overwriteSettings_Untyped, gpgPrivateKey
-            = gpgPrivateKey, gpgPrivateKey_Untyped = gpgPrivateKey_Untyped, gpgPassphrase =
-            gpgPassphrase, gpgPassphrase_Untyped = gpgPassphrase_Untyped, cache = cache,
-            cache_Untyped = cache_Untyped, cacheDependencyPath = cacheDependencyPath,
-            cacheDependencyPath_Untyped = cacheDependencyPath_Untyped, jobStatus = jobStatus,
-            jobStatus_Untyped = jobStatus_Untyped, token = token, token_Untyped = token_Untyped,
-            mvnToolchainId = mvnToolchainId, mvnToolchainId_Untyped = mvnToolchainId_Untyped,
-            mvnToolchainVendor = mvnToolchainVendor, mvnToolchainVendor_Untyped =
-            mvnToolchainVendor_Untyped, _customInputs = _customInputs, _customVersion =
-            _customVersion)
+    ) : this(javaVersion = javaVersion, javaVersion_Untyped = javaVersion_Untyped, javaVersionFile = javaVersionFile, javaVersionFile_Untyped = javaVersionFile_Untyped, distribution = distribution, distribution_Untyped = distribution_Untyped, javaPackage = javaPackage, javaPackage_Untyped = javaPackage_Untyped, architecture = architecture, architecture_Untyped = architecture_Untyped, jdkFile = jdkFile, jdkFile_Untyped = jdkFile_Untyped, checkLatest = checkLatest, checkLatest_Untyped = checkLatest_Untyped, setDefault = setDefault, setDefault_Untyped = setDefault_Untyped, verifySignature = verifySignature, verifySignature_Untyped = verifySignature_Untyped, verifySignaturePublicKey = verifySignaturePublicKey, verifySignaturePublicKey_Untyped = verifySignaturePublicKey_Untyped, serverId = serverId, serverId_Untyped = serverId_Untyped, serverUsername = serverUsername, serverUsername_Untyped = serverUsername_Untyped, serverPassword = serverPassword, serverPassword_Untyped = serverPassword_Untyped, settingsPath = settingsPath, settingsPath_Untyped = settingsPath_Untyped, overwriteSettings = overwriteSettings, overwriteSettings_Untyped = overwriteSettings_Untyped, gpgPrivateKey = gpgPrivateKey, gpgPrivateKey_Untyped = gpgPrivateKey_Untyped, gpgPassphrase = gpgPassphrase, gpgPassphrase_Untyped = gpgPassphrase_Untyped, cache = cache, cache_Untyped = cache_Untyped, cacheDependencyPath = cacheDependencyPath, cacheDependencyPath_Untyped = cacheDependencyPath_Untyped, jobStatus = jobStatus, jobStatus_Untyped = jobStatus_Untyped, token = token, token_Untyped = token_Untyped, mvnToolchainId = mvnToolchainId, mvnToolchainId_Untyped = mvnToolchainId_Untyped, mvnToolchainVendor = mvnToolchainVendor, mvnToolchainVendor_Untyped = mvnToolchainVendor_Untyped, showDownloadProgress = showDownloadProgress, showDownloadProgress_Untyped = showDownloadProgress_Untyped, _customInputs = _customInputs, _customVersion = _customVersion)
 
     @Suppress("SpreadOperator")
     override fun toYamlArguments(): LinkedHashMap<String, String> = linkedMapOf(
         *listOfNotNull(
             javaVersion?.let { "java-version" to it },
             javaVersion_Untyped?.let { "java-version" to it },
+            javaVersionFile?.let { "java-version-file" to it },
             javaVersionFile_Untyped?.let { "java-version-file" to it },
             distribution?.let { "distribution" to it.stringValue },
             distribution_Untyped?.let { "distribution" to it },
@@ -466,6 +450,12 @@ public data class SetupJava private constructor(
             jdkFile_Untyped?.let { "jdkFile" to it },
             checkLatest?.let { "check-latest" to it.toString() },
             checkLatest_Untyped?.let { "check-latest" to it },
+            setDefault?.let { "set-default" to it.toString() },
+            setDefault_Untyped?.let { "set-default" to it },
+            verifySignature?.let { "verify-signature" to it.toString() },
+            verifySignature_Untyped?.let { "verify-signature" to it },
+            verifySignaturePublicKey?.let { "verify-signature-public-key" to it },
+            verifySignaturePublicKey_Untyped?.let { "verify-signature-public-key" to it },
             serverId?.let { "server-id" to it },
             serverId_Untyped?.let { "server-id" to it },
             serverUsername?.let { "server-username" to it },
@@ -492,6 +482,8 @@ public data class SetupJava private constructor(
             mvnToolchainId_Untyped?.let { "mvn-toolchain-id" to it },
             mvnToolchainVendor?.let { "mvn-toolchain-vendor" to it },
             mvnToolchainVendor_Untyped?.let { "mvn-toolchain-vendor" to it },
+            showDownloadProgress?.let { "show-download-progress" to it.toString() },
+            showDownloadProgress_Untyped?.let { "show-download-progress" to it },
             *_customInputs.toList().toTypedArray(),
         ).toTypedArray()
     )
@@ -527,9 +519,9 @@ public data class SetupJava private constructor(
     ) {
         public object Jdk : SetupJava.JavaPackage("jdk")
 
-        public object Jre : SetupJava.JavaPackage("jre")
-
         public object JdkPlusFx : SetupJava.JavaPackage("jdk+fx")
+
+        public object Jre : SetupJava.JavaPackage("jre")
 
         public object JrePlusFx : SetupJava.JavaPackage("jre+fx")
 
@@ -541,9 +533,9 @@ public data class SetupJava private constructor(
     public sealed class BuildPlatform(
         public val stringValue: String,
     ) {
-        public object Maven : SetupJava.BuildPlatform("maven")
-
         public object Gradle : SetupJava.BuildPlatform("gradle")
+
+        public object Maven : SetupJava.BuildPlatform("maven")
 
         public object Sbt : SetupJava.BuildPlatform("sbt")
 
