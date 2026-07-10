@@ -16,7 +16,9 @@ import pl.mareklangiewicz.ure.UReplacement
 
 
 /**
- * My reproducers most of the time have nothing to do with gradle version, so it's nice to have gradle updated there,
+ * Note: The templates (source of truth) are linked to main KGround/gradle/wrapper/..
+ * But!: Don't forget ./gradlew installDist (to update templates/resources) for kgroundx
+ * BTW reproducers most of the time have nothing to do with gradle version, so it's nice to have gradle updated there,
  * but sometimes they depend on gradle version, so each update have to be checked/reproduced, before commiting/pushing.
  */
 @ExampleApi suspend fun updateGradlewFilesInMyProjects(onlyPublic: Boolean, skipReproducers: Boolean) =
@@ -31,6 +33,10 @@ import pl.mareklangiewicz.ure.UReplacement
 @ExampleApi suspend fun updateGradlewFilesInKotlinProject(projectName: String) =
   updateGradlewFilesInProject(PCodeKt / projectName)
 
+/**
+ * Note: The templates (source of truth) are linked to main KGround/gradle/wrapper/..
+ * But!: Don't forget ./gradlew installDist (to update templates/resources) for kgroundx
+ */
 suspend fun updateGradlewFilesInProject(fullPath: Path) =
   gradlewRelPaths.forEach { gradlewRelPath ->
     val log = localULog()

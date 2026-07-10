@@ -89,6 +89,10 @@ object MyOtherExamples {
 
   suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")
 
+  /**
+   * Note: The templates (source of truth) are linked to main KGround/gradle/wrapper/..
+   * But!: Don't forget ./gradlew installDist (to update templates/resources) for kgroundx
+   */
   suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false, skipReproducers = true)
 
   // See also kotlinx-workflows:MyWorkflowsExamples.kt
