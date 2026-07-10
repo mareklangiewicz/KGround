@@ -62,7 +62,7 @@ fun testTypedSample(sample: TypedSample<*, *, *, *>) = "check typed kommand line
 
 @OptIn(DelicateApi::class)
 fun testReducedSample(sample: ReducedSample<*>) = "check reduced kommand lineRaw" o {
-  val lineRaw = sample.reducedKommand.lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
+  val lineRaw = sample.reducedScript.lineRawOrNull() ?: bad { "Unknown ReducedKommand implementation" }
   if (sample.expectedLineRaw == null) log.d("Expected lineRaw not provided.")
   else lineRaw chkEq sample.expectedLineRaw
   log.d("Actual reduced kommand lineRaw is: $lineRaw")

@@ -3,6 +3,7 @@ package pl.mareklangiewicz.ulog
 import kotlin.coroutines.*
 import kotlin.time.ComparableTimeMark
 import kotlin.time.TimeSource
+import kotlinx.coroutines.currentCoroutineContext
 import pl.mareklangiewicz.annotations.DelicateApi
 import pl.mareklangiewicz.bad.bad
 import pl.mareklangiewicz.uctx.UCtx
@@ -34,11 +35,11 @@ fun interface ULog: UCtx {
 suspend inline fun <reified T: ULog> localULogAs(): T =
   localULogAsOrNull<T>() ?: bad { "No ${T::class.simpleName} provided in coroutine context." }
 
-suspend inline fun <reified T: ULog> localULogAsOrNull(): T? = coroutineContext[ULog] as? T
+suspend inline fun <reified T: ULog> localULogAsOrNull(): T? = currentCoroutineContext()[ULog] as? T
 
 suspend inline fun localULog(): ULog = localULogOrNull() ?: bad { "No ULog provided in coroutine context." }
 
-suspend inline fun localULogOrNull(): ULog? = coroutineContext[ULog]
+suspend inline fun localULogOrNull(): ULog? = currentCoroutineContext()[ULog]
 
 @Deprecated("")
 interface WithULog {

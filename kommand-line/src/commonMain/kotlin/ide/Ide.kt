@@ -1,18 +1,16 @@
 package pl.mareklangiewicz.kommand.ide
 
-import okio.Path
-import pl.mareklangiewicz.annotations.DelicateApi
-import pl.mareklangiewicz.annotations.NotPortableApi
-import pl.mareklangiewicz.bad.BadStateErr
-import pl.mareklangiewicz.bad.bad
-import pl.mareklangiewicz.bad.chkNN
+import okio.*
+import pl.mareklangiewicz.annotations.*
+import pl.mareklangiewicz.bad.*
 import pl.mareklangiewicz.kground.*
 import pl.mareklangiewicz.kommand.*
+import pl.mareklangiewicz.kommand.admin.*
+import pl.mareklangiewicz.kommand.debian.*
 import pl.mareklangiewicz.kommand.ide.Ide.*
-import pl.mareklangiewicz.kommand.admin.psAllFull
-import pl.mareklangiewicz.kommand.debian.whichFirstOrNull
-import pl.mareklangiewicz.kommand.ide.Ide.Cmd.Open.Opt
-import pl.mareklangiewicz.kommand.vim.gvimOpen
+import pl.mareklangiewicz.kommand.ide.Ide.Cmd.*
+import pl.mareklangiewicz.kommand.ide.Ide.Cmd.Open.Opt.*
+import pl.mareklangiewicz.kommand.vim.*
 import pl.mareklangiewicz.udata.*
 import pl.mareklangiewicz.ure.*
 import pl.mareklangiewicz.ure.bad.*
@@ -25,7 +23,7 @@ fun ideOpen(
   line: Int? = null,
   column: Int? = null,
   ifNoIdeRunningStart: Type? = null,
-) = ide(Cmd.Open(path1, path2, path3, line = line, column = column), ifNoIdeRunningStart)
+) = ide(Open(path1, path2, path3, line = line, column = column), ifNoIdeRunningStart)
 
 @OptIn(DelicateApi::class)
 fun ideOrGVimOpen(
@@ -45,28 +43,28 @@ fun ideOrGVimOpen(
 
 /** https://www.jetbrains.com/help/idea/command-line-differences-viewer.html */
 fun ideDiff(path1: Path, path2: Path, path3: Path? = null, ifNoIdeRunningStart: Type? = null) =
-  ide(Cmd.Diff(path1, path2, path3), ifNoIdeRunningStart)
+  ide(Diff(path1, path2, path3), ifNoIdeRunningStart)
 
 /** https://www.jetbrains.com/help/idea/command-line-merge-tool.html */
 fun ideMerge(path1: Path, path2: Path, pathOut: Path, pathBase: Path? = null, ifNoIdeRunningStart: Type? = null) =
-  ide(Cmd.Merge(path1, path2, pathOut, pathBase), ifNoIdeRunningStart)
+  ide(Merge(path1, path2, pathOut, pathBase), ifNoIdeRunningStart)
 
-fun ideHelp(type: Type) = ideOpen(type) { -Opt.Help }
+fun ideHelp(type: Type) = ideOpen(type) { -Help }
 
-fun ideVersion(type: Type) = ideOpen(type) { -Opt.Version }
+fun ideVersion(type: Type) = ideOpen(type) { -Version }
 
 /**
  * https://www.jetbrains.com/help/idea/command-line-merge-tool.html
  * BTW If Ide of given type is not running, it will start it.
  */
 fun ideMerge(type: Type, path1: Path, path2: Path, pathOut: Path, pathBase: Path? = null) =
-  ide(type,Cmd.Merge(path1, path2, pathOut, pathBase))
+  ide(type, Merge(path1, path2, pathOut, pathBase))
 
 /**
  * https://www.jetbrains.com/help/idea/command-line-differences-viewer.html
  * BTW If Ide of given type is not running, it will start it.
  */
-fun ideDiff(type: Type, path1: Path, path2: Path, path3: Path? = null) = ide(type, Cmd.Diff(path1, path2, path3))
+fun ideDiff(type: Type, path1: Path, path2: Path, path3: Path? = null) = ide(type, Diff(path1, path2, path3))
 
 /** BTW If Ide of given type is not running, it will start it (unless -Opt.Help or -Opt.Version (and no paths)). */
 fun ideOpen(
@@ -74,8 +72,8 @@ fun ideOpen(
   path1: Path? = null,
   path2: Path? = null,
   path3: Path? = null,
-  init: Cmd.Open.() -> Unit = {}
-): Ide = ide(type, Cmd.Open(path1, path2, path3).apply(init))
+  init: Open.() -> Unit = {}
+): Ide = ide(type, Open(path1, path2, path3).apply(init))
 
 fun <CmdT : Cmd> ide(cmd: CmdT, ifNoIdeRunningStart: Type? = null, init: CmdT.() -> Unit = {}) =
   ReducedScript {
@@ -229,12 +227,12 @@ suspend fun ideFindFirstRunning(): Type? {
   }
 
   suspend fun getRunningIdesRealNames(): Set<String> = psAllFull().ax()
-    .filter<String> { "Toolbox/apps" in it }
-    .map<String, String> { ureToolboxApp.findFirst(it).namedValues["app"]!! }
+    .filter { "Toolbox/apps" in it }
+    .map { ureToolboxApp.findFirst(it).namedValues["app"]!! }
     .toSet()
 
-  suspend fun Type.getRealName(): String {
-    val path = whichFirstOrNull(cmdName).ax().chkNN { "Command $cmdName not found." }
+  suspend fun Type.getRealName(): String? {
+    val path = whichFirstOrNull(cmdName).ax() ?: return null
     kommand("file", path.strf).ax().single().chkFindSingle(ureText("shell script"))
     for (line in readFileHead(path).ax())
       return ureToolboxApp.findFirstOrNull(line)?.namedValues["app"] ?: continue

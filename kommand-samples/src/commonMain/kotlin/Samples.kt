@@ -18,16 +18,16 @@ data class TypedSample<K : Kommand, In, Out, Err>(
 )
 
 data class ReducedSample<ReducedOut>(
-  val reducedKommand: ReducedKommand<ReducedOut>,
+  val reducedScript: ReducedScript<ReducedOut>,
   val expectedLineRaw: String? = null,
-) : ReducedKommand<ReducedOut> by reducedKommand
+) : ReducedScript<ReducedOut> by reducedScript
 
 internal infix fun Kommand.s(expectedLineRaw: String?) = Sample(this, expectedLineRaw = expectedLineRaw)
 
 internal infix fun <K : Kommand, In, Out, Err> TypedKommand<K, In, Out, Err>.ts(expectedLineRaw: String?) =
   TypedSample(this, expectedLineRaw = expectedLineRaw)
 
-internal infix fun <ReducedOut> ReducedKommand<ReducedOut>.rs(expectedLineRaw: String?) =
+internal infix fun <ReducedOut> ReducedScript<ReducedOut>.rs(expectedLineRaw: String?) =
   ReducedSample(this, expectedLineRaw = expectedLineRaw)
 
 

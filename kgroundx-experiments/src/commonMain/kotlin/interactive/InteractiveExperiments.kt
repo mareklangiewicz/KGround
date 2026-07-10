@@ -116,7 +116,7 @@ suspend fun Kommand.tryInteractivelyCheck(expectedLineRaw: String? = null) = toI
 
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
 suspend fun ReducedSample<*>.tryInteractivelyCheckReducedSample() {
-  reducedKommand.lineRawOrNull() chkEq expectedLineRaw // so also if both are nulls it's treated as fine.
+  reducedScript.lineRawOrNull() chkEq expectedLineRaw // so also if both are nulls it's treated as fine.
   tryInteractivelyCheckReducedScript("Exec ReducedSample ?")
 }
 

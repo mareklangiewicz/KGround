@@ -135,7 +135,7 @@ fun <InnerOut, MappedOut> ReducedKommand<InnerOut>.reducedMap(
 
 /** Mostly for tests to try to compare wrapped kommand line to expected line. */
 @DelicateApi
-fun ReducedKommand<*>.lineRawOrNull(): String? = when (this) {
+fun ReducedScript<*>.lineRawOrNull(): String? = when (this) {
   is ReducedKommandImpl<*, *, *, *, *> -> typedKommand.kommand.lineRaw()
   is ReducedKommandMap<*, *> -> reducedKommand.lineRawOrNull()
   else -> null
