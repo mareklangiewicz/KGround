@@ -155,14 +155,14 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         }
       }
 
-      val composeMain by creating {
+      val composeMain = create("composeMain") { // btw by creating is deprecated
         dependsOn(commonMain.get())
         dependencies {
           if (settings.withCompose) implementation(compose.runtime)
         }
       }
 
-      val composeTest by creating {
+      val composeTest = create("composeTest") {
         // dependsOn(composeMain) check if it's not needed and it even generates warnings!
         // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
         dependsOn(commonTest.get())
@@ -172,7 +172,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         }
       }
 
-      val composeUiMain by creating {
+      val composeUiMain = create("composeUiMain") {
         dependsOn(composeMain)
         dependencies {
           val settpose = settings.compose ?: return@dependencies
@@ -190,7 +190,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         }
       }
 
-      val composeUiTest by creating {
+      val composeUiTest = create("composeUiTest") {
         // dependsOn(composeUiMain) looks like not it's not needed and it even generates warnings!
           // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
         dependsOn(composeTest)
@@ -275,7 +275,8 @@ fun Project.defaultBuildTemplateForRawMppLib() {
             }
           }
         }
-        androidHostTest {
+        // val androidHostTest by getting is deprecated and no out-of-the-box accessor yet, like androidMain
+        getByName("androidHostTest") {
           dependencies {
             if (settings.withTestJUnit4) implementation(JUnit.junit)
             if (settings.withTestJUnit5) {
@@ -290,7 +291,8 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         }
         // NOTE: The `androidDeviceTest {...} works differently than
         // `androidInstrumentedTest {...}` and it is needed for on device tests.
-        androidDeviceTest {
+        // val androidDeviceTest by getting is deprecated and no normal accessor yet
+        getByName("androidDeviceTest") {
           // dependsOn(composeUiTest) // FIXME: Invalid Source Set Dependency Across Trees
           dependencies {
             implementation(Kotlin.test) // by default device tests don't get common tests sourceSet (unlike host tests)
