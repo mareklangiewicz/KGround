@@ -12,6 +12,9 @@ val buildScanPublishingAllowed =
 // endregion [[My Settings Stuff <~~]]
 // region [[My Settings Stuff]]
 
+// https://docs.gradle.org/current/userguide/upgrading_version_9.html#opt_into_gradle_10_behavior_by_disabling_implicit_lookup_in_parent_projects
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+
 pluginManagement {
   repositories {
     gradlePluginPortal()

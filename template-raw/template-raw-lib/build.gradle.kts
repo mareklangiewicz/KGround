@@ -275,7 +275,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
             }
           }
         }
-        val androidHostTest by getting {
+        androidHostTest {
           dependencies {
             if (settings.withTestJUnit4) implementation(JUnit.junit)
             if (settings.withTestJUnit5) {
@@ -288,9 +288,9 @@ fun Project.defaultBuildTemplateForRawMppLib() {
             }
           }
         }
-        // NOTE: The `val androidDeviceTest by getting {...} works differently than
+        // NOTE: The `androidDeviceTest {...} works differently than
         // `androidInstrumentedTest {...}` and it is needed for on device tests.
-        val androidDeviceTest by getting {
+        androidDeviceTest {
           // dependsOn(composeUiTest) // FIXME: Invalid Source Set Dependency Across Trees
           dependencies {
             implementation(Kotlin.test) // by default device tests don't get common tests sourceSet (unlike host tests)

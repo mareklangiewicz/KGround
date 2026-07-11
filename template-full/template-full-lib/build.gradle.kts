@@ -240,20 +240,20 @@ fun KotlinMultiplatformExtension.allDefault(
   }
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   sourceSets {
-    val commonMain by getting {
+    commonMain {
       dependencies {
         if (withKotlinxHtml) implementation(KotlinX.html)
         addCommonMainDependencies()
       }
     }
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(Kotlin.test)
         if (withTestUSpekX) implementation(Langiewicz.uspekx)
       }
     }
     if (withJvm) {
-      val jvmTest by getting {
+      jvmTest {
         dependencies {
           if (withTestJUnit4) implementation(JUnit.junit)
           if (withTestJUnit5) {
@@ -271,8 +271,8 @@ fun KotlinMultiplatformExtension.allDefault(
       }
     }
     if (withLinuxX64) {
-      val linuxX64Main by getting
-      val linuxX64Test by getting
+      linuxX64Main
+      linuxX64Test
     }
   }
 }
@@ -337,7 +337,7 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
   settings: LibSettings,
 ) = with(settings.compose ?: error("Compose settings not set.")) {
   sourceSets {
-    val commonMain by getting {
+    commonMain {
       dependencies {
         implementation(compose.runtime)
         if (withComposeUi) {
@@ -353,7 +353,7 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
       }
     }
     if (settings.withJvm) {
-      val jvmMain by getting {
+      jvmMain {
         dependencies {
           if (withComposeUi) {
             implementation(compose.uiTooling)
@@ -369,7 +369,7 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
           }
         }
       }
-      val jvmTest by getting {
+      jvmTest {
         dependencies {
           @Suppress("DEPRECATION")
           if (withComposeTestUiJUnit4) implementation(compose.uiTestJUnit4)
@@ -377,13 +377,13 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
       }
     }
     if (settings.withJs) {
-      val jsMain by getting {
+      jsMain {
         dependencies {
           if (withComposeHtmlCore) implementation(compose.html.core)
           if (withComposeHtmlSvg) implementation(compose.html.svg)
         }
       }
-      val jsTest by getting {
+      jsTest {
         dependencies {
           if (withComposeTestHtmlUtils) implementation(compose.html.testUtils)
         }

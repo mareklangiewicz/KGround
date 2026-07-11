@@ -190,20 +190,20 @@ fun KotlinMultiplatformExtension.allDefault(
   }
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   sourceSets {
-    val commonMain by getting {
+    commonMain {
       dependencies {
         if (withKotlinxHtml) implementation(KotlinX.html)
         addCommonMainDependencies()
       }
     }
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(Kotlin.test)
         if (withTestUSpekX) implementation(Langiewicz.uspekx)
       }
     }
     if (withJvm) {
-      val jvmTest by getting {
+      jvmTest {
         dependencies {
           if (withTestJUnit4) implementation(JUnit.junit)
           if (withTestJUnit5) {
@@ -221,8 +221,8 @@ fun KotlinMultiplatformExtension.allDefault(
       }
     }
     if (withLinuxX64) {
-      val linuxX64Main by getting
-      val linuxX64Test by getting
+      linuxX64Main
+      linuxX64Test
     }
   }
 }
