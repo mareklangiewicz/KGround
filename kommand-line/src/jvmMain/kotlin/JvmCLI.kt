@@ -56,7 +56,7 @@ private fun sequentialContext(name: String): CoroutineContext =
 //    newSingleThreadContext(name)
   Dispatchers.IO.limitedParallelism(1) + CoroutineName(name)
 
-private fun CoroutineContext.tryDispatch(block: () -> Unit) =
+private fun CoroutineContext.dispatchOrErr(block: () -> Unit) =
   (this[ContinuationInterceptor] as? CoroutineDispatcher)
     ?.dispatch(this, block)
     ?: bad { "No dispatcher in coroutine ${this[CoroutineName]?.name}" }
@@ -88,15 +88,15 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
     }
   }
 
-  override fun kill(forcibly: Boolean) = processContext.tryDispatch {
+  override fun kill(forcibly: Boolean) = processContext.dispatchOrErr {
     if (forcibly) process.destroyForcibly() else process.destroy()
   }
 
   @OptIn(DelicateApi::class)
   override fun close() {
-    stdinContext.tryDispatch { stdinClose() }
-    stdoutContext.tryDispatch { stdoutClose() }
-    stderrContext.tryDispatch { stderrClose() }
+    stdinContext.dispatchOrErr { stdinClose() }
+    stdoutContext.dispatchOrErr { stdoutClose() }
+    stderrContext.dispatchOrErr { stderrClose() }
   }
 
   @DelicateApi
@@ -130,4 +130,3 @@ private class JvmExecProcess(private val process: Process) : ExecProcess {
   @OptIn(DelicateApi::class)
   override val stderr: Flow<String> = defaultStdOutOrErrFlow(stderrContext, ::stderrReadLine, ::stderrClose)
 }
-
