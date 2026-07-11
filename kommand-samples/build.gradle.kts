@@ -28,7 +28,7 @@ defaultBuildTemplateForBasicMppLib {
 }
 
 // FIXME NOW: do I need it?
-// kotlin { js(IR) { nodejs() } }
+// kotlin { js { nodejs() } }
 
 // region [[Kotlin Module Build Template]]
 
@@ -246,7 +246,7 @@ fun KotlinMultiplatformExtension.jsDefault(
   testWithChrome: Boolean = true,
   testHeadless: Boolean = true,
 ) {
-  js(IR) {
+  js {
     if (withBrowser) browser {
       testTask {
         useKarma {

@@ -21,7 +21,7 @@ defaultBuildTemplateForBasicMppLib {
   api(project(":kommand-samples"))
 }
 
-// kotlin { js(IR) { nodejs() } }
+// kotlin { js { nodejs() } }
 
 
 // region [[Kotlin Module Build Template]]
@@ -240,7 +240,7 @@ fun KotlinMultiplatformExtension.jsDefault(
   testWithChrome: Boolean = true,
   testHeadless: Boolean = true,
 ) {
-  js(IR) {
+  js {
     if (withBrowser) browser {
       testTask {
         useKarma {

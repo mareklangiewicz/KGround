@@ -235,7 +235,7 @@ fun KotlinMultiplatformExtension.jsDefault(
   testWithChrome: Boolean = true,
   testHeadless: Boolean = true,
 ) {
-  js(IR) {
+  js {
     if (withBrowser) browser {
       testTask {
         useKarma {
@@ -283,7 +283,7 @@ fun Project.defaultBuildTemplateForBasicMppApp(
         // https://youtrack.jetbrains.com/issue/KT-31424
       }
     }
-    if (details.settings.withJs) js(IR) {
+    if (details.settings.withJs) js {
       binaries.executable()
     }
     if (details.settings.withLinuxX64) linuxX64 {
