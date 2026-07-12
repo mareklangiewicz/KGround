@@ -13,6 +13,17 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 
+// region [[Root Build Template]]
+
+fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
+  details?.let {
+    rootExtLibDetails = it
+    defaultGroupAndVerAndDescription(it)
+  }
+}
+
+// endregion [[Root Build Template]]
+
 // region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,
@@ -97,7 +108,7 @@ fun TaskCollection<Task>.defaultTestsOptions(
   if (onJvmUseJUnitPlatform) (this as? Test)?.useJUnitPlatform()
 }
 
-// Provide artifacts information requited by Maven Central
+// Provide artifacts information required by Maven Central
 fun MavenPom.defaultPOM(lib: LibDetails) {
   name put lib.name
   description put lib.description

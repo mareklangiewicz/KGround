@@ -9,9 +9,52 @@ import org.jetbrains.compose.desktop.application.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.gradle.kotlin.dsl.*
+import com.android.build.api.dsl.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
+
+// region [[Full MPP Lib Build Template]]
+
+fun Project.defaultBuildTemplateForFullMppLib(
+  details: LibDetails = rootExtLibDetails,
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+) {
+  if (details.settings.withAndro) {
+    apply(plugin = plugs.AndroLibNoVer.group) // group is actually id for plugins
+    // TODO_later: try to move the rest of andro config from below here
+  }
+  defaultBuildTemplateForComposeMppLib(
+    details = details,
+    ignoreAndroConfig = true, // andro configured below
+    ignoreAndroPublish = true, // andro publishing configured below (or ignored again, but below in defaultAndroLib)
+    addCommonMainDependencies = addCommonMainDependencies,
+  )
+
+  if (details.settings.withAndro) {
+    extensions.configure<LibraryExtension> {
+      defaultAndroLib(
+        details,
+        ignoreCompose = true, // compose mpp configured already
+        ignoreAndroPublish = true,
+          // FIXME: maybe it's fine to publish in andro way here too (full mpp lib case),
+          //  but let's analyze/test publications more before doing that (commiting to: ignoreAndroPublish = false).
+      )
+    }
+
+    // this is "single platform way" / "android way" to declare deps,
+    // it would be more "correct" to configure everything "mpp way" (android deps too),
+    // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
+    // (trust me future Marek: I've tried this already :) )
+    dependencies {
+      // ignoreCompose because we have compose configured mpp way already.
+      defaultAndroDeps(details.settings, ignoreCompose = true)
+      defaultAndroTestDeps(details.settings, ignoreCompose = true)
+    }
+  }
+}
+
+// endregion [[Full MPP Lib Build Template]]
 
 // region [[MPP Module Build Template]]
 
@@ -254,8 +297,8 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
       }
       jvmTest {
         dependencies {
-          // @Suppress("DEPRECATION")
-          // if (withComposeTestUiJUnit4) implementation(compose.uiTestJUnit4)
+          @Suppress("DEPRECATION")
+          if (withComposeTestUiJUnit4) implementation(compose.dependencies.desktop.uiTestJUnit4)
         }
       }
     }
