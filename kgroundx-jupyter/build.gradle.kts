@@ -13,7 +13,7 @@ plugins {
   id("my-convention")
   plugAll(
     plugs.KotlinMulti,
-    plugs.VannikPublish,
+    plugs.VannikPublishNoVer,
     // plugs.KotlinJupyter,
   )
 }

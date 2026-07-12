@@ -14,7 +14,7 @@ dependencies {
     implementation("com.android.tools.build:gradle:9.3.0-rc02")
     implementation("org.jetbrains.compose:compose-gradle-plugin:1.12.0-beta01")
     implementation("com.vanniktech:gradle-maven-publish-plugin:0.37.0")
-    implementation("pl.mareklangiewicz.deps:DepsKt:0.4.22")
+    implementation("pl.mareklangiewicz.deps:DepsKt:0.4.23")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

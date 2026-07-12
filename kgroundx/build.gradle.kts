@@ -11,7 +11,8 @@ import pl.mareklangiewicz.templatelogic.*
 
 plugins {
   id("my-convention")
-  plugAll(plugs.KotlinMulti, plugs.VannikPublish)
+  // plugAll(plugs.KotlinMulti, plugs.VannikPublish)
+  plugAll(plugs.KotlinMulti)
 }
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
