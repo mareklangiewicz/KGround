@@ -48,6 +48,8 @@ develocity {
 
 // endregion [[My Settings Stuff]]
 
+includeBuild("template-logic")
+
 include(":kground")
 include(":kgroundx")
 include(":kground-io")
