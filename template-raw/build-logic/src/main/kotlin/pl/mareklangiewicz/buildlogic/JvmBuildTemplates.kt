@@ -10,6 +10,8 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 
+// region [[JVM Module Build Template]]
+
 /**
  * Only for very standard small jvm libs. In most cases it's better to not use this function.
  *
@@ -75,6 +77,10 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
   }
 }
 
+// endregion [[JVM Module Build Template]]
+
+// region [[JVM App Build Template]]
+
 fun Project.defaultBuildTemplateForBasicJvmApp(
   details: LibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
@@ -86,3 +92,5 @@ fun Project.defaultBuildTemplateForBasicJvmApp(
     mainClass.set(details.run { "$appMainPackage.$appMainClass" })
   }
 }
+
+// endregion [[JVM App Build Template]]

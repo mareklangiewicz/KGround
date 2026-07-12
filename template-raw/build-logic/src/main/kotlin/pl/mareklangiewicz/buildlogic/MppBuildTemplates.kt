@@ -13,6 +13,8 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 
+// region [[MPP Module Build Template]]
+
 /**
  * Only for very standard small libs. In most cases it's better to not use this function.
  *
@@ -140,6 +142,10 @@ fun KotlinMultiplatformExtension.jsDefault(
   }
 }
 
+// endregion [[MPP Module Build Template]]
+
+// region [[MPP App Build Template]]
+
 fun Project.defaultBuildTemplateForBasicMppApp(
   details: LibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
@@ -174,6 +180,10 @@ fun Project.defaultBuildTemplateForBasicMppApp(
     }
   }
 }
+
+// endregion [[MPP App Build Template]]
+
+// region [[Compose MPP Module Build Template]]
 
 /** Only for very standard compose mpp libs. In most cases, it's better to not use this function. */
 @OptIn(ExperimentalComposeLibrary::class)
@@ -265,6 +275,10 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
   }
 }
 
+// endregion [[Compose MPP Module Build Template]]
+
+// region [[Compose MPP App Build Template]]
+
 /** Only for very standard compose mpp apps. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForComposeMppApp(
   details: LibDetails,
@@ -305,3 +319,5 @@ fun Project.defaultBuildTemplateForComposeMppApp(
       }
   }
 }
+
+// endregion [[Compose MPP App Build Template]]

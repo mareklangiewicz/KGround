@@ -12,6 +12,8 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 
+// region [[Kotlin Module Build Template]]
+
 // Kind of experimental/temporary.. not sure how it will evolve yet,
 // but currently I need these kind of substitutions/locals often enough
 // especially when updating kground <-> kommandline (trans deps issues)
@@ -126,3 +128,5 @@ fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPubli
   coordinates(lib.group, name, v)
   pom { defaultPOM(lib) }
 }
+
+// endregion [[Kotlin Module Build Template]]

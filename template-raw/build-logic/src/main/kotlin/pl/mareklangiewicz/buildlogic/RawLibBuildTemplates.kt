@@ -12,6 +12,8 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 
+// region [[Raw Lib Build Template]]
+
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForRawMppLib() {
   val details = gradle.extLibDetails
@@ -226,3 +228,5 @@ fun KotlinMultiplatformExtension.androDefault() {
     }
   }
 }
+
+// endregion [[Raw Lib Build Template]]

@@ -11,6 +11,8 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 
+// region [[Andro Common Build Template]]
+
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 fun DependencyHandler.defaultAndroDeps(
   settings: LibSettings,
@@ -123,6 +125,10 @@ fun Project.defaultPublishingOfAndroApp(
 ) = defaultPublishingOfAndroLib(lib, componentName)
 
 
+// endregion [[Andro Common Build Template]]
+
+// region [[Andro App Build Template]]
+
 fun Project.defaultBuildTemplateForAndroApp(
   details: LibDetails,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
@@ -180,3 +186,5 @@ fun ApplicationExtension.defaultAndroAppPublishVariant(
   require(!publishAAB || !publishAPK) { "Either APK or AAB can be published, but not both." }
   publishing { singleVariant(variant) { if (publishAPK) publishApk() } }
 }
+
+// endregion [[Andro App Build Template]]
