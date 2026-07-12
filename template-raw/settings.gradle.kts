@@ -53,7 +53,7 @@ gradle.extLibDetails = myLibDetails(
 )
 
 
-includeBuild("build-logic")
+includeBuild("../template-logic")
 
 include(":template-raw-lib")
 if (enableMppApp) include(":template-raw-app")

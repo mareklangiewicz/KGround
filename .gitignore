@@ -16,5 +16,6 @@
 /kgroundx-app/build
 /kommand-line/build
 /kommand-samples/build
+/tmp-original-regions
 my.gradle.log
 tags
