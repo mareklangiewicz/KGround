@@ -10,6 +10,7 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
+  id("my-convention")
   plugAll(
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
@@ -69,6 +70,7 @@ fun KotlinMultiplatformExtension.defaultCompiler(
     languageVersion.set(kotlinVer)
     apiVersion.set(kotlinVer)
     if (renderInternalDiagnosticNames) freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
+    freeCompilerArgs.add("-Xcontext-parameters")
     // useful, for example, to suppress some errors when accessing internal code from some library, like:
     // @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "EXPOSED_PARAMETER_TYPE", "EXPOSED_PROPERTY_TYPE", "CANNOT_OVERRIDE_INVISIBLE_MEMBER")
   }
@@ -88,26 +90,26 @@ fun TaskCollection<Task>.defaultTestsOptions(
   if (onJvmUseJUnitPlatform) (this as? Test)?.useJUnitPlatform()
 }
 
-// Provide artifacts information requited by Maven Central
+// Provide artifacts information required by Maven Central
 fun MavenPom.defaultPOM(lib: LibDetails) {
-  name put lib.name
-  description put lib.description
-  url put lib.githubUrl
+  name.set(lib.name)
+  description.set(lib.description)
+  url.set(lib.githubUrl)
 
   licenses {
     license {
-      name put lib.licenceName
-      url put lib.licenceUrl
+      name.set(lib.licenceName)
+      url.set(lib.licenceUrl)
     }
   }
   developers {
     developer {
-      id put lib.authorId
-      name put lib.authorName
-      email put lib.authorEmail
+      id.set(lib.authorId)
+      name.set(lib.authorName)
+      email.set(lib.authorEmail)
     }
   }
-  scm { url put lib.githubUrl }
+  scm { url.set(lib.githubUrl) }
 }
 
 fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPublishBaseExtension> {

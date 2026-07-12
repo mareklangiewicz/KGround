@@ -3,6 +3,7 @@
 /local.properties
 /.idea
 /build
+/build-logic/build
 /template-raw-andro-app/build
 /template-raw-lib/build
 /template-raw-app/build

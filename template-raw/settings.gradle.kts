@@ -53,6 +53,8 @@ gradle.extLibDetails = myLibDetails(
 )
 
 
+includeBuild("build-logic")
+
 include(":template-raw-lib")
 if (enableMppApp) include(":template-raw-app")
 if (enableJvmCliApp) include(":template-raw-jvm-cli-app")
