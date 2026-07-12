@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.buildlogic.*
+import pl.mareklangiewicz.templatelogic.*
 
 plugins {
   id("my-convention")

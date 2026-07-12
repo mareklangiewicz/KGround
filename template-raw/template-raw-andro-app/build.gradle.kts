@@ -8,7 +8,7 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.buildlogic.*
+import pl.mareklangiewicz.templatelogic.*
 
 plugins {
   id("my-convention")

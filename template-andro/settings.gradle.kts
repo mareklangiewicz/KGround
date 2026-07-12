@@ -48,5 +48,6 @@ develocity {
 // endregion [[My Settings Stuff]]
 
 rootProject.name = "template-andro"
+includeBuild("../template-logic")
 include(":template-andro-lib")
 include(":template-andro-app")

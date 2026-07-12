@@ -48,7 +48,7 @@ develocity {
 // endregion [[My Settings Stuff]]
 
 rootProject.name = "template-basic"
-
+includeBuild("../template-logic")
 include(":template-basic-lib")
 include(":template-basic-app")
 include(":template-basic-jvm-app")

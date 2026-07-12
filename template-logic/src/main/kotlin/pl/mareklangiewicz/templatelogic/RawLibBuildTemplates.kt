@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.buildlogic
+package pl.mareklangiewicz.templatelogic
 
 import org.gradle.api.*
 import org.gradle.api.artifacts.*

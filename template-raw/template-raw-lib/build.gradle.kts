@@ -8,7 +8,7 @@ import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import pl.mareklangiewicz.buildlogic.*
+import pl.mareklangiewicz.templatelogic.*
 
 plugins {
   id("my-convention")

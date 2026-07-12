@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.buildlogic
+package pl.mareklangiewicz.templatelogic
 
 import pl.mareklangiewicz.deps.*
 
