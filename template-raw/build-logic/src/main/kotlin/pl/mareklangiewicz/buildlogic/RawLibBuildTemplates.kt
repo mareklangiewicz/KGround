@@ -20,7 +20,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
   val settings = details.settings
 
   if (settings.withAndro) {
-    apply(plugin = pl.mareklangiewicz.deps.Plugs.AndroKmpNoVer.group) // group is actually id for plugins
+    apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
   }
   if (settings.compose?.withComposeTestUiJUnit5 == true)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")

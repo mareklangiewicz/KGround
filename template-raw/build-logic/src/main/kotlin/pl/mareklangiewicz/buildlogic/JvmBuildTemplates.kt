@@ -18,7 +18,7 @@ import pl.mareklangiewicz.defaults.*
  * These ignoreXXX flags are hacky, but needed. see [jvmOnlyDefault] kdoc for details.
  */
 fun Project.defaultBuildTemplateForBasicJvmLib(
-  details: LibDetails,
+  details: LibDetails = rootExtLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
   addJvmDependencies: DependencyHandler.() -> Unit = {},
@@ -82,7 +82,7 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
 // region [[JVM App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicJvmApp(
-  details: LibDetails,
+  details: LibDetails = rootExtLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
   addJvmDependencies: DependencyHandler.() -> Unit = {},

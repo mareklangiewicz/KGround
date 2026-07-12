@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.gradle.dsl.*
 import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.defaults.*
 
 // region [[Kotlin Module Build Template]]
 
@@ -44,11 +45,11 @@ fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
   if (withMavenCentral) mavenCentral()
   if (withGradle) gradlePluginPortal()
   if (withGoogle) google()
-  if (withKotlinx) maven(pl.mareklangiewicz.deps.Repos.kotlinx)
-  if (withKotlinxHtml) maven(pl.mareklangiewicz.deps.Repos.kotlinxHtml)
-  if (withComposeJbDev) maven(pl.mareklangiewicz.deps.Repos.composeJbDev)
-  if (withKtorEap) maven(pl.mareklangiewicz.deps.Repos.ktorEap)
-  if (withJitpack) maven(pl.mareklangiewicz.deps.Repos.jitpack)
+  if (withKotlinx) maven(repos.kotlinx)
+  if (withKotlinxHtml) maven(repos.kotlinxHtml)
+  if (withComposeJbDev) maven(repos.composeJbDev)
+  if (withKtorEap) maven(repos.ktorEap)
+  if (withJitpack) maven(repos.jitpack)
 }
 
 // TODO_maybe: doc says it could be now also applied globally instead for each task (and it works for andro too)
@@ -96,26 +97,26 @@ fun TaskCollection<Task>.defaultTestsOptions(
   if (onJvmUseJUnitPlatform) (this as? Test)?.useJUnitPlatform()
 }
 
-// Provide artifacts information required by Maven Central
+// Provide artifacts information requited by Maven Central
 fun MavenPom.defaultPOM(lib: LibDetails) {
-  name.set(lib.name)
-  description.set(lib.description)
-  url.set(lib.githubUrl)
+  name put lib.name
+  description put lib.description
+  url put lib.githubUrl
 
   licenses {
     license {
-      name.set(lib.licenceName)
-      url.set(lib.licenceUrl)
+      name put lib.licenceName
+      url put lib.licenceUrl
     }
   }
   developers {
     developer {
-      id.set(lib.authorId)
-      name.set(lib.authorName)
-      email.set(lib.authorEmail)
+      id put lib.authorId
+      name put lib.authorName
+      email put lib.authorEmail
     }
   }
-  scm { url.set(lib.githubUrl) }
+  scm { url put lib.githubUrl }
 }
 
 fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPublishBaseExtension> {
@@ -124,8 +125,7 @@ fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPubli
   signAllPublications()
   signAllPublicationsFixSignatoryIfFound()
   // Note: artifactId is not lib.name but current project.name (module name)
-  val v = lib.version.str
-  coordinates(lib.group, name, v)
+  coordinates(groupId = lib.group, artifactId = name, version = lib.version.str)
   pom { defaultPOM(lib) }
 }
 

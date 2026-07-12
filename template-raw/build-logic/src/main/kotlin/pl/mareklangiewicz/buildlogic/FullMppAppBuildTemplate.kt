@@ -9,7 +9,7 @@ import pl.mareklangiewicz.defaults.*
 // region [[Full MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForFullMppApp(
-  details: LibDetails,
+  details: LibDetails = rootExtLibDetails,
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
   defaultBuildTemplateForComposeMppApp(

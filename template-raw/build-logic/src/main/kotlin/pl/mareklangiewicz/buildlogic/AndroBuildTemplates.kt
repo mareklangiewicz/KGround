@@ -86,7 +86,7 @@ fun DependencyHandler.defaultAndroTestDeps(
 
   if (!ignoreCompose && settings.withCompose) addAllWithVer(
     configuration,
-    Vers.ComposeAndro,
+    vers.ComposeAndro,
     AndroidX.Compose.Ui.test,
     AndroidX.Compose.Ui.test_manifest,
     AndroidX.Compose.Ui.test_junit4.takeIf { settings.withTestJUnit4 },
@@ -103,6 +103,25 @@ fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
     "META-INF/kotlinx_coroutines_core.version",
   ),
 )
+
+// fun CommonExtension.defaultCompileOptions(
+//   jvmVer: String? = null, // it's better to use jvmToolchain (normally done in fun allDefault)
+// ) = compileOptions {
+//   jvmVer?.let {
+//     sourceCompatibility(it)
+//     targetCompatibility(it)
+//   }
+// }
+
+// fun CommonExtension.defaultComposeStuff() {
+//   // buildFeatures {
+//   //   compose = true
+//   // }
+// }
+
+// fun CommonExtension.defaultPackagingOptions() = packaging {
+//   resources.excludes.defaultAndroExcludedResources()
+// }
 
 /** Use template-andro/build.gradle.kts:fun defaultAndroLibPublishAllVariants() to create component with name "default". */
 fun Project.defaultPublishingOfAndroLib(
@@ -130,13 +149,17 @@ fun Project.defaultPublishingOfAndroApp(
 // region [[Andro App Build Template]]
 
 fun Project.defaultBuildTemplateForAndroApp(
-  details: LibDetails,
+  details: LibDetails = rootExtLibDetails,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
+  // extensions.configure<KotlinMultiplatformExtension> {
+  //   androidTarget()
+  //   details.settings.withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
+  // }
   extensions.configure<ApplicationExtension> {
     defaultAndroApp(details)
     variant?.let { defaultAndroAppPublishVariant(it) }
@@ -144,12 +167,12 @@ fun Project.defaultBuildTemplateForAndroApp(
   dependencies {
     defaultAndroDeps(details.settings)
     defaultAndroTestDeps(details.settings)
-    add("debugImplementation", AndroidX.Tracing.ktx)
+    add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroDependencies()
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
-    jvmTargetVer = null,
+    jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
   variant?.let { defaultPublishingOfAndroApp(details, it) }
@@ -161,8 +184,11 @@ fun ApplicationExtension.defaultAndroApp(
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
+  // defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig(details)
   defaultBuildTypes()
+  // details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
+  // defaultPackagingOptions()
 }
 
 fun ApplicationExtension.defaultDefaultConfig(details: LibDetails) = defaultConfig {
