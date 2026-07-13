@@ -17,7 +17,7 @@ import pl.mareklangiewicz.defaults.*
 // region [[Full MPP Lib Build Template]]
 
 fun Project.defaultBuildTemplateForFullMppLib(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
   if (details.settings.withAndro) {
@@ -64,7 +64,7 @@ fun Project.defaultBuildTemplateForFullMppLib(
  * These ignoreXXX flags are hacky, but needed. see [allDefault] kdoc for details.
  */
 fun Project.defaultBuildTemplateForBasicMppLib(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
@@ -190,7 +190,7 @@ fun KotlinMultiplatformExtension.jsDefault(
 // region [[MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicMppApp(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
@@ -231,7 +231,7 @@ fun Project.defaultBuildTemplateForBasicMppApp(
 /** Only for very standard compose mpp libs. In most cases, it's better to not use this function. */
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForComposeMppLib(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
@@ -324,7 +324,7 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
 
 /** Only for very standard compose mpp apps. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForComposeMppApp(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},

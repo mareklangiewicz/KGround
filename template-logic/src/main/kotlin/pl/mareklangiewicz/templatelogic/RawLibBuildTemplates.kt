@@ -61,9 +61,12 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       }
 
       val composeTest = create("composeTest") {
+        // dependsOn(composeMain) check if it's not needed and it even generates warnings!
+        // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
         dependsOn(commonTest.get())
         dependencies {
           val settpose = settings.compose ?: return@dependencies
+          // TODO_later anything here? any compose testing util not related to compose ui?
         }
       }
 
@@ -86,6 +89,8 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       }
 
       val composeUiTest = create("composeUiTest") {
+        // dependsOn(composeUiMain) looks like not it's not needed and it even generates warnings!
+          // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
         dependsOn(composeTest)
         dependencies {
           val settpose = settings.compose ?: return@dependencies

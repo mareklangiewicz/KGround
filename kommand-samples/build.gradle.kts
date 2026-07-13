@@ -16,7 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val details = rootExtLibDetails.copy(
+val details = gradle.extLibDetails.copy(
   name = "Kommand Samples",
   description = "Additional samples for KommandLine."
 )

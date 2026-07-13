@@ -20,6 +20,6 @@ plugins {
 
 // endregion [[Basic JVM App Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicJvmApp(gradle.extLibDetails, ignoreCompose = true, ignoreAndroTarget = true) {
+defaultBuildTemplateForBasicJvmApp(ignoreCompose = true, ignoreAndroTarget = true) {
    implementation(project(":template-raw-lib"))
 }

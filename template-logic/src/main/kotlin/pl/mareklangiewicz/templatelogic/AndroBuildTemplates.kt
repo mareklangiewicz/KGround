@@ -148,7 +148,7 @@ fun Project.defaultPublishingOfAndroApp(
 // region [[Andro Lib Build Template]]
 
 fun Project.defaultBuildTemplateForAndroLib(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   addAndroMainDependencies: DependencyHandler.() -> Unit = {},
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
@@ -231,7 +231,7 @@ fun LibraryExtension.defaultAndroLibPublishAllVariants(
 // region [[Andro App Build Template]]
 
 fun Project.defaultBuildTemplateForAndroApp(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")

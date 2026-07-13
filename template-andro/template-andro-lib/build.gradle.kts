@@ -26,6 +26,6 @@ plugins {
 defaultBuildTemplateForAndroLib()
 
 dependencies {
-  defaultAndroTestDeps(rootExtLibDetails.settings, configuration = "androidTestImplementation")
+  defaultAndroTestDeps(gradle.extLibDetails.settings, configuration = "androidTestImplementation")
   // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
 }

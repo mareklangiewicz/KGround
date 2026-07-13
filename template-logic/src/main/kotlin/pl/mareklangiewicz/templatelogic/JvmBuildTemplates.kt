@@ -18,10 +18,10 @@ import pl.mareklangiewicz.defaults.*
  * These ignoreXXX flags are hacky, but needed. see [jvmOnlyDefault] kdoc for details.
  */
 fun Project.defaultBuildTemplateForBasicJvmLib(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
-  addJvmDependencies: DependencyHandler.() -> Unit = {},
+  addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
 ) {
   require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure compose stuff" }
   require(ignoreAndroTarget || details.settings.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
@@ -52,12 +52,13 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
   settings: LibSettings,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
-  addJvmDependencies: DependencyHandler.() -> Unit = {},
+  addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
 ) = with(settings) {
   require(ignoreCompose || compose == null) { "jvmOnlyDefault can NOT configure compose stuff" }
   require(ignoreAndroTarget || settings.andro == null) { "jvmOnlyDefault can NOT configure android target" }
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   project.dependencies.apply {
+    val scope = DependencyHandlerScope.of(this)
     if (withKotlinxHtml) add("implementation", KotlinX.html)
     add("testImplementation", Kotlin.test)
     if (withTestUSpekX) add("testImplementation", Langiewicz.uspekx)
@@ -73,7 +74,7 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
     }
     if (withTestGoogleTruth) add("testImplementation", Com.Google.Truth.truth)
     if (withTestMockitoKotlin) add("testImplementation", Org.Mockito.Kotlin.mockito_kotlin)
-    addJvmDependencies()
+    scope.addJvmDependencies()
   }
 }
 
@@ -82,10 +83,10 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
 // region [[JVM App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicJvmApp(
-  details: LibDetails = rootExtLibDetails,
+  details: LibDetails = gradle.extLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
-  addJvmDependencies: DependencyHandler.() -> Unit = {},
+  addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
 ) {
   defaultBuildTemplateForBasicJvmLib(details, ignoreCompose, ignoreAndroTarget, addJvmDependencies)
   extensions.configure<JavaApplication> {

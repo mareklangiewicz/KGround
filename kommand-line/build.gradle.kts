@@ -16,7 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val details = rootExtLibDetails.copy(
+val details = gradle.extLibDetails.copy(
   name = "Kommand Line",
   description = "Kotlin DSL for popular CLI commands."
 )

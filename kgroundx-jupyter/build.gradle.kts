@@ -24,12 +24,12 @@ plugins {
 //   because looks like it makes plugs.VannikPublish fail.
 //   Try again later.. or maybe first wait until jupyter actually supports kotlin 2.1!
 
-val settings = rootExtLibDetails.settings.copy(
+val settings = gradle.extLibDetails.settings.copy(
   withJs = false,
   withLinuxX64 = false,
 )
 
-val details = rootExtLibDetails.copy(settings = settings)
+val details = gradle.extLibDetails.copy(settings = settings)
 
 // Note: I tried to use Jvm only templates for kground-jupyter module, but it's way worse approach.
 // I'd have to use java plugin for source jar generation (and had problems with that; sources are required by sonatype),
