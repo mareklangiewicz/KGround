@@ -9,6 +9,9 @@ val buildScanPublishingAllowed = true &&
   true
 // false
 
+import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.extLibDetails
+
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
 // endregion [[My Settings Stuff <~~]]
@@ -46,6 +49,18 @@ develocity {
 }
 
 // endregion [[My Settings Stuff]]
+
+gradle.extLibDetails = myLibDetails(
+  name = "TemplateAndro",
+  description = "Template for android projects.",
+  githubUrl = "https://github.com/mareklangiewicz/KGround",
+  version = Ver(0, 0, 17),
+  settings = LibSettings(
+    withTestJUnit4 = true,
+    withTestJUnit5 = false,
+    andro = LibAndroSettings( publishVariant = "debug"),
+  ),
+)
 
 rootProject.name = "template-andro"
 includeBuild("../template-logic")

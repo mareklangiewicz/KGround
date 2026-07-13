@@ -24,29 +24,4 @@ plugins {
 
 // endregion [[Full Root Build Imports and Plugs]]
 
-val enableJs = true
-val enableLinux = false
-val enableCompose = true
-val enableAndro = true
-// Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
-// Use Android Studio or disable andro target temporarily (or compile only with CLI).
-
-defaultBuildTemplateForRootProject(
-  myLibDetails(
-    name = "TemplateFull",
-    description = "Template for multi platform projects.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-full",
-    version = Ver(0, 0, 33),
-    settings = LibSettings(
-      withJs = enableJs,
-      withLinuxX64 = enableLinux,
-      withKotlinxHtml = true, // also used in common code
-      compose = LibComposeSettings(
-        withComposeHtmlCore = enableJs,
-        withComposeHtmlSvg = enableJs,
-        withComposeTestHtmlUtils = enableJs,
-      ).takeIf { enableCompose },
-      andro = LibAndroSettings().takeIf { enableAndro },
-    ),
-  ),
-)
+defaultGroupAndVerAndDescription(gradle.extLibDetails)

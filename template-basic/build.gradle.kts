@@ -14,21 +14,4 @@ plugins {
 
 // endregion [[Basic Root Build Imports and Plugs]]
 
-val enableJs = true
-val enableLinux = true
-
-defaultBuildTemplateForRootProject(
-  myLibDetails(
-    name = "TemplateBasic",
-    description = "Template for basic multi platform projects. No android or compose here.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
-    version = Ver(0, 0, 1),
-    settings = LibSettings(
-      withJs = enableJs,
-      withLinuxX64 = enableLinux,
-      withKotlinxHtml = true, // also used in common code
-      compose = null,
-      andro = null,
-    ),
-  ),
-)
+defaultGroupAndVerAndDescription(gradle.extLibDetails)

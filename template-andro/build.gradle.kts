@@ -19,16 +19,4 @@ plugins {
 
 // endregion [[Full Root Build Imports and Plugs]]
 
-defaultBuildTemplateForRootProject(
-  myLibDetails(
-    name = "TemplateAndro",
-    description = "Template for android projects.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 17),
-    settings = LibSettings(
-      withTestJUnit4 = true,
-      withTestJUnit5 = false,
-      andro = LibAndroSettings( publishVariant = "debug"),
-    ),
-  ),
-)
+defaultGroupAndVerAndDescription(gradle.extLibDetails)

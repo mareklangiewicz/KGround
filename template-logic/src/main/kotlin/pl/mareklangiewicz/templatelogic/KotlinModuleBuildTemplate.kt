@@ -13,17 +13,6 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
 
-// region [[Root Build Template]]
-
-fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
-  details?.let {
-    rootExtLibDetails = it
-    defaultGroupAndVerAndDescription(it)
-  }
-}
-
-// endregion [[Root Build Template]]
-
 // region [[Kotlin Module Build Template]]
 
 // Kind of experimental/temporary.. not sure how it will evolve yet,
