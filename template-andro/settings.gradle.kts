@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.extLibDetails
+
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
 // Careful with auto publishing fails/stack traces
@@ -9,8 +12,6 @@ val buildScanPublishingAllowed = true &&
   true
 // false
 
-import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.extLibDetails
 
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
