@@ -4,8 +4,10 @@
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.templatelogic.*
 
 plugins {
+  id("my-convention") apply false
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false
@@ -17,27 +19,4 @@ plugins {
 
 // endregion [[Full Root Build Imports and Plugs]]
 
-defaultBuildTemplateForRootProject(
-  myLibDetails(
-    name = "TemplateAndro",
-    description = "Template for android projects.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround",
-    version = Ver(0, 0, 17),
-    settings = LibSettings(
-      withTestJUnit4 = true,
-      withTestJUnit5 = false,
-      andro = LibAndroSettings( publishVariant = "debug"),
-    ),
-  ),
-)
-
-// region [[Root Build Template]]
-
-fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
-  details?.let {
-    rootExtLibDetails = it
-    defaultGroupAndVerAndDescription(it)
-  }
-}
-
-// endregion [[Root Build Template]]
+defaultGroupAndVerAndDescription(gradle.extLibDetails)

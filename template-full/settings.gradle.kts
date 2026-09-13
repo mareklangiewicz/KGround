@@ -9,6 +9,9 @@ val buildScanPublishingAllowed = true &&
   true
 // false
 
+import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.extLibDetails
+
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
 // endregion [[My Settings Stuff <~~]]
@@ -33,8 +36,8 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.22" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.develocity") version "4.5.0" // https://docs.gradle.com/develocity/gradle-plugin/
+  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
 develocity {
@@ -47,8 +50,33 @@ develocity {
 
 // endregion [[My Settings Stuff]]
 
-rootProject.name = "template-full"
+val enableJs = true
+val enableLinux = false
+val enableCompose = true
+val enableAndro = true
+// Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
+// Use Android Studio or disable andro target temporarily (or compile only with CLI).
 
+gradle.extLibDetails = myLibDetails(
+  name = "TemplateFull",
+  description = "Template for multi platform projects.",
+  githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-full",
+  version = Ver(0, 0, 33),
+  settings = LibSettings(
+    withJs = enableJs,
+    withLinuxX64 = enableLinux,
+    withKotlinxHtml = true, // also used in common code
+    compose = LibComposeSettings(
+      withComposeHtmlCore = enableJs,
+      withComposeHtmlSvg = enableJs,
+      withComposeTestHtmlUtils = enableJs,
+    ).takeIf { enableCompose },
+    andro = LibAndroSettings().takeIf { enableAndro },
+  ),
+)
+
+rootProject.name = "template-full"
+includeBuild("../template-logic")
 include(":template-full-lib")
 // include(":template-full-app")
 // include(":template-full-jvm-cli-app")

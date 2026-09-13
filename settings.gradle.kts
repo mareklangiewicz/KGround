@@ -1,4 +1,7 @@
 
+import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.extLibDetails
+
 rootProject.name = "KGround"
 
 // Careful with auto publishing fails/stack traces
@@ -34,8 +37,8 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.22" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.develocity") version "4.5.0" // https://docs.gradle.com/develocity/gradle-plugin/
+  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
 develocity {
@@ -47,6 +50,26 @@ develocity {
 }
 
 // endregion [[My Settings Stuff]]
+
+val enableJs = true
+val enableNative = true
+
+gradle.extLibDetails = myLibDetails(
+  name = "KGround",
+  description = "Kotlin Common Ground.",
+  githubUrl = "https://github.com/mareklangiewicz/KGround",
+  version = Ver(0, 1, 29),
+  // https://central.sonatype.com/artifact/pl.mareklangiewicz/kground/
+  // https://github.com/mareklangiewicz/KGround/releases
+  settings = LibSettings(
+    withJs = enableJs,
+    withLinuxX64 = enableNative,
+    compose = null,
+    withCentralPublish = true,
+  ),
+)
+
+includeBuild("template-logic")
 
 include(":kground")
 include(":kgroundx")

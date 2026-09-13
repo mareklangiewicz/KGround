@@ -3,8 +3,10 @@
 
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
+import pl.mareklangiewicz.templatelogic.*
 
 plugins {
+  id("my-convention") apply false
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false
@@ -20,8 +22,6 @@ plugins {
   plug(plugs.VannikPublish) apply false
 }
 
-val details = gradle.extLibDetails
-
-defaultGroupAndVerAndDescription(details)
+defaultGroupAndVerAndDescription(gradle.extLibDetails)
 
 // endregion [[KMP Root Build Template]]

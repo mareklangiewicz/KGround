@@ -14,7 +14,9 @@
 /kgroundx-workflows/build
 /kgroundx-jupyter/build
 /kgroundx-app/build
+/template-logic/build
 /kommand-line/build
 /kommand-samples/build
+/tmp-original-regions
 my.gradle.log
 tags

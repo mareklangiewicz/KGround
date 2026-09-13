@@ -53,6 +53,8 @@ gradle.extLibDetails = myLibDetails(
 )
 
 
+includeBuild("../template-logic")
+
 include(":template-raw-lib")
 if (enableMppApp) include(":template-raw-app")
 if (enableJvmCliApp) include(":template-raw-jvm-cli-app")
@@ -62,6 +64,9 @@ if (enableAndroApp) include(":template-raw-andro-app")
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
 // endregion [[My Settings Stuff <~~]]
 // region [[My Settings Stuff]]
+
+// https://docs.gradle.org/current/userguide/upgrading_version_9.html#opt_into_gradle_10_behavior_by_disabling_implicit_lookup_in_parent_projects
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
 
 pluginManagement {
   repositories {
@@ -82,8 +87,8 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.22" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.develocity") version "4.5.0" // https://docs.gradle.com/develocity/gradle-plugin/
+  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
 develocity {

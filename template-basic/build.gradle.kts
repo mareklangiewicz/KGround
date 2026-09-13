@@ -4,42 +4,14 @@
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.templatelogic.*
 
 plugins {
+  id("my-convention") apply false
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinJvm) apply false
 }
 
 // endregion [[Basic Root Build Imports and Plugs]]
 
-val enableJs = true
-val enableLinux = true
-
-defaultBuildTemplateForRootProject(
-  myLibDetails(
-    name = "TemplateBasic",
-    description = "Template for basic multi platform projects. No android or compose here.",
-    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
-    version = Ver(0, 0, 1),
-    settings = LibSettings(
-      withJs = enableJs,
-      withLinuxX64 = enableLinux,
-      withKotlinxHtml = true, // also used in common code
-      compose = null,
-      andro = null,
-    ),
-  ),
-)
-
-
-
-// region [[Root Build Template]]
-
-fun Project.defaultBuildTemplateForRootProject(details: LibDetails? = null) {
-  details?.let {
-    rootExtLibDetails = it
-    defaultGroupAndVerAndDescription(it)
-  }
-}
-
-// endregion [[Root Build Template]]
+defaultGroupAndVerAndDescription(gradle.extLibDetails)
