@@ -123,24 +123,21 @@ fun CommonExtension.defaultPackagingOptions() = packaging.apply {
 }
 
 /** Use template-andro/build.gradle.kts:fun defaultAndroLibPublishAllVariants() to create component with name "default". */
-fun Project.defaultPublishingOfAndroLib(
-  lib: LibDetails,
-  componentName: String = "default",
-) {
+context(details: LibDetails)
+fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   afterEvaluate {
     extensions.configure<PublishingExtension> {
       publications.register<MavenPublication>(componentName) {
         from(components[componentName])
-        pom { defaultPOM(lib) }
+        pom { defaultPOM() }
       }
     }
   }
 }
 
-fun Project.defaultPublishingOfAndroApp(
-  lib: LibDetails,
-  componentName: String = "release",
-) = defaultPublishingOfAndroLib(lib, componentName)
+context(details: LibDetails)
+fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
+  defaultPublishingOfAndroLib(componentName)
 
 
 // endregion [[Andro Common Build Template]]
@@ -157,9 +154,9 @@ fun Project.defaultBuildTemplateForAndroLib(
     androidTarget()
     jvmToolchain(details.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
   }
-  extensions.configure<LibraryExtension> {
-    defaultAndroLib(details)
-  }
+  with(details) { extensions.configure<LibraryExtension> {
+    defaultAndroLib()
+  } }
   with(details.settings) { dependencies {
     defaultAndroDeps()
     defaultAndroTestDeps()
@@ -171,19 +168,21 @@ fun Project.defaultBuildTemplateForAndroLib(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  if (andro.publishAllVariants) defaultPublishingOfAndroLib(details, "default")
-  if (andro.publishOneVariant) defaultPublishingOfAndroLib(details, andro.publishVariant)
+  with(details) {
+    if (andro.publishAllVariants) defaultPublishingOfAndroLib("default")
+    if (andro.publishOneVariant) defaultPublishingOfAndroLib(andro.publishVariant)
+  }
 }
 
+context(details: LibDetails)
 fun LibraryExtension.defaultAndroLib(
-  details: LibDetails,
   ignoreCompose: Boolean = false,
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
-  defaultDefaultConfig(details)
+  defaultDefaultConfig()
   defaultBuildTypes()
   details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
   defaultPackagingOptions()
@@ -191,7 +190,8 @@ fun LibraryExtension.defaultAndroLib(
   if (!ignoreAndroPublish && andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
 }
 
-fun LibraryExtension.defaultDefaultConfig(details: LibDetails) = defaultConfig {
+context(details: LibDetails)
+fun LibraryExtension.defaultDefaultConfig() = defaultConfig {
   val asettings = details.settings.andro ?: error("No andro settings.")
   namespace = details.namespace
   minSdk = asettings.sdkMin
@@ -238,10 +238,10 @@ fun Project.defaultBuildTemplateForAndroApp(
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
-  extensions.configure<ApplicationExtension> {
-    defaultAndroApp(details)
+  with(details) { extensions.configure<ApplicationExtension> {
+    defaultAndroApp()
     variant?.let { defaultAndroAppPublishVariant(it) }
-  }
+  } }
   with(details.settings) { dependencies {
     defaultAndroDeps()
     defaultAndroTestDeps()
@@ -253,20 +253,21 @@ fun Project.defaultBuildTemplateForAndroApp(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  variant?.let { defaultPublishingOfAndroApp(details, it) }
+  with(details) { variant?.let { defaultPublishingOfAndroApp(it) } }
 }
 
+context(details: LibDetails)
 fun ApplicationExtension.defaultAndroApp(
-  details: LibDetails,
   ignoreCompose: Boolean = false,
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
-  defaultDefaultConfig(details)
+  defaultDefaultConfig()
   defaultBuildTypes()
 }
 
-fun ApplicationExtension.defaultDefaultConfig(details: LibDetails) = defaultConfig {
+context(details: LibDetails)
+fun ApplicationExtension.defaultDefaultConfig() = defaultConfig {
   val asettings = details.settings.andro ?: error("No andro settings.")
   applicationId = details.appId
   namespace = details.namespace

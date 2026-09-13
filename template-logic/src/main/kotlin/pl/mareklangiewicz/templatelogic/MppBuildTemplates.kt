@@ -32,15 +32,14 @@ fun Project.defaultBuildTemplateForFullMppLib(
   )
 
   if (details.settings.withAndro) {
-    extensions.configure<LibraryExtension> {
+    with(details) { extensions.configure<LibraryExtension> {
       defaultAndroLib(
-        details,
         ignoreCompose = true, // compose mpp configured already
         ignoreAndroPublish = true,
           // FIXME: maybe it's fine to publish in andro way here too (full mpp lib case),
           //  but let's analyze/test publications more before doing that (commiting to: ignoreAndroPublish = false).
       )
-    }
+    } }
 
     // this is "single platform way" / "android way" to declare deps,
     // it would be more "correct" to configure everything "mpp way" (android deps too),
@@ -90,7 +89,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) with(details) { defaultPublishing() }
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 

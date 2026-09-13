@@ -27,18 +27,17 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   require(ignoreAndroTarget || details.settings.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
   repositories { addRepos(details.settings.repos) }
   defaultGroupAndVerAndDescription(details)
-  extensions.configure<KotlinJvmProjectExtension> {
+  with(details.settings) { extensions.configure<KotlinJvmProjectExtension> {
     jvmOnlyDefault(
-      settings = details.settings,
       ignoreCompose = ignoreCompose,
       ignoreAndroTarget = ignoreAndroTarget,
       addJvmDependencies = addJvmDependencies,
     )
-  }
+  } }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun jvmDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) with(details) { defaultPublishing() }
   else println("JVM Module ${name}: publishing (and signing) disabled")
 }
 
@@ -48,8 +47,8 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
  * These ignoreXXX flags are hacky, but needed because we want to inject this code also to such build files,
  * where plugins for compose and/or android are not applied at all, so compose/android stuff should be explicitly ignored.
  */
+context(settings: LibSettings)
 fun KotlinJvmProjectExtension.jvmOnlyDefault(
-  settings: LibSettings,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},

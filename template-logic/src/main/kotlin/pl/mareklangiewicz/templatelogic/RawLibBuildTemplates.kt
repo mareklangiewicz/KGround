@@ -227,7 +227,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
 
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) with(details) { defaultPublishing() }
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 

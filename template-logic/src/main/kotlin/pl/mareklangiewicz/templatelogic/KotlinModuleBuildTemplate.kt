@@ -98,35 +98,37 @@ fun TaskCollection<Task>.defaultTestsOptions(
 }
 
 // Provide artifacts information required by Maven Central
-fun MavenPom.defaultPOM(lib: LibDetails) {
-  name put lib.name
-  description put lib.description
-  url put lib.githubUrl
+context(details: LibDetails)
+fun MavenPom.defaultPOM() {
+  name put details.name
+  description put details.description
+  url put details.githubUrl
 
   licenses {
     license {
-      name put lib.licenceName
-      url put lib.licenceUrl
+      name put details.licenceName
+      url put details.licenceUrl
     }
   }
   developers {
     developer {
-      id put lib.authorId
-      name put lib.authorName
-      email put lib.authorEmail
+      id put details.authorId
+      name put details.authorName
+      email put details.authorEmail
     }
   }
-  scm { url put lib.githubUrl }
+  scm { url put details.githubUrl }
 }
 
-fun Project.defaultPublishing(lib: LibDetails) = extensions.configure<MavenPublishBaseExtension> {
+context(details: LibDetails)
+fun Project.defaultPublishing() = extensions.configure<MavenPublishBaseExtension> {
   propertiesTryOverride("signingInMemoryKey", "signingInMemoryKeyPassword", "mavenCentralPassword")
-  if (lib.settings.withCentralPublish) publishToMavenCentral(automaticRelease = false)
+  if (details.settings.withCentralPublish) publishToMavenCentral(automaticRelease = false)
   signAllPublications()
   signAllPublicationsFixSignatoryIfFound()
-  // Note: artifactId is not lib.name but current project.name (module name)
-  coordinates(groupId = lib.group, artifactId = name, version = lib.version.str)
-  pom { defaultPOM(lib) }
+  // Note: artifactId is not details.name but current project.name (module name)
+  coordinates(groupId = details.group, artifactId = name, version = details.version.str)
+  pom { defaultPOM() }
 }
 
 // endregion [[Kotlin Module Build Template]]
