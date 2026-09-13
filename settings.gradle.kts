@@ -37,8 +37,8 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.23" // https://plugins.gradle.org/search?term=mareklangiewicz
-  id("com.gradle.develocity") version "4.5.0" // https://docs.gradle.com/develocity/gradle-plugin/
+  id("pl.mareklangiewicz.deps.settings") version "0.4.24" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
 develocity {
@@ -58,7 +58,7 @@ gradle.extLibDetails = myLibDetails(
   name = "KGround",
   description = "Kotlin Common Ground.",
   githubUrl = "https://github.com/mareklangiewicz/KGround",
-  version = Ver(0, 1, 29),
+  version = Ver(0, 1, 30),
   // https://central.sonatype.com/artifact/pl.mareklangiewicz/kground/
   // https://github.com/mareklangiewicz/KGround/releases
   settings = LibSettings(
