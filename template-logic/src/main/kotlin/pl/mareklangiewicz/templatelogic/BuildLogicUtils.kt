@@ -9,5 +9,8 @@ fun testContextParameters() {
     println("Successfully used context parameters in project: ${project.name}")
 }
 
-context(_project: Project)
-val libDetails: LibDetails get() = _project.gradle.extLibDetails
+// NOTE: deliberately NO `context(Project) val libDetails get() = gradle.extLibDetails` here.
+// It would read the AMBIENT details and silently ignore the per-module overrides that
+// kgroundx-maintenance/-experiments/-workflows/-jupyter and both kommand modules rely on.
+// The effective LibDetails/LibSettings is passed down as a context parameter instead,
+// established by each defaultBuildTemplateFor* entry point.

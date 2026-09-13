@@ -46,11 +46,11 @@ fun Project.defaultBuildTemplateForFullMppLib(
     // it would be more "correct" to configure everything "mpp way" (android deps too),
     // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
     // (trust me future Marek: I've tried this already :) )
-    dependencies {
+    with(details.settings) { dependencies {
       // ignoreCompose because we have compose configured mpp way already.
-      defaultAndroDeps(details.settings, ignoreCompose = true)
-      defaultAndroTestDeps(details.settings, ignoreCompose = true)
-    }
+      defaultAndroDeps(ignoreCompose = true)
+      defaultAndroTestDeps(ignoreCompose = true)
+    } }
   }
 }
 
@@ -78,16 +78,15 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   }
   repositories { addRepos(details.settings.repos) }
   defaultGroupAndVerAndDescription(details)
-  extensions.configure<KotlinMultiplatformExtension> {
+  with(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
     allDefault(
-      settings = details.settings,
       ignoreCompose = ignoreCompose,
       ignoreAndroTarget = ignoreAndroTarget,
       ignoreAndroConfig = ignoreAndroConfig,
       ignoreAndroPublish = ignoreAndroPublish,
       addCommonMainDependencies = addCommonMainDependencies,
     )
-  }
+  } }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
@@ -105,8 +104,8 @@ fun Project.defaultBuildTemplateForBasicMppLib(
  * https://youtrack.jetbrains.com/issue/KT-61575/Publishing-a-KMP-library-handles-Android-target-inconsistently-requiring-an-explicit-publishLibraryVariants-call-to-publish
  * https://youtrack.jetbrains.com/issue/KT-60623/Deprecate-publishAllLibraryVariants-in-kotlin-android
  */
+context(settings: LibSettings)
 fun KotlinMultiplatformExtension.allDefault(
-  settings: LibSettings,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
@@ -247,9 +246,9 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     ignoreAndroPublish = ignoreAndroPublish,
     addCommonMainDependencies = addCommonMainDependencies,
   )
-  extensions.configure<KotlinMultiplatformExtension> {
-    allDefaultSourceSetsForCompose(details.settings)
-  }
+  with(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
+    allDefaultSourceSetsForCompose()
+  } }
 }
 
 
@@ -258,8 +257,8 @@ fun Project.defaultBuildTemplateForComposeMppLib(
  * because it's also used for libs without compose plugin.
  * This one does the rest, so it has to be called additionally for compose libs, after .allDefault */
 @OptIn(ExperimentalComposeLibrary::class)
+context(settings: LibSettings)
 fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
-  settings: LibSettings,
 ) = with(settings.compose ?: error("Compose settings not set.")) {
   val compose = project.extensions.getByName("compose") as ComposeExtension
   sourceSets {

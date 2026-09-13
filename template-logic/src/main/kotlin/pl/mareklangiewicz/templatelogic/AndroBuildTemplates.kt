@@ -15,8 +15,8 @@ import pl.mareklangiewicz.defaults.*
 // region [[Andro Common Build Template]]
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
+context(settings: LibSettings)
 fun DependencyHandler.defaultAndroDeps(
-  settings: LibSettings,
   ignoreCompose: Boolean = false,
   configuration: String = "implementation",
 ) {
@@ -49,8 +49,8 @@ fun DependencyHandler.defaultAndroDeps(
 }
 
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
+context(settings: LibSettings)
 fun DependencyHandler.defaultAndroTestDeps(
-  settings: LibSettings,
   ignoreCompose: Boolean = false,
   configuration: String = "testImplementation",
 ) {
@@ -160,12 +160,12 @@ fun Project.defaultBuildTemplateForAndroLib(
   extensions.configure<LibraryExtension> {
     defaultAndroLib(details)
   }
-  dependencies {
-    defaultAndroDeps(details.settings)
-    defaultAndroTestDeps(details.settings)
+  with(details.settings) { dependencies {
+    defaultAndroDeps()
+    defaultAndroTestDeps()
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroMainDependencies()
-  }
+  } }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
@@ -242,12 +242,12 @@ fun Project.defaultBuildTemplateForAndroApp(
     defaultAndroApp(details)
     variant?.let { defaultAndroAppPublishVariant(it) }
   }
-  dependencies {
-    defaultAndroDeps(details.settings)
-    defaultAndroTestDeps(details.settings)
+  with(details.settings) { dependencies {
+    defaultAndroDeps()
+    defaultAndroTestDeps()
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroDependencies()
-  }
+  } }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
