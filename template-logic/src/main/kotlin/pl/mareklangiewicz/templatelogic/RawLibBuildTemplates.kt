@@ -4,6 +4,7 @@ import org.gradle.api.*
 import org.gradle.api.artifacts.*
 import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.compose.*
+import org.jetbrains.compose.resources.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.gradle.kotlin.dsl.*
@@ -163,6 +164,10 @@ fun Project.defaultBuildTemplateForRawMppLib() {
         androidMain {
           dependsOn(composeUiMain)
           dependencies {
+            implementation(AndroidX.Core.ktx)
+            implementation(AndroidX.Activity.activity)
+            implementation(AndroidX.Activity.ktx)
+            implementation(AndroidX.Activity.compose)
             val settpose = settings.compose ?: return@dependencies
             if (settpose.withComposeUi) {
               implementation(AndroidX.Compose.Ui.ui)
@@ -210,6 +215,16 @@ fun Project.defaultBuildTemplateForRawMppLib() {
       }
     }
   }
+  if (settings.withAndro) {
+    tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
+      .configureEach { enabled = false }
+  }
+
+  (compose as ExtensionAware).extensions.configure<ResourcesExtension> {
+    // generateResClass = always
+    generateResClass = never
+  }
+
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing(details)
