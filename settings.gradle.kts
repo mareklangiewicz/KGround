@@ -58,7 +58,7 @@ gradle.extLibDetails = myLibDetails(
   name = "KGround",
   description = "Kotlin Common Ground.",
   githubUrl = "https://github.com/mareklangiewicz/KGround",
-  version = Ver(0, 1, 31),
+  version = Ver(0, 1, 32),
   // https://central.sonatype.com/artifact/pl.mareklangiewicz/kground/
   // https://github.com/mareklangiewicz/KGround/releases
   settings = LibSettings(
