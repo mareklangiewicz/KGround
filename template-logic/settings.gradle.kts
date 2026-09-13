@@ -1,1 +1,1 @@
-rootProject.name = "build-logic"
+rootProject.name = "template-logic"
