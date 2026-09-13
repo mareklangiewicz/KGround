@@ -22,7 +22,7 @@ val details = gradle.extLibDetails.copy(
 )
 
 
-defaultBuildTemplateForBasicMppLib {
+defaultBuildTemplateForBasicMppLib(details) {
   api(project(":kommand-line"))
 
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later
