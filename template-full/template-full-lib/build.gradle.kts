@@ -19,7 +19,7 @@ plugins {
     plugs.ComposeJbNoVer,
     plugs.VannikPublish,
   )
-  plug(plugs.AndroLibNoVer) apply false // will be applied conditionally depending on LibSettings
+  plug(plugs.AndroKmpNoVer) apply false // applied conditionally by defaultBuildTemplateForFullMppLib
 }
 
 // endregion [[Full MPP Lib Build Imports and Plugs]]

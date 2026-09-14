@@ -13,9 +13,6 @@ import pl.mareklangiewicz.templatelogic.*
 plugins {
   id("my-convention")
   plugAll(
-    plugs.KotlinMulti,
-    plugs.KotlinMultiCompose,
-    plugs.ComposeJbNoVer,
     plugs.AndroAppNoVer,
     plugs.VannikPublish,
   )
@@ -23,7 +20,14 @@ plugins {
 
 // endregion [[Andro App Build Imports and Plugs]]
 
-defaultBuildTemplateForAndroApp {
+// No KMP plugin here on purpose: since AGP 9 'com.android.application' cannot be combined
+// with 'org.jetbrains.kotlin.multiplatform', and there is no KMP application plugin. The
+// shared multiplatform code lives in :template-andro-lib, which this app depends on.
+var details = gradle.extLibDetails
+val settings = details.settings.copy(compose = null)
+details = details.copy(settings = settings, namespace = "pl.mareklangiewicz.templateandro.androapp")
+
+defaultBuildTemplateForAndroApp(details) {
   implementation(project(":template-andro-lib"))
 }
 

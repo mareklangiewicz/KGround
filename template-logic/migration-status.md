@@ -19,7 +19,7 @@ Last verified 2026-09-13 against KGround 0.1.32.
   Only the 9 public `defaultBuildTemplateFor*` entry points still take an explicit
   `details: LibDetails = gradle.extLibDetails` — see the constraint below.
 
-## Not migrated — `template-full`, `template-basic`, `template-andro` do not configure
+## Templates — `template-full` and `template-andro` FIXED; `template-basic` still broken
 
 All three were broken on `main` at 0.1.32. They are template projects, not published
 artifacts, so the 0.1.32 release itself is unaffected.
@@ -27,11 +27,65 @@ artifacts, so the 0.1.32 release itself is unaffected.
 Fixed here: imports sat below `val buildScanPublishingAllowed`, so the scripts did not
 compile at all ("Expecting an element"). Past that, each hits its own wall:
 
-| project | blocker |
+| project | state |
 |---|---|
-| `template-full` | AGP 9 refuses `com.android.library` together with `org.jetbrains.kotlin.multiplatform`. Needs the `plugs.AndroKmpNoVer` / `KotlinMultiplatformAndroidLibraryTarget` path that `template-raw` already uses. |
-| `template-andro` | same class of failure via `com.android.application`. |
-| `template-basic` | `com.vanniktech.maven.publish` 0.37.0 "already on the classpath with an unknown version". Note `template-raw` uses plain `plugs.VannikPublish` too and configures fine, so `NoVer` alone is NOT the fix — the difference has not been diagnosed. |
+| `template-full` | **FIXED.** `./gradlew -p template-full assemble` is BUILD SUCCESSFUL. |
+| `template-andro` | **FIXED as far as anything can be** — it configures and compiles; `assemble` stops on a pre-existing SDK drift that blocks `template-raw` identically (see below). |
+| `template-basic` | still broken. `com.vanniktech.maven.publish` 0.37.0 "already on the classpath with an unknown version". Note `template-raw` uses plain `plugs.VannikPublish` too and configures fine, so `NoVer` alone is NOT the fix — the difference has not been diagnosed. |
+
+### What the fix was
+
+The AGP 9 error is one rule with two different consequences, and the earlier guess ("migrate
+to `plugs.AndroKmpNoVer` like template-raw") was right for libraries and wrong for apps.
+
+**Libraries** — `com.android.library` cannot be combined with KMP since AGP 9, so an android
+library becomes a KMP module with the `com.android.kotlin.multiplatform.library` target:
+
+- `defaultBuildTemplateForAndroLib` and `defaultBuildTemplateForFullMppLib` now apply
+  `plugs.AndroKmpNoVer` and configure `androDefault()`; `LibraryExtension` is not applied at all.
+- Dependencies move to the KMP target's per-source-set configurations — the plain
+  `implementation` / `testImplementation` of the old path do not exist. `defaultAndroDeps` and
+  `defaultAndroTestDeps` are still reused, with `configuration = "androidMainImplementation"`,
+  `"androidHostTestImplementation"` and `"androidDeviceTestImplementation"`.
+
+**Apps** — AGP 9 ships **no KMP application plugin** (checked: the distribution registers
+`com.android.kotlin.multiplatform.library`, and nothing equivalent for applications). So an
+android app cannot be a KMP module at all. `template-andro-app` is now a plain
+`com.android.application` with no KMP plugin, depending on `:template-andro-lib` for the shared
+code — the structure `template-raw-andro-app` already had.
+
+`template-full-app` needed nothing: its `plug(plugs.AndroAppNoVer) apply false` was vestigial,
+since nothing in `template-logic` ever applied it.
+
+### Two bugs that were hiding behind the AGP wall
+
+Both only became visible after applying AGP's documented bypass
+(`android.builtInKotlin=false`, `android.newDsl=false`) to get past the plugin conflict:
+
+1. `template-andro-app` reported *"No Kotlin Targets Declared"* — `defaultBuildTemplateForAndroApp`
+   never declares a KMP target, so the module was broken independently of AGP 9. Removing the KMP
+   plugin (above) is what actually resolves it.
+2. `template-andro-lib` called
+   `defaultAndroTestDeps(gradle.extLibDetails.settings, configuration = "androidTestImplementation")`
+   — a stale call site. That function takes its settings as a **context parameter** now, so it is
+   not merely mis-called, it is **uncallable from any build script**. The device-test dependencies
+   moved into the template instead. Worth noting as a general hazard: promoting a public helper's
+   parameter to a context parameter silently removes it from every build script's reach.
+
+### Still blocked, and NOT caused by this work: compileSdk 37.0 vs 37.1
+
+`androidx.compose.ui:ui-tooling*:1.13.0-alpha03` requires compiling against Android API 37.1;
+the templates compile against 37.0, so `checkAarMetadata` fails wherever `defaultAndroDeps` adds
+the android-compose tooling dependencies.
+
+Control: **`template-raw` fails identically** (`:template-raw-andro-app:checkDebugAarMetadata`,
+same three issues), so this is pre-existing dependency drift, not migration fallout.
+`template-full` is unaffected only because it passes `ignoreCompose = true` (compose is configured
+the mpp way there) and so never pulls those artifacts.
+
+Fixing it needs a way to express a **minor** API level: `LibAndroSettings.sdkCompile` is an `Int`,
+and AGP 9's `compileSdk { version = release(37) }` would need the minor variant. That is a DepsKt
+model change — see the de-nesting note, same repo, same reason to do it separately.
 
 ## Constraint worth knowing before planning more context-parameter work
 

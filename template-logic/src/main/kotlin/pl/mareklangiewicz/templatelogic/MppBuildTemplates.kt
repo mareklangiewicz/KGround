@@ -21,8 +21,10 @@ fun Project.defaultBuildTemplateForFullMppLib(
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ): Unit = context(details, details.settings) {
   if (details.settings.withAndro) {
-    apply(plugin = plugs.AndroLibNoVer.group) // group is actually id for plugins
-    // TODO_later: try to move the rest of andro config from below here
+    // Since AGP 9 'com.android.library' cannot be combined with KMP; the android target of a
+    // KMP library comes from 'com.android.kotlin.multiplatform.library' instead, exactly as
+    // template-raw already does.
+    apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
   }
   defaultBuildTemplateForComposeMppLib(
     details = details,
@@ -32,23 +34,16 @@ fun Project.defaultBuildTemplateForFullMppLib(
   )
 
   if (details.settings.withAndro) {
-    extensions.configure<LibraryExtension> {
-      defaultAndroLib(
-        ignoreCompose = true, // compose mpp configured already
-        ignoreAndroPublish = true,
-          // FIXME: maybe it's fine to publish in andro way here too (full mpp lib case),
-          //  but let's analyze/test publications more before doing that (commiting to: ignoreAndroPublish = false).
-      )
-    }
+    extensions.configure<KotlinMultiplatformExtension> { androDefault() }
 
-    // this is "single platform way" / "android way" to declare deps,
-    // it would be more "correct" to configure everything "mpp way" (android deps too),
-    // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
-    // (trust me future Marek: I've tried this already :) )
+    // The KMP android target names its configurations per source set, so the plain
+    // "implementation"/"testImplementation" of the old com.android.library path are gone.
+    // Still reusing defaultAndroDeps rather than restating the list (trust me future Marek:
+    // I've tried configuring it all the "mpp way" already :) ).
     dependencies {
       // ignoreCompose because we have compose configured mpp way already.
-      defaultAndroDeps(ignoreCompose = true)
-      defaultAndroTestDeps(ignoreCompose = true)
+      defaultAndroDeps(ignoreCompose = true, configuration = "androidMainImplementation")
+      defaultAndroTestDeps(ignoreCompose = true, configuration = "androidHostTestImplementation")
     }
   }
 }

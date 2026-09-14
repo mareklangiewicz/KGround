@@ -8,6 +8,7 @@ import org.gradle.api.publish.maven.*
 import org.gradle.kotlin.dsl.*
 import com.android.build.api.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
+import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.defaults.*
@@ -146,30 +147,35 @@ fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
 
 fun Project.defaultBuildTemplateForAndroLib(
   details: LibDetails = gradle.extLibDetails,
-  addAndroMainDependencies: DependencyHandler.() -> Unit = {},
+  addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ): Unit = context(details, details.settings) {
-  val andro = details.settings.andro ?: error("No andro settings.")
+  details.settings.andro ?: error("No andro settings.")
   repositories { addRepos() }
+  // Since AGP 9 the 'com.android.library' plugin cannot be combined with KMP, so an android
+  // library is a KMP module with the 'com.android.kotlin.multiplatform.library' target --
+  // exactly what template-raw already does. LibraryExtension is not applied at all any more.
   extensions.configure<KotlinMultiplatformExtension> {
-    androidTarget()
+    androDefault()
     jvmToolchain(details.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
+    sourceSets.getByName("androidMain").dependencies { addAndroMainDependencies() }
   }
-  extensions.configure<LibraryExtension> {
-    defaultAndroLib()
-  }
+  // The KMP android target names its configurations per source set, so the plain
+  // "implementation"/"testImplementation" of the old com.android.library path do not exist.
+  // androidDeviceTest replaces what the template script used to ask for as
+  // "androidTestImplementation" -- it could not ask any more anyway, because
+  // defaultAndroTestDeps takes its settings as a context parameter now.
   dependencies {
-    defaultAndroDeps()
-    defaultAndroTestDeps()
-    add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
-    addAndroMainDependencies()
+    defaultAndroDeps(configuration = "androidMainImplementation")
+    defaultAndroTestDeps(configuration = "androidHostTestImplementation")
+    defaultAndroTestDeps(configuration = "androidDeviceTestImplementation")
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  if (andro.publishAllVariants) defaultPublishingOfAndroLib("default")
-  if (andro.publishOneVariant) defaultPublishingOfAndroLib(andro.publishVariant)
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+  else println("Andro Lib Module ${name}: publishing (and signing) disabled")
 }
 
 context(details: LibDetails)

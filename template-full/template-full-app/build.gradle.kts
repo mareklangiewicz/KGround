@@ -17,7 +17,6 @@ plugins {
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
   )
-  plug(plugs.AndroAppNoVer) apply false // will be applied conditionally depending on LibSettings
 }
 
 // endregion [[Full MPP App Build Imports and Plugs]]
