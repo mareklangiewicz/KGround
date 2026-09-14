@@ -324,6 +324,33 @@ Net: the plugins block and the copy dance are worth removing, but not at the pri
 `afterEvaluate` plus a mirror API. If the copy dance is the thing to kill, kill it in the
 entry-point signature instead — see the signature notes above.
 
+## Next direction — de-nest LibDetails/LibSettings in DepsKt
+
+The design note lives where the work would happen: **`DepsKt/docs/design/lib-details-denesting.md`**.
+Short version, because it changes what is worth doing on this side:
+
+`LibDetails → LibSettings → { LibComposeSettings?, LibAndroSettings?, LibReposSettings }` is
+three levels deep, and three things here are that nesting leaking — the verbatim copy dance in
+four build scripts, the `context(details, details.settings)` on every entry point (two context
+arguments for one logical thing), and helpers reaching through the tree (`with(settings.repos)`,
+`settings.andro!!`).
+
+The fix is **siblings, not one flat class** — flattening into a single ~60-field type would make
+context parameters worse. The prize is bigger than boilerplate: `compose`/`andro` being nullable
+means the nesting encodes *presence*, so as sibling context parameters a function that needs
+android declares `context(andro: LibAndroSettings)` and cannot be called outside an android scope
+— plausibly deleting the four `ignoreXxx` booleans along with the `!!`s.
+
+Consequence for this branch: a `settings: LibSettings.() -> LibSettings = { this }` parameter on
+the entry points was prototyped and **reverted**. It removed the copy dance from four modules with
+byte-identical POMs and task lists, but it only smooths ONE nesting level (a consumer reaching the
+third level would write `settings = { copy(compose = compose!!.copy(…)) }`, which is worse), and it
+forces `settings` to be declared BEFORE `details` so the fold can live in `details`'s default —
+an ordering the de-nesting would undo anyway. Not worth baking in ahead of the real fix.
+
+DepsKt is published and consumed (KGround is on 0.4.25), so that work needs its own branch and
+version, with KGround migrated only once the new shape is proven.
+
 ## Probes — what is executable, and what is only measured
 
 ```
