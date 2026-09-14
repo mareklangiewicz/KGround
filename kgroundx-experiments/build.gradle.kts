@@ -43,6 +43,14 @@ val probeDetails = gradle.extLibDetails
 val probeName: (LibDetails, Project) -> String = Project::probeNameIsProjectName
 val probeCtx: (LibDetails) -> String = ::probeContextFun
 
+// Does the same coercion survive the shape a de-nested ENTRY POINT needs: three sibling
+// context params + the Project receiver + a value param? And with a trailing lambda?
+// Order is context params, then extension receiver, then value params.
+val probeSiblings: (LibDetailsTMP, LibSettingsTMP, LibReposSettingsTMP, Project, String) -> String =
+  Project::probeSiblingEntryPointTMP
+val probeSiblingsLambda: (LibDetailsTMP, LibSettingsTMP, Project, () -> String) -> String =
+  Project::probeSiblingWithLambdaTMP
+
 // Which Kotlin compiled each side? Read the metadata stamp off real bytecode: an
 // anonymous object here is compiled by the SCRIPT compiler, LibMarker by whatever
 // builds template-logic. Gemini's flattened-reference example assumed these differ
@@ -132,6 +140,24 @@ tasks.register("probes") {
     check(
       "a context argument can be passed by name (-Xexplicit-context-arguments)",
       probeExplicitContextArg(details), "ctx:$libName",
+    )
+
+    // ----- can a FLAGLESS build script drive the sibling model? probes 14-15 ---
+    // This is the question that decides whether de-nesting can reach the PUBLIC entry
+    // points, or only template-logic's internals. Scripts have no context parameters
+    // (Gradle pins script language version to 2.2), but probe 7 showed a flattened
+    // reference gets past that. These ask whether it still works with THREE context
+    // params + receiver + value param, and with a trailing lambda.
+    val libTmp = details.toTMP()
+    check(
+      "a flagless script drives a 3-sibling context fun via the flattened coercion",
+      probeSiblings(libTmp.details, libTmp.settings, libTmp.repos, project, "!"),
+      "$libName/${details.settings.withJvm}/${details.settings.repos.withMavenCentral}/$projectName!",
+    )
+    check(
+      "the coercion still works when the entry point takes a trailing lambda",
+      probeSiblingsLambda(libTmp.details, libTmp.settings, project) { "deps" },
+      "$libName/${details.settings.withJvm}/$projectName/deps",
     )
 
     // ----- de-nesting prototype (LibTMP), probes 9-13 -------------------------

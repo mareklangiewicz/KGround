@@ -160,3 +160,19 @@ fun probeDerivedDefaultsTMP(): String {
   }
   return "${combos.size}/$matches"
 }
+
+/**
+ * The shape a de-nested PUBLIC entry point would really have: several sibling context parameters
+ * plus the `Project` extension receiver plus a value parameter. Probe 7 proved the flattened
+ * coercion for ONE context parameter; this asks whether it survives three of them.
+ *
+ * Order under coercion is: context parameters first, then the extension receiver, then value params.
+ */
+context(d: LibDetailsTMP, s: LibSettingsTMP, r: LibReposSettingsTMP)
+fun Project.probeSiblingEntryPointTMP(suffix: String): String =
+  "${d.name}/${s.withJvm}/${r.withMavenCentral}/$name$suffix"
+
+/** Same, with a trailing lambda — entry points all take one (addCommonMainDependencies etc.). */
+context(d: LibDetailsTMP, s: LibSettingsTMP)
+fun Project.probeSiblingWithLambdaTMP(addStuff: () -> String): String =
+  "${d.name}/${s.withJvm}/$name/${addStuff()}"

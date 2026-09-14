@@ -446,18 +446,39 @@ De-nesting removes the duplication structurally: the entry point keeps the check
 make (it holds the whole `LibDetails`), and the worker cannot express them because it cannot see
 the data.
 
-### Where the win STOPS — the build-script boundary
+### The build-script boundary — CORRECTED, it is a cost, not a limit
 
-`defaultBuildTemplateForBasicMppLib` keeps its `LibDetails` signature and all four `ignoreXxx`
-parameters, and that is not laziness — it is a hard limit. `kground/build.gradle.kts:20` passes
-`ignoreCompose = true` ("necessary because I sometimes include this module locally from UWidgets
-project"), and a build SCRIPT cannot express that as withholding a scope: Gradle hardcodes the
-script language version to 2.2, so scripts have no context parameters at all (see the probes, and
-the Gradle 2.2 finding above). Scripts must keep passing booleans until Gradle bumps that literal.
+An earlier version of this section claimed the de-nesting "stops at the build-script boundary"
+because Gradle pins the script language version to 2.2 and scripts therefore have no context
+parameters. **That conclusion was wrong**, and probe 7 on this very branch already contradicted it:
+a flagless script reaches a context function by coercing a reference to the flattened type.
 
-**So the de-nesting's benefit is real but bounded: it applies inside `template-logic`, not at the
-public entry points that build scripts call.** That should go into the DepsKt design note before
-any DepsKt work starts — it decides how much of the public API is worth reshaping now.
+Probes 14-15 now test the shape a de-nested PUBLIC entry point would actually have, and both pass:
+
+- three sibling context parameters + the `Project` extension receiver + a value parameter;
+- the same with a trailing lambda, which every entry point takes.
+
+Order under coercion is context parameters, then extension receiver, then value parameters. So
+scripts CAN drive sibling entry points today, with no flag and no Gradle change.
+
+**What it really costs.** The coercion goes through a function TYPE, and a function type has no
+default arguments. Control, in a script:
+
+```
+e: Initializer type mismatch: expected '(LibDetailsTMP, LibSettingsTMP, LibReposSettingsTMP, Project) -> String',
+   actual 'KFunction5<LibDetailsTMP, LibSettingsTMP, LibReposSettingsTMP, Project, String, String>'.
+```
+
+Every parameter must be listed and every argument passed explicitly. That is exactly what today's
+API is built on: `defaultBuildTemplateForBasicMppLib { ... }` works as a one-liner because
+`details: LibDetails = gradle.extLibDetails` and all four `ignoreXxx` default. Under coercion each
+call site needs a typed `val` declaration and a full argument list.
+
+**So the decision is ergonomic, not technical.** Keeping `defaultBuildTemplateForBasicMppLib` on
+`LibDetails` with boolean parameters is a defensible CHOICE — the nested object is what lets the
+common call stay a single line — and it can be revisited whenever Gradle bumps that 2.2 literal,
+at which point scripts get `context(...) { }` natively and the cost disappears. Nothing about the
+sibling model is blocked on it.
 
 ### `ignoreAndroTarget` is now dead in the whole MPP chain
 
