@@ -166,6 +166,27 @@ Related trap, already removed: a `context(Project) val libDetails get() = gradle
 reads the AMBIENT details and silently discards those per-module overrides. Any future
 context work must carry the *effective* `LibDetails`, not re-read it from the project.
 
+## Probes — the claims above are executable
+
+Every context-parameter claim in this document is asserted by
+`template-logic/probes.sh`. Run it after touching anything context-related:
+
+```
+template-logic/probes.sh        # all, ~40s
+template-logic/probes.sh 5      # just one
+template-logic/probes.sh --clean  # clear leftovers from an interrupted run
+```
+
+Half the claims are about what does NOT compile, so they cannot be unit tests;
+each probe compiles real code with real Gradle and asserts the outcome and the
+exact error text. Probe 2 is a deliberate CONTROL for probe 1 — without it,
+probe 1 would pass for a typo'd identifier just as happily as for the real
+behaviour. Both were mutation-tested: flipping `context` to `with` in probe 1
+turns it red, and dropping the explicit type in probe 5 turns that red.
+
+The suite asserts its own residue as a final check, and refuses to start
+against a dirty tree so it can never capture pollution as its "clean" backup.
+
 ## Regression control
 
 `kgroundx-maintenance` / `-experiments` / `-workflows` set `withJs = false`; `kground` does
