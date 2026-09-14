@@ -115,12 +115,40 @@ e: Too many arguments for 'context(d: LibDetails) fun probeNoReceiver(): String'
 ```
 
 Measured with a receiverless probe, so "receiver type mismatch" is not the confound.
-The prepended parameter is reachable only from Java, or from Kotlin WITH the flag.
+
+**But there IS a source-level escape hatch**, and it works from a flagless script. Taking a
+callable reference and coercing it to an explicit FLATTENED function type is accepted, and
+calls through that value are accepted too — proven by executing it, not just compiling:
+
+```kotlin
+// in build.gradle.kts, NO -Xcontext-parameters
+val f: (LibDetails) -> String = ::someCtxFun   // context param becomes arg 1
+println(f(gradle.extLibDetails))               // actually runs
+```
+
+The intermediate step is essential. A bare `val ref = X::ctxFun` resolves, but invoking
+`ref(...)` still fails with the flag error; only the explicit flattened type lets the call
+through. Argument order is context parameters, then extension receiver, then value
+parameters — as the javap signature shows.
+
+We deliberately do NOT use this for the entry points, because it is strictly worse than the
+ordinary `details` parameter they already take:
+
+- every default argument is lost — you must pass all of them, so the hacky `ignoreXXX`
+  flags become bare positional booleans, `f(s, ext, false, false, {})`, where transposing
+  two of them compiles and silently misconfigures the build
+- named arguments are gone with them
+- it defeats the purpose: you are passing the context explicitly anyway
+- it hard-codes context-before-receiver ordering, an implementation detail
+
+So the accurate statement is not "entry points cannot be context-based" but "they can, at a
+cost that is not worth paying here".
 
 ### Project stays an extension receiver, never a context parameter
 
 Entry points must keep `fun Project.…`: build scripts call them with Project as the implicit
-receiver, and they cannot satisfy a context parameter at all (same measurement as above).
+receiver, and reaching a context parameter from a flagless script needs the awkward flattened
+coercion above.
 Internal helpers keep it too — receiver syntax is what makes `extensions`, `tasks`,
 `repositories`, `plugins` and `dependencies` available unqualified; as a context parameter
 every one of those becomes `project.…`. Context parameters and an extension receiver coexist
