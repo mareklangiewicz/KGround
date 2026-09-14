@@ -30,21 +30,20 @@ import pl.mareklangiewicz.defaults.*
 const val AndroSdkCompileMinorTMP = 2
 
 /**
- * @param composeConfiguredByMpp compose is configured the MPP way (by `allDefaultSourceSetsForCompose`),
- *   so do NOT add the compose-android dependencies here.
+ * MIGRATED to the sibling model: android settings arrive as a SCOPE, so the
+ * `?: error("No andro settings.")` that opened this function is gone — it cannot be called at all
+ * without android.
  *
- * RENAMED from `ignoreCompose`, and deliberately NOT deleted by the sibling migration. It looks like
- * the presence flags that died in [jvmOnlyDefault] and [allDefault], but it is a different thing: a
- * ROUTING choice between two compose configurations, with compose very much PRESENT. No scope can
- * express it — withholding the compose scope would say "no compose at all", which is wrong here.
- * See the line below that must not follow this flag.
+ * `composeConfiguredByMpp` is gone from here too, but NOT because a scope replaced it. The
+ * compose-android dependencies moved to [defaultComposeAndroDeps], which requires a compose scope,
+ * so the routing decision now lives with the caller — the only place that knows BOTH whether
+ * compose exists and whether it was already configured the MPP way. The flag survives at those call
+ * sites, under its honest name.
  */
-context(settings: LibSettings)
+context(settings: LibSettingsTMP, andro: LibAndroSettingsTMP)
 fun DependencyHandler.defaultAndroDeps(
-  composeConfiguredByMpp: Boolean = false,
   configuration: String = "implementation",
 ) {
-  val andro = settings.andro ?: error("No andro settings.")
   addAll(
     configuration,
     AndroidX.Core.ktx,
@@ -55,39 +54,33 @@ fun DependencyHandler.defaultAndroDeps(
     // TODO_someday_maybe: more lifecycle related stuff by default (viewmodel, compose)?
     Com.Google.Android.Material.material.takeIf { andro.withMDC },
   )
-  if (!composeConfiguredByMpp && settings.withCompose) {
-    val compose = settings.compose!!
-    addAllWithVer(
-      configuration,
-      Vers.ComposeAndro,
-      AndroidX.Compose.Ui.ui,
-      AndroidX.Compose.Ui.tooling,
-      AndroidX.Compose.Ui.tooling_preview,
-      AndroidX.Compose.Material.material.takeIf { compose.withComposeMaterial2 },
-    )
-    addAll(
-      configuration,
-      AndroidX.Compose.Material3.material3.takeIf { compose.withComposeMaterial3 },
-    )
-  }
 }
 
 /**
- * @param composeConfiguredByMpp compose is configured the MPP way (by `allDefaultSourceSetsForCompose`),
- *   so do NOT add the compose-android dependencies here.
- *
- * RENAMED from `ignoreCompose`, and deliberately NOT deleted by the sibling migration. It looks like
- * the presence flags that died in [jvmOnlyDefault] and [allDefault], but it is a different thing: a
- * ROUTING choice between two compose configurations, with compose very much PRESENT. No scope can
- * express it — withholding the compose scope would say "no compose at all", which is wrong here.
- * See the line below that must not follow this flag.
+ * The compose-android dependencies [defaultAndroDeps] used to add behind `settings.compose!!`.
+ * As a compose scope there is no `!!` and no presence check: having it is the precondition.
  */
-context(settings: LibSettings)
+context(compose: LibComposeSettingsTMP)
+fun DependencyHandler.defaultComposeAndroDeps(configuration: String = "implementation") {
+  addAllWithVer(
+    configuration,
+    Vers.ComposeAndro,
+    AndroidX.Compose.Ui.ui,
+    AndroidX.Compose.Ui.tooling,
+    AndroidX.Compose.Ui.tooling_preview,
+    AndroidX.Compose.Material.material.takeIf { compose.withComposeMaterial2 },
+  )
+  addAll(
+    configuration,
+    AndroidX.Compose.Material3.material3.takeIf { compose.withComposeMaterial3 },
+  )
+}
+
+/** Migrated like [defaultAndroDeps]: android is a scope, compose routing belongs to the caller. */
+context(settings: LibSettingsTMP, andro: LibAndroSettingsTMP)
 fun DependencyHandler.defaultAndroTestDeps(
-  composeConfiguredByMpp: Boolean = false,
   configuration: String = "testImplementation",
 ) {
-  val andro = settings.andro ?: error("No andro settings.")
   addAll(
     configuration,
     AndroidX.Test.Espresso.core.takeIf { andro.withTestEspresso },
@@ -118,14 +111,18 @@ fun DependencyHandler.defaultAndroTestDeps(
     )
   }
 
-  if (!composeConfiguredByMpp && settings.withCompose) addAllWithVer(
+}
+
+/** The compose-android TEST dependencies, likewise requiring a compose scope. */
+context(settings: LibSettingsTMP, compose: LibComposeSettingsTMP)
+fun DependencyHandler.defaultComposeAndroTestDeps(configuration: String = "testImplementation") =
+  addAllWithVer(
     configuration,
     vers.ComposeAndro,
     AndroidX.Compose.Ui.test,
     AndroidX.Compose.Ui.test_manifest,
     AndroidX.Compose.Ui.test_junit4.takeIf { settings.withTestJUnit4 },
   )
-}
 
 fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
   listOf(
@@ -181,14 +178,18 @@ fun Project.defaultBuildTemplateForAndroLib(
   details: LibDetails = gradle.extLibDetails,
   addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ): Unit = context(details, details.settings) {
-  details.settings.andro ?: error("No andro settings.")
-  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
+  // THE boundary. One check turns "details that may or may not have android" into an andro scope;
+  // everything below is statically guaranteed and carries no `!!` and no `?: error`. Presence-as-
+  // scope does not delete this check, it moves it to exactly one place per entry point.
+  val lib = details.toTMP()
+  val andro = lib.andro ?: error("No andro settings.")
+  repositories { context(lib.repos) { addRepos() } }
   // Since AGP 9 the 'com.android.library' plugin cannot be combined with KMP, so an android
   // library is a KMP module with the 'com.android.kotlin.multiplatform.library' target --
   // exactly what template-raw already does. LibraryExtension is not applied at all any more.
   extensions.configure<KotlinMultiplatformExtension> {
-    androDefault()
-    jvmToolchain(details.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
+    context(lib.details, andro) { androDefault() }
+    jvmToolchain(lib.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
     sourceSets.getByName("androidMain").dependencies { addAndroMainDependencies() }
   }
   // The KMP android target names its configurations per source set, so the plain
@@ -197,9 +198,16 @@ fun Project.defaultBuildTemplateForAndroLib(
   // "androidTestImplementation" -- it could not ask any more anyway, because
   // defaultAndroTestDeps takes its settings as a context parameter now.
   dependencies {
-    defaultAndroDeps(configuration = "androidMainImplementation")
-    defaultAndroTestDeps(configuration = "androidHostTestImplementation")
-    defaultAndroTestDeps(configuration = "androidDeviceTestImplementation")
+    context(lib.settings, andro) {
+      defaultAndroDeps(configuration = "androidMainImplementation")
+      defaultAndroTestDeps(configuration = "androidHostTestImplementation")
+      defaultAndroTestDeps(configuration = "androidDeviceTestImplementation")
+    }
+    // compose-android deps only when compose EXISTS (scope opens) — no boolean, no !!
+    lib.compose?.let { compose ->
+      context(compose) { defaultComposeAndroDeps(configuration = "androidMainImplementation") }
+      context(lib.settings, compose) { defaultComposeAndroTestDeps(configuration = "androidHostTestImplementation") }
+    }
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
@@ -210,12 +218,19 @@ fun Project.defaultBuildTemplateForAndroLib(
   else println("Andro Lib Module ${name}: publishing (and signing) disabled")
 }
 
-context(details: LibDetails)
+/**
+ * NOTE: dead code since the AGP 9 migration — nothing calls this, because an android library is now
+ * a KMP module with `com.android.kotlin.multiplatform.library` and [LibraryExtension] is never
+ * applied. Migrated anyway to keep the family consistent, but UNEXERCISED by any build: the four
+ * templates cannot prove it, only that it compiles.
+ *
+ * @param configureComposeAndro caller decided compose exists AND was not configured the MPP way.
+ */
+context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
 fun LibraryExtension.defaultAndroLib(
-  composeConfiguredByMpp: Boolean = false,
+  configureComposeAndro: Boolean = false,
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
-  val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
     compileSdk = andro.sdkCompile
     compileSdkMinor = AndroSdkCompileMinorTMP
@@ -223,18 +238,18 @@ fun LibraryExtension.defaultAndroLib(
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig()
   defaultBuildTypes()
-  details.settings.compose?.takeIf { !composeConfiguredByMpp }?.let { defaultComposeStuff() }
+  if (configureComposeAndro) defaultComposeStuff()
   defaultPackagingOptions()
   if (!ignoreAndroPublish && andro.publishAllVariants) defaultAndroLibPublishAllVariants()
   if (!ignoreAndroPublish && andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
 }
 
-context(details: LibDetails)
+/** Dead code alongside [defaultAndroLib]; migrated for consistency, unexercised. */
+context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
 fun LibraryExtension.defaultDefaultConfig() = defaultConfig {
-  val asettings = details.settings.andro ?: error("No andro settings.")
   namespace = details.namespace
-  minSdk = asettings.sdkMin
-  testInstrumentationRunner = asettings.withTestRunner
+  minSdk = andro.sdkMin
+  testInstrumentationRunner = andro.withTestRunner
 }
 
 fun LibraryExtension.defaultBuildTypes() = buildTypes { release { isMinifyEnabled = false } }
@@ -273,17 +288,25 @@ fun Project.defaultBuildTemplateForAndroApp(
   details: LibDetails = gradle.extLibDetails,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
 ): Unit = context(details, details.settings) {
-  val andro = details.settings.andro ?: error("No andro settings.")
+  // Same single boundary as the lib entry point above.
+  val lib = details.toTMP()
+  val andro = lib.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
-  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
+  repositories { context(lib.repos) { addRepos() } }
   extensions.configure<ApplicationExtension> {
-    defaultAndroApp()
+    context(lib.details, andro) { defaultAndroApp(configureComposeAndro = lib.compose != null) }
     variant?.let { defaultAndroAppPublishVariant(it) }
   }
   dependencies {
-    defaultAndroDeps()
-    defaultAndroTestDeps()
+    context(lib.settings, andro) {
+      defaultAndroDeps()
+      defaultAndroTestDeps()
+    }
+    lib.compose?.let { compose ->
+      context(compose) { defaultComposeAndroDeps() }
+      context(lib.settings, compose) { defaultComposeAndroTestDeps() }
+    }
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroDependencies()
   }
@@ -295,30 +318,29 @@ fun Project.defaultBuildTemplateForAndroApp(
   variant?.let { defaultPublishingOfAndroApp(it) }
 }
 
-context(details: LibDetails)
+/** @param configureComposeAndro caller decided compose exists AND was not configured the MPP way. */
+context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
 fun ApplicationExtension.defaultAndroApp(
-  composeConfiguredByMpp: Boolean = false,
+  configureComposeAndro: Boolean = false,
 ) {
-  val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
     compileSdk = andro.sdkCompile
     compileSdkMinor = AndroSdkCompileMinorTMP
   }
   defaultDefaultConfig()
   defaultBuildTypes()
-  details.settings.compose?.takeIf { !composeConfiguredByMpp }?.let { defaultComposeStuff() }
+  if (configureComposeAndro) defaultComposeStuff()
 }
 
-context(details: LibDetails)
+context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
 fun ApplicationExtension.defaultDefaultConfig() = defaultConfig {
-  val asettings = details.settings.andro ?: error("No andro settings.")
   applicationId = details.appId
   namespace = details.namespace
-  asettings.sdkTargetPreview?.let { targetSdkPreview = it } ?: run { targetSdk = asettings.sdkTarget }
-  minSdk = asettings.sdkMin
+  andro.sdkTargetPreview?.let { targetSdkPreview = it } ?: run { targetSdk = andro.sdkTarget }
+  minSdk = andro.sdkMin
   versionCode = details.appVerCode
   versionName = details.appVerName
-  testInstrumentationRunner = asettings.withTestRunner
+  testInstrumentationRunner = andro.withTestRunner
 }
 
 fun ApplicationExtension.defaultBuildTypes() = buildTypes { getByName("release") { isMinifyEnabled = false } }

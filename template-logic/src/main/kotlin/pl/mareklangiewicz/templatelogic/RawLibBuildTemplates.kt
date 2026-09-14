@@ -20,6 +20,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
   details: LibDetails = gradle.extLibDetails,
 ): Unit = context(details, details.settings) {
   val settings = details.settings
+  val lib = details.toTMP()
 
   if (settings.withAndro) {
     apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
@@ -38,7 +39,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
     if (settings.withJvm) jvm()
     if (settings.withLinuxX64) linuxX64()
     if (settings.withJs) jsDefault()
-    if (settings.withAndro) androDefault()
+    lib.andro?.let { context(lib.details, it) { androDefault() } }
 
     applyDefaultHierarchyTemplate()
 
@@ -232,10 +233,15 @@ fun Project.defaultBuildTemplateForRawMppLib(
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
-context(details: LibDetails, settings: LibSettings)
+/**
+ * MIGRATED. Was the design note's literal example of a helper reaching through the tree
+ * (`settings.andro!!`). As a scope the `!!` is gone, and so is the `if (settings.withAndro)` guard
+ * its caller needed: `lib.andro?.let { context(it) { androDefault() } }` is one expression that
+ * both tests presence and supplies the value.
+ */
+context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
 fun KotlinMultiplatformExtension.androDefault() {
   extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
-    val andro = settings.andro!!
     minSdk { version = release(andro.sdkMin) }
     compileSdk {
       version = andro.sdkCompilePreview?.let { preview(it) }

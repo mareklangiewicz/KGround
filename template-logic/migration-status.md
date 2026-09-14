@@ -582,13 +582,67 @@ asserting absence, so no scope can express it — withholding the compose scope 
 compose at all", which is false here. The old name made it look like the presence flags that died
 in `jvmOnlyDefault` and `allDefault`; it never was one.
 
+### The andro family — presence-as-scope, where it actually pays
+
+The biggest remaining migration, and the one the design note's strongest argument rests on.
+
+**Migrated.** `defaultAndroDeps`, `defaultAndroTestDeps`, `defaultAndroLib`, `defaultAndroApp`,
+both `defaultDefaultConfig` overloads, `androDefault`, and both entry points
+(`defaultBuildTemplateForAndroLib` / `...AndroApp`).
+
+**The count.** Before: six `?: error("No andro settings.")` plus one `settings.andro!!` — the design
+note's literal example. After: **three** `?: error`, one at each point where "details that may or
+may not have android" genuinely arrives from outside (the two andro entry points, and
+`allDefaultSourceSetsForCompose`'s andro block). The `!!` is gone entirely.
+
+**Presence-as-scope does not delete the check — it moves it to one boundary.** This is the honest
+result and it is worth stating plainly, because "all the `!!`s disappear" would be wrong. Something
+must still turn a nullable into a scope at the edge, since a build script may or may not have
+configured android. What changes is that it happens ONCE per entry point, and everything below is
+statically guaranteed:
+
+```kotlin
+val lib = details.toTMP()
+val andro = lib.andro ?: error("No andro settings.")   // the only check
+context(lib.settings, andro) { defaultAndroDeps(); defaultAndroTestDeps() }
+```
+
+`androDefault` shows the payoff most compactly. Its caller needed a separate presence test next to
+the helper's own `!!`:
+
+```kotlin
+if (settings.withAndro) androDefault()   // ... and inside: val andro = settings.andro!!
+lib.andro?.let { context(lib.details, it) { androDefault() } }   // one expression, both jobs
+```
+
+**`composeConfiguredByMpp` left the leaves.** Earlier this was classified as "survives, rename
+rather than delete". Both halves held, but it moved further than predicted: the compose-android
+dependencies became `defaultComposeAndroDeps` / `defaultComposeAndroTestDeps`, which require a
+COMPOSE scope, so the routing is now expressed by whether the caller opens that scope. In
+`allDefaultSourceSetsForCompose` — the "compose is configured the MPP way" case — the flag is gone
+and replaced by simply not opening a compose scope. The boolean survives only as
+`configureComposeAndro` on `defaultAndroLib` / `defaultAndroApp`, where a caller that knows both
+facts (compose exists, and was not configured the MPP way) states its decision once.
+
+**Negative control.** A compose scope does not satisfy an andro requirement:
+
+```
+e: No context argument for 'andro: LibAndroSettingsTMP' found.
+```
+
+**Unexercised parts, stated plainly.** `defaultAndroLib` and `LibraryExtension.defaultDefaultConfig`
+remain dead code since the AGP 9 migration (an android library is a KMP module now, and
+`LibraryExtension` is never applied). They were migrated to keep the family coherent, but no build
+proves them — only that they compile. The app path (`defaultAndroApp`, `ApplicationExtension
+.defaultDefaultConfig`, both entry points, `androDefault`) IS exercised: `template-andro` assembles
+and produces `template-andro-app-debug.apk`.
+
 ### Still open
 
 - Migrated so far: `jvmOnlyDefault`, `allDefault`, `addRepos`. Still on the nested types:
   `defaultPublishing` and `defaultGroupAndVerAndDescription` (both `context(details: LibDetails)`),
-  the andro family (`defaultAndroDeps` / `defaultAndroTestDeps` / `defaultAndroLib` /
-  `defaultAndroApp`, which need an andro SCOPE — the presence-as-scope payoff, and the biggest
-  remaining prize), and `allDefaultSourceSetsForCompose` (needs a compose scope).
+  and `allDefaultSourceSetsForCompose` (needs a compose scope; its andro block still carries one of
+  the three remaining boundary checks). The andro family is DONE (above).
 - `LibTMP.toNested()` exists only to feed those still-nested internals. It is the honest measure of
   how far the migration has to go: when nothing calls it, the prototype is complete and the DepsKt
   change is fully specified.

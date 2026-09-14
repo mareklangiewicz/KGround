@@ -34,16 +34,25 @@ fun Project.defaultBuildTemplateForFullMppLib(
   )
 
   if (details.settings.withAndro) {
-    extensions.configure<KotlinMultiplatformExtension> { androDefault() }
+    extensions.configure<KotlinMultiplatformExtension> {
+      details.toTMP().let { lib -> lib.andro?.let { context(lib.details, it) { androDefault() } } }
+    }
 
     // The KMP android target names its configurations per source set, so the plain
     // "implementation"/"testImplementation" of the old com.android.library path are gone.
     // Still reusing defaultAndroDeps rather than restating the list (trust me future Marek:
     // I've tried configuring it all the "mpp way" already :) ).
     dependencies {
-      // composeConfiguredByMpp because we have compose configured the mpp way already.
-      defaultAndroDeps(composeConfiguredByMpp = true, configuration = "androidMainImplementation")
-      defaultAndroTestDeps(composeConfiguredByMpp = true, configuration = "androidHostTestImplementation")
+      // compose is configured the MPP way already, so we simply do NOT open a compose scope here:
+      // the compose-android deps live in defaultComposeAndroDeps and are unreachable without one.
+      // That is the composeConfiguredByMpp routing, expressed by omission instead of by a boolean.
+      details.toTMP().let { lib ->
+        val andro = lib.andro ?: error("No andro settings.")
+        context(lib.settings, andro) {
+          defaultAndroDeps(configuration = "androidMainImplementation")
+          defaultAndroTestDeps(configuration = "androidHostTestImplementation")
+        }
+      }
     }
   }
 }
