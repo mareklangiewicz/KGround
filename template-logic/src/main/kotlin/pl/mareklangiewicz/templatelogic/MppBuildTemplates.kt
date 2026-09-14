@@ -75,7 +75,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
     require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
     require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }
   }
-  repositories { addRepos(details.settings.repos) }
+  repositories { addRepos() }
   defaultGroupAndVerAndDescription(details)
   extensions.configure<KotlinMultiplatformExtension> {
     allDefault(

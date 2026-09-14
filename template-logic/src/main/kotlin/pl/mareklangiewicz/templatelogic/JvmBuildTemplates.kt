@@ -25,7 +25,7 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
 ): Unit = context(details, details.settings) {
   require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure compose stuff" }
   require(ignoreAndroTarget || details.settings.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
-  repositories { addRepos(details.settings.repos) }
+  repositories { addRepos() }
   defaultGroupAndVerAndDescription(details)
   extensions.configure<KotlinJvmProjectExtension> {
     jvmOnlyDefault(

@@ -149,7 +149,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   addAndroMainDependencies: DependencyHandler.() -> Unit = {},
 ): Unit = context(details, details.settings) {
   val andro = details.settings.andro ?: error("No andro settings.")
-  repositories { addRepos(details.settings.repos) }
+  repositories { addRepos() }
   extensions.configure<KotlinMultiplatformExtension> {
     androidTarget()
     jvmToolchain(details.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
@@ -235,7 +235,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   val andro = details.settings.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
-  repositories { addRepos(details.settings.repos) }
+  repositories { addRepos() }
   extensions.configure<ApplicationExtension> {
     defaultAndroApp()
     variant?.let { defaultAndroAppPublishVariant(it) }

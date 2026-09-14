@@ -26,7 +26,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
   if (settings.compose?.withComposeTestUiJUnit5 == true)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
-  repositories { addRepos(settings.repos) }
+  repositories { addRepos(settings = settings) }
   defaultGroupAndVerAndDescription(details)
 
   val compose = extensions.getByName("compose") as ComposeExtension

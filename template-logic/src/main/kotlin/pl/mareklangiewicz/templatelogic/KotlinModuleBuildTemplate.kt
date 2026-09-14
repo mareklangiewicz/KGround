@@ -39,7 +39,8 @@ fun Project.setMyWeirdSubstitutions(
   }
 }
 
-fun RepositoryHandler.addRepos(settings: LibReposSettings) = with(settings) {
+context(settings: LibSettings)
+fun RepositoryHandler.addRepos() = with(settings.repos) {
   @Suppress("DEPRECATION")
   if (withMavenLocal) mavenLocal()
   if (withMavenCentral) mavenCentral()
