@@ -168,24 +168,38 @@ context work must carry the *effective* `LibDetails`, not re-read it from the pr
 
 ## Probes — the claims above are executable
 
-Every context-parameter claim in this document is asserted by
-`template-logic/probes.sh`. Run it after touching anything context-related:
+Every context-parameter claim here is asserted by a Gradle task:
 
 ```
-template-logic/probes.sh        # all, ~40s
-template-logic/probes.sh 5      # just one
-template-logic/probes.sh --clean  # clear leftovers from an interrupted run
+./gradlew -p template-logic probes             # all, ~15s
+./gradlew -p template-logic probes -Ponly=05   # just one
 ```
 
-Half the claims are about what does NOT compile, so they cannot be unit tests;
-each probe compiles real code with real Gradle and asserts the outcome and the
-exact error text. Probe 2 is a deliberate CONTROL for probe 1 — without it,
-probe 1 would pass for a typo'd identifier just as happily as for the real
-behaviour. Both were mutation-tested: flipping `context` to `with` in probe 1
-turns it red, and dropping the explicit type in probe 5 turns that red.
+Each `template-logic/probes/*.kt` is a real snippet in two sections, mirroring this repo:
 
-The suite asserts its own residue as a final check, and refuses to start
-against a dirty tree so it can never capture pollution as its "clean" backup.
+```
+//? ---- lib ----        compiled WITH    -Xcontext-parameters  (like template-logic)
+//? ---- consumer ----   compiled WITHOUT it                    (like a build.gradle.kts)
+```
+
+Half the claims are about what does NOT compile, so they cannot be unit tests. The suite
+asserts outcome AND diagnostic text, and runs the successful ones to check real output.
+
+**The consumer section goes through Gradle's own build-script compiler, deliberately.**
+An earlier version compiled it with standalone `kotlinc` and gave DIFFERENT answers:
+kotlinc reports "no context argument for 'd: LibDetails' found" and rejects the callable
+reference outright ("unsupported because it has context parameters"), where Gradle's script
+compiler reports "specify the '-Xcontext-parameters' compiler option" and *accepts* the
+coerced reference. So probes 04/05/06 generate a throwaway Gradle project in
+`build/probes/` and run it. The lib section still uses kotlinc, since it only has to
+produce bytecode.
+
+Probe 02 is a deliberate CONTROL for probe 01 — without it, probe 01 would pass for a
+misspelled identifier just as happily as for the real behaviour. Both were mutation-tested:
+flipping `context` to `with` in probe 01 turns it red, and dropping the explicit function
+type in probe 05 turns that red.
+
+Nothing touches real sources, so there is no residue to clean up.
 
 ## Regression control
 
