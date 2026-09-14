@@ -1,46 +1,23 @@
-
-// region [[Basic MPP Lib Build Imports and Plugs]]
-
-import org.jetbrains.kotlin.gradle.dsl.*
-import org.jetbrains.kotlin.gradle.plugin.*
-import com.vanniktech.maven.publish.*
-import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
 
 plugins {
-  id("my-convention")
-  plugAll(plugs.KotlinMulti, plugs.VannikPublishNoVer)
+  id("my-mpp-lib")
 }
 
-// endregion [[Basic MPP Lib Build Imports and Plugs]]
+myMppLib {
+  settings { copy(withJs = false, withLinuxX64 = false) }
+  commonMainDependencies {
+    api(project(":kgroundx-maintenance"))
+  }
+  jvmMainDependencies {
+    api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
 
-val settings = gradle.extLibDetails.settings.copy(
-  withJs = false,
-  withLinuxX64 = false,
-)
-
-val details = gradle.extLibDetails.copy(settings = settings)
-
-defaultBuildTemplateForBasicMppLib(details) {
-  api(project(":kgroundx-maintenance"))
-}
-
-kotlin {
-  sourceSets {
-    jvmMain {
-      dependencies {
-        api(Io.GitHub.TypeSafeGitHub.github_workflows_kt)
-
-        api(Io.GitHub.TypeSafeGitHub.action_binding_generator)
-        api(Io.GitHub.TypeSafeGitHub.action_updates_checker)
-        api(Io.GitHub.TypeSafeGitHub.shared_internal)
-        // Note: I add these for easier experimenting in consuming code/libs. Not strictly needed here.
-        // All: kotlinx-workflows, kotlinx-experiments and even kotlinx-maintenance are mostly for my own experiments,
-        // so users won't be usually consuming any of that (kotlinx-workflows even less often than kotlinx-maintenance)
-        // so it's fine that kotlinx-workflows comes with a "price" (kinda heavy dependencies)
-      }
-    }
+    api(Io.GitHub.TypeSafeGitHub.action_binding_generator)
+    api(Io.GitHub.TypeSafeGitHub.action_updates_checker)
+    api(Io.GitHub.TypeSafeGitHub.shared_internal)
+    // Note: I add these for easier experimenting in consuming code/libs. Not strictly needed here.
+    // All: kotlinx-workflows, kotlinx-experiments and even kotlinx-maintenance are mostly for my own experiments,
+    // so users won't be usually consuming any of that (kotlinx-workflows even less often than kotlinx-maintenance)
+    // so it's fine that kotlinx-workflows comes with a "price" (kinda heavy dependencies)
   }
 }
