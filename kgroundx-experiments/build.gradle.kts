@@ -43,6 +43,13 @@ val probeDetails = gradle.extLibDetails
 val probeName: (LibDetails, Project) -> String = Project::probeNameIsProjectName
 val probeCtx: (LibDetails) -> String = ::probeContextFun
 
+// Which Kotlin compiled each side? Read the metadata stamp off real bytecode: an
+// anonymous object here is compiled by the SCRIPT compiler, LibMarker by whatever
+// builds template-logic. Gemini's flattened-reference example assumed these differ
+// (2.1.20 vs 2.4.20); this asserts whether they actually do.
+val scriptMetadataVersion = object {}.javaClass
+  .getAnnotation(Metadata::class.java)?.metadataVersion?.joinToString(".") ?: "unknown"
+
 tasks.register("probes") {
   group = "verification"
   description = "Assert the context-parameter claims in template-logic/migration-status.md"
@@ -50,6 +57,14 @@ tasks.register("probes") {
   val libName = probeDetails.name
   val details = probeDetails
   val log = logger
+  val embedded = embeddedKotlinVersion
+  val kmpPluginVersion = getKotlinPluginVersion()
+  // Read the module compile tasks' actual args rather than assuming: defaultCompiler()
+  // in template-logic adds the flag for module sources too, which is easy to miss.
+  val moduleArgs = provider {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
+      .flatMap { it.compilerOptions.freeCompilerArgs.get() }.distinct().sorted()
+  }
   doLast {
     var passed = 0
     val failed = mutableListOf<String>()
@@ -57,6 +72,28 @@ tasks.register("probes") {
       if (actual == expected) { log.lifecycle("  PASS  $claim"); passed++ }
       else { log.lifecycle("  FAIL  $claim\n        expected <$expected> but got <$actual>"); failed += claim }
     }
+
+    // Three compilers are actually in play here, which is easy to conflate:
+    log.lifecycle("  Kotlin per side:")
+    log.lifecycle("    lib      template-logic sources (WITH flag) : metadata ${probeLibMetadataVersion()}, stdlib ${probeLibStdlibVersion()}")
+    log.lifecycle("    consumer build.gradle.kts    (flagless)     : metadata $scriptMetadataVersion")
+    log.lifecycle("    ^ both of the above are Gradle's embedded Kotlin: $embedded")
+    // Careful: this reads TASK-level args. defaultCompiler() would add the flag, but it
+    // is only called from the raw template, so module tasks do NOT carry it -- and yet
+    // context parameters still compile in module sources, because Kotlin 2.4.x enables
+    // them by default. Only Gradle's SCRIPT compiler still demands the flag.
+    val moduleFlagged = moduleArgs.get().contains("-Xcontext-parameters")
+    log.lifecycle("    module   kgroundx-experiments/src/**.kt      : Kotlin plugin $kmpPluginVersion, -Xcontext-parameters=$moduleFlagged (not needed there)")
+    // The metadata stamp is the BINARY FORMAT version, not the compiler version -- it is
+    // evidence the two sides agree, not evidence of which release built them.
+    check(
+      "lib and consumer share one Kotlin metadata format (no version split)",
+      scriptMetadataVersion, probeLibMetadataVersion(),
+    )
+    check(
+      "module compile tasks do NOT carry the flag (defaultCompiler is raw-template only)",
+      moduleFlagged, false,
+    )
 
     // Guard: if these were ever equal the next probe would prove nothing.
     check("fixture can tell project name from lib name", projectName != libName, true)

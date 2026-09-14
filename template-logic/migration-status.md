@@ -166,6 +166,40 @@ Related trap, already removed: a `context(Project) val libDetails get() = gradle
 reads the AMBIENT details and silently discards those per-module overrides. Any future
 context work must carry the *effective* `LibDetails`, not re-read it from the project.
 
+## Three Kotlins are in play, and they differ
+
+`./gradlew :kgroundx-experiments:probes` reports this, read off real bytecode and real
+task config rather than assumed:
+
+```
+lib      template-logic sources (WITH flag) : metadata 2.2.0, stdlib 2.4.0
+consumer build.gradle.kts    (flagless)     : metadata 2.2.0
+^ both of the above are Gradle's embedded Kotlin: 2.4.0
+module   kgroundx-experiments/src/**.kt     : Kotlin plugin 2.4.20, flag not set (not needed)
+```
+
+- **Build scripts and template-logic sources** are both compiled by Gradle's *embedded*
+  Kotlin (`embeddedKotlinVersion` = 2.4.0). Same compiler; the ONLY difference between them
+  is `-Xcontext-parameters`, which `template-logic/build.gradle.kts` sets for itself.
+- **Module sources** are compiled by the Kotlin plugin (2.4.20) and **do not need the
+  flag** — Kotlin 2.4.x enables context parameters by default. Measured: a
+  `context(m: CtxProbeMarker) fun …` in `kgroundx-experiments/src/commonMain/kotlin`
+  compiles, and a deliberate type error in the same file fails, proving it really was
+  compiled.
+- Note `defaultCompiler()` *does* add the flag, but it is only ever called from
+  `defaultBuildTemplateForRawMppLib`, so KGround's own modules never receive it — and do
+  not need it. The probe asserts that, so the two facts cannot drift apart silently.
+
+This also explains the kotlinc-vs-Gradle discrepancy noted below: it is not two compilers
+disagreeing arbitrarily. The regular Kotlin 2.4.x compiler has context parameters ON by
+default; Gradle's *script* compiler is the conservative one that still demands the flag.
+
+**Consequence for the roadmap:** context parameters are fully available in KGround's own
+library code today. The restriction is specific to `build.gradle.kts`.
+
+The metadata stamp (2.2.0) is the binary FORMAT version, not a compiler release — it is
+evidence the two sides agree with each other, not evidence of which Kotlin built them.
+
 ## Probes — what is executable, and what is only measured
 
 ```

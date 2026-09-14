@@ -35,3 +35,16 @@ fun probeMultiAndUnnamed(d: LibDetails): String = context(d, d.settings) { probe
 /** Target for the flattened-coercion probe: reachable from a flagless script. */
 context(d: LibDetails)
 fun probeContextFun(): String = "ctx:" + d.name
+
+private object LibMarker
+
+/**
+ * Kotlin metadata version stamped into template-logic's OWN bytecode, i.e. evidence of
+ * which compiler actually built this side. Read off the class, not from configuration.
+ */
+fun probeLibMetadataVersion(): String =
+  LibMarker::class.java.getAnnotation(Metadata::class.java)
+    ?.metadataVersion?.joinToString(".") ?: "unknown"
+
+/** kotlin-stdlib visible to template-logic at runtime. */
+fun probeLibStdlibVersion(): String = KotlinVersion.CURRENT.toString()
