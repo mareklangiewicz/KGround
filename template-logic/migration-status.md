@@ -44,10 +44,37 @@ e: kground/build.gradle.kts: To call contextual declarations,
 ```
 
 Measured directly, not inferred. So context parameters work only inside `template-logic`
-and its precompiled script plugins. Roadmap idea #1 ("eliminate almost all explicit
-parameters") can therefore reach the internal helpers but not the public entry points,
-which must keep an ordinary `details: LibDetails` parameter for the six modules that
-override settings.
+and its precompiled script plugins. And this is not a missing flag that could be supplied
+somewhere — **Gradle hardcodes the script language version, with no configuration surface
+at all.** Read off the distribution in use (`gradle-kotlin-dsl-9.7.1.jar`,
+`org.gradle.kotlin.dsl.support.KotlinCompilerKt`):
+
+```
+gradleKotlinDslLanguageVersionSettingsFor(KotlinCompilerOptions):
+  LanguageVersionSettingsImpl(
+    LanguageVersion.KOTLIN_2_2, ApiVersion.KOTLIN_2_2,          // literals, not config
+    mapOf(skipMetadataVersionCheck, skipPrereleaseCheck, allowUnstableDependencies,
+          jvmDefaultMode=ENABLE, javaTypeEnhancementState),     // analysis flags
+    /* specificFeatures = */ default empty)                     // no LanguageFeature hook
+```
+
+`KotlinCompilerOptions` carries exactly three fields — `jvmTarget`, `allWarningsAsErrors`,
+`explicitSkipMetadataVersionCheck`. There is no `freeCompilerArgs` anywhere in the script
+compilation path; the only `-X` strings in the whole jar are the five above. The
+`org.gradle.kotlin.dsl.*` system properties that exist (`allWarningsAsErrors`,
+`skipMetadataVersionCheck`, `scriptCompilationAvoidance`, `dcl`, `internal.io.timeout`,
+`locationAwareEditorHints`) touch no language feature.
+
+So this is a property of the Gradle version, and it unblocks itself for free — with no
+flag — whenever Gradle bumps that `KOTLIN_2_2` literal to 2.4. Until then, precompiled
+script plugins (compiled by `kotlin-dsl` as ordinary Kotlin source, where `freeCompilerArgs`
+does work) are the only supported route to context parameters in root-script-adjacent code.
+That is the load-bearing reason roadmap idea #2 (persona plugins) is the route to
+"extremely clean root scripts", rather than one option among several.
+
+Roadmap idea #1 ("eliminate almost all explicit parameters") can therefore reach the
+internal helpers but not the public entry points, which must keep an ordinary
+`details: LibDetails` parameter for the six modules that override settings.
 
 ### Provide context with `context(x) { }`, NOT `with(x) { }`
 
@@ -165,6 +192,42 @@ be wrong.
 Related trap, already removed: a `context(Project) val libDetails get() = gradle.extLibDetails`
 reads the AMBIENT details and silently discards those per-module overrides. Any future
 context work must carry the *effective* `LibDetails`, not re-read it from the project.
+
+### `-Xexplicit-context-arguments` — a second, separate opt-in
+
+`ContextParameters` and `ExplicitContextArguments` are **two different `LanguageFeature`
+entries** in the Kotlin 2.4.0 / 2.4.20 compilers. The second is opted into by
+`-Xexplicit-context-arguments`, described by the compiler as *"Enable explicit passing of
+context arguments using named argument syntax."* It lets a call site supply a context
+argument by the parameter's declared name instead of establishing it with `context(..) { }`:
+
+```kotlin
+context(d: LibDetails)
+fun probeContextFun(): String = "ctx:" + d.name
+
+fun probeExplicitContextArg(details: LibDetails): String = probeContextFun(d = details)
+```
+
+Both flags are now in `template-logic/build.gradle.kts`. Control, measured: with
+`-Xcontext-parameters` alone that call site fails with
+
+```
+e: ProbeFuns.kt:57:60 No context argument for 'd: LibDetails' found.
+e: ProbeFuns.kt:57:76 No parameter with name 'd' found.
+```
+
+so the flag is doing real work and the probe cannot pass by accident. Asserted as probe #8.
+
+It is a **call-site** feature, so it does not reach consumer `build.gradle.kts` — those
+are the call sites that are pinned to language version 2.2 and cannot opt into anything.
+It changes nothing about the 9 public entry points' signatures; its value is inside
+`template-logic`, where a helper can now forward an ambient value by name rather than
+wrapping the call in `context(..) { }`.
+
+Not established: whether `ExplicitContextArguments` becomes default-on at language
+version 2.4 the way `ContextParameters` does. The control above was measured on
+`template-logic`, which is itself compiled at language version ~2.2 (metadata stamp
+`2.2.0`), so it only proves the flag is required *below* 2.4.
 
 ## Three Kotlins are in play, and they differ
 

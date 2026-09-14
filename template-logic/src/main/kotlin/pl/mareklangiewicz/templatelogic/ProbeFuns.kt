@@ -48,3 +48,10 @@ fun probeLibMetadataVersion(): String =
 
 /** kotlin-stdlib visible to template-logic at runtime. */
 fun probeLibStdlibVersion(): String = KotlinVersion.CURRENT.toString()
+
+/**
+ * Probe for `-Xexplicit-context-arguments`: pass a context argument by NAME at the call
+ * site instead of establishing it with `context(..) { }`. Separate LanguageFeature from
+ * ContextParameters, so it needs its own opt-in.
+ */
+fun probeExplicitContextArg(details: LibDetails): String = probeContextFun(d = details)

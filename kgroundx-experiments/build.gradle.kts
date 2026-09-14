@@ -126,6 +126,13 @@ tasks.register("probes") {
       "a flagless script reaches a context fun via the flattened coercion",
       probeCtx(details), "ctx:$libName",
     )
+    // -Xexplicit-context-arguments is a SEPARATE LanguageFeature from ContextParameters,
+    // so it needs its own opt-in. Control: without the flag this call site fails with
+    // "No parameter with name 'd' found." Both flags live in template-logic/build.gradle.kts.
+    check(
+      "a context argument can be passed by name (-Xexplicit-context-arguments)",
+      probeExplicitContextArg(details), "ctx:$libName",
+    )
 
     log.lifecycle("\n  $passed passed, ${failed.size} failed")
     if (failed.isNotEmpty()) throw GradleException("probes failed: ${failed.joinToString()}")
