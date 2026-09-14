@@ -291,6 +291,39 @@ The metadata stamp is not the compiler release — it tracks the LANGUAGE versio
 what makes it useful here: 2.2.0 on the script side and 2.4.0 on a module class is direct
 evidence of the split, independent of the flag behaviour it explains.
 
+## Roadmap idea #2 — "persona" precompiled script plugins: prototyped and REJECTED
+
+Built, measured, and reverted (the prototype is in git history on this branch, one commit
+before its revert). Do not re-prototype it without a new idea about the two costs below.
+
+The shape was `my-mpp-lib.gradle.kts` carrying the plugins and the build-template call,
+with overrides arriving through a `myMppLib { }` extension backed by a `MyMppLibPersona`
+class. It worked: `kgroundx-workflows` (which overrides settings AND has its own jvmMain
+dependencies) migrated to one `plugins` block plus one extension block, with the resolved
+`jvmCompileClasspath` and the generated POM **byte-identical** to the original script's.
+
+Rejected anyway, because what it buys does not cover what it costs:
+
+- **It cannot inject imports.** `Io.GitHub…` still needs `import pl.mareklangiewicz.deps.*`
+  in the consumer, so the imports region survives. Only the `plugins`/`plugAll` region and
+  the `val settings = …copy(); val details = …copy(settings = settings)` dance disappear.
+- **A consumer cannot keep its own `kotlin { }` block.** The consumer's
+  `sourceSets { jvmMain { } }` runs during evaluation; the template call runs in
+  `afterEvaluate`; Kotlin then fails with *"The compilation 'main' cannot be created after
+  the source set 'jvmMain'"*. So every source set or KMP knob a consumer wants has to be
+  mirrored onto the extension (`jvmMainDependencies { }`, and one more per migrated module).
+  The extension grows toward mirroring the whole KMP DSL.
+- **`afterEvaluate` is the mechanism, and it is an anti-pattern.** A lazier design cannot
+  avoid it: settings are exactly what decide which targets exist, so the template call has
+  to wait for the extension to be filled in.
+- **It adds a concept.** A `MyMppLibPersona` class plus an extension plus deferred timing
+  is more indirection to understand than the `defaultBuildTemplateFor*(details) { }` call
+  it replaces, for a handful of saved lines.
+
+Net: the plugins block and the copy dance are worth removing, but not at the price of
+`afterEvaluate` plus a mirror API. If the copy dance is the thing to kill, kill it in the
+entry-point signature instead — see the signature notes above.
+
 ## Probes — what is executable, and what is only measured
 
 ```
