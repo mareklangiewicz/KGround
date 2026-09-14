@@ -15,6 +15,20 @@ import pl.mareklangiewicz.defaults.*
 
 // region [[Andro Common Build Template]]
 
+/**
+ * Minor Android API level to compile against, paired with [LibAndroSettings.sdkCompile].
+ *
+ * TEMPORARY and deliberately loud: this is a VERSION, so it belongs in DepsKt's `Vers` next to
+ * `AndroSdkCompile`, with a matching `LibAndroSettings.sdkCompileMinor` field. It sits here only
+ * because KGround consumes DepsKt *published* (`settings.gradle.kts` has `depsInclude = false`),
+ * so a DepsKt change cannot reach these templates without cutting a release.
+ *
+ * Why it is needed at all: `Vers.ComposeAndro` tracks `verLast`, currently compose-android
+ * 1.13.0-alpha03, which refuses to be consumed by anything compiling against less than API 37.1.
+ * Templates are examples for new projects, so they track the newest: 37.2.
+ */
+const val AndroSdkCompileMinorTMP = 2
+
 /** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
 context(settings: LibSettings)
 fun DependencyHandler.defaultAndroDeps(
@@ -184,7 +198,10 @@ fun LibraryExtension.defaultAndroLib(
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
-  andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
+  andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
+    compileSdk = andro.sdkCompile
+    compileSdkMinor = AndroSdkCompileMinorTMP
+  }
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig()
   defaultBuildTypes()
@@ -265,9 +282,13 @@ fun ApplicationExtension.defaultAndroApp(
   ignoreCompose: Boolean = false,
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
-  andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run { compileSdk = andro.sdkCompile }
+  andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
+    compileSdk = andro.sdkCompile
+    compileSdkMinor = AndroSdkCompileMinorTMP
+  }
   defaultDefaultConfig()
   defaultBuildTypes()
+  details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
 }
 
 context(details: LibDetails)

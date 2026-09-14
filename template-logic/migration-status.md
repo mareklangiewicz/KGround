@@ -118,278 +118,46 @@ So raw's root line could never reach basic. And **no CI workflow builds any temp
 templates could rot silently. That missing gate is the real prevention story here, not the
 one-line fix.
 
-### Still blocked, and NOT caused by this work: compileSdk 37.0 vs 37.1
+### compileSdk — templates now track the newest (37.2)
 
-`androidx.compose.ui:ui-tooling*:1.13.0-alpha03` requires compiling against Android API 37.1;
-the templates compile against 37.0, so `checkAarMetadata` fails wherever `defaultAndroDeps` adds
-the android-compose tooling dependencies.
+`Vers.ComposeAndro` is `AndroidX.Compose.Runtime.runtime.verLast`, i.e. deliberately the newest
+(currently compose-android 1.13.0-alpha03), and that alpha refuses to be consumed by anything
+compiling against less than API **37.1**. The templates compiled against 37.0, so
+`checkAarMetadata` failed wherever `defaultAndroDeps` added the android-compose artifacts.
+Templates are examples for new projects, so the fix is to raise the SDK, not pin compose back.
 
-Control: **`template-raw` fails identically** (`:template-raw-andro-app:checkDebugAarMetadata`,
-same three issues), so this is pre-existing dependency drift, not migration fallout.
-`template-full` is unaffected only because it passes `ignoreCompose = true` (compose is configured
-the mpp way there) and so never pulls those artifacts.
+Available platforms are 37.1 and 37.2; the templates now target **37.2**, and AGP downloads the
+platform itself (the licence was already accepted in the SDK's `licenses/`).
 
-Fixing it needs a way to express a **minor** API level: `LibAndroSettings.sdkCompile` is an `Int`,
-and AGP 9's `compileSdk { version = release(37) }` would need the minor variant. That is a DepsKt
-model change — see the de-nesting note, same repo, same reason to do it separately.
+Expressing a *minor* API level needs AGP 9 APIs that the model does not reach yet:
 
-## Constraint worth knowing before planning more context-parameter work
+- KMP android target: `compileSdk { version = release(37) { minorApiLevel = 2 } }`
+- old DSL (`ApplicationExtension`): `compileSdk = 37; compileSdkMinor = 2`
 
-Consumer `build.gradle.kts` files **cannot** call contextual declarations — Gradle compiles
-them without `-Xcontext-parameters`:
+`LibAndroSettings.sdkCompile` is a plain `Int` with nowhere to put the minor, so the value lives
+in `AndroSdkCompileMinorTMP` in `AndroBuildTemplates.kt` — deliberately loud, because a VERSION
+belongs in DepsKt's `Vers` next to `AndroSdkCompile`, with a matching
+`LibAndroSettings.sdkCompileMinor`. It sits in KGround only because `settings.gradle.kts` has
+`depsInclude = false`, so KGround consumes DepsKt *published* and a DepsKt change cannot reach
+these templates without cutting a release. **Move it when DepsKt is next touched.**
 
-```
-e: kground/build.gradle.kts: To call contextual declarations,
-   specify the '-Xcontext-parameters' compiler option.
-```
+### template-andro-app is a plain Jetpack Compose android app now
 
-Measured directly, not inferred. So context parameters work only inside `template-logic`
-and its precompiled script plugins. And this is not a missing flag that could be supplied
-somewhere — **Gradle hardcodes the script language version, with no configuration surface
-at all.** Read off the distribution in use (`gradle-kotlin-dsl-9.7.1.jar`,
-`org.gradle.kotlin.dsl.support.KotlinCompilerKt`):
+Fallout from it no longer being a KMP module (AGP 9 has no KMP application plugin), all found by
+building rather than by reasoning:
 
-```
-gradleKotlinDslLanguageVersionSettingsFor(KotlinCompilerOptions):
-  LanguageVersionSettingsImpl(
-    LanguageVersion.KOTLIN_2_2, ApiVersion.KOTLIN_2_2,          // literals, not config
-    mapOf(skipMetadataVersionCheck, skipPrereleaseCheck, allowUnstableDependencies,
-          jvmDefaultMode=ENABLE, javaTypeEnhancementState),     // analysis flags
-    /* specificFeatures = */ default empty)                     // no LanguageFeature hook
-```
+- sources moved `src/androidMain/` → `src/main/`, the layout `template-raw-andro-app` uses
+- its namespace collided with `:template-andro-lib` (both resolved to
+  `pl.mareklangiewicz.templateandro`); the app is now `…templateandro.androapp`, and its Kotlin
+  package was renamed to match so the manifest's `.MainActivity` still resolves
+- it needs the compose **compiler** plugin (`plugs.KotlinMultiCompose`) and
+  `buildFeatures.compose`, because unlike `template-raw-andro-app` — whose UI lives in the shared
+  lib — this app uses Jetpack Compose directly. `defaultAndroApp` now enables
+  `defaultComposeStuff()` the way `defaultAndroLib` always did. Without the compiler plugin the
+  symptom is a misleading backend crash: *"Couldn't inline method call: CompositionLocal.current"*.
 
-`KotlinCompilerOptions` carries exactly three fields — `jvmTarget`, `allWarningsAsErrors`,
-`explicitSkipMetadataVersionCheck`. There is no `freeCompilerArgs` anywhere in the script
-compilation path; the only `-X` strings in the whole jar are the five above. The
-`org.gradle.kotlin.dsl.*` system properties that exist (`allWarningsAsErrors`,
-`skipMetadataVersionCheck`, `scriptCompilationAvoidance`, `dcl`, `internal.io.timeout`,
-`locationAwareEditorHints`) touch no language feature.
-
-So this is a property of the Gradle version, and it unblocks itself for free — with no
-flag — whenever Gradle bumps that `KOTLIN_2_2` literal to 2.4. Until then, precompiled
-script plugins (compiled by `kotlin-dsl` as ordinary Kotlin source, where `freeCompilerArgs`
-does work) are the only supported route to context parameters in root-script-adjacent code.
-That is the load-bearing reason roadmap idea #2 (persona plugins) is the route to
-"extremely clean root scripts", rather than one option among several.
-
-Roadmap idea #1 ("eliminate almost all explicit parameters") can therefore reach the
-internal helpers but not the public entry points, which must keep an ordinary
-`details: LibDetails` parameter for the six modules that override settings.
-
-### Provide context with `context(x) { }`, NOT `with(x) { }`
-
-Both supply a context argument, but they differ in one decisive way, measured on Kotlin
-2.4.0 (the version Gradle 9.7.1 uses to compile this module):
-
-```kotlin
-// githubUrl exists only on LibDetails, so it detects an implicit receiver:
-with(details)    { githubUrl }   // COMPILES  -> with() also makes it a RECEIVER
-context(details) { githubUrl }   // Unresolved reference -> context() does NOT
-```
-
-That matters because `LibDetails` and `Project` share `name`, `group`, `version` and
-`description`. Under `with(details)`, a `fun Project.…` body silently rebinds `name` from
-the module name to the library name — which would corrupt
-`coordinates(artifactId = name)` in `defaultPublishing` with no compile error.
-
-`context(x) { }` supplies the context argument and nothing else, so that whole class of
-shadowing cannot happen. Every context-providing site here uses it, and it takes several
-arguments at once: `context(details, details.settings) { … }`.
-
-Because it cannot shadow, the six entry points with anything to collapse establish context
-for their WHOLE body — `): Unit = context(details, details.settings) { … }` — rather than
-wrapping individual call sites. Verified safe by widening and re-running the controls
-below: `println("MPP Module ${name}…")` still resolves `name` to the project, which is
-exactly what `with` would have broken.
-
-Two groups deliberately left alone:
-- `defaultBuildTemplateForBasicJvmApp`, `…ForFullMppApp`, `…ForBasicMppApp`,
-  `…ForComposeMppApp` are pure delegators — they pass `details` explicitly to another entry
-  point and consume no context, so adding one would be dead scope.
-- `defaultBuildTemplateForRawMppLib` declares `details`/`settings` as locals inside its
-  ~200-line body, so widening would re-indent all of it to remove a single wrapper. Its one
-  narrow `context(details) { defaultPublishing() }` stays.
-
-Note the two are NOT interchangeable in the other direction: bodies that genuinely want
-receiver semantics keep `with`, e.g. `allDefault`/`jvmOnlyDefault` are declared
-`context(settings: LibSettings) fun … = with(settings) { … }` so the body can say `compose`,
-`andro`, `withJvmVer` unqualified.
-
-Regression control — `artifactId` must come from the module and `<name>` from the lib, and
-the two must stay different:
-
-```
-./gradlew -q :kommand-samples:generatePomFileForJvmPublication
-grep -E '<artifactId>|<name>' kommand-samples/build/publications/jvm/pom-default.xml
-# expect artifactId kommand-samples-jvm  and  name "Kommand Samples"
-```
-
-### Context parameters are NOT callable from Kotlin without the flag
-
-A context parameter IS compiled as a value parameter prepended before the extension
-receiver — `javap` on `KotlinModuleBuildTemplateKt` shows:
-
-```
-public static final void defaultPublishing(LibDetails, Project);
-```
-
-That is true at the JVM/ABI level, but it does NOT make such functions callable from Kotlin
-code compiled without `-Xcontext-parameters`. The frontend refuses on both counts:
-
-```
-e: To call contextual declarations, specify the '-Xcontext-parameters' compiler option.
-e: Too many arguments for 'context(d: LibDetails) fun probeNoReceiver(): String'.
-```
-
-Measured with a receiverless probe, so "receiver type mismatch" is not the confound.
-
-**But there IS a source-level escape hatch**, and it works from a flagless script. Taking a
-callable reference and coercing it to an explicit FLATTENED function type is accepted, and
-calls through that value are accepted too — proven by executing it, not just compiling:
-
-```kotlin
-// in build.gradle.kts, NO -Xcontext-parameters
-val f: (LibDetails) -> String = ::someCtxFun   // context param becomes arg 1
-println(f(gradle.extLibDetails))               // actually runs
-```
-
-The intermediate step is essential. A bare `val ref = X::ctxFun` resolves, but invoking
-`ref(...)` still fails with the flag error; only the explicit flattened type lets the call
-through. Argument order is context parameters, then extension receiver, then value
-parameters — as the javap signature shows.
-
-We deliberately do NOT use this for the entry points, because it is strictly worse than the
-ordinary `details` parameter they already take:
-
-- every default argument is lost — you must pass all of them, so the hacky `ignoreXXX`
-  flags become bare positional booleans, `f(s, ext, false, false, {})`, where transposing
-  two of them compiles and silently misconfigures the build
-- named arguments are gone with them
-- it defeats the purpose: you are passing the context explicitly anyway
-- it hard-codes context-before-receiver ordering, an implementation detail
-
-So the accurate statement is not "entry points cannot be context-based" but "they can, at a
-cost that is not worth paying here".
-
-### Project stays an extension receiver, never a context parameter
-
-Entry points must keep `fun Project.…`: build scripts call them with Project as the implicit
-receiver, and reaching a context parameter from a flagless script needs the awkward flattened
-coercion above.
-Internal helpers keep it too — receiver syntax is what makes `extensions`, `tasks`,
-`repositories`, `plugins` and `dependencies` available unqualified; as a context parameter
-every one of those becomes `project.…`. Context parameters and an extension receiver coexist
-without trouble, as the javap signature shows.
-
-### Unnamed context parameters for pure conduits
-
-`context(_: LibDetails)` is supported and still propagates downstream. Used on the two
-functions that hold the context ONLY to forward it and never name it —
-`defaultPublishingOfAndroLib` (passes it to `defaultPOM`) and `defaultPublishingOfAndroApp`
-(delegates to the former). Everywhere else the context is referenced by name, so `_` would
-be wrong.
-
-Related trap, already removed: a `context(Project) val libDetails get() = gradle.extLibDetails`
-reads the AMBIENT details and silently discards those per-module overrides. Any future
-context work must carry the *effective* `LibDetails`, not re-read it from the project.
-
-### `-Xexplicit-context-arguments` — a second, separate opt-in
-
-`ContextParameters` and `ExplicitContextArguments` are **two different `LanguageFeature`
-entries** in the Kotlin 2.4.0 / 2.4.20 compilers. The second is opted into by
-`-Xexplicit-context-arguments`, described by the compiler as *"Enable explicit passing of
-context arguments using named argument syntax."* It lets a call site supply a context
-argument by the parameter's declared name instead of establishing it with `context(..) { }`:
-
-```kotlin
-context(d: LibDetails)
-fun probeContextFun(): String = "ctx:" + d.name
-
-fun probeExplicitContextArg(details: LibDetails): String = probeContextFun(d = details)
-```
-
-Both flags are now in `template-logic/build.gradle.kts`. Control, measured: with
-`-Xcontext-parameters` alone that call site fails with
-
-```
-e: ProbeFuns.kt:57:60 No context argument for 'd: LibDetails' found.
-e: ProbeFuns.kt:57:76 No parameter with name 'd' found.
-```
-
-so the flag is doing real work and the probe cannot pass by accident. Asserted as probe #8.
-
-It is a **call-site** feature, so it does not reach consumer `build.gradle.kts` — those
-are the call sites that are pinned to language version 2.2 and cannot opt into anything.
-It changes nothing about the 9 public entry points' signatures; its value is inside
-`template-logic`, where a helper can now forward an ambient value by name rather than
-wrapping the call in `context(..) { }`.
-
-Not established: whether `ExplicitContextArguments` becomes default-on at language
-version 2.4 the way `ContextParameters` does. The control above was measured on
-`template-logic`, which is itself compiled at language version ~2.2 (metadata stamp
-`2.2.0`), so it only proves the flag is required *below* 2.4.
-
-## Three Kotlins are in play, and they differ
-
-`./gradlew :kgroundx-experiments:probes` reports this, read off real bytecode and real
-task config rather than assumed:
-
-```
-lib      template-logic sources (WITH flag) : metadata 2.2.0, stdlib 2.4.0
-consumer build.gradle.kts    (flagless)     : metadata 2.2.0
-^ both of the above are Gradle's embedded Kotlin: 2.4.0
-module   kgroundx-experiments/src/**.kt     : Kotlin plugin 2.4.20, flag not set (not needed)
-```
-
-- **Build scripts and template-logic sources** are both compiled by Gradle's *embedded*
-  Kotlin (`embeddedKotlinVersion` = 2.4.0). Same compiler; the ONLY difference between them
-  is `-Xcontext-parameters`, which `template-logic/build.gradle.kts` sets for itself.
-- **Module sources** are compiled by the Kotlin plugin (2.4.20) and **do not need the
-  flag**. Measured: a `context(m: CtxProbeMarker) fun …` in
-  `kgroundx-experiments/src/commonMain/kotlin` compiles, with a deliberate type error in
-  the same file as the control proving it really was compiled.
-
-### The gate is the LANGUAGE version 2.4, not the compiler release
-
-Compiling that same probe against each language version, the compiler says it outright:
-
-| languageVersion | result |
-|---|---|
-| 2.2 | `e: The feature "context parameters" is only available since language version 2.4` |
-| 2.3 | same error |
-| 2.4 | compiles, no flag needed |
-
-So `-Xcontext-parameters` is the opt-in for language version **below** 2.4; from 2.4 the
-feature is on by default. That single rule explains all three sides:
-
-- module sources take the plugin default (2.4) → no flag needed
-- build scripts are compiled by Gradle's embedded Kotlin **2.4.0** but at **language
-  version 2.2** → the flag is required. This is not a contradiction: `-language-version`
-  is a separate knob, so a 2.4.0 compiler can compile as 2.2. Measured two independent
-  ways — declaring a context fun in a `build.gradle.kts` reports the *same* "only
-  available since language version 2.4" error, and the `@Metadata` stamp (which tracks
-  the language version) reads `2.2.0` on script/template-logic classes versus `mv=[2,4,0]`
-  on a module class
-- `template-logic/build.gradle.kts` therefore adds the flag for itself
-
-Note `defaultCompiler()` pins `languageVersion = 2.3` AND adds the flag in the same place —
-consistent, and the reason the raw template still needs it.
-
-The probes assert that no module pins a languageVersion below 2.4 behind the compiler's
-back; pinning 2.3 turns that red with `expected <[]> but got <[2.3]>`.
-- Note `defaultCompiler()` *does* add the flag, but it is only ever called from
-  `defaultBuildTemplateForRawMppLib`, so KGround's own modules never receive it — and do
-  not need it. The probe asserts that, so the two facts cannot drift apart silently.
-
-This also explains the kotlinc-vs-Gradle discrepancy noted below: not two compilers
-disagreeing arbitrarily, just different language versions either side of the 2.4 gate.
-
-**Consequence for the roadmap:** context parameters are fully available in KGround's own
-library code today. The restriction is specific to `build.gradle.kts`.
-
-The metadata stamp is not the compiler release — it tracks the LANGUAGE version, which is
-what makes it useful here: 2.2.0 on the script side and 2.4.0 on a module class is direct
-evidence of the split, independent of the flag behaviour it explains.
+Result: `./gradlew -p template-andro assemble` is BUILD SUCCESSFUL and produces
+`template-andro-app-debug.apk`.
 
 ## Roadmap idea #2 — "persona" precompiled script plugins: prototyped and REJECTED
 

@@ -238,7 +238,8 @@ fun KotlinMultiplatformExtension.androDefault() {
     val andro = settings.andro!!
     minSdk { version = release(andro.sdkMin) }
     compileSdk {
-      version = andro.sdkCompilePreview?.let { preview(it) } ?: release(andro.sdkCompile)
+      version = andro.sdkCompilePreview?.let { preview(it) }
+        ?: release(andro.sdkCompile) { minorApiLevel = AndroSdkCompileMinorTMP }
     }
     namespace = details.namespace
     withHostTest {

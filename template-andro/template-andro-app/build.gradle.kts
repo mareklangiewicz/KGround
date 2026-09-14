@@ -14,6 +14,9 @@ plugins {
   id("my-convention")
   plugAll(
     plugs.AndroAppNoVer,
+    // This app uses Jetpack Compose directly (not compose-multiplatform), so it needs the
+    // compose COMPILER plugin. template-raw-andro-app does not: its UI lives in the shared lib.
+    plugs.KotlinMultiCompose,
     plugs.VannikPublish,
   )
 }
@@ -23,9 +26,12 @@ plugins {
 // No KMP plugin here on purpose: since AGP 9 'com.android.application' cannot be combined
 // with 'org.jetbrains.kotlin.multiplatform', and there is no KMP application plugin. The
 // shared multiplatform code lives in :template-andro-lib, which this app depends on.
-var details = gradle.extLibDetails
-val settings = details.settings.copy(compose = null)
-details = details.copy(settings = settings, namespace = "pl.mareklangiewicz.templateandro.androapp")
+//
+// Unlike template-raw-andro-app, compose is NOT set to null here: this app uses Jetpack
+// Compose directly (MainActivity and its own theme/ package), which is the point of an
+// android-only template. Keeping the compose settings is what makes defaultAndroDeps add
+// the androidx compose artifacts.
+val details = gradle.extLibDetails.copy(namespace = "pl.mareklangiewicz.templateandro.androapp")
 
 defaultBuildTemplateForAndroApp(details) {
   implementation(project(":template-andro-lib"))

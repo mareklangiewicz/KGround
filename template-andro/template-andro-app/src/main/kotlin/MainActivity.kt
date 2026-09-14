@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templateandro
+package pl.mareklangiewicz.templateandro.androapp
 
 import android.os.*
 import androidx.activity.*
@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.*
-import pl.mareklangiewicz.templateandro.theme.*
+import pl.mareklangiewicz.templateandro.androapp.theme.*
 import pl.mareklangiewicz.templateandrolib.*
 import androidx.compose.ui.Modifier as Mod
 
