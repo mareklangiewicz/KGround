@@ -79,11 +79,14 @@ tasks.register("probes") {
       else { log.lifecycle("  FAIL  $claim\n        expected <$expected> but got <$actual>"); failed += claim }
     }
 
-    // Three compilers are actually in play here, which is easy to conflate:
-    log.lifecycle("  Kotlin per side:")
+    // Compiler version and LANGUAGE version are different knobs. The metadata stamp
+    // tracks the language version (a module class here carries mv=[2,4,0]), so 2.2.0
+    // below means Gradle compiles scripts at language version 2.2 -- with a 2.4.0
+    // compiler. That is why they need -Xcontext-parameters and modules do not.
+    log.lifecycle("  Kotlin per side (metadata stamp ~= language version):")
     log.lifecycle("    lib      template-logic sources (WITH flag) : metadata ${probeLibMetadataVersion()}, stdlib ${probeLibStdlibVersion()}")
     log.lifecycle("    consumer build.gradle.kts    (flagless)     : metadata $scriptMetadataVersion")
-    log.lifecycle("    ^ both of the above are Gradle's embedded Kotlin: $embedded")
+    log.lifecycle("    ^ both compiled by Gradle's embedded Kotlin $embedded, but at language version ~2.2")
     // Careful: this reads TASK-level args. defaultCompiler() would add the flag, but it
     // is only called from the raw template, so module tasks do NOT carry it -- and yet
     // context parameters still compile in module sources, because Kotlin 2.4.x enables

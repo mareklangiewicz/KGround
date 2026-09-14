@@ -200,9 +200,13 @@ So `-Xcontext-parameters` is the opt-in for language version **below** 2.4; from
 feature is on by default. That single rule explains all three sides:
 
 - module sources take the plugin default (2.4) → no flag needed
-- build scripts run on Gradle's embedded Kotlin 2.4.0 but at a language version below 2.4
-  → the flag is required, and declaring a context fun in a `build.gradle.kts` reports the
-  *same* "only available since language version 2.4" error
+- build scripts are compiled by Gradle's embedded Kotlin **2.4.0** but at **language
+  version 2.2** → the flag is required. This is not a contradiction: `-language-version`
+  is a separate knob, so a 2.4.0 compiler can compile as 2.2. Measured two independent
+  ways — declaring a context fun in a `build.gradle.kts` reports the *same* "only
+  available since language version 2.4" error, and the `@Metadata` stamp (which tracks
+  the language version) reads `2.2.0` on script/template-logic classes versus `mv=[2,4,0]`
+  on a module class
 - `template-logic/build.gradle.kts` therefore adds the flag for itself
 
 Note `defaultCompiler()` pins `languageVersion = 2.3` AND adds the flag in the same place —
@@ -220,8 +224,9 @@ disagreeing arbitrarily, just different language versions either side of the 2.4
 **Consequence for the roadmap:** context parameters are fully available in KGround's own
 library code today. The restriction is specific to `build.gradle.kts`.
 
-The metadata stamp (2.2.0) is the binary FORMAT version, not a compiler release — it is
-evidence the two sides agree with each other, not evidence of which Kotlin built them.
+The metadata stamp is not the compiler release — it tracks the LANGUAGE version, which is
+what makes it useful here: 2.2.0 on the script side and 2.4.0 on a module class is direct
+evidence of the split, independent of the flag behaviour it explains.
 
 ## Probes — what is executable, and what is only measured
 
