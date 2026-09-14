@@ -391,24 +391,92 @@ Not "no context argument found" — the name does not EXIST. Under the old `with
 This is the `ignoreXxx` claim discharged on real code rather than on a probe: the guarantee moved
 from a runtime check to name resolution.
 
-**Control caveat — read before trusting the green build.** NOTHING calls
-`defaultBuildTemplateForBasicJvmLib`, `defaultBuildTemplateForBasicJvmApp` or `jvmOnlyDefault`:
-no KGround module and no template build script. They are dead code today, the same condition
-already noted for `defaultAndroLib` / `LibraryExtension.defaultDefaultConfig`. So the four
-assembling templates prove this migration COMPILES; they do not exercise it at runtime. The next
-entry point to migrate should be one that is actually called.
+**CORRECTION (this was recorded wrongly at first).** An earlier note here claimed nothing calls
+`defaultBuildTemplateForBasicJvmLib` / `...BasicJvmApp` / `jvmOnlyDefault`, so the green templates
+only proved compilation. That was a bad grep — the pattern left out `BasicJvmApp`. In fact
+`template-full/template-full-jvm-cli-app` and `template-raw/template-raw-jvm-cli-app` both call
+`defaultBuildTemplateForBasicJvmApp(ignoreCompose = true, ignoreAndroTarget = true)`, which reaches
+`defaultBuildTemplateForBasicJvmLib` and then `jvmOnlyDefault`. Two template assembles DO exercise
+that path at configuration time, so the migration is runtime-verified, not compile-only.
 
 **Not migrated here.** `defaultBuildTemplateForBasicJvmLib` keeps its own `LibDetails` signature
 and its own two `require`s. Those guard the ENTRY POINT's contract with the whole details object,
 which is a separate step — it pulls in `addRepos`, `defaultGroupAndVerAndDescription` and
 `defaultPublishing`, all still on the nested types.
 
+### Second migration — `allDefault` takes siblings (the MPP path)
+
+`allDefault` now reads `context(settings: LibSettingsTMP)` and takes only
+`addCommonMainDependencies`. **All four `ignoreXxx` gone, three `require`s gone:**
+
+```kotlin
+require(ignoreCompose || compose == null) { "allDefault can not configure compose stuff" }
+andro?.let {
+  require(ignoreAndroConfig) { "allDefault can not configure android stuff (besides just adding target)" }
+  require(ignoreAndroPublish || it.publishNoVariants) { "allDefault can not publish android stuff YET" }
+}
+```
+
+Call site in `defaultBuildTemplateForBasicMppLib` went from forwarding four booleans to
+`context(details.settings.toTMP()) { allDefault(addCommonMainDependencies = ...) }`.
+
+This one is a REAL runtime control, unlike the jvm increment: every one of KGround's 11 modules
+calls `defaultBuildTemplateForBasicMppLib`, and `allDefault` runs at CONFIGURATION time, so simply
+configuring the build executes the migrated code 11 times. `template-basic-lib` calls it too.
+
+**Negative control.** Referencing the withheld siblings inside the migrated body is rejected:
+
+```
+e: ...MppBuildTemplates.kt:131:15 Unresolved reference 'andro'.
+e: ...MppBuildTemplates.kt:130:15 None of the following candidates is applicable:
+```
+
+Note the asymmetry — `andro` is cleanly unresolved, but `compose` reports "no applicable candidate"
+because a DIFFERENT `compose` symbol (the Gradle compose plugin accessor) is in scope in this file.
+Rejected either way, but it is not the clean `Unresolved reference 'compose'` seen in
+`JvmBuildTemplates.kt`, and it is worth knowing that withholding a scope does not guarantee the
+name is free — an unrelated symbol can still answer to it.
+
+### The three `require`s were DUPLICATES — a symptom worth naming
+
+All three checks deleted from `allDefault` were verbatim copies of checks
+`defaultBuildTemplateForBasicMppLib` performs immediately before calling it. The nested model handed
+both levels the same over-broad object, so both levels had to re-assert the same facts about it.
+De-nesting removes the duplication structurally: the entry point keeps the checks it can actually
+make (it holds the whole `LibDetails`), and the worker cannot express them because it cannot see
+the data.
+
+### Where the win STOPS — the build-script boundary
+
+`defaultBuildTemplateForBasicMppLib` keeps its `LibDetails` signature and all four `ignoreXxx`
+parameters, and that is not laziness — it is a hard limit. `kground/build.gradle.kts:20` passes
+`ignoreCompose = true` ("necessary because I sometimes include this module locally from UWidgets
+project"), and a build SCRIPT cannot express that as withholding a scope: Gradle hardcodes the
+script language version to 2.2, so scripts have no context parameters at all (see the probes, and
+the Gradle 2.2 finding above). Scripts must keep passing booleans until Gradle bumps that literal.
+
+**So the de-nesting's benefit is real but bounded: it applies inside `template-logic`, not at the
+public entry points that build scripts call.** That should go into the DepsKt design note before
+any DepsKt work starts — it decides how much of the public API is worth reshaping now.
+
+### `ignoreAndroTarget` is now dead in the whole MPP chain
+
+It was already dead inside `allDefault` (the `androidTarget` block it guarded is commented out).
+Now the entry point forwards it nowhere, so it is an inert parameter on
+`defaultBuildTemplateForBasicMppLib`, `...BasicMppApp`, `defaultBuildTemplateForComposeMppLib` and
+`...ComposeMppApp`. Removing it from those four signatures is a follow-up, deliberately not done
+here to keep this increment to one change.
+
 ### Still open
 
-- `jvmOnlyDefault` is migrated (above); everything else still takes the nested types. The next
-  increment should pick an entry point that is actually CALLED, so the templates become a real
-  runtime control rather than a compile-only one — `defaultBuildTemplateForBasicMppLib` is the
-  obvious candidate (it carries all four `ignoreXxx` and every template uses it), but it also
-  drags in `addRepos` + `allDefault`, so it is a bigger bite than this one was.
+- `jvmOnlyDefault` and `allDefault` are migrated. Still on the nested types: `addRepos`
+  (`context(settings: LibSettings)`, reaches through to `settings.repos` — a direct candidate, since
+  `repos` is a sibling now), `defaultPublishing` / `defaultGroupAndVerAndDescription`
+  (`LibDetails`), `defaultAndroDeps` / `defaultAndroLib` (the andro family), and
+  `allDefaultSourceSetsForCompose`.
+- `addRepos` is the obvious next one and the cheapest: it is the design note's own example of a
+  helper reaching through the tree (`with(settings.repos)`), and as a sibling it becomes
+  `context(repos: LibReposSettingsTMP)` with no reaching at all.
+- Removing the dead `ignoreAndroTarget` from the four MPP signatures (above).
 - `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
   const is still the source of the default, so the two are not yet collapsed.

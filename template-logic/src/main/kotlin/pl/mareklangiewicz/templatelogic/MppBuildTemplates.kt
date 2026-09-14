@@ -73,13 +73,12 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   repositories { addRepos() }
   defaultGroupAndVerAndDescription(details)
   extensions.configure<KotlinMultiplatformExtension> {
-    allDefault(
-      ignoreCompose = ignoreCompose,
-      ignoreAndroTarget = ignoreAndroTarget,
-      ignoreAndroConfig = ignoreAndroConfig,
-      ignoreAndroPublish = ignoreAndroPublish,
-      addCommonMainDependencies = addCommonMainDependencies,
-    )
+    // Four booleans became zero: hand allDefault the platform/testing flags and nothing else.
+    // Whether compose or andro get configured is decided HERE, by which scopes are opened, not
+    // there by which booleans were forwarded.
+    context(details.settings.toTMP()) {
+      allDefault(addCommonMainDependencies = addCommonMainDependencies)
+    }
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
@@ -91,26 +90,43 @@ fun Project.defaultBuildTemplateForBasicMppLib(
 /**
  * Only for very standard small libs. In most cases it's better to not use this function.
  *
- * These ignoreXXX flags are hacky, but needed because we want to inject this code also to such build files,
- * where plugins for compose and/or android are not applied at all, so compose/android stuff should be explicitly ignored,
- * and then configured right after this call, using code from another special region (region using compose and/or andro plugin stuff).
- * Also kmp andro publishing is in the middle of big changes, so let's not support it yet, and let's wait for more clarity regarding:
+ * MIGRATED to the sibling model ([LibSettingsTMP]). ALL FOUR `ignoreXxx` flags are gone from this
+ * function, and so are the three `require`s they guarded:
+ *
+ * ```
+ * require(ignoreCompose || compose == null) { "allDefault can not configure compose stuff" }
+ * andro?.let {
+ *   require(ignoreAndroConfig) { "allDefault can not configure android stuff (besides just adding target)" }
+ *   require(ignoreAndroPublish || it.publishNoVariants) { "allDefault can not publish android stuff YET" }
+ * }
+ * ```
+ *
+ * The old kdoc explained the flags as needed "because we want to inject this code also to such build
+ * files, where plugins for compose and/or android are not applied at all". [LibSettingsTMP] has no
+ * `compose` and no `andro` to begin with, so this body cannot name either one, and the caller opts
+ * out by not opening those scopes rather than by passing a boolean.
+ *
+ * Note what did NOT simply vanish. `ignoreAndroPublish` guarded a constraint on the CONTENT of the
+ * andro settings (`publishNoVariants`), not on their presence, so it has to live where the content
+ * is visible: [defaultBuildTemplateForBasicMppLib], which still holds the whole [LibDetails].
+ * Nothing had to be moved there, because it was ALREADY there — all three `require`s deleted here
+ * were verbatim duplicates of checks the entry point performs immediately before calling this
+ * function. That duplication is itself a symptom of the nesting: both levels were handed the same
+ * over-broad object, so both had to re-assert the same things about it.
+ *
+ * `ignoreAndroTarget` was already dead here before this migration — the `androidTarget` block it
+ * guarded is commented out (see below). With this change it is dead in the whole MPP chain: the
+ * entry point now only forwards it to nothing. Removing it from those signatures is a follow-up.
+ *
+ * kmp andro publishing is in the middle of big changes, so let's not support it yet, and let's wait
+ * for more clarity regarding:
  * https://youtrack.jetbrains.com/issue/KT-61575/Publishing-a-KMP-library-handles-Android-target-inconsistently-requiring-an-explicit-publishLibraryVariants-call-to-publish
  * https://youtrack.jetbrains.com/issue/KT-60623/Deprecate-publishAllLibraryVariants-in-kotlin-android
  */
-context(settings: LibSettings)
+context(settings: LibSettingsTMP)
 fun KotlinMultiplatformExtension.allDefault(
-  ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
-  ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
-  ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
-  ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) = with(settings) {
-  require(ignoreCompose || compose == null) { "allDefault can not configure compose stuff" }
-  andro?.let {
-    require(ignoreAndroConfig) { "allDefault can not configure android stuff (besides just adding target)" }
-    require(ignoreAndroPublish || it.publishNoVariants) { "allDefault can not publish android stuff YET" }
-  }
   if (withJvm) jvm()
   if (withJs) jsDefault()
   if (withLinuxX64) linuxX64()
