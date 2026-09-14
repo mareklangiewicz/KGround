@@ -488,6 +488,63 @@ Now the entry point forwards it nowhere, so it is an inert parameter on
 `...ComposeMppApp`. Removing it from those four signatures is a follow-up, deliberately not done
 here to keep this increment to one change.
 
+### Script-facing helpers — the copy dance reaches build scripts, with no context params
+
+Answering "do we just need a helper on the template-logic side?": yes, and it turns out the
+flattened-reference coercion (probes 14-15) is not needed for it at all.
+
+Added in `LibTMP.kt`:
+
+- `Gradle.extLibTMP` — the sibling set for this build, a plain property.
+- `Project.libTMP { }` — adjust one sibling, root named ONCE.
+- `Project.defaultBuildTemplateForBasicMppLib(lib: LibTMP = gradle.extLibTMP, ...)` — an overload
+  keeping full one-liner ergonomics: `lib` defaults, the trailing lambda stays trailing.
+- `LibTMP.toNested()` — re-nests for the internals that are still `LibDetails`-based
+  (`defaultPublishing`, `defaultGroupAndVerAndDescription`, `addRepos`). TEMPORARY, disappears with
+  `toTMP()` once those migrate or DepsKt de-nests.
+
+All of these are plain parameters and plain values, so a flagless script uses them naturally — no
+coercion, no `val` declaration, no defaults lost, no Gradle change.
+
+**The important split this makes visible.** The design note's symptoms do not share a mechanism:
+
+| symptom | needs | reaches build scripts? |
+|---|---|---|
+| 1. nested-copy boilerplate | DATA SHAPE only | **yes, today** |
+| 2. `context(details, details.settings)` pairs | context parameters | behind the boundary |
+| 3. helpers reaching through (`settings.andro!!`) | context parameters | behind the boundary |
+
+Symptom 1 — the one that shows up in every build script, four of them verbatim — is pure data shape
+and is available immediately. Symptoms 2 and 3 need context parameters and stay inside
+`template-logic`. Worth carrying into the DepsKt design: de-nesting the DATA and adopting context
+parameters are two separable changes, and the first is the one consumers actually see.
+
+### First real build script converted — `kgroundx-experiments`
+
+```kotlin
+// was: two statements, root named twice
+val settings = gradle.extLibDetails.settings.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true)
+val details = gradle.extLibDetails.copy(settings = settings)
+defaultBuildTemplateForBasicMppLib(details) { ... }
+
+// now: one statement
+defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }) { ... }
+```
+
+Probe 16 asserts the conversion is behaviour-preserving: the sibling form rebuilds a `LibDetails`
+EQUAL to the one the nested dance produced, across every field including `compose` / `andro` /
+`repos`. Probe 17 is its guard — it shows that comparison can actually fail, so probe 16 is not
+passing vacuously. Three more scripts (`kgroundx-maintenance`, `kgroundx-workflows`,
+`kgroundx-jupyter`) carry the same verbatim dance and are not converted yet.
+
+### DepsKt can use context parameters internally
+
+Worth recording since it shaped the plan above: DepsKt is an ordinary Kotlin module, so it compiles
+at language version 2.4 with context parameters available by default, and can add
+`-Xexplicit-context-arguments` exactly as `template-logic` does. Nothing in the sibling model is
+blocked on DepsKt's own compilation. The flagless constraint applies ONLY to consumers' build
+scripts — which is precisely why the helper layer above is the shape that matters for them.
+
 ### Still open
 
 - `jvmOnlyDefault` and `allDefault` are migrated. Still on the nested types: `addRepos`
@@ -499,5 +556,8 @@ here to keep this increment to one change.
   helper reaching through the tree (`with(settings.repos)`), and as a sibling it becomes
   `context(repos: LibReposSettingsTMP)` with no reaching at all.
 - Removing the dead `ignoreAndroTarget` from the four MPP signatures (above).
+- Converting the other three copy-dance scripts (`kgroundx-maintenance`, `kgroundx-workflows`,
+  `kgroundx-jupyter`) to `libTMP { }`, plus `kommand-line` / `kommand-samples` which copy
+  `details` directly.
 - `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
   const is still the source of the default, so the two are not yet collapsed.

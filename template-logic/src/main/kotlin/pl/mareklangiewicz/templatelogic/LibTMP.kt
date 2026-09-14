@@ -1,6 +1,10 @@
 package pl.mareklangiewicz.templatelogic
 
+import org.gradle.api.Project
+import org.gradle.api.invocation.Gradle
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.*
 
 // region [[Lib TMP — sibling set, defaults and adapter]]
 
@@ -170,3 +174,144 @@ fun LibReposSettings.toTMP() = LibReposSettingsTMP(
 )
 
 // endregion [[Lib TMP — sibling set, defaults and adapter]]
+
+// region [[Lib TMP — build-script facing helpers]]
+
+/**
+ * The sibling set for this build, un-nested from `gradle.extLibDetails`.
+ *
+ * Deliberately a PLAIN property returning a plain value: build scripts are compiled flagless
+ * (Gradle pins script language version to 2.2), so nothing here may require context parameters at
+ * the call site. Scripts do not need them — see [defaultBuildTemplateForBasicMppLib] below.
+ */
+val Gradle.extLibTMP: LibTMP get() = extLibDetails.toTMP()
+
+/**
+ * Sibling-model entry point. Same one-liner ergonomics as the [LibDetails] overload — `lib`
+ * defaults, the trailing lambda stays trailing — so scripts gain the flat `copy` WITHOUT needing
+ * context parameters, the flattened-reference coercion, or any Gradle change:
+ *
+ * ```kotlin
+ * // nested: two statements, root named twice, inner type named explicitly
+ * val settings = gradle.extLibDetails.settings.copy(withJs = false, withLinuxX64 = false)
+ * val details = gradle.extLibDetails.copy(settings = settings)
+ * defaultBuildTemplateForBasicMppLib(details) { ... }
+ *
+ * // sibling: one statement
+ * defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false) }) { ... }
+ * ```
+ *
+ * This is the point where the two halves of the de-nesting separate. The copy-dance win (symptom 1
+ * in the design note) is pure DATA SHAPE and reaches build scripts today. The presence-as-scope win
+ * needs context parameters and stays behind this boundary, where [LibSettingsTMP] and friends are
+ * handed to the workers individually.
+ */
+fun Project.defaultBuildTemplateForBasicMppLib(
+  lib: LibTMP = gradle.extLibTMP,
+  ignoreCompose: Boolean = false,
+  ignoreAndroConfig: Boolean = false,
+  ignoreAndroPublish: Boolean = false,
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForBasicMppLib(
+  details = lib.toNested(),
+  ignoreCompose = ignoreCompose,
+  ignoreAndroConfig = ignoreAndroConfig,
+  ignoreAndroPublish = ignoreAndroPublish,
+  addCommonMainDependencies = addCommonMainDependencies,
+)
+
+/**
+ * Adjust just the platform/testing flags, leaving every other sibling alone — the flat single
+ * `copy` the design note wants, with the root named ONCE.
+ */
+fun Project.libTMP(adjustSettings: (LibSettingsTMP) -> LibSettingsTMP): LibTMP =
+  gradle.extLibTMP.let { it.copy(settings = adjustSettings(it.settings)) }
+
+/**
+ * Re-nests the siblings so the still-nested internals ([LibDetails]-based `defaultPublishing`,
+ * `defaultGroupAndVerAndDescription`, `addRepos`) keep working unchanged. TEMPORARY: it disappears
+ * together with [toTMP] once those migrate, or once DepsKt de-nests for real.
+ */
+fun LibTMP.toNested(): LibDetails = LibDetails(
+  name = details.name,
+  group = details.group,
+  description = details.description,
+  authorId = details.authorId,
+  authorName = details.authorName,
+  authorEmail = details.authorEmail,
+  githubUrl = details.githubUrl,
+  licenceName = details.licenceName,
+  licenceUrl = details.licenceUrl,
+  version = details.version,
+  namespace = details.namespace,
+  appId = details.appId,
+  appMainPackage = details.appMainPackage,
+  appMainClass = details.appMainClass,
+  appMainFun = details.appMainFun,
+  appVerCode = details.appVerCode,
+  appVerName = details.appVerName,
+  settings = LibSettings(
+    withJvm = settings.withJvm,
+    withJvmVer = settings.withJvmVer,
+    withJs = settings.withJs,
+    withLinuxX64 = settings.withLinuxX64,
+    withKotlinxHtml = settings.withKotlinxHtml,
+    withTestJUnit5 = settings.withTestJUnit5,
+    withTestJUnit4 = settings.withTestJUnit4,
+    withTestJUnit4OnAndroidDevice = settings.withTestJUnit4OnAndroidDevice,
+    withTestUSpekX = settings.withTestUSpekX,
+    withTestGoogleTruth = settings.withTestGoogleTruth,
+    withTestMockitoKotlin = settings.withTestMockitoKotlin,
+    withCentralPublish = settings.withCentralPublish,
+    compose = compose?.toNested(),
+    andro = andro?.toNested(),
+    repos = repos.toNested(),
+  ),
+)
+
+fun LibComposeSettingsTMP.toNested() = LibComposeSettings(
+  withComposeUi = withComposeUi,
+  withComposeFoundation = withComposeFoundation,
+  withComposeMaterial2 = withComposeMaterial2,
+  withComposeMaterial3 = withComposeMaterial3,
+  withComposeMaterialIconsExtended = withComposeMaterialIconsExtended,
+  withComposeFullAnimation = withComposeFullAnimation,
+  withComposeDesktop = withComposeDesktop,
+  withComposeDesktopComponents = withComposeDesktopComponents,
+  withComposeHtmlCore = withComposeHtmlCore,
+  withComposeHtmlSvg = withComposeHtmlSvg,
+  withComposeTestUi = withComposeTestUi,
+  withComposeTestUiJUnit4 = withComposeTestUiJUnit4,
+  withComposeTestUiJUnit5 = withComposeTestUiJUnit5,
+  withComposeTestHtmlUtils = withComposeTestHtmlUtils,
+)
+
+fun LibAndroSettingsTMP.toNested() = LibAndroSettings(
+  sdkCompilePreview = sdkCompilePreview,
+  sdkCompile = sdkCompile,
+  sdkTargetPreview = sdkTargetPreview,
+  sdkTarget = sdkTarget,
+  sdkMin = sdkMin,
+  withAppCompat = withAppCompat,
+  withLifecycle = withLifecycle,
+  withActivityCompose = withActivityCompose,
+  withMDC = withMDC,
+  withTestEspresso = withTestEspresso,
+  withTestRunner = withTestRunner,
+  publishVariant = publishVariant,
+)
+
+@Suppress("DEPRECATION")
+fun LibReposSettingsTMP.toNested() = LibReposSettings(
+  withMavenLocal = withMavenLocal,
+  withMavenCentral = withMavenCentral,
+  withGradle = withGradle,
+  withGoogle = withGoogle,
+  withKotlinx = withKotlinx,
+  withKotlinxHtml = withKotlinxHtml,
+  withComposeJbDev = withComposeJbDev,
+  withKtorEap = withKtorEap,
+  withJitpack = withJitpack,
+)
+
+// endregion [[Lib TMP — build-script facing helpers]]

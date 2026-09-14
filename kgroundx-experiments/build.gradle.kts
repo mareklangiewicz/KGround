@@ -16,13 +16,10 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val settings = gradle.extLibDetails.settings.copy(
-  withJs = false,
-  withLinuxX64 = false,
-  withKotlinxHtml = true,
-)
-val details = gradle.extLibDetails.copy(settings = settings)
-defaultBuildTemplateForBasicMppLib(details) {
+// Sibling model: one flat copy, root named once. The nested form this replaces was
+//   val settings = gradle.extLibDetails.settings.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true)
+//   val details = gradle.extLibDetails.copy(settings = settings)
+defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }) {
   api(project(":kgroundx-io"))
   api(project(":kgroundx-maintenance"))
   implementation(Org.Hildan.Chrome.devtools_kotlin)
@@ -140,6 +137,25 @@ tasks.register("probes") {
     check(
       "a context argument can be passed by name (-Xexplicit-context-arguments)",
       probeExplicitContextArg(details), "ctx:$libName",
+    )
+
+    // ----- did converting THIS script change anything? probe 16 --------------
+    // The conversion above is only safe if the sibling form rebuilds the exact same
+    // LibDetails the nested dance produced -- data-class equality over every field,
+    // including compose/andro/repos. If these ever diverge, the whole module config
+    // diverges with them.
+    val nestedDance = gradle.extLibDetails.let {
+      it.copy(settings = it.settings.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true))
+    }
+    val siblingForm = libTMP { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }.toNested()
+    check(
+      "converting this script to the sibling form rebuilds an identical LibDetails",
+      siblingForm, nestedDance,
+    )
+    // Guard: the fixture must be able to FAIL, or the check above proves nothing.
+    check(
+      "that comparison can tell two different configs apart",
+      libTMP { it.copy(withJs = true) }.toNested() == nestedDance, false,
     )
 
     // ----- can a FLAGLESS build script drive the sibling model? probes 14-15 ---
