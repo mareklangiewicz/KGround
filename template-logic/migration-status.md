@@ -66,7 +66,22 @@ the module name to the library name — which would corrupt
 `coordinates(artifactId = name)` in `defaultPublishing` with no compile error.
 
 `context(x) { }` supplies the context argument and nothing else, so that whole class of
-shadowing cannot happen. Every context-providing site here uses it.
+shadowing cannot happen. Every context-providing site here uses it, and it takes several
+arguments at once: `context(details, details.settings) { … }`.
+
+Because it cannot shadow, the six entry points with anything to collapse establish context
+for their WHOLE body — `): Unit = context(details, details.settings) { … }` — rather than
+wrapping individual call sites. Verified safe by widening and re-running the controls
+below: `println("MPP Module ${name}…")` still resolves `name` to the project, which is
+exactly what `with` would have broken.
+
+Two groups deliberately left alone:
+- `defaultBuildTemplateForBasicJvmApp`, `…ForFullMppApp`, `…ForBasicMppApp`,
+  `…ForComposeMppApp` are pure delegators — they pass `details` explicitly to another entry
+  point and consume no context, so adding one would be dead scope.
+- `defaultBuildTemplateForRawMppLib` declares `details`/`settings` as locals inside its
+  ~200-line body, so widening would re-indent all of it to remove a single wrapper. Its one
+  narrow `context(details) { defaultPublishing() }` stays.
 
 Note the two are NOT interchangeable in the other direction: bodies that genuinely want
 receiver semantics keep `with`, e.g. `allDefault`/`jvmOnlyDefault` are declared

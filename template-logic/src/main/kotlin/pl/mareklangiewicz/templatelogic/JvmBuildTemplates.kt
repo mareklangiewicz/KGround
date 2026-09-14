@@ -22,22 +22,22 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
-) {
+): Unit = context(details, details.settings) {
   require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure compose stuff" }
   require(ignoreAndroTarget || details.settings.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
   repositories { addRepos(details.settings.repos) }
   defaultGroupAndVerAndDescription(details)
-  context(details.settings) { extensions.configure<KotlinJvmProjectExtension> {
+  extensions.configure<KotlinJvmProjectExtension> {
     jvmOnlyDefault(
       ignoreCompose = ignoreCompose,
       ignoreAndroTarget = ignoreAndroTarget,
       addJvmDependencies = addJvmDependencies,
     )
-  } }
+  }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun jvmDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) context(details) { defaultPublishing() }
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("JVM Module ${name}: publishing (and signing) disabled")
 }
 

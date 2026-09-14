@@ -19,7 +19,7 @@ import pl.mareklangiewicz.defaults.*
 fun Project.defaultBuildTemplateForFullMppLib(
   details: LibDetails = gradle.extLibDetails,
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+): Unit = context(details, details.settings) {
   if (details.settings.withAndro) {
     apply(plugin = plugs.AndroLibNoVer.group) // group is actually id for plugins
     // TODO_later: try to move the rest of andro config from below here
@@ -32,24 +32,24 @@ fun Project.defaultBuildTemplateForFullMppLib(
   )
 
   if (details.settings.withAndro) {
-    context(details) { extensions.configure<LibraryExtension> {
+    extensions.configure<LibraryExtension> {
       defaultAndroLib(
         ignoreCompose = true, // compose mpp configured already
         ignoreAndroPublish = true,
           // FIXME: maybe it's fine to publish in andro way here too (full mpp lib case),
           //  but let's analyze/test publications more before doing that (commiting to: ignoreAndroPublish = false).
       )
-    } }
+    }
 
     // this is "single platform way" / "android way" to declare deps,
     // it would be more "correct" to configure everything "mpp way" (android deps too),
     // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
     // (trust me future Marek: I've tried this already :) )
-    context(details.settings) { dependencies {
+    dependencies {
       // ignoreCompose because we have compose configured mpp way already.
       defaultAndroDeps(ignoreCompose = true)
       defaultAndroTestDeps(ignoreCompose = true)
-    } }
+    }
   }
 }
 
@@ -69,7 +69,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+): Unit = context(details, details.settings) {
   require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicMppLib can not configure compose stuff" }
   details.settings.andro?.let {
     require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
@@ -77,7 +77,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   }
   repositories { addRepos(details.settings.repos) }
   defaultGroupAndVerAndDescription(details)
-  context(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
+  extensions.configure<KotlinMultiplatformExtension> {
     allDefault(
       ignoreCompose = ignoreCompose,
       ignoreAndroTarget = ignoreAndroTarget,
@@ -85,11 +85,11 @@ fun Project.defaultBuildTemplateForBasicMppLib(
       ignoreAndroPublish = ignoreAndroPublish,
       addCommonMainDependencies = addCommonMainDependencies,
     )
-  } }
+  }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) context(details) { defaultPublishing() }
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
@@ -234,7 +234,7 @@ fun Project.defaultBuildTemplateForComposeMppLib(
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) = with(details.settings.compose ?: error("Compose settings not set.")) {
+): Unit = context(details, details.settings) { with(details.settings.compose ?: error("Compose settings not set.")) {
   if (withComposeTestUiJUnit5)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
   defaultBuildTemplateForBasicMppLib(
@@ -245,10 +245,10 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     ignoreAndroPublish = ignoreAndroPublish,
     addCommonMainDependencies = addCommonMainDependencies,
   )
-  context(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
+  extensions.configure<KotlinMultiplatformExtension> {
     allDefaultSourceSetsForCompose()
-  } }
-}
+  }
+} }
 
 
 /**

@@ -147,31 +147,29 @@ fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
 fun Project.defaultBuildTemplateForAndroLib(
   details: LibDetails = gradle.extLibDetails,
   addAndroMainDependencies: DependencyHandler.() -> Unit = {},
-) {
+): Unit = context(details, details.settings) {
   val andro = details.settings.andro ?: error("No andro settings.")
   repositories { addRepos(details.settings.repos) }
   extensions.configure<KotlinMultiplatformExtension> {
     androidTarget()
     jvmToolchain(details.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
   }
-  context(details) { extensions.configure<LibraryExtension> {
+  extensions.configure<LibraryExtension> {
     defaultAndroLib()
-  } }
-  context(details.settings) { dependencies {
+  }
+  dependencies {
     defaultAndroDeps()
     defaultAndroTestDeps()
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroMainDependencies()
-  } }
+  }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  context(details) {
-    if (andro.publishAllVariants) defaultPublishingOfAndroLib("default")
-    if (andro.publishOneVariant) defaultPublishingOfAndroLib(andro.publishVariant)
-  }
+  if (andro.publishAllVariants) defaultPublishingOfAndroLib("default")
+  if (andro.publishOneVariant) defaultPublishingOfAndroLib(andro.publishVariant)
 }
 
 context(details: LibDetails)
@@ -233,27 +231,27 @@ fun LibraryExtension.defaultAndroLibPublishAllVariants(
 fun Project.defaultBuildTemplateForAndroApp(
   details: LibDetails = gradle.extLibDetails,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
-) {
+): Unit = context(details, details.settings) {
   val andro = details.settings.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
-  context(details) { extensions.configure<ApplicationExtension> {
+  extensions.configure<ApplicationExtension> {
     defaultAndroApp()
     variant?.let { defaultAndroAppPublishVariant(it) }
-  } }
-  context(details.settings) { dependencies {
+  }
+  dependencies {
     defaultAndroDeps()
     defaultAndroTestDeps()
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroDependencies()
-  } }
+  }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  context(details) { variant?.let { defaultPublishingOfAndroApp(it) } }
+  variant?.let { defaultPublishingOfAndroApp(it) }
 }
 
 context(details: LibDetails)
