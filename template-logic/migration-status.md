@@ -166,40 +166,49 @@ Related trap, already removed: a `context(Project) val libDetails get() = gradle
 reads the AMBIENT details and silently discards those per-module overrides. Any future
 context work must carry the *effective* `LibDetails`, not re-read it from the project.
 
-## Probes — the claims above are executable
-
-Every context-parameter claim here is asserted by a Gradle task:
+## Probes — what is executable, and what is only measured
 
 ```
-./gradlew -p template-logic probes             # all, ~15s
-./gradlew -p template-logic probes -Ponly=05   # just one
+./gradlew :kgroundx-experiments:probes      # ~2s
 ```
 
-Each `template-logic/probes/*.kt` is a real snippet in two sections, mirroring this repo:
+No scaffolding: this repo already IS the setup the claims are about. The task lives in a
+build script compiled WITHOUT `-Xcontext-parameters` and calls small helpers in
+`template-logic/.../ProbeFuns.kt`, compiled WITH it. It asserts, at runtime:
 
-```
-//? ---- lib ----        compiled WITH    -Xcontext-parameters  (like template-logic)
-//? ---- consumer ----   compiled WITHOUT it                    (like a build.gradle.kts)
-```
+| claim | how |
+|---|---|
+| `context(x)` does not shadow `Project.name` the way `with(x)` would | calls a `context(LibDetails) fun Project.…` that returns `name`, asserts it is the MODULE name |
+| `context(a, b)` works and `context(_)` forwards without naming | calls a conduit that names neither context |
+| a flagless script reaches a context fun via the flattened coercion | `val f: (LibDetails, Project) -> String = Project::probeNameIsProjectName` |
 
-Half the claims are about what does NOT compile, so they cannot be unit tests. The suite
-asserts outcome AND diagnostic text, and runs the successful ones to check real output.
+The first probe is guarded by a fixture check that the project name and library name
+actually differ — otherwise it would prove nothing. Mutation-tested: switching the helper
+to `with(details) { name }` fails it with `expected <kgroundx-experiments> but got
+<KGround>`, which is precisely the wrong-artifactId bug it exists to catch.
 
-**The consumer section goes through Gradle's own build-script compiler, deliberately.**
-An earlier version compiled it with standalone `kotlinc` and gave DIFFERENT answers:
-kotlinc reports "no context argument for 'd: LibDetails' found" and rejects the callable
-reference outright ("unsupported because it has context parameters"), where Gradle's script
-compiler reports "specify the '-Xcontext-parameters' compiler option" and *accepts* the
-coerced reference. So probes 04/05/06 generate a throwaway Gradle project in
-`build/probes/` and run it. The lib section still uses kotlinc, since it only has to
-produce bytecode.
+Note the third row does double duty: the flagless script can only reach those helpers
+*because* the coercion works, so every probe here also exercises it.
 
-Probe 02 is a deliberate CONTROL for probe 01 — without it, probe 01 would pass for a
-misspelled identifier just as happily as for the real behaviour. Both were mutation-tested:
-flipping `context` to `with` in probe 01 turns it red, and dropping the explicit function
-type in probe 05 turns that red.
+**Not executable — measured 2026-09-14, Kotlin 2.4.0 / Gradle 9.7.1:**
 
-Nothing touches real sources, so there is no residue to clean up.
+- A flagless script cannot call a context fun naturally: `e: To call contextual
+  declarations, specify the '-Xcontext-parameters' compiler option.`
+- A bare `val ref = ::ctxFun` resolves, but invoking `ref()` fails with the same error;
+  only the explicit flattened type gets through.
+- `context(d) { githubUrl }` does not resolve, while `with(d) { githubUrl }` does — the
+  compile-level form of the shadowing claim above.
+
+These are compile-FAILURE claims, so a Gradle task cannot assert them without generating
+throwaway projects; that machinery existed briefly and was not worth its weight. They are
+also background facts rather than invariants: if Kotlin relaxed any of them it would open
+an option, not break this build. The consequence that would actually bite — shadowing — is
+covered positively above.
+
+Also worth knowing if you extend the task: standalone `kotlinc` and Gradle's build-script
+compiler DISAGREE here. kotlinc reports "no context argument found" and rejects the
+callable reference as "unsupported because it has context parameters". Probing with
+kotlinc therefore contradicts the claims; only the real script compiler counts.
 
 ## Regression control
 
