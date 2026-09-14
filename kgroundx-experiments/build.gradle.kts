@@ -134,6 +134,33 @@ tasks.register("probes") {
       probeExplicitContextArg(details), "ctx:$libName",
     )
 
+    // ----- de-nesting prototype (LibTMP), probes 9-13 -------------------------
+    // The headline claim -- presence becomes a compile-time scope check -- is NOT here:
+    // it is a compile error, so it was proven by construction instead. See probeSdkFullTMP.
+    check(
+      "un-nesting the real extLibDetails loses no field (adapter is total)",
+      probeAdapterFidelityTMP(details), 0,
+    )
+    check(
+      "changing two flags: same result, one copy instead of two, root named once not twice",
+      probeCopyDanceTMP(details), "false/false/${details.settings.withJvm}|false/false/${details.settings.withJvm}|2|1",
+    )
+    check(
+      "cross-object compose defaults survive the move into a named function",
+      probeDerivedDefaultsTMP(), "8/8",
+    )
+    check(
+      "an andro scope is entered without any !! (and is absent when there is no andro)",
+      probeAndroScopeTMP(details.toTMP()), details.settings.andro
+        ?.let { "${it.sdkCompile}.$AndroSdkCompileMinorTMP" } ?: "no-andro-scope",
+    )
+    // Found while transcribing LibAndroSettings for the prototype, NOT a prototype feature:
+    // published DepsKt 0.4.25 has publishOneVariant = !publishNoVariants && !publishNoVariants.
+    check(
+      "DepsKt publishOneVariant is buggy for \"*\" (true), sibling copy fixes it (false)",
+      probePublishVariantBugTMP(), "true|false",
+    )
+
     log.lifecycle("\n  $passed passed, ${failed.size} failed")
     if (failed.isNotEmpty()) throw GradleException("probes failed: ${failed.joinToString()}")
   }

@@ -279,3 +279,94 @@ not. After any change to how settings propagate, check the override still bites:
 ```
 
 A run where both report the same number means settings fell back to ambient.
+
+## De-nesting prototype — `LibTMP` (local, KGround only)
+
+The DepsKt de-nesting (`~/code/kotlin/DepsKt/docs/design/lib-details-denesting.md`) is being
+proven **here first**, as `LibDetailsTMP` / `LibSettingsTMP` / `LibComposeSettingsTMP` /
+`LibAndroSettingsTMP` / `LibReposSettingsTMP` + `LibTMP`, same `TMP` convention as
+`AndroSdkCompileMinorTMP`. DepsKt is published and consumed (KGround is on 0.4.25), so changing
+it is a breaking change to a public model; prototyping in the consumer costs no version burn and
+runs against a working control (four assembling templates).
+
+Files: `LibDetailsTMP.kt` (the five siblings), `LibTMP.kt` (derivations, factory, adapter).
+Nothing in the build templates calls them yet — this is the model, proven, not the migration.
+
+### `LibDetails.toTMP()` is the seam
+
+The prototype is driven from the REAL `gradle.extLibDetails`, so no build script and no
+`settings.gradle.kts` changed. Probe 9 asserts the adapter is total (0 mismatched fields across
+28 checks, presence included). When DepsKt de-nests for real, the adapter is what gets deleted.
+
+### Proven
+
+`./gradlew :kgroundx-experiments:probes` — **13 passed, 0 failed** (was 8).
+
+- **Presence becomes a compile-time check.** THE headline claim, and it is a compile error, so it
+  is not in the probes task — proven by construction: a call to `context(andro: LibAndroSettingsTMP)
+  fun probeSdkFullTMP()` with no scope open fails with
+  `No context argument for 'andro: LibAndroSettingsTMP' found.`
+  The nested model's equivalents are a runtime `settings.andro!!` NPE or a runtime `require`.
+- **Copy dance halves** (probe 10): same resulting flags, one `copy` instead of two, root named
+  once instead of twice. The other four siblings need no re-wrapping.
+- **The interdependent defaults do move** (probe 11). This was the design note's "actual design
+  work" and it is smaller than feared: only TWO derivations actually cross object boundaries
+  (`LibSettings.compose`'s ten flags, and `repos.withKotlinxHtml`). Both became named functions —
+  `defaultComposeSettingsTMP()` / `defaultReposSettingsTMP()`, each `context(settings:
+  LibSettingsTMP)`. Verified equal to the constructor defaults across all 8 combinations of
+  `withJvm` × `withJs` × `withTestJUnit4`. Everything else (`withJvmVer`, `withTestJUnit5`) derives
+  within ONE declaration and needs no change at all.
+
+### Found on the way — a real bug in published DepsKt 0.4.25
+
+`LibAndroSettings.publishOneVariant` is `!publishNoVariants && !publishNoVariants` — the second
+conjunct should be `!publishAllVariants`. A lib with `publishVariant = "*"` therefore reports
+**both** `publishAllVariants` and `publishOneVariant` true, and `defaultAndroLib` runs
+`defaultAndroLibPublishAllVariants()` *and* `defaultAndroLibPublishVariant("*")`. Asserted as
+probe 13; fixed in `LibAndroSettingsTMP`. Not a prototype feature — it is live in DepsKt today,
+and no KGround module currently sets `publishVariant = "*"`, which is why nothing has burned.
+
+### Correction to the design note — the `ignoreXxx` story is better AND worse than stated
+
+The note says sibling scoping "plausibly deletes the four `ignoreXxx` booleans". Having read every
+call site and every `require`, the real count is **three die, two survive** — there are five, not
+four, because `ignoreCompose` is two different concepts sharing one name.
+
+**Die — but not for the reason the note gives.** `ignoreCompose` (in
+`defaultBuildTemplateForBasicJvmLib` / `jvmOnlyDefault` / `defaultBuildTemplateForBasicMppLib` /
+`allDefault`), `ignoreAndroTarget`, and `ignoreAndroConfig` all guard requires of this shape:
+
+```kotlin
+details.settings.andro?.let {
+  require(ignoreAndroConfig) { "allDefault can not configure android stuff" }
+}
+```
+
+That is not "is android absent?" — it is *"android is present and you must acknowledge this
+template will not configure it."* The flag exists because **nesting makes the sub-settings
+impossible to withhold**: a caller passing `details` drags `andro` along whether the callee can
+handle it or not, so the only way to say "ignore it" is to pass a boolean saying so.
+
+With siblings the caller simply does not open the andro scope, and "this template cannot configure
+android" is expressed by the signature not asking for it. So the win is sharper than the note
+claims: not "a scope check replaces `settings.andro!!`", but **the caller can withhold the scope at
+all** — which the nested model makes impossible. This is the strongest argument for de-nesting
+found so far, and it is worth adding to the design note.
+
+**Survive.** Two are not about presence and no scoping can remove them:
+
+- `ignoreCompose` in `defaultAndroDeps` / `defaultAndroTestDeps` / `defaultAndroLib` means *compose
+  mpp is configured instead of compose andro* — a ROUTING choice between two compose
+  configurations, with compose very much present. `AndroBuildTemplates.kt:43` says so outright:
+  `AndroidX.Activity.compose.takeIf { andro.withActivityCompose }, // this should not depend on
+  ignoreCompose!`. It should be RENAMED (`composeConfiguredByMpp`?), not deleted.
+- `ignoreAndroPublish` guards `require(ignoreAndroPublish || it.publishNoVariants)` — a constraint
+  on the CONTENT of the andro scope (`publishVariant`), not on its existence.
+
+### Still open
+
+- Nothing is migrated: no entry point takes the siblings yet. Next increment is
+  `defaultBuildTemplateForBasicJvmLib` + `jvmOnlyDefault` — the two whose `ignoreXxx` genuinely
+  become scope checks, and the smallest place the win is visible in real code.
+- `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
+  const is still the source of the default, so the two are not yet collapsed.
