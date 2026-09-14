@@ -28,11 +28,12 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   repositories { addRepos() }
   defaultGroupAndVerAndDescription(details)
   extensions.configure<KotlinJvmProjectExtension> {
-    jvmOnlyDefault(
-      ignoreCompose = ignoreCompose,
-      ignoreAndroTarget = ignoreAndroTarget,
-      addJvmDependencies = addJvmDependencies,
-    )
+    // The whole opt-out: hand over the jvm/testing flags and NOTHING else. There is no
+    // ignoreCompose/ignoreAndroTarget to forward any more, because there is nothing to ignore —
+    // `details.settings.compose` and `.andro` simply never enter jvmOnlyDefault's scope.
+    context(details.settings.toTMP()) {
+      jvmOnlyDefault(addJvmDependencies = addJvmDependencies)
+    }
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun jvmDefault using jvmToolchain
@@ -44,17 +45,26 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
 /**
  * Only for very standard small jvm libs. In most cases it's better to not use this function.
  *
- * These ignoreXXX flags are hacky, but needed because we want to inject this code also to such build files,
- * where plugins for compose and/or android are not applied at all, so compose/android stuff should be explicitly ignored.
+ * MIGRATED to the sibling model ([LibSettingsTMP]) — the first entry point to move. Both
+ * `ignoreCompose` and `ignoreAndroTarget`, and both `require`s they guarded, are GONE:
+ *
+ * ```
+ * require(ignoreCompose || compose == null) { "jvmOnlyDefault can NOT configure compose stuff" }
+ * require(ignoreAndroTarget || settings.andro == null) { "jvmOnlyDefault can NOT configure android target" }
+ * ```
+ *
+ * The old kdoc called the flags "hacky, but needed because we want to inject this code also to such
+ * build files, where plugins for compose and/or android are not applied at all". That need came
+ * entirely from NESTING: a caller holding `LibSettings` could not hand over the jvm flags without
+ * also handing over `compose` and `andro`, so the only way to say "those do not apply here" was a
+ * boolean plus a runtime check. As a sibling, [LibSettingsTMP] carries no `compose` and no `andro`
+ * at all — this function cannot configure them because it cannot NAME them, and the caller opts out
+ * by simply not opening those scopes. A runtime `require` became the absence of a parameter.
  */
-context(settings: LibSettings)
+context(settings: LibSettingsTMP)
 fun KotlinJvmProjectExtension.jvmOnlyDefault(
-  ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
-  ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
 ) = with(settings) {
-  require(ignoreCompose || compose == null) { "jvmOnlyDefault can NOT configure compose stuff" }
-  require(ignoreAndroTarget || settings.andro == null) { "jvmOnlyDefault can NOT configure android target" }
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   project.dependencies.apply {
     val scope = DependencyHandlerScope.of(this)

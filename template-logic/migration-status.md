@@ -363,10 +363,52 @@ found so far, and it is worth adding to the design note.
 - `ignoreAndroPublish` guards `require(ignoreAndroPublish || it.publishNoVariants)` — a constraint
   on the CONTENT of the andro scope (`publishVariant`), not on its existence.
 
+### First migration — `jvmOnlyDefault` takes siblings
+
+`jvmOnlyDefault` now reads `context(settings: LibSettingsTMP)` and takes only
+`addJvmDependencies`. Deleted outright:
+
+```kotlin
+ignoreCompose: Boolean = false,
+ignoreAndroTarget: Boolean = false,
+require(ignoreCompose || compose == null) { "jvmOnlyDefault can NOT configure compose stuff" }
+require(ignoreAndroTarget || settings.andro == null) { "jvmOnlyDefault can NOT configure android target" }
+```
+
+Its one call site in `defaultBuildTemplateForBasicJvmLib` went from forwarding two booleans to
+`context(details.settings.toTMP()) { jvmOnlyDefault(addJvmDependencies = addJvmDependencies) }` —
+handing over the jvm/testing flags and nothing else.
+
+**Verified by construction, and the enforcement is stronger than predicted.** Referencing `compose`
+inside the migrated body fails with:
+
+```
+e: Unresolved reference 'compose'.
+```
+
+Not "no context argument found" — the name does not EXIST. Under the old `with(settings)` receiver
+`compose` resolved perfectly well and only a runtime `require` stood between it and being used.
+This is the `ignoreXxx` claim discharged on real code rather than on a probe: the guarantee moved
+from a runtime check to name resolution.
+
+**Control caveat — read before trusting the green build.** NOTHING calls
+`defaultBuildTemplateForBasicJvmLib`, `defaultBuildTemplateForBasicJvmApp` or `jvmOnlyDefault`:
+no KGround module and no template build script. They are dead code today, the same condition
+already noted for `defaultAndroLib` / `LibraryExtension.defaultDefaultConfig`. So the four
+assembling templates prove this migration COMPILES; they do not exercise it at runtime. The next
+entry point to migrate should be one that is actually called.
+
+**Not migrated here.** `defaultBuildTemplateForBasicJvmLib` keeps its own `LibDetails` signature
+and its own two `require`s. Those guard the ENTRY POINT's contract with the whole details object,
+which is a separate step — it pulls in `addRepos`, `defaultGroupAndVerAndDescription` and
+`defaultPublishing`, all still on the nested types.
+
 ### Still open
 
-- Nothing is migrated: no entry point takes the siblings yet. Next increment is
-  `defaultBuildTemplateForBasicJvmLib` + `jvmOnlyDefault` — the two whose `ignoreXxx` genuinely
-  become scope checks, and the smallest place the win is visible in real code.
+- `jvmOnlyDefault` is migrated (above); everything else still takes the nested types. The next
+  increment should pick an entry point that is actually CALLED, so the templates become a real
+  runtime control rather than a compile-only one — `defaultBuildTemplateForBasicMppLib` is the
+  obvious candidate (it carries all four `ignoreXxx` and every template uses it), but it also
+  drags in `addRepos` + `allDefault`, so it is a bigger bite than this one was.
 - `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
   const is still the source of the default, so the two are not yet collapsed.
