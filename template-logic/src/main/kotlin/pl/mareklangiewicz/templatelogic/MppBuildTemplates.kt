@@ -32,7 +32,7 @@ fun Project.defaultBuildTemplateForFullMppLib(
   )
 
   if (details.settings.withAndro) {
-    with(details) { extensions.configure<LibraryExtension> {
+    context(details) { extensions.configure<LibraryExtension> {
       defaultAndroLib(
         ignoreCompose = true, // compose mpp configured already
         ignoreAndroPublish = true,
@@ -45,7 +45,7 @@ fun Project.defaultBuildTemplateForFullMppLib(
     // it would be more "correct" to configure everything "mpp way" (android deps too),
     // but it's more important to reuse andro related functions like "fun defaultAndroDeps"
     // (trust me future Marek: I've tried this already :) )
-    with(details.settings) { dependencies {
+    context(details.settings) { dependencies {
       // ignoreCompose because we have compose configured mpp way already.
       defaultAndroDeps(ignoreCompose = true)
       defaultAndroTestDeps(ignoreCompose = true)
@@ -77,7 +77,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   }
   repositories { addRepos(details.settings.repos) }
   defaultGroupAndVerAndDescription(details)
-  with(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
+  context(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
     allDefault(
       ignoreCompose = ignoreCompose,
       ignoreAndroTarget = ignoreAndroTarget,
@@ -89,7 +89,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) with(details) { defaultPublishing() }
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) context(details) { defaultPublishing() }
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
@@ -245,7 +245,7 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     ignoreAndroPublish = ignoreAndroPublish,
     addCommonMainDependencies = addCommonMainDependencies,
   )
-  with(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
+  context(details.settings) { extensions.configure<KotlinMultiplatformExtension> {
     allDefaultSourceSetsForCompose()
   } }
 }

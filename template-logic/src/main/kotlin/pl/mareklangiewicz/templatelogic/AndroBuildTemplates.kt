@@ -154,10 +154,10 @@ fun Project.defaultBuildTemplateForAndroLib(
     androidTarget()
     jvmToolchain(details.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
   }
-  with(details) { extensions.configure<LibraryExtension> {
+  context(details) { extensions.configure<LibraryExtension> {
     defaultAndroLib()
   } }
-  with(details.settings) { dependencies {
+  context(details.settings) { dependencies {
     defaultAndroDeps()
     defaultAndroTestDeps()
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
@@ -168,7 +168,7 @@ fun Project.defaultBuildTemplateForAndroLib(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  with(details) {
+  context(details) {
     if (andro.publishAllVariants) defaultPublishingOfAndroLib("default")
     if (andro.publishOneVariant) defaultPublishingOfAndroLib(andro.publishVariant)
   }
@@ -238,11 +238,11 @@ fun Project.defaultBuildTemplateForAndroApp(
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { addRepos(details.settings.repos) }
-  with(details) { extensions.configure<ApplicationExtension> {
+  context(details) { extensions.configure<ApplicationExtension> {
     defaultAndroApp()
     variant?.let { defaultAndroAppPublishVariant(it) }
   } }
-  with(details.settings) { dependencies {
+  context(details.settings) { dependencies {
     defaultAndroDeps()
     defaultAndroTestDeps()
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
@@ -253,7 +253,7 @@ fun Project.defaultBuildTemplateForAndroApp(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
   defaultGroupAndVerAndDescription(details)
-  with(details) { variant?.let { defaultPublishingOfAndroApp(it) } }
+  context(details) { variant?.let { defaultPublishingOfAndroApp(it) } }
 }
 
 context(details: LibDetails)

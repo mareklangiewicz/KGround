@@ -49,19 +49,32 @@ parameters") can therefore reach the internal helpers but not the public entry p
 which must keep an ordinary `details: LibDetails` parameter for the six modules that
 override settings.
 
-### Establish context with `with(x)`, and keep the scope narrow
+### Provide context with `context(x) { }`, NOT `with(x) { }`
 
-`with(value) { ... }` supplies a context argument (verified by compiling). But `with` also
-makes the value an **implicit receiver**, and `LibDetails` and `Project` share member names
-— `name`, `group`, `version`, `description`. Wrapping a whole `fun Project.…` body in
-`with(details)` therefore silently rebinds `name` from the module name to the library name,
-which would corrupt `coordinates(artifactId = name)` in `defaultPublishing`.
+Both supply a context argument, but they differ in one decisive way, measured on Kotlin
+2.4.0 (the version Gradle 9.7.1 uses to compile this module):
 
-So entry points wrap only the narrow call sites, never their whole body. Context
-*parameters* are safe here precisely because they are NOT receivers and cannot shadow.
+```kotlin
+// githubUrl exists only on LibDetails, so it detects an implicit receiver:
+with(details)    { githubUrl }   // COMPILES  -> with() also makes it a RECEIVER
+context(details) { githubUrl }   // Unresolved reference -> context() does NOT
+```
 
-Regression control for exactly this: `artifactId` must come from the module and `<name>`
-from the lib, and the two must stay different —
+That matters because `LibDetails` and `Project` share `name`, `group`, `version` and
+`description`. Under `with(details)`, a `fun Project.…` body silently rebinds `name` from
+the module name to the library name — which would corrupt
+`coordinates(artifactId = name)` in `defaultPublishing` with no compile error.
+
+`context(x) { }` supplies the context argument and nothing else, so that whole class of
+shadowing cannot happen. Every context-providing site here uses it.
+
+Note the two are NOT interchangeable in the other direction: bodies that genuinely want
+receiver semantics keep `with`, e.g. `allDefault`/`jvmOnlyDefault` are declared
+`context(settings: LibSettings) fun … = with(settings) { … }` so the body can say `compose`,
+`andro`, `withJvmVer` unqualified.
+
+Regression control — `artifactId` must come from the module and `<name>` from the lib, and
+the two must stay different:
 
 ```
 ./gradlew -q :kommand-samples:generatePomFileForJvmPublication
