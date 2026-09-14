@@ -29,10 +29,19 @@ import pl.mareklangiewicz.defaults.*
  */
 const val AndroSdkCompileMinorTMP = 2
 
-/** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
+/**
+ * @param composeConfiguredByMpp compose is configured the MPP way (by `allDefaultSourceSetsForCompose`),
+ *   so do NOT add the compose-android dependencies here.
+ *
+ * RENAMED from `ignoreCompose`, and deliberately NOT deleted by the sibling migration. It looks like
+ * the presence flags that died in [jvmOnlyDefault] and [allDefault], but it is a different thing: a
+ * ROUTING choice between two compose configurations, with compose very much PRESENT. No scope can
+ * express it — withholding the compose scope would say "no compose at all", which is wrong here.
+ * See the line below that must not follow this flag.
+ */
 context(settings: LibSettings)
 fun DependencyHandler.defaultAndroDeps(
-  ignoreCompose: Boolean = false,
+  composeConfiguredByMpp: Boolean = false,
   configuration: String = "implementation",
 ) {
   val andro = settings.andro ?: error("No andro settings.")
@@ -40,13 +49,13 @@ fun DependencyHandler.defaultAndroDeps(
     configuration,
     AndroidX.Core.ktx,
     AndroidX.AppCompat.appcompat.takeIf { andro.withAppCompat },
-    AndroidX.Activity.compose.takeIf { andro.withActivityCompose }, // this should not depend on ignoreCompose!
+    AndroidX.Activity.compose.takeIf { andro.withActivityCompose }, // this should NOT depend on composeConfiguredByMpp!
     AndroidX.Lifecycle.compiler.takeIf { andro.withLifecycle },
     AndroidX.Lifecycle.runtime_ktx.takeIf { andro.withLifecycle },
     // TODO_someday_maybe: more lifecycle related stuff by default (viewmodel, compose)?
     Com.Google.Android.Material.material.takeIf { andro.withMDC },
   )
-  if (!ignoreCompose && settings.withCompose) {
+  if (!composeConfiguredByMpp && settings.withCompose) {
     val compose = settings.compose!!
     addAllWithVer(
       configuration,
@@ -63,10 +72,19 @@ fun DependencyHandler.defaultAndroDeps(
   }
 }
 
-/** @param ignoreCompose Should be set to true if compose mpp is configured instead of compose andro */
+/**
+ * @param composeConfiguredByMpp compose is configured the MPP way (by `allDefaultSourceSetsForCompose`),
+ *   so do NOT add the compose-android dependencies here.
+ *
+ * RENAMED from `ignoreCompose`, and deliberately NOT deleted by the sibling migration. It looks like
+ * the presence flags that died in [jvmOnlyDefault] and [allDefault], but it is a different thing: a
+ * ROUTING choice between two compose configurations, with compose very much PRESENT. No scope can
+ * express it — withholding the compose scope would say "no compose at all", which is wrong here.
+ * See the line below that must not follow this flag.
+ */
 context(settings: LibSettings)
 fun DependencyHandler.defaultAndroTestDeps(
-  ignoreCompose: Boolean = false,
+  composeConfiguredByMpp: Boolean = false,
   configuration: String = "testImplementation",
 ) {
   val andro = settings.andro ?: error("No andro settings.")
@@ -100,7 +118,7 @@ fun DependencyHandler.defaultAndroTestDeps(
     )
   }
 
-  if (!ignoreCompose && settings.withCompose) addAllWithVer(
+  if (!composeConfiguredByMpp && settings.withCompose) addAllWithVer(
     configuration,
     vers.ComposeAndro,
     AndroidX.Compose.Ui.test,
@@ -164,7 +182,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ): Unit = context(details, details.settings) {
   details.settings.andro ?: error("No andro settings.")
-  repositories { addRepos() }
+  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
   // Since AGP 9 the 'com.android.library' plugin cannot be combined with KMP, so an android
   // library is a KMP module with the 'com.android.kotlin.multiplatform.library' target --
   // exactly what template-raw already does. LibraryExtension is not applied at all any more.
@@ -194,7 +212,7 @@ fun Project.defaultBuildTemplateForAndroLib(
 
 context(details: LibDetails)
 fun LibraryExtension.defaultAndroLib(
-  ignoreCompose: Boolean = false,
+  composeConfiguredByMpp: Boolean = false,
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
@@ -205,7 +223,7 @@ fun LibraryExtension.defaultAndroLib(
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig()
   defaultBuildTypes()
-  details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
+  details.settings.compose?.takeIf { !composeConfiguredByMpp }?.let { defaultComposeStuff() }
   defaultPackagingOptions()
   if (!ignoreAndroPublish && andro.publishAllVariants) defaultAndroLibPublishAllVariants()
   if (!ignoreAndroPublish && andro.publishOneVariant) defaultAndroLibPublishVariant(andro.publishVariant)
@@ -258,7 +276,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   val andro = details.settings.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
-  repositories { addRepos() }
+  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
   extensions.configure<ApplicationExtension> {
     defaultAndroApp()
     variant?.let { defaultAndroAppPublishVariant(it) }
@@ -279,7 +297,7 @@ fun Project.defaultBuildTemplateForAndroApp(
 
 context(details: LibDetails)
 fun ApplicationExtension.defaultAndroApp(
-  ignoreCompose: Boolean = false,
+  composeConfiguredByMpp: Boolean = false,
 ) {
   val andro = details.settings.andro ?: error("No andro settings.")
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
@@ -288,7 +306,7 @@ fun ApplicationExtension.defaultAndroApp(
   }
   defaultDefaultConfig()
   defaultBuildTypes()
-  details.settings.compose?.takeIf { !ignoreCompose }?.let { defaultComposeStuff() }
+  details.settings.compose?.takeIf { !composeConfiguredByMpp }?.let { defaultComposeStuff() }
 }
 
 context(details: LibDetails)

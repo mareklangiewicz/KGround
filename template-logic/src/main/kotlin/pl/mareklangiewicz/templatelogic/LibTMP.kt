@@ -221,11 +221,27 @@ fun Project.defaultBuildTemplateForBasicMppLib(
 )
 
 /**
- * Adjust just the platform/testing flags, leaving every other sibling alone — the flat single
- * `copy` the design note wants, with the root named ONCE.
+ * Adjust one sibling, leaving the rest alone, with the root named ONCE.
+ *
+ * `adjustSettings` is last so it stays the trailing lambda (the common case); adjust identity with
+ * `libTMP(adjustDetails = { it.copy(name = "...") })`.
+ *
+ * Be precise about what is doing the work here. [LibTMP] is a BUNDLE, so `lib.copy(settings =
+ * lib.settings.copy(..))` is still two levels — this helper hides that, it is not removed by the
+ * data shape alone. The nested model had an equivalent helper built on this branch
+ * (`settings: LibSettings.() -> LibSettings` on entry points) and it was reverted as insufficient.
+ *
+ * The difference is depth, and it is the whole point: from the bundle EVERY sibling is exactly one
+ * level away, so one helper shape covers all five. Nested, `compose` and `andro` sit three levels
+ * down, so the same helper leaves a consumer writing
+ * `settings = { copy(compose = compose!!.copy(..)) }` — deeper, and with a `!!`.
  */
-fun Project.libTMP(adjustSettings: (LibSettingsTMP) -> LibSettingsTMP): LibTMP =
-  gradle.extLibTMP.let { it.copy(settings = adjustSettings(it.settings)) }
+fun Project.libTMP(
+  adjustDetails: (LibDetailsTMP) -> LibDetailsTMP = { it },
+  adjustSettings: (LibSettingsTMP) -> LibSettingsTMP = { it },
+): LibTMP = gradle.extLibTMP.let {
+  it.copy(details = adjustDetails(it.details), settings = adjustSettings(it.settings))
+}
 
 /**
  * Re-nests the siblings so the still-nested internals ([LibDetails]-based `defaultPublishing`,

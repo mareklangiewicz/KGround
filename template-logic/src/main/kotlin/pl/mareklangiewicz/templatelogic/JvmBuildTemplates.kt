@@ -25,7 +25,7 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
 ): Unit = context(details, details.settings) {
   require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure compose stuff" }
   require(ignoreAndroTarget || details.settings.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
-  repositories { addRepos() }
+  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
   defaultGroupAndVerAndDescription(details)
   extensions.configure<KotlinJvmProjectExtension> {
     // The whole opt-out: hand over the jvm/testing flags and NOTHING else. There is no

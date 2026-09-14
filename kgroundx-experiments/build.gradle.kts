@@ -158,6 +158,23 @@ tasks.register("probes") {
       libTMP { it.copy(withJs = true) }.toNested() == nestedDance, false,
     )
 
+    // ----- the details-adjusting form too (kommand-line/-samples), probe 18 ----
+    // This one guards artifactId: those scripts rename the lib, and coordinates() publishes
+    // under details.name. copy() does NOT recompute namespace/appId (constructor defaults
+    // run at construction only), so both forms must carry the ORIGINAL namespace forward.
+    val nestedRenamed = gradle.extLibDetails.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.")
+    val siblingRenamed = libTMP(
+      adjustDetails = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") },
+    ).toNested()
+    check(
+      "the details-adjusting form rebuilds an identical LibDetails (artifactId + namespace)",
+      siblingRenamed, nestedRenamed,
+    )
+    check(
+      "and it really did keep the ORIGINAL namespace, not one recomputed from the new name",
+      siblingRenamed.namespace, gradle.extLibDetails.namespace,
+    )
+
     // ----- can a FLAGLESS build script drive the sibling model? probes 14-15 ---
     // This is the question that decides whether de-nesting can reach the PUBLIC entry
     // points, or only template-logic's internals. Scripts have no context parameters

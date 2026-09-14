@@ -16,13 +16,9 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val details = gradle.extLibDetails.copy(
-  name = "Kommand Samples",
-  description = "Additional samples for KommandLine."
-)
-
-
-defaultBuildTemplateForBasicMppLib(details) {
+defaultBuildTemplateForBasicMppLib(
+  libTMP(adjustDetails = { it.copy(name = "Kommand Samples", description = "Additional samples for KommandLine.") }),
+) {
   api(project(":kommand-line"))
 
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later

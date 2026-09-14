@@ -16,12 +16,9 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val details = gradle.extLibDetails.copy(
-  name = "Kommand Line",
-  description = "Kotlin DSL for popular CLI commands."
-)
-
-defaultBuildTemplateForBasicMppLib(details) {
+defaultBuildTemplateForBasicMppLib(
+  libTMP(adjustDetails = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") }),
+) {
   api(project(":kground"))
   api(project(":kground-io"))
 }

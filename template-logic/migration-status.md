@@ -545,19 +545,52 @@ at language version 2.4 with context parameters available by default, and can ad
 blocked on DepsKt's own compilation. The flagless constraint applies ONLY to consumers' build
 scripts — which is precisely why the helper layer above is the shape that matters for them.
 
+### Cleanup pass — everything the earlier increments deferred
+
+**All six copy-dance scripts converted.** `kgroundx-experiments`, `kgroundx-maintenance`,
+`kgroundx-workflows`, `kgroundx-jupyter` (settings form) and `kommand-line`, `kommand-samples`
+(identity form, via `libTMP(adjustDetails = { ... })`). Each lost two statements naming the root
+twice. Probe 18 covers the identity form specifically because those scripts rename the lib and
+`coordinates(artifactId = name)` publishes under `details.name`; probe 19 asserts the rebuilt
+details keep the ORIGINAL `namespace` rather than one recomputed from the new name — `copy()` never
+re-runs constructor defaults, and both forms must agree about that.
+
+**`ignoreAndroTarget` deleted** from all four MPP signatures. It guarded a commented-out
+`androidTarget` block, so it was inert before this work and provably dead after `allDefault` stopped
+taking it.
+
+**`defaultBuildTemplateForBasicMppLib(details: LibDetails, ...)` lost its default.** With two
+overloads both fully defaulted, `defaultBuildTemplateForBasicMppLib(ignoreCompose = true) { }` in
+`kground/build.gradle.kts` was ambiguous. Dropping the default on the nested overload makes the
+sibling overload the only candidate for script-shaped calls; internal callers pass `details`
+explicitly anyway.
+
+**`addRepos` migrated** — the design note's own "helpers reach through the tree" example. Was
+`context(settings: LibSettings)` + `with(settings.repos)`; now `context(reposSettings:
+LibReposSettingsTMP)` with nothing to reach through. Five call sites updated.
+
+The parameter is named `reposSettings`, not `repos`, and that is load-bearing: the body calls
+`maven(repos.kotlinx)` where `repos` is a top-level DepsKt object, and a context parameter named
+`repos` would take that name. Probe 1 established that a context parameter does not shadow an
+extension RECEIVER; this is the complementary hazard — it does occupy its own NAME. Worth carrying
+into DepsKt, where `LibReposSettings` and the `repos` object live side by side.
+
+**`ignoreCompose` → `composeConfiguredByMpp`** across `defaultAndroDeps`, `defaultAndroTestDeps`,
+`defaultAndroLib`, `defaultAndroApp`, and the two call sites in `allDefaultSourceSetsForCompose`.
+This is the survivor identified earlier: it selects between two compose configurations rather than
+asserting absence, so no scope can express it — withholding the compose scope would claim "no
+compose at all", which is false here. The old name made it look like the presence flags that died
+in `jvmOnlyDefault` and `allDefault`; it never was one.
+
 ### Still open
 
-- `jvmOnlyDefault` and `allDefault` are migrated. Still on the nested types: `addRepos`
-  (`context(settings: LibSettings)`, reaches through to `settings.repos` — a direct candidate, since
-  `repos` is a sibling now), `defaultPublishing` / `defaultGroupAndVerAndDescription`
-  (`LibDetails`), `defaultAndroDeps` / `defaultAndroLib` (the andro family), and
-  `allDefaultSourceSetsForCompose`.
-- `addRepos` is the obvious next one and the cheapest: it is the design note's own example of a
-  helper reaching through the tree (`with(settings.repos)`), and as a sibling it becomes
-  `context(repos: LibReposSettingsTMP)` with no reaching at all.
-- Removing the dead `ignoreAndroTarget` from the four MPP signatures (above).
-- Converting the other three copy-dance scripts (`kgroundx-maintenance`, `kgroundx-workflows`,
-  `kgroundx-jupyter`) to `libTMP { }`, plus `kommand-line` / `kommand-samples` which copy
-  `details` directly.
+- Migrated so far: `jvmOnlyDefault`, `allDefault`, `addRepos`. Still on the nested types:
+  `defaultPublishing` and `defaultGroupAndVerAndDescription` (both `context(details: LibDetails)`),
+  the andro family (`defaultAndroDeps` / `defaultAndroTestDeps` / `defaultAndroLib` /
+  `defaultAndroApp`, which need an andro SCOPE — the presence-as-scope payoff, and the biggest
+  remaining prize), and `allDefaultSourceSetsForCompose` (needs a compose scope).
+- `LibTMP.toNested()` exists only to feed those still-nested internals. It is the honest measure of
+  how far the migration has to go: when nothing calls it, the prototype is complete and the DepsKt
+  change is fully specified.
 - `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
   const is still the source of the default, so the two are not yet collapsed.

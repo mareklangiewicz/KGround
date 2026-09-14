@@ -39,8 +39,18 @@ fun Project.setMyWeirdSubstitutions(
   }
 }
 
-context(settings: LibSettings)
-fun RepositoryHandler.addRepos() = with(settings.repos) {
+/**
+ * MIGRATED to the sibling model. Was `context(settings: LibSettings)` + `with(settings.repos)` —
+ * the design note's own example of "helpers reach through the tree". As a sibling there is nothing
+ * to reach through: the repo settings arrive directly.
+ *
+ * The context parameter is `reposSettings`, NOT `repos`, on purpose. This body calls
+ * `maven(repos.kotlinx)`, where `repos` is a top-level DepsKt object; a context parameter named
+ * `repos` would take that name and break those calls. Worth remembering alongside probe 1 — a
+ * context parameter does not shadow an extension RECEIVER, but it does occupy its own name.
+ */
+context(reposSettings: LibReposSettingsTMP)
+fun RepositoryHandler.addRepos() = with(reposSettings) {
   @Suppress("DEPRECATION")
   if (withMavenLocal) mavenLocal()
   if (withMavenCentral) mavenCentral()

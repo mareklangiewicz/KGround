@@ -41,9 +41,9 @@ fun Project.defaultBuildTemplateForFullMppLib(
     // Still reusing defaultAndroDeps rather than restating the list (trust me future Marek:
     // I've tried configuring it all the "mpp way" already :) ).
     dependencies {
-      // ignoreCompose because we have compose configured mpp way already.
-      defaultAndroDeps(ignoreCompose = true, configuration = "androidMainImplementation")
-      defaultAndroTestDeps(ignoreCompose = true, configuration = "androidHostTestImplementation")
+      // composeConfiguredByMpp because we have compose configured the mpp way already.
+      defaultAndroDeps(composeConfiguredByMpp = true, configuration = "androidMainImplementation")
+      defaultAndroTestDeps(composeConfiguredByMpp = true, configuration = "androidHostTestImplementation")
     }
   }
 }
@@ -58,9 +58,8 @@ fun Project.defaultBuildTemplateForFullMppLib(
  * These ignoreXXX flags are hacky, but needed. see [allDefault] kdoc for details.
  */
 fun Project.defaultBuildTemplateForBasicMppLib(
-  details: LibDetails = gradle.extLibDetails,
+  details: LibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
-  ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
@@ -70,7 +69,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
     require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
     require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }
   }
-  repositories { addRepos() }
+  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
   defaultGroupAndVerAndDescription(details)
   extensions.configure<KotlinMultiplatformExtension> {
     // Four booleans became zero: hand allDefault the platform/testing flags and nothing else.
@@ -201,14 +200,12 @@ fun KotlinMultiplatformExtension.jsDefault(
 fun Project.defaultBuildTemplateForBasicMppApp(
   details: LibDetails = gradle.extLibDetails,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
-  ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
   defaultBuildTemplateForBasicMppLib(
     details = details,
     ignoreCompose = ignoreCompose,
-    ignoreAndroTarget = ignoreAndroTarget,
     ignoreAndroConfig = ignoreAndroConfig,
     ignoreAndroPublish = true,
     addCommonMainDependencies = addCommonMainDependencies,
@@ -241,7 +238,6 @@ fun Project.defaultBuildTemplateForBasicMppApp(
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForComposeMppLib(
   details: LibDetails = gradle.extLibDetails,
-  ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
@@ -251,7 +247,6 @@ fun Project.defaultBuildTemplateForComposeMppLib(
   defaultBuildTemplateForBasicMppLib(
     details = details,
     ignoreCompose = true,
-    ignoreAndroTarget = ignoreAndroTarget,
     ignoreAndroConfig = ignoreAndroConfig,
     ignoreAndroPublish = ignoreAndroPublish,
     addCommonMainDependencies = addCommonMainDependencies,
@@ -334,7 +329,6 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
 /** Only for very standard compose mpp apps. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForComposeMppApp(
   details: LibDetails = gradle.extLibDetails,
-  ignoreAndroTarget: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
@@ -342,7 +336,6 @@ fun Project.defaultBuildTemplateForComposeMppApp(
   val desktop = (compose as ExtensionAware).extensions.getByName("desktop") as DesktopExtension
   defaultBuildTemplateForComposeMppLib(
     details = details,
-    ignoreAndroTarget = ignoreAndroTarget,
     ignoreAndroConfig = ignoreAndroConfig,
     ignoreAndroPublish = true,
     addCommonMainDependencies = addCommonMainDependencies,

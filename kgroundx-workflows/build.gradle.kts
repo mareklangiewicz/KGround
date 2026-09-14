@@ -16,14 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val settings = gradle.extLibDetails.settings.copy(
-  withJs = false,
-  withLinuxX64 = false,
-)
-
-val details = gradle.extLibDetails.copy(settings = settings)
-
-defaultBuildTemplateForBasicMppLib(details) {
+defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false) }) {
   api(project(":kgroundx-maintenance"))
 }
 
