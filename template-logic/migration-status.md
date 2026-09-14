@@ -182,17 +182,40 @@ module   kgroundx-experiments/src/**.kt     : Kotlin plugin 2.4.20, flag not set
   Kotlin (`embeddedKotlinVersion` = 2.4.0). Same compiler; the ONLY difference between them
   is `-Xcontext-parameters`, which `template-logic/build.gradle.kts` sets for itself.
 - **Module sources** are compiled by the Kotlin plugin (2.4.20) and **do not need the
-  flag** — Kotlin 2.4.x enables context parameters by default. Measured: a
-  `context(m: CtxProbeMarker) fun …` in `kgroundx-experiments/src/commonMain/kotlin`
-  compiles, and a deliberate type error in the same file fails, proving it really was
-  compiled.
+  flag**. Measured: a `context(m: CtxProbeMarker) fun …` in
+  `kgroundx-experiments/src/commonMain/kotlin` compiles, with a deliberate type error in
+  the same file as the control proving it really was compiled.
+
+### The gate is the LANGUAGE version 2.4, not the compiler release
+
+Compiling that same probe against each language version, the compiler says it outright:
+
+| languageVersion | result |
+|---|---|
+| 2.2 | `e: The feature "context parameters" is only available since language version 2.4` |
+| 2.3 | same error |
+| 2.4 | compiles, no flag needed |
+
+So `-Xcontext-parameters` is the opt-in for language version **below** 2.4; from 2.4 the
+feature is on by default. That single rule explains all three sides:
+
+- module sources take the plugin default (2.4) → no flag needed
+- build scripts run on Gradle's embedded Kotlin 2.4.0 but at a language version below 2.4
+  → the flag is required, and declaring a context fun in a `build.gradle.kts` reports the
+  *same* "only available since language version 2.4" error
+- `template-logic/build.gradle.kts` therefore adds the flag for itself
+
+Note `defaultCompiler()` pins `languageVersion = 2.3` AND adds the flag in the same place —
+consistent, and the reason the raw template still needs it.
+
+The probes assert that no module pins a languageVersion below 2.4 behind the compiler's
+back; pinning 2.3 turns that red with `expected <[]> but got <[2.3]>`.
 - Note `defaultCompiler()` *does* add the flag, but it is only ever called from
   `defaultBuildTemplateForRawMppLib`, so KGround's own modules never receive it — and do
   not need it. The probe asserts that, so the two facts cannot drift apart silently.
 
-This also explains the kotlinc-vs-Gradle discrepancy noted below: it is not two compilers
-disagreeing arbitrarily. The regular Kotlin 2.4.x compiler has context parameters ON by
-default; Gradle's *script* compiler is the conservative one that still demands the flag.
+This also explains the kotlinc-vs-Gradle discrepancy noted below: not two compilers
+disagreeing arbitrarily, just different language versions either side of the 2.4 gate.
 
 **Consequence for the roadmap:** context parameters are fully available in KGround's own
 library code today. The restriction is specific to `build.gradle.kts`.

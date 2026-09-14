@@ -65,6 +65,12 @@ tasks.register("probes") {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
       .flatMap { it.compilerOptions.freeCompilerArgs.get() }.distinct().sorted()
   }
+  // The real gate is the LANGUAGE version, not the compiler release: the compiler says
+  // "The feature \"context parameters\" is only available since language version 2.4".
+  val moduleLangVersion = provider {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
+      .mapNotNull { it.compilerOptions.languageVersion.orNull?.version }.distinct().sorted()
+  }
   doLast {
     var passed = 0
     val failed = mutableListOf<String>()
@@ -83,7 +89,8 @@ tasks.register("probes") {
     // context parameters still compile in module sources, because Kotlin 2.4.x enables
     // them by default. Only Gradle's SCRIPT compiler still demands the flag.
     val moduleFlagged = moduleArgs.get().contains("-Xcontext-parameters")
-    log.lifecycle("    module   kgroundx-experiments/src/**.kt      : Kotlin plugin $kmpPluginVersion, -Xcontext-parameters=$moduleFlagged (not needed there)")
+    val langVersions = moduleLangVersion.get()
+    log.lifecycle("    module   kgroundx-experiments/src/**.kt      : Kotlin plugin $kmpPluginVersion, languageVersion=${langVersions.ifEmpty { listOf("(plugin default)") }}, -Xcontext-parameters=$moduleFlagged")
     // The metadata stamp is the BINARY FORMAT version, not the compiler version -- it is
     // evidence the two sides agree, not evidence of which release built them.
     check(
@@ -93,6 +100,12 @@ tasks.register("probes") {
     check(
       "module compile tasks do NOT carry the flag (defaultCompiler is raw-template only)",
       moduleFlagged, false,
+    )
+    // Context params need EITHER languageVersion >= 2.4 OR the flag. Modules get the
+    // former, build scripts neither -- hence the flag in template-logic/build.gradle.kts.
+    check(
+      "modules do not pin languageVersion below 2.4 (which would need the flag back)",
+      langVersions.filter { it < "2.4" }, emptyList<String>(),
     )
 
     // Guard: if these were ever equal the next probe would prove nothing.
