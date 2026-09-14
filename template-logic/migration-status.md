@@ -97,6 +97,43 @@ grep -E '<artifactId>|<name>' kommand-samples/build/publications/jvm/pom-default
 # expect artifactId kommand-samples-jvm  and  name "Kommand Samples"
 ```
 
+### Context parameters are NOT callable from Kotlin without the flag
+
+A context parameter IS compiled as a value parameter prepended before the extension
+receiver — `javap` on `KotlinModuleBuildTemplateKt` shows:
+
+```
+public static final void defaultPublishing(LibDetails, Project);
+```
+
+That is true at the JVM/ABI level, but it does NOT make such functions callable from Kotlin
+code compiled without `-Xcontext-parameters`. The frontend refuses on both counts:
+
+```
+e: To call contextual declarations, specify the '-Xcontext-parameters' compiler option.
+e: Too many arguments for 'context(d: LibDetails) fun probeNoReceiver(): String'.
+```
+
+Measured with a receiverless probe, so "receiver type mismatch" is not the confound.
+The prepended parameter is reachable only from Java, or from Kotlin WITH the flag.
+
+### Project stays an extension receiver, never a context parameter
+
+Entry points must keep `fun Project.…`: build scripts call them with Project as the implicit
+receiver, and they cannot satisfy a context parameter at all (same measurement as above).
+Internal helpers keep it too — receiver syntax is what makes `extensions`, `tasks`,
+`repositories`, `plugins` and `dependencies` available unqualified; as a context parameter
+every one of those becomes `project.…`. Context parameters and an extension receiver coexist
+without trouble, as the javap signature shows.
+
+### Unnamed context parameters for pure conduits
+
+`context(_: LibDetails)` is supported and still propagates downstream. Used on the two
+functions that hold the context ONLY to forward it and never name it —
+`defaultPublishingOfAndroLib` (passes it to `defaultPOM`) and `defaultPublishingOfAndroApp`
+(delegates to the former). Everywhere else the context is referenced by name, so `_` would
+be wrong.
+
 Related trap, already removed: a `context(Project) val libDetails get() = gradle.extLibDetails`
 reads the AMBIENT details and silently discards those per-module overrides. Any future
 context work must carry the *effective* `LibDetails`, not re-read it from the project.

@@ -123,7 +123,7 @@ fun CommonExtension.defaultPackagingOptions() = packaging.apply {
 }
 
 /** Use template-andro/build.gradle.kts:fun defaultAndroLibPublishAllVariants() to create component with name "default". */
-context(details: LibDetails)
+context(_: LibDetails)
 fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   afterEvaluate {
     extensions.configure<PublishingExtension> {
@@ -135,7 +135,7 @@ fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   }
 }
 
-context(details: LibDetails)
+context(_: LibDetails)
 fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
   defaultPublishingOfAndroLib(componentName)
 
