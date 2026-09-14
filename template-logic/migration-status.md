@@ -31,7 +31,7 @@ compile at all ("Expecting an element"). Past that, each hits its own wall:
 |---|---|
 | `template-full` | **FIXED.** `./gradlew -p template-full assemble` is BUILD SUCCESSFUL. |
 | `template-andro` | **FIXED as far as anything can be** — it configures and compiles; `assemble` stops on a pre-existing SDK drift that blocks `template-raw` identically (see below). |
-| `template-basic` | still broken. `com.vanniktech.maven.publish` 0.37.0 "already on the classpath with an unknown version". Note `template-raw` uses plain `plugs.VannikPublish` too and configures fine, so `NoVer` alone is NOT the fix — the difference has not been diagnosed. |
+| `template-basic` | **FIXED.** Root script was missing `plug(plugs.VannikPublish) apply false` — see the diagnosis below. |
 
 ### What the fix was
 
@@ -71,6 +71,52 @@ Both only became visible after applying AGP's documented bypass
    not merely mis-called, it is **uncallable from any build script**. The device-test dependencies
    moved into the template instead. Worth noting as a general hazard: promoting a public helper's
    parameter to a context parameter silently removes it from every build script's reach.
+
+### `template-basic` — diagnosed and fixed
+
+Symptom: `Error resolving plugin [id: 'com.vanniktech.maven.publish', version: '0.37.0'] >
+... already on the classpath with an unknown version, so compatibility cannot be checked.`
+
+**Cause.** `template-logic` depends on the publish plugin (`implementation(
+"com.vanniktech:gradle-maven-publish-plugin:0.37.0")`), so applying `id("my-convention")`
+puts it on a subproject's classpath with **no version metadata**. A subproject then asking
+for it *with* a version cannot be checked against that entry. There are exactly two ways
+out, and both are already used in this repo:
+
+| project | root declares it | subprojects ask for | result |
+|---|---|---|---|
+| KGround itself | no | `plugs.VannikPublishNoVer` | works |
+| `template-raw` / `-full` / `-andro` | **yes**, `apply false` | `plugs.VannikPublish` | works |
+| `template-basic` | no | `plugs.VannikPublish` | **failed** |
+
+`template-basic` did neither. Fix: declare it once in its root script, matching the other
+three templates.
+
+**The earlier note in this file was a false inference.** It said "template-raw uses plain
+`plugs.VannikPublish` too and configures fine, so `NoVer` alone is NOT the fix". Raw works
+because of its *root* declaration, not because versioned requests are safe. Measured both
+ways: switching the three subprojects to `VannikPublishNoVer` with no root line **also**
+configures. Two independent fixes; the root line was chosen for consistency with the sibling
+templates.
+
+**The module named in the error was not special.** Gradle evaluates subprojects
+alphabetically, so `template-basic-app` failed merely by being first. Proven: fixing only
+that module moved the identical error to `template-basic-jvm-app`. All three shared the
+defect — which is why looking for something specific to one module led nowhere.
+
+**Why it drifted, and why nothing caught it.** `AGENTS.md`'s sync tool propagates build-file
+regions *by name* from `template-raw`. The root region names do not match:
+
+- `template-raw`: `[[KMP Root Build Template]]`
+- `template-full` and `template-andro`: `[[Full Root Build Imports and Plugs]]` (same as each
+  other, so they stay in sync)
+- `template-basic`: `[[Basic Root Build Imports and Plugs]]` — **unique, so nothing ever syncs
+  into it**
+
+So raw's root line could never reach basic. And **no CI workflow builds any template**
+(`.github/workflows/` has dbuild/ddepsub/drelease, none of which touch them), so all four
+templates could rot silently. That missing gate is the real prevention story here, not the
+one-line fix.
 
 ### Still blocked, and NOT caused by this work: compileSdk 37.0 vs 37.1
 
