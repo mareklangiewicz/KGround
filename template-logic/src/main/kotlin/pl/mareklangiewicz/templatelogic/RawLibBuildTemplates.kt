@@ -16,8 +16,9 @@ import pl.mareklangiewicz.defaults.*
 // region [[Raw Lib Build Template]]
 
 @OptIn(ExperimentalComposeLibrary::class)
-fun Project.defaultBuildTemplateForRawMppLib() {
-  val details = gradle.extLibDetails
+fun Project.defaultBuildTemplateForRawMppLib(
+  details: LibDetails = gradle.extLibDetails,
+): Unit = context(details, details.settings) {
   val settings = details.settings
 
   if (settings.withAndro) {
@@ -26,7 +27,7 @@ fun Project.defaultBuildTemplateForRawMppLib() {
   if (settings.compose?.withComposeTestUiJUnit5 == true)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
-  repositories { addRepos(settings = settings) }
+  repositories { addRepos() }
   defaultGroupAndVerAndDescription(details)
 
   val compose = extensions.getByName("compose") as ComposeExtension
@@ -227,13 +228,12 @@ fun Project.defaultBuildTemplateForRawMppLib() {
 
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) context(details) { defaultPublishing() }
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
+context(details: LibDetails, settings: LibSettings)
 fun KotlinMultiplatformExtension.androDefault() {
-  val details = project.gradle.extLibDetails
-  val settings = details.settings
   extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
     val andro = settings.andro!!
     minSdk { version = release(andro.sdkMin) }
