@@ -19,7 +19,12 @@ Last verified 2026-09-13 against KGround 0.1.32.
   Only the 9 public `defaultBuildTemplateFor*` entry points still take an explicit
   `details: LibDetails = gradle.extLibDetails` — see the constraint below.
 
-## Templates — `template-full` and `template-andro` FIXED; `template-basic` still broken
+## Templates — all four assemble
+
+`./gradlew -p <template> assemble` is BUILD SUCCESSFUL for `template-raw`, `template-full`,
+`template-andro` and `template-basic`. `template-raw` was never broken at configuration time,
+but it did not assemble either until the compileSdk bump below; both it and `template-basic`
+also needed `kotlinUpgradeYarnLock`, their committed lock files having rotted unnoticed.
 
 All three were broken on `main` at 0.1.32. They are template projects, not published
 artifacts, so the 0.1.32 release itself is unaffected.
@@ -30,7 +35,7 @@ compile at all ("Expecting an element"). Past that, each hits its own wall:
 | project | state |
 |---|---|
 | `template-full` | **FIXED.** `./gradlew -p template-full assemble` is BUILD SUCCESSFUL. |
-| `template-andro` | **FIXED as far as anything can be** — it configures and compiles; `assemble` stops on a pre-existing SDK drift that blocks `template-raw` identically (see below). |
+| `template-andro` | **FIXED.** `./gradlew -p template-andro assemble` is BUILD SUCCESSFUL and produces `template-andro-app-debug.apk`. |
 | `template-basic` | **FIXED.** Root script was missing `plug(plugs.VannikPublish) apply false` — see the diagnosis below. |
 
 ### What the fix was
