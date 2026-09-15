@@ -1,3 +1,9 @@
+> **Moved 2026-09-15.** This file used to live at `template-logic/migration-status.md`. That module
+> is gone: its build templates are DepsKt's `:templatefun` and its probes are `probe-logic/`. The
+> file is kept verbatim as the evidence record for the de-nesting migration -- every probe, control
+> and compiler error text. Paths inside it refer to the old layout on purpose. What happened after
+> it is in `DepsKt/docs/design/lib-details-denesting.md`.
+
 # template-logic migration status
 
 Experimental branch `build-logic-context-params`. Kept here, not on `main`.

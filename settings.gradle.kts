@@ -28,8 +28,8 @@ pluginManagement {
 
   val depsDir = File(rootDir, "../DepsKt").normalize()
   val depsInclude =
-    // depsDir.exists()
-    false
+    depsDir.exists()
+    // false
   if (depsInclude) {
     logger.warn("Including local build $depsDir")
     includeBuild(depsDir)
@@ -71,7 +71,10 @@ gradle.extLib = lib(
   withCompose = false, // was: compose = null - presence, stated as presence
 )
 
-includeBuild("template-logic")
+// template-logic is gone: the build templates come from DepsKt's :templatefun now, reached through
+// the composite include in pluginManagement above (and, once published, through a plugin version).
+// probe-logic is what is left of it here -- see probe-logic/build.gradle.kts for why it exists.
+includeBuild("probe-logic")
 
 include(":kground")
 include(":kgroundx")

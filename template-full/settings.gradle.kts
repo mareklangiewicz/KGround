@@ -26,10 +26,10 @@ pluginManagement {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
 
-  val depsDir = File(rootDir, "../DepsKt").normalize()
+  val depsDir = File(rootDir, "../../DepsKt").normalize()
   val depsInclude =
-    // depsDir.exists()
-    false
+    depsDir.exists()
+    // false
   if (depsInclude) {
     logger.warn("Including local build $depsDir")
     includeBuild(depsDir)
@@ -80,7 +80,6 @@ gradle.extLib = lib(
 )
 
 rootProject.name = "template-full"
-includeBuild("../template-logic")
 include(":template-full-lib")
 // include(":template-full-app")
 // include(":template-full-jvm-cli-app")

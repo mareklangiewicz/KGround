@@ -3,10 +3,10 @@
 
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("my-convention") apply false
+  id("pl.mareklangiewicz.templatefun") apply false
   plug(plugs.KotlinMulti) apply false
   plug(plugs.KotlinJvm) apply false
   plug(plugs.KotlinMultiCompose) apply false

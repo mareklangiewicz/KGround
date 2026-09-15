@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# Gate for the build-logic-context-params branch: prove template-logic still works.
+# Gate for the build-logic-context-params branch: prove templatefun still works.
+#
+# templatefun lives in DepsKt now, reached through the composite include in settings.gradle.kts.
+# The `compile` step below compiles probe-logic, which depends on it, so the substitution itself
+# is part of what the gate checks: if the composite stops binding, this step fails first.
 #
 # Why a script and not a one-liner: running probes + KGround assemble + four template
 # assembles back to back pins several Gradle and Kotlin daemons at once and chokes a
@@ -39,7 +43,7 @@ NATIVE_MODULES=(kground kground-io kgroundx kgroundx-io kommand-line kommand-sam
 # between them, so a step can be split into per-module invocations without extra plumbing.
 step_cmds() {
   case "$1" in
-    compile)       echo "./gradlew $GRADLE_FLAGS :template-logic:compileKotlin" ;;
+    compile)       echo "./gradlew $GRADLE_FLAGS :probe-logic:compileKotlin" ;;
     probes)        echo "./gradlew $GRADLE_FLAGS :kgroundx-experiments:probes" ;;
     native-dist)   echo "./gradlew $GRADLE_FLAGS downloadKotlinNativeDistribution" ;;
     npm)           echo "./gradlew $GRADLE_FLAGS kotlinKotlinNpmCachesSetup jsPackageJson jsPublicPackageJson" ;;

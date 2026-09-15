@@ -7,10 +7,12 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
+import pl.mareklangiewicz.probelogic.*
 
 plugins {
-  id("my-convention")
+  id("pl.mareklangiewicz.templatefun")
+  id("my-probes") // probe-logic, this branch only -- see the probes task below
   plugAll(plugs.KotlinMulti, plugs.VannikPublishNoVer)
 }
 
@@ -29,8 +31,8 @@ defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 
 }
 
 // ===== context-parameter probes (experimental, this branch only) =============
-// See template-logic/migration-status.md. No scaffolding: THIS script is compiled
-// WITHOUT -Xcontext-parameters and template-logic WITH it, which is exactly the
+// See docs/design/lib-details-denesting.md. No scaffolding: THIS script is compiled
+// WITHOUT -Xcontext-parameters and probe-logic WITH it, which is exactly the
 // setup the claims are about.  ./gradlew :kgroundx-experiments:probes
 val probeDetails = gradle.extLibDetails
 
@@ -50,14 +52,14 @@ val probeSiblingsLambda: (LibInfo, LibFlags, Project, () -> String) -> String =
 
 // Which Kotlin compiled each side? Read the metadata stamp off real bytecode: an
 // anonymous object here is compiled by the SCRIPT compiler, LibMarker by whatever
-// builds template-logic. Gemini's flattened-reference example assumed these differ
+// builds probe-logic. Gemini's flattened-reference example assumed these differ
 // (2.1.20 vs 2.4.20); this asserts whether they actually do.
 val scriptMetadataVersion = object {}.javaClass
   .getAnnotation(Metadata::class.java)?.metadataVersion?.joinToString(".") ?: "unknown"
 
 tasks.register("probes") {
   group = "verification"
-  description = "Assert the context-parameter claims in template-logic/migration-status.md"
+  description = "Assert the context-parameter claims in probe-logic/src/**/ProbeFuns.kt"
   val projectName = project.name
   val libName = probeDetails.name
   val details = probeDetails
@@ -65,7 +67,7 @@ tasks.register("probes") {
   val embedded = embeddedKotlinVersion
   val kmpPluginVersion = getKotlinPluginVersion()
   // Read the module compile tasks' actual args rather than assuming: defaultCompiler()
-  // in template-logic adds the flag for module sources too, which is easy to miss.
+  // in templatefun adds the flag for module sources too, which is easy to miss.
   val moduleArgs = provider {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
       .flatMap { it.compilerOptions.freeCompilerArgs.get() }.distinct().sorted()
@@ -89,7 +91,7 @@ tasks.register("probes") {
     // below means Gradle compiles scripts at language version 2.2 -- with a 2.4.0
     // compiler. That is why they need -Xcontext-parameters and modules do not.
     log.lifecycle("  Kotlin per side (metadata stamp ~= language version):")
-    log.lifecycle("    lib      template-logic sources (WITH flag) : metadata ${probeLibMetadataVersion()}, stdlib ${probeLibStdlibVersion()}")
+    log.lifecycle("    lib      probe-logic sources (WITH flag)   : metadata ${probeLibMetadataVersion()}, stdlib ${probeLibStdlibVersion()}")
     log.lifecycle("    consumer build.gradle.kts    (flagless)     : metadata $scriptMetadataVersion")
     log.lifecycle("    ^ both compiled by Gradle's embedded Kotlin $embedded, but at language version ~2.2")
     // Careful: this reads TASK-level args. defaultCompiler() would add the flag, but it
@@ -110,7 +112,7 @@ tasks.register("probes") {
       moduleFlagged, false,
     )
     // Context params need EITHER languageVersion >= 2.4 OR the flag. Modules get the
-    // former, build scripts neither -- hence the flag in template-logic/build.gradle.kts.
+    // former, build scripts neither -- hence the flag in probe-logic/build.gradle.kts.
     check(
       "modules do not pin languageVersion below 2.4 (which would need the flag back)",
       langVersions.filter { it < "2.4" }, emptyList<String>(),
@@ -133,7 +135,7 @@ tasks.register("probes") {
     )
     // -Xexplicit-context-arguments is a SEPARATE LanguageFeature from ContextParameters,
     // so it needs its own opt-in. Control: without the flag this call site fails with
-    // "No parameter with name 'd' found." Both flags live in template-logic/build.gradle.kts.
+    // "No parameter with name 'd' found." Both flags live in probe-logic/build.gradle.kts.
     check(
       "a context argument can be passed by name (-Xexplicit-context-arguments)",
       probeExplicitContextArg(details), "ctx:$libName",
@@ -177,7 +179,7 @@ tasks.register("probes") {
 
     // ----- can a FLAGLESS build script drive the sibling model? probes 14-15 ---
     // This is the question that decides whether de-nesting can reach the PUBLIC entry
-    // points, or only template-logic's internals. Scripts have no context parameters
+    // points, or only templatefun's internals. Scripts have no context parameters
     // (Gradle pins script language version to 2.2), but probe 7 showed a flattened
     // reference gets past that. These ask whether it still works with THREE context
     // params + receiver + value param, and with a trailing lambda.

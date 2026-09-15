@@ -1,7 +1,8 @@
-package pl.mareklangiewicz.templatelogic
+package pl.mareklangiewicz.probelogic
 
 import org.gradle.api.Project
 import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.templatefun.AndroSdkCompileMinor
 
 // Experimental probe helpers for the context-parameter claims in migration-status.md.
 // Branch-only; nothing in the build templates calls these.
