@@ -683,12 +683,79 @@ and `toNested()` / `toTMP()` go with it.
 **Gate re-run after this increment:** probes **19/19**, `./gradlew assemble` green for all 11
 modules, all four templates assemble, `template-andro-app-debug.apk` produced (2026-09-15).
 
+### Every entry point takes siblings, with ONE scope opened at the top
+
+The increment above left each entry point opening NARROW scopes at individual call sites
+(`context(lib.details, lib.settings) { defaultPublishing() }`, three or four per function). That
+worked, and it is what made the old `context(details, details.settings)` openings dead — but dead
+is not the same as replaced, and Marek pushed back on deleting them rather than filling them with
+the sibling types. He is right, and the resulting shape is the one DepsKt will want.
+
+All nine entry points now take `lib: LibTMP = gradle.extLibTMP` and open
+`context(lib.details, lib.settings)` exactly once, with a bare body underneath:
+`defaultBuildTemplateForBasicJvmLib`/`App`, `...BasicMppLib`/`App`, `...ComposeMppLib`/`App`,
+`...FullMppLib`/`App`, `...AndroLib`/`App`, `...RawMppLib`. Each keeps a four-line `LibDetails`
+shim (un-nest once, delegate in), and finding 7 is enforced in code: the shims carry no default.
+
+`compose` and `andro` stay narrow on purpose — they are the nullable ones, so they are opened at
+their boundary inside the body, which is what makes the boundary visible.
+
+**Two things fell out that the design note should claim.**
+
+1. *Inner calls got SHORTER, not merely relocated.* With details and settings already in scope, a
+   helper needing one more sibling names only that one:
+
+   ```kotlin
+   context(lib.details, andro) { androDefault() }   // before
+   context(andro) { androDefault() }                // after
+   ```
+
+   The same happened to four `context(lib.settings, compose)` / `context(lib.settings, andro)`
+   pairs. This is the compositional half of the argument: scopes ACCUMULATE, so each level adds
+   only what it introduces. A nested model cannot do that — `details.settings` has to be spelled
+   out again at every level because it is reached through a field, not held open.
+
+2. *`withAndro` and `withCompose` disappeared from two more places.* In
+   `defaultBuildTemplateForFullMppLib` and the raw template, `if (details.settings.withAndro)`
+   appeared three times around code that then re-derived the andro settings. It is now one
+   `lib.andro?.let { andro -> .. }`: the guard and the value arrive together, and the body cannot
+   be entered without one. Add this to the `ignoreXxx` story — the booleans that died are not only
+   the parameters, but the `withXxx` READS at call sites.
+
+**Gate for this increment, run through `gate.sh`** (see below): probes 19/19, `assemble` green,
+all four templates assemble, `template-andro-app-debug.apk` freshly produced 12:41 on 2026-09-15.
+
+### Running the gate on a small machine — `gate.sh`
+
+Running probes + KGround `assemble` + four template assembles back to back pins several Gradle and
+Kotlin daemons at once and chokes a laptop with ~3Gi free. `./gate.sh` runs the same commands one
+at a time, smallest first, with a settle pause and a memory readout between them.
+
+It also stages what `assemble` depends on BEFORE calling it. The breakdown is from
+`./gradlew assemble -m` (dry run), not from guessing: 6x `compileKotlinLinuxX64`, 6x
+`compileTestKotlinLinuxX64` (yes, test compilation is in the `assemble` graph), 6x
+`compileKotlinJs` plus npm setup, 10x `compileKotlinJvm`, 6x metadata, and
+`downloadKotlinNativeDistribution`. The native steps run ONE MODULE PER INVOCATION.
+
+Measured effect of staging: with all of the above warm, `assemble` itself finished in **4 seconds**,
+and peak memory never dipped below ~3Gi available. Full order:
+
+```
+compile probes native-dist npm meta jvm js native native-test assemble \
+  template-basic template-full template-andro template-raw
+```
+
+The apk check only fires when `template-andro` was actually in the run's steps, and compares the
+file against a timestamp taken at startup — printing the path unconditionally reports an artifact
+from an earlier run, which is a success signal that cannot fail.
+
 ### Still open
 
 - `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
   const is still the source of the default, so the two are not yet collapsed.
 - The design note `~/code/kotlin/DepsKt/docs/design/lib-details-denesting.md` still has none of
-  findings 1-7. Updating it is the next step; the prototype no longer has one.
+  findings 1-7, nor the two above (scopes accumulate; the `withXxx` reads die too). Updating it is
+  the next step; the prototype no longer has one.
 - Unchanged and still true: `defaultAndroLib` and `LibraryExtension.defaultDefaultConfig` are
   migrated but UNEXERCISED (dead since AGP 9), and no tests were run on any template — `assemble`
   only, nothing installed or launched.
