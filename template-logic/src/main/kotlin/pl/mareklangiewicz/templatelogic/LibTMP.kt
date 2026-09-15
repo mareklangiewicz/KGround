@@ -187,40 +187,6 @@ fun LibReposSettings.toTMP() = LibReposSettingsTMP(
 val Gradle.extLibTMP: LibTMP get() = extLibDetails.toTMP()
 
 /**
- * Sibling-model entry point. Same one-liner ergonomics as the [LibDetails] overload — `lib`
- * defaults, the trailing lambda stays trailing — so scripts gain the flat `copy` WITHOUT needing
- * context parameters, the flattened-reference coercion, or any Gradle change:
- *
- * ```kotlin
- * // nested: two statements, root named twice, inner type named explicitly
- * val settings = gradle.extLibDetails.settings.copy(withJs = false, withLinuxX64 = false)
- * val details = gradle.extLibDetails.copy(settings = settings)
- * defaultBuildTemplateForBasicMppLib(details) { ... }
- *
- * // sibling: one statement
- * defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false) }) { ... }
- * ```
- *
- * This is the point where the two halves of the de-nesting separate. The copy-dance win (symptom 1
- * in the design note) is pure DATA SHAPE and reaches build scripts today. The presence-as-scope win
- * needs context parameters and stays behind this boundary, where [LibSettingsTMP] and friends are
- * handed to the workers individually.
- */
-fun Project.defaultBuildTemplateForBasicMppLib(
-  lib: LibTMP = gradle.extLibTMP,
-  ignoreCompose: Boolean = false,
-  ignoreAndroConfig: Boolean = false,
-  ignoreAndroPublish: Boolean = false,
-  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForBasicMppLib(
-  details = lib.toNested(),
-  ignoreCompose = ignoreCompose,
-  ignoreAndroConfig = ignoreAndroConfig,
-  ignoreAndroPublish = ignoreAndroPublish,
-  addCommonMainDependencies = addCommonMainDependencies,
-)
-
-/**
  * Adjust one sibling, leaving the rest alone, with the root named ONCE.
  *
  * `adjustSettings` is last so it stays the trailing lambda (the common case); adjust identity with
@@ -244,9 +210,15 @@ fun Project.libTMP(
 }
 
 /**
- * Re-nests the siblings so the still-nested internals ([LibDetails]-based `defaultPublishing`,
- * `defaultGroupAndVerAndDescription`, `addRepos`) keep working unchanged. TEMPORARY: it disappears
- * together with [toTMP] once those migrate, or once DepsKt de-nests for real.
+ * The distance meter, now reading ZERO. It re-nests the siblings, and it was introduced to keep the
+ * still-nested internals working while they were migrated one at a time. They are all migrated, so
+ * **no production path calls this any more** — the last caller was the entry-point overload that
+ * delegated to the [LibDetails] one, and that delegation now runs the other way round (see
+ * [defaultBuildTemplateForBasicMppLib]).
+ *
+ * It survives only as a measuring instrument: the probes compare the sibling model against the
+ * nested one, and they need something to compare against. When DepsKt de-nests for real, the nested
+ * model is gone and so is this function, together with [toTMP].
  */
 fun LibTMP.toNested(): LibDetails = LibDetails(
   name = details.name,

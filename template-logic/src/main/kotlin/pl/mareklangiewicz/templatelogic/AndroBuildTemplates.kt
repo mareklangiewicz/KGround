@@ -153,7 +153,7 @@ fun CommonExtension.defaultPackagingOptions() = packaging.apply {
 }
 
 /** Use template-andro/build.gradle.kts:fun defaultAndroLibPublishAllVariants() to create component with name "default". */
-context(_: LibDetails)
+context(_: LibDetailsTMP)
 fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   afterEvaluate {
     extensions.configure<PublishingExtension> {
@@ -165,7 +165,7 @@ fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   }
 }
 
-context(_: LibDetails)
+context(_: LibDetailsTMP)
 fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
   defaultPublishingOfAndroLib(componentName)
 
@@ -213,9 +213,11 @@ fun Project.defaultBuildTemplateForAndroLib(
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
-  defaultGroupAndVerAndDescription(details)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-  else println("Andro Lib Module ${name}: publishing (and signing) disabled")
+  context(lib.details, lib.settings) {
+    defaultGroupAndVerAndDescriptionTMP()
+    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+    else println("Andro Lib Module ${name}: publishing (and signing) disabled")
+  }
 }
 
 /**
@@ -314,8 +316,10 @@ fun Project.defaultBuildTemplateForAndroApp(
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
-  defaultGroupAndVerAndDescription(details)
-  variant?.let { defaultPublishingOfAndroApp(it) }
+  context(lib.details) {
+    defaultGroupAndVerAndDescriptionTMP()
+    variant?.let { defaultPublishingOfAndroApp(it) }
+  }
 }
 
 /** @param configureComposeAndro caller decided compose exists AND was not configured the MPP way. */

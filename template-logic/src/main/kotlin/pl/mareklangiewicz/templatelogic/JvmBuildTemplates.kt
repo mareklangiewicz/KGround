@@ -25,8 +25,9 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
 ): Unit = context(details, details.settings) {
   require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure compose stuff" }
   require(ignoreAndroTarget || details.settings.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
-  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
-  defaultGroupAndVerAndDescription(details)
+  val lib = details.toTMP()
+  repositories { context(lib.repos) { addRepos() } }
+  context(lib.details) { defaultGroupAndVerAndDescriptionTMP() }
   extensions.configure<KotlinJvmProjectExtension> {
     // The whole opt-out: hand over the jvm/testing flags and NOTHING else. There is no
     // ignoreCompose/ignoreAndroTarget to forward any more, because there is nothing to ignore —
@@ -38,8 +39,10 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun jvmDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-  else println("JVM Module ${name}: publishing (and signing) disabled")
+  context(lib.details, lib.settings) {
+    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+    else println("JVM Module ${name}: publishing (and signing) disabled")
+  }
 }
 
 /**

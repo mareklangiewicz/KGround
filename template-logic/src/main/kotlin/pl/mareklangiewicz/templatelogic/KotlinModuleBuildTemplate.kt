@@ -109,7 +109,7 @@ fun TaskCollection<Task>.defaultTestsOptions(
 }
 
 // Provide artifacts information required by Maven Central
-context(details: LibDetails)
+context(details: LibDetailsTMP)
 fun MavenPom.defaultPOM() {
   name put details.name
   description put details.description
@@ -131,15 +131,37 @@ fun MavenPom.defaultPOM() {
   scm { url put details.githubUrl }
 }
 
-context(details: LibDetails)
+/**
+ * MIGRATED to the sibling model. The nested version reached through ONE field
+ * (`details.settings.withCentralPublish`) for a single flag; as siblings that flag arrives as its
+ * own context parameter, so this function names exactly the two things it uses and nothing else.
+ *
+ * Note it is still `context(..)` and not `with(..)`: [LibDetailsTMP] has a `name` too, and
+ * `coordinates(artifactId = name)` must resolve to the PROJECT name. See [probeNameIsProjectName].
+ */
+context(details: LibDetailsTMP, settings: LibSettingsTMP)
 fun Project.defaultPublishing() = extensions.configure<MavenPublishBaseExtension> {
   propertiesTryOverride("signingInMemoryKey", "signingInMemoryKeyPassword", "mavenCentralPassword")
-  if (details.settings.withCentralPublish) publishToMavenCentral(automaticRelease = false)
+  if (settings.withCentralPublish) publishToMavenCentral(automaticRelease = false)
   signAllPublications()
   signAllPublicationsFixSignatoryIfFound()
   // Note: artifactId is not details.name but current project.name (module name)
   coordinates(groupId = details.group, artifactId = name, version = details.version.str)
   pom { defaultPOM() }
+}
+
+/**
+ * Sibling-model replacement for DepsKt's `defaultGroupAndVerAndDescription(lib: LibDetails)`.
+ *
+ * That one is published and takes the nested type, so the prototype cannot migrate it in place; it
+ * is restated here over [LibDetailsTMP]. It reads only identity fields, which is the point: it never
+ * needed `settings` at all, and as a sibling it cannot even see it.
+ */
+context(details: LibDetailsTMP)
+fun Project.defaultGroupAndVerAndDescriptionTMP() {
+  group = details.group
+  version = details.version.str
+  description = details.description
 }
 
 // endregion [[Kotlin Module Build Template]]

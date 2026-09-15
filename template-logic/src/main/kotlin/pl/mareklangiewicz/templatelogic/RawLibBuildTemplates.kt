@@ -28,8 +28,8 @@ fun Project.defaultBuildTemplateForRawMppLib(
   if (settings.compose?.withComposeTestUiJUnit5 == true)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
-  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
-  defaultGroupAndVerAndDescription(details)
+  repositories { context(lib.repos) { addRepos() } }
+  context(lib.details) { defaultGroupAndVerAndDescriptionTMP() }
 
   val compose = extensions.getByName("compose") as ComposeExtension
 
@@ -229,8 +229,10 @@ fun Project.defaultBuildTemplateForRawMppLib(
 
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-  else println("MPP Module ${name}: publishing (and signing) disabled")
+  context(lib.details, lib.settings) {
+    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+    else println("MPP Module ${name}: publishing (and signing) disabled")
+  }
 }
 
 /**

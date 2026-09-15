@@ -67,33 +67,61 @@ fun Project.defaultBuildTemplateForFullMppLib(
  * These ignoreXXX flags are hacky, but needed. see [allDefault] kdoc for details.
  */
 fun Project.defaultBuildTemplateForBasicMppLib(
-  details: LibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = context(details, details.settings) {
-  require(ignoreCompose || details.settings.compose == null) { "defaultBuildTemplateForBasicMppLib can not configure compose stuff" }
-  details.settings.andro?.let {
+) {
+  // These three still guard CONTENT, not presence, which is why they stay here and not lower down:
+  // this is the level that can see whether a compose/andro scope exists at all. See the kdoc below.
+  require(ignoreCompose || lib.compose == null) { "defaultBuildTemplateForBasicMppLib can not configure compose stuff" }
+  lib.andro?.let {
     require(ignoreAndroConfig) { "defaultBuildTemplateForBasicMppLib can not configure android stuff (besides just adding target)" }
     require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }
   }
-  repositories { context(details.settings.repos.toTMP()) { addRepos() } }
-  defaultGroupAndVerAndDescription(details)
+  repositories { context(lib.repos) { addRepos() } }
+  context(lib.details) { defaultGroupAndVerAndDescriptionTMP() }
   extensions.configure<KotlinMultiplatformExtension> {
     // Four booleans became zero: hand allDefault the platform/testing flags and nothing else.
     // Whether compose or andro get configured is decided HERE, by which scopes are opened, not
     // there by which booleans were forwarded.
-    context(details.settings.toTMP()) {
+    context(lib.settings) {
       allDefault(addCommonMainDependencies = addCommonMainDependencies)
     }
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
-  tasks.defaultTestsOptions(onJvmUseJUnitPlatform = details.settings.withTestJUnit5)
-  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-  else println("MPP Module ${name}: publishing (and signing) disabled")
+  tasks.defaultTestsOptions(onJvmUseJUnitPlatform = lib.settings.withTestJUnit5)
+  context(lib.details, lib.settings) {
+    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+    else println("MPP Module ${name}: publishing (and signing) disabled")
+  }
 }
+
+/**
+ * Nested-model compatibility shim, and the shape of what DepsKt's own migration will leave behind:
+ * a caller still holding a [LibDetails] un-nests it ONCE, at the top, and everything below is
+ * siblings. Nothing in KGround calls this any more — all 11 build scripts and all four templates go
+ * through the [LibTMP] entry point above.
+ *
+ * Finding 7 from the prototype lives here: two fully-defaulted overloads of the same name are
+ * ambiguous, so this one deliberately has NO default for [details]. The default belongs to the
+ * sibling form, because that is the one scripts call.
+ */
+fun Project.defaultBuildTemplateForBasicMppLib(
+  details: LibDetails,
+  ignoreCompose: Boolean = false,
+  ignoreAndroConfig: Boolean = false,
+  ignoreAndroPublish: Boolean = false,
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForBasicMppLib(
+  lib = details.toTMP(),
+  ignoreCompose = ignoreCompose,
+  ignoreAndroConfig = ignoreAndroConfig,
+  ignoreAndroPublish = ignoreAndroPublish,
+  addCommonMainDependencies = addCommonMainDependencies,
+)
 
 /**
  * Only for very standard small libs. In most cases it's better to not use this function.
@@ -250,20 +278,24 @@ fun Project.defaultBuildTemplateForComposeMppLib(
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = context(details, details.settings) { with(details.settings.compose ?: error("Compose settings not set.")) {
-  if (withComposeTestUiJUnit5)
+): Unit = context(details, details.settings) {
+  // The compose boundary, and the only check: from here down compose is a SCOPE, so nothing below
+  // re-tests its presence and nothing carries `settings.compose!!`.
+  val lib = details.toTMP()
+  val compose = lib.compose ?: error("Compose settings not set.")
+  if (compose.withComposeTestUiJUnit5)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
   defaultBuildTemplateForBasicMppLib(
-    details = details,
+    lib = lib,
     ignoreCompose = true,
     ignoreAndroConfig = ignoreAndroConfig,
     ignoreAndroPublish = ignoreAndroPublish,
     addCommonMainDependencies = addCommonMainDependencies,
   )
   extensions.configure<KotlinMultiplatformExtension> {
-    allDefaultSourceSetsForCompose()
+    context(lib.settings, compose) { allDefaultSourceSetsForCompose() }
   }
-} }
+}
 
 
 /**
@@ -271,60 +303,64 @@ fun Project.defaultBuildTemplateForComposeMppLib(
  * because it's also used for libs without compose plugin.
  * This one does the rest, so it has to be called additionally for compose libs, after .allDefault */
 @OptIn(ExperimentalComposeLibrary::class)
-context(settings: LibSettings)
+context(settings: LibSettingsTMP, compose: LibComposeSettingsTMP)
 fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
-) = with(settings.compose ?: error("Compose settings not set.")) {
-  val compose = project.extensions.getByName("compose") as ComposeExtension
+) = with(compose) {
+  // Finding #6 in miniature: a context parameter does not shadow a receiver, but it DOES occupy its
+  // own name. `compose` was already taken here by the Gradle ComposeExtension, so the extension is
+  // the one that had to be renamed -- exactly the collision the DepsKt migration will hit with
+  // `repos`. The settings win the bare name because `with` spells their flags out below.
+  val composeExt = project.extensions.getByName("compose") as ComposeExtension
   sourceSets {
     commonMain {
       dependencies {
-        implementation(compose.dependencies.runtime)
+        implementation(composeExt.dependencies.runtime)
         if (withComposeUi) {
-          implementation(compose.dependencies.ui)
+          implementation(composeExt.dependencies.ui)
         }
-        if (withComposeFoundation) implementation(compose.dependencies.foundation)
+        if (withComposeFoundation) implementation(composeExt.dependencies.foundation)
         if (withComposeFullAnimation) {
-          implementation(compose.dependencies.animation)
-          implementation(compose.dependencies.animationGraphics)
+          implementation(composeExt.dependencies.animation)
+          implementation(composeExt.dependencies.animationGraphics)
         }
-        if (withComposeMaterial2) implementation(compose.dependencies.material)
-        if (withComposeMaterial3) implementation(compose.dependencies.material3)
+        if (withComposeMaterial2) implementation(composeExt.dependencies.material)
+        if (withComposeMaterial3) implementation(composeExt.dependencies.material3)
       }
     }
     if (settings.withJvm) {
       jvmMain {
         dependencies {
           if (withComposeUi) {
-            implementation(compose.dependencies.uiTooling)
-            implementation(compose.dependencies.preview)
+            implementation(composeExt.dependencies.uiTooling)
+            implementation(composeExt.dependencies.preview)
           }
-          if (withComposeMaterialIconsExtended) implementation(compose.dependencies.materialIconsExtended)
+          if (withComposeMaterialIconsExtended) implementation(composeExt.dependencies.materialIconsExtended)
           if (withComposeDesktop) {
-            implementation(compose.dependencies.desktop.common)
-            implementation(compose.dependencies.desktop.currentOs)
+            implementation(composeExt.dependencies.desktop.common)
+            implementation(composeExt.dependencies.desktop.currentOs)
           }
           if (withComposeDesktopComponents) {
-            implementation(compose.dependencies.desktop.components.splitPane)
+            implementation(composeExt.dependencies.desktop.components.splitPane)
           }
         }
       }
       jvmTest {
         dependencies {
           @Suppress("DEPRECATION")
-          if (withComposeTestUiJUnit4) implementation(compose.dependencies.desktop.uiTestJUnit4)
+          if (withComposeTestUiJUnit4) implementation(composeExt.dependencies.desktop.uiTestJUnit4)
         }
       }
     }
     if (settings.withJs) {
       jsMain {
         dependencies {
-          if (withComposeHtmlCore) implementation(compose.dependencies.html.core)
-          if (withComposeHtmlSvg) implementation(compose.dependencies.html.svg)
+          if (withComposeHtmlCore) implementation(composeExt.dependencies.html.core)
+          if (withComposeHtmlSvg) implementation(composeExt.dependencies.html.svg)
         }
       }
       jsTest {
         dependencies {
-          if (withComposeTestHtmlUtils) implementation(compose.dependencies.html.testUtils)
+          if (withComposeTestHtmlUtils) implementation(composeExt.dependencies.html.testUtils)
         }
       }
     }
