@@ -637,14 +637,58 @@ proves them — only that they compile. The app path (`defaultAndroApp`, `Applic
 .defaultDefaultConfig`, both entry points, `androDefault`) IS exercised: `template-andro` assembles
 and produces `template-andro-app-debug.apk`.
 
+### Last internals migrated — `toNested()` reaches ZERO production callers
+
+The prototype is complete by its own measure. Migrated in this increment:
+
+- **`defaultPOM` / `defaultPublishing`** → `context(details: LibDetailsTMP, settings: LibSettingsTMP)`.
+  `defaultPublishing` reached through exactly one field (`details.settings.withCentralPublish`);
+  as siblings it names the two things it uses and cannot see anything else. Still `context(..)`
+  and not `with(..)`, for the reason probe 4/5 exist: `LibDetailsTMP` has a `name` too, and
+  `coordinates(artifactId = name)` must resolve to the PROJECT name.
+- **`defaultGroupAndVerAndDescription`** could NOT be migrated in place — it lives in *published*
+  DepsKt (`src/main/kotlin/defaults/Defaults.kt`) and takes the nested type. Restated locally as
+  `defaultGroupAndVerAndDescriptionTMP()` over `LibDetailsTMP`. Worth noting for the DepsKt branch:
+  it reads only identity fields, so it never needed `settings` at all, and as a sibling it cannot
+  even see it.
+- **`defaultPublishingOfAndroLib` / `...App`** → `context(_: LibDetailsTMP)`, following `defaultPOM`.
+- **`allDefaultSourceSetsForCompose`** → `context(settings: LibSettingsTMP, compose:
+  LibComposeSettingsTMP)`. Its `settings.compose ?: error("Compose settings not set.")` is gone;
+  the check now happens once, at the `defaultBuildTemplateForComposeMppLib` boundary, which is the
+  same presence-as-scope shape the andro family already had.
+
+**Finding 6 recurred, in the prototype's own code.** `allDefaultSourceSetsForCompose` already had a
+local `val compose = project.extensions.getByName("compose") as ComposeExtension`. A context
+parameter does not shadow a receiver, but it DOES occupy its own name, so one of the two had to
+move: the settings take the bare name (the body spells their flags out under `with`) and the Gradle
+extension became `composeExt`. This is exactly the `repos` / `reposSettings` collision predicted for
+DepsKt, hit a second time without looking for it — evidence the rename is systematic, not incidental.
+
+**The entry point flipped, and that is what zeroed the meter.** `defaultBuildTemplateForBasicMppLib`
+is now defined over `LibTMP` (with the default `gradle.extLibTMP`), and the `LibDetails` overload is
+a four-line shim that calls `details.toTMP()` and delegates *into* it. Before, the delegation ran the
+other way and `toNested()` was in the path of every single build. Nothing was lost: all 11 KGround
+build scripts and all four templates were already on the sibling overload, so the flip changed no
+call site.
+
+That shim is the shape of the DepsKt migration itself: un-nest ONCE at the top, siblings below.
+Finding 7 is enforced there in code — the shim deliberately has no default for `details`, because
+two fully-defaulted overloads of one name are ambiguous.
+
+**Where `toNested()` still appears.** Only in `kgroundx-experiments/build.gradle.kts`, in probes
+16-18, where the nested model is the *control* being compared against. That is the instrument, not
+a dependency: no production path reaches it. When DepsKt de-nests for real, the control disappears
+and `toNested()` / `toTMP()` go with it.
+
+**Gate re-run after this increment:** probes **19/19**, `./gradlew assemble` green for all 11
+modules, all four templates assemble, `template-andro-app-debug.apk` produced (2026-09-15).
+
 ### Still open
 
-- Migrated so far: `jvmOnlyDefault`, `allDefault`, `addRepos`. Still on the nested types:
-  `defaultPublishing` and `defaultGroupAndVerAndDescription` (both `context(details: LibDetails)`),
-  and `allDefaultSourceSetsForCompose` (needs a compose scope; its andro block still carries one of
-  the three remaining boundary checks). The andro family is DONE (above).
-- `LibTMP.toNested()` exists only to feed those still-nested internals. It is the honest measure of
-  how far the migration has to go: when nothing calls it, the prototype is complete and the DepsKt
-  change is fully specified.
 - `LibAndroSettingsTMP.sdkCompileMinor` is where `AndroSdkCompileMinorTMP` wants to live; the
   const is still the source of the default, so the two are not yet collapsed.
+- The design note `~/code/kotlin/DepsKt/docs/design/lib-details-denesting.md` still has none of
+  findings 1-7. Updating it is the next step; the prototype no longer has one.
+- Unchanged and still true: `defaultAndroLib` and `LibraryExtension.defaultDefaultConfig` are
+  migrated but UNEXERCISED (dead since AGP 9), and no tests were run on any template — `assemble`
+  only, nothing installed or launched.
