@@ -279,14 +279,6 @@ fun LibraryExtension.defaultAndroLibPublishAllVariants(
   }
 }
 
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForAndroLib(
-  details: LibDetails,
-  addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForAndroLib(
-  lib = details.toLib(),
-  addAndroMainDependencies = addAndroMainDependencies,
-)
 
 // endregion [[Andro Lib Build Template]]
 
@@ -324,14 +316,6 @@ fun Project.defaultBuildTemplateForAndroApp(
   defaultGroupAndVerAndDescription(lib)
   variant?.let { defaultPublishingOfAndroApp(it) }
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForAndroApp(
-  details: LibDetails,
-  addAndroDependencies: DependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForAndroApp(
-  lib = details.toLib(),
-  addAndroDependencies = addAndroDependencies,
-)
 
 
 /** @param configureComposeAndro caller decided compose exists AND was not configured the MPP way. */

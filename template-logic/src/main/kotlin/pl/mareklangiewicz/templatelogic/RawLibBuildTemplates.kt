@@ -231,12 +231,6 @@ fun Project.defaultBuildTemplateForRawMppLib(
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForRawMppLib(
-  details: LibDetails,
-): Unit = defaultBuildTemplateForRawMppLib(
-  lib = details.toLib(),
-)
 
 
 /**

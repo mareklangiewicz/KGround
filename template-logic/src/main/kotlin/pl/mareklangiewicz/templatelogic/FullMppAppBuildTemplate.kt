@@ -18,14 +18,6 @@ fun Project.defaultBuildTemplateForFullMppApp(
     addCommonMainDependencies = addCommonMainDependencies,
   )
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForFullMppApp(
-  details: LibDetails,
-  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForFullMppApp(
-  lib = details.toLib(),
-  addCommonMainDependencies = addCommonMainDependencies,
-)
 
 
 // endregion [[Full MPP App Build Template]]

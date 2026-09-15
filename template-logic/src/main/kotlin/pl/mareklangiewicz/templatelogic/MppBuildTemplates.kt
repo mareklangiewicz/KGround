@@ -55,14 +55,6 @@ fun Project.defaultBuildTemplateForFullMppLib(
     }
   }
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForFullMppLib(
-  details: LibDetails,
-  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForFullMppLib(
-  lib = details.toLib(),
-  addCommonMainDependencies = addCommonMainDependencies,
-)
 
 
 // endregion [[Full MPP Lib Build Template]]
@@ -103,29 +95,6 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
-/**
- * Nested-model compatibility shim, and the shape of what DepsKt's own migration will leave behind:
- * a caller still holding a [LibDetails] un-nests it ONCE, at the top, and everything below is
- * siblings. Nothing in KGround calls this any more — all 11 build scripts and all four templates go
- * through the [Lib] entry point above.
- *
- * Finding 7 from the prototype lives here: two fully-defaulted overloads of the same name are
- * ambiguous, so this one deliberately has NO default for [details]. The default belongs to the
- * sibling form, because that is the one scripts call.
- */
-fun Project.defaultBuildTemplateForBasicMppLib(
-  details: LibDetails,
-  ignoreCompose: Boolean = false,
-  ignoreAndroConfig: Boolean = false,
-  ignoreAndroPublish: Boolean = false,
-  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForBasicMppLib(
-  lib = details.toLib(),
-  ignoreCompose = ignoreCompose,
-  ignoreAndroConfig = ignoreAndroConfig,
-  ignoreAndroPublish = ignoreAndroPublish,
-  addCommonMainDependencies = addCommonMainDependencies,
-)
 
 /**
  * Only for very standard small libs. In most cases it's better to not use this function.
@@ -299,19 +268,6 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     context(compose) { allDefaultSourceSetsForCompose() }
   }
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForComposeMppLib(
-  details: LibDetails,
-  ignoreAndroConfig: Boolean = false,
-  ignoreAndroPublish: Boolean = false,
-  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = defaultBuildTemplateForComposeMppLib(
-  lib = details.toLib(),
-  ignoreAndroConfig = ignoreAndroConfig,
-  ignoreAndroPublish = ignoreAndroPublish,
-  addCommonMainDependencies = addCommonMainDependencies,
-)
-
 
 
 /**

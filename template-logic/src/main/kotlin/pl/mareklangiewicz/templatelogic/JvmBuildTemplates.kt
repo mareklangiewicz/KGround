@@ -39,18 +39,6 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("JVM Module ${name}: publishing (and signing) disabled")
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForBasicJvmLib(
-  details: LibDetails,
-  ignoreCompose: Boolean = false,
-  ignoreAndroTarget: Boolean = false,
-  addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
-): Unit = defaultBuildTemplateForBasicJvmLib(
-  lib = details.toLib(),
-  ignoreCompose = ignoreCompose,
-  ignoreAndroTarget = ignoreAndroTarget,
-  addJvmDependencies = addJvmDependencies,
-)
 
 
 /**
@@ -113,18 +101,6 @@ fun Project.defaultBuildTemplateForBasicJvmApp(
     mainClass.set(lib.info.run { "$appMainPackage.$appMainClass" })
   }
 }
-/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
-fun Project.defaultBuildTemplateForBasicJvmApp(
-  details: LibDetails,
-  ignoreCompose: Boolean = false,
-  ignoreAndroTarget: Boolean = false,
-  addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
-): Unit = defaultBuildTemplateForBasicJvmApp(
-  lib = details.toLib(),
-  ignoreCompose = ignoreCompose,
-  ignoreAndroTarget = ignoreAndroTarget,
-  addJvmDependencies = addJvmDependencies,
-)
 
 
 // endregion [[JVM App Build Template]]
