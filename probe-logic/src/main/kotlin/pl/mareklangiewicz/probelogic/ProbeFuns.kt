@@ -2,7 +2,6 @@ package pl.mareklangiewicz.probelogic
 
 import org.gradle.api.Project
 import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.templatefun.AndroSdkCompileMinor
 
 // Experimental probe helpers for the context-parameter claims in migration-status.md.
 // Branch-only; nothing in the build templates calls these.
@@ -68,12 +67,15 @@ fun probeExplicitContextArg(details: LibDetails): String = probeContextFun(d = d
  * In the nested model the same mistake costs a runtime `settings.andro!!` NPE, or an
  * `ignoreAndroTarget` boolean guarding a runtime `require`.
  *
- * Note the minor level still comes from [AndroSdkCompileMinor], not from the andro scope: DepsKt
- * deliberately left `sdkCompileMinor` out of [LibAndro], because carrying a field the nested model
- * lacks would make `Lib.toNested()` lossy and weaken its own equivalence tests.
+ * Since 0.4.29 the minor level comes from the andro scope too. It used to come from templatefun's
+ * `AndroSdkCompileMinor` const, because DepsKt deliberately left `sdkCompileMinor` out of
+ * [LibAndro] while a field the nested model lacked would have made `Lib.toNested()` lossy; that
+ * field now exists on both models. Reading it here keeps the probe honest for the same reason the
+ * const did: the templates read `andro.sdkCompileMinor`, so this names the very thing they use,
+ * and a probe that inlined the number would keep passing after the templates moved on.
  */
 context(andro: LibAndro)
-fun probeSdkFull(): String = "${andro.sdkCompile}.$AndroSdkCompileMinor"
+fun probeSdkFull(): String = "${andro.sdkCompile}.${andro.sdkCompileMinor}"
 
 /** Opening the scope is the only way in — and having opened it, no `!!` appears anywhere below. */
 fun probeAndroScope(lib: Lib): String =

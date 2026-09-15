@@ -213,7 +213,9 @@ tasks.register("probes") {
     check(
       "an andro scope is entered without any !! (and is absent when there is no andro)",
       probeAndroScope(details.toLib()), details.settings.andro
-        ?.let { "${it.sdkCompile}.$AndroSdkCompileMinor" } ?: "no-andro-scope",
+        // Expectation derived from the NESTED model while probeAndroScope reads the SIBLING one,
+        // so this now also witnesses that 0.4.29 put sdkCompileMinor on both, in agreement.
+        ?.let { "${it.sdkCompile}.${it.sdkCompileMinor}" } ?: "no-andro-scope",
     )
     // Found while transcribing LibAndroSettings for the prototype, NOT a prototype feature.
     // Fixed in DepsKt 0.4.26, so this flipped from witnessing the bug to guarding against it:

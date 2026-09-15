@@ -23,11 +23,12 @@ repositories {
 }
 
 dependencies {
-  implementation("pl.mareklangiewicz.deps:DepsKt:0.4.28")
-  // Only for AndroSdkCompileMinor, which probeSdkFull asserts against. Naming the same const the
-  // templates use is the point: a probe that inlined the number would keep passing after the
-  // templates moved on. The composite substitutes both of these to the local DepsKt build.
-  implementation("pl.mareklangiewicz.deps:templatefun:0.4.28")
+  implementation("pl.mareklangiewicz.deps:DepsKt:0.4.29")
+  // No longer needed for a symbol: AndroSdkCompileMinor collapsed into LibAndro in 0.4.29, so
+  // probeSdkFull reads it off the andro scope from :deps instead. Kept deliberately, because
+  // gate.sh's compile step is :probe-logic:compileKotlin and this is what makes that step exercise
+  // the composite substitution for templatefun -- drop it and the gate stops checking the binding.
+  implementation("pl.mareklangiewicz.deps:templatefun:0.4.29")
 }
 
 // The point of the module. Note the probes themselves report that module sources no longer NEED
