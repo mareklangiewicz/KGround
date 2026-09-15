@@ -23,11 +23,11 @@ repositories {
 }
 
 dependencies {
-  implementation("pl.mareklangiewicz.deps:DepsKt:0.4.27")
+  implementation("pl.mareklangiewicz.deps:DepsKt:0.4.28")
   // Only for AndroSdkCompileMinor, which probeSdkFull asserts against. Naming the same const the
   // templates use is the point: a probe that inlined the number would keep passing after the
   // templates moved on. The composite substitutes both of these to the local DepsKt build.
-  implementation("pl.mareklangiewicz.deps:templatefun:0.4.27")
+  implementation("pl.mareklangiewicz.deps:templatefun:0.4.28")
 }
 
 // The point of the module. Note the probes themselves report that module sources no longer NEED
