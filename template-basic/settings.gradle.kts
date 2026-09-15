@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.extLibDetails
+import pl.mareklangiewicz.utils.extLib
 
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
@@ -37,7 +37,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.26" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -54,18 +54,20 @@ develocity {
 val enableJs = true
 val enableLinux = true
 
-gradle.extLibDetails = myLibDetails(
-  name = "TemplateBasic",
-  description = "Template for basic multi platform projects. No android or compose here.",
-  githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
-  version = Ver(0, 0, 1),
-  settings = LibSettings(
+gradle.extLib = lib(
+  info = myLibInfo(
+    name = "TemplateBasic",
+    description = "Template for basic multi platform projects. No android or compose here.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
+    version = Ver(0, 0, 1),
+  ),
+  flags = LibFlags(
     withJs = enableJs,
     withLinuxX64 = enableLinux,
     withKotlinxHtml = true, // also used in common code
-    compose = null,
-    andro = null,
   ),
+  withCompose = false, // was: compose = null
+  // andro is absent by default - was: andro = null
 )
 
 rootProject.name = "template-basic"

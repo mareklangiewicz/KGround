@@ -31,9 +31,10 @@ plugins {
 // Compose directly (MainActivity and its own theme/ package), which is the point of an
 // android-only template. Keeping the compose settings is what makes defaultAndroDeps add
 // the androidx compose artifacts.
-val details = gradle.extLibDetails.copy(namespace = "pl.mareklangiewicz.templateandro.androapp")
+// One flat copy of the ONE sibling that changes, with the root named once.
+val lib = myLib(adjustInfo = { it.copy(namespace = "pl.mareklangiewicz.templateandro.androapp") })
 
-defaultBuildTemplateForAndroApp(details) {
+defaultBuildTemplateForAndroApp(lib) {
   implementation(project(":template-andro-lib"))
 }
 

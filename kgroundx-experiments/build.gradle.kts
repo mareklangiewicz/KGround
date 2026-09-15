@@ -19,7 +19,7 @@ plugins {
 // Sibling model: one flat copy, root named once. The nested form this replaces was
 //   val settings = gradle.extLibDetails.settings.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true)
 //   val details = gradle.extLibDetails.copy(settings = settings)
-defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }) {
+defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }) {
   api(project(":kgroundx-io"))
   api(project(":kgroundx-maintenance"))
   implementation(Org.Hildan.Chrome.devtools_kotlin)
@@ -43,10 +43,10 @@ val probeCtx: (LibDetails) -> String = ::probeContextFun
 // Does the same coercion survive the shape a de-nested ENTRY POINT needs: three sibling
 // context params + the Project receiver + a value param? And with a trailing lambda?
 // Order is context params, then extension receiver, then value params.
-val probeSiblings: (LibDetailsTMP, LibSettingsTMP, LibReposSettingsTMP, Project, String) -> String =
-  Project::probeSiblingEntryPointTMP
-val probeSiblingsLambda: (LibDetailsTMP, LibSettingsTMP, Project, () -> String) -> String =
-  Project::probeSiblingWithLambdaTMP
+val probeSiblings: (LibInfo, LibFlags, LibRepos, Project, String) -> String =
+  Project::probeSiblingEntryPoint
+val probeSiblingsLambda: (LibInfo, LibFlags, Project, () -> String) -> String =
+  Project::probeSiblingWithLambda
 
 // Which Kotlin compiled each side? Read the metadata stamp off real bytecode: an
 // anonymous object here is compiled by the SCRIPT compiler, LibMarker by whatever
@@ -147,7 +147,7 @@ tasks.register("probes") {
     val nestedDance = gradle.extLibDetails.let {
       it.copy(settings = it.settings.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true))
     }
-    val siblingForm = libTMP { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }.toNested()
+    val siblingForm = myLib { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }.toNested()
     check(
       "converting this script to the sibling form rebuilds an identical LibDetails",
       siblingForm, nestedDance,
@@ -155,7 +155,7 @@ tasks.register("probes") {
     // Guard: the fixture must be able to FAIL, or the check above proves nothing.
     check(
       "that comparison can tell two different configs apart",
-      libTMP { it.copy(withJs = true) }.toNested() == nestedDance, false,
+      myLib { it.copy(withJs = true) }.toNested() == nestedDance, false,
     )
 
     // ----- the details-adjusting form too (kommand-line/-samples), probe 18 ----
@@ -163,8 +163,8 @@ tasks.register("probes") {
     // under details.name. copy() does NOT recompute namespace/appId (constructor defaults
     // run at construction only), so both forms must carry the ORIGINAL namespace forward.
     val nestedRenamed = gradle.extLibDetails.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.")
-    val siblingRenamed = libTMP(
-      adjustDetails = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") },
+    val siblingRenamed = myLib(
+      adjustInfo = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") },
     ).toNested()
     check(
       "the details-adjusting form rebuilds an identical LibDetails (artifactId + namespace)",
@@ -181,43 +181,44 @@ tasks.register("probes") {
     // (Gradle pins script language version to 2.2), but probe 7 showed a flattened
     // reference gets past that. These ask whether it still works with THREE context
     // params + receiver + value param, and with a trailing lambda.
-    val libTmp = details.toTMP()
+    val libSib = details.toLib()
     check(
       "a flagless script drives a 3-sibling context fun via the flattened coercion",
-      probeSiblings(libTmp.details, libTmp.settings, libTmp.repos, project, "!"),
+      probeSiblings(libSib.info, libSib.flags, libSib.repos, project, "!"),
       "$libName/${details.settings.withJvm}/${details.settings.repos.withMavenCentral}/$projectName!",
     )
     check(
       "the coercion still works when the entry point takes a trailing lambda",
-      probeSiblingsLambda(libTmp.details, libTmp.settings, project) { "deps" },
+      probeSiblingsLambda(libSib.info, libSib.flags, project) { "deps" },
       "$libName/${details.settings.withJvm}/$projectName/deps",
     )
 
-    // ----- de-nesting prototype (LibTMP), probes 9-13 -------------------------
+    // ----- de-nesting prototype (Lib), probes 9-13 -------------------------
     // The headline claim -- presence becomes a compile-time scope check -- is NOT here:
-    // it is a compile error, so it was proven by construction instead. See probeSdkFullTMP.
+    // it is a compile error, so it was proven by construction instead. See probeSdkFull.
     check(
       "un-nesting the real extLibDetails loses no field (adapter is total)",
-      probeAdapterFidelityTMP(details), 0,
+      probeAdapterFidelity(details), 0,
     )
     check(
       "changing two flags: same result, one copy instead of two, root named once not twice",
-      probeCopyDanceTMP(details), "false/false/${details.settings.withJvm}|false/false/${details.settings.withJvm}|2|1",
+      probeCopyDance(details), "false/false/${details.settings.withJvm}|false/false/${details.settings.withJvm}|2|1",
     )
     check(
       "cross-object compose defaults survive the move into a named function",
-      probeDerivedDefaultsTMP(), "8/8",
+      probeDerivedDefaults(), "8/8",
     )
     check(
       "an andro scope is entered without any !! (and is absent when there is no andro)",
-      probeAndroScopeTMP(details.toTMP()), details.settings.andro
-        ?.let { "${it.sdkCompile}.$AndroSdkCompileMinorTMP" } ?: "no-andro-scope",
+      probeAndroScope(details.toLib()), details.settings.andro
+        ?.let { "${it.sdkCompile}.$AndroSdkCompileMinor" } ?: "no-andro-scope",
     )
-    // Found while transcribing LibAndroSettings for the prototype, NOT a prototype feature:
-    // published DepsKt 0.4.25 has publishOneVariant = !publishNoVariants && !publishNoVariants.
+    // Found while transcribing LibAndroSettings for the prototype, NOT a prototype feature.
+    // Fixed in DepsKt 0.4.26, so this flipped from witnessing the bug to guarding against it:
+    // both models must now agree, and both must be right.
     check(
-      "DepsKt publishOneVariant is buggy for \"*\" (true), sibling copy fixes it (false)",
-      probePublishVariantBugTMP(), "true|false",
+      "publishOneVariant over \"\"/\"*\"/\"debug\" agrees in both models and is correct",
+      probePublishVariantAgreement(), "false/false/true|false/false/true",
     )
 
     log.lifecycle("\n  $passed passed, ${failed.size} failed")

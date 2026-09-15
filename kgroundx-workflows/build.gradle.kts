@@ -16,7 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicMppLib(libTMP { it.copy(withJs = false, withLinuxX64 = false) }) {
+defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false) }) {
   api(project(":kgroundx-maintenance"))
 }
 

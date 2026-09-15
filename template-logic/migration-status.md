@@ -759,3 +759,73 @@ from an earlier run, which is a success signal that cannot fail.
 - Unchanged and still true: `defaultAndroLib` and `LibraryExtension.defaultDefaultConfig` are
   migrated but UNEXERCISED (dead since AGP 9), and no tests were run on any template — `assemble`
   only, nothing installed or launched.
+
+---
+
+## The port to the real DepsKt model (2026-09-15)
+
+The prototype is gone. DepsKt 0.4.26 ships the sibling model for real — `Lib`, `LibInfo`,
+`LibFlags`, `LibCompose`, `LibAndro`, `LibRepos`, the `lib(..)` factory, `defaultLibCompose` /
+`defaultLibRepos`, the `extLib` ext storage and both adapters — so everything this branch was
+standing in for has been deleted here and replaced by imports.
+
+### What changed
+
+- `LibDetailsTMP.kt` (123 lines) and `LibTMP.kt` (305 lines) **deleted**. What remains is
+  `LibHelpers.kt` (~43 lines): only `Project.myLib(adjustInfo, adjustFlags)`, which is genuinely
+  KGround-side. The five types, the bundle, the factory, both derivations and both adapters now
+  come from DepsKt.
+- Pins bumped in two places: `settings.gradle.kts` (settings plugin `0.4.26`) and
+  `template-logic/build.gradle.kts` (`pl.mareklangiewicz.deps:DepsKt:0.4.26`).
+- `settings.gradle.kts` now builds the sibling form directly — `gradle.extLib = lib(info =
+  myLibInfo(..), flags = LibFlags(..), withCompose = false)` — so `compose = null` became
+  `withCompose = false`: presence, stated as presence.
+- The local `defaultGroupAndVerAndDescriptionTMP` restatement is **deleted**. It existed only
+  because DepsKt's version took the nested type; 0.4.26 ships a sibling one, so the call sites use
+  it directly. One less duplicate.
+- The `…TMP` suffix is gone everywhere, including the probe names — the model is real now, so the
+  suffix would have been a lie.
+
+### The rename was safe because every old spelling was an error
+
+`LibDetailsTMP` → `LibInfo`, `LibSettingsTMP` → `LibFlags`, and so on: no old name survives as
+anything valid, so a missed site is a compile error rather than silently-wrong behaviour. Two
+rounds of compile-fix caught everything, and both rounds landed in the one file that deliberately
+mixes the two models (`ProbeFuns.kt`) plus the probe build script.
+
+Three fixes were NOT mechanical and are worth recording:
+
+1. `probeSdkFull` used `andro.sdkCompileMinor`. **DepsKt's `LibAndro` has no such field**, on
+   purpose — carrying a field the nested model lacks would make `Lib.toNested()` lossy and weaken
+   DepsKt's own equivalence tests. So `AndroSdkCompileMinor` (the KGround const) is still the source
+   of the minor level, and the "still open" item below stays open.
+2. DepsKt's derivations take a plain parameter, not a context parameter, because DepsKt compiles
+   without `-Xcontext-parameters`. `context(nested.toTMP()) { defaultComposeSettingsTMP() }` became
+   `defaultLibCompose(nested.toFlags())`.
+3. The per-type adapters have their own names in DepsKt (`toFlags()`, `toSibling()`), not one
+   overloaded `toTMP()`.
+
+### A probe changed meaning, and failed for the right reason first
+
+`probePublishVariantBug` asserted `"true|false"` — DepsKt's `publishOneVariant` broken, the sibling
+copy fixed. **DepsKt 0.4.26 fixed the bug**, so the broken control no longer exists and the probe
+failed on the first run after the bump. That is the failure you want: the assertion had encoded a
+bug as expected behaviour.
+
+It is now `probePublishVariantAgreement`, a regression guard — `publishOneVariant` over
+`""` / `"*"` / `"debug"` must read `false/false/true` in BOTH models.
+
+### Gate
+
+Probes **19/19** against the real model. The heavier steps were run with `PAUSE=45`.
+
+### Still open (carried forward)
+
+- `LibAndro.sdkCompileMinor` — still not collapsed; `AndroSdkCompileMinor` remains the const, and
+  DepsKt deferred the field deliberately (see above). This is now a DepsKt-side additive step.
+- Unchanged and still true: `defaultAndroLib` and `LibraryExtension.defaultDefaultConfig` are
+  migrated but UNEXERCISED (dead since AGP 9), and no tests were run on any template — `assemble`
+  only, nothing installed or launched.
+- DepsKt step 4 (drop the nested types and both adapters) is blocked until the probes stop needing
+  the nested model as a control — `probeCopyDance`, `probeAdapterFidelity` and
+  `probePublishVariantAgreement` all compare against it by design.

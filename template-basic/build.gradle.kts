@@ -20,4 +20,4 @@ plugins {
 
 // endregion [[Basic Root Build Imports and Plugs]]
 
-defaultGroupAndVerAndDescription(gradle.extLibDetails)
+defaultGroupAndVerAndDescription(gradle.extLib)

@@ -49,7 +49,7 @@ fun Project.setMyWeirdSubstitutions(
  * `repos` would take that name and break those calls. Worth remembering alongside probe 1 — a
  * context parameter does not shadow an extension RECEIVER, but it does occupy its own name.
  */
-context(reposSettings: LibReposSettingsTMP)
+context(reposSettings: LibRepos)
 fun RepositoryHandler.addRepos() = with(reposSettings) {
   @Suppress("DEPRECATION")
   if (withMavenLocal) mavenLocal()
@@ -109,26 +109,26 @@ fun TaskCollection<Task>.defaultTestsOptions(
 }
 
 // Provide artifacts information required by Maven Central
-context(details: LibDetailsTMP)
+context(info: LibInfo)
 fun MavenPom.defaultPOM() {
-  name put details.name
-  description put details.description
-  url put details.githubUrl
+  name put info.name
+  description put info.description
+  url put info.githubUrl
 
   licenses {
     license {
-      name put details.licenceName
-      url put details.licenceUrl
+      name put info.licenceName
+      url put info.licenceUrl
     }
   }
   developers {
     developer {
-      id put details.authorId
-      name put details.authorName
-      email put details.authorEmail
+      id put info.authorId
+      name put info.authorName
+      email put info.authorEmail
     }
   }
-  scm { url put details.githubUrl }
+  scm { url put info.githubUrl }
 }
 
 /**
@@ -136,32 +136,18 @@ fun MavenPom.defaultPOM() {
  * (`details.settings.withCentralPublish`) for a single flag; as siblings that flag arrives as its
  * own context parameter, so this function names exactly the two things it uses and nothing else.
  *
- * Note it is still `context(..)` and not `with(..)`: [LibDetailsTMP] has a `name` too, and
+ * Note it is still `context(..)` and not `with(..)`: [LibInfo] has a `name` too, and
  * `coordinates(artifactId = name)` must resolve to the PROJECT name. See [probeNameIsProjectName].
  */
-context(details: LibDetailsTMP, settings: LibSettingsTMP)
+context(info: LibInfo, flags: LibFlags)
 fun Project.defaultPublishing() = extensions.configure<MavenPublishBaseExtension> {
   propertiesTryOverride("signingInMemoryKey", "signingInMemoryKeyPassword", "mavenCentralPassword")
-  if (settings.withCentralPublish) publishToMavenCentral(automaticRelease = false)
+  if (flags.withCentralPublish) publishToMavenCentral(automaticRelease = false)
   signAllPublications()
   signAllPublicationsFixSignatoryIfFound()
   // Note: artifactId is not details.name but current project.name (module name)
-  coordinates(groupId = details.group, artifactId = name, version = details.version.str)
+  coordinates(groupId = info.group, artifactId = name, version = info.version.str)
   pom { defaultPOM() }
-}
-
-/**
- * Sibling-model replacement for DepsKt's `defaultGroupAndVerAndDescription(lib: LibDetails)`.
- *
- * That one is published and takes the nested type, so the prototype cannot migrate it in place; it
- * is restated here over [LibDetailsTMP]. It reads only identity fields, which is the point: it never
- * needed `settings` at all, and as a sibling it cannot even see it.
- */
-context(details: LibDetailsTMP)
-fun Project.defaultGroupAndVerAndDescriptionTMP() {
-  group = details.group
-  version = details.version.str
-  description = details.description
 }
 
 // endregion [[Kotlin Module Build Template]]

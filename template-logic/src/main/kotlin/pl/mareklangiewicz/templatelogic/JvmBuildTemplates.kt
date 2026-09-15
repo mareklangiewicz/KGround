@@ -18,24 +18,24 @@ import pl.mareklangiewicz.defaults.*
  * These ignoreXXX flags are hacky, but needed. see [jvmOnlyDefault] kdoc for details.
  */
 fun Project.defaultBuildTemplateForBasicJvmLib(
-  lib: LibTMP = gradle.extLibTMP,
+  lib: Lib = gradle.extLib,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
-): Unit = context(lib.details, lib.settings) {
+): Unit = context(lib.info, lib.flags) {
   require(ignoreCompose || lib.compose == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure compose stuff" }
   require(ignoreAndroTarget || lib.andro == null) { "defaultBuildTemplateForBasicJvmLib can NOT configure android target" }
   repositories { context(lib.repos) { addRepos() } }
-  defaultGroupAndVerAndDescriptionTMP()
+  defaultGroupAndVerAndDescription(lib)
   extensions.configure<KotlinJvmProjectExtension> {
     // The whole opt-out: the jvm/testing flags are in scope and NOTHING else is. There is no
     // ignoreCompose/ignoreAndroTarget to forward any more, because there is nothing to ignore —
-    // `compose` and `andro` are not reachable from [LibSettingsTMP] at all.
+    // `compose` and `andro` are not reachable from [LibFlags] at all.
     jvmOnlyDefault(addJvmDependencies = addJvmDependencies)
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun jvmDefault using jvmToolchain
-  tasks.defaultTestsOptions(onJvmUseJUnitPlatform = lib.settings.withTestJUnit5)
+  tasks.defaultTestsOptions(onJvmUseJUnitPlatform = lib.flags.withTestJUnit5)
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("JVM Module ${name}: publishing (and signing) disabled")
 }
@@ -46,7 +46,7 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
   ignoreAndroTarget: Boolean = false,
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
 ): Unit = defaultBuildTemplateForBasicJvmLib(
-  lib = details.toTMP(),
+  lib = details.toLib(),
   ignoreCompose = ignoreCompose,
   ignoreAndroTarget = ignoreAndroTarget,
   addJvmDependencies = addJvmDependencies,
@@ -56,7 +56,7 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
 /**
  * Only for very standard small jvm libs. In most cases it's better to not use this function.
  *
- * MIGRATED to the sibling model ([LibSettingsTMP]) — the first entry point to move. Both
+ * MIGRATED to the sibling model ([LibFlags]) — the first entry point to move. Both
  * `ignoreCompose` and `ignoreAndroTarget`, and both `require`s they guarded, are GONE:
  *
  * ```
@@ -68,14 +68,14 @@ fun Project.defaultBuildTemplateForBasicJvmLib(
  * build files, where plugins for compose and/or android are not applied at all". That need came
  * entirely from NESTING: a caller holding `LibSettings` could not hand over the jvm flags without
  * also handing over `compose` and `andro`, so the only way to say "those do not apply here" was a
- * boolean plus a runtime check. As a sibling, [LibSettingsTMP] carries no `compose` and no `andro`
+ * boolean plus a runtime check. As a sibling, [LibFlags] carries no `compose` and no `andro`
  * at all — this function cannot configure them because it cannot NAME them, and the caller opts out
  * by simply not opening those scopes. A runtime `require` became the absence of a parameter.
  */
-context(settings: LibSettingsTMP)
+context(flags: LibFlags)
 fun KotlinJvmProjectExtension.jvmOnlyDefault(
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
-) = with(settings) {
+) = with(flags) {
   withJvmVer?.let { jvmToolchain(it.toInt()) } // works for jvm and android
   project.dependencies.apply {
     val scope = DependencyHandlerScope.of(this)
@@ -103,14 +103,14 @@ fun KotlinJvmProjectExtension.jvmOnlyDefault(
 // region [[JVM App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicJvmApp(
-  lib: LibTMP = gradle.extLibTMP,
+  lib: Lib = gradle.extLib,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroTarget: Boolean = false, // so user have to explicitly say THAT he wants to ignore android target.
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
-): Unit = context(lib.details, lib.settings) {
+): Unit = context(lib.info, lib.flags) {
   defaultBuildTemplateForBasicJvmLib(lib, ignoreCompose, ignoreAndroTarget, addJvmDependencies)
   extensions.configure<JavaApplication> {
-    mainClass.set(lib.details.run { "$appMainPackage.$appMainClass" })
+    mainClass.set(lib.info.run { "$appMainPackage.$appMainClass" })
   }
 }
 /** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
@@ -120,7 +120,7 @@ fun Project.defaultBuildTemplateForBasicJvmApp(
   ignoreAndroTarget: Boolean = false,
   addJvmDependencies: DependencyHandlerScope.() -> Unit = {},
 ): Unit = defaultBuildTemplateForBasicJvmApp(
-  lib = details.toTMP(),
+  lib = details.toLib(),
   ignoreCompose = ignoreCompose,
   ignoreAndroTarget = ignoreAndroTarget,
   addJvmDependencies = addJvmDependencies,

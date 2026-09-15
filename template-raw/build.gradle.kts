@@ -22,6 +22,6 @@ plugins {
   plug(plugs.VannikPublish) apply false
 }
 
-defaultGroupAndVerAndDescription(gradle.extLibDetails)
+defaultGroupAndVerAndDescription(gradle.extLib)
 
 // endregion [[KMP Root Build Template]]

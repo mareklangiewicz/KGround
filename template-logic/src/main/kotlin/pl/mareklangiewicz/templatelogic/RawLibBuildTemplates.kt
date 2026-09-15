@@ -17,9 +17,9 @@ import pl.mareklangiewicz.defaults.*
 
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForRawMppLib(
-  lib: LibTMP = gradle.extLibTMP,
-): Unit = context(lib.details, lib.settings) {
-  val settings = lib.settings
+  lib: Lib = gradle.extLib,
+): Unit = context(lib.info, lib.flags) {
+  val flags = lib.flags
 
   if (lib.andro != null) {
     apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
@@ -28,16 +28,16 @@ fun Project.defaultBuildTemplateForRawMppLib(
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
   repositories { context(lib.repos) { addRepos() } }
-  defaultGroupAndVerAndDescriptionTMP()
+  defaultGroupAndVerAndDescription(lib)
 
   val compose = extensions.getByName("compose") as ComposeExtension
 
   extensions.configure<KotlinMultiplatformExtension> {
-    defaultCompiler(jvmVer = settings.withJvmVer?.toInt())
+    defaultCompiler(jvmVer = flags.withJvmVer?.toInt())
 
-    if (settings.withJvm) jvm()
-    if (settings.withLinuxX64) linuxX64()
-    if (settings.withJs) jsDefault()
+    if (flags.withJvm) jvm()
+    if (flags.withLinuxX64) linuxX64()
+    if (flags.withJs) jsDefault()
     lib.andro?.let { context(it) { androDefault() } }
 
     applyDefaultHierarchyTemplate()
@@ -45,13 +45,13 @@ fun Project.defaultBuildTemplateForRawMppLib(
     sourceSets {
       commonMain {
         dependencies {
-          if (settings.withKotlinxHtml) implementation(KotlinX.html)
+          if (flags.withKotlinxHtml) implementation(KotlinX.html)
         }
       }
       commonTest {
         dependencies {
           implementation(Kotlin.test)
-          if (settings.withTestUSpekX) implementation(Langiewicz.uspekx)
+          if (flags.withTestUSpekX) implementation(Langiewicz.uspekx)
         }
       }
 
@@ -100,7 +100,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
         }
       }
 
-      if (settings.withJvm) {
+      if (flags.withJvm) {
         jvmMain {
           dependsOn(composeUiMain)
           dependencies {
@@ -123,24 +123,24 @@ fun Project.defaultBuildTemplateForRawMppLib(
         jvmTest {
           dependsOn(composeUiTest)
           dependencies {
-            if (settings.withTestJUnit4) implementation(JUnit.junit)
-            if (settings.withTestJUnit5) {
+            if (flags.withTestJUnit4) implementation(JUnit.junit)
+            if (flags.withTestJUnit5) {
               implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
               runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
             }
-            if (settings.withTestUSpekX) {
-              if (settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-              if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+            if (flags.withTestUSpekX) {
+              if (flags.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+              if (flags.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
-            if (settings.withTestGoogleTruth) implementation(Com.Google.Truth.truth)
-            if (settings.withTestMockitoKotlin) implementation(Org.Mockito.Kotlin.mockito_kotlin)
+            if (flags.withTestGoogleTruth) implementation(Com.Google.Truth.truth)
+            if (flags.withTestMockitoKotlin) implementation(Org.Mockito.Kotlin.mockito_kotlin)
 
             val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeTestUiJUnit4) implementation(compose.dependencies.desktop.uiTestJUnit4)
           }
         }
       }
-      if (settings.withJs) {
+      if (flags.withJs) {
         jsMain {
           dependsOn(composeMain)
           dependencies {
@@ -157,7 +157,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
           }
         }
       }
-      if (settings.withLinuxX64) {
+      if (flags.withLinuxX64) {
         linuxX64Main
         linuxX64Test
       }
@@ -180,21 +180,21 @@ fun Project.defaultBuildTemplateForRawMppLib(
         }
         getByName("androidHostTest") {
           dependencies {
-            if (settings.withTestJUnit4) implementation(JUnit.junit)
-            if (settings.withTestJUnit5) {
+            if (flags.withTestJUnit4) implementation(JUnit.junit)
+            if (flags.withTestJUnit5) {
               implementation(Org.JUnit.Jupiter.junit_jupiter_engine)
               runtimeOnly(Org.JUnit.Platform.junit_platform_launcher)
             }
-            if (settings.withTestUSpekX) {
-              if (settings.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
-              if (settings.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
+            if (flags.withTestUSpekX) {
+              if (flags.withTestJUnit4) implementation(Langiewicz.uspekx_junit4)
+              if (flags.withTestJUnit5) implementation(Langiewicz.uspekx_junit5)
             }
           }
         }
         getByName("androidDeviceTest") {
           dependencies {
             implementation(Kotlin.test)
-            if (settings.withTestJUnit4OnAndroidDevice) {
+            if (flags.withTestJUnit4OnAndroidDevice) {
               implementation(JUnit.junit)
               implementation(AndroidX.Test.core)
               implementation(AndroidX.Test.core_ktx)
@@ -202,11 +202,11 @@ fun Project.defaultBuildTemplateForRawMppLib(
               implementation(AndroidX.Test.Ext.junit)
               implementation(AndroidX.Test.Ext.junit_ktx)
             }
-            else if (settings.withTestJUnit5) {
+            else if (flags.withTestJUnit5) {
               error("JUnit5 is NOT yet supported on android device tests.")
             }
-            if (settings.withTestUSpekX) {
-              if (settings.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
+            if (flags.withTestUSpekX) {
+              if (flags.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
             }
             val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeTestUi) implementation(AndroidX.Compose.Ui.test)
@@ -227,7 +227,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
   }
 
   configurations.checkVerSync(warnOnly = true)
-  tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
+  tasks.defaultTestsOptions(onJvmUseJUnitPlatform = flags.withTestJUnit5)
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("MPP Module ${name}: publishing (and signing) disabled")
 }
@@ -235,7 +235,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
 fun Project.defaultBuildTemplateForRawMppLib(
   details: LibDetails,
 ): Unit = defaultBuildTemplateForRawMppLib(
-  lib = details.toTMP(),
+  lib = details.toLib(),
 )
 
 
@@ -245,15 +245,15 @@ fun Project.defaultBuildTemplateForRawMppLib(
  * its caller needed: `lib.andro?.let { context(it) { androDefault() } }` is one expression that
  * both tests presence and supplies the value.
  */
-context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
+context(info: LibInfo, andro: LibAndro)
 fun KotlinMultiplatformExtension.androDefault() {
   extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
     minSdk { version = release(andro.sdkMin) }
     compileSdk {
       version = andro.sdkCompilePreview?.let { preview(it) }
-        ?: release(andro.sdkCompile) { minorApiLevel = AndroSdkCompileMinorTMP }
+        ?: release(andro.sdkCompile) { minorApiLevel = AndroSdkCompileMinor }
     }
-    namespace = details.namespace
+    namespace = info.namespace
     withHostTest {
     }
     withDeviceTest {

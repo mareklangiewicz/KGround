@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.extLibDetails
+import pl.mareklangiewicz.utils.extLib
 
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
@@ -37,7 +37,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.26" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -51,16 +51,18 @@ develocity {
 
 // endregion [[My Settings Stuff]]
 
-gradle.extLibDetails = myLibDetails(
-  name = "TemplateAndro",
-  description = "Template for android projects.",
-  githubUrl = "https://github.com/mareklangiewicz/KGround",
-  version = Ver(0, 0, 17),
-  settings = LibSettings(
+gradle.extLib = lib(
+  info = myLibInfo(
+    name = "TemplateAndro",
+    description = "Template for android projects.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround",
+    version = Ver(0, 0, 17),
+  ),
+  flags = LibFlags(
     withTestJUnit4 = true,
     withTestJUnit5 = false,
-    andro = LibAndroSettings( publishVariant = "debug"),
   ),
+  andro = LibAndro(publishVariant = "debug"),
 )
 
 rootProject.name = "template-andro"

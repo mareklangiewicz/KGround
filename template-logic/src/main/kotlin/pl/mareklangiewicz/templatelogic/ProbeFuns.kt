@@ -56,23 +56,27 @@ fun probeLibStdlibVersion(): String = KotlinVersion.CURRENT.toString()
  */
 fun probeExplicitContextArg(details: LibDetails): String = probeContextFun(d = details)
 
-// ===== de-nesting prototype probes (LibTMP) ==================================
-// See LibDetailsTMP.kt and ~/code/kotlin/DepsKt/docs/design/lib-details-denesting.md.
+// ===== de-nesting prototype probes (Lib) ==================================
+// See LibInfo.kt and ~/code/kotlin/DepsKt/docs/design/lib-details-denesting.md.
 
 /**
  * Needs an andro scope to exist at all. The NEGATIVE is the interesting half and it is a
  * COMPILE-time property, so it cannot be asserted from the `probes` task; it was verified by
  * construction instead — calling this with no scope open fails with
- * "No context argument for 'andro: LibAndroSettingsTMP' found."
+ * "No context argument for 'andro: LibAndro' found."
  * In the nested model the same mistake costs a runtime `settings.andro!!` NPE, or an
  * `ignoreAndroTarget` boolean guarding a runtime `require`.
+ *
+ * Note the minor level still comes from [AndroSdkCompileMinor], not from the andro scope: DepsKt
+ * deliberately left `sdkCompileMinor` out of [LibAndro], because carrying a field the nested model
+ * lacks would make `Lib.toNested()` lossy and weaken its own equivalence tests.
  */
-context(andro: LibAndroSettingsTMP)
-fun probeSdkFullTMP(): String = "${andro.sdkCompile}.${andro.sdkCompileMinor}"
+context(andro: LibAndro)
+fun probeSdkFull(): String = "${andro.sdkCompile}.$AndroSdkCompileMinor"
 
 /** Opening the scope is the only way in — and having opened it, no `!!` appears anywhere below. */
-fun probeAndroScopeTMP(lib: LibTMP): String =
-  lib.andro?.let { context(it) { probeSdkFullTMP() } } ?: "no-andro-scope"
+fun probeAndroScope(lib: Lib): String =
+  lib.andro?.let { context(it) { probeSdkFull() } } ?: "no-andro-scope"
 
 /**
  * The copy dance, both ways, from the same starting point. Returns
@@ -85,16 +89,16 @@ fun probeAndroScopeTMP(lib: LibTMP): String =
  * Sibling: one flat copy of the ONE sibling that changed. The other four are untouched and
  * keep flowing on their own, so there is nothing to re-wrap and no root to name a second time.
  */
-fun probeCopyDanceTMP(orig: LibDetails): String {
+fun probeCopyDance(orig: LibDetails): String {
   val nestedSettings = orig.settings.copy(withJs = false, withLinuxX64 = false)
   val nested = orig.copy(settings = nestedSettings)
 
-  val lib = orig.toTMP()
-  val sibling = lib.copy(settings = lib.settings.copy(withJs = false, withLinuxX64 = false))
+  val lib = orig.toLib()
+  val sibling = lib.copy(flags = lib.flags.copy(withJs = false, withLinuxX64 = false))
 
   fun flags(withJs: Boolean, withLinuxX64: Boolean, withJvm: Boolean) = "$withJs/$withLinuxX64/$withJvm"
   val n = flags(nested.settings.withJs, nested.settings.withLinuxX64, nested.settings.withJvm)
-  val s = flags(sibling.settings.withJs, sibling.settings.withLinuxX64, sibling.settings.withJvm)
+  val s = flags(sibling.flags.withJs, sibling.flags.withLinuxX64, sibling.flags.withJvm)
   return "$n|$s|2|1"
 }
 
@@ -102,10 +106,10 @@ fun probeCopyDanceTMP(orig: LibDetails): String {
  * The adapter is the migration seam, so it has to be total: every flag of the real
  * `gradle.extLibDetails` must survive un-nesting. Returns the number of MISMATCHED fields.
  */
-fun probeAdapterFidelityTMP(orig: LibDetails): Int {
-  val lib = orig.toTMP()
-  val d = lib.details
-  val s = lib.settings
+fun probeAdapterFidelity(orig: LibDetails): Int {
+  val lib = orig.toLib()
+  val d = lib.info
+  val s = lib.flags
   val checks = listOf(
     d.name == orig.name, d.group == orig.group, d.description == orig.description,
     d.authorId == orig.authorId, d.authorName == orig.authorName, d.authorEmail == orig.authorEmail,
@@ -128,15 +132,22 @@ fun probeAdapterFidelityTMP(orig: LibDetails): Int {
 
 /**
  * Transcribing [LibAndroSettings] for the prototype surfaced a real bug in the published model:
- * `publishOneVariant` reads `!publishNoVariants && !publishNoVariants` — the second conjunct
- * should be `!publishAllVariants`. So today a lib with `publishVariant = "*"` reports BOTH
- * `publishAllVariants` and `publishOneVariant` true, and [defaultAndroLib] runs both publish paths.
- * Returns "<broken>|<fixed>" for the all-variants case.
+ * `publishOneVariant` read `!publishNoVariants && !publishNoVariants` — the second conjunct should
+ * have been `!publishAllVariants`. A lib with `publishVariant = "*"` therefore reported BOTH
+ * `publishAllVariants` and `publishOneVariant`, and [defaultAndroLib] ran both publish paths.
+ *
+ * **Fixed in DepsKt 0.4.26, so this probe changed meaning.** It used to witness the bug, asserting
+ * "broken|fixed"; with the bug gone there is no broken control left to compare against, and an
+ * assertion that still expected `true` would fail for the RIGHT reason — it did, on the first run
+ * after the bump. It is now a regression guard: both models must agree, and both must be correct.
+ *
+ * Returns `publishOneVariant` over "", "*", "debug" for each model, as "<nested>|<sibling>".
  */
-fun probePublishVariantBugTMP(): String {
-  val broken = LibAndroSettings(publishVariant = "*")
-  val fixed = LibAndroSettingsTMP(publishVariant = "*")
-  return "${broken.publishOneVariant}|${fixed.publishOneVariant}"
+fun probePublishVariantAgreement(): String {
+  val variants = listOf("", "*", "debug")
+  val nested = variants.joinToString("/") { LibAndroSettings(publishVariant = it).publishOneVariant.toString() }
+  val sibling = variants.joinToString("/") { LibAndro(publishVariant = it).publishOneVariant.toString() }
+  return "$nested|$sibling"
 }
 
 /**
@@ -148,7 +159,7 @@ fun probePublishVariantBugTMP(): String {
  * that the derivation actually reads (withJvm, withJs, withTestJUnit4/5) and compares the named
  * function against the constructor default it replaces. Returns "<combos>/<matches>".
  */
-fun probeDerivedDefaultsTMP(): String {
+fun probeDerivedDefaults(): String {
   val combos = buildList {
     for (withJvm in listOf(true, false))
       for (withJs in listOf(true, false))
@@ -156,7 +167,7 @@ fun probeDerivedDefaultsTMP(): String {
           add(LibSettings(withJvm = withJvm, withJs = withJs, withTestJUnit4 = withTestJUnit4))
   }
   val matches = combos.count { nested ->
-    context(nested.toTMP()) { defaultComposeSettingsTMP() } == nested.compose?.toTMP()
+    defaultLibCompose(nested.toFlags()) == nested.compose?.toSibling()
   }
   return "${combos.size}/$matches"
 }
@@ -168,11 +179,11 @@ fun probeDerivedDefaultsTMP(): String {
  *
  * Order under coercion is: context parameters first, then the extension receiver, then value params.
  */
-context(d: LibDetailsTMP, s: LibSettingsTMP, r: LibReposSettingsTMP)
-fun Project.probeSiblingEntryPointTMP(suffix: String): String =
+context(d: LibInfo, s: LibFlags, r: LibRepos)
+fun Project.probeSiblingEntryPoint(suffix: String): String =
   "${d.name}/${s.withJvm}/${r.withMavenCentral}/$name$suffix"
 
 /** Same, with a trailing lambda — entry points all take one (addCommonMainDependencies etc.). */
-context(d: LibDetailsTMP, s: LibSettingsTMP)
-fun Project.probeSiblingWithLambdaTMP(addStuff: () -> String): String =
+context(d: LibInfo, s: LibFlags)
+fun Project.probeSiblingWithLambda(addStuff: () -> String): String =
   "${d.name}/${s.withJvm}/$name/${addStuff()}"

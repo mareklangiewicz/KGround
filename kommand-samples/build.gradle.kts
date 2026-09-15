@@ -17,7 +17,7 @@ plugins {
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 defaultBuildTemplateForBasicMppLib(
-  libTMP(adjustDetails = { it.copy(name = "Kommand Samples", description = "Additional samples for KommandLine.") }),
+  myLib(adjustInfo = { it.copy(name = "Kommand Samples", description = "Additional samples for KommandLine.") }),
 ) {
   api(project(":kommand-line"))
 

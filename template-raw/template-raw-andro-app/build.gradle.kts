@@ -20,11 +20,12 @@ plugins {
 
 // endregion [[Andro App Build Imports and Plugs]]
 
-var details = gradle.extLibDetails
-val settings = details.settings.copy(compose = null)
-details = details.copy(settings = settings, namespace = "pl.mareklangiewicz.templateraw.androapp")
+// Was three statements with a `var`, the root named twice, and compose removed two levels down.
+// Now: one adjustment of one sibling, and dropping compose is a flat copy on the bundle.
+val lib = myLib(adjustInfo = { it.copy(namespace = "pl.mareklangiewicz.templateraw.androapp") })
+  .copy(compose = null) // this app does not use compose directly
 
-defaultBuildTemplateForAndroApp(details) {
+defaultBuildTemplateForAndroApp(lib) {
   implementation(project(":template-raw-lib"))
 }
 

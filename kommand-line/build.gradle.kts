@@ -17,7 +17,7 @@ plugins {
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 defaultBuildTemplateForBasicMppLib(
-  libTMP(adjustDetails = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") }),
+  myLib(adjustInfo = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") }),
 ) {
   api(project(":kground"))
   api(project(":kground-io"))

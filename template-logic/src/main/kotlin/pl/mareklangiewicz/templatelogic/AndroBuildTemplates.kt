@@ -27,7 +27,7 @@ import pl.mareklangiewicz.defaults.*
  * 1.13.0-alpha03, which refuses to be consumed by anything compiling against less than API 37.1.
  * Templates are examples for new projects, so they track the newest: 37.2.
  */
-const val AndroSdkCompileMinorTMP = 2
+const val AndroSdkCompileMinor = 2
 
 /**
  * MIGRATED to the sibling model: android settings arrive as a SCOPE, so the
@@ -40,7 +40,7 @@ const val AndroSdkCompileMinorTMP = 2
  * compose exists and whether it was already configured the MPP way. The flag survives at those call
  * sites, under its honest name.
  */
-context(settings: LibSettingsTMP, andro: LibAndroSettingsTMP)
+context(flags: LibFlags, andro: LibAndro)
 fun DependencyHandler.defaultAndroDeps(
   configuration: String = "implementation",
 ) {
@@ -60,7 +60,7 @@ fun DependencyHandler.defaultAndroDeps(
  * The compose-android dependencies [defaultAndroDeps] used to add behind `settings.compose!!`.
  * As a compose scope there is no `!!` and no presence check: having it is the precondition.
  */
-context(compose: LibComposeSettingsTMP)
+context(compose: LibCompose)
 fun DependencyHandler.defaultComposeAndroDeps(configuration: String = "implementation") {
   addAllWithVer(
     configuration,
@@ -77,51 +77,51 @@ fun DependencyHandler.defaultComposeAndroDeps(configuration: String = "implement
 }
 
 /** Migrated like [defaultAndroDeps]: android is a scope, compose routing belongs to the caller. */
-context(settings: LibSettingsTMP, andro: LibAndroSettingsTMP)
+context(flags: LibFlags, andro: LibAndro)
 fun DependencyHandler.defaultAndroTestDeps(
   configuration: String = "testImplementation",
 ) {
   addAll(
     configuration,
     AndroidX.Test.Espresso.core.takeIf { andro.withTestEspresso },
-    Com.Google.Truth.truth.takeIf { settings.withTestGoogleTruth },
+    Com.Google.Truth.truth.takeIf { flags.withTestGoogleTruth },
     AndroidX.Test.rules,
     AndroidX.Test.runner,
-    AndroidX.Test.Ext.truth.takeIf { settings.withTestGoogleTruth },
-    Org.Mockito.Kotlin.mockito_kotlin.takeIf { settings.withTestMockitoKotlin },
+    AndroidX.Test.Ext.truth.takeIf { flags.withTestGoogleTruth },
+    Org.Mockito.Kotlin.mockito_kotlin.takeIf { flags.withTestMockitoKotlin },
   )
 
-  if (settings.withTestJUnit4) {
+  if (flags.withTestJUnit4) {
     addAll(
       configuration,
       Kotlin.test_junit.withVer(Vers.Kotlin),
       JUnit.junit,
-      Langiewicz.uspekx_junit4.takeIf { settings.withTestUSpekX },
+      Langiewicz.uspekx_junit4.takeIf { flags.withTestUSpekX },
       AndroidX.Test.Ext.junit_ktx,
     )
   }
   // android doesn't fully support JUnit5, but adding deps anyway to be able to write JUnit5 dependent code
-  if (settings.withTestJUnit5) {
+  if (flags.withTestJUnit5) {
     addAll(
       configuration,
       Kotlin.test_junit5.withVer(Vers.Kotlin),
       Org.JUnit.Jupiter.junit_jupiter_api,
       Org.JUnit.Jupiter.junit_jupiter_engine,
-      Langiewicz.uspekx_junit5.takeIf { settings.withTestUSpekX },
+      Langiewicz.uspekx_junit5.takeIf { flags.withTestUSpekX },
     )
   }
 
 }
 
 /** The compose-android TEST dependencies, likewise requiring a compose scope. */
-context(settings: LibSettingsTMP, compose: LibComposeSettingsTMP)
+context(flags: LibFlags, compose: LibCompose)
 fun DependencyHandler.defaultComposeAndroTestDeps(configuration: String = "testImplementation") =
   addAllWithVer(
     configuration,
     vers.ComposeAndro,
     AndroidX.Compose.Ui.test,
     AndroidX.Compose.Ui.test_manifest,
-    AndroidX.Compose.Ui.test_junit4.takeIf { settings.withTestJUnit4 },
+    AndroidX.Compose.Ui.test_junit4.takeIf { flags.withTestJUnit4 },
   )
 
 fun MutableSet<String>.defaultAndroExcludedResources() = addAll(
@@ -153,7 +153,7 @@ fun CommonExtension.defaultPackagingOptions() = packaging.apply {
 }
 
 /** Use template-andro/build.gradle.kts:fun defaultAndroLibPublishAllVariants() to create component with name "default". */
-context(_: LibDetailsTMP)
+context(_: LibInfo)
 fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   afterEvaluate {
     extensions.configure<PublishingExtension> {
@@ -165,7 +165,7 @@ fun Project.defaultPublishingOfAndroLib(componentName: String = "default") {
   }
 }
 
-context(_: LibDetailsTMP)
+context(_: LibInfo)
 fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
   defaultPublishingOfAndroLib(componentName)
 
@@ -175,9 +175,9 @@ fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
 // region [[Andro Lib Build Template]]
 
 fun Project.defaultBuildTemplateForAndroLib(
-  lib: LibTMP = gradle.extLibTMP,
+  lib: Lib = gradle.extLib,
   addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = context(lib.details, lib.settings) {
+): Unit = context(lib.info, lib.flags) {
   // THE boundary. One check turns "details that may or may not have android" into an andro scope;
   // everything below is statically guaranteed and carries no `!!` and no `?: error`. Presence-as-
   // scope does not delete this check, it moves it to exactly one place per entry point.
@@ -188,7 +188,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   // exactly what template-raw already does. LibraryExtension is not applied at all any more.
   extensions.configure<KotlinMultiplatformExtension> {
     context(andro) { androDefault() } // details is already in scope, so only the andro half is added
-    jvmToolchain(lib.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
+    jvmToolchain(lib.flags.withJvmVer?.toInt() ?: 17) // works for jvm and android
     sourceSets.getByName("androidMain").dependencies { addAndroMainDependencies() }
   }
   // The KMP android target names its configurations per source set, so the plain
@@ -212,7 +212,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
-  defaultGroupAndVerAndDescriptionTMP()
+  defaultGroupAndVerAndDescription(lib)
   if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
   else println("Andro Lib Module ${name}: publishing (and signing) disabled")
 }
@@ -225,14 +225,14 @@ fun Project.defaultBuildTemplateForAndroLib(
  *
  * @param configureComposeAndro caller decided compose exists AND was not configured the MPP way.
  */
-context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
+context(info: LibInfo, andro: LibAndro)
 fun LibraryExtension.defaultAndroLib(
   configureComposeAndro: Boolean = false,
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say IF he wants to ignore it.
 ) {
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
     compileSdk = andro.sdkCompile
-    compileSdkMinor = AndroSdkCompileMinorTMP
+    compileSdkMinor = AndroSdkCompileMinor
   }
   defaultCompileOptions(jvmVer = null) // actually it does nothing now. jvm ver is normally configured via jvmToolchain
   defaultDefaultConfig()
@@ -244,9 +244,9 @@ fun LibraryExtension.defaultAndroLib(
 }
 
 /** Dead code alongside [defaultAndroLib]; migrated for consistency, unexercised. */
-context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
+context(info: LibInfo, andro: LibAndro)
 fun LibraryExtension.defaultDefaultConfig() = defaultConfig {
-  namespace = details.namespace
+  namespace = info.namespace
   minSdk = andro.sdkMin
   testInstrumentationRunner = andro.withTestRunner
 }
@@ -284,7 +284,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   details: LibDetails,
   addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ): Unit = defaultBuildTemplateForAndroLib(
-  lib = details.toTMP(),
+  lib = details.toLib(),
   addAndroMainDependencies = addAndroMainDependencies,
 )
 
@@ -293,9 +293,9 @@ fun Project.defaultBuildTemplateForAndroLib(
 // region [[Andro App Build Template]]
 
 fun Project.defaultBuildTemplateForAndroApp(
-  lib: LibTMP = gradle.extLibTMP,
+  lib: Lib = gradle.extLib,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
-): Unit = context(lib.details, lib.settings) {
+): Unit = context(lib.info, lib.flags) {
   // Same single boundary as the lib entry point above.
   val andro = lib.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
@@ -321,7 +321,7 @@ fun Project.defaultBuildTemplateForAndroApp(
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
-  defaultGroupAndVerAndDescriptionTMP()
+  defaultGroupAndVerAndDescription(lib)
   variant?.let { defaultPublishingOfAndroApp(it) }
 }
 /** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
@@ -329,33 +329,33 @@ fun Project.defaultBuildTemplateForAndroApp(
   details: LibDetails,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
 ): Unit = defaultBuildTemplateForAndroApp(
-  lib = details.toTMP(),
+  lib = details.toLib(),
   addAndroDependencies = addAndroDependencies,
 )
 
 
 /** @param configureComposeAndro caller decided compose exists AND was not configured the MPP way. */
-context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
+context(info: LibInfo, andro: LibAndro)
 fun ApplicationExtension.defaultAndroApp(
   configureComposeAndro: Boolean = false,
 ) {
   andro.sdkCompilePreview?.let { compileSdkPreview = it } ?: run {
     compileSdk = andro.sdkCompile
-    compileSdkMinor = AndroSdkCompileMinorTMP
+    compileSdkMinor = AndroSdkCompileMinor
   }
   defaultDefaultConfig()
   defaultBuildTypes()
   if (configureComposeAndro) defaultComposeStuff()
 }
 
-context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
+context(info: LibInfo, andro: LibAndro)
 fun ApplicationExtension.defaultDefaultConfig() = defaultConfig {
-  applicationId = details.appId
-  namespace = details.namespace
+  applicationId = info.appId
+  namespace = info.namespace
   andro.sdkTargetPreview?.let { targetSdkPreview = it } ?: run { targetSdk = andro.sdkTarget }
   minSdk = andro.sdkMin
-  versionCode = details.appVerCode
-  versionName = details.appVerName
+  versionCode = info.appVerCode
+  versionName = info.appVerName
   testInstrumentationRunner = andro.withTestRunner
 }
 

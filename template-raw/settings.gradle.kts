@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.extLibDetails
+import pl.mareklangiewicz.utils.extLib
 
 rootProject.name = "template-raw"
 
@@ -24,31 +24,35 @@ val enableAndro = true
 // Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
 // Use Android Studio or disable andro target temporarily (or compile only with CLI).
 
-gradle.extLibDetails = myLibDetails(
-  name = "TemplateRaw",
-  description = "Raw template for multi platform projects.",
-  githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-raw",
-  version = Ver(0, 0, 35),
-  settings = LibSettings(
+gradle.extLib = lib(
+  info = myLibInfo(
+    name = "TemplateRaw",
+    description = "Raw template for multi platform projects.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-raw",
+    version = Ver(0, 0, 35),
+  ),
+  flags = LibFlags(
     withJs = enableJs,
     withLinuxX64 = enableLinux,
     withKotlinxHtml = true, // also used in common code
     withTestJUnit5 = true,
     withTestJUnit4OnAndroidDevice = true,
-    compose = LibComposeSettings(
-      withComposeHtmlCore = enableJs,
-      withComposeHtmlSvg = enableJs,
-      withComposeTestHtmlUtils = enableJs,
-      withComposeTestUi = true,
-      withComposeTestUiJUnit4 = true,
-      // withComposeTestUiJUnit5 = true, // What about this??
-    ).takeIf { enableCompose },
-    andro = LibAndroSettings().takeIf { enableAndro },
-    repos = LibReposSettings(
-      withComposeJbDev = true,
-        // TODO: remove after update when new stable compose is published.
-        //   BTW it's very slow, use gradle offline mode after syncing to run tasks faster
-    ),
+  ),
+  withCompose = enableCompose,
+  withAndro = enableAndro,
+  compose = LibCompose(
+    withComposeHtmlCore = enableJs,
+    withComposeHtmlSvg = enableJs,
+    withComposeTestHtmlUtils = enableJs,
+    withComposeTestUi = true,
+    withComposeTestUiJUnit4 = true,
+    // withComposeTestUiJUnit5 = true, // What about this??
+  ).takeIf { enableCompose },
+  // Note: stated explicitly, so it does NOT pick up withKotlinxHtml from flags - same as before.
+  repos = LibRepos(
+    withComposeJbDev = true,
+      // TODO: remove after update when new stable compose is published.
+      //   BTW it's very slow, use gradle offline mode after syncing to run tasks faster
   ),
 )
 
@@ -87,7 +91,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.26" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
