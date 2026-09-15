@@ -15,7 +15,7 @@
 #   STOP_DAEMONS=1 ./gate.sh  # stop Gradle daemons after every step (slowest, leanest)
 #   ./gate.sh --list          # show step names and exit
 
-set -euo pipefail
+set -Eeuo pipefail
 cd "$(dirname "$0")"
 
 PAUSE=${PAUSE:-20}
@@ -66,6 +66,25 @@ if [[ ${#steps[@]} -eq 0 ]]; then steps=("${ALL_STEPS[@]}"); fi
 # Timestamp reference, so "is the apk fresh?" compares against THIS run, not the clock.
 gate_started=$(mktemp -t kground-gate-XXXXXX)
 
+# This gate once printed a green banner while a step had failed, so the exit code and the
+# log disagreed and the log was the one people read. Now exactly one verdict line is
+# emitted, from an EXIT trap, on EVERY path out of this script -- a step failure, a set -e
+# abort anywhere else, an unknown step name, or Ctrl-C. Log and exit code cannot diverge.
+gate_reason=""
+verdict() {
+  local rc=$?
+  if [[ $rc -eq 0 ]]; then
+    echo "GATE: GREEN -- steps: ${steps[*]:-(none)}"
+  else
+    echo "GATE: RED (exit $rc)${gate_reason:+ -- $gate_reason}" >&2
+  fi
+  rm -f "$gate_started"
+  exit $rc
+}
+# ERR fires for a set -e abort, which otherwise leaves no trace at all in the log.
+trap 'gate_reason=${gate_reason:-"aborted at line $LINENO"}' ERR
+trap verdict EXIT
+
 # NOTE: plain `[[ cond ]] && cmd` as a trailing statement is a set -e landmine -- when the
 # condition is false the list returns 1. Everything below uses explicit `if`.
 settle() {
@@ -78,8 +97,8 @@ settle() {
 }
 
 for s in "${steps[@]}"; do
-  mapfile -t cmds < <(step_cmds "$s") || true
-  [[ ${#cmds[@]} -gt 0 ]] || { echo "unknown step: $s (try --list)" >&2; exit 2; }
+  mapfile -t cmds < <(step_cmds "$s")
+  [[ ${#cmds[@]} -gt 0 ]] || { gate_reason="unknown step: $s"; echo "unknown step: $s (try --list)" >&2; exit 2; }
   banner "STEP $s   ($((${#cmds[@]})) invocation(s))   $(date +%H:%M:%S)   $(mem)"
   for cmd in "${cmds[@]}"; do
     echo "+ $cmd"
@@ -88,6 +107,7 @@ for s in "${steps[@]}"; do
     if $cmd; then
       echo "-- OK in $((SECONDS - start))s"
     else
+      gate_reason="step '$s' failed: $cmd"
       echo "!! FAILED after $((SECONDS - start))s: $cmd" >&2
       echo "!! stopping at step '$s' -- nothing below was run." >&2
       exit 1
@@ -97,9 +117,8 @@ for s in "${steps[@]}"; do
   if [[ "$s" != "${steps[-1]}" ]]; then settle; fi
 done
 
-banner "GATE GREEN   $(date +%H:%M:%S)   $(mem)"
-echo "steps run: ${steps[*]}"
-
+# Post-run validation runs BEFORE any success banner: the old order printed "GATE GREEN"
+# and only then checked the apk, so a failing run still showed green in the log.
 # Only report the apk when THIS run built it. Printing it unconditionally would show a
 # stale artifact from an earlier run -- a success signal that cannot fail is not evidence.
 apk=template-andro/template-andro-app/build/outputs/apk/debug/template-andro-app-debug.apk
@@ -107,8 +126,11 @@ if [[ " ${steps[*]} " == *" template-andro "* ]]; then
   if [[ -f $apk && $apk -nt $gate_started ]]; then
     echo "apk: $(find "$apk" -printf '%TY-%Tm-%Td %TH:%TM %p\n')"
   else
+    gate_reason="template-andro ran but produced no fresh apk"
     echo "!! template-andro ran but produced no fresh apk: $apk" >&2
     exit 1
   fi
 fi
-rm -f "$gate_started"
+
+banner "GATE GREEN   $(date +%H:%M:%S)   $(mem)"
+echo "steps run: ${steps[*]}"
