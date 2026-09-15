@@ -17,19 +17,18 @@ import pl.mareklangiewicz.defaults.*
 
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForRawMppLib(
-  details: LibDetails = gradle.extLibDetails,
-): Unit = context(details, details.settings) {
-  val settings = details.settings
-  val lib = details.toTMP()
+  lib: LibTMP = gradle.extLibTMP,
+): Unit = context(lib.details, lib.settings) {
+  val settings = lib.settings
 
-  if (settings.withAndro) {
+  if (lib.andro != null) {
     apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
   }
-  if (settings.compose?.withComposeTestUiJUnit5 == true)
+  if (lib.compose?.withComposeTestUiJUnit5 == true)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
 
   repositories { context(lib.repos) { addRepos() } }
-  context(lib.details) { defaultGroupAndVerAndDescriptionTMP() }
+  defaultGroupAndVerAndDescriptionTMP()
 
   val compose = extensions.getByName("compose") as ComposeExtension
 
@@ -39,7 +38,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
     if (settings.withJvm) jvm()
     if (settings.withLinuxX64) linuxX64()
     if (settings.withJs) jsDefault()
-    lib.andro?.let { context(lib.details, it) { androDefault() } }
+    lib.andro?.let { context(it) { androDefault() } }
 
     applyDefaultHierarchyTemplate()
 
@@ -59,7 +58,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
       val composeMain = create("composeMain") {
         dependsOn(commonMain.get())
         dependencies {
-          if (settings.withCompose) implementation(compose.dependencies.runtime)
+          if (lib.compose != null) implementation(compose.dependencies.runtime)
         }
       }
 
@@ -68,7 +67,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
         // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
         dependsOn(commonTest.get())
         dependencies {
-          val settpose = settings.compose ?: return@dependencies
+          val settpose = lib.compose ?: return@dependencies
           // TODO_later anything here? any compose testing util not related to compose ui?
         }
       }
@@ -76,7 +75,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
       val composeUiMain = create("composeUiMain") {
         dependsOn(composeMain)
         dependencies {
-          val settpose = settings.compose ?: return@dependencies
+          val settpose = lib.compose ?: return@dependencies
           if (settpose.withComposeUi) {
             implementation(compose.dependencies.ui)
             implementation(compose.dependencies.components.resources)
@@ -96,7 +95,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
           // TODO_later: understand root cause - check kotlin mpp warnings and where it's generated in sources.
         dependsOn(composeTest)
         dependencies {
-          val settpose = settings.compose ?: return@dependencies
+          val settpose = lib.compose ?: return@dependencies
           if (settpose.withComposeTestUi) implementation(compose.dependencies.uiTest)
         }
       }
@@ -105,7 +104,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
         jvmMain {
           dependsOn(composeUiMain)
           dependencies {
-            val settpose = settings.compose ?: return@dependencies
+            val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeUi) {
               implementation(compose.dependencies.uiTooling)
               implementation(compose.dependencies.uiUtil)
@@ -136,7 +135,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
             if (settings.withTestGoogleTruth) implementation(Com.Google.Truth.truth)
             if (settings.withTestMockitoKotlin) implementation(Org.Mockito.Kotlin.mockito_kotlin)
 
-            val settpose = settings.compose ?: return@dependencies
+            val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeTestUiJUnit4) implementation(compose.dependencies.desktop.uiTestJUnit4)
           }
         }
@@ -145,7 +144,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
         jsMain {
           dependsOn(composeMain)
           dependencies {
-            val settpose = settings.compose ?: return@dependencies
+            val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeHtmlCore) implementation(compose.dependencies.html.core)
             if (settpose.withComposeHtmlSvg) implementation(compose.dependencies.html.svg)
           }
@@ -153,7 +152,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
         jsTest {
           dependsOn(composeTest)
           dependencies {
-            val settpose = settings.compose ?: return@dependencies
+            val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeTestHtmlUtils) implementation(compose.dependencies.html.testUtils)
           }
         }
@@ -162,7 +161,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
         linuxX64Main
         linuxX64Test
       }
-      if (settings.withAndro) {
+      if (lib.andro != null) {
         androidMain {
           dependsOn(composeUiMain)
           dependencies {
@@ -170,7 +169,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
             implementation(AndroidX.Activity.activity)
             implementation(AndroidX.Activity.ktx)
             implementation(AndroidX.Activity.compose)
-            val settpose = settings.compose ?: return@dependencies
+            val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeUi) {
               implementation(AndroidX.Compose.Ui.ui)
               implementation(AndroidX.Compose.Ui.util)
@@ -209,7 +208,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
             if (settings.withTestUSpekX) {
               if (settings.withTestJUnit4OnAndroidDevice) implementation(Langiewicz.uspekx_junit4)
             }
-            val settpose = settings.compose ?: return@dependencies
+            val settpose = lib.compose ?: return@dependencies
             if (settpose.withComposeTestUi) implementation(AndroidX.Compose.Ui.test)
             if (settpose.withComposeTestUiJUnit4) implementation(AndroidX.Compose.Ui.test_junit4)
           }
@@ -217,7 +216,7 @@ fun Project.defaultBuildTemplateForRawMppLib(
       }
     }
   }
-  if (settings.withAndro) {
+  if (lib.andro != null) {
     tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
       .configureEach { enabled = false }
   }
@@ -229,11 +228,16 @@ fun Project.defaultBuildTemplateForRawMppLib(
 
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = settings.withTestJUnit5)
-  context(lib.details, lib.settings) {
-    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-    else println("MPP Module ${name}: publishing (and signing) disabled")
-  }
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+  else println("MPP Module ${name}: publishing (and signing) disabled")
 }
+/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
+fun Project.defaultBuildTemplateForRawMppLib(
+  details: LibDetails,
+): Unit = defaultBuildTemplateForRawMppLib(
+  lib = details.toTMP(),
+)
+
 
 /**
  * MIGRATED. Was the design note's literal example of a helper reaching through the tree

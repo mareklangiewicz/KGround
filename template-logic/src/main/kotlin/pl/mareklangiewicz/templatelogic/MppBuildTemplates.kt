@@ -17,25 +17,27 @@ import pl.mareklangiewicz.defaults.*
 // region [[Full MPP Lib Build Template]]
 
 fun Project.defaultBuildTemplateForFullMppLib(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = context(details, details.settings) {
-  if (details.settings.withAndro) {
+): Unit = context(lib.details, lib.settings) {
+  if (lib.andro != null) {
     // Since AGP 9 'com.android.library' cannot be combined with KMP; the android target of a
     // KMP library comes from 'com.android.kotlin.multiplatform.library' instead, exactly as
     // template-raw already does.
     apply(plugin = plugs.AndroKmpNoVer.group) // group is actually id for plugins
   }
   defaultBuildTemplateForComposeMppLib(
-    details = details,
+    lib = lib,
     ignoreAndroConfig = true, // andro configured below
     ignoreAndroPublish = true, // andro publishing configured below (or ignored again, but below in defaultAndroLib)
     addCommonMainDependencies = addCommonMainDependencies,
   )
 
-  if (details.settings.withAndro) {
+  // `withAndro` is gone: presence IS the scope, so the guard and the value arrive together, and the
+  // body below cannot be entered without one. Three reads of `details.settings.withAndro` became one.
+  lib.andro?.let { andro ->
     extensions.configure<KotlinMultiplatformExtension> {
-      details.toTMP().let { lib -> lib.andro?.let { context(lib.details, it) { androDefault() } } }
+      context(andro) { androDefault() }
     }
 
     // The KMP android target names its configurations per source set, so the plain
@@ -46,16 +48,22 @@ fun Project.defaultBuildTemplateForFullMppLib(
       // compose is configured the MPP way already, so we simply do NOT open a compose scope here:
       // the compose-android deps live in defaultComposeAndroDeps and are unreachable without one.
       // That is the composeConfiguredByMpp routing, expressed by omission instead of by a boolean.
-      details.toTMP().let { lib ->
-        val andro = lib.andro ?: error("No andro settings.")
-        context(lib.settings, andro) {
-          defaultAndroDeps(configuration = "androidMainImplementation")
-          defaultAndroTestDeps(configuration = "androidHostTestImplementation")
-        }
+      context(andro) {
+        defaultAndroDeps(configuration = "androidMainImplementation")
+        defaultAndroTestDeps(configuration = "androidHostTestImplementation")
       }
     }
   }
 }
+/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
+fun Project.defaultBuildTemplateForFullMppLib(
+  details: LibDetails,
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForFullMppLib(
+  lib = details.toTMP(),
+  addCommonMainDependencies = addCommonMainDependencies,
+)
+
 
 // endregion [[Full MPP Lib Build Template]]
 
@@ -72,7 +80,7 @@ fun Project.defaultBuildTemplateForBasicMppLib(
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+): Unit = context(lib.details, lib.settings) {
   // These three still guard CONTENT, not presence, which is why they stay here and not lower down:
   // this is the level that can see whether a compose/andro scope exists at all. See the kdoc below.
   require(ignoreCompose || lib.compose == null) { "defaultBuildTemplateForBasicMppLib can not configure compose stuff" }
@@ -81,22 +89,18 @@ fun Project.defaultBuildTemplateForBasicMppLib(
     require(ignoreAndroPublish || it.publishNoVariants) { "defaultBuildTemplateForBasicMppLib can not publish android stuff YET" }
   }
   repositories { context(lib.repos) { addRepos() } }
-  context(lib.details) { defaultGroupAndVerAndDescriptionTMP() }
+  defaultGroupAndVerAndDescriptionTMP()
   extensions.configure<KotlinMultiplatformExtension> {
-    // Four booleans became zero: hand allDefault the platform/testing flags and nothing else.
+    // Four booleans became zero: allDefault sees the platform/testing flags and nothing else.
     // Whether compose or andro get configured is decided HERE, by which scopes are opened, not
     // there by which booleans were forwarded.
-    context(lib.settings) {
-      allDefault(addCommonMainDependencies = addCommonMainDependencies)
-    }
+    allDefault(addCommonMainDependencies = addCommonMainDependencies)
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(jvmTargetVer = null) // jvmVer is set in fun allDefault using jvmToolchain
   tasks.defaultTestsOptions(onJvmUseJUnitPlatform = lib.settings.withTestJUnit5)
-  context(lib.details, lib.settings) {
-    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-    else println("MPP Module ${name}: publishing (and signing) disabled")
-  }
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+  else println("MPP Module ${name}: publishing (and signing) disabled")
 }
 
 /**
@@ -235,32 +239,32 @@ fun KotlinMultiplatformExtension.jsDefault(
 // region [[MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForBasicMppApp(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   ignoreCompose: Boolean = false, // so user have to explicitly say THAT he wants to ignore compose settings here.
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
+): Unit = context(lib.details, lib.settings) {
   defaultBuildTemplateForBasicMppLib(
-    details = details,
+    lib = lib,
     ignoreCompose = ignoreCompose,
     ignoreAndroConfig = ignoreAndroConfig,
     ignoreAndroPublish = true,
     addCommonMainDependencies = addCommonMainDependencies,
   )
   extensions.configure<KotlinMultiplatformExtension> {
-    if (details.settings.withJvm) jvm {
+    if (lib.settings.withJvm) jvm {
       mainRun {
-        mainClass = details.run { "$appMainPackage.$appMainClass" }
+        mainClass = lib.details.run { "$appMainPackage.$appMainClass" }
         logger.info("MPP App ${project.name}: MPP plugin (without compose) just adds jvmRun task (experimental). No executable.")
       }
     }
-    if (details.settings.withJs) js {
+    if (lib.settings.withJs) js {
       binaries.executable()
     }
-    if (details.settings.withLinuxX64) linuxX64 {
+    if (lib.settings.withLinuxX64) linuxX64 {
       binaries {
         executable {
-          entryPoint = details.run { "$appMainPackage.$appMainFun" }
+          entryPoint = lib.details.run { "$appMainPackage.$appMainFun" }
         }
       }
     }
@@ -274,14 +278,13 @@ fun Project.defaultBuildTemplateForBasicMppApp(
 /** Only for very standard compose mpp libs. In most cases, it's better to not use this function. */
 @OptIn(ExperimentalComposeLibrary::class)
 fun Project.defaultBuildTemplateForComposeMppLib(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   ignoreAndroPublish: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = context(details, details.settings) {
+): Unit = context(lib.details, lib.settings) {
   // The compose boundary, and the only check: from here down compose is a SCOPE, so nothing below
   // re-tests its presence and nothing carries `settings.compose!!`.
-  val lib = details.toTMP()
   val compose = lib.compose ?: error("Compose settings not set.")
   if (compose.withComposeTestUiJUnit5)
     logger.warn("Compose UI Tests with JUnit5 are not supported yet! Configuring JUnit5 anyway.")
@@ -293,9 +296,22 @@ fun Project.defaultBuildTemplateForComposeMppLib(
     addCommonMainDependencies = addCommonMainDependencies,
   )
   extensions.configure<KotlinMultiplatformExtension> {
-    context(lib.settings, compose) { allDefaultSourceSetsForCompose() }
+    context(compose) { allDefaultSourceSetsForCompose() }
   }
 }
+/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
+fun Project.defaultBuildTemplateForComposeMppLib(
+  details: LibDetails,
+  ignoreAndroConfig: Boolean = false,
+  ignoreAndroPublish: Boolean = false,
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForComposeMppLib(
+  lib = details.toTMP(),
+  ignoreAndroConfig = ignoreAndroConfig,
+  ignoreAndroPublish = ignoreAndroPublish,
+  addCommonMainDependencies = addCommonMainDependencies,
+)
+
 
 
 /**
@@ -373,38 +389,38 @@ fun KotlinMultiplatformExtension.allDefaultSourceSetsForCompose(
 
 /** Only for very standard compose mpp apps. In most cases it's better to not use this function. */
 fun Project.defaultBuildTemplateForComposeMppApp(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   ignoreAndroConfig: Boolean = false, // so user have to explicitly say THAT he wants to ignore it.
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-) {
-  val compose = extensions.getByName("compose") as ComposeExtension
-  val desktop = (compose as ExtensionAware).extensions.getByName("desktop") as DesktopExtension
+): Unit = context(lib.details, lib.settings) {
+  val composeExt = extensions.getByName("compose") as ComposeExtension
+  val desktop = (composeExt as ExtensionAware).extensions.getByName("desktop") as DesktopExtension
   defaultBuildTemplateForComposeMppLib(
-    details = details,
+    lib = lib,
     ignoreAndroConfig = ignoreAndroConfig,
     ignoreAndroPublish = true,
     addCommonMainDependencies = addCommonMainDependencies,
   )
   extensions.configure<KotlinMultiplatformExtension> {
-    if (details.settings.withJs) js {
+    if (lib.settings.withJs) js {
       binaries.executable()
     }
-    if (details.settings.withLinuxX64) linuxX64 {
+    if (lib.settings.withLinuxX64) linuxX64 {
       binaries {
         executable {
-          entryPoint = "${details.appMainPackage}.${details.appMainFun}"
+          entryPoint = "${lib.details.appMainPackage}.${lib.details.appMainFun}"
         }
       }
     }
   }
-  if (details.settings.withJvm) {
+  if (lib.settings.withJvm) {
     desktop.application {
-        mainClass = details.run { "$appMainPackage.$appMainClass" }
+        mainClass = lib.details.run { "$appMainPackage.$appMainClass" }
         nativeDistributions {
           targetFormats(TargetFormat.Deb)
-          packageName = details.name
-          packageVersion = details.version.str
-          description = details.description
+          packageName = lib.details.name
+          packageVersion = lib.details.version.str
+          description = lib.details.description
         }
       }
   }

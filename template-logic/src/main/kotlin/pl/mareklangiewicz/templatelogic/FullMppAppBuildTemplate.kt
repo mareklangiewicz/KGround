@@ -9,14 +9,23 @@ import pl.mareklangiewicz.defaults.*
 // region [[Full MPP App Build Template]]
 
 fun Project.defaultBuildTemplateForFullMppApp(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
 ) {
   defaultBuildTemplateForComposeMppApp(
-    details = details,
+    lib = lib,
     ignoreAndroConfig = true,
     addCommonMainDependencies = addCommonMainDependencies,
   )
 }
+/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
+fun Project.defaultBuildTemplateForFullMppApp(
+  details: LibDetails,
+  addCommonMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForFullMppApp(
+  lib = details.toTMP(),
+  addCommonMainDependencies = addCommonMainDependencies,
+)
+
 
 // endregion [[Full MPP App Build Template]]

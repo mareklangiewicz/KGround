@@ -175,20 +175,19 @@ fun Project.defaultPublishingOfAndroApp(componentName: String = "release") =
 // region [[Andro Lib Build Template]]
 
 fun Project.defaultBuildTemplateForAndroLib(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
-): Unit = context(details, details.settings) {
+): Unit = context(lib.details, lib.settings) {
   // THE boundary. One check turns "details that may or may not have android" into an andro scope;
   // everything below is statically guaranteed and carries no `!!` and no `?: error`. Presence-as-
   // scope does not delete this check, it moves it to exactly one place per entry point.
-  val lib = details.toTMP()
   val andro = lib.andro ?: error("No andro settings.")
   repositories { context(lib.repos) { addRepos() } }
   // Since AGP 9 the 'com.android.library' plugin cannot be combined with KMP, so an android
   // library is a KMP module with the 'com.android.kotlin.multiplatform.library' target --
   // exactly what template-raw already does. LibraryExtension is not applied at all any more.
   extensions.configure<KotlinMultiplatformExtension> {
-    context(lib.details, andro) { androDefault() }
+    context(andro) { androDefault() } // details is already in scope, so only the andro half is added
     jvmToolchain(lib.settings.withJvmVer?.toInt() ?: 17) // works for jvm and android
     sourceSets.getByName("androidMain").dependencies { addAndroMainDependencies() }
   }
@@ -198,7 +197,7 @@ fun Project.defaultBuildTemplateForAndroLib(
   // "androidTestImplementation" -- it could not ask any more anyway, because
   // defaultAndroTestDeps takes its settings as a context parameter now.
   dependencies {
-    context(lib.settings, andro) {
+    context(andro) {
       defaultAndroDeps(configuration = "androidMainImplementation")
       defaultAndroTestDeps(configuration = "androidHostTestImplementation")
       defaultAndroTestDeps(configuration = "androidDeviceTestImplementation")
@@ -206,18 +205,16 @@ fun Project.defaultBuildTemplateForAndroLib(
     // compose-android deps only when compose EXISTS (scope opens) — no boolean, no !!
     lib.compose?.let { compose ->
       context(compose) { defaultComposeAndroDeps(configuration = "androidMainImplementation") }
-      context(lib.settings, compose) { defaultComposeAndroTestDeps(configuration = "androidHostTestImplementation") }
+      context(compose) { defaultComposeAndroTestDeps(configuration = "androidHostTestImplementation") }
     }
   }
   configurations.checkVerSync(warnOnly = true)
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
-  context(lib.details, lib.settings) {
-    defaultGroupAndVerAndDescriptionTMP()
-    if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
-    else println("Andro Lib Module ${name}: publishing (and signing) disabled")
-  }
+  defaultGroupAndVerAndDescriptionTMP()
+  if (plugins.hasPlugin("com.vanniktech.maven.publish")) defaultPublishing()
+  else println("Andro Lib Module ${name}: publishing (and signing) disabled")
 }
 
 /**
@@ -282,32 +279,40 @@ fun LibraryExtension.defaultAndroLibPublishAllVariants(
   }
 }
 
+/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
+fun Project.defaultBuildTemplateForAndroLib(
+  details: LibDetails,
+  addAndroMainDependencies: KotlinDependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForAndroLib(
+  lib = details.toTMP(),
+  addAndroMainDependencies = addAndroMainDependencies,
+)
+
 // endregion [[Andro Lib Build Template]]
 
 // region [[Andro App Build Template]]
 
 fun Project.defaultBuildTemplateForAndroApp(
-  details: LibDetails = gradle.extLibDetails,
+  lib: LibTMP = gradle.extLibTMP,
   addAndroDependencies: DependencyHandler.() -> Unit = {},
-): Unit = context(details, details.settings) {
+): Unit = context(lib.details, lib.settings) {
   // Same single boundary as the lib entry point above.
-  val lib = details.toTMP()
   val andro = lib.andro ?: error("No andro settings.")
   require(!andro.publishAllVariants) { "Only single app variant can be published" }
   val variant = andro.publishVariant.takeIf { andro.publishOneVariant }
   repositories { context(lib.repos) { addRepos() } }
   extensions.configure<ApplicationExtension> {
-    context(lib.details, andro) { defaultAndroApp(configureComposeAndro = lib.compose != null) }
+    context(andro) { defaultAndroApp(configureComposeAndro = lib.compose != null) }
     variant?.let { defaultAndroAppPublishVariant(it) }
   }
   dependencies {
-    context(lib.settings, andro) {
+    context(andro) {
       defaultAndroDeps()
       defaultAndroTestDeps()
     }
     lib.compose?.let { compose ->
       context(compose) { defaultComposeAndroDeps() }
-      context(lib.settings, compose) { defaultComposeAndroTestDeps() }
+      context(compose) { defaultComposeAndroTestDeps() }
     }
     add("debugImplementation", AndroidX.Tracing.ktx) // https://github.com/android/android-test/issues/1755
     addAndroDependencies()
@@ -316,11 +321,18 @@ fun Project.defaultBuildTemplateForAndroApp(
   tasks.defaultKotlinCompileOptions(
     jvmTargetVer = null, // jvmVer is set jvmToolchain in fun allDefault
   )
-  context(lib.details) {
-    defaultGroupAndVerAndDescriptionTMP()
-    variant?.let { defaultPublishingOfAndroApp(it) }
-  }
+  defaultGroupAndVerAndDescriptionTMP()
+  variant?.let { defaultPublishingOfAndroApp(it) }
 }
+/** Nested-model compat shim: un-nest ONCE at the top, siblings below. No default for [details] (finding 7). */
+fun Project.defaultBuildTemplateForAndroApp(
+  details: LibDetails,
+  addAndroDependencies: DependencyHandler.() -> Unit = {},
+): Unit = defaultBuildTemplateForAndroApp(
+  lib = details.toTMP(),
+  addAndroDependencies = addAndroDependencies,
+)
+
 
 /** @param configureComposeAndro caller decided compose exists AND was not configured the MPP way. */
 context(details: LibDetailsTMP, andro: LibAndroSettingsTMP)
