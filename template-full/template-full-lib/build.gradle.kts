@@ -27,9 +27,3 @@ plugins {
 
 defaultBuildTemplateForFullMppLib()
 
-// This lib has full Compose UI (not just compose-html) on js, so Skiko has to be bundled by webpack
-// or `checkComposeUiTestConfigurationForJs` fails. See https://youtrack.jetbrains.com/issue/CMP-4906
-// template-raw-lib avoids this by keeping js on compose-html only (its `composeUiTest` source set is
-// not in jsTest's dependsOn chain). The durable fix belongs in DepsKt's
-// `defaultBuildTemplateForFullMppLib`, which -- unlike the App templates -- never declares js binaries.
-kotlin { js { binaries.executable() } }
