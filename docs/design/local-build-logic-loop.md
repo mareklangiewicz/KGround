@@ -14,8 +14,8 @@ one build at it, revert everything afterwards.
 Add the same suffix in BOTH places DepsKt's own comments say must stay in sync:
 
 ```kotlin
-version = Ver(0, 4, 30, suffix = "-local1"),        // settings.gradle.kts
-val DepsPlug = Ver(0, 4, 30, suffix = "-local1")    // deps/src/main/kotlin/deps/Vers.kt
+version = Ver(0, 4, 31, suffix = "-local1"),        // settings.gradle.kts
+val DepsPlug = Ver(0, 4, 31, suffix = "-local1")    // deps/src/main/kotlin/deps/Vers.kt
 ```
 
 ```bash
@@ -38,7 +38,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.30-local1"  // ADD the suffix
+  id("pl.mareklangiewicz.deps.settings") version "0.4.31-local1"  // ADD the suffix
 }
 ```
 
