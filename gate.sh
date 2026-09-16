@@ -2,19 +2,29 @@
 # Gate for the build-logic-context-params branch: prove templatefun still works.
 #
 # templatefun lives in DepsKt now, reached through the composite include in settings.gradle.kts.
-# The `compile` step below compiles probe-logic, which depends on it, so the substitution itself
-# is part of what the gate checks: if the composite stops binding, this step fails first.
 #
-# Why a script and not a one-liner: running probes + KGround assemble + four template
+# This gate does NOT check that the composite is binding, and used to claim it did. Measured
+# 2026-09-16: with the substitution deliberately broken (templatefun renamed in DepsKt's settings so
+# no coordinate matches), BOTH `./gradlew :kground:compileKotlinJvm` and the old
+# `:probe-logic:compileKotlin` still went BUILD SUCCESSFUL -- Gradle silently resolved the PUBLISHED
+# templatefun instead. A dependency on templatefun does not make a compile step fail when
+# substitution stops; it just changes which jar arrives. The old claim was a success signal that
+# could not fail.
+#
+# To actually check it, read the binding rather than a build result:
+#   ./gradlew :<module>:dependencyInsight --configuration compileClasspath --dependency templatefun
+# and require "-> project" in the output. Not wired in as a step yet.
+#
+# Why a script and not a one-liner: running KGround assemble + four template
 # assembles back to back pins several Gradle and Kotlin daemons at once and chokes a
 # laptop with little RAM. This runs ONE step at a time, smallest first, and pauses in
 # between so memory can settle and you can Ctrl-C at a sane boundary.
 #
 # Usage:
 #   ./gate.sh                 # every step, in order, smallest first
-#   ./gate.sh probes          # just one step (any step name below)
+#   ./gate.sh compile         # just one step (any step name below)
 #   ./gate.sh native assemble # prewarm the heavy native compiles, then assemble
-#   ./gate.sh compile probes  # a few, in the order given
+#   ./gate.sh compile jvm     # a few, in the order given
 #   PAUSE=60 ./gate.sh        # longer settle between steps (default 20s)
 #   STOP_DAEMONS=1 ./gate.sh  # stop Gradle daemons after every step (slowest, leanest)
 #   ./gate.sh --list          # show step names and exit
@@ -32,7 +42,7 @@ GRADLE_FLAGS=${GRADLE_FLAGS:---max-workers=1}
 # The breakdown comes from `./gradlew assemble -m` (dry run), which lists the real graph:
 # 6x compileKotlinLinuxX64 + 6x compileTestKotlinLinuxX64 (native, the heaviest), 6x
 # compileKotlinJs plus npm setup, 10x compileKotlinJvm, 6x metadata.
-ALL_STEPS=(compile probes native-dist npm meta jvm js native native-test assemble
+ALL_STEPS=(compile native-dist npm meta jvm js native native-test assemble
            template-basic template-full template-andro template-raw)
 
 # The six modules with a linuxX64 target. Native compilation is the one place where doing
@@ -43,8 +53,7 @@ NATIVE_MODULES=(kground kground-io kgroundx kgroundx-io kommand-line kommand-sam
 # between them, so a step can be split into per-module invocations without extra plumbing.
 step_cmds() {
   case "$1" in
-    compile)       echo "./gradlew $GRADLE_FLAGS :probe-logic:compileKotlin" ;;
-    probes)        echo "./gradlew $GRADLE_FLAGS :kgroundx-experiments:probes" ;;
+    compile)       echo "./gradlew $GRADLE_FLAGS :kgroundx-experiments:compileKotlinJvm" ;;
     native-dist)   echo "./gradlew $GRADLE_FLAGS downloadKotlinNativeDistribution" ;;
     npm)           echo "./gradlew $GRADLE_FLAGS kotlinKotlinNpmCachesSetup jsPackageJson jsPublicPackageJson" ;;
     meta)          echo "./gradlew $GRADLE_FLAGS compileCommonMainKotlinMetadata" ;;

@@ -73,8 +73,7 @@ gradle.extLib = lib(
 
 // template-logic is gone: the build templates come from DepsKt's :templatefun now, reached through
 // the composite include in pluginManagement above (and, once published, through a plugin version).
-// probe-logic is what is left of it here -- see probe-logic/build.gradle.kts for why it exists.
-includeBuild("probe-logic")
+// probe-logic went with it -- see docs/design/template-logic-migration-status.md.
 
 include(":kground")
 include(":kgroundx")

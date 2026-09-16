@@ -37,14 +37,14 @@ expect() {
 echo "gate.sh self-test"
 
 stub 1
-expect "a failing step is RED and names the step" 1 "RED (exit 1) -- step 'compile' failed" compile probes
+expect "a failing step is RED and names the step" 1 "RED (exit 1) -- step 'compile' failed" compile jvm
 
 stub 0
 # Every step "succeeds" but no apk exists, so the full run must still be RED -- this is the
 # exact regression that made the gate untrustworthy: green banner, failing run.
 expect "full run with no fresh apk is RED" 1 "RED (exit 1) -- template-andro ran but produced no fresh apk"
 
-expect "steps that skip template-andro are GREEN" 0 "GREEN -- steps: compile probes" compile probes
+expect "steps that skip template-andro are GREEN" 0 "GREEN -- steps: compile jvm" compile jvm
 
 expect "an unknown step name is RED, not GREEN" 2 "RED (exit 2) -- unknown step: bogus" bogus
 

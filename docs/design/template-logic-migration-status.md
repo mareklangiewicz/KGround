@@ -1,8 +1,32 @@
 > **Moved 2026-09-15.** This file used to live at `template-logic/migration-status.md`. That module
-> is gone: its build templates are DepsKt's `:templatefun` and its probes are `probe-logic/`. The
-> file is kept verbatim as the evidence record for the de-nesting migration -- every probe, control
-> and compiler error text. Paths inside it refer to the old layout on purpose. What happened after
-> it is in `DepsKt/docs/design/lib-details-denesting.md`.
+> is gone: its build templates are DepsKt's `:templatefun`. The file is kept verbatim as the
+> evidence record for the de-nesting migration -- every probe, control and compiler error text.
+> Paths inside it refer to the old layout on purpose. What happened after it is in
+> `DepsKt/docs/design/lib-details-denesting.md`.
+>
+> **The probes are RETIRED as of 2026-09-16, and `probe-logic/` is deleted.** Nothing below is
+> runnable any more; read it as a record of what was measured, not as instructions. The experiment
+> it was evidence for has shipped, and evidence for a decision already made is not a regression
+> suite. Where each claim went:
+>
+> - **The script/module seam** (probes 1-8, 14-15: metadata agreement, the module flag, the
+>   `languageVersion >= 2.4` precondition, non-shadowing of `Project.name`, `context(a,b)` and `_`
+>   forwarding, the flattened coercion with one and with three context parameters, and with a
+>   trailing lambda, `-Xexplicit-context-arguments`) is now exercised by a PRODUCTION build script:
+>   DepsKt's own `deps/build.gradle.kts` applies published templatefun and calls
+>   `Project::defaultPublishing` through the flattened coercion on every build. A real consumer
+>   doing it beats a probe asserting it, and cannot rot on a branch.
+> - **The adjustment claims** (probes 16-18) are `DepsKt/deps/src/test/kotlin/LibAdjustmentTest.kt`.
+> - **The model claims** (`probeAdapterFidelity`, `probeCopyDance`, `probeDerivedDefaults`,
+>   `probePublishVariantAgreement`) were already covered, more strictly and in both directions, by
+>   `DepsKt/deps/src/test/kotlin/LibDenestingTest.kt`. They were duplicates, not evidence.
+> - **`probeAndroScope`** is not ported. Its interesting half is a compile error, recorded below as
+>   proven by construction; its runtime half is covered by the round trips.
+>
+> One claim did NOT survive scrutiny: that compiling `probe-logic` checked the composite binding.
+> Measured 2026-09-16 -- with the substitution deliberately broken, `:probe-logic:compileKotlin`
+> still went BUILD SUCCESSFUL, silently resolving the published templatefun. See the note at the top
+> of `gate.sh`.
 
 # template-logic migration status
 
