@@ -7,22 +7,18 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("my-convention")
+  id("pl.mareklangiewicz.templatefun")
   plugAll(plugs.KotlinMulti, plugs.VannikPublishNoVer)
 }
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val details = gradle.extLibDetails.copy(
-  name = "Kommand Samples",
-  description = "Additional samples for KommandLine."
-)
-
-
-defaultBuildTemplateForBasicMppLib(details) {
+defaultBuildTemplateForBasicMppLib(
+  myLib(adjustInfo = { it.copy(name = "Kommand Samples", description = "Additional samples for KommandLine.") }),
+) {
   api(project(":kommand-line"))
 
   // TODO: Now needed for SampleLinesTests, move reflect stuff to kground.ureflect later

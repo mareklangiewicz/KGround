@@ -8,15 +8,15 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("my-convention")
+  id("pl.mareklangiewicz.templatefun")
   plugAll(
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
-    plugs.AndroLibNoVer,
+    plugs.AndroKmpNoVer,
     plugs.VannikPublish,
   )
 }
@@ -24,8 +24,3 @@ plugins {
 // endregion [[Andro Lib Build Imports and Plugs]]
 
 defaultBuildTemplateForAndroLib()
-
-dependencies {
-  defaultAndroTestDeps(gradle.extLibDetails.settings, configuration = "androidTestImplementation")
-  // TODO_someday: investigate why "androidTestImplementation" doesn't inherit from "testImplementation"
-}

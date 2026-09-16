@@ -129,7 +129,7 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
       usesJdk()
       usesGradle()
       runGradleW("updateGeneratedDeps")
-      usesAddAndCommitFile("src/main/kotlin/deps/Deps.kt")
+      usesAddAndCommitFile("deps/src/main/kotlin/deps/Deps.kt")
     }
   }.write("update-generated-deps.yml", PProjDepsKt)
 }

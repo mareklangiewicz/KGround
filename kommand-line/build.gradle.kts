@@ -7,21 +7,18 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("my-convention")
+  id("pl.mareklangiewicz.templatefun")
   plugAll(plugs.KotlinMulti, plugs.VannikPublishNoVer)
 }
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val details = gradle.extLibDetails.copy(
-  name = "Kommand Line",
-  description = "Kotlin DSL for popular CLI commands."
-)
-
-defaultBuildTemplateForBasicMppLib(details) {
+defaultBuildTemplateForBasicMppLib(
+  myLib(adjustInfo = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") }),
+) {
   api(project(":kground"))
   api(project(":kground-io"))
 }

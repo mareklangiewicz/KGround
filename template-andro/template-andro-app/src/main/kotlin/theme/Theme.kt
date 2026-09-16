@@ -1,4 +1,4 @@
-package pl.mareklangiewicz.templateandro.theme
+package pl.mareklangiewicz.templateandro.androapp.theme
 
 import android.app.Activity
 import android.os.Build

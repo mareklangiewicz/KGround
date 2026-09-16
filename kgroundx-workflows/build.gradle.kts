@@ -7,23 +7,16 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("my-convention")
+  id("pl.mareklangiewicz.templatefun")
   plugAll(plugs.KotlinMulti, plugs.VannikPublishNoVer)
 }
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-val settings = gradle.extLibDetails.settings.copy(
-  withJs = false,
-  withLinuxX64 = false,
-)
-
-val details = gradle.extLibDetails.copy(settings = settings)
-
-defaultBuildTemplateForBasicMppLib(details) {
+defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false) }) {
   api(project(":kgroundx-maintenance"))
 }
 

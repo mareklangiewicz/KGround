@@ -8,10 +8,10 @@ import com.vanniktech.maven.publish.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("my-convention")
+  id("pl.mareklangiewicz.templatefun")
   plugAll(
     plugs.AndroAppNoVer,
     plugs.VannikPublish,
@@ -20,16 +20,17 @@ plugins {
 
 // endregion [[Andro App Build Imports and Plugs]]
 
-var details = gradle.extLibDetails
-val settings = details.settings.copy(compose = null)
-details = details.copy(settings = settings, namespace = "pl.mareklangiewicz.templateraw.androapp")
+// Was three statements with a `var`, the root named twice, and compose removed two levels down.
+// Now: one adjustment of one sibling, and dropping compose is a flat copy on the bundle.
+val lib = myLib(adjustInfo = { it.copy(namespace = "pl.mareklangiewicz.templateraw.androapp") })
+  .copy(compose = null) // this app does not use compose directly
 
-defaultBuildTemplateForAndroApp(details) {
+defaultBuildTemplateForAndroApp(lib) {
   implementation(project(":template-raw-lib"))
 }
 
 
 // TODO_later: better defaults for versions - algo from (major, minor, path) to code;
-// Very important: default synchronization between app version and LibDetails
+// Very important: default synchronization between app version and Lib
 // I have to have one source of truth!! But carefully select defaults propagation!
 // Also use new libs properties in compose.desktop.application...

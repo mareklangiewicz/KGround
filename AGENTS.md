@@ -43,3 +43,10 @@ Build file regions (marked with `// region [[Name]]` / `// endregion [[Name]]`) 
 - `--include-main` - Also update main `KGround/` project files (default: only templates)
 - `--backup` - Create `.bak` files before modifying
 - `--list-regions` - Show available regions and exit
+
+## Developing DepsKt and KGround (or the templates) together
+
+Use a **scoped local publication**: DepsKt published under a suffixed version, picked up through a
+content-filtered `mavenLocal`. Never `includeBuild("../DepsKt")` — measured, it substitutes
+templatefun but not DepsKt, so you silently get a split classpath. Steps, cleanup and the
+measurements behind them: `docs/design/local-build-logic-loop.md`.

@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import pl.mareklangiewicz.defaults.*
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.*
-import pl.mareklangiewicz.templatelogic.*
+import pl.mareklangiewicz.templatefun.*
 
 plugins {
   plugAll(
@@ -17,7 +17,6 @@ plugins {
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
   )
-  plug(plugs.AndroAppNoVer) apply false // will be applied conditionally depending on LibSettings
 }
 
 // endregion [[Full MPP App Build Imports and Plugs]]

@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+import pl.mareklangiewicz.deps.*
+import pl.mareklangiewicz.utils.extLib
+
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
 // Careful with auto publishing fails/stack traces
@@ -9,8 +12,6 @@ val buildScanPublishingAllowed = true &&
   true
 // false
 
-import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.extLibDetails
 
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
@@ -25,7 +26,7 @@ pluginManagement {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
 
-  val depsDir = File(rootDir, "../DepsKt").normalize()
+  val depsDir = File(rootDir, "../../DepsKt").normalize()
   val depsInclude =
     // depsDir.exists()
     false
@@ -36,7 +37,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.30" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -53,22 +54,23 @@ develocity {
 val enableJs = true
 val enableLinux = true
 
-gradle.extLibDetails = myLibDetails(
-  name = "TemplateBasic",
-  description = "Template for basic multi platform projects. No android or compose here.",
-  githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
-  version = Ver(0, 0, 1),
-  settings = LibSettings(
+gradle.extLib = lib(
+  info = myLibInfo(
+    name = "TemplateBasic",
+    description = "Template for basic multi platform projects. No android or compose here.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround/tree/main/template-basic",
+    version = Ver(0, 0, 1),
+  ),
+  flags = LibFlags(
     withJs = enableJs,
     withLinuxX64 = enableLinux,
     withKotlinxHtml = true, // also used in common code
-    compose = null,
-    andro = null,
   ),
+  withCompose = false, // was: compose = null
+  // andro is absent by default - was: andro = null
 )
 
 rootProject.name = "template-basic"
-includeBuild("../template-logic")
 include(":template-basic-lib")
 include(":template-basic-app")
 include(":template-basic-jvm-app")

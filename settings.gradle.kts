@@ -1,6 +1,6 @@
 
 import pl.mareklangiewicz.deps.*
-import pl.mareklangiewicz.utils.extLibDetails
+import pl.mareklangiewicz.utils.extLib
 
 rootProject.name = "KGround"
 
@@ -37,7 +37,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.25" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.30" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -54,22 +54,25 @@ develocity {
 val enableJs = true
 val enableNative = true
 
-gradle.extLibDetails = myLibDetails(
-  name = "KGround",
-  description = "Kotlin Common Ground.",
-  githubUrl = "https://github.com/mareklangiewicz/KGround",
-  version = Ver(0, 1, 32),
-  // https://central.sonatype.com/artifact/pl.mareklangiewicz/kground/
-  // https://github.com/mareklangiewicz/KGround/releases
-  settings = LibSettings(
+gradle.extLib = lib(
+  info = myLibInfo(
+    name = "KGround",
+    description = "Kotlin Common Ground.",
+    githubUrl = "https://github.com/mareklangiewicz/KGround",
+    version = Ver(0, 1, 32),
+    // https://central.sonatype.com/artifact/pl.mareklangiewicz/kground/
+    // https://github.com/mareklangiewicz/KGround/releases
+  ),
+  flags = LibFlags(
     withJs = enableJs,
     withLinuxX64 = enableNative,
-    compose = null,
     withCentralPublish = true,
   ),
+  withCompose = false, // was: compose = null - presence, stated as presence
 )
 
-includeBuild("template-logic")
+// template-logic is gone: the build templates come from DepsKt's :templatefun now, applied as a
+// published plugin whose version rides along with the deps settings plugin pinned above.
 
 include(":kground")
 include(":kgroundx")
