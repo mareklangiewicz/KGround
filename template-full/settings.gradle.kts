@@ -69,6 +69,8 @@ gradle.extLib = lib(
     withJs = enableJs,
     withLinuxX64 = enableLinux,
     withKotlinxHtml = true, // also used in common code
+    withTestJUnit5 = true,
+    withTestJUnit4OnAndroidDevice = true,
   ),
   withCompose = enableCompose,
   withAndro = enableAndro,
@@ -76,7 +78,16 @@ gradle.extLib = lib(
     withComposeHtmlCore = enableJs,
     withComposeHtmlSvg = enableJs,
     withComposeTestHtmlUtils = enableJs,
+    withComposeTestUi = true,
+    withComposeTestUiJUnit4 = true,
+    // withComposeTestUiJUnit5 = true, // What about this??
   ).takeIf { enableCompose },
+  // Note: stated explicitly, so it does NOT pick up withKotlinxHtml from flags - same as before.
+  repos = LibRepos(
+    withComposeJbDev = true,
+      // TODO: remove after update when new stable compose is published.
+      //   BTW it's very slow, use gradle offline mode after syncing to run tasks faster
+  ),
 )
 
 rootProject.name = "template-full"
