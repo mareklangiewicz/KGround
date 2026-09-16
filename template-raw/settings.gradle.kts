@@ -14,7 +14,7 @@ val allowBuildScanPublish = isCI
 // val allowBuildScanPublish = false
 
 val enableMppApp = true
-val enableJvmCliApp = false
+val enableJvmCliApp = true
 val enableAndroApp = true
 
 val enableJs = true
