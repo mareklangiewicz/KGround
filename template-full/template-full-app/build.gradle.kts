@@ -12,6 +12,7 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.templatefun.*
 
 plugins {
+  id("pl.mareklangiewicz.templatefun")
   plugAll(
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
