@@ -18,7 +18,7 @@ val enableJvmCliApp = true
 val enableAndroApp = true
 
 val enableJs = true
-val enableLinux = false // has to be false until JetBrains implements Compose UI for linuxX64..
+val enableLinux = true // ok since 0.4.58: composeMain (runtime only) reaches linuxX64, Compose UI does not.
 val enableCompose = true // has to be true at least for now (too keep template-raw logic simple)
 val enableAndro = true
 // Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
@@ -90,7 +90,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.57" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.58" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 

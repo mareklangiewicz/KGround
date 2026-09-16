@@ -37,7 +37,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.57" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.58" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -52,7 +52,7 @@ develocity {
 // endregion [[My Settings Stuff]]
 
 val enableJs = true
-val enableLinux = false
+val enableLinux = true // ok since 0.4.58: composeMain (runtime only) reaches linuxX64, Compose UI does not.
 val enableCompose = true
 val enableAndro = true
 // Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
