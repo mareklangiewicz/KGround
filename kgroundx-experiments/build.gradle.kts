@@ -16,9 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-// Sibling model: one flat copy, root named once. The nested form this replaces was
-//   val settings = gradle.extLibDetails.settings.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true)
-//   val details = gradle.extLibDetails.copy(settings = settings)
+// Sibling model: one flat copy, root named once.
 defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }) {
   api(project(":kgroundx-io"))
   api(project(":kgroundx-maintenance"))

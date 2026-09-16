@@ -14,8 +14,8 @@ one build at it, revert everything afterwards.
 Add the same suffix in BOTH places DepsKt's own comments say must stay in sync:
 
 ```kotlin
-version = Ver(0, 4, 29, suffix = "-local1"),        // settings.gradle.kts
-val DepsPlug = Ver(0, 4, 29, suffix = "-local1")    // deps/src/main/kotlin/deps/Vers.kt
+version = Ver(0, 4, 30, suffix = "-local1"),        // settings.gradle.kts
+val DepsPlug = Ver(0, 4, 30, suffix = "-local1")    // deps/src/main/kotlin/deps/Vers.kt
 ```
 
 ```bash
@@ -38,7 +38,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.29-local1"  // ADD the suffix
+  id("pl.mareklangiewicz.deps.settings") version "0.4.30-local1"  // ADD the suffix
 }
 ```
 
@@ -74,7 +74,7 @@ tasks.register("probeOrigins") {
   doLast {
     val c = Class.forName("pl.mareklangiewicz.deps.LibInfo")
     println("DepsKt from: " + c.protectionDomain?.codeSource?.location)
-    println("has getId(): " + c.methods.any { it.name == "getId" })  // an API only the new build has
+    println("has getId(): " + c.methods.any { it.name == "getId" })  // pick any API only one side has
   }
 }
 ```
