@@ -51,8 +51,16 @@ develocity {
 
 // endregion [[My Settings Stuff]]
 
+// Which sibling modules this template includes.
+val enableMppApp = true
+val enableJvmCliApp = true
+val enableAndroApp = false
+
+// Which targets and features the lib itself gets.
 val enableJs = true
 val enableLinux = true
+val enableCompose = false // this template is deliberately the plain one: no compose, no android.
+val enableAndro = false
 
 gradle.extLib = lib(
   info = myLibInfo(
@@ -66,11 +74,11 @@ gradle.extLib = lib(
     withLinuxX64 = enableLinux,
     withKotlinxHtml = true, // also used in common code
   ),
-  withCompose = false, // was: compose = null
-  // andro is absent by default - was: andro = null
+  withCompose = enableCompose,
+  withAndro = enableAndro,
 )
 
 rootProject.name = "template-basic"
 include(":template-basic-lib")
-include(":template-basic-app")
-include(":template-basic-jvm-app")
+if (enableMppApp) include(":template-basic-app")
+if (enableJvmCliApp) include(":template-basic-jvm-app")

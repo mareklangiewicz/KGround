@@ -51,6 +51,12 @@ develocity {
 
 // endregion [[My Settings Stuff]]
 
+// Which sibling modules this template includes.
+val enableMppApp = true
+val enableJvmCliApp = true
+val enableAndroApp = true
+
+// Which targets and features the lib itself gets.
 val enableJs = true
 val enableLinux = true // ok since 0.4.58: composeMain (runtime only) reaches linuxX64, Compose UI does not.
 val enableCompose = true
@@ -92,6 +98,6 @@ gradle.extLib = lib(
 
 rootProject.name = "template-full"
 include(":template-full-lib")
-include(":template-full-app")
-include(":template-full-jvm-cli-app")
-include(":template-full-andro-app")
+if (enableMppApp) include(":template-full-app")
+if (enableJvmCliApp) include(":template-full-jvm-cli-app")
+if (enableAndroApp) include(":template-full-andro-app")

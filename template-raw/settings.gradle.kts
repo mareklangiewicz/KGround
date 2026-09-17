@@ -13,13 +13,15 @@ val allowBuildScanPublish = isCI
 // val allowBuildScanPublish = !isCI
 // val allowBuildScanPublish = false
 
+// Which sibling modules this template includes.
 val enableMppApp = true
 val enableJvmCliApp = true
 val enableAndroApp = true
 
+// Which targets and features the lib itself gets.
 val enableJs = true
 val enableLinux = true // ok since 0.4.58: composeMain (runtime only) reaches linuxX64, Compose UI does not.
-val enableCompose = true // has to be true at least for now (too keep template-raw logic simple)
+val enableCompose = true
 val enableAndro = true
 // Note: Andro works, but NOT under IntelliJ (with enabled andro plugin/jetpack compose plugin)
 // Use Android Studio or disable andro target temporarily (or compile only with CLI).

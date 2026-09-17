@@ -51,6 +51,17 @@ develocity {
 
 // endregion [[My Settings Stuff]]
 
+// Which sibling modules this template includes.
+val enableMppApp = false
+val enableJvmCliApp = false
+val enableAndroApp = true
+
+// Which targets and features the lib itself gets.
+val enableJs = false // android-only template: the lib has no js target.
+val enableLinux = false
+val enableCompose = true // Jetpack Compose, used directly by template-andro-app.
+val enableAndro = true
+
 gradle.extLib = lib(
   info = myLibInfo(
     name = "TemplateAndro",
@@ -59,12 +70,16 @@ gradle.extLib = lib(
     version = Ver(0, 0, 17),
   ),
   flags = LibFlags(
+    withJs = enableJs,
+    withLinuxX64 = enableLinux,
     withTestJUnit4 = true,
     withTestJUnit5 = false,
   ),
-  andro = LibAndro(publishVariant = "debug"),
+  withCompose = enableCompose,
+  withAndro = enableAndro,
+  andro = LibAndro(publishVariant = "debug").takeIf { enableAndro },
 )
 
 rootProject.name = "template-andro"
 include(":template-andro-lib")
-include(":template-andro-app")
+if (enableAndroApp) include(":template-andro-app")
