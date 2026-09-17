@@ -58,7 +58,7 @@ object MyBasicExamples {
     alsoGradleKts = true,
   )
 
-  private val PTemplBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-app/src"
+  private val PTemplBasicJvmAppSrc = PProjKGround / "template-basic/template-basic-jvm-cli-app/src"
 
   suspend fun disableBasicKtFile() = (PTemplBasicJvmAppSrc / "main" / "kotlin/App.jvm.kt").myKotlinFileDisable()
 

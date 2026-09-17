@@ -81,4 +81,4 @@ gradle.extLib = lib(
 rootProject.name = "template-basic"
 include(":template-basic-lib")
 if (enableMppApp) include(":template-basic-app")
-if (enableJvmCliApp) include(":template-basic-jvm-app")
+if (enableJvmCliApp) include(":template-basic-jvm-cli-app")
