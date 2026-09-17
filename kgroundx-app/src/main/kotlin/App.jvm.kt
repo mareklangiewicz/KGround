@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.versionOption
 import com.github.ajalt.clikt.parameters.types.boolean
 import kotlinx.coroutines.*
 import pl.mareklangiewicz.annotations.*
@@ -58,8 +59,18 @@ fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
 
 
 
+/**
+ * The version baked into the jar manifest by kgroundx-app/build.gradle.kts.
+ *
+ * Null when running from loose classes rather than a jar (IDE, tests) -- there is no manifest to
+ * read then, so say so instead of inventing a number.
+ */
+private fun kgroundxVersion(): String =
+  KGroundXCommand::class.java.`package`?.implementationVersion ?: "unknown (no jar manifest)"
+
 private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
   init {
+    versionOption(kgroundxVersion())
     subcommands(
       GetUserFlagCommand(),
       SetUserFlagCommand(),
