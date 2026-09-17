@@ -14,7 +14,7 @@ plugins {
   // Resolve the publish plugin ONCE here, with its version. Without this the only source of
   // it is the templatefun plugin's own classpath (templatefun depends on it), which Gradle sees as
   // "unknown version" -- and then a versioned request in a subproject cannot be checked
-  // against it. template-raw/-full/-andro all declare it here for the same reason.
+  // against it. template-full and template-andro declare it here for the same reason.
   plug(plugs.VannikPublish) apply false
 }
 

@@ -15,7 +15,7 @@ plugins {
   plugAll(
     plugs.AndroAppNoVer,
     // This app uses Jetpack Compose directly (not compose-multiplatform), so it needs the
-    // compose COMPILER plugin. template-raw-andro-app does not: its UI lives in the shared lib.
+    // compose COMPILER plugin.
     plugs.KotlinMultiCompose,
     plugs.VannikPublish,
   )
@@ -27,10 +27,9 @@ plugins {
 // with 'org.jetbrains.kotlin.multiplatform', and there is no KMP application plugin. The
 // shared multiplatform code lives in :template-andro-lib, which this app depends on.
 //
-// Unlike template-raw-andro-app, compose is NOT set to null here: this app uses Jetpack
-// Compose directly (MainActivity and its own theme/ package), which is the point of an
-// android-only template. Keeping the compose settings is what makes defaultAndroDeps add
-// the androidx compose artifacts.
+// Compose settings are kept (not nulled out): this app uses Jetpack Compose directly
+// (MainActivity and its own theme/ package), which is the point of an android-only template,
+// and keeping them is what makes defaultAndroDeps add the androidx compose artifacts.
 // One flat copy of the ONE sibling that changes, with the root named once.
 val lib = myLib(adjustInfo = { it.copy(namespace = "pl.mareklangiewicz.templateandro.androapp") })
 

@@ -4,13 +4,13 @@ import java.io.File
 import java.nio.file.Files
 
 val ROOT = File("/home/marek/code/kotlin/KGround")
-val TEMPLATE_RAW = ROOT.resolve("template-raw")
+val TEMPLATE_SRC = ROOT.resolve("template-full")
 
 val SOURCE_PRIORITY = listOf(
-    "template-raw-lib",
-    "template-raw-app",
-    "template-raw-andro-app",
-    "template-raw-jvm-cli-app",
+    "template-full-lib",
+    "template-full-app",
+    "template-full-andro-app",
+    "template-full-jvm-cli-app",
     ""
 )
 
@@ -96,7 +96,7 @@ fun parseArgs(args: Array<String>): Map<String, Any> {
 
 fun listAllRegions() {
     val allRegions = findAllRegionsInTemplateRaw()
-    println("Available regions in template-raw/:\n")
+    println("Available regions in template-full/:\n")
     for ((name, sources) in allRegions) {
         val sourcePaths = sources.joinToString(", ") { it.relativeTo(ROOT).path }
         println("  * $name")
@@ -113,7 +113,7 @@ fun listAllRegions() {
 
 fun findAllRegionsInTemplateRaw(): Map<String, List<File>> {
     val result = mutableMapOf<String, MutableList<File>>()
-    val gradleFiles = TEMPLATE_RAW.walkTopDown()
+    val gradleFiles = TEMPLATE_SRC.walkTopDown()
         .filter { it.isFile && (it.name.endsWith(".gradle.kts") || it.name == "settings.gradle.kts") }
     
     for (file in gradleFiles) {
@@ -175,7 +175,7 @@ fun selectSourceFile(sourceFiles: List<File>): File? {
     for (priority in SOURCE_PRIORITY) {
         val matching = sourceFiles.find { 
             if (priority.isEmpty()) {
-                it.parentFile == TEMPLATE_RAW
+                it.parentFile == TEMPLATE_SRC
             } else {
                 it.path.contains("/$priority/")
             }
@@ -205,7 +205,7 @@ fun findTargetFiles(regionName: String): MutableList<File> {
     val targets = mutableListOf<File>()
     
     for (file in ROOT.walkTopDown().filter { it.isFile && (it.name.endsWith(".gradle.kts") || it.name == "settings.gradle.kts") }) {
-        if (file.path.contains("/template-raw/")) continue
+        if (file.path.contains("/template-full/")) continue
         if (pattern.containsMatchIn(file.readText())) {
             targets.add(file)
         }

@@ -13,7 +13,7 @@ Keep this sheet handy when automating changes or onboarding new agents.
 
 ## Template Sync Tool
 
-Build file regions (marked with `// region [[Name]]` / `// endregion [[Name]]`) can be synchronized from `template-raw/` to other templates.
+Build file regions (marked with `// region [[Name]]` / `// endregion [[Name]]`) can be synchronized from `template-full/` to other templates.
 
 ### Usage
 

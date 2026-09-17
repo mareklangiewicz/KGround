@@ -43,7 +43,7 @@ GRADLE_FLAGS=${GRADLE_FLAGS:---max-workers=1}
 # 6x compileKotlinLinuxX64 + 6x compileTestKotlinLinuxX64 (native, the heaviest), 6x
 # compileKotlinJs plus npm setup, 10x compileKotlinJvm, 6x metadata.
 ALL_STEPS=(compile native-dist npm meta jvm js native native-test assemble
-           template-basic template-full template-andro template-raw)
+           template-basic template-full template-andro)
 
 # The six modules with a linuxX64 target. Native compilation is the one place where doing
 # all six in one invocation is noticeably heavier than doing them one at a time.

@@ -2,7 +2,9 @@
 
 How to develop DepsKt together with KGround or its templates, and the measurements behind the
 recipe. `AGENTS.md` points here. Prototyped in `template-raw` on 2026-09-16 and reverted; nothing
-below is committed build config.
+below is committed build config. (`template-raw` was deleted on 2026-09-17 once it and
+`template-full` converged -- the recipe applies unchanged to `template-full`.)
+
 
 ## The recipe: a scoped local publication
 
@@ -24,7 +26,7 @@ cd ~/code/kotlin/DepsKt && ./gradlew publishToMavenLocal
 
 ### 2. Point the consuming build at it
 
-Two temporary edits in the consumer's `settings.gradle.kts` (`KGround/`, `template-raw/`, ..).
+Two temporary edits in the consumer's `settings.gradle.kts` (`KGround/`, `template-full/`, ..).
 They are INSIDE the `[[My Settings Stuff]]` region, so **do not run `sync-regions` while they are
 in place, and do not commit them**:
 
