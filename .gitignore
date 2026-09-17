@@ -4,6 +4,8 @@
 /local.properties
 /.idea
 /build
+/abcdk/build
+/tuplek/build
 /kground/build
 /kgroundx/build
 /kground-io/build

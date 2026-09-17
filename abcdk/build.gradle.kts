@@ -1,4 +1,3 @@
-
 // region [[Basic MPP Lib Build Imports and Plugs]]
 
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -16,13 +15,4 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicMppLib(
-  ignoreCompose = true, // necessary because I sometimes include this module locally from UWidgets project
-) {
-  api(project(":abcdk"))
-  api(project(":tuplek"))
-  api(Langiewicz.upue)
-  api(KotlinX.datetime)
-  api(KotlinX.coroutines_core)
-  implementation(Kotlin.reflect)
-}
+defaultBuildTemplateForBasicMppLib()

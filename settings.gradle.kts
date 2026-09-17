@@ -74,6 +74,12 @@ gradle.extLib = lib(
 // template-logic is gone: the build templates come from DepsKt's :templatefun now, applied as a
 // published plugin whose version rides along with the deps settings plugin pinned above.
 
+// abcdk and tuplek were folded in from their own repos (mareklangiewicz/AbcdK, .../TupleK). They
+// keep their artifact ids, so consumers of pl.mareklangiewicz:abcdk / :tuplek are unaffected -- but
+// they now ride KGround's single version, which jumps them past their old 0.0.x line.
+include(":abcdk")
+include(":tuplek")
+
 include(":kground")
 include(":kgroundx")
 include(":kground-io")
