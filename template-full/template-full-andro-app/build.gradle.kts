@@ -14,16 +14,20 @@ plugins {
   id("pl.mareklangiewicz.templatefun")
   plugAll(
     plugs.AndroAppNoVer,
+    // The compose COMPILER plugin, even though this app declares no @Composable today.
+    // App modules are meant to stay thin, but someone using this template should be able to
+    // drop a quick @Composable in here before deciding to lift it into a lib module.
+    plugs.KotlinMultiCompose,
     plugs.VannikPublish,
   )
 }
 
 // endregion [[Andro App Build Imports and Plugs]]
 
-// Compose is dropped here: this app declares no @Composable of its own, it only calls
-// setMyHelloContent() from :template-full-lib, so it needs no compose compiler plugin.
+// Compose is intentionally kept (not nulled out): this app has no @Composable of its own yet,
+// but keeping the compose settings is what makes defaultAndroDeps supply the compose artifacts,
+// so adding one here is a one-liner rather than a build-script change.
 val lib = myLib(adjustInfo = { it.copy(namespace = "pl.mareklangiewicz.templatefull.androapp") })
-  .copy(compose = null) // this app does not use compose directly
 
 defaultBuildTemplateForAndroApp(lib) {
   implementation(project(":template-full-lib"))
