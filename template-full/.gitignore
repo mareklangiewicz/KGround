@@ -3,6 +3,7 @@
 /local.properties
 /.idea
 /build
+/template-full-andro-app/build
 /template-full-lib/build
 /template-full-app/build
 /template-full-jvm-cli-app/build
