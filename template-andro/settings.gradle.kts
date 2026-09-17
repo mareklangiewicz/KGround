@@ -77,6 +77,10 @@ gradle.extLib = lib(
     withLinuxX64 = enableLinux,
     withTestJUnit4 = true,
     withTestJUnit5 = false,
+    // Device tests take JUnit4 through their OWN flag -- the plain withTestJUnit4 does not reach
+    // that configuration. Without this, @RunWith(USpekJUnit4Runner) in androidDeviceTest does not
+    // resolve. See defaultAndroTestDeps' kdoc.
+    withTestJUnit4OnAndroidDevice = true,
   ),
   withCompose = enableCompose,
   withAndro = enableAndro,
