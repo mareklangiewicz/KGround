@@ -20,6 +20,6 @@ plugins {
 
 // endregion [[Basic JVM App Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicJvmApp(ignoreCompose = true, ignoreAndroTarget = true) {
+defaultBuildTemplateForBasicJvmApp(publish = LibPublish(), ignoreCompose = true, ignoreAndroTarget = true) {
    implementation(project(":template-full-lib"))
 }

@@ -20,6 +20,6 @@ plugins {
 
 // endregion [[Basic JVM App Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicJvmApp {
+defaultBuildTemplateForBasicJvmApp(publish = LibPublish()) {
    implementation(project(":template-basic-lib"))
 }

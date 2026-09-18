@@ -40,7 +40,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.62" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.63" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -84,7 +84,7 @@ gradle.extLib = lib(
   ),
   withCompose = enableCompose,
   withAndro = enableAndro,
-  andro = LibAndro(publishVariant = "debug").takeIf { enableAndro },
+  andro = LibAndro().takeIf { enableAndro },
 )
 
 rootProject.name = "template-andro"

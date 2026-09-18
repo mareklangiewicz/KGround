@@ -25,5 +25,5 @@ plugins {
 // endregion [[Full MPP Lib Build Imports and Plugs]]
 
 
-defaultBuildTemplateForFullMppLib()
+defaultBuildTemplateForFullMppLib(publish = LibPublish())
 

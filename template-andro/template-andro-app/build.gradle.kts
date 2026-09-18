@@ -33,7 +33,7 @@ plugins {
 // One flat copy of the ONE sibling that changes, with the root named once.
 val lib = myLib(adjustInfo = { it.copy(namespace = "pl.mareklangiewicz.templateandro.androapp") })
 
-defaultBuildTemplateForAndroApp(lib) {
+defaultBuildTemplateForAndroApp(lib, publish = LibPublish(androVariant = "debug")) {
   implementation(project(":template-andro-lib"))
 }
 

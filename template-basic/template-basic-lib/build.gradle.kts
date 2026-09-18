@@ -16,7 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicMppLib {
+defaultBuildTemplateForBasicMppLib(publish = LibPublish()) {
   api(Langiewicz.abcdk)
   api(Langiewicz.tuplek)
   api(Langiewicz.upue)

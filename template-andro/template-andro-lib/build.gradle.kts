@@ -23,4 +23,4 @@ plugins {
 
 // endregion [[Andro Lib Build Imports and Plugs]]
 
-defaultBuildTemplateForAndroLib()
+defaultBuildTemplateForAndroLib(publish = LibPublish())

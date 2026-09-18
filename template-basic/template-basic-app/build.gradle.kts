@@ -17,6 +17,6 @@ plugins {
 // endregion [[Basic MPP App Build Imports and Plugs]]
 
 
-defaultBuildTemplateForBasicMppApp {
+defaultBuildTemplateForBasicMppApp(publish = LibPublish()) {
   implementation(project(":template-basic-lib"))
 }
