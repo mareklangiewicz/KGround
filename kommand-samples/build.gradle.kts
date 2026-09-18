@@ -18,6 +18,7 @@ plugins {
 
 defaultBuildTemplateForBasicMppLib(
   myLib(adjustInfo = { it.copy(name = "Kommand Samples", description = "Additional samples for KommandLine.") }),
+  publish = LibPublish(toCentral = true),
 ) {
   api(project(":kommand-line"))
 

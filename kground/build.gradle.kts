@@ -17,6 +17,7 @@ plugins {
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 defaultBuildTemplateForBasicMppLib(
+  publish = LibPublish(toCentral = true),
   ignoreCompose = true, // necessary because I sometimes include this module locally from UWidgets project
 ) {
   api(project(":abcdk"))

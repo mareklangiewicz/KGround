@@ -37,7 +37,7 @@ pluginManagement {
 }
 
 plugins {
-  id("pl.mareklangiewicz.deps.settings") version "0.4.62" // https://plugins.gradle.org/search?term=mareklangiewicz
+  id("pl.mareklangiewicz.deps.settings") version "0.4.63" // https://plugins.gradle.org/search?term=mareklangiewicz
   id("com.gradle.develocity") version "4.5.1" // https://docs.gradle.com/develocity/gradle-plugin/
 }
 
@@ -66,7 +66,14 @@ gradle.extLib = lib(
   flags = LibFlags(
     withJs = enableJs,
     withLinuxX64 = enableNative,
-    withCentralPublish = true,
+    // withCentralPublish is GONE from LibFlags as of DepsKt 0.4.63. It was a per-REPO flag living in
+    // the object every module clones for PLATFORM reasons, so `gradle.extLib.copy(flags = ..)`
+    // carried it into modules that never asked -- that is how six of USpek's SAMPLE apps ended up
+    // one green build away from permanent Maven Central coordinates. Each module that publishes now
+    // says so itself: `publish = LibPublish(toCentral = true)` at its own
+    // defaultBuildTemplateFor* call. All 13 included modules here do; a module that forgot would
+    // FAIL at configuration time, not publish nothing quietly.
+    // See DepsKt/docs/design/publish-intent-per-module.md.
   ),
   withCompose = false, // was: compose = null - presence, stated as presence
 )

@@ -28,7 +28,7 @@ plugins {
 // I'd have to use java plugin for source jar generation (and had problems with that; sources are required by sonatype),
 // also it's better to rely on modern kotlin mpp plugin (even if only jvm target is enabled),
 // to generate all needed gradle metadata so it's all compatible when other mpp projects depend on this module.
-defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false) }) {
+defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false) }, publish = LibPublish(toCentral = true)) {
   api(project(":kgroundx-maintenance"))
 }
 

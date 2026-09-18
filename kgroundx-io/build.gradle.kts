@@ -16,7 +16,7 @@ plugins {
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicMppLib {
+defaultBuildTemplateForBasicMppLib(publish = LibPublish(toCentral = true)) {
   api(project(":kgroundx"))
   api(project(":kground-io"))
   api(project(":kommand-line"))

@@ -17,7 +17,7 @@ plugins {
 // endregion [[Basic MPP Lib Build Imports and Plugs]]
 
 // Sibling model: one flat copy, root named once.
-defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }) {
+defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 = false, withKotlinxHtml = true) }, publish = LibPublish(toCentral = true)) {
   api(project(":kgroundx-io"))
   api(project(":kgroundx-maintenance"))
   implementation(Org.Hildan.Chrome.devtools_kotlin)

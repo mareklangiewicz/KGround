@@ -20,7 +20,7 @@ plugins {
 
 // endregion [[Basic JVM App Build Imports and Plugs]]
 
-defaultBuildTemplateForBasicJvmApp {
+defaultBuildTemplateForBasicJvmApp(publish = LibPublish(toCentral = true)) {
   implementation(project(":kgroundx-jupyter"))
   implementation(project(":kgroundx-workflows"))
   implementation(project(":kgroundx-experiments"))

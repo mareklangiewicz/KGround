@@ -18,6 +18,7 @@ plugins {
 
 defaultBuildTemplateForBasicMppLib(
   myLib(adjustInfo = { it.copy(name = "Kommand Line", description = "Kotlin DSL for popular CLI commands.") }),
+  publish = LibPublish(toCentral = true),
 ) {
   api(project(":kground"))
   api(project(":kground-io"))
