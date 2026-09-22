@@ -48,25 +48,26 @@ Build file regions (marked with `// region [[Name]]` / `// endregion [[Name]]`) 
 - `--backup` - Create `.bak` files before modifying
 - `--list-regions` - Show available regions and exit
 
-### Two things it does that you have to undo by hand
-
-Both measured 2026-09-22 while syncing `[[My Settings Stuff]]`.
-
-**It rewrites the root `settings.gradle.kts` `depsDir` path, and `--include-main` does not stop
-it.** The source region says `File(rootDir, "../../DepsKt")` because `template-full/` sits one
-level deeper; the root project needs `"../DepsKt"`. Every `--apply` overwrites it with the
-template's depth, which breaks the local-DepsKt composite workflow described below. `--include-main`
-is no protection: its filter only drops paths starting with `kground`, and the root settings file
-does not. **After any apply, check that line and put it back.** The `[[My Settings Stuff <~~]]`
-region above it documents an arrow rewrite (`~~>".*/Deps\.kt"~~>"../DepsKt"<~~`) that would fix
-this automatically, but it is not implemented -- `MyTemplates.kt` carries it as
-`TODO_someday`, and both the collector and the injector pass `allowTildes = false`, so tilde
-regions are skipped entirely.
+### One thing it does that looks like a change but is not
 
 **It reports every target as changed on every run.** The region it writes differs from the region
 it reads by one trailing blank line, so a freshly synced file still shows as `(content changed)`
 next run. Verified not cumulative: a second apply leaves the file byte-identical, so this is noise
 in the report, not drift in the files. Do not chase it.
+
+### It used to clobber the root `depsDir` path -- fixed at the source, 2026-09-22
+
+Worth knowing, because the fix is the reason this tool is now safe to run unattended. The region
+used to carry `File(rootDir, "../../DepsKt")`, a path whose correct depth differs per project, so
+every `--apply` rewrote the root project's `"../DepsKt"` and had to be undone by hand.
+`--include-main` was no protection: its filter only drops paths starting with `kground`, and the
+root settings file does not. The path is absolute now (`enableLocalDepsKtInDir`), which is the same
+line everywhere, so the region has **no per-project text left at all** and a sync needs no repair.
+
+That also makes the `[[My Settings Stuff <~~]]` region dead: the arrow rewrite it documents
+(`~~>".*/Deps\.kt"~~>"../DepsKt"<~~`) exists to patch exactly that depth, was never implemented
+(`MyTemplates.kt` carries it as `TODO_someday`), and both the collector and the injector pass
+`allowTildes = false` so tilde regions are skipped entirely. It is left in place for now.
 
 ## Developing DepsKt and KGround (or the templates) together
 

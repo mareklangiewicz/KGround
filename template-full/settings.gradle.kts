@@ -6,7 +6,7 @@ import pl.mareklangiewicz.utils.extLib
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
 // Careful with auto publishing fails/stack traces
-val buildScanPublishingAllowed = true &&
+val enableBuildScanPublishingOnFailure = true &&
   System.getenv("GITHUB_ACTIONS") == "true" &&
   // System.getenv("GITHUB_ACTIONS") != "true" &&
   true
@@ -29,13 +29,16 @@ pluginManagement {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
 
-  val depsDir = File(rootDir, "../../DepsKt").normalize()
-  val depsInclude =
-    // depsDir.exists()
-    false
-  if (depsInclude) {
-    logger.warn("Including local build $depsDir")
-    includeBuild(depsDir)
+  // Absolute on purpose: this is then the SAME line in every project, with no ../.. depth to
+  // adjust per repo -- which is the only thing the (unimplemented) [[My Settings Stuff <~~]] arrow
+  // region ever existed to patch up, and the only per-project text this region still had.
+  val enableLocalDepsKtInDir: File? =
+    null
+    // File("/home/marek/code/kotlin/DepsKt")
+    // File("/home/marek/code/kotlin/DepsKt").takeIf { it.exists() }
+  if (enableLocalDepsKtInDir != null) {
+    logger.warn("Including local build $enableLocalDepsKtInDir")
+    includeBuild(enableLocalDepsKtInDir)
   }
 }
 
@@ -52,8 +55,8 @@ develocity {
     // the settings-script top-level `val` from inside it captures the script OBJECT, which the
     // configuration cache rejects: "cannot serialize Gradle script object references". A local is
     // captured by value.
-    val allowed = buildScanPublishingAllowed
-    publishing.onlyIf { allowed && it.buildResult.failures.isNotEmpty() }
+    val enabled = enableBuildScanPublishingOnFailure
+    publishing.onlyIf { enabled && it.buildResult.failures.isNotEmpty() }
   }
 }
 
