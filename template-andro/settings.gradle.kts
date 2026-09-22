@@ -47,7 +47,6 @@ develocity {
   }
 }
 
-
 // endregion [[My Settings Stuff]]
 
 // Which sibling modules this template includes.

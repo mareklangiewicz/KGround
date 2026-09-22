@@ -47,7 +47,6 @@ develocity {
   }
 }
 
-
 // endregion [[My Settings Stuff]]
 
 val enableJs = true
