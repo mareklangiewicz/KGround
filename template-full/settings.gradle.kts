@@ -48,7 +48,12 @@ develocity {
   buildScan {
     termsOfUseUrl = "https://gradle.com/terms-of-service"
     termsOfUseAgree = "yes"
-    publishing.onlyIf { buildScanPublishingAllowed && it.buildResult.failures.isNotEmpty() }
+    // Copied to a local at configuration time. `onlyIf` runs at the END of the build, so reading
+    // the settings-script top-level `val` from inside it captures the script OBJECT, which the
+    // configuration cache rejects: "cannot serialize Gradle script object references". A local is
+    // captured by value.
+    val allowed = buildScanPublishingAllowed
+    publishing.onlyIf { allowed && it.buildResult.failures.isNotEmpty() }
   }
 }
 

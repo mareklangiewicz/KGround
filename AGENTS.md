@@ -48,6 +48,26 @@ Build file regions (marked with `// region [[Name]]` / `// endregion [[Name]]`) 
 - `--backup` - Create `.bak` files before modifying
 - `--list-regions` - Show available regions and exit
 
+### Two things it does that you have to undo by hand
+
+Both measured 2026-09-22 while syncing `[[My Settings Stuff]]`.
+
+**It rewrites the root `settings.gradle.kts` `depsDir` path, and `--include-main` does not stop
+it.** The source region says `File(rootDir, "../../DepsKt")` because `template-full/` sits one
+level deeper; the root project needs `"../DepsKt"`. Every `--apply` overwrites it with the
+template's depth, which breaks the local-DepsKt composite workflow described below. `--include-main`
+is no protection: its filter only drops paths starting with `kground`, and the root settings file
+does not. **After any apply, check that line and put it back.** The `[[My Settings Stuff <~~]]`
+region above it documents an arrow rewrite (`~~>".*/Deps\.kt"~~>"../DepsKt"<~~`) that would fix
+this automatically, but it is not implemented -- `MyTemplates.kt` carries it as
+`TODO_someday`, and both the collector and the injector pass `allowTildes = false`, so tilde
+regions are skipped entirely.
+
+**It reports every target as changed on every run.** The region it writes differs from the region
+it reads by one trailing blank line, so a freshly synced file still shows as `(content changed)`
+next run. Verified not cumulative: a second apply leaves the file byte-identical, so this is noise
+in the report, not drift in the files. Do not chase it.
+
 ## Developing DepsKt and KGround (or the templates) together
 
 Use a **scoped local publication**: DepsKt published under a suffixed version, picked up through a
