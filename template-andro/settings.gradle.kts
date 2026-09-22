@@ -3,7 +3,6 @@
 import pl.mareklangiewicz.deps.*
 import pl.mareklangiewicz.utils.extLib
 
-// gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
 // region [[My Settings Stuff]]
 
