@@ -65,10 +65,15 @@ root settings file does not. Both of the region's knobs are environment variable
 there is no path and no flag in the file at all: the region has **no per-project text left**, and a
 sync needs no repair.
 
-That also makes the `[[My Settings Stuff <~~]]` region dead: the arrow rewrite it documents
-(`~~>".*/Deps\.kt"~~>"../DepsKt"<~~`) exists to patch exactly that depth, was never implemented
-(`MyTemplates.kt` carries it as `TODO_someday`), and both the collector and the injector pass
-`allowTildes = false` so tilde regions are skipped entirely. It is left in place for now.
+That also made the `[[My Settings Stuff <~~]]` regions dead, and **they have been deleted here**.
+The arrow rewrite they documented (`~~>".*/Deps\.kt"~~>"../DepsKt"<~~`) existed to patch exactly
+that per-project depth, was never implemented (`MyTemplates.kt` still carries it as
+`TODO_someday`), and both the collector and the injector pass `allowTildes = false`, so tilde
+regions were skipped entirely -- they described a fixup that never ran, for a problem that no
+longer exists.
+
+Note they are **not** synced, for the same reason: the injector skips them. So the ~19 other repos
+carrying this region each keep their own copy, and deleting those is a manual sweep.
 
 ## The two settings-region toggles are environment variables
 

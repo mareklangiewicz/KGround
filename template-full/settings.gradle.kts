@@ -5,9 +5,6 @@ import pl.mareklangiewicz.utils.extLib
 
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
-// region [[My Settings Stuff <~~]]
-// ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
-// endregion [[My Settings Stuff <~~]]
 // region [[My Settings Stuff]]
 
 // https://docs.gradle.org/current/userguide/upgrading_version_9.html#opt_into_gradle_10_behavior_by_disabling_implicit_lookup_in_parent_projects
