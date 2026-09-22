@@ -5,14 +5,6 @@ import pl.mareklangiewicz.utils.extLib
 
 // gradle.logSomeEventsToFile(rootProjectPath / "my.gradle.log")
 
-// Careful with auto publishing fails/stack traces
-val enableBuildScanPublishingOnFailure = true &&
-  System.getenv("GITHUB_ACTIONS") == "true" &&
-  // System.getenv("GITHUB_ACTIONS") != "true" &&
-  true
-// false
-
-
 // region [[My Settings Stuff <~~]]
 // ~~>".*/Deps\.kt"~~>"../../DepsKt"<~~ Example how to adjust regions (in case source region is a bit different).
 // endregion [[My Settings Stuff <~~]]
@@ -29,13 +21,10 @@ pluginManagement {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
 
-  // Absolute on purpose: this is then the SAME line in every project, with no ../.. depth to
-  // adjust per repo -- which is the only thing the (unimplemented) [[My Settings Stuff <~~]] arrow
-  // region ever existed to patch up, and the only per-project text this region still had.
-  val enableLocalDepsKtInDir: File? =
-    null
-    // File("/home/marek/code/kotlin/DepsKt")
-    // File("/home/marek/code/kotlin/DepsKt").takeIf { it.exists() }
+  // Opt-in through the environment, so this region is identical in every project and no flag has
+  // to live above it and be kept in sync. Unset means off. To enable for one run:
+  //   ENABLE_LOCAL_DEPSKT_IN_DIR=/home/marek/code/kotlin/DepsKt ./gradlew build
+  val enableLocalDepsKtInDir = System.getenv("ENABLE_LOCAL_DEPSKT_IN_DIR")?.let { File(it).normalize() }
   if (enableLocalDepsKtInDir != null) {
     logger.warn("Including local build $enableLocalDepsKtInDir")
     includeBuild(enableLocalDepsKtInDir)
@@ -51,11 +40,13 @@ develocity {
   buildScan {
     termsOfUseUrl = "https://gradle.com/terms-of-service"
     termsOfUseAgree = "yes"
-    // Copied to a local at configuration time. `onlyIf` runs at the END of the build, so reading
-    // the settings-script top-level `val` from inside it captures the script OBJECT, which the
-    // configuration cache rejects: "cannot serialize Gradle script object references". A local is
-    // captured by value.
-    val enabled = enableBuildScanPublishingOnFailure
+    // Opt-in through the environment; unset means no scan is ever published, which is what keeps
+    // private repos safe without anyone remembering to switch them off. A public repo turns it on
+    // in its own CI workflow:  ENABLE_BUILD_SCAN_PUBLISHING_ON_FAILURE=true
+    // Read into a local at configuration time: `onlyIf` runs at the END of the build, and reading
+    // a settings-script top-level `val` from there would capture the script OBJECT, which the
+    // configuration cache rejects. A local is captured by value.
+    val enabled = System.getenv("ENABLE_BUILD_SCAN_PUBLISHING_ON_FAILURE") == "true"
     publishing.onlyIf { enabled && it.buildResult.failures.isNotEmpty() }
   }
 }

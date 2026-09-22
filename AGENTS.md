@@ -61,13 +61,39 @@ Worth knowing, because the fix is the reason this tool is now safe to run unatte
 used to carry `File(rootDir, "../../DepsKt")`, a path whose correct depth differs per project, so
 every `--apply` rewrote the root project's `"../DepsKt"` and had to be undone by hand.
 `--include-main` was no protection: its filter only drops paths starting with `kground`, and the
-root settings file does not. The path is absolute now (`enableLocalDepsKtInDir`), which is the same
-line everywhere, so the region has **no per-project text left at all** and a sync needs no repair.
+root settings file does not. Both of the region's knobs are environment variables now (below), so
+there is no path and no flag in the file at all: the region has **no per-project text left**, and a
+sync needs no repair.
 
 That also makes the `[[My Settings Stuff <~~]]` region dead: the arrow rewrite it documents
 (`~~>".*/Deps\.kt"~~>"../DepsKt"<~~`) exists to patch exactly that depth, was never implemented
 (`MyTemplates.kt` carries it as `TODO_someday`), and both the collector and the injector pass
 `allowTildes = false` so tilde regions are skipped entirely. It is left in place for now.
+
+## The two settings-region toggles are environment variables
+
+`[[My Settings Stuff]]` is synced across ~19 repos, so anything project-specific inside it is a
+bug. Both knobs are read from the environment instead, which keeps the region byte-identical
+everywhere and means **nothing above the region has to be kept in sync with it**. An earlier
+attempt used a `val` above the region; the region referenced it, so the name crossed the boundary
+and any repo taking a new region with an old `val` would fail to compile.
+
+```bash
+ENABLE_BUILD_SCAN_PUBLISHING_ON_FAILURE=true   # publish a build scan when a build fails
+ENABLE_LOCAL_DEPSKT_IN_DIR=/abs/path/to/DepsKt # composite-include a local DepsKt for this run
+```
+
+**Both are opt-in: unset means off.** That is deliberate -- a private repo publishes no scan
+without anyone remembering to switch it off, which is the failure that matters. The price is that a
+PUBLIC repo wanting scans must say so in its own CI workflow. Those workflows are generated from a
+Kotlin DSL (`kgroundx-workflows/src/jvmMain/kotlin/workflows/MyWorkflows.kt`), so the env var goes
+in the DSL and the YAML is regenerated -- editing `.github/workflows/*.yml` by hand is pointless.
+**Not done yet: KGround's own `dbuild` does not set it, so this repo currently publishes no scans.**
+
+Note `System.getenv` works in every part of a settings script, including inside
+`pluginManagement { }`, which runs before the script body -- that early pass is exactly why a
+script-level `val` cannot be read there. Gradle tracks the reads as configuration-cache inputs, so
+toggling a variable invalidates the entry rather than silently reusing a stale one (both measured).
 
 ## Developing DepsKt and KGround (or the templates) together
 
