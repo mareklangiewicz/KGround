@@ -12,20 +12,16 @@ import pl.mareklangiewicz.templatefun.*
 
 plugins {
   plugAll(
-    plugs.TemplateFun,
+    plugs.TemplateFunNoVer, // version comes from the root: a versioned request here fails in composite builds
     plugs.AndroAppNoVer,
     // The compose COMPILER plugin, even though this app declares no @Composable today.
     // App modules are meant to stay thin, but someone using this template should be able to
     // drop a quick @Composable in here before deciding to lift it into a lib module.
     plugs.KotlinMultiCompose,
-    // plugs.VannikPublish is deliberately ABSENT. This app publishes nothing: template-full sets no
-    // android publishVariant, so no component was ever registered and the plugin produced exactly
-    // zero publication tasks -- measured, before the DepsKt 0.4.63 migration. Since 0.4.63 that
-    // combination (publish plugin applied, no LibPublish passed) is a configuration ERROR rather
-    // than a silent no-op, and the honest fix is to drop the plugin, not to invent an opt-in.
-    // :template-full-app next door already had no publish plugin, so the two app modules now agree.
-    // To publish this app, add the plugin back AND pass
-    // publish = LibPublish(androVariant = "release") -- see :template-andro-app for the shape.
+    // Plumbing only: publishing is decided by publish = LibPublish(..) at the build template call
+    // below, and without one this plugin publishes nothing (DepsKt 0.4.65+). Kept unconditionally so
+    // this region is identical in apps that publish and apps that do not.
+    plugs.VannikPublish,
   )
 }
 
