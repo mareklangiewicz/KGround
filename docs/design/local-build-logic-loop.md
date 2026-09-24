@@ -1,5 +1,15 @@
 # Running a build against a local DepsKt
 
+> **Superseded 2026-09-24.** The everyday way is now the composite toggle,
+> `ENABLE_LOCAL_DEPSKT_IN_DIR=/abs/path/to/DepsKt`, and it is NOT split: measured on KGround's root
+> build, the settings plugin, a project build script and templatefun all came from the local DepsKt.
+> The "composite never binds DepsKt" result below had one cause nobody saw at the time: every
+> variant passed a `File` to `includeBuild` inside `pluginManagement { }`, which only accepts a
+> `String`, so Kotlin resolved it to the outer `Settings.includeBuild` — a plain composite that
+> substitutes jars but never contributes the SETTINGS plugin. Fixed in the synced settings region
+> (`includeBuild(enableLocalDepsKtInDir.path)`, plus a guard so DepsKt does not include itself).
+> The recipe and measurements below are kept as history; the recipe still works.
+
 How to develop DepsKt together with KGround or its templates, and the measurements behind the
 recipe. `AGENTS.md` points here. Prototyped in `template-raw` on 2026-09-16 and reverted; nothing
 below is committed build config. (`template-raw` was deleted on 2026-09-17 once it and
@@ -108,6 +118,9 @@ run is ~5s: configuration plus one task, no compilation.
 | `includeBuild(dir) { dependencySubstitution { .. } }` | build FAILS |
 
 Every composite variant gives a SPLIT classpath: local templatefun against published DepsKt.
+(2026-09-24: the two `pluginManagement { includeBuild }` rows used a `File` argument, i.e. the WRONG
+overload — see the note at the top. `--include-build` and top-level `includeBuild` are ordinary
+composites by design and never supply a settings plugin, so those rows stand.)
 DepsKt reaches a consumer through the SETTINGS plugin, whose classpath is established for the
 settings script itself; templatefun arrives later as an ordinary project-script plugin, and that
 one does substitute.

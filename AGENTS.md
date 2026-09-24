@@ -102,7 +102,25 @@ toggling a variable invalidates the entry rather than silently reusing a stale o
 
 ## Developing DepsKt and KGround (or the templates) together
 
-Use a **scoped local publication**: DepsKt published under a suffixed version, picked up through a
-content-filtered `mavenLocal`. Never `includeBuild("../DepsKt")` — measured, it substitutes
-templatefun but not DepsKt, so you silently get a split classpath. Steps, cleanup and the
-measurements behind them: `docs/design/local-build-logic-loop.md`.
+Use the composite toggle from the settings region (see above) — no code change, nothing to revert:
+
+```bash
+ENABLE_LOCAL_DEPSKT_IN_DIR=/home/marek/code/kotlin/DepsKt ./gradlew build
+```
+
+Both the settings plugin (so `Vers`, `plugs`, the Lib model) and templatefun then come from the
+local DepsKt. Measured 2026-09-24 on this root build with a marker version bumped only in the local
+DepsKt: the settings plugin AND a project build script both saw the marker, templatefun was built
+from the included DepsKt, and the control (env unset) saw the published version everywhere.
+
+**Check the banner, never a green build:** `DepsSettingsPlugin <ver> apply in project KGround`
+must name the local version. Local and published often share a version, so bump `Vers.DepsPlug` in
+the local DepsKt (uncommitted) when you need to tell them apart. Gradle silently falls back to the
+published plugin when the include does not bind.
+
+This replaces the old advice to never `includeBuild("../DepsKt")`. That measurement was real but
+had one cause: the region passed a `File` to `includeBuild` inside `pluginManagement { }`, which
+only takes a `String`, so the call resolved to the outer `Settings.includeBuild` — a plain composite
+that substitutes jars (templatefun) but never contributes plugins, hence the split classpath. The
+scoped `mavenLocal` publication in `docs/design/local-build-logic-loop.md` still works, but is no
+longer needed for this.
