@@ -11,8 +11,8 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("pl.mareklangiewicz.templatefun")
   plugAll(
+    plugs.TemplateFun,
     plugs.AndroAppNoVer,
     // The compose COMPILER plugin, even though this app declares no @Composable today.
     // App modules are meant to stay thin, but someone using this template should be able to
