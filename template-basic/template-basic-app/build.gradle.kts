@@ -10,7 +10,7 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  plugAll(plugs.TemplateFun, plugs.KotlinMulti, plugs.VannikPublish)
+  plugAll(plugs.TemplateFunNoVer, plugs.KotlinMulti, plugs.VannikPublish)
 }
 
 // endregion [[Basic MPP App Build Imports and Plugs]]

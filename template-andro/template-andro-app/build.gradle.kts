@@ -12,16 +12,15 @@ import pl.mareklangiewicz.templatefun.*
 
 plugins {
   plugAll(
-    plugs.TemplateFun,
+    plugs.TemplateFunNoVer, // version comes from the root: a versioned request here fails in composite builds
     plugs.AndroAppNoVer,
     // The compose COMPILER plugin, even though this app declares no @Composable today.
     // App modules are meant to stay thin, but someone using this template should be able to
     // drop a quick @Composable in here before deciding to lift it into a lib module.
     plugs.KotlinMultiCompose,
-    // PRESENT here, unlike :template-full-andro-app: this app is the one that shows the publishing
-    // shape -- publish = LibPublish(androVariant = "debug") below. Since DepsKt 0.4.63 a LibPublish
-    // without this plugin is a configuration ERROR, so the two app regions must differ here, and
-    // the template sync (which copies template-full's region) must not overwrite this copy.
+    // Plumbing only: publishing is decided by publish = LibPublish(..) at the build template call
+    // below, and without one this plugin publishes nothing (DepsKt 0.4.65+). Kept unconditionally so
+    // this region is identical in apps that publish and apps that do not.
     plugs.VannikPublish,
   )
 }

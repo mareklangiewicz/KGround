@@ -13,7 +13,7 @@ import pl.mareklangiewicz.templatefun.*
 
 plugins {
   plugAll(
-    plugs.TemplateFun,
+    plugs.TemplateFunNoVer, // version comes from the root: a versioned request here fails in composite builds
     plugs.KotlinMulti,
     plugs.KotlinMultiCompose,
     plugs.ComposeJbNoVer,
