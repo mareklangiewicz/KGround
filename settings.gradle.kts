@@ -72,8 +72,8 @@ gradle.extLib = lib(
     // carried it into modules that never asked -- that is how six of USpek's SAMPLE apps ended up
     // one green build away from permanent Maven Central coordinates. Each module that publishes now
     // says so itself: `publish = LibPublish(toCentral = true)` at its own
-    // defaultBuildTemplateFor* call. All 13 included modules here do; a module that forgot would
-    // FAIL at configuration time, not publish nothing quietly.
+    // defaultBuildTemplateFor* call. Every included module here does, except :upue-test, which is
+    // deliberately unpublished: with no LibPublish it is simply not published (DepsKt 0.4.65+).
     // See DepsKt/docs/design/publish-intent-per-module.md.
   ),
   withCompose = false, // was: compose = null - presence, stated as presence
@@ -87,6 +87,11 @@ gradle.extLib = lib(
 // they now ride KGround's single version, which jumps them past their old 0.0.x line.
 include(":abcdk")
 include(":tuplek")
+
+// upue was folded in the same way (from mareklangiewicz/UPue) and keeps its artifact id too.
+// upue-test is its jvm-only, Truth-based assertion helper: a test dependency of :upue, NOT published.
+include(":upue")
+include(":upue-test")
 
 include(":kground")
 include(":kgroundx")

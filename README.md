@@ -16,3 +16,9 @@ folded in from their own repos. They keep their own artifact ids, so
 `pl.mareklangiewicz:abcdk` and `pl.mareklangiewicz:tuplek` still work - but they now ride KGround's
 version, so they jump from the 0.0.x line straight to KGround's current one. `kground` api-exposes
 both, so depending on `kground` alone is enough.
+
+Also now merged with upue (micro multiplatform reactive library: minimal, composable push/pull
+streams, plus the small collection interfaces and encodings they build on). It keeps its artifact id
+too: `pl.mareklangiewicz:upue` jumps from the 0.0.x line to KGround's version, and `kground`
+api-exposes it. Its old jvm/Truth-based test helper `upue-test` lives here as an unpublished,
+test-only module.

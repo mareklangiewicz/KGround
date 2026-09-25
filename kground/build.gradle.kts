@@ -21,7 +21,7 @@ defaultBuildTemplateForBasicMppLib(
 ) {
   api(project(":abcdk"))
   api(project(":tuplek"))
-  api(Langiewicz.upue)
+  api(project(":upue"))
   api(KotlinX.datetime)
   api(KotlinX.coroutines_core)
   implementation(Kotlin.reflect)

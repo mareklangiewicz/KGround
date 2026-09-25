@@ -1,4 +1,3 @@
-
 // region [[Basic MPP Lib Build Imports and Plugs]]
 
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -10,8 +9,7 @@ import pl.mareklangiewicz.utils.*
 import pl.mareklangiewicz.templatefun.*
 
 plugins {
-  id("pl.mareklangiewicz.templatefun")
-  plugAll(plugs.KotlinMulti, plugs.VannikPublish)
+  plugAll(plugs.TemplateFunNoVer, plugs.KotlinMulti, plugs.VannikPublish)
 }
 
 // endregion [[Basic MPP Lib Build Imports and Plugs]]

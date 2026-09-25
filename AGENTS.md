@@ -8,6 +8,13 @@ This repository contains `KGround`, a Kotlin "Common Ground". Common code that s
   - They keep their artifact ids but ride KGround's single version; `kground` api-exposes both.
   - The old repos (mareklangiewicz/AbcdK, .../TupleK) are archived - their READMEs point here.
     KGround v0.1.35 was the first release to publish both artifacts.
+- `upue` (micro reactive lib) was folded in the same way, from mareklangiewicz/UPue.
+  - Same artifact id, KGround's version; `kground` api-exposes it.
+  - Its push/pull reactive layer (Pue, Pusher/Puller, Relay, ...) is the POINT of upue, not legacy:
+    minimal and highly composable, with advantages over coroutines/Flow. Don't prune or replace it.
+  - `upue-test` (jvm, Truth-based asserts) is a test-only dependency of `:upue` and is NOT
+    published. It will probably be rewritten.
+  - The old UPue repo is NOT archived yet: archive it once a KGround release publishes `upue`.
 - Modules starting with: `kgroundx` have additional, less common stuff.
   - More opinionated / dirty / experimental.
 - Modules starting with: `kommand` contain DSLs for popular CLI commands.
