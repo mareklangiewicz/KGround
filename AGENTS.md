@@ -11,6 +11,8 @@ This repository contains `KGround`, a Kotlin "Common Ground". Common code that s
 - Modules starting with: `kgroundx` have additional, less common stuff.
   - More opinionated / dirty / experimental.
 - Modules starting with: `kommand` contain DSLs for popular CLI commands.
+  - `kommand-line` was folded in from mareklangiewicz/KommandLine (now archived, README points
+    here). Its artifact id CHANGED: old `kommandline` (last 0.0.88) -> `kommand-line` (0.1.x).
 - Code style is Kotlin Official with adjustments in `.editorconfig`
 
 Keep this sheet handy when automating changes or onboarding new agents.
