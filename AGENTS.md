@@ -6,8 +6,8 @@ This repository contains `KGround`, a Kotlin "Common Ground". Common code that s
 
 - `abcdk` (tiny unions) and `tuplek` (tiny tuples) were folded in from their own repos.
   - They keep their artifact ids but ride KGround's single version; `kground` api-exposes both.
-  - The old repos (mareklangiewicz/AbcdK, .../TupleK) are dead but NOT yet archived - their
-    READMEs point here. Archive them once a KGround release has published both artifacts.
+  - The old repos (mareklangiewicz/AbcdK, .../TupleK) are archived - their READMEs point here.
+    KGround v0.1.35 was the first release to publish both artifacts.
 - Modules starting with: `kgroundx` have additional, less common stuff.
   - More opinionated / dirty / experimental.
 - Modules starting with: `kommand` contain DSLs for popular CLI commands.
