@@ -102,6 +102,9 @@ without anyone remembering to switch it off, which is the failure that matters. 
 PUBLIC repo wanting scans must say so in its own CI workflow. Those workflows are generated from a
 Kotlin DSL (`kgroundx-workflows/src/jvmMain/kotlin/workflows/MyWorkflows.kt`), so the env var goes
 in the DSL and the YAML is regenerated -- editing `.github/workflows/*.yml` by hand is pointless.
+KGround's `dbuild` also builds the three templates (separate builds the root `build` never
+reaches), one parallel job each. `:kgroundx-workflows:jvmTest` fails if the committed `dbuild.yml`
+is out of date with the generator, and its failure message gives the `cp` that regenerates it.
 **Not done yet: KGround's own `dbuild` does not set it, so this repo currently publishes no scans.**
 
 Note `System.getenv` works in every part of a settings script, including inside

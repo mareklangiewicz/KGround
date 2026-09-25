@@ -27,3 +27,51 @@ jobs:
     - id: 'step-3'
       name: 'build'
       run: './gradlew build --no-configuration-cache --no-parallel'
+  build-template-basic-for-UbuntuLatest:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - id: 'step-0'
+      uses: 'actions/checkout@v7'
+    - id: 'step-1'
+      name: 'Set up JDK'
+      uses: 'actions/setup-java@v5'
+      with:
+        java-version: '23'
+        distribution: 'zulu'
+    - id: 'step-2'
+      uses: 'gradle/actions/setup-gradle@v4'
+    - id: 'step-3'
+      name: 'build (template-basic)'
+      run: './gradlew -p template-basic build --no-configuration-cache --no-parallel'
+  build-template-full-for-UbuntuLatest:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - id: 'step-0'
+      uses: 'actions/checkout@v7'
+    - id: 'step-1'
+      name: 'Set up JDK'
+      uses: 'actions/setup-java@v5'
+      with:
+        java-version: '23'
+        distribution: 'zulu'
+    - id: 'step-2'
+      uses: 'gradle/actions/setup-gradle@v4'
+    - id: 'step-3'
+      name: 'build (template-full)'
+      run: './gradlew -p template-full build --no-configuration-cache --no-parallel'
+  build-template-andro-for-UbuntuLatest:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - id: 'step-0'
+      uses: 'actions/checkout@v7'
+    - id: 'step-1'
+      name: 'Set up JDK'
+      uses: 'actions/setup-java@v5'
+      with:
+        java-version: '23'
+        distribution: 'zulu'
+    - id: 'step-2'
+      uses: 'gradle/actions/setup-gradle@v4'
+    - id: 'step-3'
+      name: 'build (template-andro)'
+      run: './gradlew -p template-andro build --no-configuration-cache --no-parallel'

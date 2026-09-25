@@ -20,6 +20,10 @@
 # laptop with little RAM. This runs ONE step at a time, smallest first, and pauses in
 # between so memory can settle and you can Ctrl-C at a sane boundary.
 #
+# CI covers the same ground on every push: dbuild runs the root `build` (which includes tests,
+# unlike this gate's `assemble`) plus one parallel job per template. So this script is only for
+# checking locally BEFORE pushing; for risky changes, a branch + PR lets dbuild do it instead.
+#
 # Usage:
 #   ./gate.sh                 # every step, in order, smallest first
 #   ./gate.sh compile         # just one step (any step name below)

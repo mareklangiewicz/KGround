@@ -208,9 +208,25 @@ suspend fun injectDWorkflowsToProject(
   }
 }
 
+/**
+ * Extra gradle root projects (dirs relative to the repo root) that dbuild also builds, each in its
+ * own parallel job. For standalone builds living inside a repo, which the root `./gradlew build`
+ * never reaches. KGround's templates are the case: separate builds, and too heavy to build all
+ * together on a small laptop (see KGround/gate.sh), so CI builds them instead.
+ */
+internal fun myDBuildExtraDirsForProject(projectName: String): List<String> = when (projectName) {
+  "KGround" -> LO("template-basic", "template-full", "template-andro")
+  else -> LO()
+}
+
+/** The dbuild workflow for given project. Unlike the others it needs no network, so tests can check it. */
+internal fun myDefaultBuildWorkflowForProject(projectName: String) =
+  myDefaultBuildWorkflow(extraDirs = myDBuildExtraDirsForProject(projectName))
+
 @OptIn(ExampleApi::class)
 private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
   dname = dname,
+  dbuildExtraDirs = myDBuildExtraDirsForProject(projectName),
   dreleasePackage = when(projectName) {
     "UWidgets" -> "packageDeb" // I can't do packageReleaseDeb because proguard only supports jvm18 and fails.
     "AreaKim" -> "packageDeb"
@@ -249,11 +265,12 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
  */
 private fun myDefaultWorkflow(
   dname: String,
+  dbuildExtraDirs: List<String> = LO(),
   dreleasePackage: String? = null,
   dreleaseUpload: List<String> = LO(),
   dreleaseOssPublish: Boolean = false,
 ) = when (dname) {
-  "dbuild" -> myDefaultBuildWorkflow()
+  "dbuild" -> myDefaultBuildWorkflow(extraDirs = dbuildExtraDirs)
   "drelease" -> myDefaultReleaseWorkflow(
     env = if (dreleaseOssPublish) myOssPublishingSecretsEnv else MO(),
     dreleasePackage = dreleasePackage,
@@ -267,6 +284,7 @@ private fun myDefaultWorkflow(
 private fun myDefaultBuildWorkflow(
   runners: List<RunnerType> = LO(RunnerType.UbuntuLatest),
   env: Map<String, String> = MO(),
+  extraDirs: List<String> = LO(),
 ) = myWorkflow(
   name = "dbuild",
   on = LO(Push(branches = LO("master", "main")), PullRequest(), WorkflowDispatch()),
@@ -277,6 +295,12 @@ private fun myDefaultBuildWorkflow(
       id = "build-for-${runnerType::class.simpleName}",
       runsOn = runnerType,
     ) { usesDefaultBuild() }
+    extraDirs.forEach { dir ->
+      job(
+        id = "build-$dir-for-${runnerType::class.simpleName}",
+        runsOn = runnerType,
+      ) { usesDefaultBuild(projectDir = dir) }
+    }
   }
 }
 
@@ -338,11 +362,12 @@ fun JobBuilder<JobOutputs.EMPTY>.usesJdk(
     distribution = distribution,
   ),
 )
-fun JobBuilder<JobOutputs.EMPTY>.usesDefaultBuild() {
+/** @param projectDir null means the repo root build; otherwise a separate build dir, via gradle -p */
+fun JobBuilder<JobOutputs.EMPTY>.usesDefaultBuild(projectDir: String? = null) {
   uses(action = Checkout())
   usesJdk()
   usesGradle()
-  runGradleW("build")
+  runGradleW("build", projectDir)
 }
 
 fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
@@ -358,8 +383,10 @@ fun JobBuilder<JobOutputs.EMPTY>.usesGradle(
   env = env,
 )
 
-fun JobBuilder<JobOutputs.EMPTY>.runGradleW(tasks: String) =
-  run(name = tasks, command = "./gradlew $tasks --no-configuration-cache --no-parallel")
+fun JobBuilder<JobOutputs.EMPTY>.runGradleW(tasks: String, projectDir: String? = null) = run(
+  name = if (projectDir == null) tasks else "$tasks ($projectDir)",
+  command = "./gradlew ${projectDir?.let { "-p $it " }.orEmpty()}$tasks --no-configuration-cache --no-parallel",
+)
 
 // Not deleting for a while.
 @Deprecated("Use generated: bindings/generated/ActionsSetupGradle.kt")
