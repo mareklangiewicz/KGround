@@ -14,7 +14,8 @@ This repository contains `KGround`, a Kotlin "Common Ground". Common code that s
     minimal and highly composable, with advantages over coroutines/Flow. Don't prune or replace it.
   - `upue-test` (jvm, Truth-based asserts) is a test-only dependency of `:upue` and is NOT
     published. It will probably be rewritten.
-  - The old UPue repo is NOT archived yet: archive it once a KGround release publishes `upue`.
+  - The old UPue repo is archived (its README points here). KGround v0.1.37 was the first release
+    to publish `upue`; its history was merged in, so `git log --follow` reaches back to 2016.
 - Modules starting with: `kgroundx` have additional, less common stuff.
   - More opinionated / dirty / experimental.
 - Modules starting with: `kommand` contain DSLs for popular CLI commands.
