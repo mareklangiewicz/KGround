@@ -17,12 +17,12 @@ import pl.mareklangiewicz.usubmit.xd.*
 @ExperimentalApi("Fast solution for running some code parts. Like examples/samples.")
 // BTW Maybe better final solution could be more like compose based browser/picker for classes/methods to run?
 //   Not only graphical but also automatically TUI (UWidgets/mordant) and automatically some plain CLI too.
-suspend fun tryInteractivelyCodeRefWithLogging(reference: String) {
+suspend fun tryInteractivelyCodeRefWithLogging(reference: String, args: List<String> = emptyList()) {
   val log = localULog()
   try {
     log.w("try-code $reference starting")
     withLogBadStreams {
-      tryInteractivelySomethingRef(reference)
+      tryInteractivelySomethingRef(reference, args)
       log.w("try-code $reference finished")
     }
   } catch (ex: Exception) {
@@ -38,7 +38,7 @@ suspend fun tryInteractivelyOpenLogCache() {
   val fs = localUFileSys()
   val submit = localUSubmit()
   val notes = fs.pathToTmpNotes
-  isInteractiveCodeEnabled() && submit.askIf("Try to open log cache in IDE (in tmp.notes)?") || return
+  isInteractiveCodeEnabled() && submit.askIf("Try to open log cache in IDE (in tmp.notes)?", questionId = "try-code.open-log") || return
   writeFileWithDD(lines, notes).ax()
   ideOrGVimOpen(notes).ax()
 }

@@ -74,7 +74,8 @@ object MyTemplatesExamples {
     tryDiffMyConflictingTemplatesSrc()
   }
 
-  suspend fun tryInjectToAbcdK() = tryInjectMyTemplatesToProject(PCodeKt / "AbcdK")
+  /** kgroundx try-code tryInjectToProject SMokK (the project dir under PCodeKt) */
+  suspend fun tryInjectToProject(projectName: String) = tryInjectMyTemplatesToProject(PCodeKt / projectName)
 
   suspend fun tryInjectToKGround() = tryInjectMyTemplatesToProject(PCodeKt / "KGround")
 

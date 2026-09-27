@@ -45,7 +45,7 @@ suspend fun Kommand.axInteractiveTry(
   optTermWrap: (innerKommand: Kommand) -> Kommand = { termXDefault(it) },
 ) = ifInteractiveCodeEnabled {
   val submit = localUSubmit()
-  if (submit.askIf(confirmation)) {
+  if (submit.askIf(confirmation, questionId = "kommand.start")) {
     var kommand = when {
       insideBash -> inBash(pauseBeforeExit)
       pauseBeforeExit -> bad { "Can not pause before exit if not using bash shell" }

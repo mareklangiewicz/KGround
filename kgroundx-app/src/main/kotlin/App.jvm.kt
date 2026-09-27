@@ -7,7 +7,12 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.core.findOrSetObject
+import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.options.associate
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.versionOption
 import com.github.ajalt.clikt.parameters.types.boolean
 import kotlinx.coroutines.*
@@ -25,6 +30,8 @@ import pl.mareklangiewicz.ulog.ULogLevel
 import pl.mareklangiewicz.ulog.hack.UHackySharedFlowLog
 import pl.mareklangiewicz.ulog.i
 import pl.mareklangiewicz.ulog.localULog
+import pl.mareklangiewicz.usubmit.USubmit
+import pl.mareklangiewicz.usubmit.xd.CannedSupervisor
 
 fun main(args: Array<String>) = kgroundx(args)
 
@@ -42,7 +49,7 @@ fun main(args: Array<String>) = kgroundx(args)
 fun kgroundx(args: Array<String>) = KGroundXCommand().main(args)
 
 @DelicateApi("Very opinionated setup for launching main stuff. Usually better to copy and adjust to own needs.")
-fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
+fun runBlockingMain(name: String, submit: USubmit = ZenitySupervisor(), block: suspend CoroutineScope.() -> Unit) =
   runBlocking {
     val log = UHackySharedFlowLog(
       minLevel = ULogLevel.INFO,
@@ -50,7 +57,7 @@ fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
     ) { level, data -> "L ${level.symbol} ${data.str(maxLength = 512)}" }
     // FIXME_later: Maybe I should log with Clikt "echo"? is it thread-safe??
     uctxWithIO(
-      context = log + ZenitySupervisor() + getSysCLI(),
+      context = log + submit + getSysCLI(),
       name = name,
       // dispatcher = null, // FIXME_later: rethink default dispatcher
       block = block,
@@ -68,7 +75,19 @@ fun runBlockingMain(name: String, block: suspend CoroutineScope.() -> Unit) =
 private fun kgroundxVersion(): String =
   KGroundXCommand::class.java.`package`?.implementationVersion ?: "unknown (no jar manifest)"
 
+/** No canned answers: ask a human (zenity). Any: answer from them, and never pop anything up. */
+private fun supervisorFor(answers: Map<String, String>): USubmit =
+  if (answers.isEmpty()) ZenitySupervisor() else CannedSupervisor(answers)
+
 private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
+
+  val answers by option(
+    "--answer",
+    metavar = "ID=VALUE",
+    help = "Answer the question with this id instead of asking (repeatable). With any --answer given, " +
+      "nothing pops up: an unanswered question fails, and messages go to the log.",
+  ).associate()
+
   init {
     versionOption(kgroundxVersion())
     subcommands(
@@ -83,7 +102,7 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
     )
   }
 
-  override fun run() = Unit
+  override fun run() { currentContext.findOrSetObject { answers } }
 
   override fun helpEpilog(context: Context): String {
     return super.helpEpilog(context) + """
@@ -92,16 +111,18 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
         $commandName set-user-flag code.interactive true
         $commandName set-user-flag code.interactive false
         $commandName try-code-xclip
-        $commandName try-code tryInjectToAbcdK
+        $commandName try-code tryInjectToProject SMokK
         $commandName try-code tryInjectToKGround
         $commandName try-code tryInjectToAllMyProjects
         $commandName try-code updateGradlewInExampleProject
         $commandName try-code updateGradlewInMyProjects
         $commandName try-code checkAllMDW
         $commandName try-code injectMDWToMyProjects
+        $commandName try-code injectDWToProject kthreelhu
+        $commandName --answer try-code.call=yes --answer try-code.open-log=no try-code checkDWInProject kthreelhu
         $commandName try-code collectGabrysCards
       Also using full "paths", f.e.:
-        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToAbcdK
+        $commandName try-code pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples#tryInjectToKGround
         $commandName try-code pl.mareklangiewicz.kgroundx.experiments.MyExperiments#collectGabrysCards
     """.trimIndent().replace('\n', '\u0085')
       // have to use special "manual" line-breaks
@@ -114,29 +135,34 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
 }
 
 private class GetUserFlagCommand() : CliktCommand() {
+  val answers by requireObject<Map<String, String>>()
   val flag by argument(help = "user flag name")
-  override fun run() = runBlockingMain(commandName) {
+  override fun run() = runBlockingMain(commandName, supervisorFor(answers)) {
     localULog().i(getUserFlagFullStr(localCLI(), flag))
   }
 }
 
 private class SetUserFlagCommand() : CliktCommand() {
+  val answers by requireObject<Map<String, String>>()
   val flag by argument(help = "user flag name")
   val value by argument(help = "user flag value").boolean()
-  override fun run() = runBlockingMain(commandName) {
+  override fun run() = runBlockingMain(commandName, supervisorFor(answers)) {
     setUserFlag(localCLI(), flag, value)
   }
 }
 
 private class TryCodeCommand() : CliktCommand() {
+  val answers by requireObject<Map<String, String>>()
   val codeRef by argument(help = "code reference")
-  override fun run() = runBlockingMain(commandName) {
-    tryInteractivelyCodeRefWithLogging(codeRef)
+  val codeArgs by argument(help = "String arguments for the referenced function").multiple()
+  override fun run() = runBlockingMain(commandName, supervisorFor(answers)) {
+    tryInteractivelyCodeRefWithLogging(codeRef, codeArgs)
   }
 }
 
 private class TryCodeXclipCommand() : CliktCommand() {
-  override fun run() = runBlockingMain(commandName) {
+  val answers by requireObject<Map<String, String>>()
+  override fun run() = runBlockingMain(commandName, supervisorFor(answers)) {
     tryInteractivelyCodeRefWithLogging("xclip")
   }
 }

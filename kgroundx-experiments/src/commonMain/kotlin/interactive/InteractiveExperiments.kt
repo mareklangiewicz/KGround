@@ -30,7 +30,7 @@ import pl.mareklangiewicz.usubmit.xd.*
  */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-suspend fun tryInteractivelySomethingRef(reference: String, defaultClasses: List<String> = LO(
+suspend fun tryInteractivelySomethingRef(reference: String, args: List<String> = emptyList(), defaultClasses: List<String> = LO(
   "pl.mareklangiewicz.kgroundx.maintenance.MyBasicExamples",
   "pl.mareklangiewicz.kgroundx.maintenance.MyTemplatesExamples",
   "pl.mareklangiewicz.kgroundx.maintenance.MyOtherExamples",
@@ -50,9 +50,9 @@ suspend fun tryInteractivelySomethingRef(reference: String, defaultClasses: List
   var (className, methodName) = parseSomethingRef(ref)
   // BTW We will try to call only the first actually found code (className#methodName)
   if (className.isEmpty()) className = defaultClasses
-    .firstOrNull { getReflectCallOrNull(it, methodName) != null }
-    .reqNN { "The $methodName not found in any known class." }
-  tryInteractivelyClassMember(className, methodName)
+    .firstOrNull { getReflectCallOrNull(it, methodName, args) != null }
+    .reqNN { "The $methodName taking ${args.size} String args not found in any known class." }
+  tryInteractivelyClassMember(className, methodName, args)
 }
 
 @NotPortableApi
@@ -79,15 +79,15 @@ private fun parseSomethingRef(ref: String): Pair<String, String> {
  */
 @NotPortableApi
 @DelicateApi("API for manual interactive experimentation. Conditionally skips")
-suspend fun tryInteractivelyClassMember(className: String, memberName: String) {
+suspend fun tryInteractivelyClassMember(className: String, memberName: String, args: List<String> = emptyList()) {
   val log = localULog()
-  log.i("tryInteractivelyClassMember(\"$className\", \"$memberName\")")
-  val call = getReflectCallOrNull(className, memberName) ?: return
+  log.i("tryInteractivelyClassMember(\"$className\", \"$memberName\", $args)")
+  val call = getReflectCallOrNull(className, memberName, args) ?: return
   // BTW it returns early if member not found, before we start to interact with the user,
   // but the invariant holds: the actual code is never run without user confirmation.
   ifInteractiveCodeEnabled {
     val submit = localUSubmit()
-    submit.askIf("Call member $memberName\nfrom class $className?") || return
+    submit.askIf("Call member $memberName${args.joinToString(prefix = "(", postfix = ")") { "\"$it\"" }}\nfrom class $className?", questionId = "try-code.call") || return
     val member: Any? = call()
     // Note: call() will either already "do the thing" (when the member is just a fun to call)
     //  or it will only get the property (like ReducedScript/Sample etc.) which will be tried (or not) later.
@@ -125,7 +125,7 @@ suspend fun ReducedScript<*>.tryInteractivelyCheckReducedScript(
   question: String = "Exec ReducedScript ?",
 ) {
   val submit = localUSubmit()
-  submit.askIf(question) || return
+  submit.askIf(question, questionId = "try-code.exec-script") || return
   val reducedOut = ax()
   reducedOut.tryOpenDataInIDEOrGVim("Open ReducedOut: ${reducedOut.about} in tmp.notes in IDE (if running) or in GVim ?")
 }
@@ -144,7 +144,7 @@ suspend fun Any?.tryOpenDataInIDEOrGVim(question: String? = null): Any {
     this is Boolean -> log.i("It is Boolean: $this. Nothing to open.")
     this is String && isEmpty() -> log.i("It is empty string. Nothing to open.")
     this is Collection<*> && isEmpty() -> log.i("It is empty collection. Nothing to open.")
-    !submit.askIf(question ?: "Open $about in tmp.notes in IDE (if running) or in GVim ?") -> log.i("Not opening.")
+    !submit.askIf(question ?: "Open $about in tmp.notes in IDE (if running) or in GVim ?", questionId = "try-code.open-result") -> log.i("Not opening.")
     else -> {
       val lines = if (this is Collection<*>) map { it.strfon } else strf.lines()
       val notes = fs.pathToTmpNotes

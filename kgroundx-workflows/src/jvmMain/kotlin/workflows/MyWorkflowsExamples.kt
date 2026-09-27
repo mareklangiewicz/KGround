@@ -15,7 +15,11 @@ object MyWorkflowsExamples {
 
   suspend fun injectMDWToMyProjects() = injectMyDWorkflowsToMyProjects(onlyPublic = false)
 
-  suspend fun injectDWToExampleProject() = injectDWorkflowsToProject(PCodeKt / "AbcdK")
+  /** kgroundx try-code injectDWToProject kthreelhu (the project dir under PCodeKt) */
+  suspend fun injectDWToProject(projectName: String) = injectDWorkflowsToProject(PCodeKt / projectName)
+
+  /** kgroundx try-code checkDWInProject kthreelhu (the project dir under PCodeKt) */
+  suspend fun checkDWInProject(projectName: String) = checkMyDWorkflowsInProject(PCodeKt / projectName)
 
   suspend fun injectGenerateDepsWToRefreshDepsRepo() = injectHackyGenerateDepsWorkflowToRefreshDepsRepo()
 

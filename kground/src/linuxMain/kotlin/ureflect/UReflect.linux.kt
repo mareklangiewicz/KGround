@@ -7,7 +7,11 @@ import pl.mareklangiewicz.udata.LO
 
 @DelicateApi
 @NotPortableApi("Only JVM supported; null will be returned on other platforms")
-actual fun getReflectCallOrNull(className: String, memberName: String): (suspend () -> Any?)? = null
+actual fun getReflectCallOrNull(
+  className: String,
+  memberName: String,
+  args: List<String>,
+): (suspend () -> Any?)? = null
 
 @DelicateApi("Generally delicate, but in particular it changes getter.isAccessible")
 @NotPortableApi("Only JVM supported; empty list will be returned on other platforms")
