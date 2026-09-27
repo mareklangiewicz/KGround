@@ -142,6 +142,17 @@ fun injectUpdateGeneratedDepsWorkflowToDepsKtRepo() {
  */
 private val MyDWorkflowNames = LO("dbuild", "drelease", "ddepsub")
 
+/**
+ * Private repos get dbuild only (and a manual one, see [myDefaultBuildWorkflow]): they pay for
+ * Actions minutes, nothing in them is released (drelease), and no one else depends on them, so the
+ * dependency graph (ddepsub) has no audience.
+ */
+internal fun myDWorkflowNames(isPublic: Boolean): List<String> =
+  if (isPublic) MyDWorkflowNames else LO("dbuild")
+
+@OptIn(ExampleApi::class)
+private suspend fun isMyPublicProject(projectName: String) = projectName in getMyPublicProjectsNames()
+
 
 suspend fun checkMyDWorkflowsInProject(
   projectPath: Path,
@@ -153,10 +164,12 @@ suspend fun checkMyDWorkflowsInProject(
   val log = localULog()
   val fs = localUFileSys()
   log.i("Check my dworkflows in project: $projectPath")
+  val isPublic = isMyPublicProject(projectPath.name)
+  val dnames = myDWorkflowNames(isPublic)
   @Suppress("DEPRECATION")
   val yamlFiles = findAllFiles(yamlFilesPath, maxDepth = 1).filterExt(yamlFilesExt)
   val yamlNames = yamlFiles.map { it.name.substringBeforeLast('.') }
-  for (dname in MyDWorkflowNames) {
+  for (dname in dnames) {
     if (dname !in yamlNames) {
       val summary = "Workflow $dname not found."
       log.e("ERR project:${projectPath.name}: $summary")
@@ -166,8 +179,14 @@ suspend fun checkMyDWorkflowsInProject(
 
   for (file in yamlFiles) {
     val dname = file.name.substringBeforeLast('.')
+    if (dname in MyDWorkflowNames && dname !in dnames) {
+      val summary = "Workflow $dname should not exist in a private project."
+      log.e("ERR project:${projectPath.name}: $summary")
+      if (failIfUnknownWorkflowFound) bad { summary }
+      continue
+    }
     val contentExpected = try {
-      myDefaultWorkflowForProject(dname, projectPath.name).generateYaml()
+      myDefaultWorkflowForProject(dname, projectPath.name, isPublic).generateYaml()
     } catch (e: IllegalStateException) {
       if (failIfUnknownWorkflowFound) throw e
       else {
@@ -192,14 +211,23 @@ suspend fun injectDWorkflowsToProject(
   val log = localULog()
   val fs = localUFileSys()
   log.i("Inject default workflows to project: $projectPath")
-  for (dname in MyDWorkflowNames) {
+  val isPublic = isMyPublicProject(projectPath.name)
+  val dnames = myDWorkflowNames(isPublic)
+  for (dname in MyDWorkflowNames - dnames) {
+    // Ours (the "d" prefix), left by an injection from before private repos got dbuild only.
+    val file = yamlFilesPath / "$dname.$yamlFilesExt"
+    if (!fs.exists(file)) continue
+    fs.delete(file)
+    log.i("Inject workflows to private project:${projectPath.name} - deleted $dname")
+  }
+  for (dname in dnames) {
     val file = yamlFilesPath / "$dname.$yamlFilesExt"
     val contentOld = try {
       fs.readUtf8(file)
     } catch (e: FileNotFoundException) {
       ""
     }
-    val contentNew = myDefaultWorkflowForProject(dname, projectPath.name).generateYaml()
+    val contentNew = myDefaultWorkflowForProject(dname, projectPath.name, isPublic).generateYaml()
     fs.writeUtf8(file, contentNew, createParentDir = true)
     val summary =
       if (contentNew == contentOld) "No changes."
@@ -219,18 +247,20 @@ internal fun myDBuildExtraDirsForProject(projectName: String): List<String> = wh
   else -> LO()
 }
 
-/** The dbuild workflow for given project. Unlike the others it needs no network, so tests can check it. */
-internal fun myDefaultBuildWorkflowForProject(projectName: String) =
-  myDefaultBuildWorkflow(extraDirs = myDBuildExtraDirsForProject(projectName))
+/**
+ * The dbuild workflow for given project. Unlike the others it needs no network (visibility is
+ * passed in, not fetched), so tests can check it.
+ */
+internal fun myDefaultBuildWorkflowForProject(projectName: String, isPublic: Boolean) =
+  myDefaultBuildWorkflow(extraDirs = myDBuildExtraDirsForProject(projectName), manualOnly = !isPublic)
 
-@OptIn(ExampleApi::class)
-private suspend fun myDefaultWorkflowForProject(dname: String, projectName: String) = myDefaultWorkflow(
+/** drelease is generated for public projects only (see [myDWorkflowNames]), so no private ones here. */
+private fun myDefaultWorkflowForProject(dname: String, projectName: String, isPublic: Boolean) = myDefaultWorkflow(
   dname = dname,
   dbuildExtraDirs = myDBuildExtraDirsForProject(projectName),
+  dbuildManualOnly = !isPublic,
   dreleasePackage = when(projectName) {
     "UWidgets" -> "packageDeb" // I can't do packageReleaseDeb because proguard only supports jvm18 and fails.
-    "AreaKim" -> "packageDeb"
-    "kokpit667" -> "packageDeb"
     else -> null
   },
   dreleaseUpload = when(projectName) {
@@ -242,20 +272,9 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
       "uwidgets-demo-app/build/outputs/apk/debug/*.apk",
       "uwidgets-demo-app/build/outputs/apk/release/*.apk",
     )
-    "AreaKim" -> LO(
-      "areakim-demo-app/build/compose/binaries/main/deb/*.deb",
-      "areakim-demo-app/build/outputs/apk/debug/*.apk",
-      "areakim-demo-app/build/outputs/apk/release/*.apk",
-    )
-    "kokpit667" -> LO(
-      "kodeskapp/build/compose/binaries/main/deb/*.deb",
-      "kodrapp/build/outputs/apk/debug/*.apk",
-      "kodrapp/build/outputs/apk/release/*.apk",
-      "kmd/build/distributions/*.zip"
-    )
     else -> LO()
   },
-  dreleaseOssPublish = projectName in getMyPublicProjectsNames()
+  dreleaseOssPublish = isPublic,
 )
 
 /**
@@ -266,11 +285,12 @@ private suspend fun myDefaultWorkflowForProject(dname: String, projectName: Stri
 private fun myDefaultWorkflow(
   dname: String,
   dbuildExtraDirs: List<String> = LO(),
+  dbuildManualOnly: Boolean = false,
   dreleasePackage: String? = null,
   dreleaseUpload: List<String> = LO(),
   dreleaseOssPublish: Boolean = false,
 ) = when (dname) {
-  "dbuild" -> myDefaultBuildWorkflow(extraDirs = dbuildExtraDirs)
+  "dbuild" -> myDefaultBuildWorkflow(extraDirs = dbuildExtraDirs, manualOnly = dbuildManualOnly)
   "drelease" -> myDefaultReleaseWorkflow(
     env = if (dreleaseOssPublish) myOssPublishingSecretsEnv else MO(),
     dreleasePackage = dreleasePackage,
@@ -285,9 +305,12 @@ private fun myDefaultBuildWorkflow(
   runners: List<RunnerType> = LO(RunnerType.UbuntuLatest),
   env: Map<String, String> = MO(),
   extraDirs: List<String> = LO(),
+  /** true: runs only when dispatched by hand (private repos: no Actions minutes spent blindly on each push) */
+  manualOnly: Boolean = false,
 ) = myWorkflow(
   name = "dbuild",
-  on = LO(Push(branches = LO("master", "main")), PullRequest(), WorkflowDispatch()),
+  on = if (manualOnly) LO(WorkflowDispatch())
+    else LO(Push(branches = LO("master", "main")), PullRequest(), WorkflowDispatch()),
   env = env,
 ) {
   runners.forEach { runnerType ->
