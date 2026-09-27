@@ -254,8 +254,14 @@ internal fun myDBuildExtraDirsForProject(projectName: String): List<String> = wh
 internal fun myDefaultBuildWorkflowForProject(projectName: String, isPublic: Boolean) =
   myDefaultBuildWorkflow(extraDirs = myDBuildExtraDirsForProject(projectName), manualOnly = !isPublic)
 
+/**
+ * Public projects that publish nothing (apps, no publish plugin applied), so their drelease must not
+ * run publishAndReleaseToMavenCentral -- the task would not even exist, failing every tag.
+ */
+private val MyUnpublishedPublicProjectsNames = setOf("kthreelhu")
+
 /** drelease is generated for public projects only (see [myDWorkflowNames]), so no private ones here. */
-private fun myDefaultWorkflowForProject(dname: String, projectName: String, isPublic: Boolean) = myDefaultWorkflow(
+internal fun myDefaultWorkflowForProject(dname: String, projectName: String, isPublic: Boolean) = myDefaultWorkflow(
   dname = dname,
   dbuildExtraDirs = myDBuildExtraDirsForProject(projectName),
   dbuildManualOnly = !isPublic,
@@ -274,7 +280,7 @@ private fun myDefaultWorkflowForProject(dname: String, projectName: String, isPu
     )
     else -> LO()
   },
-  dreleaseOssPublish = isPublic,
+  dreleaseOssPublish = isPublic && projectName !in MyUnpublishedPublicProjectsNames,
 )
 
 /**

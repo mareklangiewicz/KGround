@@ -38,6 +38,14 @@ class MyWorkflowsTest {
     assertEquals(listOf<Trigger>(WorkflowDispatch()), on)
   }
 
+  /** kthreelhu is public but publishes nothing (no publish plugin): the task would not even exist. */
+  @Test fun releaseOfUnpublishedPublicProjectDoesNotPublishToCentral() {
+    val yaml = myDefaultWorkflowForProject("drelease", "kthreelhu", isPublic = true).generateYaml()
+    assertTrue("publishAndReleaseToMavenCentral" !in yaml, yaml)
+    val yamlPublishing = myDefaultWorkflowForProject("drelease", "SMokK", isPublic = true).generateYaml()
+    assertTrue("publishAndReleaseToMavenCentral" in yamlPublishing, yamlPublishing)
+  }
+
   @Test fun publicDBuildStillRunsOnPush() {
     val on = myDefaultBuildWorkflowForProject("KGround", isPublic = true).on
     assertTrue(on.any { it is Push }, "public dbuild lost its push trigger: $on")
