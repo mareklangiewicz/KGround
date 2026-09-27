@@ -118,8 +118,12 @@ toggling a variable invalidates the entry rather than silently reusing a stale o
 Use the composite toggle from the settings region (see above) — no code change, nothing to revert:
 
 ```bash
-ENABLE_LOCAL_DEPSKT_IN_DIR=/home/marek/code/kotlin/DepsKt ./gradlew build
+ENABLE_LOCAL_DEPSKT_IN_DIR=/home/marek/code/kotlin/DepsKt gndx gradle run build
 ```
+
+`gndx gradle` forwards every `ENABLE_*` variable into its capped unit and prints an `env: forwarding …`
+line; no such line means the toggle did not go in (a unit otherwise gets the systemd user manager's
+environment, not the shell's).
 
 Both the settings plugin (so `Vers`, `plugs`, the Lib model) and templatefun then come from the
 local DepsKt. Measured 2026-09-24 on this root build with a marker version bumped only in the local
@@ -127,7 +131,9 @@ DepsKt: the settings plugin AND a project build script both saw the marker, temp
 from the included DepsKt, and the control (env unset) saw the published version everywhere.
 
 **Check the banner, never a green build:** `DepsSettingsPlugin <ver> apply in project KGround`
-must name the local version. Local and published often share a version, so bump `Vers.DepsPlug` in
+must name the local version. It prints only when configuration actually runs, so turn the
+configuration cache off for that run:
+`gndx gradle run help --no-stage --output --gradle-arg=--no-configuration-cache | grep DepsSettingsPlugin`. Local and published often share a version, so bump `Vers.DepsPlug` in
 the local DepsKt (uncommitted) when you need to tell them apart. Gradle silently falls back to the
 published plugin when the include does not bind.
 
@@ -137,3 +143,33 @@ only takes a `String`, so the call resolved to the outer `Settings.includeBuild`
 that substitutes jars (templatefun) but never contributes plugins, hence the split classpath. The
 scoped `mavenLocal` publication in `docs/design/local-build-logic-loop.md` still works, but is no
 longer needed for this.
+
+## Checking locally before a push
+
+Run Gradle only through `gndx gradle` (see `~/AGENTS.md`), never `./gradlew` directly. The root build
+and the three templates are four separate builds; the root `build` never reaches the templates:
+
+```bash
+gndx gradle run build
+gndx gradle run build --dir=template-basic
+gndx gradle run build --dir=template-full
+gndx gradle run build --dir=template-andro
+```
+
+This is what `dbuild` runs on every push (the root build plus one job per template). `gndx gradle`
+stages each heavy task on its own under a memory cap, one Gradle at a time, which is the job the old
+`gate.sh` did by hand; that script is deleted. For risky changes, a branch + PR lets dbuild do it
+instead.
+
+**A green build does not prove the local DepsKt was used.** With the templatefun substitution
+deliberately broken (2026-09-16), `:kground:compileKotlinJvm` still went BUILD SUCCESSFUL: Gradle
+silently resolved the PUBLISHED templatefun instead, and both jars have the same symbols. templatefun
+is a PLUGIN, so read the build-script classpath (`--output` prints Gradle's own report):
+
+```bash
+ENABLE_LOCAL_DEPSKT_IN_DIR=/home/marek/code/kotlin/DepsKt gndx gradle run buildEnvironment --no-stage --output | grep templatefun
+```
+
+Bound, it lists `project ':DepsKt:templatefun'`; not bound, it lists
+`pl.mareklangiewicz.deps:templatefun:<ver>` (both measured 2026-09-27). The plugin banner check above
+covers the settings plugin.
