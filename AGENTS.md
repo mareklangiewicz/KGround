@@ -121,9 +121,9 @@ Use the composite toggle from the settings region (see above) — no code change
 ENABLE_LOCAL_DEPSKT_IN_DIR=/home/marek/code/kotlin/DepsKt gndx gradle run build
 ```
 
-`gndx gradle` forwards every `ENABLE_*` variable into its capped unit and prints an `env: forwarding …`
-line; no such line means the toggle did not go in (a unit otherwise gets the systemd user manager's
-environment, not the shell's).
+`gndx gradle` forwards the caller's whole environment into its capped unit (by name, so no value is
+ever in a command line), and prints the `ENABLE_*` toggles it forwarded in one `env: forwarding …`
+line. No such line means the toggle was not set in the shell that ran `gndx`.
 
 Both the settings plugin (so `Vers`, `plugs`, the Lib model) and templatefun then come from the
 local DepsKt. Measured 2026-09-24 on this root build with a marker version bumped only in the local
