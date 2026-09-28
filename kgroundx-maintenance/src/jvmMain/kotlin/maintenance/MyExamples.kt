@@ -90,11 +90,14 @@ object MyOtherExamples {
 
   suspend fun updateGradlewInExampleProject() = updateGradlewFilesInKotlinProject(projectName = "AbcdK")
 
-  /**
-   * Note: The templates (source of truth) are linked to main KGround/gradle/wrapper/..
-   * But!: Don't forget ./gradlew installDist (to update templates/resources) for kgroundx
-   */
+  /** Copies KGround's root wrapper files (its working tree, no installDist needed) to all my gradle projects. */
   suspend fun updateGradlewInMyProjects() = updateGradlewFilesInMyProjects(onlyPublic = false, skipReproducers = true)
+
+  /** Latest gradle release to KGround's root wrapper, then to all my gradle projects. See [updateGradleEverywhere]. */
+  suspend fun updateGradleEverywhere() = pl.mareklangiewicz.kgroundx.maintenance.updateGradleEverywhere(dryRun = false)
+
+  /** What [updateGradleEverywhere] would do, changing nothing. */
+  suspend fun checkGradleEverywhere() = pl.mareklangiewicz.kgroundx.maintenance.updateGradleEverywhere(dryRun = true)
 
   // See also kotlinx-workflows:MyWorkflowsExamples.kt
 }

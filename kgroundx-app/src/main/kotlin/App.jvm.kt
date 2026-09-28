@@ -116,6 +116,8 @@ private class KGroundXCommand() : CliktCommand(name = "kgroundx") {
         $commandName try-code tryInjectToAllMyProjects
         $commandName try-code updateGradlewInExampleProject
         $commandName try-code updateGradlewInMyProjects
+        $commandName try-code checkGradleEverywhere
+        $commandName try-code updateGradleEverywhere
         $commandName try-code checkAllMDW
         $commandName try-code injectMDWToMyProjects
         $commandName try-code injectDWToProject kthreelhu

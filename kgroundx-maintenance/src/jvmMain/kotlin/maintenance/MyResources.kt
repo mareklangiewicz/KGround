@@ -37,11 +37,10 @@ suspend fun updateKGroundTemplatesSymLinks() {
     .filterExt("gradle.kts")
     .toList()
 
-  // prepare the list of gradlew files
-  val gradlewFiles = gradlewRelPaths.map { PProjKGround / it }
+  // (no gradlew files: updateGradlewFilesInProject copies them from KGround's working tree, not from resources)
 
   // generate .tmpl symlinks in resources/templates (relative to PathToKGroundProject)
-  (buildFiles + gradlewFiles).forEach { srcAbs ->
+  buildFiles.forEach { srcAbs ->
     val srcRel = srcAbs.asRelativeTo(PProjKGround)
     val linkRel = PResRelTmpl / srcRel.withName { "$it.tmpl" }
     val linkAbs = PProjKGround / linkRel
