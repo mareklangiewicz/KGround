@@ -18,10 +18,8 @@ defaultBuildTemplateForBasicMppLib(publish = LibPublish(toCentral = true))
 
 kotlin {
   sourceSets {
-    val jvmTest by getting {
-      dependencies {
-        implementation(project(":upue-test"))
-      }
+    jvmTest.dependencies {
+      implementation(project(":upue-test"))
     }
   }
 }

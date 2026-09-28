@@ -21,10 +21,8 @@ defaultBuildTemplateForBasicMppLib(myLib { it.copy(withJs = false, withLinuxX64 
 
 kotlin {
   sourceSets {
-    val jvmMain by getting {
-      dependencies {
-        api(Com.Google.Truth.truth)
-      }
+    jvmMain.dependencies {
+      api(Com.Google.Truth.truth)
     }
   }
 }
