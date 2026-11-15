@@ -2,7 +2,7 @@ package pl.mareklangiewicz.upue
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 class ColsTests {
 
@@ -39,8 +39,10 @@ class ColsTests {
     }
 
     @Test fun arrayLikeInitTest() {
-        JsArr<String?>(js("{length:0}"))
-        try { JsArr<String?>(js("{}")) }
-        catch (e: Exception) { assertTrue { e is ClassCastException } }
+        assertEquals(0, JsArr<String?>(js("{length:0}")).len)
+        // Missing length throws NullPointerException on Kotlin 2.5; older compilers threw
+        // ClassCastException. The contract is fail-fast rejection, not the cast's exception type.
+        assertFailsWith<RuntimeException> { JsArr<String?>(js("{}")) }
+        assertFailsWith<RuntimeException> { JsArr<String?>(js("{length:'invalid'}")) }
     }
 }
