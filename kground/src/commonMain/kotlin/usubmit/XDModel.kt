@@ -33,7 +33,7 @@ import pl.mareklangiewicz.usubmit.xd.XD.*
    * Supervisor always can pause the worker by suspending [USubmit.invoke] call for long time;
    * Supervisor always can fire the worker by throwing [kotlinx.coroutines.CancellationException] from [USubmit.invoke].
    */
-  data class Action(val name: String) : XD
+  data class Action(val name: String, val trigger: SuggestTrigger? = null) : XD
 
   /**
    * @param hidden only means it should be hidden to the user when he enters it (passed both ways).
@@ -74,6 +74,12 @@ import pl.mareklangiewicz.usubmit.xd.XD.*
   @JvmInline value class SuggestTimeout(val duration: Duration = 10.seconds) : ToSuggest
 
   @JvmInline value class SuggestEntry(val entry: Entry = Entry()) : ToSuggest
+
+  /**
+   * TODO_someday: define (and use here) nice parsed hierarchy for triggers (keys, gestures, etc. but pretty minimal at first)
+   * (for now let's say the trigger it's in form of hyprland notation)
+   */
+  @JvmInline value class SuggestTrigger(val trigger: String? = null)
 
   /** In XD model the [USubmit.invoke] return value is always of type [ToReturn] */
   sealed interface ToReturn : XD
